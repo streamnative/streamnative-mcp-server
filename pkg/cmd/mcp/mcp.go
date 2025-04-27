@@ -5,6 +5,7 @@ package mcp
 import (
 	"log"
 	"os"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -33,8 +34,11 @@ func (o *ServerOptions) Complete() error {
 		os.Exit(1)
 	}
 
-	conf := o.Options.LoadConfigOrDie()
-	issuer := conf.Auth.Issuer()
+	if err := o.Options.Complete(); err != nil {
+		return err
+	}
+
+	issuer := o.Options.LoadConfigOrDie().Auth.Issuer()
 
 	// authorize
 	flow, err := o.newClientCredentialsFlow(issuer, o.KeyFile)
@@ -47,14 +51,17 @@ func (o *ServerOptions) Complete() error {
 	}
 
 	// persist the authorization data
-	log.Printf("grant: %v", grant)
-	log.Printf("o.Options: %v", o.Options)
-
 	if err = o.Options.SaveGrant(issuer.Audience, *grant); err != nil {
 		return errors.Wrap(err, "Unable to store the authorization data")
 	}
 
-	return o.Options.Complete()
+	err = config.InitSNCloudClient(
+		issuer.IssuerEndpoint, issuer.Audience, o.KeyFile, o.Options.Server, 30*time.Second, o.Options.Store)
+	if err != nil {
+		return errors.Wrap(err, "failed to initialize StreamNative Cloud client")
+	}
+
+	return nil
 }
 
 func (o *ServerOptions) AddFlags(cmd *cobra.Command) {
@@ -67,7 +74,6 @@ func (o *ServerOptions) AddFlags(cmd *cobra.Command) {
 func (o *ServerOptions) newClientCredentialsFlow(
 	issuer auth.Issuer, keyFile string) (*auth.ClientCredentialsFlow, error) {
 	flow, err := auth.NewDefaultClientCredentialsFlow(issuer, keyFile)
-	log.Printf("flow: %v", flow)
 	if err != nil {
 		return nil, err
 	}

@@ -3,6 +3,7 @@ package config
 import (
 	"context"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/pkg/errors"
@@ -108,8 +109,13 @@ func InitSNCloudClient(issuerURL, audience, keyFilePath, apiURL string, timeout 
 	}
 
 	// 7. Create API client configuration
+	parsedURL, err := url.Parse(apiURL)
+	if err != nil {
+		return errors.Wrap(err, "failed to parse API URL")
+	}
 	config := sncloud.NewConfiguration()
-	config.Host = apiURL
+	config.Host = parsedURL.Host
+	config.Scheme = parsedURL.Scheme
 	config.HTTPClient = httpClient
 	config.UserAgent = "StreamNative-MCP-Server/1.0.0"
 

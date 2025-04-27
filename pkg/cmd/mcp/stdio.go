@@ -10,14 +10,13 @@ import (
 	"os/signal"
 	"syscall"
 
+	stdlog "log"
+
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/streamnative/streamnative-mcp-server/pkg/cmd/mcp/log"
-)
-
-const (
-	OptionsKey = "snctl-options"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp"
 )
 
 func NewCmdMcpStdioServer(configOpts *ServerOptions) *cobra.Command {
@@ -62,8 +61,8 @@ func runStdioServer(configOpts *ServerOptions) error {
 	}
 
 	// Create a new MCP server
+	ctx = context.WithValue(ctx, mcp.OptionsKey, configOpts.Options)
 	stdioServer := server.NewStdioServer(newStdioServer(configOpts))
-	ctx = context.WithValue(ctx, OptionsKey, configOpts.Options)
 
 	// Start listening for messages
 	errC := make(chan error, 1)
@@ -101,12 +100,18 @@ func runStdioServer(configOpts *ServerOptions) error {
 }
 
 func newStdioServer(configOpts *ServerOptions) *server.MCPServer {
+	issuer := configOpts.Options.LoadConfigOrDie().Auth.Issuer()
+	userName, err := configOpts.Options.WhoAmI(issuer.Audience)
+	if err != nil {
+		stdlog.Fatalf("failed to get user name: %v", err)
+		os.Exit(1)
+	}
 	// Create a new MCP server
 	s := server.NewMCPServer(
 		"streamnative-mcp-server",
 		"0.0.1",
 		server.WithResourceCapabilities(true, true),
-		server.WithInstructions(`StreamNative Cloud MCP Server provides resources and tools for AI agents to interact with StreamNative Cloud resources and services.
+		server.WithInstructions(fmt.Sprintf(`StreamNative Cloud MCP Server provides resources and tools for AI agents to interact with StreamNative Cloud resources and services.
 
 ### StreamNative Cloud API Server Resources
 
@@ -147,16 +152,22 @@ func newStdioServer(configOpts *ServerOptions) *server.MCPServer {
 - **PulsarClusters** are specific deployment units within an instance, used for actual data streaming operations.
 - **Users** and **Service Accounts** belong to an organization, used for accessing resources, with permissions managed by the organization.
 - **Secrets** belong to an organization and can be shared across instances for securely storing sensitive data.
-- **Data Streaming Engine** is associated with an instance, defining the technical architecture and feature support for clusters.`),
+- **Data Streaming Engine** is associated with an instance, defining the technical architecture and feature support for clusters.
+
+Logged in as %s.`, userName)),
 		server.WithLogging())
 
 	// Set up API server resources and tools here - these will need to be implemented
-	// apiServerAddResourcesSupport(s)
-	// apiServerAddResourcesTools(s, configOpts.ReadOnly)
-	// apiServerAddContextTools(s, configOpts.ReadOnly)
+	mcp.RegisterPrompts(s)
 
-	// Set up pulsar admin tools
-	// Add these as needed or in future iterations
+	// Tools
+	mcp.RegisterContextTools(s)
 
+	mcp.PulsarAdminAddBrokersTools(s, configOpts.ReadOnly)
+	mcp.PulsarAdminAddBrokerStatsTools(s, configOpts.ReadOnly)
+	mcp.PulsarAdminAddClusterTools(s, configOpts.ReadOnly)
+	mcp.PulsarAdminAddFunctionsWorkerTools(s, configOpts.ReadOnly)
+	mcp.PulsarAdminAddNamespaceTools(s, configOpts.ReadOnly)
+	mcp.PulsarAdminAddNamespacePolicyTools(s, configOpts.ReadOnly)
 	return s
 }
