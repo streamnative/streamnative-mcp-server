@@ -109,6 +109,29 @@ func optionalParamArray[T any](arguments map[string]interface{}, paramName strin
 	return result, true
 }
 
+// optionalParamConfigs gets an optional parameter as a list of key=value strings
+func optionalParamConfigs(arguments map[string]interface{}, paramName string) ([]string, bool) {
+
+	param, ok := arguments[paramName]
+	if !ok {
+		return nil, false
+	}
+
+	paramArray, ok := param.([]interface{})
+	if !ok {
+		return nil, false
+	}
+
+	result := make([]string, 0, len(paramArray))
+	for _, item := range paramArray {
+		if strValue, ok := item.(string); ok {
+			result = append(result, strValue)
+		}
+	}
+
+	return result, true
+}
+
 func getOptions(ctx context.Context) *config.Options {
 	return ctx.Value(OptionsKey).(*config.Options)
 }
@@ -195,4 +218,22 @@ func isPackageURLSupported(packageURL string) bool {
 		}
 	}
 	return false
+}
+
+// parseMessageConfigs parses a list of key=value strings into a map
+func parseMessageConfigs(configs []string) (map[string]*string, error) {
+	result := make(map[string]*string)
+
+	for _, config := range configs {
+		parts := strings.SplitN(config, "=", 2)
+		if len(parts) != 2 {
+			return nil, fmt.Errorf("invalid config format: %s (expected key=value)", config)
+		}
+
+		key := parts[0]
+		value := parts[1]
+		result[key] = &value
+	}
+
+	return result, nil
 }

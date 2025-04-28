@@ -182,5 +182,7 @@ Logged in as %s.`, userName)),
 	mcp.PulsarAdminAddTopicPolicyTools(s, configOpts.ReadOnly)
 	mcp.PulsarClientAddConsumerTools(s, configOpts.ReadOnly)
 	mcp.PulsarClientAddProducerTools(s, configOpts.ReadOnly)
+
+	mcp.KafkaAdminAddTopicTools(s, configOpts.ReadOnly)
 	return s
 }

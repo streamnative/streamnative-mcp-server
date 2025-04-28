@@ -5,9 +5,12 @@ import (
 	"fmt"
 
 	"github.com/streamnative/streamnative-mcp-server/pkg/config"
+	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 	sncloud "github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserve"
 )
+
+const DefaultKafkaPort = 9093
 
 func SetContext(options *config.Options, instanceName, clusterName string) error {
 	snConfig := options.LoadConfigOrDie()
@@ -136,6 +139,24 @@ func SetContext(options *config.Options, instanceName, clusterName string) error
 	})
 	if err != nil {
 		return fmt.Errorf("failed to set pulsar context: %v", err)
+	}
+
+	err = kafka.NewCurrentKafkaContext(kafka.KafkaContext{
+		BootstrapServers:       fmt.Sprintf("%s:%d", dnsName, DefaultKafkaPort),
+		SchemaRegistryURL:      fmt.Sprintf("https://%s/kafka", dnsName),
+		ConnectURL:             fmt.Sprintf("%s/admin/kafkaconnect/", snConfig.ProxyLocation),
+		AuthType:               "sasl_ssl",
+		AuthMechanism:          "PLAIN",
+		AuthUser:               "public/default",
+		AuthPass:               "token:" + accessToken,
+		UseTLS:                 true,
+		SchemaRegistryAuthUser: "public/default",
+		SchemaRegistryAuthPass: accessToken,
+		ConnectAuthUser:        "public/default",
+		ConnectAuthPass:        accessToken,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to set kafka context: %v", err)
 	}
 
 	return nil
