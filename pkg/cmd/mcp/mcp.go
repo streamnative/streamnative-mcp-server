@@ -16,10 +16,13 @@ import (
 
 // ServerOptions is the options for the MCP server commands
 type ServerOptions struct {
-	ReadOnly    bool
-	KeyFile     string
-	LogFile     string
-	LogCommands bool
+	ReadOnly                  bool
+	KeyFile                   string
+	LogFile                   string
+	LogCommands               bool
+	StreamNativeCloudFeatures []string
+	PulsarFeatures            []string
+	KafkaFeatures             []string
 	*config.Options
 }
 

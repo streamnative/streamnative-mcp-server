@@ -20,8 +20,8 @@ func RegisterContextTools(s *server.MCPServer) {
 	s.AddTool(whoamiTool, handleWhoami)
 
 	// Add set-context tool
-	setContextTool := mcp.NewTool("streamnative_cloud_use_pulsar_cluster",
-		mcp.WithDescription("Set the current context to a specific pulsar cluster, you can use pulsar and kafka tools to interact with the cluster."),
+	setContextTool := mcp.NewTool("streamnative_cloud_context_use_cluster",
+		mcp.WithDescription("Set the current context to a specific StreamNative Cloud cluster, once you set the context, you can use pulsar and kafka tools to interact with the cluster. If you encounter ContextNotSetErr, please use `streamnative_cloud_context_available_clusters` to list the available clusters and set the context to a specific cluster."),
 		mcp.WithString("instanceName", mcp.Required(),
 			mcp.Description("The name of the pulsar instance to use"),
 		),
@@ -33,7 +33,7 @@ func RegisterContextTools(s *server.MCPServer) {
 
 	// Add available-contexts tool
 	availableContextsTool := mcp.NewTool("streamnative_cloud_available_contexts",
-		mcp.WithDescription("Display the available pulsar clusters for the current organization on StreamNative Cloud. You will need to ask for the USER to confirm the target context cluster if there are multiple clusters."),
+		mcp.WithDescription("Display the available pulsar clusters for the current organization on StreamNative Cloud. You can use `streamnative_cloud_context_use_cluster` to change the context to a specific cluster. You will need to ask for the USER to confirm the target context cluster if there are multiple clusters."),
 	)
 	s.AddTool(availableContextsTool, handleAvailableContexts)
 }

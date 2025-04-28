@@ -81,7 +81,7 @@ func handleListPulsarClusters(ctx context.Context, _ mcp.GetPromptRequest) (*mcp
 	}
 
 	return &mcp.GetPromptResult{
-		Description: fmt.Sprintf("Pulsar clusters from StreamNative Cloud organization %s, you can use `streamnative_cloud_use_pulsar_cluster` tool to switch to selected cluster, and use pulsar and kafka tools to interact with the cluster.", options.Organization),
+		Description: fmt.Sprintf("Pulsar clusters from StreamNative Cloud organization %s, you can use `streamnative_cloud_context_use_cluster` tool to switch to selected cluster, and use pulsar and kafka tools to interact with the cluster.", options.Organization),
 		Messages:    messages,
 	}, nil
 }
@@ -138,7 +138,7 @@ func handleReadPulsarCluster(ctx context.Context, request mcp.GetPromptRequest) 
 	}
 
 	return &mcp.GetPromptResult{
-		Description: fmt.Sprintf("Detailed information of Pulsar cluster %s, you can use `streamnative_cloud_use_pulsar_cluster` tool to switch to this cluster, and use pulsar and kafka tools to interact with the cluster.", name),
+		Description: fmt.Sprintf("Detailed information of Pulsar cluster %s, you can use `streamnative_cloud_context_use_cluster` tool to switch to this cluster, and use pulsar and kafka tools to interact with the cluster.", name),
 		Messages:    messages,
 	}, nil
 }

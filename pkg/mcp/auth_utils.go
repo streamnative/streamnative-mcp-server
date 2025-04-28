@@ -33,16 +33,16 @@ func getBasePath(proxyLocation, org, clusterID string) string {
 
 func getIssuer(instance *sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarInstance, configIssuer auth.Issuer) (*auth.Issuer, error) {
 	if instance.Status == nil {
-		return nil, fmt.Errorf("PulsarInstance '%s' has no auth configuration", instance.Metadata.Name)
+		return nil, fmt.Errorf("PulsarInstance '%s' has no auth configuration", *instance.Metadata.Name)
 	}
 
 	if instance.Status.Auth.Type != "oauth2" && instance.Status.Auth.Type != "apikey" {
 		return nil, fmt.Errorf("PulsarInstance '%s' has unsupported auth type: %s",
-			instance.Metadata.Name, instance.Status.Auth.Type)
+			*instance.Metadata.Name, instance.Status.Auth.Type)
 	}
 
 	if instance.Status.Auth.Oauth2.Audience == "" || instance.Status.Auth.Oauth2.IssuerURL == "" {
-		return nil, fmt.Errorf("PulsarInstance '%s' has no OAuth2 configuration", instance.Metadata.Name)
+		return nil, fmt.Errorf("PulsarInstance '%s' has no OAuth2 configuration", *instance.Metadata.Name)
 	}
 
 	// Construct issuer information from instance and config

@@ -68,21 +68,21 @@ func (pc *PulsarContext) SetPulsarContext() error {
 
 func GetAdminClient() (cmdutils.Client, error) {
 	if cmdutils.PulsarCtlConfig.WebServiceURL == "" {
-		return nil, fmt.Errorf("Please set the cluster context first.")
+		return nil, fmt.Errorf("ContextNotSetErr: Please set the cluster context first.")
 	}
 	return AdminClient, nil
 }
 
 func GetAdminV3Client() (cmdutils.Client, error) {
 	if cmdutils.PulsarCtlConfig.WebServiceURL == "" {
-		return nil, fmt.Errorf("Please set the cluster context first.")
+		return nil, fmt.Errorf("ContextNotSetErr: Please set the cluster context first.")
 	}
 	return AdminV3Client, nil
 }
 
 func GetPulsarClient() (pulsar.Client, error) {
 	if CurrentPulsarClientOptions.URL == "" {
-		return nil, fmt.Errorf("Please set the cluster context first.")
+		return nil, fmt.Errorf("ContextNotSetErr: Please set the cluster context first.")
 	}
 	return Client, nil
 }
