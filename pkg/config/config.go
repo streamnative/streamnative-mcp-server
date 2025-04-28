@@ -59,7 +59,9 @@ func (a *Auth) Issuer() auth.Issuer {
 }
 
 type Context struct {
-	Organization string `yaml:"organization,omitempty"`
+	Organization    string `yaml:"organization,omitempty"`
+	DefaultInstance string `yaml:"default-instance,omitempty"`
+	DefaultCluster  string `yaml:"default-cluster,omitempty"`
 }
 
 type Storage interface {

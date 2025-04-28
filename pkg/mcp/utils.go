@@ -156,8 +156,8 @@ func isInstanceValid(instance sncloud.ComGithubStreamnativeCloudApiServerPkgApis
 }
 
 // buildTokenKey creates a unique key for storing the token in the cache
-func buildTokenKey(namespace, clusterUID string) string {
-	return fmt.Sprintf("%s-%s-%s", KeyPrefix, namespace, clusterUID)
+func buildTokenKey(namespace, clusterUID, myselfGrant string) string {
+	return fmt.Sprintf("%s-%s-%s-%s", KeyPrefix, namespace, clusterUID, myselfGrant)
 }
 
 func hasCachedValidToken(cachedGrant *auth.AuthorizationGrant) (bool, error) {

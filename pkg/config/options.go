@@ -30,9 +30,11 @@ type Options struct {
 	// the audience identifier for the API server (default: server URL)
 	Audience string
 	// the client ID to use for authorization grants (note: not used for service accounts)
-	ClientID      string
-	Organization  string
-	ProxyLocation string
+	ClientID        string
+	Organization    string
+	DefaultInstance string
+	DefaultCluster  string
+	ProxyLocation   string
 }
 
 // NewConfigOptions creates and returns a new Options instance with default values
@@ -58,7 +60,11 @@ func (o *Options) AddFlags(cmd *cobra.Command) {
 		"The organization to use for the API server")
 	cmd.PersistentFlags().StringVar(&o.ProxyLocation, "proxy-location", GlobalDefaultProxyLocation,
 		"The proxy location to use for the API server")
-	cmd.MarkFlagRequired("organization")
+	_ = cmd.MarkFlagRequired("organization")
+	cmd.PersistentFlags().StringVar(&o.DefaultInstance, "default-instance", "",
+		"The default instance to use for the API server")
+	cmd.PersistentFlags().StringVar(&o.DefaultCluster, "default-cluster", "",
+		"The default cluster to use for the API server")
 	o.AuthOptions.AddFlags(cmd)
 }
 
@@ -103,7 +109,9 @@ func (o *Options) LoadConfig() (*SnConfig, error) {
 			ClientID:       o.ClientID,
 		},
 		Context: Context{
-			Organization: o.Organization,
+			Organization:    o.Organization,
+			DefaultInstance: o.DefaultInstance,
+			DefaultCluster:  o.DefaultCluster,
 		},
 		ProxyLocation: o.ProxyLocation,
 	}
@@ -111,19 +119,8 @@ func (o *Options) LoadConfig() (*SnConfig, error) {
 }
 
 func (o *Options) LoadConfigOrDie() *SnConfig {
-	config := &SnConfig{
-		Server: o.Server,
-		Auth: Auth{
-			IssuerEndpoint: o.IssuerEndpoint,
-			Audience:       o.Audience,
-			ClientID:       o.ClientID,
-		},
-		Context: Context{
-			Organization: o.Organization,
-		},
-		ProxyLocation: o.ProxyLocation,
-	}
-	return config
+	cfg, _ := o.LoadConfig()
+	return cfg
 }
 
 func (o *Options) SaveConfig(config *SnConfig) error {

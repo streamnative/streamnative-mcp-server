@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/streamnative/streamnative-mcp-server/pkg/auth"
 	"github.com/streamnative/streamnative-mcp-server/pkg/config"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp"
 )
 
 // ServerOptions is the options for the MCP server commands
@@ -59,6 +60,13 @@ func (o *ServerOptions) Complete() error {
 		issuer.IssuerEndpoint, issuer.Audience, o.KeyFile, o.Options.Server, 30*time.Second, o.Options.Store)
 	if err != nil {
 		return errors.Wrap(err, "failed to initialize StreamNative Cloud client")
+	}
+
+	if o.Options.DefaultInstance != "" && o.Options.DefaultCluster != "" {
+		err = mcp.SetContext(o.Options, o.Options.DefaultInstance, o.Options.DefaultCluster)
+		if err != nil {
+			return errors.Wrap(err, "failed to set StreamNative Cloud context")
+		}
 	}
 
 	return nil
