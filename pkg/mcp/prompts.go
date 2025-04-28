@@ -21,7 +21,7 @@ func RegisterPrompts(s *server.MCPServer) {
 	), handleReadPulsarCluster)
 }
 
-func handleListPulsarClusters(ctx context.Context, request mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
+func handleListPulsarClusters(ctx context.Context, _ mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
 	options := getOptions(ctx)
 	apiClient, err := config.GetAPIClient()
 	if err != nil {

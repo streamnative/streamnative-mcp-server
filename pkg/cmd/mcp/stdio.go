@@ -180,5 +180,7 @@ Logged in as %s.`, userName)),
 	mcp.PulsarAdminAddFunctionsTools(s, configOpts.ReadOnly)
 	mcp.PulsarAdminAddSourcesTools(s, configOpts.ReadOnly)
 	mcp.PulsarAdminAddTopicPolicyTools(s, configOpts.ReadOnly)
+	mcp.PulsarClientAddConsumerTools(s, configOpts.ReadOnly)
+	mcp.PulsarClientAddProducerTools(s, configOpts.ReadOnly)
 	return s
 }

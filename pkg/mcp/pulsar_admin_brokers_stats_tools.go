@@ -21,7 +21,7 @@ func PulsarAdminAddBrokerStatsTools(s *server.MCPServer, readOnly bool) {
 			"2. MBean stats (resource=mbeans): JVM MBeans statistics\n"+
 			"3. Topics stats (resource=topics): Statistics about all topics managed by the broker\n"+
 			"4. Allocator stats (resource=allocator_stats): Memory allocator statistics for specific allocator\n"+
-			"5. Load report (resource=load_report): Broker load information\n\n"+
+			"5. Load report (resource=load_report): Broker load information, sometimes the load report is not available, so suggest to use other resources to get the broker metrics\n\n"+
 			"Example: {\"resource\": \"monitoring_metrics\"} retrieves all monitoring metrics\n"+
 			"Example: {\"resource\": \"allocator_stats\", \"allocator_name\": \"default\"} retrieves stats for the default allocator\n"+
 			"This tool requires Pulsar super-user permissions."),

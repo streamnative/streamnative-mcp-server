@@ -32,6 +32,12 @@ func RegisterContextTools(s *server.MCPServer) {
 		),
 	)
 	s.AddTool(setContextTool, handleSetContext)
+
+	// Add available-contexts tool
+	availableContextsTool := mcp.NewTool("streamnative_cloud_available_contexts",
+		mcp.WithDescription("Display the available pulsar clusters for the current organization on StreamNative Cloud. You will need to ask for the USER to confirm the target context cluster if there are multiple clusters."),
+	)
+	s.AddTool(availableContextsTool, handleAvailableContexts)
 }
 
 // handleWhoami handles the whoami tool request
@@ -93,15 +99,20 @@ func handleSetContext(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 	}
 
 	var instance sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarInstance
+	foundInstance := false
 	for _, i := range instances.Items {
 		if *i.Metadata.Name == instanceName {
 			if isInstanceValid(i) {
 				instance = i
+				foundInstance = true
 				break
 			} else {
 				return mcp.NewToolResultError(fmt.Sprintf("Pulsar instance %s is not valid", instanceName)), nil
 			}
 		}
+	}
+	if !foundInstance {
+		return mcp.NewToolResultError(fmt.Sprintf("Pulsar instance %s not found", instanceName)), nil
 	}
 
 	clusters, _, err := apiClient.CloudStreamnativeIoV1alpha1Api.ListCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(ctx, options.Organization).Execute()
@@ -110,15 +121,20 @@ func handleSetContext(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 	}
 
 	var cluster sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarCluster
+	foundCluster := false
 	for _, c := range clusters.Items {
 		if *c.Metadata.Name == clusterName && c.Spec.InstanceName == instanceName {
 			if isClusterAvailable(c) {
 				cluster = c
+				foundCluster = true
 				break
 			} else {
 				return mcp.NewToolResultError(fmt.Sprintf("Pulsar cluster %s is not available", clusterName)), nil
 			}
 		}
+	}
+	if !foundCluster {
+		return mcp.NewToolResultError(fmt.Sprintf("Pulsar cluster %s not found", clusterName)), nil
 	}
 
 	clusterUID := string(*cluster.Metadata.Uid)
@@ -194,4 +210,21 @@ func handleSetContext(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 	}
 
 	return mcp.NewToolResultText("Pulsar context set successfully"), nil
+}
+
+func handleAvailableContexts(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	promptResponse, err := handleListPulsarClusters(ctx, mcp.GetPromptRequest{})
+	if err != nil || promptResponse == nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to list pulsar clusters: %v", err)), nil
+	}
+
+	response := ""
+	for _, message := range promptResponse.Messages {
+		if textContent, ok := message.Content.(mcp.TextContent); ok {
+			response += textContent.Text + "\n"
+		}
+	}
+	response += "Please confirm the target context cluster with USER if there are multiple clusters!"
+
+	return mcp.NewToolResultText(response), nil
 }
