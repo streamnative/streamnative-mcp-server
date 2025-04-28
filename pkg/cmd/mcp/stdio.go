@@ -169,5 +169,16 @@ Logged in as %s.`, userName)),
 	mcp.PulsarAdminAddFunctionsWorkerTools(s, configOpts.ReadOnly)
 	mcp.PulsarAdminAddNamespaceTools(s, configOpts.ReadOnly)
 	mcp.PulsarAdminAddNamespacePolicyTools(s, configOpts.ReadOnly)
+	mcp.PulsarAdminAddNsIsolationPolicyTools(s, configOpts.ReadOnly)
+	mcp.PulsarAdminAddPackagesTools(s, configOpts.ReadOnly)
+	mcp.PulsarAdminAddResourceQuotasTools(s, configOpts.ReadOnly)
+	mcp.PulsarAdminAddSchemasTools(s, configOpts.ReadOnly)
+	mcp.PulsarAdminAddSubscriptionTools(s, configOpts.ReadOnly)
+	mcp.PulsarAdminAddTenantTools(s, configOpts.ReadOnly)
+	mcp.PulsarAdminAddTopicTools(s, configOpts.ReadOnly)
+	mcp.PulsarAdminAddSinksTools(s, configOpts.ReadOnly)
+	mcp.PulsarAdminAddFunctionsTools(s, configOpts.ReadOnly)
+	mcp.PulsarAdminAddSourcesTools(s, configOpts.ReadOnly)
+	mcp.PulsarAdminAddTopicPolicyTools(s, configOpts.ReadOnly)
 	return s
 }

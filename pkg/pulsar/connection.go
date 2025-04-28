@@ -34,6 +34,10 @@ func NewCurrentPulsarContext(pc PulsarContext) error {
 	return pc.SetPulsarContext()
 }
 
+func init() {
+	cmdutils.PulsarCtlConfig = &cmdutils.ClusterConfig{}
+}
+
 func (pc *PulsarContext) SetPulsarContext() error {
 	var err error
 	// Configure pulsarctl with the token
@@ -60,4 +64,25 @@ func (pc *PulsarContext) SetPulsarContext() error {
 	}
 
 	return nil
+}
+
+func GetAdminClient() (cmdutils.Client, error) {
+	if cmdutils.PulsarCtlConfig.WebServiceURL == "" {
+		return nil, fmt.Errorf("Please set the cluster context first.")
+	}
+	return AdminClient, nil
+}
+
+func GetAdminV3Client() (cmdutils.Client, error) {
+	if cmdutils.PulsarCtlConfig.WebServiceURL == "" {
+		return nil, fmt.Errorf("Please set the cluster context first.")
+	}
+	return AdminV3Client, nil
+}
+
+func GetPulsarClient() (pulsar.Client, error) {
+	if CurrentPulsarClientOptions.URL == "" {
+		return nil, fmt.Errorf("Please set the cluster context first.")
+	}
+	return Client, nil
 }

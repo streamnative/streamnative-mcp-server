@@ -71,7 +71,10 @@ func handleNamespace(readOnly bool) func(context.Context, mcp.CallToolRequest) (
 		}
 
 		// Create Pulsar client
-		client := pulsar.AdminClient
+		client, err := pulsar.GetAdminClient()
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
+		}
 
 		// Route to appropriate handler based on operation
 		switch operation {

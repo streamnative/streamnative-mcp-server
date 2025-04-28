@@ -43,7 +43,10 @@ func PulsarAdminAddBrokerStatsTools(s *server.MCPServer, readOnly bool) {
 // handleBrokerStats returns a function to handle broker stats requests
 func handleBrokerStats(_ bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		client := pulsar.AdminClient
+		client, err := pulsar.GetAdminClient()
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
+		}
 
 		// Get required resource parameter
 		resource, err := requiredParam[string](request.Params.Arguments, "resource")
