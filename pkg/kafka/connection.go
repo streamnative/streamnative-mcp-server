@@ -39,6 +39,7 @@ var KafkaAdminClient *kadm.Client
 var KafkaClient *kgo.Client
 var KafkaSchemaRegistryClient *sr.Client
 var KafkaConnectClient Connect
+var options []kgo.Opt
 
 func NewCurrentKafkaContext(kc KafkaContext) error {
 	CurrentKafkaContext = kc
@@ -111,7 +112,7 @@ func saslOpt(config *SASLConfig, opts []kgo.Opt) ([]kgo.Opt, error) {
 
 func (kc *KafkaContext) SetKafkaContext() error {
 	var err error
-	options := []kgo.Opt{}
+	options = []kgo.Opt{}
 	options = append(options, kgo.SeedBrokers(strings.Split(kc.BootstrapServers, ",")...))
 	tlsConfig := &TLSConfig{
 		Enabled:        kc.UseTLS,
@@ -167,11 +168,16 @@ func (kc *KafkaContext) SetKafkaContext() error {
 	return nil
 }
 
-func GetKafkaClient() (*kgo.Client, error) {
+func GetKafkaClient(opts ...kgo.Opt) (*kgo.Client, error) {
 	if KafkaClient == nil {
 		return nil, fmt.Errorf("kafka client not initialized")
 	}
-	return KafkaClient, nil
+	clientOpts := append(options, opts...)
+	cli, err := kgo.NewClient(clientOpts...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create kafka client: %w", err)
+	}
+	return cli, nil
 }
 
 func GetKafkaAdminClient() (*kadm.Client, error) {

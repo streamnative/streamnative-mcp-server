@@ -132,6 +132,22 @@ func optionalParamConfigs(arguments map[string]interface{}, paramName string) ([
 	return result, true
 }
 
+// requiredParamObject gets a required object parameter from the request
+func requiredParamObject(arguments map[string]interface{}, name string) (map[string]interface{}, error) {
+	// Get the parameter value
+	paramValue, found := arguments[name]
+	if !found || paramValue == nil {
+		return nil, fmt.Errorf("%s parameter is required", name)
+	}
+
+	// Convert to map
+	if mapVal, ok := paramValue.(map[string]interface{}); ok {
+		return mapVal, nil
+	}
+
+	return nil, fmt.Errorf("%s parameter must be an object", name)
+}
+
 func getOptions(ctx context.Context) *config.Options {
 	return ctx.Value(OptionsKey).(*config.Options)
 }
@@ -166,6 +182,14 @@ func convertToMapInterface(m map[string]string) map[string]interface{} {
 	result := make(map[string]interface{})
 	for k, v := range m {
 		result[k] = v
+	}
+	return result
+}
+
+func convertToMapString(m map[string]interface{}) map[string]string {
+	result := make(map[string]string)
+	for k, v := range m {
+		result[k] = fmt.Sprintf("%v", v)
 	}
 	return result
 }

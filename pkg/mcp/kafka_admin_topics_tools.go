@@ -13,10 +13,6 @@ import (
 )
 
 func KafkaAdminAddTopicTools(s *server.MCPServer, readOnly bool) {
-	// kafka_admin_topics_list
-	// kafka_admin_topics_get
-	// kafka_admin_topics_create
-	// kafka_admin_topics_delete
 	resourceDesc := "Resource to operate on. Available resources:\n" +
 		"- topic: A single Kafka topic for operations on individual topics (create, get, delete)\n" +
 		"- topics: Collection of Kafka topics for bulk operations (list)"
@@ -25,7 +21,8 @@ func KafkaAdminAddTopicTools(s *server.MCPServer, readOnly bool) {
 		"- list: List all topics in the Kafka cluster, optionally including internal topics\n" +
 		"- get: Get detailed configuration for a specific topic\n" +
 		"- create: Create a new topic with specified partitions, replication factor, and optional configs\n" +
-		"- delete: Delete an existing topic\n"
+		"- delete: Delete an existing topic\n" +
+		"- metadata: Get metadata for a specific topic\n"
 
 	toolDesc := "Unified tool for managing Apache Kafka topics.\n" +
 		"This tool provides access to various Kafka topic operations, including creation, deletion, listing, and configuration retrieval.\n" +
@@ -50,6 +47,10 @@ func KafkaAdminAddTopicTools(s *server.MCPServer, readOnly bool) {
 		"   resource: \"topic\"\n" +
 		"   operation: \"delete\"\n" +
 		"   name: \"topic-to-delete\"\n\n" +
+		"5. Get full metadata including topic and broker information for a specific topic:\n" +
+		"   resource: \"topic\"\n" +
+		"   operation: \"metadata\"\n" +
+		"   name: \"my-topic\"\n\n" +
 		"This tool requires Kafka super-user permissions."
 
 	kafkaTopicTool := mcp.NewTool("kafka_admin_topics",
@@ -132,6 +133,8 @@ func handleKafkaTopicTool(readOnly bool) func(context.Context, mcp.CallToolReque
 				return handleKafkaTopicCreate(ctx, admin, request)
 			case "delete":
 				return handleKafkaTopicDelete(ctx, admin, request)
+			case "metadata":
+				return handleKafkaTopicMetadata(ctx, admin, request)
 			default:
 				return mcp.NewToolResultError(fmt.Sprintf("Invalid operation for resource 'topic': %s", operation)), nil
 			}
@@ -253,6 +256,26 @@ func handleKafkaTopicsList(ctx context.Context, admin *kadm.Client, request mcp.
 	jsonBytes, err := json.Marshal(topicNames)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to marshal topic names: %v", err)), nil
+	}
+
+	return mcp.NewToolResultText(string(jsonBytes)), nil
+}
+
+func handleKafkaTopicMetadata(ctx context.Context, admin *kadm.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	// Get required parameters
+	topicName, err := requiredParam[string](request.Params.Arguments, "name")
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic name: %v", err)), nil
+	}
+
+	topicDetails, err := admin.Metadata(ctx, topicName)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic metadata: %v", err)), nil
+	}
+
+	jsonBytes, err := json.Marshal(topicDetails)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to marshal topic metadata: %v", err)), nil
 	}
 
 	return mcp.NewToolResultText(string(jsonBytes)), nil

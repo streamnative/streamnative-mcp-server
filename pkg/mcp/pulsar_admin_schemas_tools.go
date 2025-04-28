@@ -78,7 +78,7 @@ func handleSchemaTool(readOnly bool) func(context.Context, mcp.CallToolRequest) 
 
 		topic, err := requiredParam[string](request.Params.Arguments, "topic")
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic'. Please provide the fully qualified topic name.", err)), nil
+			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic'. Please provide the fully qualified topic name: %v", err)), nil
 		}
 
 		// Normalize parameters
@@ -176,7 +176,7 @@ func handleSchemaGet(admin cmdutils.Client, topic string, request mcp.CallToolRe
 func handleSchemaUpload(admin cmdutils.Client, topic string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	filename, err := requiredParam[string](request.Params.Arguments, "filename")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'filename' for schema.upload. Please provide the path to the schema definition file.", err)), nil
+		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'filename' for schema.upload. Please provide the path to the schema definition file: %v", err)), nil
 	}
 
 	// Read and parse the schema file

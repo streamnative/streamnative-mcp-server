@@ -95,7 +95,7 @@ func handleSubscriptionTool(readOnly bool) func(context.Context, mcp.CallToolReq
 
 		topic, err := requiredParam[string](request.Params.Arguments, "topic")
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic'. Please provide the fully qualified topic name.", err)), nil
+			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic'. Please provide the fully qualified topic name: %v", err)), nil
 		}
 
 		// Normalize parameters

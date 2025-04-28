@@ -184,5 +184,11 @@ Logged in as %s.`, userName)),
 	mcp.PulsarClientAddProducerTools(s, configOpts.ReadOnly)
 
 	mcp.KafkaAdminAddTopicTools(s, configOpts.ReadOnly)
+	mcp.KafkaAdminAddPartitionsTools(s, configOpts.ReadOnly)
+	mcp.KafkaAdminAddGroupsTools(s, configOpts.ReadOnly)
+	mcp.KafkaAdminAddSchemaRegistryTools(s, configOpts.ReadOnly)
+	mcp.KafkaAdminAddKafkaConnectTools(s, configOpts.ReadOnly)
+	mcp.KafkaClientAddConsumeTools(s, configOpts.ReadOnly)
+	mcp.KafkaClientAddProduceTools(s, configOpts.ReadOnly)
 	return s
 }
