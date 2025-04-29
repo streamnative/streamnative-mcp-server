@@ -3,6 +3,7 @@
 package mcp
 
 import (
+	"slices"
 	"time"
 
 	"github.com/pkg/errors"
@@ -67,14 +68,24 @@ func (o *ServerOptions) Complete() error {
 				return errors.Wrap(err, "failed to set StreamNative Cloud context")
 			}
 		}
-	}
 
-	// If the external Kafka is provided, enable kafka only mode
-	if snConfig.ExternalKafka != nil {
+		if len(o.Features) != 0 {
+			requiredFeatures := []mcp.McpFeature{
+				mcp.FeatureStreamNativeCloud,
+			}
+			for _, feature := range requiredFeatures {
+				if !slices.Contains(o.Features, string(feature)) {
+					o.Features = append(o.Features, string(feature))
+				}
+			}
+		} else {
+			o.Features = []string{string(mcp.FeatureAll)}
+		}
+	} else if snConfig.ExternalKafka != nil {
 		if len(o.Features) != 0 {
 			return errors.New("kafka-only mode does not support additional features")
 		}
-		o.Features = []string{"kafka-client", "kafka-admin", "kafka-admin-schema-registry"}
+		o.Features = []string{string(mcp.FeatureKafkaClient), string(mcp.FeatureKafkaAdmin), string(mcp.FeatureKafkaAdminSchemaRegistry)}
 		err := kafka.NewCurrentKafkaContext(kafka.KafkaContext{
 			BootstrapServers:          snConfig.ExternalKafka.BootstrapServers,
 			AuthType:                  snConfig.ExternalKafka.AuthType,
@@ -97,11 +108,12 @@ func (o *ServerOptions) Complete() error {
 		if len(o.Features) != 0 {
 			return errors.New("pulsar-only mode does not support additional features")
 		}
-		o.Features = []string{"pulsar-admin", "pulsar-client"}
+		o.Features = []string{string(mcp.FeatureAllPulsar)}
 		err := pulsar.NewCurrentPulsarContext(pulsar.PulsarContext{
 			WebServiceURL:                 snConfig.ExternalPulsar.WebServiceURL,
 			AuthPlugin:                    snConfig.ExternalPulsar.AuthPlugin,
 			AuthParams:                    snConfig.ExternalPulsar.AuthParams,
+			Token:                         snConfig.ExternalPulsar.Token,
 			TLSAllowInsecureConnection:    snConfig.ExternalPulsar.TLSAllowInsecureConnection,
 			TLSEnableHostnameVerification: snConfig.ExternalPulsar.TLSEnableHostnameVerification,
 			TLSTrustCertsFilePath:         snConfig.ExternalPulsar.TLSTrustCertsFilePath,

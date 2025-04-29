@@ -89,6 +89,8 @@ func (o *Options) AddFlags(cmd *cobra.Command) {
 		"The auth user to use for Kafka")
 	cmd.PersistentFlags().StringVar(&o.Kafka.AuthPass, "kafka-auth-pass", "",
 		"The auth password to use for Kafka")
+	cmd.PersistentFlags().BoolVar(&o.Kafka.UseTLS, "kafka-use-tls", false,
+		"Use TLS for Kafka")
 	cmd.PersistentFlags().StringVar(&o.Kafka.ClientKeyFile, "kafka-client-key-file", "",
 		"The client key file to use for Kafka")
 	cmd.PersistentFlags().StringVar(&o.Kafka.ClientCertFile, "kafka-client-cert-file", "",
@@ -117,9 +119,11 @@ func (o *Options) AddFlags(cmd *cobra.Command) {
 		"The TLS cert file to use for Pulsar")
 	cmd.PersistentFlags().StringVar(&o.Pulsar.TLSKeyFile, "pulsar-tls-key-file", "",
 		"The TLS key file to use for Pulsar")
+	cmd.PersistentFlags().StringVar(&o.Pulsar.Token, "pulsar-token", "",
+		"The token to use for Pulsar")
 
 	cmd.MarkFlagsMutuallyExclusive("key-file", "use-external-kafka", "use-external-pulsar")
-	cmd.MarkFlagsRequiredTogether("pulsar-cluster", "pulsar-instance", "key-file")
+	cmd.MarkFlagsRequiredTogether("pulsar-cluster", "pulsar-instance")
 	cmd.MarkFlagsRequiredTogether("use-external-kafka", "kafka-bootstrap-servers")
 	cmd.MarkFlagsRequiredTogether("use-external-pulsar", "pulsar-web-service-url")
 	o.AuthOptions.AddFlags(cmd)

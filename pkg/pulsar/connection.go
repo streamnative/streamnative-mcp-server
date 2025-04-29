@@ -66,7 +66,7 @@ func (pc *PulsarContext) SetPulsarContext() error {
 
 		authProvider, err := pulsar.NewAuthentication(pc.AuthPlugin, pc.AuthParams)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to create authentication provider: %w", err)
 		}
 		CurrentPulsarClientOptions = pulsar.ClientOptions{
 			URL:               pc.WebServiceURL,
@@ -81,7 +81,7 @@ func (pc *PulsarContext) SetPulsarContext() error {
 
 	Client, err = pulsar.NewClient(CurrentPulsarClientOptions)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create pulsar client: %w", err)
 	}
 
 	return nil

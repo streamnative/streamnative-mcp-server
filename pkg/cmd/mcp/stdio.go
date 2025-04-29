@@ -125,7 +125,6 @@ func newStdioServer(configOpts *ServerOptions, logrusLogger *logrus.Logger) *ser
 			server.WithLogging())
 
 		mcp.RegisterPrompts(s)
-
 		mcp.RegisterContextTools(s, configOpts.Features)
 	} else if snConfig.ExternalKafka != nil {
 		s = server.NewMCPServer(
