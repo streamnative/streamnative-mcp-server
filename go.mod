@@ -14,7 +14,6 @@ require (
 	github.com/streamnative/pulsarctl v0.4.3-0.20250312214758-e472faec284b
 	github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserve v0.0.0-00010101000000-000000000000
 	github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect v0.0.0-00010101000000-000000000000
-	github.com/stretchr/testify v1.10.0
 	github.com/twmb/franz-go v1.18.1
 	github.com/twmb/franz-go/pkg/kadm v1.16.0
 	github.com/twmb/franz-go/pkg/sr v1.3.0
@@ -72,6 +71,7 @@ require (
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/spf13/cast v1.7.1 // indirect
 	github.com/spf13/pflag v1.0.6 // indirect
+	github.com/stretchr/testify v1.10.0 // indirect
 	github.com/twmb/franz-go/pkg/kmsg v1.9.0 // indirect
 	github.com/yosida95/uritemplate/v3 v3.0.2 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
@@ -80,7 +80,6 @@ require (
 	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/term v0.28.0 // indirect
 	google.golang.org/protobuf v1.35.1 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 replace github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserve => ./sdk/sdk-apiserver
