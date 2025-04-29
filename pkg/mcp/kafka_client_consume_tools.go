@@ -8,12 +8,15 @@ import (
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
+	"github.com/sirupsen/logrus"
 	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
 	"github.com/twmb/franz-go/pkg/kgo"
 )
 
+var logger *logrus.Logger
+
 // KafkaClientAddConsumeTools adds Kafka client consume tools to the MCP server
-func KafkaClientAddConsumeTools(s *server.MCPServer, readOnly bool) {
+func KafkaClientAddConsumeTools(s *server.MCPServer, readOnly bool, logrusLogger *logrus.Logger) {
 	toolDesc := "Consume messages from a Kafka topic.\n" +
 		"This tool allows you to read messages from Kafka topics, specifying various consumption parameters.\n\n" +
 		"Kafka Consumer Concepts:\n" +
@@ -24,7 +27,7 @@ func KafkaClientAddConsumeTools(s *server.MCPServer, readOnly bool) {
 		"This tool provides a temporary consumer instance for diagnostic and testing purposes. " +
 		"It does not commit offsets back to Kafka unless the 'group' parameter is explicitly specified.\n\n" +
 		"Usage Examples:\n\n" +
-		"1. Basic consumption - Get 10 latest messages from a topic:\n" +
+		"1. Basic consumption - Get 10 earliest messages from a topic:\n" +
 		"   topic: \"my-topic\"\n" +
 		"   max-messages: 10\n\n" +
 		"2. Consume from beginning - Get messages from the start of a topic:\n" +
@@ -35,12 +38,7 @@ func KafkaClientAddConsumeTools(s *server.MCPServer, readOnly bool) {
 		"   topic: \"my-topic\"\n" +
 		"   group: \"my-consumer-group\"\n" +
 		"   offset: \"atcommitted\"\n\n" +
-		"4. Specific partition - Read from a particular partition starting at the beginning:\n" +
-		"   topic: \"my-topic\"\n" +
-		"   partition: 0\n" +
-		"   offset: \"atstart\"\n" +
-		"   max-messages: 50\n\n" +
-		"5. Time-limited consumption - Set a longer timeout for slow topics:\n" +
+		"4. Time-limited consumption - Set a longer timeout for slow topics:\n" +
 		"   topic: \"my-topic\"\n" +
 		"   max-messages: 100\n" +
 		"   timeout: 30\n\n" +
@@ -59,13 +57,6 @@ func KafkaClientAddConsumeTools(s *server.MCPServer, readOnly bool) {
 				"Optional. If provided, the consumer will join this consumer group and track offsets with Kafka. "+
 				"If not provided, a random group ID will be generated, and offsets won't be committed back to Kafka. "+
 				"Using a meaningful group ID is important when you want to resume consumption later or coordinate multiple consumers."),
-		),
-		mcp.WithNumber("partition",
-			mcp.Description("The specific partition number to consume from. "+
-				"Optional. Partitions are zero-indexed (0, 1, 2, etc). "+
-				"If not specified, messages will be consumed from all partitions of the topic. "+
-				"This is useful when you need to debug or read from a specific partition. "+
-				"When specified, the 'offset' parameter determines where in the partition to start reading."),
 		),
 		mcp.WithString("offset",
 			mcp.Description("The offset position to start consuming from. "+
@@ -90,6 +81,9 @@ func KafkaClientAddConsumeTools(s *server.MCPServer, readOnly bool) {
 		),
 	)
 	s.AddTool(consumeTool, handleKafkaConsume)
+	if logrusLogger != nil {
+		logger = logrusLogger
+	}
 }
 
 // handleKafkaConsume handles consuming messages from a Kafka topic
@@ -102,14 +96,19 @@ func handleKafkaConsume(ctx context.Context, request mcp.CallToolRequest) (*mcp.
 	}
 	opts = append(opts, kgo.ConsumeTopics(topicName))
 
-	// Get optional parameters
-	groupID, hasGroup := optionalParam[string](request.Params.Arguments, "group")
-	if !hasGroup {
-		// Generate a random group ID if not provided
-		groupID = fmt.Sprintf("snmcp-kafka-%d", time.Now().UnixNano())
+	opts = append(opts, kgo.FetchIsolationLevel(kgo.ReadUncommitted()))
+	opts = append(opts, kgo.KeepRetryableFetchErrors())
+	w := logger.Writer()
+	opts = append(opts, kgo.WithLogger(kgo.BasicLogger(w, kgo.LogLevelInfo, nil)))
+	maxMessages, hasMaxMessages := optionalParam[float64](request.Params.Arguments, "max-messages")
+	if !hasMaxMessages {
+		maxMessages = 10 // Default to 10 messages
 	}
-	opts = append(opts, kgo.ConsumerGroup(groupID))
-	partitionID, hasPartition := optionalParam[float64](request.Params.Arguments, "partition")
+
+	timeoutSec, hasTimeout := optionalParam[float64](request.Params.Arguments, "timeout")
+	if !hasTimeout {
+		timeoutSec = 10 // Default to 10 seconds
+	}
 
 	offsetStr, hasOffset := optionalParam[string](request.Params.Arguments, "offset")
 	if !hasOffset {
@@ -125,31 +124,12 @@ func handleKafkaConsume(ctx context.Context, request mcp.CallToolRequest) (*mcp.
 	case "atcommitted":
 		offset = kgo.NewOffset().AtCommitted()
 	default:
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid offset value: %s. Must be one of 'atstart', 'atend', or 'atcommitted'", offsetStr)), nil
+		offset = kgo.NewOffset().AtStart()
 	}
 
-	if hasPartition {
-		// Consume from specific partition with specified offset
-		opts = append(opts, kgo.ConsumePartitions(map[string]map[int32]kgo.Offset{
-			topicName: {
-				int32(partitionID): offset,
-			},
-		}))
-	} else {
-		opts = append(opts, kgo.ConsumeResetOffset(offset))
-	}
+	opts = append(opts, kgo.ConsumeResetOffset(offset))
 
-	// maxMessages, hasMaxMessages := optionalParam[float64](request.Params.Arguments, "max-messages")
-	// if !hasMaxMessages {
-	// 	maxMessages = 10 // Default to 10 messages
-	// }
-
-	timeoutSec, hasTimeout := optionalParam[float64](request.Params.Arguments, "timeout")
-	if !hasTimeout {
-		timeoutSec = 10 // Default to 10 seconds
-	}
-
-	opts = append(opts, kgo.BlockRebalanceOnPoll())
+	logger.Infof("Consuming from topic: %s, offset: %s, max-messages: %d, timeout: %d", topicName, offsetStr, int(maxMessages), int(timeoutSec))
 
 	// Create Kafka client using the new Kafka package
 	kafkaClient, err := kafka.GetKafkaClient(opts...)
@@ -162,23 +142,38 @@ func handleKafkaConsume(ctx context.Context, request mcp.CallToolRequest) (*mcp.
 	timeoutCtx, cancel := context.WithTimeout(ctx, time.Duration(timeoutSec)*time.Second)
 	defer cancel()
 
-	if err = kafkaClient.Ping(context.Background()); err != nil { // check connectivity to cluster
+	if err = kafkaClient.Ping(timeoutCtx); err != nil { // check connectivity to cluster
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to ping Kafka cluster: %v", err)), nil
 	}
 
-	// Consume messages
-	fetches := kafkaClient.PollFetches(timeoutCtx)
-	if fetches.IsClientClosed() {
-		return mcp.NewToolResultError(fmt.Sprintf("Kafka client closed: %v", err)), nil
+	topics := kafkaClient.OptValue("ConsumeTopics")
+	logger.Infof("Consuming from topics: %v\n", topics)
+
+	results := make([]*kgo.Record, 0)
+consumerLoop:
+	for {
+		fetches := kafkaClient.PollRecords(timeoutCtx, int(maxMessages))
+		iter := fetches.RecordIter()
+		logger.Infof("NumRecords: %d\n", fetches.NumRecords())
+
+		for _, fetchErr := range fetches.Errors() {
+			logger.Infof("error consuming from topic: topic=%s, partition=%d, err=%v\n",
+				fetchErr.Topic, fetchErr.Partition, fetchErr.Err)
+			break consumerLoop
+		}
+
+		for !iter.Done() {
+			record := iter.Next()
+			results = append(results, record)
+			if len(results) >= int(maxMessages) {
+				break consumerLoop
+			}
+		}
 	}
 
-	records := fetches.Records()
-
-	// Format the output as JSON
-	jsonBytes, err := json.Marshal(records)
+	jsonResults, err := json.Marshal(results)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to marshal messages: %v", err)), nil
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to marshal results: %v", err)), nil
 	}
-
-	return mcp.NewToolResultText(string(jsonBytes)), nil
+	return mcp.NewToolResultText(string(jsonResults)), nil
 }

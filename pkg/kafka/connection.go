@@ -7,6 +7,7 @@ import (
 
 	"github.com/twmb/franz-go/pkg/kadm"
 	"github.com/twmb/franz-go/pkg/kgo"
+	"github.com/twmb/franz-go/pkg/kversion"
 	"github.com/twmb/franz-go/pkg/sasl/plain"
 	"github.com/twmb/franz-go/pkg/sasl/scram"
 	"github.com/twmb/franz-go/pkg/sr"
@@ -135,6 +136,7 @@ func (kc *KafkaContext) SetKafkaContext() error {
 	if err != nil {
 		return fmt.Errorf("failed to create SASL config: %w", err)
 	}
+	options = append(options, kgo.MaxVersions(kversion.V2_8_0()))
 
 	KafkaClient, err = kgo.NewClient(
 		options...,

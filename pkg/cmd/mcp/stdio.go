@@ -15,7 +15,7 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/streamnative/streamnative-mcp-server/pkg/cmd/mcp/log"
+	"github.com/streamnative/streamnative-mcp-server/pkg/log"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp"
 )
 
@@ -42,35 +42,25 @@ func runStdioServer(configOpts *ServerOptions) error {
 	defer stop()
 
 	// Initialize logger if log file specified
-	var logger *logrus.Logger
-	var err error
-
-	if configOpts.LogFile != "" || configOpts.LogCommands {
-		logger, err = log.InitLogger(configOpts.LogFile)
-		if err != nil {
-			return fmt.Errorf("failed to initialize logger: %w", err)
-		}
-
-		if configOpts.LogFile != "" {
-			logger.Infof("Logging to file: %s", configOpts.LogFile)
-		}
-
-		if configOpts.LogCommands {
-			logger.Info("Command logging enabled")
-		}
+	logger, err := initLogger(configOpts.LogFile)
+	if err != nil {
+		stdlog.Fatal("Failed to initialize logger:", err)
 	}
 
 	// Create a new MCP server
 	ctx = context.WithValue(ctx, mcp.OptionsKey, configOpts.Options)
-	stdioServer := server.NewStdioServer(newStdioServer(configOpts))
+	stdLogger := stdlog.New(logger.Writer(), "snmcp-server", 0)
+	stdioServer := server.NewStdioServer(newStdioServer(configOpts, logger))
+
+	stdioServer.SetErrorLogger(stdLogger)
 
 	// Start listening for messages
 	errC := make(chan error, 1)
 	go func() {
 		in, out := io.Reader(os.Stdin), io.Writer(os.Stdout)
 
-		// If command logging is enabled, wrap the IO with a logger
-		if configOpts.LogCommands && logger != nil {
+		if configOpts.LogCommands {
+			// If command logging is enabled, wrap the IO with a logger
 			loggedIO := log.NewIOLogger(in, out, logger)
 			in, out = loggedIO, loggedIO
 		}
@@ -99,7 +89,24 @@ func runStdioServer(configOpts *ServerOptions) error {
 	return nil
 }
 
-func newStdioServer(configOpts *ServerOptions) *server.MCPServer {
+func initLogger(filePath string) (*logrus.Logger, error) {
+	if filePath == "" {
+		return logrus.New(), nil
+	}
+
+	fd, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open log file: %w", err)
+	}
+
+	logger := logrus.New()
+	logger.SetFormatter(&logrus.TextFormatter{})
+	logger.SetLevel(logrus.DebugLevel)
+	logger.SetOutput(fd)
+	return logger, nil
+}
+
+func newStdioServer(configOpts *ServerOptions, logrusLogger *logrus.Logger) *server.MCPServer {
 	issuer := configOpts.Options.LoadConfigOrDie().Auth.Issuer()
 	userName, err := configOpts.Options.WhoAmI(issuer.Audience)
 	if err != nil {
@@ -188,7 +195,7 @@ Logged in as %s.`, userName)),
 	mcp.KafkaAdminAddGroupsTools(s, configOpts.ReadOnly)
 	mcp.KafkaAdminAddSchemaRegistryTools(s, configOpts.ReadOnly)
 	mcp.KafkaAdminAddKafkaConnectTools(s, configOpts.ReadOnly)
-	mcp.KafkaClientAddConsumeTools(s, configOpts.ReadOnly)
+	mcp.KafkaClientAddConsumeTools(s, configOpts.ReadOnly, logrusLogger)
 	mcp.KafkaClientAddProduceTools(s, configOpts.ReadOnly)
 	return s
 }

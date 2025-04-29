@@ -11,11 +11,13 @@ import (
 	sncloud "github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserve"
 )
 
+type ContextKey string
+
 const (
-	OptionsKey                        = "snmcp-options"
-	AnnotationStreamNativeCloudEngine = "cloud.streamnative.io/engine"
-	KeyPrefix                         = "snmcp-token"
-	TokenRefreshWindow                = 5 * time.Minute
+	OptionsKey                        ContextKey = "snmcp-options"
+	AnnotationStreamNativeCloudEngine            = "cloud.streamnative.io/engine"
+	KeyPrefix                                    = "snmcp-token"
+	TokenRefreshWindow                           = 5 * time.Minute
 )
 
 // requiredParam is a helper function that can be used to fetch a requested parameter from the request.
