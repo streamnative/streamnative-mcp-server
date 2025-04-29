@@ -120,7 +120,7 @@ func PulsarAdminAddFunctionsTools(s *server.MCPServer, readOnly bool, features [
 }
 
 // handleFunctionsTool returns a handler function for the unified functions tool
-func handleFunctionsTool(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleFunctionsTool(readOnly bool) func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Create Pulsar client with API version V3
 		client := cmdutils.NewPulsarClientWithAPIVersion(config.V3)
@@ -222,7 +222,7 @@ func handleFunctionsTool(readOnly bool) func(context.Context, mcp.CallToolReques
 }
 
 // handleFunctionList handles listing all functions under a namespace
-func handleFunctionList(ctx context.Context, client cmdutils.Client, tenant, namespace string) (*mcp.CallToolResult, error) {
+func handleFunctionList(_ context.Context, client cmdutils.Client, tenant, namespace string) (*mcp.CallToolResult, error) {
 	// Get function list
 	functions, err := client.Functions().GetFunctions(tenant, namespace)
 	if err != nil {
@@ -240,7 +240,7 @@ func handleFunctionList(ctx context.Context, client cmdutils.Client, tenant, nam
 }
 
 // handleFunctionGet handles getting information about a function
-func handleFunctionGet(ctx context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
+func handleFunctionGet(_ context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
 	// Get function info
 	functionConfig, err := client.Functions().GetFunction(tenant, namespace, name)
 	if err != nil {
@@ -258,7 +258,7 @@ func handleFunctionGet(ctx context.Context, client cmdutils.Client, tenant, name
 }
 
 // handleFunctionStatus handles getting the status of a function
-func handleFunctionStatus(ctx context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
+func handleFunctionStatus(_ context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
 	// Get function status
 	status, err := client.Functions().GetFunctionStatus(tenant, namespace, name)
 	if err != nil {
@@ -276,7 +276,7 @@ func handleFunctionStatus(ctx context.Context, client cmdutils.Client, tenant, n
 }
 
 // handleFunctionStats handles getting the statistics of a function
-func handleFunctionStats(ctx context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
+func handleFunctionStats(_ context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
 	// Get function stats
 	stats, err := client.Functions().GetFunctionStats(tenant, namespace, name)
 	if err != nil {
@@ -294,7 +294,7 @@ func handleFunctionStats(ctx context.Context, client cmdutils.Client, tenant, na
 }
 
 // handleFunctionQuerystate handles querying the state of a function
-func handleFunctionQuerystate(ctx context.Context, client cmdutils.Client, tenant, namespace, name, key string) (*mcp.CallToolResult, error) {
+func handleFunctionQuerystate(_ context.Context, client cmdutils.Client, tenant, namespace, name, key string) (*mcp.CallToolResult, error) {
 	// Query function state
 	state, err := client.Functions().GetFunctionState(tenant, namespace, name, key)
 	if err != nil {
@@ -312,7 +312,7 @@ func handleFunctionQuerystate(ctx context.Context, client cmdutils.Client, tenan
 }
 
 // handleFunctionCreate handles creating a new function
-func handleFunctionCreate(ctx context.Context, client cmdutils.Client, tenant, namespace, name string, arguments map[string]interface{}) (*mcp.CallToolResult, error) {
+func handleFunctionCreate(_ context.Context, client cmdutils.Client, tenant, namespace, name string, arguments map[string]interface{}) (*mcp.CallToolResult, error) {
 	// Extract required parameters
 	classname, err := requiredParam[string](arguments, "classname")
 	if err != nil {
@@ -375,7 +375,7 @@ func handleFunctionCreate(ctx context.Context, client cmdutils.Client, tenant, n
 }
 
 // handleFunctionUpdate handles updating an existing function
-func handleFunctionUpdate(ctx context.Context, client cmdutils.Client, tenant, namespace, name string, arguments map[string]interface{}) (*mcp.CallToolResult, error) {
+func handleFunctionUpdate(_ context.Context, client cmdutils.Client, tenant, namespace, name string, arguments map[string]interface{}) (*mcp.CallToolResult, error) {
 	// Extract optional parameters
 	classname, _ := optionalParam[string](arguments, "classname")
 	inputTopics, _ := optionalParamArray[string](arguments, "inputs")
@@ -436,7 +436,7 @@ func handleFunctionUpdate(ctx context.Context, client cmdutils.Client, tenant, n
 }
 
 // handleFunctionDelete handles deleting a function
-func handleFunctionDelete(ctx context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
+func handleFunctionDelete(_ context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
 	// Delete function
 	err := client.Functions().DeleteFunction(tenant, namespace, name)
 	if err != nil {
@@ -449,7 +449,7 @@ func handleFunctionDelete(ctx context.Context, client cmdutils.Client, tenant, n
 }
 
 // handleFunctionStart handles starting a function
-func handleFunctionStart(ctx context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
+func handleFunctionStart(_ context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
 	// Start function
 	err := client.Functions().StartFunction(tenant, namespace, name)
 	if err != nil {
@@ -462,7 +462,7 @@ func handleFunctionStart(ctx context.Context, client cmdutils.Client, tenant, na
 }
 
 // handleFunctionStop handles stopping a function
-func handleFunctionStop(ctx context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
+func handleFunctionStop(_ context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
 	// Stop function
 	err := client.Functions().StopFunction(tenant, namespace, name)
 	if err != nil {
@@ -475,7 +475,7 @@ func handleFunctionStop(ctx context.Context, client cmdutils.Client, tenant, nam
 }
 
 // handleFunctionRestart handles restarting a function
-func handleFunctionRestart(ctx context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
+func handleFunctionRestart(_ context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
 	// Restart function
 	err := client.Functions().RestartFunction(tenant, namespace, name)
 	if err != nil {
@@ -488,7 +488,7 @@ func handleFunctionRestart(ctx context.Context, client cmdutils.Client, tenant, 
 }
 
 // handleFunctionPutstate handles putting state into the state store of a function
-func handleFunctionPutstate(ctx context.Context, client cmdutils.Client, tenant, namespace, name, key, value string) (*mcp.CallToolResult, error) {
+func handleFunctionPutstate(_ context.Context, client cmdutils.Client, tenant, namespace, name, key, value string) (*mcp.CallToolResult, error) {
 	// Create function state
 	state := utils.FunctionState{
 		Key:         key,
@@ -507,7 +507,7 @@ func handleFunctionPutstate(ctx context.Context, client cmdutils.Client, tenant,
 }
 
 // handleFunctionTrigger handles triggering a function
-func handleFunctionTrigger(ctx context.Context, client cmdutils.Client, tenant, namespace, name, topic, triggerValue string) (*mcp.CallToolResult, error) {
+func handleFunctionTrigger(_ context.Context, client cmdutils.Client, tenant, namespace, name, topic, triggerValue string) (*mcp.CallToolResult, error) {
 	// Trigger function
 	result, err := client.Functions().TriggerFunction(tenant, namespace, name, topic, triggerValue, "")
 	if err != nil {

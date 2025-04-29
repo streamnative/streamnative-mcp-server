@@ -212,6 +212,7 @@ func handleClientConsume(ctx context.Context, request mcp.CallToolRequest) (*mcp
 			return mcp.NewToolResultError("DLQ topic is required when max-redeliver-count is specified"), nil
 		}
 		consumerOpts.DLQ = &pulsar.DLQPolicy{
+			//nolint:gosec
 			MaxDeliveries:    uint32(maxRedeliverCount),
 			DeadLetterTopic:  dlqTopic,
 			RetryLetterTopic: fmt.Sprintf("%s-retry", dlqTopic),

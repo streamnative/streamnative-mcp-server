@@ -192,7 +192,7 @@ func handleSinksTool(readOnly bool) func(context.Context, mcp.CallToolRequest) (
 }
 
 // handleSinkList handles listing all sinks under a namespace
-func handleSinkList(ctx context.Context, admin cmdutils.Client, tenant, namespace string) (*mcp.CallToolResult, error) {
+func handleSinkList(_ context.Context, admin cmdutils.Client, tenant, namespace string) (*mcp.CallToolResult, error) {
 	sinks, err := admin.Sinks().ListSinks(tenant, namespace)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to list sinks in tenant '%s' namespace '%s': %v. Check that the tenant and namespace exist and you have proper permissions.",
@@ -209,7 +209,7 @@ func handleSinkList(ctx context.Context, admin cmdutils.Client, tenant, namespac
 }
 
 // handleSinkGet handles getting information about a sink
-func handleSinkGet(ctx context.Context, admin cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
+func handleSinkGet(_ context.Context, admin cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
 	sink, err := admin.Sinks().GetSink(tenant, namespace, name)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get sink '%s' in tenant '%s' namespace '%s': %v. Verify the sink exists and you have proper permissions.",
@@ -226,7 +226,7 @@ func handleSinkGet(ctx context.Context, admin cmdutils.Client, tenant, namespace
 }
 
 // handleSinkStatus handles getting the status of a sink
-func handleSinkStatus(ctx context.Context, admin cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
+func handleSinkStatus(_ context.Context, admin cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
 	status, err := admin.Sinks().GetSinkStatus(tenant, namespace, name)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get status for sink '%s' in tenant '%s' namespace '%s': %v. Verify the sink exists and is properly deployed.",
@@ -243,7 +243,7 @@ func handleSinkStatus(ctx context.Context, admin cmdutils.Client, tenant, namesp
 }
 
 // handleSinkCreate handles creating a new sink
-func handleSinkCreate(ctx context.Context, admin cmdutils.Client, arguments map[string]interface{}) (*mcp.CallToolResult, error) {
+func handleSinkCreate(_ context.Context, admin cmdutils.Client, arguments map[string]interface{}) (*mcp.CallToolResult, error) {
 	tenant, err := requiredParam[string](arguments, "tenant")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get tenant: %v", err)), nil
@@ -349,7 +349,7 @@ func handleSinkCreate(ctx context.Context, admin cmdutils.Client, arguments map[
 }
 
 // handleSinkUpdate handles updating an existing sink
-func handleSinkUpdate(ctx context.Context, admin cmdutils.Client, arguments map[string]interface{}) (*mcp.CallToolResult, error) {
+func handleSinkUpdate(_ context.Context, admin cmdutils.Client, arguments map[string]interface{}) (*mcp.CallToolResult, error) {
 	tenant, err := requiredParam[string](arguments, "tenant")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get tenant: %v", err)), nil
@@ -452,7 +452,7 @@ func handleSinkUpdate(ctx context.Context, admin cmdutils.Client, arguments map[
 }
 
 // handleSinkDelete handles deleting a sink
-func handleSinkDelete(ctx context.Context, admin cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
+func handleSinkDelete(_ context.Context, admin cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
 	err := admin.Sinks().DeleteSink(tenant, namespace, name)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to delete sink '%s' in tenant '%s' namespace '%s': %v. Verify the sink exists and you have deletion permissions.",
@@ -464,7 +464,7 @@ func handleSinkDelete(ctx context.Context, admin cmdutils.Client, tenant, namesp
 }
 
 // handleSinkStart handles starting a sink
-func handleSinkStart(ctx context.Context, admin cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
+func handleSinkStart(_ context.Context, admin cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
 	err := admin.Sinks().StartSink(tenant, namespace, name)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to start sink '%s' in tenant '%s' namespace '%s': %v. Verify the sink exists and is not already running.",
@@ -476,7 +476,7 @@ func handleSinkStart(ctx context.Context, admin cmdutils.Client, tenant, namespa
 }
 
 // handleSinkStop handles stopping a sink
-func handleSinkStop(ctx context.Context, admin cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
+func handleSinkStop(_ context.Context, admin cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
 	err := admin.Sinks().StopSink(tenant, namespace, name)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to stop sink '%s' in tenant '%s' namespace '%s': %v. Verify the sink exists and is currently running.",
@@ -488,7 +488,7 @@ func handleSinkStop(ctx context.Context, admin cmdutils.Client, tenant, namespac
 }
 
 // handleSinkRestart handles restarting a sink
-func handleSinkRestart(ctx context.Context, admin cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
+func handleSinkRestart(_ context.Context, admin cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
 	err := admin.Sinks().RestartSink(tenant, namespace, name)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to restart sink '%s' in tenant '%s' namespace '%s': %v. Verify the sink exists and is properly deployed.",
@@ -500,7 +500,7 @@ func handleSinkRestart(ctx context.Context, admin cmdutils.Client, tenant, names
 }
 
 // handleListBuiltInSinks handles listing all built-in sink connectors
-func handleListBuiltInSinks(ctx context.Context, admin cmdutils.Client) (*mcp.CallToolResult, error) {
+func handleListBuiltInSinks(_ context.Context, admin cmdutils.Client) (*mcp.CallToolResult, error) {
 	sinks, err := admin.Sinks().GetBuiltInSinks()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to list built-in sinks: %v. There might be an issue connecting to the Pulsar cluster.", err)), nil

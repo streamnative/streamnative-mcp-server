@@ -72,7 +72,7 @@ func PulsarAdminAddPackagesTools(s *server.MCPServer, readOnly bool, features []
 
 // handlePackageTool returns a function that handles package-related operations
 func handlePackageTool(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	return func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get required parameters
 		resource, err := requiredParam[string](request.Params.Arguments, "resource")
 		if err != nil {

@@ -93,7 +93,7 @@ func handleSetContext(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 	return mcp.NewToolResultText("StreamNative Cloud context set successfully"), nil
 }
 
-func handleAvailableContexts(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleAvailableContexts(ctx context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	promptResponse, err := handleListPulsarClusters(ctx, mcp.GetPromptRequest{})
 	if err != nil || promptResponse == nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to list pulsar clusters: %v", err)), nil

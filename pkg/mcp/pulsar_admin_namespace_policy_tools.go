@@ -289,7 +289,7 @@ func PulsarAdminAddNamespacePolicyTools(s *server.MCPServer, readOnly bool, feat
 }
 
 // handleNamespaceGetPolicies handles getting policies for a namespace
-func handleNamespaceGetPolicies(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleNamespaceGetPolicies(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
 	client, err := pulsar.GetAdminClient()
 	if err != nil {
@@ -317,7 +317,7 @@ func handleNamespaceGetPolicies(ctx context.Context, request mcp.CallToolRequest
 }
 
 // handleSetMessageTTL handles setting message TTL for a namespace
-func handleSetMessageTTL(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetMessageTTL(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
 	client, err := pulsar.GetAdminClient()
 	if err != nil {
@@ -349,7 +349,7 @@ func handleSetMessageTTL(ctx context.Context, request mcp.CallToolRequest) (*mcp
 }
 
 // handleSetRetention handles setting retention for a namespace
-func handleSetRetention(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetRetention(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
 	client, err := pulsar.GetAdminClient()
 	if err != nil {
@@ -428,7 +428,7 @@ func handleSetRetention(ctx context.Context, request mcp.CallToolRequest) (*mcp.
 }
 
 // handleGrantPermission handles granting permissions on a namespace
-func handleGrantPermission(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleGrantPermission(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
 	client, err := pulsar.GetAdminClient()
 	if err != nil {
@@ -482,7 +482,7 @@ func parseActions(actions []string) ([]utils.AuthAction, error) {
 }
 
 // handleRevokePermission handles revoking permissions from a namespace
-func handleRevokePermission(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleRevokePermission(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
 	client, err := pulsar.GetAdminClient()
 	if err != nil {
@@ -514,7 +514,7 @@ func handleRevokePermission(ctx context.Context, request mcp.CallToolRequest) (*
 }
 
 // handleSetReplicationClusters handles setting replication clusters for a namespace
-func handleSetReplicationClusters(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetReplicationClusters(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
 	client, err := pulsar.GetAdminClient()
 	if err != nil {
@@ -547,7 +547,7 @@ func handleSetReplicationClusters(ctx context.Context, request mcp.CallToolReque
 }
 
 // handleSetBacklogQuota handles setting backlog quota for a namespace
-func handleSetBacklogQuota(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetBacklogQuota(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
 	client, err := pulsar.GetAdminClient()
 	if err != nil {
@@ -621,7 +621,7 @@ func handleSetBacklogQuota(ctx context.Context, request mcp.CallToolRequest) (*m
 }
 
 // handleRemoveBacklogQuota handles removing backlog quota from a namespace
-func handleRemoveBacklogQuota(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleRemoveBacklogQuota(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
 	client, err := pulsar.GetAdminClient()
 	if err != nil {
@@ -643,7 +643,7 @@ func handleRemoveBacklogQuota(ctx context.Context, request mcp.CallToolRequest) 
 }
 
 // handleSetTopicAutoCreation handles setting topic auto-creation for a namespace
-func handleSetTopicAutoCreation(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetTopicAutoCreation(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
 	client, err := pulsar.GetAdminClient()
 	if err != nil {
@@ -706,7 +706,7 @@ func handleSetTopicAutoCreation(ctx context.Context, request mcp.CallToolRequest
 }
 
 // handleRemoveTopicAutoCreation handles removing topic auto-creation config from a namespace
-func handleRemoveTopicAutoCreation(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleRemoveTopicAutoCreation(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
 	client, err := pulsar.GetAdminClient()
 	if err != nil {
@@ -734,7 +734,7 @@ func handleRemoveTopicAutoCreation(ctx context.Context, request mcp.CallToolRequ
 }
 
 // handleSetSchemaValidationEnforced handles setting schema validation enforced status for a namespace
-func handleSetSchemaValidationEnforced(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetSchemaValidationEnforced(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
 	client, err := pulsar.GetAdminClient()
 	if err != nil {
@@ -773,7 +773,7 @@ func handleSetSchemaValidationEnforced(ctx context.Context, request mcp.CallTool
 }
 
 // handleSetSchemaAutoUpdateStrategy handles setting schema auto-update strategy for a namespace
-func handleSetSchemaAutoUpdateStrategy(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetSchemaAutoUpdateStrategy(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
 	client, err := pulsar.GetAdminClient()
 	if err != nil {
@@ -814,7 +814,7 @@ func handleSetSchemaAutoUpdateStrategy(ctx context.Context, request mcp.CallTool
 }
 
 // handleSetIsAllowAutoUpdateSchema handles setting auto update schema allowance for a namespace
-func handleSetIsAllowAutoUpdateSchema(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetIsAllowAutoUpdateSchema(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
 	client, err := pulsar.GetAdminClient()
 	if err != nil {
@@ -864,7 +864,7 @@ func handleSetIsAllowAutoUpdateSchema(ctx context.Context, request mcp.CallToolR
 }
 
 // handleSetOffloadThreshold handles setting offload threshold for a namespace
-func handleSetOffloadThreshold(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetOffloadThreshold(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
 	client, err := pulsar.GetAdminClient()
 	if err != nil {
@@ -905,7 +905,7 @@ func handleSetOffloadThreshold(ctx context.Context, request mcp.CallToolRequest)
 }
 
 // handleSetOffloadDeletionLag handles setting offload deletion lag for a namespace
-func handleSetOffloadDeletionLag(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetOffloadDeletionLag(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
 	client, err := pulsar.GetAdminClient()
 	if err != nil {
@@ -949,7 +949,7 @@ func handleSetOffloadDeletionLag(ctx context.Context, request mcp.CallToolReques
 }
 
 // handleClearOffloadDeletionLag handles clearing offload deletion lag for a namespace
-func handleClearOffloadDeletionLag(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleClearOffloadDeletionLag(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
 	client, err := pulsar.GetAdminClient()
 	if err != nil {
@@ -979,7 +979,7 @@ func handleClearOffloadDeletionLag(ctx context.Context, request mcp.CallToolRequ
 }
 
 // handleSetCompactionThreshold handles setting compaction threshold for a namespace
-func handleSetCompactionThreshold(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetCompactionThreshold(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
 	client, err := pulsar.GetAdminClient()
 	if err != nil {
@@ -1020,7 +1020,7 @@ func handleSetCompactionThreshold(ctx context.Context, request mcp.CallToolReque
 }
 
 // handleSetMaxProducersPerTopic handles setting max producers per topic for a namespace
-func handleSetMaxProducersPerTopic(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetMaxProducersPerTopic(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
 	client, err := pulsar.GetAdminClient()
 	if err != nil {
@@ -1065,7 +1065,7 @@ func handleSetMaxProducersPerTopic(ctx context.Context, request mcp.CallToolRequ
 }
 
 // handleSetMaxConsumersPerTopic handles setting max consumers per topic for a namespace
-func handleSetMaxConsumersPerTopic(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetMaxConsumersPerTopic(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
 	client, err := pulsar.GetAdminClient()
 	if err != nil {
@@ -1110,7 +1110,7 @@ func handleSetMaxConsumersPerTopic(ctx context.Context, request mcp.CallToolRequ
 }
 
 // handleSetMaxConsumersPerSubscription handles setting max consumers per subscription for a namespace
-func handleSetMaxConsumersPerSubscription(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetMaxConsumersPerSubscription(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
 	client, err := pulsar.GetAdminClient()
 	if err != nil {
@@ -1155,7 +1155,7 @@ func handleSetMaxConsumersPerSubscription(ctx context.Context, request mcp.CallT
 }
 
 // handleSetAntiAffinityGroup handles setting the anti-affinity group for a namespace
-func handleSetAntiAffinityGroup(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetAntiAffinityGroup(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
 	client, err := pulsar.GetAdminClient()
 	if err != nil {
@@ -1184,7 +1184,7 @@ func handleSetAntiAffinityGroup(ctx context.Context, request mcp.CallToolRequest
 }
 
 // handleDeleteAntiAffinityGroup handles deleting the anti-affinity group of a namespace
-func handleDeleteAntiAffinityGroup(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleDeleteAntiAffinityGroup(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
 	client, err := pulsar.GetAdminClient()
 	if err != nil {
@@ -1208,7 +1208,7 @@ func handleDeleteAntiAffinityGroup(ctx context.Context, request mcp.CallToolRequ
 }
 
 // handleSetPersistence handles setting persistence policy for a namespace
-func handleSetPersistence(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetPersistence(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
 	client, err := pulsar.GetAdminClient()
 	if err != nil {
@@ -1282,7 +1282,7 @@ func handleSetPersistence(ctx context.Context, request mcp.CallToolRequest) (*mc
 }
 
 // handleSetDeduplication handles setting the deduplication status for a namespace
-func handleSetDeduplication(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetDeduplication(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
 	client, err := pulsar.GetAdminClient()
 	if err != nil {
@@ -1313,7 +1313,7 @@ func handleSetDeduplication(ctx context.Context, request mcp.CallToolRequest) (*
 }
 
 // handleSetEncryptionRequired handles setting whether encryption is required for a namespace
-func handleSetEncryptionRequired(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetEncryptionRequired(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
 	client, err := pulsar.GetAdminClient()
 	if err != nil {
@@ -1352,7 +1352,7 @@ func handleSetEncryptionRequired(ctx context.Context, request mcp.CallToolReques
 }
 
 // handleSetSubscriptionAuthMode handles setting the default subscription auth mode for a namespace
-func handleSetSubscriptionAuthMode(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetSubscriptionAuthMode(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
 	client, err := pulsar.GetAdminClient()
 	if err != nil {
@@ -1394,7 +1394,7 @@ func handleSetSubscriptionAuthMode(ctx context.Context, request mcp.CallToolRequ
 }
 
 // handleGrantSubscriptionPermission handles granting subscription permissions to roles
-func handleGrantSubscriptionPermission(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleGrantSubscriptionPermission(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
 	client, err := pulsar.GetAdminClient()
 	if err != nil {
@@ -1439,7 +1439,7 @@ func handleGrantSubscriptionPermission(ctx context.Context, request mcp.CallTool
 }
 
 // handleRevokeSubscriptionPermission handles revoking subscription permissions from a role
-func handleRevokeSubscriptionPermission(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleRevokeSubscriptionPermission(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
 	client, err := pulsar.GetAdminClient()
 	if err != nil {
@@ -1480,7 +1480,7 @@ func handleRevokeSubscriptionPermission(ctx context.Context, request mcp.CallToo
 }
 
 // handleSetDispatchRate handles setting the default message dispatch rate for a namespace
-func handleSetDispatchRate(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetDispatchRate(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
 	client, err := pulsar.GetAdminClient()
 	if err != nil {
@@ -1548,7 +1548,7 @@ func handleSetDispatchRate(ctx context.Context, request mcp.CallToolRequest) (*m
 }
 
 // handleSetReplicatorDispatchRate handles setting the default replicator message dispatch rate for a namespace
-func handleSetReplicatorDispatchRate(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetReplicatorDispatchRate(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
 	client, err := pulsar.GetAdminClient()
 	if err != nil {
@@ -1616,7 +1616,7 @@ func handleSetReplicatorDispatchRate(ctx context.Context, request mcp.CallToolRe
 }
 
 // handleSetSubscribeRate handles setting the default subscribe rate per consumer for a namespace
-func handleSetSubscribeRate(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetSubscribeRate(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
 	client, err := pulsar.GetAdminClient()
 	if err != nil {
@@ -1671,7 +1671,7 @@ func handleSetSubscribeRate(ctx context.Context, request mcp.CallToolRequest) (*
 }
 
 // handleSetSubscriptionDispatchRate handles setting the default subscription message dispatch rate for a namespace
-func handleSetSubscriptionDispatchRate(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetSubscriptionDispatchRate(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
 	client, err := pulsar.GetAdminClient()
 	if err != nil {
@@ -1739,7 +1739,7 @@ func handleSetSubscriptionDispatchRate(ctx context.Context, request mcp.CallTool
 }
 
 // handleSetPublishRate handles setting the default message publish rate of a namespace
-func handleSetPublishRate(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetPublishRate(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
 	client, err := pulsar.GetAdminClient()
 	if err != nil {

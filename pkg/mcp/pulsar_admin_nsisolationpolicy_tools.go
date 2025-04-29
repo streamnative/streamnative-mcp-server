@@ -72,7 +72,7 @@ func PulsarAdminAddNsIsolationPolicyTools(s *server.MCPServer, readOnly bool, fe
 
 // handleNsIsolationPolicy returns a function that handles namespace isolation policy operations
 func handleNsIsolationPolicy(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	return func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Create Pulsar client
 		client, err := pulsar.GetAdminClient()
 		if err != nil {

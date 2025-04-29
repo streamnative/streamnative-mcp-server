@@ -116,8 +116,8 @@ func PulsarAdminAddTopicTools(s *server.MCPServer, readOnly bool, features []str
 }
 
 // handleTopicTool returns a function that handles topic operations
-func handleTopicTool(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicTool(readOnly bool) func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	return func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get required parameters
 		resource, err := requiredParam[string](request.Params.Arguments, "resource")
 		if err != nil {
@@ -387,10 +387,9 @@ func handleTopicCreate(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp
 	if int(partitions) == 0 {
 		return mcp.NewToolResultText(fmt.Sprintf("Successfully created non-partitioned topic '%s'",
 			topicName.String())), nil
-	} else {
-		return mcp.NewToolResultText(fmt.Sprintf("Successfully created topic '%s' with %d partitions",
-			topicName.String(), int(partitions))), nil
 	}
+	return mcp.NewToolResultText(fmt.Sprintf("Successfully created topic '%s' with %d partitions",
+		topicName.String(), int(partitions))), nil
 }
 
 // handleTopicDelete deletes a topic
@@ -688,22 +687,6 @@ func handleTopicUpdate(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp
 
 	return mcp.NewToolResultText(fmt.Sprintf("Successfully updated topic '%s' partitions to %d",
 		topicName.String(), int(partitions))), nil
-}
-
-// toFloat64 attempts to convert a value to float64
-func toFloat64(value interface{}) (float64, bool) {
-	switch v := value.(type) {
-	case float64:
-		return v, true
-	case float32:
-		return float64(v), true
-	case int:
-		return float64(v), true
-	case int64:
-		return float64(v), true
-	default:
-		return 0, false
-	}
 }
 
 // handleTopicOffload offloads data from a topic to long-term storage

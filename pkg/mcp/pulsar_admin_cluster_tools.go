@@ -77,7 +77,7 @@ func PulsarAdminAddClusterTools(s *server.MCPServer, readOnly bool, features []s
 
 // handleClusterTool returns a function to handle cluster tool requests
 func handleClusterTool(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	return func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		client, err := pulsar.GetAdminClient()
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil

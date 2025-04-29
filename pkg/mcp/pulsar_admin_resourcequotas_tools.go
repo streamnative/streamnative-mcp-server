@@ -82,8 +82,8 @@ func PulsarAdminAddResourceQuotasTools(s *server.MCPServer, readOnly bool, featu
 }
 
 // handleResourceQuotaTool returns a function that handles resource quota operations
-func handleResourceQuotaTool(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleResourceQuotaTool(readOnly bool) func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	return func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get required parameters
 		resource, err := requiredParam[string](request.Params.Arguments, "resource")
 		if err != nil {

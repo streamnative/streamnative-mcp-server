@@ -72,7 +72,7 @@ func PulsarAdminAddBrokersTools(s *server.MCPServer, readOnly bool, features []s
 
 // Return a handler function, with readOnly state captured in closure
 func handleBrokerTool(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	return func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		client, err := pulsar.GetAdminClient()
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil

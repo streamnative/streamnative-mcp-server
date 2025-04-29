@@ -1,0 +1,51 @@
+name: Build
+on:
+  pull_request:
+    branches:
+      - master
+      - release/*
+    paths:
+      - '**'
+      - '!docs/**'
+      - '!README.md'
+      - '!CONTRIBUTING.md'
+
+env:
+  GOPRIVATE: github.com/streamnative
+  ACCESS_TOKEN: ${{ secrets.SNBOT_GITHUB_TOKEN }}
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Git token
+        run: |
+          git config --global user.email "snbot@streamnative.io"
+          git config --global user.name "StreamNative Bot"
+          git config --global url."https://streamnativebot:${ACCESS_TOKEN}@github.com/".insteadOf "https://github.com/"
+        
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version-file: 'go.mod'
+
+      - name: Docker login
+        run: docker login -u="${{ secrets.DOCKER_USER }}" -p="${{ secrets.DOCKER_PASSWORD }}"
+
+      - name: Run GoReleaser (snapshot)
+        uses: goreleaser/goreleaser-action@v3
+        with:
+          version: latest
+          args: release --snapshot --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.SNBOT_GITHUB_TOKEN }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/

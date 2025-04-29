@@ -199,7 +199,7 @@ func handleSourcesTool(readOnly bool) func(context.Context, mcp.CallToolRequest)
 }
 
 // handleSourceList handles listing all sources under a namespace
-func handleSourceList(ctx context.Context, admin cmdutils.Client, tenant, namespace string) (*mcp.CallToolResult, error) {
+func handleSourceList(_ context.Context, admin cmdutils.Client, tenant, namespace string) (*mcp.CallToolResult, error) {
 	sources, err := admin.Sources().ListSources(tenant, namespace)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to list sources in tenant '%s' namespace '%s': %v. Check that the tenant and namespace exist and you have proper permissions.",
@@ -216,7 +216,7 @@ func handleSourceList(ctx context.Context, admin cmdutils.Client, tenant, namesp
 }
 
 // handleSourceGet handles getting information about a source
-func handleSourceGet(ctx context.Context, admin cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
+func handleSourceGet(_ context.Context, admin cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
 	source, err := admin.Sources().GetSource(tenant, namespace, name)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get source '%s' in tenant '%s' namespace '%s': %v. Verify the source exists and you have proper permissions.",
@@ -233,7 +233,7 @@ func handleSourceGet(ctx context.Context, admin cmdutils.Client, tenant, namespa
 }
 
 // handleSourceStatus handles getting the status of a source
-func handleSourceStatus(ctx context.Context, admin cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
+func handleSourceStatus(_ context.Context, admin cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
 	status, err := admin.Sources().GetSourceStatus(tenant, namespace, name)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get status for source '%s' in tenant '%s' namespace '%s': %v. Verify the source exists and is properly deployed.",
@@ -250,7 +250,7 @@ func handleSourceStatus(ctx context.Context, admin cmdutils.Client, tenant, name
 }
 
 // handleSourceCreate handles creating a new source
-func handleSourceCreate(ctx context.Context, admin cmdutils.Client, arguments map[string]interface{}) (*mcp.CallToolResult, error) {
+func handleSourceCreate(_ context.Context, admin cmdutils.Client, arguments map[string]interface{}) (*mcp.CallToolResult, error) {
 	tenant, err := requiredParam[string](arguments, "tenant")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get tenant: %v", err)), nil
@@ -366,7 +366,7 @@ func handleSourceCreate(ctx context.Context, admin cmdutils.Client, arguments ma
 }
 
 // handleSourceUpdate handles updating an existing source
-func handleSourceUpdate(ctx context.Context, admin cmdutils.Client, arguments map[string]interface{}) (*mcp.CallToolResult, error) {
+func handleSourceUpdate(_ context.Context, admin cmdutils.Client, arguments map[string]interface{}) (*mcp.CallToolResult, error) {
 	tenant, err := requiredParam[string](arguments, "tenant")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get tenant: %v", err)), nil
@@ -479,7 +479,7 @@ func handleSourceUpdate(ctx context.Context, admin cmdutils.Client, arguments ma
 }
 
 // handleSourceDelete handles deleting a source
-func handleSourceDelete(ctx context.Context, admin cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
+func handleSourceDelete(_ context.Context, admin cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
 	err := admin.Sources().DeleteSource(tenant, namespace, name)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to delete source '%s' in tenant '%s' namespace '%s': %v. Verify the source exists and you have deletion permissions.",
@@ -491,7 +491,7 @@ func handleSourceDelete(ctx context.Context, admin cmdutils.Client, tenant, name
 }
 
 // handleSourceStart handles starting a source
-func handleSourceStart(ctx context.Context, admin cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
+func handleSourceStart(_ context.Context, admin cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
 	err := admin.Sources().StartSource(tenant, namespace, name)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to start source '%s' in tenant '%s' namespace '%s': %v. Verify the source exists and is not already running.",
@@ -503,7 +503,7 @@ func handleSourceStart(ctx context.Context, admin cmdutils.Client, tenant, names
 }
 
 // handleSourceStop handles stopping a source
-func handleSourceStop(ctx context.Context, admin cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
+func handleSourceStop(_ context.Context, admin cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
 	err := admin.Sources().StopSource(tenant, namespace, name)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to stop source '%s' in tenant '%s' namespace '%s': %v. Verify the source exists and is currently running.",
@@ -515,7 +515,7 @@ func handleSourceStop(ctx context.Context, admin cmdutils.Client, tenant, namesp
 }
 
 // handleSourceRestart handles restarting a source
-func handleSourceRestart(ctx context.Context, admin cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
+func handleSourceRestart(_ context.Context, admin cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
 	err := admin.Sources().RestartSource(tenant, namespace, name)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to restart source '%s' in tenant '%s' namespace '%s': %v. Verify the source exists and is properly deployed.",
@@ -527,7 +527,7 @@ func handleSourceRestart(ctx context.Context, admin cmdutils.Client, tenant, nam
 }
 
 // handleListBuiltInSources handles listing all built-in source connectors
-func handleListBuiltInSources(ctx context.Context, admin cmdutils.Client) (*mcp.CallToolResult, error) {
+func handleListBuiltInSources(_ context.Context, admin cmdutils.Client) (*mcp.CallToolResult, error) {
 	sources, err := admin.Sources().GetBuiltInSources()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to list built-in sources: %v. There might be an issue connecting to the Pulsar cluster.", err)), nil

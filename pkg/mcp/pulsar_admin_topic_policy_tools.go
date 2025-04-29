@@ -313,7 +313,7 @@ func PulsarAdminAddTopicPolicyTools(s *server.MCPServer, readOnly bool, features
 }
 
 // handleTopicsGetPublishRate gets the publish rate for a topic
-func handleTopicsGetPublishRate(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsGetPublishRate(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -353,7 +353,7 @@ func handleTopicsGetPublishRate(ctx context.Context, request mcp.CallToolRequest
 }
 
 // handleTopicsSetPublishRate sets the publish rate for a topic
-func handleTopicsSetPublishRate(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsSetPublishRate(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -424,7 +424,7 @@ func handleTopicsSetPublishRate(ctx context.Context, request mcp.CallToolRequest
 }
 
 // handleTopicsRemovePublishRate removes the publish rate for a topic
-func handleTopicsRemovePublishRate(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsRemovePublishRate(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -453,7 +453,7 @@ func handleTopicsRemovePublishRate(ctx context.Context, request mcp.CallToolRequ
 }
 
 // handleTopicsGetPermissions gets the permissions on a topic
-func handleTopicsGetPermissions(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsGetPermissions(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -488,7 +488,7 @@ func handleTopicsGetPermissions(ctx context.Context, request mcp.CallToolRequest
 }
 
 // handleTopicsGrantPermissions grants a new permission to a role on a topic
-func handleTopicsGrantPermissions(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsGrantPermissions(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -543,7 +543,7 @@ func handleTopicsGrantPermissions(ctx context.Context, request mcp.CallToolReque
 }
 
 // handleTopicsRevokePermissions revokes all permissions for a role on a topic
-func handleTopicsRevokePermissions(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsRevokePermissions(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -597,7 +597,7 @@ func grantTopicPermission(admin interface{}, topicName utils.TopicName, role str
 }
 
 // handleTopicsGetMessageTTL gets the message TTL for a topic
-func handleTopicsGetMessageTTL(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsGetMessageTTL(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -631,7 +631,7 @@ func handleTopicsGetMessageTTL(ctx context.Context, request mcp.CallToolRequest)
 }
 
 // handleTopicsSetMessageTTL sets the message TTL for a topic
-func handleTopicsSetMessageTTL(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsSetMessageTTL(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -677,7 +677,7 @@ func handleTopicsSetMessageTTL(ctx context.Context, request mcp.CallToolRequest)
 }
 
 // handleTopicsRemoveMessageTTL removes the message TTL for a topic
-func handleTopicsRemoveMessageTTL(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsRemoveMessageTTL(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -706,7 +706,7 @@ func handleTopicsRemoveMessageTTL(ctx context.Context, request mcp.CallToolReque
 }
 
 // handleTopicsGetMaxProducers gets the maximum number of producers allowed for a topic
-func handleTopicsGetMaxProducers(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsGetMaxProducers(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -741,7 +741,7 @@ func handleTopicsGetMaxProducers(ctx context.Context, request mcp.CallToolReques
 }
 
 // handleTopicsSetMaxProducers sets the maximum number of producers allowed for a topic
-func handleTopicsSetMaxProducers(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsSetMaxProducers(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -787,7 +787,7 @@ func handleTopicsSetMaxProducers(ctx context.Context, request mcp.CallToolReques
 }
 
 // handleTopicsRemoveMaxProducers removes the maximum producers limit for a topic
-func handleTopicsRemoveMaxProducers(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsRemoveMaxProducers(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -816,7 +816,7 @@ func handleTopicsRemoveMaxProducers(ctx context.Context, request mcp.CallToolReq
 }
 
 // handleTopicsGetMaxConsumers gets the maximum number of consumers allowed for a topic
-func handleTopicsGetMaxConsumers(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsGetMaxConsumers(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -851,7 +851,7 @@ func handleTopicsGetMaxConsumers(ctx context.Context, request mcp.CallToolReques
 }
 
 // handleTopicsSetMaxConsumers sets the maximum number of consumers allowed for a topic
-func handleTopicsSetMaxConsumers(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsSetMaxConsumers(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -897,7 +897,7 @@ func handleTopicsSetMaxConsumers(ctx context.Context, request mcp.CallToolReques
 }
 
 // handleTopicsRemoveMaxConsumers removes the maximum consumers limit for a topic
-func handleTopicsRemoveMaxConsumers(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsRemoveMaxConsumers(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -927,7 +927,7 @@ func handleTopicsRemoveMaxConsumers(ctx context.Context, request mcp.CallToolReq
 
 // handleTopicsGetMaxUnackMessagesPerConsumer
 // gets the maximum number of unacknowledged messages allowed for a consumer on a topic
-func handleTopicsGetMaxUnackMessagesPerConsumer(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsGetMaxUnackMessagesPerConsumer(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -965,7 +965,7 @@ func handleTopicsGetMaxUnackMessagesPerConsumer(ctx context.Context, request mcp
 
 // handleTopicsSetMaxUnackMessagesPerConsumer
 // sets the maximum number of unacknowledged messages allowed for a consumer on a topic
-func handleTopicsSetMaxUnackMessagesPerConsumer(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsSetMaxUnackMessagesPerConsumer(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -1012,7 +1012,7 @@ func handleTopicsSetMaxUnackMessagesPerConsumer(ctx context.Context, request mcp
 
 // handleTopicsRemoveMaxUnackMessagesPerConsumer
 // removes the maximum unacknowledged messages per consumer limit for a topic
-func handleTopicsRemoveMaxUnackMessagesPerConsumer(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsRemoveMaxUnackMessagesPerConsumer(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -1047,7 +1047,7 @@ func handleTopicsRemoveMaxUnackMessagesPerConsumer(ctx context.Context, request 
 
 // handleTopicsGetMaxUnackMessagesPerSubscription
 // gets the maximum number of unacknowledged messages allowed for a subscription on a topic
-func handleTopicsGetMaxUnackMessagesPerSubscription(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsGetMaxUnackMessagesPerSubscription(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -1087,7 +1087,7 @@ func handleTopicsGetMaxUnackMessagesPerSubscription(ctx context.Context, request
 
 // handleTopicsSetMaxUnackMessagesPerSubscription
 // sets the maximum number of unacknowledged messages allowed for a subscription on a topic
-func handleTopicsSetMaxUnackMessagesPerSubscription(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsSetMaxUnackMessagesPerSubscription(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -1138,7 +1138,7 @@ func handleTopicsSetMaxUnackMessagesPerSubscription(ctx context.Context, request
 
 // handleTopicsRemoveMaxUnackMessagesPerSubscription
 // removes the maximum unacknowledged messages per subscription limit for a topic
-func handleTopicsRemoveMaxUnackMessagesPerSubscription(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsRemoveMaxUnackMessagesPerSubscription(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -1172,7 +1172,7 @@ func handleTopicsRemoveMaxUnackMessagesPerSubscription(ctx context.Context, requ
 }
 
 // handleTopicsGetPersistence gets the persistence policy for a topic
-func handleTopicsGetPersistence(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsGetPersistence(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -1207,7 +1207,7 @@ func handleTopicsGetPersistence(ctx context.Context, request mcp.CallToolRequest
 }
 
 // handleTopicsSetPersistence sets the persistence policy for a topic
-func handleTopicsSetPersistence(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsSetPersistence(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -1275,7 +1275,7 @@ func handleTopicsSetPersistence(ctx context.Context, request mcp.CallToolRequest
 }
 
 // handleTopicsRemovePersistence removes the persistence policy for a topic
-func handleTopicsRemovePersistence(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsRemovePersistence(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -1304,7 +1304,7 @@ func handleTopicsRemovePersistence(ctx context.Context, request mcp.CallToolRequ
 }
 
 // handleTopicsGetDelayedDelivery gets the delayed delivery policy for a topic
-func handleTopicsGetDelayedDelivery(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsGetDelayedDelivery(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -1339,7 +1339,7 @@ func handleTopicsGetDelayedDelivery(ctx context.Context, request mcp.CallToolReq
 }
 
 // handleTopicsSetDelayedDelivery sets the delayed delivery policy for a topic
-func handleTopicsSetDelayedDelivery(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsSetDelayedDelivery(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -1397,7 +1397,7 @@ func handleTopicsSetDelayedDelivery(ctx context.Context, request mcp.CallToolReq
 }
 
 // handleTopicsRemoveDelayedDelivery removes the delayed delivery policy for a topic
-func handleTopicsRemoveDelayedDelivery(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsRemoveDelayedDelivery(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -1426,7 +1426,7 @@ func handleTopicsRemoveDelayedDelivery(ctx context.Context, request mcp.CallTool
 }
 
 // handleTopicsGetDispatchRate gets the message dispatch rate for a topic
-func handleTopicsGetDispatchRate(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsGetDispatchRate(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -1466,7 +1466,7 @@ func handleTopicsGetDispatchRate(ctx context.Context, request mcp.CallToolReques
 }
 
 // handleTopicsSetDispatchRate sets the message dispatch rate for a topic
-func handleTopicsSetDispatchRate(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsSetDispatchRate(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -1548,7 +1548,7 @@ func handleTopicsSetDispatchRate(ctx context.Context, request mcp.CallToolReques
 }
 
 // handleTopicsRemoveDispatchRate removes the message dispatch rate for a topic
-func handleTopicsRemoveDispatchRate(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsRemoveDispatchRate(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -1577,7 +1577,7 @@ func handleTopicsRemoveDispatchRate(ctx context.Context, request mcp.CallToolReq
 }
 
 // handleTopicsGetDeduplicationStatus gets the deduplication status for a topic
-func handleTopicsGetDeduplicationStatus(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsGetDeduplicationStatus(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -1611,7 +1611,7 @@ func handleTopicsGetDeduplicationStatus(ctx context.Context, request mcp.CallToo
 }
 
 // handleTopicsSetDeduplicationStatus sets the deduplication status for a topic
-func handleTopicsSetDeduplicationStatus(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsSetDeduplicationStatus(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -1650,7 +1650,7 @@ func handleTopicsSetDeduplicationStatus(ctx context.Context, request mcp.CallToo
 }
 
 // handleTopicsRemoveDeduplicationStatus removes the deduplication status for a topic
-func handleTopicsRemoveDeduplicationStatus(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsRemoveDeduplicationStatus(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -1679,7 +1679,7 @@ func handleTopicsRemoveDeduplicationStatus(ctx context.Context, request mcp.Call
 }
 
 // handleTopicsGetRetention gets the retention policy for a topic
-func handleTopicsGetRetention(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsGetRetention(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -1745,7 +1745,7 @@ func handleTopicsGetRetention(ctx context.Context, request mcp.CallToolRequest) 
 }
 
 // handleTopicsSetRetention sets the retention policy for a topic
-func handleTopicsSetRetention(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsSetRetention(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -1812,7 +1812,7 @@ func handleTopicsSetRetention(ctx context.Context, request mcp.CallToolRequest) 
 }
 
 // handleTopicsRemoveRetention removes the retention policy for a topic
-func handleTopicsRemoveRetention(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsRemoveRetention(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -1841,7 +1841,7 @@ func handleTopicsRemoveRetention(ctx context.Context, request mcp.CallToolReques
 }
 
 // handleTopicsGetBacklogQuota gets the backlog quota policy for a topic
-func handleTopicsGetBacklogQuota(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsGetBacklogQuota(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -1887,7 +1887,7 @@ func handleTopicsGetBacklogQuota(ctx context.Context, request mcp.CallToolReques
 }
 
 // handleTopicsSetBacklogQuota sets the backlog quota policy for a topic
-func handleTopicsSetBacklogQuota(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsSetBacklogQuota(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -1958,7 +1958,7 @@ func handleTopicsSetBacklogQuota(ctx context.Context, request mcp.CallToolReques
 }
 
 // handleTopicsRemoveBacklogQuota removes the backlog quota policy from a topic
-func handleTopicsRemoveBacklogQuota(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsRemoveBacklogQuota(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -2000,7 +2000,7 @@ func handleTopicsRemoveBacklogQuota(ctx context.Context, request mcp.CallToolReq
 }
 
 // handleTopicsGetCompactionThreshold gets the compaction threshold for a topic
-func handleTopicsGetCompactionThreshold(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsGetCompactionThreshold(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -2042,7 +2042,7 @@ func handleTopicsGetCompactionThreshold(ctx context.Context, request mcp.CallToo
 }
 
 // handleTopicsSetCompactionThreshold sets the compaction threshold for a topic
-func handleTopicsSetCompactionThreshold(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsSetCompactionThreshold(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -2088,7 +2088,7 @@ func handleTopicsSetCompactionThreshold(ctx context.Context, request mcp.CallToo
 }
 
 // handleTopicsRemoveCompactionThreshold removes the compaction threshold for a topic
-func handleTopicsRemoveCompactionThreshold(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsRemoveCompactionThreshold(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -2118,7 +2118,7 @@ func handleTopicsRemoveCompactionThreshold(ctx context.Context, request mcp.Call
 }
 
 // handleTopicsGetInactiveTopic gets the inactive topic policies for a topic
-func handleTopicsGetInactiveTopic(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsGetInactiveTopic(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -2160,7 +2160,7 @@ func handleTopicsGetInactiveTopic(ctx context.Context, request mcp.CallToolReque
 }
 
 // handleTopicsSetInactiveTopic sets the inactive topic policies for a topic
-func handleTopicsSetInactiveTopic(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsSetInactiveTopic(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
@@ -2223,7 +2223,7 @@ func handleTopicsSetInactiveTopic(ctx context.Context, request mcp.CallToolReque
 }
 
 // handleTopicsRemoveInactiveTopic removes the inactive topic policies from a topic
-func handleTopicsRemoveInactiveTopic(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicsRemoveInactiveTopic(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := requiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
