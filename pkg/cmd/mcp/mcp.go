@@ -135,6 +135,7 @@ func (o *ServerOptions) Complete() error {
 			return errors.New("no valid configuration found")
 		}
 	}
+	return nil
 }
 
 func (o *ServerOptions) AddFlags(cmd *cobra.Command) {
