@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
@@ -18,7 +19,11 @@ import (
 )
 
 // PulsarAdminAddSchemasTools adds schema-related tools to the MCP server
-func PulsarAdminAddSchemasTools(s *server.MCPServer, readOnly bool) {
+func PulsarAdminAddSchemasTools(s *server.MCPServer, readOnly bool, features []string) {
+	if !slices.Contains(features, string(FeaturePulsarAdminSchemas)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) {
+		return
+	}
+
 	// Add unified schema management tool
 	toolDesc := "Manage Apache Pulsar schemas for topics. " +
 		"Schemas in Pulsar define the structure of message data, enabling data validation, evolution, and interoperability. " +

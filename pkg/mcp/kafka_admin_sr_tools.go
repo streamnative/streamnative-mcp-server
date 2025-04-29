@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -12,7 +13,11 @@ import (
 	"github.com/twmb/franz-go/pkg/sr"
 )
 
-func KafkaAdminAddSchemaRegistryTools(s *server.MCPServer, readOnly bool) {
+func KafkaAdminAddSchemaRegistryTools(s *server.MCPServer, readOnly bool, features []string) {
+	if !slices.Contains(features, string(FeatureKafkaAdminSchemaRegistry)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllKafka)) {
+		return
+	}
+
 	resourceDesc := "Resource to operate on. Available resources:\n" +
 		"- subjects: Collection of all schema subjects in the Schema Registry\n" +
 		"- subject: A specific schema subject (a named schema that can have multiple versions)\n" +

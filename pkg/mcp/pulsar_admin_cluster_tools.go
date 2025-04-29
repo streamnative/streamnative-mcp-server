@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
 	"github.com/mark3labs/mcp-go/mcp"
@@ -13,7 +14,10 @@ import (
 )
 
 // PulsarAdminAddClusterTools adds cluster-related tools to the MCP server
-func PulsarAdminAddClusterTools(s *server.MCPServer, readOnly bool) {
+func PulsarAdminAddClusterTools(s *server.MCPServer, readOnly bool, features []string) {
+	if !slices.Contains(features, string(FeaturePulsarAdminClusters)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) {
+		return
+	}
 	// Create a single unified cluster tool
 	clusterTool := mcp.NewTool("pulsar_admin_cluster",
 		mcp.WithDescription("Unified tool for managing Apache Pulsar clusters.\n"+

@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
@@ -16,7 +17,11 @@ import (
 )
 
 // PulsarAdminAddSubscriptionTools adds subscription-related tools to the MCP server
-func PulsarAdminAddSubscriptionTools(s *server.MCPServer, readOnly bool) {
+func PulsarAdminAddSubscriptionTools(s *server.MCPServer, readOnly bool, features []string) {
+	if !slices.Contains(features, string(FeaturePulsarAdminSubscriptions)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) {
+		return
+	}
+
 	// Add unified subscription management tool
 	toolDesc := "Manage Apache Pulsar subscriptions on topics. " +
 		"Subscriptions are named entities representing consumer groups that maintain their position in a topic. " +

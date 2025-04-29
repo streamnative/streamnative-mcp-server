@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
@@ -15,7 +16,11 @@ import (
 )
 
 // PulsarAdminAddTopicPolicyTools adds topic policy-related tools to the MCP server
-func PulsarAdminAddTopicPolicyTools(s *server.MCPServer, readOnly bool) {
+func PulsarAdminAddTopicPolicyTools(s *server.MCPServer, readOnly bool, features []string) {
+	if !slices.Contains(features, string(FeaturePulsarAdminTopicPolicy)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) {
+		return
+	}
+
 	// Add unified topic policy get tool
 	topicGetPolicyTool := mcp.NewTool("pulsar_admin_topic_policy_get",
 		mcp.WithDescription("Get a policy configuration for a topic. "+

@@ -30,11 +30,11 @@ type Options struct {
 	// the audience identifier for the API server (default: server URL)
 	Audience string
 	// the client ID to use for authorization grants (note: not used for service accounts)
-	ClientID        string
-	Organization    string
-	DefaultInstance string
-	DefaultCluster  string
-	ProxyLocation   string
+	ClientID       string
+	Organization   string
+	PulsarInstance string
+	PulsarCluster  string
+	ProxyLocation  string
 }
 
 // NewConfigOptions creates and returns a new Options instance with default values
@@ -61,9 +61,9 @@ func (o *Options) AddFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().StringVar(&o.ProxyLocation, "proxy-location", GlobalDefaultProxyLocation,
 		"The proxy location to use for the API server")
 	_ = cmd.MarkFlagRequired("organization")
-	cmd.PersistentFlags().StringVar(&o.DefaultInstance, "default-instance", "",
+	cmd.PersistentFlags().StringVar(&o.PulsarInstance, "pulsar-instance", "",
 		"The default instance to use for the API server")
-	cmd.PersistentFlags().StringVar(&o.DefaultCluster, "default-cluster", "",
+	cmd.PersistentFlags().StringVar(&o.PulsarCluster, "pulsar-cluster", "",
 		"The default cluster to use for the API server")
 	o.AuthOptions.AddFlags(cmd)
 }
@@ -109,9 +109,9 @@ func (o *Options) LoadConfig() (*SnConfig, error) {
 			ClientID:       o.ClientID,
 		},
 		Context: Context{
-			Organization:    o.Organization,
-			DefaultInstance: o.DefaultInstance,
-			DefaultCluster:  o.DefaultCluster,
+			Organization:   o.Organization,
+			PulsarInstance: o.PulsarInstance,
+			PulsarCluster:  o.PulsarCluster,
 		},
 		ProxyLocation: o.ProxyLocation,
 	}

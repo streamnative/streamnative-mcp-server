@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"slices"
 	"time"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -14,9 +15,13 @@ import (
 )
 
 // KafkaClientAddProduceTools adds Kafka client produce tools to the MCP server
-func KafkaClientAddProduceTools(s *server.MCPServer, readOnly bool) {
+func KafkaClientAddProduceTools(s *server.MCPServer, readOnly bool, features []string) {
 	// Skip registration if in read-only mode
 	if readOnly {
+		return
+	}
+
+	if !slices.Contains(features, string(FeatureKafkaClient)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllKafka)) {
 		return
 	}
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
@@ -14,7 +15,11 @@ import (
 )
 
 // PulsarAdminAddNsIsolationPolicyTools adds namespace isolation policy related tools to the MCP server
-func PulsarAdminAddNsIsolationPolicyTools(s *server.MCPServer, readOnly bool) {
+func PulsarAdminAddNsIsolationPolicyTools(s *server.MCPServer, readOnly bool, features []string) {
+	if !slices.Contains(features, string(FeaturePulsarAdminNsIsolationPolicy)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) {
+		return
+	}
+
 	// Add unified namespace isolation policy tool
 	toolDesc := "Manage namespace isolation policies in a Pulsar cluster. " +
 		"Allows viewing, creating, updating, and deleting namespace isolation policies. " +

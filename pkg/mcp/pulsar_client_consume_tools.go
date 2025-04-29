@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
@@ -16,7 +17,11 @@ import (
 )
 
 // PulsarClientAddConsumerTools adds Pulsar client consumer tools to the MCP server
-func PulsarClientAddConsumerTools(s *server.MCPServer, _ bool) {
+func PulsarClientAddConsumerTools(s *server.MCPServer, _ bool, features []string) {
+	if !slices.Contains(features, string(FeaturePulsarClient)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) {
+		return
+	}
+
 	// Main consume tool
 	consumeTool := mcp.NewTool("pulsar_client_consume",
 		mcp.WithDescription("Consume messages from a Pulsar topic. This tool allows you to consume messages "+

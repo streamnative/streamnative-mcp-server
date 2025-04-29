@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/admin/config"
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
@@ -13,7 +14,10 @@ import (
 )
 
 // PulsarAdminAddFunctionsTools adds a unified function-related tool to the MCP server
-func PulsarAdminAddFunctionsTools(s *server.MCPServer, readOnly bool) {
+func PulsarAdminAddFunctionsTools(s *server.MCPServer, readOnly bool, features []string) {
+	if !slices.Contains(features, string(FeaturePulsarAdminFunctions)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) {
+		return
+	}
 	// Create a single unified tool for all function operations
 	toolDesc := "Manage Apache Pulsar Functions for stream processing. " +
 		"Pulsar Functions are lightweight compute processes that can consume messages from one or more Pulsar topics, " +

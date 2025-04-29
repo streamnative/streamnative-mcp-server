@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -11,7 +12,11 @@ import (
 	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
 )
 
-func KafkaAdminAddKafkaConnectTools(s *server.MCPServer, readOnly bool) {
+func KafkaAdminAddKafkaConnectTools(s *server.MCPServer, readOnly bool, features []string) {
+	if !slices.Contains(features, string(FeatureKafkaAdminKafkaConnect)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllKafka)) {
+		return
+	}
+
 	resourceDesc := "Resource to operate on. Available resources:\n" +
 		"- kafka-connect-cluster: A single Kafka Connect cluster that manages connectors and tasks.\n" +
 		"- connector: A single Kafka Connect connector instance that moves data between Kafka and external systems.\n" +

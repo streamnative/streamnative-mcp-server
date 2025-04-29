@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 	"time"
 
@@ -17,7 +18,11 @@ import (
 )
 
 // PulsarClientAddProducerTools adds Pulsar client producer tools to the MCP server
-func PulsarClientAddProducerTools(s *server.MCPServer, _ bool) {
+func PulsarClientAddProducerTools(s *server.MCPServer, _ bool, features []string) {
+	if !slices.Contains(features, string(FeaturePulsarClient)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) {
+		return
+	}
+
 	// Main produce tool
 	produceTool := mcp.NewTool("pulsar_client_produce",
 		mcp.WithDescription("Produce messages to a Pulsar topic. This tool allows you to send messages "+

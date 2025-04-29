@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/admin/config"
@@ -14,7 +15,11 @@ import (
 )
 
 // PulsarAdminAddSinksTools adds a unified sink-related tool to the MCP server
-func PulsarAdminAddSinksTools(s *server.MCPServer, readOnly bool) {
+func PulsarAdminAddSinksTools(s *server.MCPServer, readOnly bool, features []string) {
+	if !slices.Contains(features, string(FeaturePulsarAdminSinks)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) {
+		return
+	}
+
 	// Create a single unified tool for all sink operations
 	toolDesc := "Manage Apache Pulsar Sinks for data movement and integration. " +
 		"Pulsar Sinks are connectors that export data from Pulsar topics to external systems such as databases, " +

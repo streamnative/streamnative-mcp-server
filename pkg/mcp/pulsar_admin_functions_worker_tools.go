@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
@@ -14,7 +15,10 @@ import (
 )
 
 // PulsarAdminAddFunctionsWorkerTools adds functions worker-related tools to the MCP server
-func PulsarAdminAddFunctionsWorkerTools(s *server.MCPServer, readOnly bool) {
+func PulsarAdminAddFunctionsWorkerTools(s *server.MCPServer, readOnly bool, features []string) {
+	if !slices.Contains(features, string(FeaturePulsarAdminFunctionsWorker)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) {
+		return
+	}
 	// Create a single unified functions worker tool
 	functionsWorkerTool := mcp.NewTool("pulsar_admin_functions_worker",
 		mcp.WithDescription("Unified tool for managing Apache Pulsar Functions Worker resources.\n"+

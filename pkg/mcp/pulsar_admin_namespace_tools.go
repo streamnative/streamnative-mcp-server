@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strconv"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
@@ -14,7 +15,11 @@ import (
 )
 
 // PulsarAdminAddNamespaceTools adds namespace-related tools to the MCP server
-func PulsarAdminAddNamespaceTools(s *server.MCPServer, readOnly bool) {
+func PulsarAdminAddNamespaceTools(s *server.MCPServer, readOnly bool, features []string) {
+	if !slices.Contains(features, string(FeaturePulsarAdminNamespaces)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) {
+		return
+	}
+
 	// Create a unified namespace tool with resource+operation parameters
 	namespaceTool := mcp.NewTool("pulsar_admin_namespace",
 		mcp.WithDescription("Manage Pulsar namespaces with various operations. "+

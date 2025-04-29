@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
@@ -16,7 +17,11 @@ import (
 )
 
 // PulsarAdminAddTopicTools adds topic-related tools to the MCP server
-func PulsarAdminAddTopicTools(s *server.MCPServer, readOnly bool) {
+func PulsarAdminAddTopicTools(s *server.MCPServer, readOnly bool, features []string) {
+	if !slices.Contains(features, string(FeaturePulsarAdminTopics)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) {
+		return
+	}
+
 	// Add unified topic management tool
 	toolDesc := "Manage Apache Pulsar topics. " +
 		"Topics are the core messaging entities in Pulsar that store and transmit messages. " +
@@ -384,7 +389,7 @@ func handleTopicCreate(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp
 			topicName.String())), nil
 	} else {
 		return mcp.NewToolResultText(fmt.Sprintf("Successfully created topic '%s' with %d partitions",
-		topicName.String(), int(partitions))), nil
+			topicName.String(), int(partitions))), nil
 	}
 }
 

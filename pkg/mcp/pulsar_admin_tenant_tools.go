@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
@@ -14,7 +15,11 @@ import (
 )
 
 // PulsarAdminAddTenantTools adds tenant-related tools to the MCP server
-func PulsarAdminAddTenantTools(s *server.MCPServer, readOnly bool) {
+func PulsarAdminAddTenantTools(s *server.MCPServer, readOnly bool, features []string) {
+	if !slices.Contains(features, string(FeaturePulsarAdminTenants)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) {
+		return
+	}
+
 	// Add unified tenant management tool
 	toolDesc := "Manage Apache Pulsar tenants. " +
 		"Tenants are the highest level administrative unit in Pulsar's multi-tenancy hierarchy. " +

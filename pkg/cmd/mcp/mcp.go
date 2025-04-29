@@ -16,13 +16,11 @@ import (
 
 // ServerOptions is the options for the MCP server commands
 type ServerOptions struct {
-	ReadOnly                  bool
-	KeyFile                   string
-	LogFile                   string
-	LogCommands               bool
-	StreamNativeCloudFeatures []string
-	PulsarFeatures            []string
-	KafkaFeatures             []string
+	ReadOnly    bool
+	KeyFile     string
+	LogFile     string
+	LogCommands bool
+	Features    []string
 	*config.Options
 }
 
@@ -65,8 +63,8 @@ func (o *ServerOptions) Complete() error {
 		return errors.Wrap(err, "failed to initialize StreamNative Cloud client")
 	}
 
-	if o.Options.DefaultInstance != "" && o.Options.DefaultCluster != "" {
-		err = mcp.SetContext(o.Options, o.Options.DefaultInstance, o.Options.DefaultCluster)
+	if o.Options.PulsarInstance != "" && o.Options.PulsarCluster != "" {
+		err = mcp.SetContext(o.Options, o.Options.PulsarInstance, o.Options.PulsarCluster)
 		if err != nil {
 			return errors.Wrap(err, "failed to set StreamNative Cloud context")
 		}
@@ -80,6 +78,7 @@ func (o *ServerOptions) AddFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().BoolVarP(&o.ReadOnly, "read-only", "r", false, "Read-only mode")
 	cmd.PersistentFlags().StringVar(&o.LogFile, "log-file", "", "Path to log file")
 	cmd.PersistentFlags().BoolVar(&o.LogCommands, "enable-command-logging", false, "When enabled, the server will log all command requests and responses to the log file")
+	cmd.PersistentFlags().StringSliceVar(&o.Features, "features", []string{}, "Features to enable")
 }
 
 func (o *ServerOptions) newClientCredentialsFlow(

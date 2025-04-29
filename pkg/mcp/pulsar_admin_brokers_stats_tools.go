@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
@@ -12,7 +13,10 @@ import (
 )
 
 // PulsarAdminAddBrokerStatsTools adds broker-stats related tools to the MCP server
-func PulsarAdminAddBrokerStatsTools(s *server.MCPServer, readOnly bool) {
+func PulsarAdminAddBrokerStatsTools(s *server.MCPServer, readOnly bool, features []string) {
+	if !slices.Contains(features, string(FeaturePulsarAdminBrokersStatus)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) {
+		return
+	}
 	// Unified broker stats tool
 	brokerStatsTool := mcp.NewTool("pulsar_admin_broker_stats",
 		mcp.WithDescription("Unified tool for retrieving Apache Pulsar broker statistics.\n"+

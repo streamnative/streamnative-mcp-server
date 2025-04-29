@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/admin/config"
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
@@ -13,7 +14,11 @@ import (
 )
 
 // PulsarAdminAddSourcesTools adds a unified source-related tool to the MCP server
-func PulsarAdminAddSourcesTools(s *server.MCPServer, readOnly bool) {
+func PulsarAdminAddSourcesTools(s *server.MCPServer, readOnly bool, features []string) {
+	if !slices.Contains(features, string(FeaturePulsarAdminSources)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) {
+		return
+	}
+
 	// Create a single unified tool for all source operations
 	toolDesc := "Manage Apache Pulsar Sources for data ingestion and integration. " +
 		"Pulsar Sources are connectors that import data from external systems into Pulsar topics. " +

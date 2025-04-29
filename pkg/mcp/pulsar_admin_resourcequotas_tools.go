@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
@@ -16,7 +17,10 @@ import (
 )
 
 // PulsarAdminAddResourceQuotasTools adds resource quotas-related tools to the MCP server
-func PulsarAdminAddResourceQuotasTools(s *server.MCPServer, readOnly bool) {
+func PulsarAdminAddResourceQuotasTools(s *server.MCPServer, readOnly bool, features []string) {
+	if !slices.Contains(features, string(FeaturePulsarAdminResourceQuotas)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) {
+		return
+	}
 	// Add unified resource quotas management tool
 	toolDesc := "Manage Apache Pulsar resource quotas for brokers, namespaces and bundles. " +
 		"Resource quotas define limits for resource usage such as message rates, bandwidth, and memory. " +

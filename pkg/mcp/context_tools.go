@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
@@ -11,7 +12,10 @@ import (
 	"github.com/streamnative/streamnative-mcp-server/pkg/config"
 )
 
-func RegisterContextTools(s *server.MCPServer) {
+func RegisterContextTools(s *server.MCPServer, features []string) {
+	if !slices.Contains(features, string(FeatureStreamNativeCloud)) && !slices.Contains(features, string(FeatureAll)) {
+		return
+	}
 	// Add whoami tool
 	whoamiTool := mcp.NewTool("streamnative_cloud_context_whoami",
 		mcp.WithDescription("Display the currently logged-in service account. "+

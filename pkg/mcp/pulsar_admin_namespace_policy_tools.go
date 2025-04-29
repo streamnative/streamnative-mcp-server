@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -16,7 +17,10 @@ import (
 )
 
 // PulsarAdminAddNamespacePolicyTools adds namespace policy-related tools to the MCP server
-func PulsarAdminAddNamespacePolicyTools(s *server.MCPServer, readOnly bool) {
+func PulsarAdminAddNamespacePolicyTools(s *server.MCPServer, readOnly bool, features []string) {
+	if !slices.Contains(features, string(FeaturePulsarAdminNamespacePolicy)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) {
+		return
+	}
 	namespaceGetPoliciesTool := mcp.NewTool("pulsar_admin_namespace_policy_get",
 		mcp.WithDescription("Get the configuration policies of a namespace. "+
 			"Returns a comprehensive view of all policies applied to the namespace. "+

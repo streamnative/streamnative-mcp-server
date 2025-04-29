@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -13,7 +14,11 @@ import (
 )
 
 // PulsarAdminAddPackagesTools adds package-related tools to the MCP server
-func PulsarAdminAddPackagesTools(s *server.MCPServer, readOnly bool) {
+func PulsarAdminAddPackagesTools(s *server.MCPServer, readOnly bool, features []string) {
+	if !slices.Contains(features, string(FeaturePulsarAdminPackages)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) {
+		return
+	}
+
 	// Add unified package management tool
 	toolDesc := "Manage packages in Apache Pulsar. Support package scheme: `function://`, `source://`, `sink://`" +
 		"Allows listing, viewing, updating, downloading and uploading packages. " +

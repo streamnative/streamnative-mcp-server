@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"time"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -16,7 +17,11 @@ import (
 var logger *logrus.Logger
 
 // KafkaClientAddConsumeTools adds Kafka client consume tools to the MCP server
-func KafkaClientAddConsumeTools(s *server.MCPServer, readOnly bool, logrusLogger *logrus.Logger) {
+func KafkaClientAddConsumeTools(s *server.MCPServer, readOnly bool, logrusLogger *logrus.Logger, features []string) {
+	if !slices.Contains(features, string(FeatureKafkaClient)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllKafka)) {
+		return
+	}
+
 	toolDesc := "Consume messages from a Kafka topic.\n" +
 		"This tool allows you to read messages from Kafka topics, specifying various consumption parameters.\n\n" +
 		"Kafka Consumer Concepts:\n" +

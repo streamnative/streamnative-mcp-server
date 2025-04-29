@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -12,7 +13,11 @@ import (
 	"github.com/twmb/franz-go/pkg/kadm"
 )
 
-func KafkaAdminAddPartitionsTools(s *server.MCPServer, readOnly bool) {
+func KafkaAdminAddPartitionsTools(s *server.MCPServer, readOnly bool, features []string) {
+	if !slices.Contains(features, string(FeatureKafkaAdmin)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllKafka)) {
+		return
+	}
+
 	resourceDesc := "Resource to operate on. Available resources:\n" +
 		"- partition: A single Kafka Partition of a Kafka topic. Partitions are the basic unit of parallelism and data distribution in Kafka."
 

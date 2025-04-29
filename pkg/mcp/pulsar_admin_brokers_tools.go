@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
@@ -12,7 +13,10 @@ import (
 )
 
 // PulsarAdminAddBrokersTools adds broker-related tools to the MCP server
-func PulsarAdminAddBrokersTools(s *server.MCPServer, readOnly bool) {
+func PulsarAdminAddBrokersTools(s *server.MCPServer, readOnly bool, features []string) {
+	if !slices.Contains(features, string(FeaturePulsarAdminBrokers)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) {
+		return
+	}
 	// Create a single unified broker tool to replace multiple individual tools
 	brokersTool := mcp.NewTool("pulsar_admin_brokers",
 		mcp.WithDescription("Unified tool for managing Apache Pulsar broker resources. This tool integrates multiple broker management functions, including:\n"+
