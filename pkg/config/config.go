@@ -19,6 +19,10 @@ type SnConfig struct {
 	// settable context
 	Context       Context `yaml:"context"`
 	ProxyLocation string  `yaml:"proxy-location"`
+	KeyFile       string  `yaml:"key-file"`
+
+	ExternalKafka  *ExternalKafka  `yaml:"external-kafka"`
+	ExternalPulsar *ExternalPulsar `yaml:"external-pulsar"`
 }
 
 type Auth struct {

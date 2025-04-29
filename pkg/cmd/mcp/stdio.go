@@ -107,65 +107,41 @@ func initLogger(filePath string) (*logrus.Logger, error) {
 }
 
 func newStdioServer(configOpts *ServerOptions, logrusLogger *logrus.Logger) *server.MCPServer {
-	issuer := configOpts.Options.LoadConfigOrDie().Auth.Issuer()
-	userName, err := configOpts.Options.WhoAmI(issuer.Audience)
-	if err != nil {
-		stdlog.Fatalf("failed to get user name: %v", err)
-		os.Exit(1)
+	snConfig := configOpts.Options.LoadConfigOrDie()
+	var s *server.MCPServer
+	if snConfig.KeyFile != "" {
+		issuer := snConfig.Auth.Issuer()
+		userName, err := configOpts.Options.WhoAmI(issuer.Audience)
+		if err != nil {
+			stdlog.Fatalf("failed to get user name: %v", err)
+			os.Exit(1)
+		}
+		// Create a new MCP server
+		s = server.NewMCPServer(
+			"streamnative-mcp-server",
+			"0.0.1",
+			server.WithResourceCapabilities(true, true),
+			server.WithInstructions(mcp.GetStreamNativeCloudServerInstructions(userName)),
+			server.WithLogging())
+
+		mcp.RegisterPrompts(s)
+
+		mcp.RegisterContextTools(s, configOpts.Features)
+	} else if snConfig.ExternalKafka != nil {
+		s = server.NewMCPServer(
+			"streamnative-mcp-server/kafka",
+			"0.0.1",
+			server.WithResourceCapabilities(true, true),
+			server.WithInstructions(mcp.GetExternalKafkaServerInstructions(snConfig.ExternalKafka.BootstrapServers)),
+			server.WithLogging())
+	} else if snConfig.ExternalPulsar != nil {
+		s = server.NewMCPServer(
+			"streamnative-mcp-server/pulsar",
+			"0.0.1",
+			server.WithResourceCapabilities(true, true),
+			server.WithInstructions(mcp.GetExternalPulsarServerInstructions(snConfig.ExternalPulsar.WebServiceURL)),
+			server.WithLogging())
 	}
-	// Create a new MCP server
-	s := server.NewMCPServer(
-		"streamnative-mcp-server",
-		"0.0.1",
-		server.WithResourceCapabilities(true, true),
-		server.WithInstructions(fmt.Sprintf(`StreamNative Cloud MCP Server provides resources and tools for AI agents to interact with StreamNative Cloud resources and services.
-
-### StreamNative Cloud API Server Resources
-
-1. **Organizations**  
-   - **Concept**: An organization is the top-level resource in StreamNative Cloud. It is a logical grouping used to manage access permissions and organize resources. Most users need only one organization, but multiple organizations can be created for different departments or teams.
-   - **Relationship**: An organization contains PulsarInstances, PulsarClusters, Users, Service Accounts, and Secrets. It acts as a container for all other resources and determines who can access what.
-
-2. **PulsarInstances**  
-   - **Concept**: An instance is an environment within an organization, typically associated with a specific cloud provider. Instances can contain multiple PulsarClusters and other components (like Connectors, Functions, etc.). Different teams can use separate instances to isolate their resources.
-   - **Types**: Instances can be fully hosted on StreamNative's cloud account or deployed on a user's cloud account via the Bring-Your-Own-Cloud (BYOC) option.
-   - **Relationship**: PulsarInstances belong to an organization and contain one or more PulsarClusters. Each PulsarInstance is associated with a specific Data Streaming Engine and cloud provider.
-
-3. **PulsarClusters**  
-   - **Concept**: A cluster is a specific deployment unit within an instance, located in a particular cloud region. Clusters provide service endpoints that allow clients to connect using different protocols (like Pulsar, Kafka, MQTT) and perform operations such as sending and receiving messages, running functions, etc.
-   - **Relationship**: PulsarClusters belong to a PulsarInstance and can replicate data among themselves within the same instance using Geo-Replication. Clusters are where actual data streaming operations occur.
-
-4. **Users**  
-   - **Concept**: A user represents a person who can log in and access StreamNative Cloud resources. Users can be assigned different permissions within an organization.
-   - **Relationship**: Users belong to an organization and can access instances and clusters within it, depending on their permissions.
-
-5. **Service Accounts**  
-   - **Concept**: A service account represents an application that programmatically accesses StreamNative Cloud resources and Pulsar resources within clusters.
-   - **Relationship**: Service accounts belong to an organization and can be used across multiple instances, though authentication credentials or API keys differ per instance.
-
-6. **Secrets**  
-   - **Concept**: Secrets are used to store and manage sensitive data such as passwords, tokens, and private keys. Secrets can be referenced in Connectors and Pulsar Functions.
-   - **Relationship**: Secrets belong to an organization and can be shared across multiple instances within that organization.
-
-7. **Data Streaming Engine**  
-   - **Concept**: The Data Streaming Engine is the core technology that runs StreamNative Cloud clusters. There are two options: Classic Engine and Ursa Engine.
-     - **Classic Engine**: The default engine, based on ZooKeeper and BookKeeper, offering low-latency storage suitable for latency-sensitive workloads. It supports Pulsar, Kafka, and MQTT protocols.
-     - **Ursa Engine**: A next-generation engine based on Oxia and object storage (like S3), providing cost-optimized storage for latency-relaxed scenarios. It currently focuses on Kafka protocol support.
-   - **Relationship**: The Data Streaming Engine is associated with an instance, determining how clusters within that instance operate and what features they support.
-
-### Hierarchical Relationship Summary of Resources
-- **Organization** is the top level, containing all other resources.
-- **PulsarInstances** belong to an organization, representing a cloud environment, and contain multiple **Clusters**.
-- **PulsarClusters** are specific deployment units within an instance, used for actual data streaming operations.
-- **Users** and **Service Accounts** belong to an organization, used for accessing resources, with permissions managed by the organization.
-- **Secrets** belong to an organization and can be shared across instances for securely storing sensitive data.
-- **Data Streaming Engine** is associated with an instance, defining the technical architecture and feature support for clusters.
-
-Logged in as %s.`, userName)),
-		server.WithLogging())
-	mcp.RegisterPrompts(s)
-
-	mcp.RegisterContextTools(s, configOpts.Features)
 
 	mcp.PulsarAdminAddBrokersTools(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.PulsarAdminAddBrokerStatsTools(s, configOpts.ReadOnly, configOpts.Features)

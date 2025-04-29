@@ -35,6 +35,12 @@ type Options struct {
 	PulsarInstance string
 	PulsarCluster  string
 	ProxyLocation  string
+	KeyFile        string
+
+	UseExternalKafka  bool
+	UseExternalPulsar bool
+	Kafka             ExternalKafka
+	Pulsar            ExternalPulsar
 }
 
 // NewConfigOptions creates and returns a new Options instance with default values
@@ -48,6 +54,8 @@ func NewConfigOptions() *Options {
 func (o *Options) AddFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().StringVar(&o.ConfigDir, "config-dir", "",
 		"If present, the config directory to use")
+	cmd.PersistentFlags().StringVar(&o.KeyFile, "key-file", "",
+		"The key file to use for authentication to StreamNative Cloud")
 	cmd.PersistentFlags().StringVar(&o.Server, "server", GlobalDefaultAPIServer,
 		"The server to connect to")
 	cmd.PersistentFlags().StringVar(&o.IssuerEndpoint, "issuer", GlobalDefaultIssuer,
@@ -65,6 +73,55 @@ func (o *Options) AddFlags(cmd *cobra.Command) {
 		"The default instance to use for the API server")
 	cmd.PersistentFlags().StringVar(&o.PulsarCluster, "pulsar-cluster", "",
 		"The default cluster to use for the API server")
+	cmd.PersistentFlags().BoolVar(&o.UseExternalKafka, "use-external-kafka", false,
+		"Use external Kafka")
+	cmd.PersistentFlags().BoolVar(&o.UseExternalPulsar, "use-external-pulsar", false,
+		"Use external Pulsar")
+	cmd.PersistentFlags().StringVar(&o.Kafka.BootstrapServers, "kafka-bootstrap-servers", "",
+		"The bootstrap servers to use for Kafka")
+	cmd.PersistentFlags().StringVar(&o.Kafka.SchemaRegistryURL, "kafka-schema-registry-url", "",
+		"The schema registry URL to use for Kafka")
+	cmd.PersistentFlags().StringVar(&o.Kafka.AuthType, "kafka-auth-type", "",
+		"The auth type to use for Kafka")
+	cmd.PersistentFlags().StringVar(&o.Kafka.AuthMechanism, "kafka-auth-mechanism", "",
+		"The auth mechanism to use for Kafka")
+	cmd.PersistentFlags().StringVar(&o.Kafka.AuthUser, "kafka-auth-user", "",
+		"The auth user to use for Kafka")
+	cmd.PersistentFlags().StringVar(&o.Kafka.AuthPass, "kafka-auth-pass", "",
+		"The auth password to use for Kafka")
+	cmd.PersistentFlags().StringVar(&o.Kafka.ClientKeyFile, "kafka-client-key-file", "",
+		"The client key file to use for Kafka")
+	cmd.PersistentFlags().StringVar(&o.Kafka.ClientCertFile, "kafka-client-cert-file", "",
+		"The client certificate file to use for Kafka")
+	cmd.PersistentFlags().StringVar(&o.Kafka.CaFile, "kafka-ca-file", "",
+		"The CA file to use for Kafka")
+	cmd.PersistentFlags().StringVar(&o.Kafka.SchemaRegistryAuthUser, "kafka-schema-registry-auth-user", "",
+		"The auth user to use for the schema registry")
+	cmd.PersistentFlags().StringVar(&o.Kafka.SchemaRegistryAuthPass, "kafka-schema-registry-auth-pass", "",
+		"The auth password to use for the schema registry")
+	cmd.PersistentFlags().StringVar(&o.Kafka.SchemaRegistryBearerToken, "kafka-schema-registry-bearer-token", "",
+		"The bearer token to use for the schema registry")
+	cmd.PersistentFlags().StringVar(&o.Pulsar.WebServiceURL, "pulsar-web-service-url", "",
+		"The web service URL to use for Pulsar")
+	cmd.PersistentFlags().StringVar(&o.Pulsar.AuthPlugin, "pulsar-auth-plugin", "",
+		"The auth plugin to use for Pulsar")
+	cmd.PersistentFlags().StringVar(&o.Pulsar.AuthParams, "pulsar-auth-params", "",
+		"The auth params to use for Pulsar")
+	cmd.PersistentFlags().BoolVar(&o.Pulsar.TLSAllowInsecureConnection, "pulsar-tls-allow-insecure-connection", false,
+		"The TLS allow insecure connection to use for Pulsar")
+	cmd.PersistentFlags().BoolVar(&o.Pulsar.TLSEnableHostnameVerification, "pulsar-tls-enable-hostname-verification", true,
+		"The TLS enable hostname verification to use for Pulsar")
+	cmd.PersistentFlags().StringVar(&o.Pulsar.TLSTrustCertsFilePath, "pulsar-tls-trust-certs-file-path", "",
+		"The TLS trust certs file path to use for Pulsar")
+	cmd.PersistentFlags().StringVar(&o.Pulsar.TLSCertFile, "pulsar-tls-cert-file", "",
+		"The TLS cert file to use for Pulsar")
+	cmd.PersistentFlags().StringVar(&o.Pulsar.TLSKeyFile, "pulsar-tls-key-file", "",
+		"The TLS key file to use for Pulsar")
+
+	cmd.MarkFlagsMutuallyExclusive("key-file", "use-external-kafka", "use-external-pulsar")
+	cmd.MarkFlagsRequiredTogether("pulsar-cluster", "pulsar-instance", "key-file")
+	cmd.MarkFlagsRequiredTogether("use-external-kafka", "kafka-bootstrap-servers")
+	cmd.MarkFlagsRequiredTogether("use-external-pulsar", "pulsar-web-service-url")
 	o.AuthOptions.AddFlags(cmd)
 }
 
@@ -114,6 +171,13 @@ func (o *Options) LoadConfig() (*SnConfig, error) {
 			PulsarCluster:  o.PulsarCluster,
 		},
 		ProxyLocation: o.ProxyLocation,
+		KeyFile:       o.KeyFile,
+	}
+	if o.UseExternalKafka {
+		config.ExternalKafka = &o.Kafka
+	}
+	if o.UseExternalPulsar {
+		config.ExternalPulsar = &o.Pulsar
 	}
 	return config, nil
 }

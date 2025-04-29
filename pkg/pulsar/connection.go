@@ -16,6 +16,8 @@ const (
 type PulsarContext struct {
 	WebServiceURL                 string
 	Token                         string
+	AuthPlugin                    string
+	AuthParams                    string
 	TLSAllowInsecureConnection    bool
 	TLSEnableHostnameVerification bool
 	TLSTrustCertsFilePath         string
@@ -41,18 +43,37 @@ func init() {
 func (pc *PulsarContext) SetPulsarContext() error {
 	var err error
 	// Configure pulsarctl with the token
-	cmdutils.PulsarCtlConfig = &cmdutils.ClusterConfig{
-		WebServiceURL: pc.WebServiceURL,
-		AuthPlugin:    "org.apache.pulsar.client.impl.auth.AuthenticationToken",
-		AuthParams:    fmt.Sprintf("token:%s", pc.Token),
-	}
+	if pc.Token != "" {
+		cmdutils.PulsarCtlConfig = &cmdutils.ClusterConfig{
+			WebServiceURL: pc.WebServiceURL,
+			AuthPlugin:    "org.apache.pulsar.client.impl.auth.AuthenticationToken",
+			AuthParams:    fmt.Sprintf("token:%s", pc.Token),
+		}
 
-	// Set the global client options
-	CurrentPulsarClientOptions = pulsar.ClientOptions{
-		URL:               pc.WebServiceURL,
-		Authentication:    pulsar.NewAuthenticationToken(pc.Token),
-		OperationTimeout:  DefaultClientTimeout,
-		ConnectionTimeout: DefaultClientTimeout,
+		// Set the global client options
+		CurrentPulsarClientOptions = pulsar.ClientOptions{
+			URL:               pc.WebServiceURL,
+			Authentication:    pulsar.NewAuthenticationToken(pc.Token),
+			OperationTimeout:  DefaultClientTimeout,
+			ConnectionTimeout: DefaultClientTimeout,
+		}
+	} else if pc.AuthPlugin != "" && pc.AuthParams != "" {
+		cmdutils.PulsarCtlConfig = &cmdutils.ClusterConfig{
+			WebServiceURL: pc.WebServiceURL,
+			AuthPlugin:    pc.AuthPlugin,
+			AuthParams:    pc.AuthParams,
+		}
+
+		authProvider, err := pulsar.NewAuthentication(pc.AuthPlugin, pc.AuthParams)
+		if err != nil {
+			return err
+		}
+		CurrentPulsarClientOptions = pulsar.ClientOptions{
+			URL:               pc.WebServiceURL,
+			Authentication:    authProvider,
+			OperationTimeout:  DefaultClientTimeout,
+			ConnectionTimeout: DefaultClientTimeout,
+		}
 	}
 
 	AdminClient = cmdutils.NewPulsarClient()
