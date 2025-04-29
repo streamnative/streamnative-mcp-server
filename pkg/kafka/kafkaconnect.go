@@ -89,8 +89,6 @@ type Connect interface {
 	GetConnectorStatus(ctx context.Context, name string) (*ConnectorInfo, error)
 	// GetConnectorTasks gets the tasks of a connector
 	GetConnectorTasks(ctx context.Context, name string) ([]TaskInfo, error)
-	// RestartTask restarts a task
-	RestartTask(ctx context.Context, connector string, taskID int) error
 	// ListPlugins lists all connector plugins
 	ListPlugins(ctx context.Context) ([]PluginInfo, error)
 	// ValidateConfig validates a connector configuration
@@ -153,7 +151,7 @@ func NewConnect(kc *KafkaContext) (Connect, error) {
 }
 
 // GetInfo gets information about the Kafka Connect cluster
-func (c *connectImpl) GetInfo(ctx context.Context) (map[string]interface{}, error) {
+func (c *connectImpl) GetInfo(_ context.Context) (map[string]interface{}, error) {
 	// Make request
 	serverInfo, _, err := c.client.DefaultAPI.ServerInfo(c.ctx).Execute()
 	if err != nil {
@@ -176,7 +174,7 @@ func (c *connectImpl) GetInfo(ctx context.Context) (map[string]interface{}, erro
 }
 
 // ListConnectors lists all connectors
-func (c *connectImpl) ListConnectors(ctx context.Context) ([]string, error) {
+func (c *connectImpl) ListConnectors(_ context.Context) ([]string, error) {
 	// Make request
 	resp, err := c.client.DefaultAPI.ListConnectors(c.ctx).Execute()
 	if err != nil {
@@ -226,7 +224,7 @@ func (c *connectImpl) GetConnector(ctx context.Context, name string) (*Connector
 }
 
 // CreateConnector creates a new connector
-func (c *connectImpl) CreateConnector(ctx context.Context, name string, config map[string]string) (*ConnectorInfo, error) {
+func (c *connectImpl) CreateConnector(_ context.Context, name string, config map[string]string) (*ConnectorInfo, error) {
 	// Create request payload
 	payload := *kafkaconnect.NewCreateConnectorRequest()
 	payload.SetName(name)
@@ -271,7 +269,7 @@ func (c *connectImpl) CreateConnector(ctx context.Context, name string, config m
 }
 
 // UpdateConnector updates a connector
-func (c *connectImpl) UpdateConnector(ctx context.Context, name string, config map[string]string) (*ConnectorInfo, error) {
+func (c *connectImpl) UpdateConnector(_ context.Context, name string, config map[string]string) (*ConnectorInfo, error) {
 	// Create request payload
 	// Convert config to map[string]string as required by the SDK
 	stringConfig := make(map[string]string)
@@ -322,7 +320,7 @@ func (c *connectImpl) UpdateConnector(ctx context.Context, name string, config m
 }
 
 // DeleteConnector deletes a connector
-func (c *connectImpl) DeleteConnector(ctx context.Context, name string) error {
+func (c *connectImpl) DeleteConnector(_ context.Context, name string) error {
 	// Make request
 	_, err := c.client.DefaultAPI.DestroyConnector(c.ctx, name).Execute()
 	if err != nil {
@@ -333,7 +331,7 @@ func (c *connectImpl) DeleteConnector(ctx context.Context, name string) error {
 }
 
 // PauseConnector pauses a connector
-func (c *connectImpl) PauseConnector(ctx context.Context, name string) error {
+func (c *connectImpl) PauseConnector(_ context.Context, name string) error {
 	// Make request
 	_, err := c.client.DefaultAPI.PauseConnector(c.ctx, name).Execute()
 	if err != nil {
@@ -344,7 +342,7 @@ func (c *connectImpl) PauseConnector(ctx context.Context, name string) error {
 }
 
 // ResumeConnector resumes a connector
-func (c *connectImpl) ResumeConnector(ctx context.Context, name string) error {
+func (c *connectImpl) ResumeConnector(_ context.Context, name string) error {
 	// Make request
 	_, err := c.client.DefaultAPI.ResumeConnector(c.ctx, name).Execute()
 	if err != nil {
@@ -355,7 +353,7 @@ func (c *connectImpl) ResumeConnector(ctx context.Context, name string) error {
 }
 
 // RestartConnector restarts a connector
-func (c *connectImpl) RestartConnector(ctx context.Context, name string) error {
+func (c *connectImpl) RestartConnector(_ context.Context, name string) error {
 	// Make request
 	_, err := c.client.DefaultAPI.RestartConnector(c.ctx, name).Execute()
 	if err != nil {
@@ -366,7 +364,7 @@ func (c *connectImpl) RestartConnector(ctx context.Context, name string) error {
 }
 
 // GetConnectorConfig gets the configuration of a connector
-func (c *connectImpl) GetConnectorConfig(ctx context.Context, name string) (map[string]string, error) {
+func (c *connectImpl) GetConnectorConfig(_ context.Context, name string) (map[string]string, error) {
 	// Make request
 	config, _, err := c.client.DefaultAPI.GetConnectorConfig(c.ctx, name).Execute()
 	if err != nil {
@@ -377,7 +375,7 @@ func (c *connectImpl) GetConnectorConfig(ctx context.Context, name string) (map[
 }
 
 // GetConnectorStatus gets the status of a connector
-func (c *connectImpl) GetConnectorStatus(ctx context.Context, name string) (*ConnectorInfo, error) {
+func (c *connectImpl) GetConnectorStatus(_ context.Context, name string) (*ConnectorInfo, error) {
 	// Make request
 	_, resp, err := c.client.DefaultAPI.GetConnectorStatus(c.ctx, name).Execute()
 	if err != nil {
@@ -432,7 +430,7 @@ func (c *connectImpl) GetConnectorStatus(ctx context.Context, name string) (*Con
 }
 
 // GetConnectorTasks gets the tasks of a connector
-func (c *connectImpl) GetConnectorTasks(ctx context.Context, name string) ([]TaskInfo, error) {
+func (c *connectImpl) GetConnectorTasks(_ context.Context, name string) ([]TaskInfo, error) {
 	// Make request
 	_, resp, err := c.client.DefaultAPI.GetTaskConfigs(c.ctx, name).Execute()
 	if err != nil {
@@ -472,19 +470,8 @@ func (c *connectImpl) GetConnectorTasks(ctx context.Context, name string) ([]Tas
 	return taskInfos, nil
 }
 
-// RestartTask restarts a task
-func (c *connectImpl) RestartTask(ctx context.Context, connector string, taskID int) error {
-	// Make request
-	_, err := c.client.DefaultAPI.RestartTask(c.ctx, connector, int32(taskID)).Execute()
-	if err != nil {
-		return fmt.Errorf("failed to restart task: %w", err)
-	}
-
-	return nil
-}
-
 // ListPlugins lists all connector plugins
-func (c *connectImpl) ListPlugins(ctx context.Context) ([]PluginInfo, error) {
+func (c *connectImpl) ListPlugins(_ context.Context) ([]PluginInfo, error) {
 	// Make request
 	_, resp, err := c.client.DefaultAPI.ListConnectorPlugins(c.ctx).Execute()
 	if err != nil {
@@ -523,7 +510,7 @@ func (c *connectImpl) ListPlugins(ctx context.Context) ([]PluginInfo, error) {
 }
 
 // ValidateConfig validates a connector configuration
-func (c *connectImpl) ValidateConfig(ctx context.Context, pluginClass string, config map[string]string) (map[string]interface{}, error) {
+func (c *connectImpl) ValidateConfig(_ context.Context, pluginClass string, config map[string]string) (map[string]interface{}, error) {
 	// Create request payload
 	// Convert config to map[string]string as required by the SDK
 	stringConfig := make(map[string]string)

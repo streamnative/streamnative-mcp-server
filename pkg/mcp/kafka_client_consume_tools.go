@@ -17,7 +17,7 @@ import (
 var logger *logrus.Logger
 
 // KafkaClientAddConsumeTools adds Kafka client consume tools to the MCP server
-func KafkaClientAddConsumeTools(s *server.MCPServer, readOnly bool, logrusLogger *logrus.Logger, features []string) {
+func KafkaClientAddConsumeTools(s *server.MCPServer, _ bool, logrusLogger *logrus.Logger, features []string) {
 	if !slices.Contains(features, string(FeatureKafkaClient)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllKafka)) {
 		return
 	}

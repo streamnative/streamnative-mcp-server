@@ -120,9 +120,9 @@ func handleClientConsume(ctx context.Context, request mcp.CallToolRequest) (*mcp
 		regex = val
 	}
 
-	maxRedeliverCount := 0
+	var maxRedeliverCount int32
 	if val, exists := optionalParam[float64](request.Params.Arguments, "max-redeliver-count"); exists {
-		maxRedeliverCount = int(val)
+		maxRedeliverCount = int32(val)
 	}
 
 	dlqTopic := ""
@@ -290,7 +290,7 @@ func handleClientConsume(ctx context.Context, request mcp.CallToolRequest) (*mcp
 		messages = append(messages, messageData)
 
 		// Acknowledge the message
-		consumer.Ack(msg)
+		_ = consumer.Ack(msg)
 	}
 
 	// Prepare response

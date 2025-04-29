@@ -253,7 +253,7 @@ func handleKafkaTopicsList(ctx context.Context, admin *kadm.Client, request mcp.
 		}
 	}
 	topicNames := []string{}
-	for topicName, _ := range topics {
+	for topicName := range topics {
 		topicNames = append(topicNames, topicName)
 	}
 

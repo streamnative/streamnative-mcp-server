@@ -3,7 +3,7 @@
 package store
 
 import (
-	"crypto/sha1"
+	"crypto/sha1" //nolint:gosec
 	"encoding/json"
 	"fmt"
 	"sync"
@@ -180,7 +180,7 @@ func (f *KeyringStore) setItem(item storedItem) error {
 
 // hashKeyringKey creates a safe key based on the given string
 func hashKeyringKey(s string) string {
-	h := sha1.New()
+	h := sha1.New() //nolint:gosec
 	h.Write([]byte(s))
 	bs := h.Sum(nil)
 	return fmt.Sprintf("%x", bs)

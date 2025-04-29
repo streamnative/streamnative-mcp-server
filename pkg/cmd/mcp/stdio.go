@@ -24,7 +24,7 @@ func NewCmdMcpStdioServer(configOpts *ServerOptions) *cobra.Command {
 		Use:   "stdio",
 		Short: "Start stdio server",
 		Long:  `Start a server that communicates via standard input/output streams using JSON-RPC messages.`,
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(_ *cobra.Command, _ []string) {
 			if err := runStdioServer(configOpts); err != nil {
 				fmt.Fprintf(os.Stderr, "failed to run stdio server: %v\n", err)
 			}
@@ -109,37 +109,49 @@ func initLogger(filePath string) (*logrus.Logger, error) {
 func newStdioServer(configOpts *ServerOptions, logrusLogger *logrus.Logger) *server.MCPServer {
 	snConfig := configOpts.Options.LoadConfigOrDie()
 	var s *server.MCPServer
-	if snConfig.KeyFile != "" {
-		issuer := snConfig.Auth.Issuer()
-		userName, err := configOpts.Options.WhoAmI(issuer.Audience)
-		if err != nil {
-			stdlog.Fatalf("failed to get user name: %v", err)
+	switch {
+	case snConfig.KeyFile != "":
+		{
+			issuer := snConfig.Auth.Issuer()
+			userName, err := configOpts.Options.WhoAmI(issuer.Audience)
+			if err != nil {
+				stdlog.Fatalf("failed to get user name: %v", err)
+				os.Exit(1)
+			}
+			// Create a new MCP server
+			s = server.NewMCPServer(
+				"streamnative-mcp-server",
+				"0.0.1",
+				server.WithResourceCapabilities(true, true),
+				server.WithInstructions(mcp.GetStreamNativeCloudServerInstructions(userName)),
+				server.WithLogging())
+
+			mcp.RegisterPrompts(s)
+			mcp.RegisterContextTools(s, configOpts.Features)
+		}
+	case snConfig.ExternalKafka != nil:
+		{
+			s = server.NewMCPServer(
+				"streamnative-mcp-server/kafka",
+				"0.0.1",
+				server.WithResourceCapabilities(true, true),
+				server.WithInstructions(mcp.GetExternalKafkaServerInstructions(snConfig.ExternalKafka.BootstrapServers)),
+				server.WithLogging())
+		}
+	case snConfig.ExternalPulsar != nil:
+		{
+			s = server.NewMCPServer(
+				"streamnative-mcp-server/pulsar",
+				"0.0.1",
+				server.WithResourceCapabilities(true, true),
+				server.WithInstructions(mcp.GetExternalPulsarServerInstructions(snConfig.ExternalPulsar.WebServiceURL)),
+				server.WithLogging())
+		}
+	default:
+		{
+			stdlog.Fatalf("no valid configuration found")
 			os.Exit(1)
 		}
-		// Create a new MCP server
-		s = server.NewMCPServer(
-			"streamnative-mcp-server",
-			"0.0.1",
-			server.WithResourceCapabilities(true, true),
-			server.WithInstructions(mcp.GetStreamNativeCloudServerInstructions(userName)),
-			server.WithLogging())
-
-		mcp.RegisterPrompts(s)
-		mcp.RegisterContextTools(s, configOpts.Features)
-	} else if snConfig.ExternalKafka != nil {
-		s = server.NewMCPServer(
-			"streamnative-mcp-server/kafka",
-			"0.0.1",
-			server.WithResourceCapabilities(true, true),
-			server.WithInstructions(mcp.GetExternalKafkaServerInstructions(snConfig.ExternalKafka.BootstrapServers)),
-			server.WithLogging())
-	} else if snConfig.ExternalPulsar != nil {
-		s = server.NewMCPServer(
-			"streamnative-mcp-server/pulsar",
-			"0.0.1",
-			server.WithResourceCapabilities(true, true),
-			server.WithInstructions(mcp.GetExternalPulsarServerInstructions(snConfig.ExternalPulsar.WebServiceURL)),
-			server.WithLogging())
 	}
 
 	mcp.PulsarAdminAddBrokersTools(s, configOpts.ReadOnly, configOpts.Features)

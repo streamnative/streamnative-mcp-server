@@ -7,7 +7,6 @@ import (
 
 	"github.com/99designs/keyring"
 	"github.com/spf13/cobra"
-	"github.com/streamnative/streamnative-mcp-server/pkg/auth"
 )
 
 const (
@@ -62,11 +61,6 @@ func (o *AuthOptions) makeKeyring() (keyring.Keyring, error) {
 	})
 }
 
-func keyringPrompt(prompt string) (string, error) {
+func keyringPrompt(_ string) (string, error) {
 	return "", nil
-}
-
-func (o *AuthOptions) loadIssuerData() (auth.Issuer, error) {
-	conf := o.storage.LoadConfigOrDie()
-	return conf.Auth.Issuer(), nil
 }

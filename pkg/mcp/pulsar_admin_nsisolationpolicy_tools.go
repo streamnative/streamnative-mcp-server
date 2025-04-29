@@ -247,7 +247,7 @@ func handleBrokerResource(client cmdutils.Client, operation, cluster string, req
 }
 
 // handleNsIsolationBrokersResource handles operations on the "brokers" resource for namespace isolation policies
-func handleNsIsolationBrokersResource(client cmdutils.Client, operation, cluster string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleNsIsolationBrokersResource(client cmdutils.Client, operation, cluster string, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	switch operation {
 	case "list":
 		// Get all brokers with policies

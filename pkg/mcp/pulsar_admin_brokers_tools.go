@@ -170,9 +170,10 @@ func handleBrokersResource(client cmdutils.Client, operation string, request mcp
 }
 
 // Handle health resource
-func handleHealthResource(client cmdutils.Client, operation string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleHealthResource(client cmdutils.Client, operation string, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	switch operation {
 	case "get":
+		//nolint:staticcheck
 		err := client.Brokers().HealthCheck()
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Broker health check failed: %v. "+

@@ -43,7 +43,7 @@ func RegisterContextTools(s *server.MCPServer, features []string) {
 }
 
 // handleWhoami handles the whoami tool request
-func handleWhoami(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleWhoami(ctx context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	options := ctx.Value(OptionsKey).(*config.Options)
 	issuer := options.LoadConfigOrDie().Auth.Issuer()
 

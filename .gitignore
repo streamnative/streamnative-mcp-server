@@ -5,3 +5,6 @@ dist/
 .DS_Store 
 tmp/
 *.log
+
+# Go
+vendor

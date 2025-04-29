@@ -298,7 +298,7 @@ func produceRecord(ctx context.Context, client *kgo.Client, record *kgo.Record, 
 			return nil, results[0].Err
 		}
 	} else {
-		client.Produce(ctx, record, func(r *kgo.Record, err error) {
+		client.Produce(ctx, record, func(_ *kgo.Record, err error) {
 			if err != nil {
 				// Log the error but continue since we're async
 				fmt.Printf("Async produce error: %v\n", err)

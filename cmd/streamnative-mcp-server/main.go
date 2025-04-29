@@ -38,8 +38,8 @@ func newRootCommand(configOpts *config.Options) *cobra.Command {
 		Short: "StreamNative Cloud MCP Server for AI agent integration",
 		Long: `StreamNative Cloud MCP Server provides resources and tools for AI agents 
 to interact with StreamNative Cloud resources and services.`,
-		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Help()
+		Run: func(cmd *cobra.Command, _ []string) {
+			_ = cmd.Help()
 		},
 		Version: fmt.Sprintf("Version: %s\nCommit: %s\nBuild Date: %s", version, commit, date),
 	}

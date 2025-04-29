@@ -53,7 +53,7 @@ func PulsarAdminAddTopicTools(s *server.MCPServer, readOnly bool, features []str
 		"- unload: Unload a topic\n" +
 		"- terminate: Terminate a topic\n" +
 		"- compact: Trigger compaction on a topic\n" +
-		"- update: Update a topic configuration\n" +
+		"- update: Update a topic partitions\n" +
 		"- offload: Offload data from a topic to long-term storage\n" +
 		"- offload-status: Check the status of data offloading for a topic"
 
@@ -77,7 +77,7 @@ func PulsarAdminAddTopicTools(s *server.MCPServer, readOnly bool, features []str
 				"A namespace is a logical grouping of topics within a tenant."),
 		),
 		mcp.WithNumber("partitions",
-			mcp.Description("The number of partitions for the topic. Required for 'create' operation. "+
+			mcp.Description("The number of partitions for the topic. Required for 'create' and 'update' operations. "+
 				"Set to 0 for a non-partitioned topic. "+
 				"Partitioned topics provide higher throughput by dividing message traffic across multiple brokers. "+
 				"Each partition is an independent unit with its own retention and cursor positions."),
@@ -670,9 +670,9 @@ func handleTopicUpdate(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.update: %v", err)), nil
 	}
 
-	configStr, err := requiredParam[string](request.Params.Arguments, "config")
+	partitions, err := requiredParam[float64](request.Params.Arguments, "partitions")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'config' for topic.update: %v", err)), nil
+		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'partitions' for topic.update: %v", err)), nil
 	}
 
 	// Get topic name
@@ -681,61 +681,13 @@ func handleTopicUpdate(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp
 		return mcp.NewToolResultError(fmt.Sprintf("Invalid topic name '%s': %v", topic, err)), nil
 	}
 
-	// Parse the config JSON into a map
-	var configMap map[string]interface{}
-	if err := json.Unmarshal([]byte(configStr), &configMap); err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to parse topic configuration JSON: %v. "+
-			"Ensure the JSON is valid and properly formatted.", err)), nil
+	err = admin.Topics().Update(*topicName, int(partitions))
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to update topic '%s': %v", topic, err)), nil
 	}
 
-	// Track updated configurations
-	var updatedConfigs []string
-	var updateErrors []string
-
-	// Process configurations based on available API methods
-	for key, value := range configMap {
-		switch key {
-		case "deduplicationEnabled", "deduplication_enabled":
-			enabled, ok := value.(bool)
-			if ok {
-				// Note: Using the config key as example for tracking updates
-				updatedConfigs = append(updatedConfigs, fmt.Sprintf("deduplication=%v", enabled))
-			} else {
-				updateErrors = append(updateErrors, "Invalid value type for deduplication_enabled, expected boolean")
-			}
-		case "retentionTimeInMinutes", "retention_time":
-			if retention, ok := toFloat64(value); ok {
-				updatedConfigs = append(updatedConfigs, fmt.Sprintf("retention_time=%v", retention))
-			} else {
-				updateErrors = append(updateErrors, "Invalid value type for retention time, expected number")
-			}
-		case "retentionSizeInMB", "retention_size":
-			if size, ok := toFloat64(value); ok {
-				updatedConfigs = append(updatedConfigs, fmt.Sprintf("retention_size=%v", size))
-			} else {
-				updateErrors = append(updateErrors, "Invalid value type for retention size, expected number")
-			}
-		// Add other configuration parameters as needed
-		default:
-			updateErrors = append(updateErrors, fmt.Sprintf("Unsupported configuration: %s", key))
-		}
-	}
-
-	// Handle update errors
-	if len(updateErrors) > 0 {
-		return mcp.NewToolResultError(fmt.Sprintf("Topic configuration update encountered issues: %v",
-			strings.Join(updateErrors, ", "))), nil
-	}
-
-	if len(updatedConfigs) == 0 {
-		return mcp.NewToolResultError("No valid configuration options were provided to update"), nil
-	}
-
-	// In a real implementation, we would apply the specific configuration updates here
-	// This is a simplified example demonstrating the approach
-
-	return mcp.NewToolResultText(fmt.Sprintf("Successfully updated topic '%s' configuration: %s",
-		topicName.String(), strings.Join(updatedConfigs, ", "))), nil
+	return mcp.NewToolResultText(fmt.Sprintf("Successfully updated topic '%s' partitions to %d",
+		topicName.String(), int(partitions))), nil
 }
 
 // toFloat64 attempts to convert a value to float64

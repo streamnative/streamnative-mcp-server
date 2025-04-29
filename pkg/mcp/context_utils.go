@@ -38,9 +38,8 @@ func SetContext(options *config.Options, instanceName, clusterName string) error
 				instance = i
 				foundInstance = true
 				break
-			} else {
-				return fmt.Errorf("Pulsar instance %s is not valid", instanceName)
 			}
+			return fmt.Errorf("Pulsar instance %s is not valid", instanceName)
 		}
 	}
 	if !foundInstance {
@@ -60,9 +59,8 @@ func SetContext(options *config.Options, instanceName, clusterName string) error
 				cluster = c
 				foundCluster = true
 				break
-			} else {
-				return fmt.Errorf("Pulsar cluster %s is not available", clusterName)
 			}
+			return fmt.Errorf("Pulsar cluster %s is not available", clusterName)
 		}
 	}
 	if !foundCluster {

@@ -140,41 +140,41 @@ func handleSchemaGet(admin cmdutils.Client, topic string, request mcp.CallToolRe
 		}
 
 		return mcp.NewToolResultText(string(jsonBytes)), nil
-	} else {
-		// Get latest schema
-		schemaInfoWithVersion, err := admin.Schemas().GetSchemaInfoWithVersion(topic)
-		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get latest schema for topic '%s': %v",
-				topic, err)), nil
-		}
-
-		// Format the output
-		var output bytes.Buffer
-		name, err := json.Marshal(schemaInfoWithVersion.SchemaInfo.Name)
-		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to process schema name: %v", err)), nil
-		}
-
-		schemaType, err := json.Marshal(schemaInfoWithVersion.SchemaInfo.Type)
-		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to process schema type: %v", err)), nil
-		}
-
-		properties, err := json.Marshal(schemaInfoWithVersion.SchemaInfo.Properties)
-		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to process schema properties: %v", err)), nil
-		}
-
-		schema, err := prettyPrint(schemaInfoWithVersion.SchemaInfo.Schema)
-		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to format schema definition: %v", err)), nil
-		}
-
-		fmt.Fprintf(&output, "{\n  name: %s \n  schema: %s\n  type: %s \n  properties: %s\n  version: %d\n}",
-			string(name), string(schema), string(schemaType), string(properties), schemaInfoWithVersion.Version)
-
-		return mcp.NewToolResultText(output.String()), nil
 	}
+	// Get latest schema
+	schemaInfoWithVersion, err := admin.Schemas().GetSchemaInfoWithVersion(topic)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to get latest schema for topic '%s': %v",
+			topic, err)), nil
+	}
+
+	// Format the output
+	var output bytes.Buffer
+	name, err := json.Marshal(schemaInfoWithVersion.SchemaInfo.Name)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to process schema name: %v", err)), nil
+	}
+
+	schemaType, err := json.Marshal(schemaInfoWithVersion.SchemaInfo.Type)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to process schema type: %v", err)), nil
+	}
+
+	properties, err := json.Marshal(schemaInfoWithVersion.SchemaInfo.Properties)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to process schema properties: %v", err)), nil
+	}
+
+	schema, err := prettyPrint(schemaInfoWithVersion.SchemaInfo.Schema)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to format schema definition: %v", err)), nil
+	}
+
+	fmt.Fprintf(&output, "{\n  name: %s \n  schema: %s\n  type: %s \n  properties: %s\n  version: %d\n}",
+		string(name), string(schema), string(schemaType), string(properties), schemaInfoWithVersion.Version)
+
+	return mcp.NewToolResultText(output.String()), nil
+
 }
 
 // handleSchemaUpload handles uploading a schema

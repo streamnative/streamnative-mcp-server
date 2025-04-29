@@ -359,32 +359,3 @@ func generateMessagePayloads(messages []string, files []string) ([][]byte, error
 
 	return payloads, nil
 }
-
-// buildSchema builds a schema based on the specified key and value schema types
-// Note: This function is kept for future use but temporarily not used
-func buildSchema(keySchemaType, valueSchemaType, keyValueEncodingType string) (pulsar.Schema, error) {
-	// If key-value encoding is specified, create a schema for each component
-	if keyValueEncodingType != "" {
-		// TODO: Implement proper key-value schema when API is confirmed
-		return getComponentSchema(valueSchemaType)
-	}
-
-	// Otherwise, just return the value schema
-	return getComponentSchema(valueSchemaType)
-}
-
-// getComponentSchema returns a schema based on the specified type
-func getComponentSchema(schemaType string) (pulsar.Schema, error) {
-	switch schemaType {
-	case "string":
-		return pulsar.NewStringSchema(nil), nil
-	case "bytes":
-		return pulsar.NewBytesSchema(nil), nil
-	case "json":
-		return pulsar.NewJSONSchema("", nil), nil
-	case "avro":
-		return nil, fmt.Errorf("avro schema not implemented yet")
-	default:
-		return nil, fmt.Errorf("unsupported schema type: %s", schemaType)
-	}
-}

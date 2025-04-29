@@ -14,6 +14,7 @@ import (
 	"github.com/twmb/tlscfg"
 )
 
+//nolint:revive
 type KafkaContext struct {
 	BootstrapServers  string
 	AuthType          string
@@ -174,6 +175,7 @@ func GetKafkaClient(opts ...kgo.Opt) (*kgo.Client, error) {
 	if KafkaClient == nil {
 		return nil, fmt.Errorf("kafka client not initialized")
 	}
+	//nolint:gocritic
 	clientOpts := append(options, opts...)
 	cli, err := kgo.NewClient(clientOpts...)
 	if err != nil {
