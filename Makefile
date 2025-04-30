@@ -18,3 +18,8 @@ build:
 		-X ${VERSION_PATH}.commit=${GIT_COMMIT} \
 		-X ${VERSION_PATH}.date=${BUILD_DATE}" \
 		-o bin/snmcp cmd/streamnative-mcp-server/main.go
+
+# go install github.com/elastic/go-licenser@latest
+.PHONY: fix-license
+fix-license:
+	go-licenser -license ASL2 -exclude sdk
