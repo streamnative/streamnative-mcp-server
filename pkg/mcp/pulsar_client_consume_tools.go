@@ -1,5 +1,3 @@
-// Copyright (c) 2024 StreamNative, Inc. All Rights Reserved.
-
 package mcp
 
 import (

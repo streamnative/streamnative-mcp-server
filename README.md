@@ -207,4 +207,4 @@ For more information, visit [modelcontextprotocol.io](https://modelcontextprotoc
 
 ## License
 
-Copyright (c) 2025 StreamNative, Inc. All Rights Reserved.
+Licensed under the Apache License Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
