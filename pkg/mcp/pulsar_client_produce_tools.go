@@ -42,12 +42,12 @@ func PulsarClientAddProducerTools(s *server.MCPServer, _ bool, features []string
 	produceTool := mcp.NewTool("pulsar_client_produce",
 		mcp.WithDescription("Produce messages to a Pulsar topic. This tool allows you to send messages "+
 			"to a specified Pulsar topic with various options to control message format, "+
-			"batching, and properties."),
+			"batching, and properties. Do not use this tool for Kafka protocol operations. Use 'kafka_client_produce' instead."),
 		mcp.WithString("topic", mcp.Required(),
 			mcp.Description("Topic to produce to"),
 		),
 		mcp.WithArray("messages",
-			mcp.Description("Messages to send. Specify multiple times for multiple messages."),
+			mcp.Description("Messages to send. Specify multiple times for multiple messages. IMPORTANT: Use this parameter to provide message content."),
 		),
 		mcp.WithArray("files",
 			mcp.Description("Files to send as message content. Specify multiple times for multiple files."),
@@ -72,30 +72,6 @@ func PulsarClientAddProducerTools(s *server.MCPServer, _ bool, features []string
 		),
 		mcp.WithString("key",
 			mcp.Description("Partitioning key to add to each message"),
-		),
-		mcp.WithString("key-value-key",
-			mcp.Description("Value to add as message key in KeyValue schema"),
-		),
-		mcp.WithString("key-value-key-file",
-			mcp.Description("Path to file containing the value to add as message key in KeyValue schema"),
-		),
-		mcp.WithString("value-schema",
-			mcp.Description("Schema type for the value (can be string, bytes, json, avro) (default: bytes)"),
-		),
-		mcp.WithString("key-schema",
-			mcp.Description("Schema type for the key (can be string, bytes, json, avro) (default: string)"),
-		),
-		mcp.WithString("key-value-encoding-type",
-			mcp.Description("Key Value Encoding Type (can be separated or inline)"),
-		),
-		mcp.WithString("encryption-key-name",
-			mcp.Description("The public key name to encrypt payload"),
-		),
-		mcp.WithString("encryption-key-value",
-			mcp.Description("The URI of public key to encrypt payload"),
-		),
-		mcp.WithBoolean("disable-replication",
-			mcp.Description("Disable geo-replication for messages (default: false)"),
 		),
 	)
 	s.AddTool(produceTool, handleClientProduce)
@@ -128,7 +104,7 @@ func handleClientProduce(ctx context.Context, request mcp.CallToolRequest) (*mcp
 	}
 
 	if len(messages) == 0 && len(files) == 0 {
-		return mcp.NewToolResultError("Please supply message content with either --messages or --files"), nil
+		return mcp.NewToolResultError("Please supply message content with 'messages' parameter."), nil
 	}
 
 	numProduce := 1
@@ -168,50 +144,6 @@ func handleClientProduce(ctx context.Context, request mcp.CallToolRequest) (*mcp
 	key := ""
 	if val, exists := optionalParam[string](request.Params.Arguments, "key"); exists {
 		key = val
-	}
-
-	keyValueKey := ""
-	if val, exists := optionalParam[string](request.Params.Arguments, "key-value-key"); exists {
-		keyValueKey = val
-	}
-
-	keyValueKeyFile := ""
-	if val, exists := optionalParam[string](request.Params.Arguments, "key-value-key-file"); exists {
-		keyValueKeyFile = val
-	}
-
-	// Read but not used due to API compatibility issues
-	_ = ""
-	if val, exists := optionalParam[string](request.Params.Arguments, "value-schema"); exists && val != "" {
-		_ = val
-	}
-
-	_ = ""
-	if val, exists := optionalParam[string](request.Params.Arguments, "key-schema"); exists && val != "" {
-		_ = val
-	}
-
-	_ = ""
-	if val, exists := optionalParam[string](request.Params.Arguments, "key-value-encoding-type"); exists {
-		_ = val
-		if val != "separated" && val != "inline" {
-			return mcp.NewToolResultError("Invalid key-value-encoding-type: must be 'separated' or 'inline'"), nil
-		}
-	}
-
-	_ = ""
-	if val, exists := optionalParam[string](request.Params.Arguments, "encryption-key-name"); exists {
-		_ = val
-	}
-
-	_ = ""
-	if val, exists := optionalParam[string](request.Params.Arguments, "encryption-key-value"); exists {
-		_ = val
-	}
-
-	disableReplication := false
-	if val, exists := optionalParam[bool](request.Params.Arguments, "disable-replication"); exists {
-		disableReplication = val
 	}
 
 	// Split messages by separator if needed
@@ -269,20 +201,6 @@ func handleClientProduce(ctx context.Context, request mcp.CallToolRequest) (*mcp
 		}
 	}
 
-	// Get key value key bytes
-	_ = []byte(nil)
-	if keyValueKey != "" {
-		// We'd validate but not using for now
-		_ = []byte(keyValueKey)
-	} else if keyValueKeyFile != "" {
-		// We'd validate but not using for now
-		data, err := os.ReadFile(keyValueKeyFile)
-		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to read key-value-key-file: %v", err)), nil
-		}
-		_ = data
-	}
-
 	// Setup rate limiter
 	var limiter *time.Ticker
 	if rate > 0 {
@@ -294,7 +212,7 @@ func handleClientProduce(ctx context.Context, request mcp.CallToolRequest) (*mcp
 	// Send messages
 	numMessagesSent := 0
 	var lastMessageID pulsar.MessageID
-	for i := 0; i < numProduce; i++ {
+	for range numProduce {
 		for _, payload := range messagePayloads {
 			// Apply rate limiting if enabled
 			if limiter != nil {
@@ -315,16 +233,6 @@ func handleClientProduce(ctx context.Context, request mcp.CallToolRequest) (*mcp
 			if key != "" {
 				msg.Key = key
 			}
-
-			// Handle geo-replication
-			if disableReplication {
-				msg.DisableReplication = true
-			}
-
-			// Note: KeyValue handling is commented out until correct API is confirmed
-			// if keyValueEncodingType != "" && keyValueKeyBytes != nil {
-			//     // TODO: Implement KeyValue schema handling when API is confirmed
-			// }
 
 			// Send the message
 			msgID, err := producer.Send(ctx, msg)

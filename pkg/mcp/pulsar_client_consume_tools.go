@@ -41,7 +41,7 @@ func PulsarClientAddConsumerTools(s *server.MCPServer, _ bool, features []string
 	consumeTool := mcp.NewTool("pulsar_client_consume",
 		mcp.WithDescription("Consume messages from a Pulsar topic. This tool allows you to consume messages "+
 			"from a specified Pulsar topic with various options to control the subscription behavior, "+
-			"message processing, and display format."),
+			"message processing, and display format. Do not use this tool for Kafka protocol operations. Use 'kafka_client_consume' instead."),
 		mcp.WithString("topic", mcp.Required(),
 			mcp.Description("Topic to consume from"),
 		),

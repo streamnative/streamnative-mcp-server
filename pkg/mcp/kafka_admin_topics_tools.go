@@ -49,6 +49,7 @@ func KafkaAdminAddTopicTools(s *server.MCPServer, readOnly bool, features []stri
 	toolDesc := "Unified tool for managing Apache Kafka topics.\n" +
 		"This tool provides access to various Kafka topic operations, including creation, deletion, listing, and configuration retrieval.\n" +
 		"Kafka topics are distributed append-only logs that store ordered, immutable records. Topics can be partitioned for parallel processing.\n\n" +
+		"Do not use this tool for Pulsar protocol operations. Use 'pulsar_admin_topics' instead." +
 		"Usage Examples:\n\n" +
 		"1. List all topics:\n" +
 		"   resource: \"topics\"\n" +

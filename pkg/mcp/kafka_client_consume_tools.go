@@ -47,7 +47,7 @@ func KafkaClientAddConsumeTools(s *server.MCPServer, _ bool, logrusLogger *logru
 		"- Offsets track the position of consumers in each partition, allowing resumption after failures\n" +
 		"- Partitions are independent ordered sequences of messages that enable parallel processing\n\n" +
 		"This tool provides a temporary consumer instance for diagnostic and testing purposes. " +
-		"It does not commit offsets back to Kafka unless the 'group' parameter is explicitly specified.\n\n" +
+		"It does not commit offsets back to Kafka unless the 'group' parameter is explicitly specified. Do not use this tool for Pulsar protocol operations. Use 'pulsar_client_consume' instead.\n\n" +
 		"Usage Examples:\n\n" +
 		"1. Basic consumption - Get 10 earliest messages from a topic:\n" +
 		"   topic: \"my-topic\"\n" +

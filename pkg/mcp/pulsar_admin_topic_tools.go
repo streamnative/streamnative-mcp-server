@@ -47,6 +47,7 @@ func PulsarAdminAddTopicTools(s *server.MCPServer, readOnly bool, features []str
 		"Topics follow a hierarchical naming structure: persistent://tenant/namespace/topic. " +
 		"This tool supports various operations on topics including creation, deletion, lookup, compaction, " +
 		"offloading, and retrieving statistics. " +
+		"Do not use this tool for Kafka protocol operations. Use 'kafka_admin_topics' instead." +
 		"Most operations require namespace admin permissions."
 
 	resourceDesc := "Resource to operate on. Available resources:\n" +

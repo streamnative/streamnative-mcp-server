@@ -49,7 +49,7 @@ func KafkaClientAddProduceTools(s *server.MCPServer, readOnly bool, features []s
 		"- Messages can include a key, which determines the partition assignment (consistent hashing)\n" +
 		"- Headers can be added to messages to include metadata without affecting the message payload\n" +
 		"- Partitions enable parallel processing and ordered delivery within a single partition\n\n" +
-		"This tool provides a simple producer instance for diagnostic and testing purposes.\n\n" +
+		"This tool provides a simple producer instance for diagnostic and testing purposes. Do not use this tool for Pulsar protocol operations. Use 'pulsar_client_produce' instead.\n\n" +
 		"Usage Examples:\n\n" +
 		"1. Basic message production - Send a simple message to a topic:\n" +
 		"   topic: \"my-topic\"\n" +
