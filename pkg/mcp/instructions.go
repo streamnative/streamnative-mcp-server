@@ -54,8 +54,8 @@ func GetStreamNativeCloudServerInstructions(userName string) string {
 	
 	7. **Data Streaming Engine**  
 		 - **Concept**: The Data Streaming Engine is the core technology that runs StreamNative Cloud clusters. There are two options: Classic Engine and Ursa Engine.
-			 - **Classic Engine**: The default engine, based on ZooKeeper and BookKeeper, offering low-latency storage suitable for latency-sensitive workloads. It supports Pulsar, Kafka, and MQTT protocols.
-			 - **Ursa Engine**: A next-generation engine based on Oxia and object storage (like S3), providing cost-optimized storage for latency-relaxed scenarios. It currently focuses on Kafka protocol support. For Ursa Engine, you can only uses 'kafka-client-*' or 'kafka-admin-*' tools.
+			 - **Classic Engine**: The default engine, based on ZooKeeper and BookKeeper, offering low-latency storage suitable for latency-sensitive workloads. It supports Pulsar, Kafka, and MQTT protocols. For Classic Engine, Pulsar protocol will be the default protocol.
+			 - **Ursa Engine**: A next-generation engine based on Oxia and object storage (like S3), providing cost-optimized storage for latency-relaxed scenarios. It currently focuses on Kafka protocol support. For Ursa Engine, you can only uses 'kafka-client-*' or 'kafka-admin-*' tools, do not use 'pulsar-client-*' or 'pulsar-admin-*' tools.
 		 - **Relationship**: The Data Streaming Engine is associated with an instance, determining how clusters within that instance operate and what features they support.
 	
 	### Protocol-Specific Tools
