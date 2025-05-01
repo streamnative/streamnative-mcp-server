@@ -18,6 +18,7 @@
 package config
 
 type ExternalPulsar struct {
+	ServiceURL                    string
 	WebServiceURL                 string
 	Token                         string
 	AuthPlugin                    string

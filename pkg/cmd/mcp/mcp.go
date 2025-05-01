@@ -131,6 +131,7 @@ func (o *ServerOptions) Complete() error {
 			}
 			o.Features = []string{string(mcp.FeatureAllPulsar)}
 			err := pulsar.NewCurrentPulsarContext(pulsar.PulsarContext{
+				ServiceURL:                    snConfig.ExternalPulsar.ServiceURL,
 				WebServiceURL:                 snConfig.ExternalPulsar.WebServiceURL,
 				AuthPlugin:                    snConfig.ExternalPulsar.AuthPlugin,
 				AuthParams:                    snConfig.ExternalPulsar.AuthParams,

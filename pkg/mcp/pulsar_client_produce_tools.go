@@ -65,7 +65,7 @@ func PulsarClientAddProducerTools(s *server.MCPServer, _ bool, features []string
 			mcp.Description("Should split the message and publish in chunks if message size is larger than allowed max size (default: false)"),
 		),
 		mcp.WithString("separator",
-			mcp.Description("Character to split messages string on (default: comma)"),
+			mcp.Description("Character to split messages string on (default: none)"),
 		),
 		mcp.WithArray("properties",
 			mcp.Description("Properties to add, key=value format. Specify multiple times for multiple properties."),
@@ -151,7 +151,7 @@ func handleClientProduce(ctx context.Context, request mcp.CallToolRequest) (*mcp
 		chunkingAllowed = val
 	}
 
-	separator := ","
+	separator := ""
 	if val, exists := optionalParam[string](request.Params.Arguments, "separator"); exists && val != "" {
 		separator = val
 	}

@@ -46,6 +46,7 @@ func GetStreamNativeCloudServerInstructions(userName string) string {
 	5. **Service Accounts**  
 		 - **Concept**: A service account represents an application that programmatically accesses StreamNative Cloud resources and Pulsar resources within clusters.
 		 - **Relationship**: Service accounts belong to an organization and can be used across multiple instances, though authentication credentials or API keys differ per instance.
+		 - **Service Account Binding**: Service account binding in StreamNative involves associating a service account with specific resources or permissions within the StreamNative Cloud environment. This process is crucial for managing access and ensuring that service accounts have the necessary permissions to interact with Pulsar clusters and other resources. It is often used by manage Pulsar Functions, Pulsar IO Connectors, and Kafka Connect connectors. Related tools: 'pulsar_admin_functions', 'pulsar_admin_sinks', 'pulsar_admin_sources', and 'kafka_admin_connect'.
 	
 	6. **Secrets**  
 		 - **Concept**: Secrets are used to store and manage sensitive data such as passwords, tokens, and private keys. Secrets can be referenced in Connectors and Pulsar Functions.
@@ -54,8 +55,13 @@ func GetStreamNativeCloudServerInstructions(userName string) string {
 	7. **Data Streaming Engine**  
 		 - **Concept**: The Data Streaming Engine is the core technology that runs StreamNative Cloud clusters. There are two options: Classic Engine and Ursa Engine.
 			 - **Classic Engine**: The default engine, based on ZooKeeper and BookKeeper, offering low-latency storage suitable for latency-sensitive workloads. It supports Pulsar, Kafka, and MQTT protocols.
-			 - **Ursa Engine**: A next-generation engine based on Oxia and object storage (like S3), providing cost-optimized storage for latency-relaxed scenarios. It currently focuses on Kafka protocol support.
+			 - **Ursa Engine**: A next-generation engine based on Oxia and object storage (like S3), providing cost-optimized storage for latency-relaxed scenarios. It currently focuses on Kafka protocol support. For Ursa Engine, you can only uses 'kafka-client-*' or 'kafka-admin-*' tools.
 		 - **Relationship**: The Data Streaming Engine is associated with an instance, determining how clusters within that instance operate and what features they support.
+	
+	### Protocol-Specific Tools
+	- When working with **Pulsar protocol resources**, you should only use 'pulsar-admin-*' or 'pulsar-client-*' tools. Do not use 'kafka-client-*' or 'kafka-admin-*' tools for Pulsar protocol operations.
+	- When working with **Kafka protocol resources**, you should only use 'kafka-client-*' or 'kafka-admin-*' tools. Do not use 'pulsar-admin-*' or 'pulsar-client-*' tools for Kafka protocol operations.
+	- Using the appropriate protocol-specific tools ensures correct functionality and prevents errors when interacting with different protocol resources.
 	
 	### Hierarchical Relationship Summary of Resources
 	- **Organization** is the top level, containing all other resources.

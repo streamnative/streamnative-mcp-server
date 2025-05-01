@@ -80,8 +80,11 @@ func PulsarAdminAddFunctionsTools(s *server.MCPServer, readOnly bool, features [
 		// Additional parameters for specific operations
 		mcp.WithString("classname",
 			mcp.Description("The fully qualified class name implementing the function. Required for 'create' operation, optional for 'update'. "+
-				"For Java functions, this should be the class that implements pulsar io interfaces. "+
-				"For Python, this is typically the file and function name (e.g., 'example.py:process'). "+
+				"For Java functions, this should be the class that implements pulsar function interfaces. "+
+				"For Python, this MUST be in format of `<Python_filename_without_extension>.<ClassName>` - for example: "+
+				"if file is '/path/to/exclamation.py' with class 'ExclamationFunction', classname must be 'exclamation.ExclamationFunction'; "+
+				"if file is '/path/to/double_number.py' with class 'DoubleNumber', classname must be 'double_number.DoubleNumber'. "+
+				"Common error: using just the class name 'DoubleNumber' (without filename prefix) will cause function creation to fail. "+
 				"Go functions should specify the 'main' function of the binary.")),
 		mcp.WithArray("inputs",
 			mcp.Description("The input topics for the function (array of strings). Optional for 'create' and 'update' operations. "+
@@ -95,9 +98,22 @@ func PulsarAdminAddFunctionsTools(s *server.MCPServer, readOnly bool, features [
 				"The output topic will be automatically created if it doesn't exist.")),
 		mcp.WithString("jar",
 			mcp.Description("Path to the JAR file containing the function code. Optional for 'create' and 'update' operations. "+
-				"Can be a local path or a URL accessible to the Pulsar broker. "+
+				"Support `file://`, `http://`, `https://`, `function://`, `source://`, `sink://` protocol. "+
+				"Can be a local path or supported URL protocol accessible to the Pulsar broker. "+
 				"For Java functions, this should contain all dependencies for the function. "+
 				"The jar file must be compatible with the Pulsar Functions API.")),
+		mcp.WithString("py",
+			mcp.Description("Path to the Python file containing the function code. Optional for 'create' and 'update' operations. "+
+				"Support `file://`, `http://`, `https://`, `function://`, `source://`, `sink://` protocol. "+
+				"Can be a local path or supported URL protocol accessible to the Pulsar broker. "+
+				"For Python functions, this should be the file path to the Python file, in format of `.py`, `.zip`, or `.whl`. "+
+				"The Python file must be compatible with the Pulsar Functions API.")),
+		mcp.WithString("go",
+			mcp.Description("Path to the Go file containing the function code. Optional for 'create' and 'update' operations. "+
+				"Support `file://`, `http://`, `https://`, `function://`, `source://`, `sink://` protocol. "+
+				"Can be a local path or supported URL protocol accessible to the Pulsar broker. "+
+				"For Go functions, this should be the file path to the Go file, in format of executable binary. "+
+				"The Go file must be compatible with the Pulsar Functions API.")),
 		mcp.WithNumber("parallelism",
 			mcp.Description("The parallelism factor of the function. Optional for 'create' and 'update' operations. "+
 				"Determines how many instances of the function will run concurrently. "+
@@ -340,6 +356,8 @@ func handleFunctionCreate(_ context.Context, client cmdutils.Client, tenant, nam
 	inputTopics, _ := optionalParamArray[string](arguments, "inputs")
 	output, _ := optionalParam[string](arguments, "output")
 	jar, _ := optionalParam[string](arguments, "jar")
+	py, _ := optionalParam[string](arguments, "py")
+	goPath, _ := optionalParam[string](arguments, "go")
 	parallelismFloat, _ := optionalParam[float64](arguments, "parallelism")
 	parallelism := int(parallelismFloat)
 
@@ -362,10 +380,23 @@ func handleFunctionCreate(_ context.Context, client cmdutils.Client, tenant, nam
 		Parallelism: parallelism,
 	}
 
+	fileName := ""
 	// Set jar if provided
-	if jar != "" {
+	switch {
+	case jar != "":
 		jarPtr := jar
 		functionConfig.Jar = &jarPtr
+		fileName = jar
+	case py != "":
+		pyPtr := py
+		functionConfig.Py = &pyPtr
+		fileName = py
+	case goPath != "":
+		goPtr := goPath
+		functionConfig.Go = &goPtr
+		fileName = goPath
+	default:
+		return mcp.NewToolResultError("No file path provided for function creation. Please provide a valid file path for the function creation operation."), nil
 	}
 
 	// Set inputs
@@ -381,7 +412,7 @@ func handleFunctionCreate(_ context.Context, client cmdutils.Client, tenant, nam
 	}
 
 	// Create function
-	err = client.Functions().CreateFunc(functionConfig, "")
+	err = client.Functions().CreateFunc(functionConfig, fileName)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to create function '%s' in tenant '%s' namespace '%s': %v. Verify all parameters are correct and required resources exist.",
 			name, tenant, namespace, err)), nil
@@ -398,6 +429,8 @@ func handleFunctionUpdate(_ context.Context, client cmdutils.Client, tenant, nam
 	inputTopics, _ := optionalParamArray[string](arguments, "inputs")
 	output, _ := optionalParam[string](arguments, "output")
 	jar, _ := optionalParam[string](arguments, "jar")
+	py, _ := optionalParam[string](arguments, "py")
+	goPath, _ := optionalParam[string](arguments, "go")
 	parallelismFloat, _ := optionalParam[float64](arguments, "parallelism")
 	parallelism := int(parallelismFloat)
 
@@ -420,10 +453,23 @@ func handleFunctionUpdate(_ context.Context, client cmdutils.Client, tenant, nam
 		Parallelism: parallelism,
 	}
 
+	fileName := ""
 	// Set jar if provided
-	if jar != "" {
+	switch {
+	case jar != "":
 		jarPtr := jar
 		functionConfig.Jar = &jarPtr
+		fileName = jar
+	case py != "":
+		pyPtr := py
+		functionConfig.Py = &pyPtr
+		fileName = py
+	case goPath != "":
+		goPtr := goPath
+		functionConfig.Go = &goPtr
+		fileName = goPath
+	default:
+		return mcp.NewToolResultError("No file path provided for function update. Please provide a valid file path for the function update operation."), nil
 	}
 
 	// Set inputs
@@ -442,7 +488,7 @@ func handleFunctionUpdate(_ context.Context, client cmdutils.Client, tenant, nam
 	}
 
 	// Update function
-	err := client.Functions().UpdateFunction(functionConfig, "", updateOptions)
+	err := client.Functions().UpdateFunction(functionConfig, fileName, updateOptions)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to update function '%s' in tenant '%s' namespace '%s': %v. Verify the function exists and all parameters are valid.",
 			name, tenant, namespace, err)), nil

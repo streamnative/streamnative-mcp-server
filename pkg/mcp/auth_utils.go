@@ -24,6 +24,10 @@ import (
 	sncloud "github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserve"
 )
 
+const (
+	DefaultPulsarPort = 6651
+)
+
 // getFlow creates the appropriate OAuth2 flow based on the grant type
 func getFlow(issuer *auth.Issuer, grant *auth.AuthorizationGrant) (auth.Flow, error) {
 	switch grant.Type {
@@ -46,6 +50,11 @@ func getBasePath(proxyLocation, org, clusterID string) string {
 	}
 
 	return fmt.Sprintf("%s/pulsar-admin/%s/pulsarcluster-%s", proxyLocation, org, clusterID)
+}
+
+// getServiceURL constructs the service URL for Pulsar protocol
+func getServiceURL(dnsName string) string {
+	return fmt.Sprintf("pulsar+ssl://%s:%d", dnsName, DefaultPulsarPort)
 }
 
 func getIssuer(instance *sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarInstance, configIssuer auth.Issuer) (*auth.Issuer, error) {

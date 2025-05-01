@@ -32,6 +32,7 @@ const (
 
 //nolint:revive
 type PulsarContext struct {
+	ServiceURL                    string
 	WebServiceURL                 string
 	Token                         string
 	AuthPlugin                    string
@@ -70,7 +71,7 @@ func (pc *PulsarContext) SetPulsarContext() error {
 
 		// Set the global client options
 		CurrentPulsarClientOptions = pulsar.ClientOptions{
-			URL:               pc.WebServiceURL,
+			URL:               pc.ServiceURL,
 			Authentication:    pulsar.NewAuthenticationToken(pc.Token),
 			OperationTimeout:  DefaultClientTimeout,
 			ConnectionTimeout: DefaultClientTimeout,
@@ -87,7 +88,7 @@ func (pc *PulsarContext) SetPulsarContext() error {
 			return fmt.Errorf("failed to create authentication provider: %w", err)
 		}
 		CurrentPulsarClientOptions = pulsar.ClientOptions{
-			URL:               pc.WebServiceURL,
+			URL:               pc.ServiceURL,
 			Authentication:    authProvider,
 			OperationTimeout:  DefaultClientTimeout,
 			ConnectionTimeout: DefaultClientTimeout,

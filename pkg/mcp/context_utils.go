@@ -150,6 +150,7 @@ func SetContext(options *config.Options, instanceName, clusterName string) error
 
 	err = pulsar.NewCurrentPulsarContext(pulsar.PulsarContext{
 		WebServiceURL: getBasePath(snConfig.ProxyLocation, options.Organization, clusterUID),
+		ServiceURL:    getServiceURL(dnsName),
 		Token:         accessToken,
 	})
 	if err != nil {
