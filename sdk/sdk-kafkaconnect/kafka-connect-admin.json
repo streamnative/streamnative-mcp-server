@@ -1,0 +1,1181 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "Kafka Connect With Pulsar API",
+    "version" : "0.0.1"
+  },
+  "paths" : {
+    "/" : {
+      "get" : {
+        "operationId" : "serverInfo",
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ServerInfo"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/connector-plugins" : {
+      "get" : {
+        "summary" : "List all connector plugins installed",
+        "operationId" : "listConnectorPlugins",
+        "parameters" : [ {
+          "name" : "connectorsOnly",
+          "in" : "query",
+          "description" : "Whether to list only connectors instead of all plugins",
+          "schema" : {
+            "type" : "boolean",
+            "default" : true
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/PluginInfo"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/connector-plugins/catalog" : {
+      "get" : {
+        "summary" : "List all connector catalog",
+        "operationId" : "listConnectorPluginsCatalog",
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/FunctionMeshConnectorDefinition"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/connector-plugins/{pluginName}/config" : {
+      "get" : {
+        "summary" : "Get the configuration definition for the specified pluginName",
+        "operationId" : "getConnectorConfigDef",
+        "parameters" : [ {
+          "name" : "pluginName",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ConfigKeyInfo"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/connector-plugins/{pluginName}/config/validate" : {
+      "put" : {
+        "summary" : "Validate the provided configuration against the configuration definition for the specified pluginName",
+        "operationId" : "validateConfigs",
+        "parameters" : [ {
+          "name" : "pluginName",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "additionalProperties" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ConfigInfos"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/connectors" : {
+      "get" : {
+        "operationId" : "listConnectors",
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : { }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      },
+      "post" : {
+        "operationId" : "createConnector",
+        "parameters" : [ {
+          "name" : "forward",
+          "in" : "query",
+          "schema" : {
+            "type" : "boolean"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateConnectorRequest"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : { }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/connectors/{connector}" : {
+      "get" : {
+        "operationId" : "getConnector",
+        "parameters" : [ {
+          "name" : "connector",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ConnectorInfo"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      },
+      "delete" : {
+        "operationId" : "destroyConnector",
+        "parameters" : [ {
+          "name" : "connector",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "forward",
+          "in" : "query",
+          "schema" : {
+            "type" : "boolean"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : { }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/connectors/{connector}/config" : {
+      "get" : {
+        "operationId" : "getConnectorConfig",
+        "parameters" : [ {
+          "name" : "connector",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "additionalProperties" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      },
+      "put" : {
+        "operationId" : "putConnectorConfig",
+        "parameters" : [ {
+          "name" : "connector",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "forward",
+          "in" : "query",
+          "schema" : {
+            "type" : "boolean"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "additionalProperties" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : { }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/connectors/{connector}/offsets" : {
+      "get" : {
+        "operationId" : "getOffsets",
+        "parameters" : [ {
+          "name" : "connector",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SNConnectorOffsets"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      },
+      "delete" : {
+        "operationId" : "resetConnectorOffsets",
+        "parameters" : [ {
+          "name" : "forward",
+          "in" : "query",
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
+          "name" : "connector",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : { }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      },
+      "patch" : {
+        "operationId" : "alterConnectorOffsets",
+        "parameters" : [ {
+          "name" : "forward",
+          "in" : "query",
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
+          "name" : "connector",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SNConnectorOffsets"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : { }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/connectors/{connector}/pause" : {
+      "put" : {
+        "operationId" : "pauseConnector",
+        "parameters" : [ {
+          "name" : "connector",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : { }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/connectors/{connector}/restart" : {
+      "post" : {
+        "operationId" : "restartConnector",
+        "parameters" : [ {
+          "name" : "connector",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "includeTasks",
+          "in" : "query",
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        }, {
+          "name" : "onlyFailed",
+          "in" : "query",
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        }, {
+          "name" : "forward",
+          "in" : "query",
+          "schema" : {
+            "type" : "boolean"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : { }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/connectors/{connector}/resume" : {
+      "put" : {
+        "operationId" : "resumeConnector",
+        "parameters" : [ {
+          "name" : "connector",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : { }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/connectors/{connector}/status" : {
+      "get" : {
+        "operationId" : "getConnectorStatus",
+        "parameters" : [ {
+          "name" : "connector",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ConnectorStateInfo"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/connectors/{connector}/stop" : {
+      "put" : {
+        "operationId" : "stopConnector",
+        "parameters" : [ {
+          "name" : "connector",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "forward",
+          "in" : "query",
+          "schema" : {
+            "type" : "boolean"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : { }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/connectors/{connector}/tasks" : {
+      "get" : {
+        "operationId" : "getTaskConfigs",
+        "parameters" : [ {
+          "name" : "connector",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/TaskInfo"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/connectors/{connector}/tasks-config" : {
+      "get" : {
+        "operationId" : "getTasksConfig",
+        "parameters" : [ {
+          "name" : "connector",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "additionalProperties" : {
+                    "type" : "object",
+                    "additionalProperties" : {
+                      "type" : "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : true,
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/connectors/{connector}/tasks/{task}/restart" : {
+      "post" : {
+        "operationId" : "restartTask",
+        "parameters" : [ {
+          "name" : "connector",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "task",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "forward",
+          "in" : "query",
+          "schema" : {
+            "type" : "boolean"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : { }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/connectors/{connector}/tasks/{task}/status" : {
+      "get" : {
+        "operationId" : "getTaskStatus",
+        "parameters" : [ {
+          "name" : "connector",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "task",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TaskState"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/connectors/{connector}/topics" : {
+      "get" : {
+        "operationId" : "getConnectorActiveTopics",
+        "parameters" : [ {
+          "name" : "connector",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : { }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/connectors/{connector}/topics/reset" : {
+      "put" : {
+        "operationId" : "resetConnectorActiveTopics",
+        "parameters" : [ {
+          "name" : "connector",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : { }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/health" : {
+      "get" : {
+        "summary" : "Health check endpoint to verify worker readiness and liveness",
+        "operationId" : "healthCheck",
+        "responses" : {
+          "default" : {
+            "description" : "default response",
+            "content" : {
+              "application/json" : { }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "ConfigFieldDefinition" : {
+        "type" : "object",
+        "properties" : {
+          "attributes" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string"
+            }
+          },
+          "fieldName" : {
+            "type" : "string"
+          },
+          "typeName" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ConfigInfo" : {
+        "type" : "object",
+        "properties" : {
+          "definition" : {
+            "$ref" : "#/components/schemas/ConfigKeyInfo"
+          },
+          "value" : {
+            "$ref" : "#/components/schemas/ConfigValueInfo"
+          }
+        }
+      },
+      "ConfigInfos" : {
+        "type" : "object",
+        "properties" : {
+          "configs" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ConfigInfo"
+            }
+          },
+          "error_count" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "groups" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "name" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ConfigKeyInfo" : {
+        "type" : "object",
+        "properties" : {
+          "default_value" : {
+            "type" : "string"
+          },
+          "dependents" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "display_name" : {
+            "type" : "string"
+          },
+          "documentation" : {
+            "type" : "string"
+          },
+          "group" : {
+            "type" : "string"
+          },
+          "importance" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "order" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "order_in_group" : {
+            "type" : "integer",
+            "format" : "int32",
+            "writeOnly" : true
+          },
+          "required" : {
+            "type" : "boolean"
+          },
+          "type" : {
+            "type" : "string"
+          },
+          "width" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ConfigValueInfo" : {
+        "type" : "object",
+        "properties" : {
+          "errors" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "recommended_values" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "value" : {
+            "type" : "string"
+          },
+          "visible" : {
+            "type" : "boolean"
+          }
+        }
+      },
+      "ConnectorInfo" : {
+        "type" : "object",
+        "properties" : {
+          "config" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string"
+            }
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "tasks" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ConnectorTaskId"
+            }
+          },
+          "type" : {
+            "type" : "string",
+            "enum" : [ "source", "sink", "unknown" ]
+          }
+        }
+      },
+      "ConnectorState" : {
+        "type" : "object",
+        "properties" : {
+          "msg" : {
+            "type" : "string",
+            "writeOnly" : true
+          },
+          "state" : {
+            "type" : "string"
+          },
+          "trace" : {
+            "type" : "string"
+          },
+          "worker_id" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ConnectorStateInfo" : {
+        "type" : "object",
+        "properties" : {
+          "connector" : {
+            "$ref" : "#/components/schemas/ConnectorState"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "tasks" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/TaskState"
+            }
+          },
+          "type" : {
+            "type" : "string",
+            "enum" : [ "source", "sink", "unknown" ]
+          }
+        }
+      },
+      "ConnectorTaskId" : {
+        "type" : "object",
+        "properties" : {
+          "connector" : {
+            "type" : "string"
+          },
+          "task" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "CreateConnectorRequest" : {
+        "type" : "object",
+        "properties" : {
+          "config" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string"
+            }
+          },
+          "initial_state" : {
+            "type" : "string",
+            "enum" : [ "RUNNING", "PAUSED", "STOPPED" ]
+          },
+          "name" : {
+            "type" : "string"
+          }
+        }
+      },
+      "FunctionMeshConnectorDefinition" : {
+        "type" : "object",
+        "properties" : {
+          "defaultSchemaType" : {
+            "type" : "string"
+          },
+          "defaultSerdeClassName" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "iconLink" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "imageRegistry" : {
+            "type" : "string"
+          },
+          "imageRepository" : {
+            "type" : "string"
+          },
+          "imageTag" : {
+            "type" : "string"
+          },
+          "jar" : {
+            "type" : "string"
+          },
+          "jarFullName" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "sinkClass" : {
+            "type" : "string"
+          },
+          "sinkConfigClass" : {
+            "type" : "string"
+          },
+          "sinkConfigFieldDefinitions" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ConfigFieldDefinition"
+            }
+          },
+          "sinkDocLink" : {
+            "type" : "string"
+          },
+          "sinkTypeClassName" : {
+            "type" : "string"
+          },
+          "sourceClass" : {
+            "type" : "string"
+          },
+          "sourceConfigClass" : {
+            "type" : "string"
+          },
+          "sourceConfigFieldDefinitions" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ConfigFieldDefinition"
+            }
+          },
+          "sourceDocLink" : {
+            "type" : "string"
+          },
+          "sourceTypeClassName" : {
+            "type" : "string"
+          },
+          "typeClassName" : {
+            "type" : "string"
+          },
+          "version" : {
+            "type" : "string"
+          }
+        }
+      },
+      "PluginInfo" : {
+        "type" : "object",
+        "properties" : {
+          "class" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string"
+          },
+          "version" : {
+            "type" : "string"
+          }
+        }
+      },
+      "SNConnectorOffset" : {
+        "type" : "object",
+        "properties" : {
+          "offset" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "integer",
+              "format" : "int32"
+            }
+          },
+          "partition" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string"
+            }
+          }
+        }
+      },
+      "SNConnectorOffsets" : {
+        "type" : "object",
+        "properties" : {
+          "offsets" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/SNConnectorOffset"
+            }
+          }
+        }
+      },
+      "ServerInfo" : {
+        "type" : "object",
+        "properties" : {
+          "commit" : {
+            "type" : "string"
+          },
+          "kafka_cluster_id" : {
+            "type" : "string"
+          },
+          "version" : {
+            "type" : "string"
+          }
+        }
+      },
+      "TaskInfo" : {
+        "type" : "object",
+        "properties" : {
+          "config" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "string"
+            }
+          },
+          "id" : {
+            "$ref" : "#/components/schemas/ConnectorTaskId"
+          }
+        }
+      },
+      "TaskState" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "msg" : {
+            "type" : "string",
+            "writeOnly" : true
+          },
+          "state" : {
+            "type" : "string"
+          },
+          "trace" : {
+            "type" : "string"
+          },
+          "worker_id" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "securitySchemes" : {
+      "basicAuth" : {
+        "type" : "http",
+        "scheme" : "basic"
+      }
+    }
+  }
+}
