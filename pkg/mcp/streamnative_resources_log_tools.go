@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"regexp"
 	"slices"
@@ -270,9 +269,7 @@ func (o *LogOptions) getLogs(client *http.Client, position int64,
 	}
 	err = json.Unmarshal(body, &logResult)
 	if err != nil {
-		log.Printf("failed to decode logs (%s): %v", url, err)
-		log.Printf("response: %s", string(body))
-		return results, fmt.Errorf("failed to decode logs (%s) (response: %s): %v", url, string(body), err)
+		return results, fmt.Errorf("failed to decode logs (%s): %v", url, err)
 	}
 
 	nextPosition := position
