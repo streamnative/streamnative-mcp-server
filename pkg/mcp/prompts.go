@@ -45,10 +45,11 @@ func handleListPulsarClusters(ctx context.Context, _ mcp.GetPromptRequest) (*mcp
 		return nil, fmt.Errorf("failed to get API client: %v", err)
 	}
 
-	clusters, _, err := apiClient.CloudStreamnativeIoV1alpha1Api.ListCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(ctx, options.Organization).Execute()
+	clusters, clustersBody, err := apiClient.CloudStreamnativeIoV1alpha1Api.ListCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(ctx, options.Organization).Execute()
 	if err != nil {
 		return nil, fmt.Errorf("failed to list pulsar clusters: %v", err)
 	}
+	defer clustersBody.Body.Close()
 
 	var messages = make(
 		[]mcp.PromptMessage,
@@ -115,11 +116,11 @@ func handleReadPulsarCluster(ctx context.Context, request mcp.GetPromptRequest) 
 		return nil, fmt.Errorf("failed to get name: %v", err)
 	}
 
-	clusters, _, err := apiClient.CloudStreamnativeIoV1alpha1Api.ListCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(ctx, options.Organization).Execute()
+	clusters, clustersBody, err := apiClient.CloudStreamnativeIoV1alpha1Api.ListCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(ctx, options.Organization).Execute()
 	if err != nil {
 		return nil, fmt.Errorf("failed to list pulsar clusters: %v", err)
 	}
-
+	defer clustersBody.Body.Close()
 	var cluster sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarCluster
 	for _, c := range clusters.Items {
 		if *c.Metadata.Name == name {

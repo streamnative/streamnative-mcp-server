@@ -27,7 +27,6 @@ import (
 	"golang.org/x/oauth2"
 	"k8s.io/utils/clock"
 
-	dbg "github.com/gmlewis/go-httpdebug/httpdebug"
 	"github.com/streamnative/streamnative-mcp-server/pkg/auth"
 	"github.com/streamnative/streamnative-mcp-server/pkg/auth/cache"
 	"github.com/streamnative/streamnative-mcp-server/pkg/auth/store"
@@ -198,14 +197,11 @@ func InitSNCloudLogClient(issuerData auth.Issuer, tokenStore store.Store) error 
 	}
 
 	tokenSource := oauth2.ReuseTokenSource(nil, tokenRefresher)
-	b := dbg.New()
-	b.RedactEntireJWT = false
 	SNCloudLogClient = &http.Client{
 		Timeout: 10 * time.Second,
 		Transport: &oauth2.Transport{
 			Source: tokenSource,
-			// Base:   http.DefaultTransport,
-			Base: b,
+			Base:   http.DefaultTransport,
 		},
 	}
 

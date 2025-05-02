@@ -95,7 +95,7 @@ type LogOptions struct {
 	Since                        string
 	Timestamp                    string
 	Follow                       bool
-	ReplicaID                    int
+	replicaID                    int
 	Previous                     bool
 	InsecureSkipTLSVerifyBackend bool
 }
@@ -144,9 +144,9 @@ func handleStreamNativeResourcesLog(ctx context.Context, request mcp.CallToolReq
 		size = "20"
 	}
 
-	replicaId, hasReplicaId := optionalParam[int](request.Params.Arguments, "replica_id")
-	if !hasReplicaId {
-		replicaId = -1
+	replicaID, hasreplicaID := optionalParam[int](request.Params.Arguments, "replica_id")
+	if !hasreplicaID {
+		replicaID = -1
 	}
 
 	timestampStr, hasTimestamp := optionalParam[string](request.Params.Arguments, "timestamp")
@@ -188,7 +188,7 @@ func handleStreamNativeResourcesLog(ctx context.Context, request mcp.CallToolReq
 		PulsarNamespace:              namespace,
 		Size:                         size,
 		Follow:                       false, // we do not support follow as streaming in MCP yet.
-		ReplicaID:                    replicaId,
+		replicaID:                    replicaID,
 		Previous:                     previousContainer,
 		InsecureSkipTLSVerifyBackend: false,
 		Since:                        sinceStr,
@@ -247,7 +247,7 @@ func (o *LogOptions) getLogs(client *http.Client, position int64,
 		o.Timestamp,
 		position,
 		record,
-		o.ReplicaID,
+		o.replicaID,
 	)
 
 	req, err := http.NewRequest("GET", url, nil)

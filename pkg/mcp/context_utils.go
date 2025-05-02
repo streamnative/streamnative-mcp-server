@@ -42,10 +42,11 @@ func SetContext(options *config.Options, instanceName, clusterName string) error
 		return fmt.Errorf("failed to get API client: %v", err)
 	}
 
-	instances, _, err := apiClient.CloudStreamnativeIoV1alpha1Api.ListCloudStreamnativeIoV1alpha1NamespacedPulsarInstance(ctx, options.Organization).Execute()
+	instances, instancesBody, err := apiClient.CloudStreamnativeIoV1alpha1Api.ListCloudStreamnativeIoV1alpha1NamespacedPulsarInstance(ctx, options.Organization).Execute()
 	if err != nil {
 		return fmt.Errorf("failed to list pulsar instances: %v", err)
 	}
+	defer instancesBody.Body.Close()
 
 	var instance sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarInstance
 	foundInstance := false
@@ -63,11 +64,11 @@ func SetContext(options *config.Options, instanceName, clusterName string) error
 		return fmt.Errorf("Pulsar instance %s not found", instanceName)
 	}
 
-	clusters, _, err := apiClient.CloudStreamnativeIoV1alpha1Api.ListCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(ctx, options.Organization).Execute()
+	clusters, clustersBody, err := apiClient.CloudStreamnativeIoV1alpha1Api.ListCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(ctx, options.Organization).Execute()
 	if err != nil {
 		return fmt.Errorf("failed to list pulsar clusters: %v", err)
 	}
-
+	defer clustersBody.Body.Close()
 	var cluster sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarCluster
 	foundCluster := false
 	for _, c := range clusters.Items {
@@ -102,7 +103,6 @@ func SetContext(options *config.Options, instanceName, clusterName string) error
 		return fmt.Errorf("failed to get issuer: %v", err)
 	}
 
-	// tokenKey := buildTokenKey(options.Organization, clusterUID, myselfGrant.ClientCredentials.ClientEmail)
 	tokenKey := issuer.Audience
 
 	accessToken := ""
