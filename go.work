@@ -1,0 +1,7 @@
+go 1.24.1
+
+use .
+
+use ./sdk/sdk-apiserver
+
+use ./sdk/sdk-kafkaconnect

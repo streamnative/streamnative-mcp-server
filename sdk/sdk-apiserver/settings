@@ -1,0 +1,19 @@
+# kubernetes-client/gen commit to use for code generation.
+export GEN_COMMIT=d71ff1efd
+
+# GitHub username/organization to clone kubernetes repo from.
+export USERNAME=kubernetes
+
+# Kubernetes branch/tag to get the OpenAPI spec from.
+export KUBERNETES_BRANCH="v1.18.0"
+
+# client version for packaging and releasing. It can
+# be different than SPEC_VERSION.
+export CLIENT_VERSION="0.0.1"
+
+# Name of the release package
+export PACKAGE_NAME="sncloud"
+
+export OPENAPI_GENERATOR_COMMIT=v6.2.0
+
+export OPENAPI_SKIP_FETCH_SPEC=true
