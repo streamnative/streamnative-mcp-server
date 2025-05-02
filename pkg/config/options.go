@@ -34,6 +34,7 @@ const (
 	GlobalDefaultAudience      = "https://api.streamnative.cloud"
 	GlobalDefaultAPIServer     = "https://api.streamnative.cloud"
 	GlobalDefaultProxyLocation = "https://proxy.streamnative.cloud"
+	GlobalDefaultLogLocation   = "https://log.streamnative.cloud"
 )
 
 // Options represents the common options used throughout the program.
@@ -52,6 +53,7 @@ type Options struct {
 	PulsarInstance string
 	PulsarCluster  string
 	ProxyLocation  string
+	LogLocation    string
 	KeyFile        string
 
 	UseExternalKafka  bool
@@ -85,6 +87,8 @@ func (o *Options) AddFlags(cmd *cobra.Command) {
 		"The organization to use for the API server")
 	cmd.PersistentFlags().StringVar(&o.ProxyLocation, "proxy-location", GlobalDefaultProxyLocation,
 		"The proxy location to use for the API server")
+	cmd.PersistentFlags().StringVar(&o.LogLocation, "log-location", GlobalDefaultLogLocation,
+		"The log location to use for the API server")
 	_ = cmd.MarkFlagRequired("organization")
 	cmd.PersistentFlags().StringVar(&o.PulsarInstance, "pulsar-instance", "",
 		"The default instance to use for the API server")
@@ -192,6 +196,7 @@ func (o *Options) LoadConfig() (*SnConfig, error) {
 			PulsarCluster:  o.PulsarCluster,
 		},
 		ProxyLocation: o.ProxyLocation,
+		LogLocation:   o.LogLocation,
 		KeyFile:       o.KeyFile,
 	}
 	if o.UseExternalKafka {

@@ -24,6 +24,9 @@ import (
 	"github.com/apache/pulsar-client-go/pulsar"
 	pulsaradminconfig "github.com/apache/pulsar-client-go/pulsaradmin/pkg/admin/config"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
+	"github.com/streamnative/streamnative-mcp-server/pkg/auth"
+	"github.com/streamnative/streamnative-mcp-server/pkg/auth/store"
+	"github.com/streamnative/streamnative-mcp-server/pkg/config"
 )
 
 const (
@@ -50,9 +53,22 @@ var AdminClient cmdutils.Client
 var AdminV3Client cmdutils.Client
 var Client pulsar.Client
 
-func NewCurrentPulsarContext(pc PulsarContext) error {
+func NewCurrentPulsarContext(pc PulsarContext, issuer *auth.Issuer, tokenStore *store.Store) error {
 	CurrentPulsarContext = pc
+	if issuer != nil && tokenStore != nil {
+		_ = config.InitSNCloudLogClient(*issuer, *tokenStore)
+	} else {
+		config.ResetSNCloudLogClient()
+	}
 	return pc.SetPulsarContext()
+}
+
+func ResetCurrentPulsarContext() {
+	CurrentPulsarContext = PulsarContext{}
+	CurrentPulsarClientOptions = pulsar.ClientOptions{}
+	AdminClient = nil
+	AdminV3Client = nil
+	Client = nil
 }
 
 func init() {

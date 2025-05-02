@@ -82,6 +82,7 @@ func (o *ServerOptions) Complete() error {
 			if o.Options.PulsarInstance != "" && o.Options.PulsarCluster != "" {
 				err = mcp.SetContext(o.Options, o.Options.PulsarInstance, o.Options.PulsarCluster)
 				if err != nil {
+					mcp.ResetMcpContext()
 					return errors.Wrap(err, "failed to set StreamNative Cloud context")
 				}
 			}
@@ -141,7 +142,7 @@ func (o *ServerOptions) Complete() error {
 				TLSTrustCertsFilePath:         snConfig.ExternalPulsar.TLSTrustCertsFilePath,
 				TLSCertFile:                   snConfig.ExternalPulsar.TLSCertFile,
 				TLSKeyFile:                    snConfig.ExternalPulsar.TLSKeyFile,
-			})
+			}, nil, nil)
 			if err != nil {
 				return errors.Wrap(err, "failed to set external Pulsar context")
 			}

@@ -27,6 +27,7 @@ import (
 	"golang.org/x/oauth2"
 	"k8s.io/utils/clock"
 
+	dbg "github.com/gmlewis/go-httpdebug/httpdebug"
 	"github.com/streamnative/streamnative-mcp-server/pkg/auth"
 	"github.com/streamnative/streamnative-mcp-server/pkg/auth/cache"
 	"github.com/streamnative/streamnative-mcp-server/pkg/auth/store"
@@ -35,6 +36,7 @@ import (
 
 var SNCloudClientConfiguration *sncloud.Configuration
 var SNCloudClient *sncloud.APIClient
+var SNCloudLogClient *http.Client
 
 // OAuth2TokenRefresher implements oauth2.TokenSource interface for refreshing OAuth2 tokens
 // This is now a wrapper around the cache.CachingTokenSource to leverage the existing token caching
@@ -182,4 +184,41 @@ func TokenRefreshed(audience string, token *oauth2.Token, tokenStore store.Store
 
 	// Save back to store
 	return tokenStore.SaveGrant(audience, *grant)
+}
+
+func InitSNCloudLogClient(issuerData auth.Issuer, tokenStore store.Store) error {
+	refresher, err := auth.NewDefaultClientCredentialsGrantRefresher(issuerData, clock.RealClock{})
+	if err != nil {
+		return errors.Wrap(err, "failed to create token refresher")
+	}
+
+	tokenRefresher, err := NewOAuth2TokenRefresher(tokenStore, issuerData.Audience, refresher)
+	if err != nil {
+		return errors.Wrap(err, "failed to create token refresher")
+	}
+
+	tokenSource := oauth2.ReuseTokenSource(nil, tokenRefresher)
+	b := dbg.New()
+	b.RedactEntireJWT = false
+	SNCloudLogClient = &http.Client{
+		Timeout: 10 * time.Second,
+		Transport: &oauth2.Transport{
+			Source: tokenSource,
+			// Base:   http.DefaultTransport,
+			Base: b,
+		},
+	}
+
+	return nil
+}
+
+func ResetSNCloudLogClient() {
+	SNCloudLogClient = nil
+}
+
+func GetSNCloudLogClient() (*http.Client, error) {
+	if SNCloudLogClient == nil {
+		return nil, errors.New("log tools are for StreamNative Cloud only, please check your context")
+	}
+	return SNCloudLogClient, nil
 }

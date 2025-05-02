@@ -143,6 +143,7 @@ func newStdioServer(configOpts *ServerOptions, logrusLogger *logrus.Logger) *ser
 
 			mcp.RegisterPrompts(s)
 			mcp.RegisterContextTools(s, configOpts.Features)
+			mcp.StreamNativeAddLogTools(s, configOpts.ReadOnly, configOpts.Features)
 		}
 	case snConfig.ExternalKafka != nil:
 		{

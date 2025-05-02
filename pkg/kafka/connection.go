@@ -65,6 +65,14 @@ func NewCurrentKafkaContext(kc KafkaContext) error {
 	return kc.SetKafkaContext()
 }
 
+func ResetCurrentKafkaContext() {
+	CurrentKafkaContext = KafkaContext{}
+	KafkaAdminClient = nil
+	KafkaClient = nil
+	KafkaSchemaRegistryClient = nil
+	KafkaConnectClient = nil
+}
+
 type SASLConfig struct {
 	Mechanism string
 	Username  string

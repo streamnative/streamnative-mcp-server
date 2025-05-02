@@ -102,7 +102,8 @@ func SetContext(options *config.Options, instanceName, clusterName string) error
 		return fmt.Errorf("failed to get issuer: %v", err)
 	}
 
-	tokenKey := buildTokenKey(options.Organization, clusterUID, myselfGrant.ClientCredentials.ClientEmail)
+	// tokenKey := buildTokenKey(options.Organization, clusterUID, myselfGrant.ClientCredentials.ClientEmail)
+	tokenKey := issuer.Audience
 
 	accessToken := ""
 	refreshToken := true
@@ -152,7 +153,7 @@ func SetContext(options *config.Options, instanceName, clusterName string) error
 		WebServiceURL: getBasePath(snConfig.ProxyLocation, options.Organization, clusterUID),
 		ServiceURL:    getServiceURL(dnsName),
 		Token:         accessToken,
-	})
+	}, issuer, &options.AuthOptions.Store)
 	if err != nil {
 		return fmt.Errorf("failed to set pulsar context: %v", err)
 	}
@@ -175,5 +176,13 @@ func SetContext(options *config.Options, instanceName, clusterName string) error
 		return fmt.Errorf("failed to set kafka context: %v", err)
 	}
 
+	SetMcpContext(instanceName, clusterName, options.Organization)
+
 	return nil
+}
+
+func ResetContext() {
+	pulsar.ResetCurrentPulsarContext()
+	kafka.ResetCurrentKafkaContext()
+	ResetMcpContext()
 }
