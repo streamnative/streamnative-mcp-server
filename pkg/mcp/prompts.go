@@ -36,6 +36,16 @@ func RegisterPrompts(s *server.MCPServer) {
 		mcp.WithPromptDescription("Read a Pulsar cluster in the StreamNative Cloud"),
 		mcp.WithArgument("name", mcp.RequiredArgument(), mcp.ArgumentDescription("The name of the Pulsar cluster")),
 	), handleReadPulsarCluster)
+	s.AddPrompt(
+		mcp.NewPrompt("build-streamnative-cloud-serverless-cluster",
+			mcp.WithPromptDescription("Build a Serverless Pulsar cluster in the StreamNative Cloud"),
+			mcp.WithArgument("instance-name", mcp.RequiredArgument(), mcp.ArgumentDescription("The name of the Pulsar instance, cannot reuse the name of existing instance.")),
+			mcp.WithArgument("cluster-name", mcp.RequiredArgument(), mcp.ArgumentDescription("The name of the Pulsar cluster, cannot reuse the name of existing cluster.")),
+			mcp.WithArgument("provider", mcp.RequiredArgument(), mcp.ArgumentDescription("The cloud provider, could be `aws`, `gcp`, `azure`. If the selected provider do not serve serverless cluster, the prompt will return an error.")),
+			mcp.WithArgument("location", mcp.ArgumentDescription("The cluster location / region of the cloud provider, optional, default to the first available location from the provider.")),
+		),
+		handleBuildServerlessPulsarCluster,
+	)
 }
 
 func handleListPulsarClusters(ctx context.Context, _ mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
@@ -159,4 +169,56 @@ func handleReadPulsarCluster(ctx context.Context, request mcp.GetPromptRequest) 
 		Description: fmt.Sprintf("Detailed information of Pulsar cluster %s, you can use `streamnative_cloud_context_use_cluster` tool to switch to this cluster, and use pulsar and kafka tools to interact with the cluster.", name),
 		Messages:    messages,
 	}, nil
+}
+
+func handleBuildServerlessPulsarCluster(ctx context.Context, request mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
+	options := getOptions(ctx)
+	apiClient, err := config.GetAPIClient()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get API client: %v", err)
+	}
+	arguments := convertToMapInterface(request.Params.Arguments)
+
+	instanceName, err := requiredParam[string](arguments, "instance-name")
+	if err != nil {
+		return nil, fmt.Errorf("failed to get instance name: %v", err)
+	}
+
+	clusterName, err := requiredParam[string](arguments, "cluster-name")
+	if err != nil {
+		return nil, fmt.Errorf("failed to get cluster name: %v", err)
+	}
+
+	provider, err := requiredParam[string](arguments, "provider")
+	if err != nil {
+		return nil, fmt.Errorf("failed to get provider: %v", err)
+	}
+
+	location, err := optionalParam[string](arguments, "location")
+	if err != nil {
+		return nil, fmt.Errorf("failed to get location: %v", err)
+	}
+
+	poolOptions, poolOptionsBody, err := apiClient.CloudStreamnativeIoV1alpha1Api.ListCloudStreamnativeIoV1alpha1NamespacedPoolOption(ctx, options.Organization).Execute()
+	if err != nil {
+		return nil, fmt.Errorf("failed to list pool options: %v", err)
+	}
+	defer poolOptionsBody.Body.Close()
+	if poolOptions == nil {
+		return nil, fmt.Errorf("no pool options found")
+	}
+
+	pools := make([]sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Pool, 0)
+	poolMembers := make([]sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMember, 0)
+
+	for _, poolOpt := range poolOptions.Items {
+		poolOpt.Spec.PoolRef
+	}
+
+	clusters, clustersBody, err := apiClient.CloudStreamnativeIoV1alpha1Api.ListCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(ctx, options.Organization).Execute()
+	if err != nil {
+		return nil, fmt.Errorf("failed to list pulsar clusters: %v", err)
+	}
+	defer clustersBody.Body.Close()
+
 }
