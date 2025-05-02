@@ -157,7 +157,7 @@ The following sets of tools are available (all available by default on StreamNat
 | `kafka-admin-groups` | Manage Kafka consumer groups |
 | `kafka-admin-schema-registry` | Interact with Kafka Schema Registry |
 | `kafka-admin-connect` | Manage Kafka Connect connectors |
-| `streamnative-cloud` | Manage the context of StreamNative Cloud |
+| `streamnative-cloud` | Manage the context, check resources logs of StreamNative Cloud |
 
 ### Usage Examples
 
