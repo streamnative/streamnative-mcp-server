@@ -36,7 +36,7 @@ func KafkaAdminAddGroupsTools(s *server.MCPServer, readOnly bool, features []str
 	}
 
 	resourceDesc := "Resource to operate on. Available resources:\n" +
-		"- group: A single Kafka Consumer Group for operations on individual groups (describe, remove-members)\n" +
+		"- group: A single Kafka Consumer Group for operations on individual groups (describe, remove-members, set-offset, delete-offset)\n" +
 		"- groups: Collection of Kafka Consumer Groups for bulk operations (list)"
 
 	operationDesc := "Operation to perform. Available operations:\n" +
