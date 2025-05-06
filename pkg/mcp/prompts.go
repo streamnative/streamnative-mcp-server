@@ -28,6 +28,42 @@ import (
 	sncloud "github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserver"
 )
 
+type ServerlessPoolMember struct {
+	Provider  string
+	Namespace string
+	Pool      string
+	Location  string
+}
+
+var (
+	ServerlessPoolMemberList = []ServerlessPoolMember{
+		{
+			Provider:  "aws",
+			Namespace: "streamnative",
+			Pool:      "shared-aws",
+			Location:  "us-east-2",
+		},
+		{
+			Provider:  "aws",
+			Namespace: "streamnative",
+			Pool:      "functions-aws",
+			Location:  "us-east-2",
+		},
+		{
+			Provider:  "azure",
+			Namespace: "streamnative",
+			Pool:      "shared-azure",
+			Location:  "eastus",
+		},
+		{
+			Provider:  "gcloud",
+			Namespace: "streamnative",
+			Pool:      "shared-gcp",
+			Location:  "us-central1",
+		},
+	}
+)
+
 func RegisterPrompts(s *server.MCPServer) {
 	s.AddPrompt(mcp.NewPrompt("list-streamnative-cloud-pulsar-clusters",
 		mcp.WithPromptDescription("List all Pulsar clusters in the StreamNative Cloud"),
@@ -212,7 +248,17 @@ func handleBuildServerlessPulsarCluster(ctx context.Context, request mcp.GetProm
 	poolMembers := make([]sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMember, 0)
 
 	for _, poolOpt := range poolOptions.Items {
-		poolOpt.Spec.PoolRef
+		if pr, ok := poolOpt.Spec.GetPoolRefOk(); ok {
+			for _, poolMember := range ServerlessPoolMemberList {
+				if pr.Name == poolMember.Pool && pr.Namespace == poolMember.Namespace {
+					for _, location := range poolOpt.Spec.Locations {
+						if location.Location == poolMember.Location {
+							pools = append(pools, poolOpt)
+						}
+					}
+				}
+			}
+		}
 	}
 
 	clusters, clustersBody, err := apiClient.CloudStreamnativeIoV1alpha1Api.ListCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(ctx, options.Organization).Execute()
