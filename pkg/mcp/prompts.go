@@ -26,6 +26,8 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/config"
 	sncloud "github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserver"
+	"gopkg.in/yaml.v2"
+	"k8s.io/utils/ptr"
 )
 
 type ServerlessPoolMember struct {
@@ -43,24 +45,18 @@ var (
 			Pool:      "shared-aws",
 			Location:  "us-east-2",
 		},
-		{
-			Provider:  "aws",
-			Namespace: "streamnative",
-			Pool:      "functions-aws",
-			Location:  "us-east-2",
-		},
-		{
-			Provider:  "azure",
-			Namespace: "streamnative",
-			Pool:      "shared-azure",
-			Location:  "eastus",
-		},
-		{
-			Provider:  "gcloud",
-			Namespace: "streamnative",
-			Pool:      "shared-gcp",
-			Location:  "us-central1",
-		},
+		// {
+		// 	Provider:  "azure",
+		// 	Namespace: "streamnative",
+		// 	Pool:      "shared-azure",
+		// 	Location:  "eastus",
+		// },
+		// {
+		// 	Provider:  "gcloud",
+		// 	Namespace: "streamnative",
+		// 	Pool:      "shared-gcp",
+		// 	Location:  "us-central1",
+		// },
 	}
 )
 
@@ -77,8 +73,7 @@ func RegisterPrompts(s *server.MCPServer) {
 			mcp.WithPromptDescription("Build a Serverless Pulsar cluster in the StreamNative Cloud"),
 			mcp.WithArgument("instance-name", mcp.RequiredArgument(), mcp.ArgumentDescription("The name of the Pulsar instance, cannot reuse the name of existing instance.")),
 			mcp.WithArgument("cluster-name", mcp.RequiredArgument(), mcp.ArgumentDescription("The name of the Pulsar cluster, cannot reuse the name of existing cluster.")),
-			mcp.WithArgument("provider", mcp.RequiredArgument(), mcp.ArgumentDescription("The cloud provider, could be `aws`, `gcp`, `azure`. If the selected provider do not serve serverless cluster, the prompt will return an error.")),
-			mcp.WithArgument("location", mcp.ArgumentDescription("The cluster location / region of the cloud provider, optional, default to the first available location from the provider.")),
+			// mcp.WithArgument("provider", mcp.RequiredArgument(), mcp.ArgumentDescription("The cloud provider, could be `aws`, `gcp`, `azure`. If the selected provider do not serve serverless cluster, the prompt will return an error.")),
 		),
 		handleBuildServerlessPulsarCluster,
 	)
@@ -225,15 +220,12 @@ func handleBuildServerlessPulsarCluster(ctx context.Context, request mcp.GetProm
 		return nil, fmt.Errorf("failed to get cluster name: %v", err)
 	}
 
-	provider, err := requiredParam[string](arguments, "provider")
-	if err != nil {
-		return nil, fmt.Errorf("failed to get provider: %v", err)
-	}
+	// provider, err := requiredParam[string](arguments, "provider")
+	// if err != nil {
+	// 	return nil, fmt.Errorf("failed to get provider: %v", err)
+	// }
 
-	location, err := optionalParam[string](arguments, "location")
-	if err != nil {
-		return nil, fmt.Errorf("failed to get location: %v", err)
-	}
+	provider := "aws"
 
 	poolOptions, poolOptionsBody, err := apiClient.CloudStreamnativeIoV1alpha1Api.ListCloudStreamnativeIoV1alpha1NamespacedPoolOption(ctx, options.Organization).Execute()
 	if err != nil {
@@ -244,8 +236,8 @@ func handleBuildServerlessPulsarCluster(ctx context.Context, request mcp.GetProm
 		return nil, fmt.Errorf("no pool options found")
 	}
 
-	pools := make([]sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Pool, 0)
-	poolMembers := make([]sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMember, 0)
+	var poolRef *sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolRef
+	var selectedLocation *string
 
 	for _, poolOpt := range poolOptions.Items {
 		if pr, ok := poolOpt.Spec.GetPoolRefOk(); ok {
@@ -253,7 +245,9 @@ func handleBuildServerlessPulsarCluster(ctx context.Context, request mcp.GetProm
 				if pr.Name == poolMember.Pool && pr.Namespace == poolMember.Namespace {
 					for _, location := range poolOpt.Spec.Locations {
 						if location.Location == poolMember.Location {
-							pools = append(pools, poolOpt)
+							poolRef = pr
+							selectedLocation = &location.Location
+							break
 						}
 					}
 				}
@@ -261,10 +255,73 @@ func handleBuildServerlessPulsarCluster(ctx context.Context, request mcp.GetProm
 		}
 	}
 
-	clusters, clustersBody, err := apiClient.CloudStreamnativeIoV1alpha1Api.ListCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(ctx, options.Organization).Execute()
-	if err != nil {
-		return nil, fmt.Errorf("failed to list pulsar clusters: %v", err)
+	if poolRef == nil || selectedLocation == nil {
+		return nil, fmt.Errorf("no available pool on %s", provider)
 	}
-	defer clustersBody.Body.Close()
 
+	inst := sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarInstance{}
+	clus := sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarCluster{}
+
+	inst.Metadata = &sncloud.V1ObjectMeta{
+		Name:      &instanceName,
+		Namespace: &options.Organization,
+		Labels: &map[string]string{
+			"managed-by": "streamnative-mcp",
+		},
+	}
+
+	inst.Spec = &sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarInstanceSpec{
+		AvailabilityMode: "zonal",
+		PoolRef:          poolRef,
+		Type:             ptr.To("serverless"),
+	}
+
+	clus.Metadata = &sncloud.V1ObjectMeta{
+		Name:      ptr.To(""),
+		Namespace: &options.Organization,
+		Labels: &map[string]string{
+			"managed-by": "streamnative-mcp",
+		},
+	}
+
+	clus.Spec = &sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarClusterSpec{
+		Broker: sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Broker{
+			Replicas: 2,
+			Resources: &sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1DefaultNodeResource{
+				Cpu:    "1000m",
+				Memory: "4294967296",
+			},
+		},
+		DisplayName:    ptr.To(clusterName),
+		InstanceName:   instanceName,
+		Location:       *selectedLocation,
+		ReleaseChannel: ptr.To("rapid"),
+	}
+
+	bundleYaml := ""
+	instYaml, err := yaml.Marshal(inst)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal instance: %v", err)
+	}
+	clusYaml, err := yaml.Marshal(clus)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal cluster: %v", err)
+	}
+
+	bundleYaml = fmt.Sprintf("%s\n---------\n%s\n", string(instYaml), string(clusYaml))
+
+	messages := []mcp.PromptMessage{
+		{
+			Content: mcp.TextContent{
+				Type: "text",
+				Text: bundleYaml,
+			},
+			Role: mcp.RoleUser,
+		},
+	}
+
+	return &mcp.GetPromptResult{
+		Description: fmt.Sprintf("The Pulsar cluster %s is being built, you can use `streamnative_cloud_context_use_cluster` tool to switch to this cluster, and use pulsar and kafka tools to interact with the cluster.", clusterName),
+		Messages:    messages,
+	}, nil
 }
