@@ -205,6 +205,36 @@ The Model Context Protocol (MCP) is an open protocol that standardizes how appli
 
 For more information, visit [modelcontextprotocol.io](https://modelcontextprotocol.io/introduction).
 
+## Release
+
+_This section describes how to release a new version of `snmcp`._
+
+1. Generate a tag for the new version (see Versioning, below):
+
+```
+git tag -a v0.0.1 -m "v0.0.1"
+```
+
+5. Push the tag to the git repository:
+
+```
+git push origin refs/tags/v0.0.1
+```
+
+The release workflow will:
+
+- build Go binaries for supported platforms
+- archive the binaries
+- publish a release to the github repository ([ref](https://github.com/streamnative/streamnative-mcp-server/releases))
+
+### Versioning
+
+This project uses [semver](https://semver.org/) semantics.
+
+- Stable: `vX.Y.Z`
+- Pre-release: `vX.Y.Z-rc.W`
+- Snapshot: `vX.Y.Z-SNAPSHOT-commit`
+
 ## License
 
 Licensed under the Apache License Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
