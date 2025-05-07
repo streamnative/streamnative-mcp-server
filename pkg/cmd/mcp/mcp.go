@@ -53,93 +53,105 @@ func (o *ServerOptions) Complete() error {
 	snConfig := o.Options.LoadConfigOrDie()
 
 	// If the key file is provided, use it to authenticate to StreamNative Cloud
-	if snConfig.KeyFile != "" {
-		issuer := snConfig.Auth.Issuer()
+	switch {
+	case snConfig.KeyFile != "":
+		{
+			issuer := snConfig.Auth.Issuer()
 
-		// authorize
-		flow, err := o.newClientCredentialsFlow(issuer, o.KeyFile)
-		if err != nil {
-			return errors.Wrap(err, "configuration error: unable to use client credential flow")
-		}
-		grant, err := flow.Authorize()
-		if err != nil {
-			return errors.Wrap(err, "activation failed")
-		}
-
-		// persist the authorization data
-		if err = o.Options.SaveGrant(issuer.Audience, *grant); err != nil {
-			return errors.Wrap(err, "Unable to store the authorization data")
-		}
-
-		err = config.InitSNCloudClient(
-			issuer.IssuerEndpoint, issuer.Audience, o.KeyFile, o.Options.Server, 30*time.Second, o.Options.Store)
-		if err != nil {
-			return errors.Wrap(err, "failed to initialize StreamNative Cloud client")
-		}
-
-		if o.Options.PulsarInstance != "" && o.Options.PulsarCluster != "" {
-			err = mcp.SetContext(o.Options, o.Options.PulsarInstance, o.Options.PulsarCluster)
+			// authorize
+			flow, err := o.newClientCredentialsFlow(issuer, o.KeyFile)
 			if err != nil {
-				return errors.Wrap(err, "failed to set StreamNative Cloud context")
+				return errors.Wrap(err, "configuration error: unable to use client credential flow")
 			}
-		}
+			grant, err := flow.Authorize()
+			if err != nil {
+				return errors.Wrap(err, "activation failed")
+			}
 
-		if len(o.Features) != 0 {
-			requiredFeatures := []mcp.McpFeature{
-				mcp.FeatureStreamNativeCloud,
+			// persist the authorization data
+			if err = o.Options.SaveGrant(issuer.Audience, *grant); err != nil {
+				return errors.Wrap(err, "Unable to store the authorization data")
 			}
-			for _, feature := range requiredFeatures {
-				if !slices.Contains(o.Features, string(feature)) {
-					o.Features = append(o.Features, string(feature))
+
+			err = config.InitSNCloudClient(
+				issuer.IssuerEndpoint, issuer.Audience, o.KeyFile, o.Options.Server, 30*time.Second, o.Options.Store)
+			if err != nil {
+				return errors.Wrap(err, "failed to initialize StreamNative Cloud client")
+			}
+
+			if o.Options.PulsarInstance != "" && o.Options.PulsarCluster != "" {
+				err = mcp.SetContext(o.Options, o.Options.PulsarInstance, o.Options.PulsarCluster)
+				if err != nil {
+					mcp.ResetMcpContext()
+					return errors.Wrap(err, "failed to set StreamNative Cloud context")
 				}
 			}
-		} else {
-			o.Features = []string{string(mcp.FeatureAll)}
+
+			if len(o.Features) != 0 {
+				requiredFeatures := []mcp.Feature{
+					mcp.FeatureStreamNativeCloud,
+				}
+				for _, feature := range requiredFeatures {
+					if !slices.Contains(o.Features, string(feature)) {
+						o.Features = append(o.Features, string(feature))
+					}
+				}
+			} else {
+				o.Features = []string{string(mcp.FeatureAll)}
+			}
 		}
-	} else if snConfig.ExternalKafka != nil {
-		if len(o.Features) != 0 {
-			return errors.New("kafka-only mode does not support additional features")
+	case snConfig.ExternalKafka != nil:
+		{
+			if len(o.Features) != 0 {
+				return errors.New("kafka-only mode does not support additional features")
+			}
+			o.Features = []string{string(mcp.FeatureKafkaClient), string(mcp.FeatureKafkaAdmin), string(mcp.FeatureKafkaAdminSchemaRegistry)}
+			err := kafka.NewCurrentKafkaContext(kafka.KafkaContext{
+				BootstrapServers:          snConfig.ExternalKafka.BootstrapServers,
+				AuthType:                  snConfig.ExternalKafka.AuthType,
+				AuthMechanism:             snConfig.ExternalKafka.AuthMechanism,
+				AuthUser:                  snConfig.ExternalKafka.AuthUser,
+				AuthPass:                  snConfig.ExternalKafka.AuthPass,
+				UseTLS:                    snConfig.ExternalKafka.UseTLS,
+				ClientKeyFile:             snConfig.ExternalKafka.ClientKeyFile,
+				ClientCertFile:            snConfig.ExternalKafka.ClientCertFile,
+				CaFile:                    snConfig.ExternalKafka.CaFile,
+				SchemaRegistryURL:         snConfig.ExternalKafka.SchemaRegistryURL,
+				SchemaRegistryAuthUser:    snConfig.ExternalKafka.SchemaRegistryAuthUser,
+				SchemaRegistryAuthPass:    snConfig.ExternalKafka.SchemaRegistryAuthPass,
+				SchemaRegistryBearerToken: snConfig.ExternalKafka.SchemaRegistryBearerToken,
+			})
+			if err != nil {
+				return errors.Wrap(err, "failed to set external Kafka context")
+			}
 		}
-		o.Features = []string{string(mcp.FeatureKafkaClient), string(mcp.FeatureKafkaAdmin), string(mcp.FeatureKafkaAdminSchemaRegistry)}
-		err := kafka.NewCurrentKafkaContext(kafka.KafkaContext{
-			BootstrapServers:          snConfig.ExternalKafka.BootstrapServers,
-			AuthType:                  snConfig.ExternalKafka.AuthType,
-			AuthMechanism:             snConfig.ExternalKafka.AuthMechanism,
-			AuthUser:                  snConfig.ExternalKafka.AuthUser,
-			AuthPass:                  snConfig.ExternalKafka.AuthPass,
-			UseTLS:                    snConfig.ExternalKafka.UseTLS,
-			ClientKeyFile:             snConfig.ExternalKafka.ClientKeyFile,
-			ClientCertFile:            snConfig.ExternalKafka.ClientCertFile,
-			CaFile:                    snConfig.ExternalKafka.CaFile,
-			SchemaRegistryURL:         snConfig.ExternalKafka.SchemaRegistryURL,
-			SchemaRegistryAuthUser:    snConfig.ExternalKafka.SchemaRegistryAuthUser,
-			SchemaRegistryAuthPass:    snConfig.ExternalKafka.SchemaRegistryAuthPass,
-			SchemaRegistryBearerToken: snConfig.ExternalKafka.SchemaRegistryBearerToken,
-		})
-		if err != nil {
-			return errors.Wrap(err, "failed to set external Kafka context")
+	case snConfig.ExternalPulsar != nil:
+		{
+			if len(o.Features) != 0 {
+				return errors.New("pulsar-only mode does not support additional features")
+			}
+			o.Features = []string{string(mcp.FeatureAllPulsar)}
+			err := pulsar.NewCurrentPulsarContext(pulsar.PulsarContext{
+				ServiceURL:                    snConfig.ExternalPulsar.ServiceURL,
+				WebServiceURL:                 snConfig.ExternalPulsar.WebServiceURL,
+				AuthPlugin:                    snConfig.ExternalPulsar.AuthPlugin,
+				AuthParams:                    snConfig.ExternalPulsar.AuthParams,
+				Token:                         snConfig.ExternalPulsar.Token,
+				TLSAllowInsecureConnection:    snConfig.ExternalPulsar.TLSAllowInsecureConnection,
+				TLSEnableHostnameVerification: snConfig.ExternalPulsar.TLSEnableHostnameVerification,
+				TLSTrustCertsFilePath:         snConfig.ExternalPulsar.TLSTrustCertsFilePath,
+				TLSCertFile:                   snConfig.ExternalPulsar.TLSCertFile,
+				TLSKeyFile:                    snConfig.ExternalPulsar.TLSKeyFile,
+			}, nil, nil)
+			if err != nil {
+				return errors.Wrap(err, "failed to set external Pulsar context")
+			}
 		}
-	} else if snConfig.ExternalPulsar != nil {
-		if len(o.Features) != 0 {
-			return errors.New("pulsar-only mode does not support additional features")
-		}
-		o.Features = []string{string(mcp.FeatureAllPulsar)}
-		err := pulsar.NewCurrentPulsarContext(pulsar.PulsarContext{
-			WebServiceURL:                 snConfig.ExternalPulsar.WebServiceURL,
-			AuthPlugin:                    snConfig.ExternalPulsar.AuthPlugin,
-			AuthParams:                    snConfig.ExternalPulsar.AuthParams,
-			Token:                         snConfig.ExternalPulsar.Token,
-			TLSAllowInsecureConnection:    snConfig.ExternalPulsar.TLSAllowInsecureConnection,
-			TLSEnableHostnameVerification: snConfig.ExternalPulsar.TLSEnableHostnameVerification,
-			TLSTrustCertsFilePath:         snConfig.ExternalPulsar.TLSTrustCertsFilePath,
-			TLSCertFile:                   snConfig.ExternalPulsar.TLSCertFile,
-			TLSKeyFile:                    snConfig.ExternalPulsar.TLSKeyFile,
-		})
-		if err != nil {
-			return errors.Wrap(err, "failed to set external Pulsar context")
+	default:
+		{
+			return errors.New("no valid configuration found")
 		}
 	}
-
 	return nil
 }
 

@@ -61,7 +61,7 @@ func SetContext(options *config.Options, instanceName, clusterName string) error
 		}
 	}
 	if !foundInstance {
-		return fmt.Errorf("Pulsar instance %s not found", instanceName)
+		return fmt.Errorf("Pulsar instance %s not found in organization %s", instanceName, options.Organization)
 	}
 
 	clusters, clustersBody, err := apiClient.CloudStreamnativeIoV1alpha1Api.ListCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(ctx, options.Organization).Execute()
