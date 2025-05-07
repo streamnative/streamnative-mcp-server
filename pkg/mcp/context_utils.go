@@ -24,7 +24,7 @@ import (
 	"github.com/streamnative/streamnative-mcp-server/pkg/config"
 	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
-	sncloud "github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserve"
+	sncloud "github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserver"
 )
 
 const DefaultKafkaPort = 9093

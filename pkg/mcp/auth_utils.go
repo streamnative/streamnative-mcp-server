@@ -21,7 +21,7 @@ import (
 	"fmt"
 
 	"github.com/streamnative/streamnative-mcp-server/pkg/auth"
-	sncloud "github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserve"
+	sncloud "github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserver"
 )
 
 const (

@@ -30,7 +30,7 @@ import (
 	"github.com/streamnative/streamnative-mcp-server/pkg/auth"
 	"github.com/streamnative/streamnative-mcp-server/pkg/auth/cache"
 	"github.com/streamnative/streamnative-mcp-server/pkg/auth/store"
-	sncloud "github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserve"
+	sncloud "github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserver"
 )
 
 var SNCloudClientConfiguration *sncloud.Configuration
