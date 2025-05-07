@@ -83,6 +83,6 @@ require (
 	google.golang.org/protobuf v1.35.1 // indirect
 )
 
-replace github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserve => ./sdk/sdk-apiserver
+replace github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserver => ./sdk/sdk-apiserver
 
 replace github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect => ./sdk/sdk-kafkaconnect
