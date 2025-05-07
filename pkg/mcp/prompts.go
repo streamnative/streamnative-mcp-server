@@ -26,7 +26,6 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/config"
 	sncloud "github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserver"
-	"gopkg.in/yaml.v2"
 	"k8s.io/utils/ptr"
 )
 
@@ -262,6 +261,8 @@ func handleBuildServerlessPulsarCluster(ctx context.Context, request mcp.GetProm
 	inst := sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarInstance{}
 	clus := sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarCluster{}
 
+	inst.ApiVersion = ptr.To("cloud.streamnative.io/v1alpha1")
+	inst.Kind = ptr.To("PulsarInstance")
 	inst.Metadata = &sncloud.V1ObjectMeta{
 		Name:      &instanceName,
 		Namespace: &options.Organization,
@@ -276,6 +277,8 @@ func handleBuildServerlessPulsarCluster(ctx context.Context, request mcp.GetProm
 		Type:             ptr.To("serverless"),
 	}
 
+	clus.ApiVersion = ptr.To("cloud.streamnative.io/v1alpha1")
+	clus.Kind = ptr.To("PulsarCluster")
 	clus.Metadata = &sncloud.V1ObjectMeta{
 		Name:      ptr.To(""),
 		Namespace: &options.Organization,
@@ -298,30 +301,41 @@ func handleBuildServerlessPulsarCluster(ctx context.Context, request mcp.GetProm
 		ReleaseChannel: ptr.To("rapid"),
 	}
 
-	bundleYaml := ""
-	instYaml, err := yaml.Marshal(inst)
+	instJson, err := json.Marshal(inst)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal instance: %v", err)
 	}
-	clusYaml, err := yaml.Marshal(clus)
+	clusJson, err := json.Marshal(clus)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal cluster: %v", err)
 	}
-
-	bundleYaml = fmt.Sprintf("%s\n---------\n%s\n", string(instYaml), string(clusYaml))
 
 	messages := []mcp.PromptMessage{
 		{
 			Content: mcp.TextContent{
 				Type: "text",
-				Text: bundleYaml,
+				Text: "The following is the Pulsar instance JSON definition and the Pulsar cluster JSON definition, you can use the `streamnative_cloud_resources_apply` tool to apply the resources to the StreamNative Cloud. Please directly use the JSON content and not modify the content. The PulsarCluster name is required to be empty.",
+			},
+			Role: mcp.RoleUser,
+		},
+		{
+			Content: mcp.TextContent{
+				Type: "text",
+				Text: string(instJson),
+			},
+			Role: mcp.RoleUser,
+		},
+		{
+			Content: mcp.TextContent{
+				Type: "text",
+				Text: string(clusJson),
 			},
 			Role: mcp.RoleUser,
 		},
 	}
 
 	return &mcp.GetPromptResult{
-		Description: fmt.Sprintf("The Pulsar cluster %s is being built, you can use `streamnative_cloud_context_use_cluster` tool to switch to this cluster, and use pulsar and kafka tools to interact with the cluster.", clusterName),
+		Description: fmt.Sprintf("Create a new Serverless Pulsar cluster %s's related resources that can be applied to the StreamNative Cloud.", clusterName),
 		Messages:    messages,
 	}, nil
 }
