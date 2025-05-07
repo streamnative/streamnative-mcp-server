@@ -12,7 +12,7 @@ require (
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.9.1
 	github.com/streamnative/pulsarctl v0.4.3-0.20250312214758-e472faec284b
-	github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserve v0.0.0-00010101000000-000000000000
+	github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserver v0.0.0-20250506174209-b67ea08ddd82
 	github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect v0.0.0-00010101000000-000000000000
 	github.com/twmb/franz-go v1.18.1
 	github.com/twmb/franz-go/pkg/kadm v1.16.0
@@ -83,6 +83,6 @@ require (
 	google.golang.org/protobuf v1.35.1 // indirect
 )
 
-replace github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserve => ./sdk/sdk-apiserver
+replace github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserver => ./sdk/sdk-apiserver
 
 replace github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect => ./sdk/sdk-kafkaconnect
