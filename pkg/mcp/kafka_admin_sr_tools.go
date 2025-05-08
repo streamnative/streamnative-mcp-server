@@ -31,7 +31,7 @@ import (
 )
 
 func KafkaAdminAddSchemaRegistryTools(s *server.MCPServer, readOnly bool, features []string) {
-	if !slices.Contains(features, string(FeatureKafkaAdminSchemaRegistry)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllKafka)) {
+	if !slices.Contains(features, string(FeatureKafkaAdminSchemaRegistry)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllKafka)) && !slices.Contains(features, string(FeatureKafkaAdmin)) {
 		return
 	}
 
