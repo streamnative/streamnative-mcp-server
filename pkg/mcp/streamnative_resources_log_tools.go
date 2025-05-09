@@ -42,9 +42,9 @@ func StreamNativeAddLogTools(s *server.MCPServer, _ bool, features []string) {
 		return
 	}
 
-	logTool := mcp.NewTool("streamnative_resources_log",
+	logTool := mcp.NewTool("sncloud_logs",
 		mcp.WithDescription("Display the logs of resources in StreamNative Cloud, including pulsar functions, pulsar source connectors, pulsar sink connectors, and kafka connect connectors logs running along with PulsarInstance and PulsarCluster."+
-			"This tool is used to help you debug the issues of resources in StreamNative Cloud. You can use `streamnative_cloud_context_use_cluster` to change the context to a specific cluster first, then use this tool to get the logs of resources in the cluster. This tool is suggested to be used with 'pulsar_admin_functions', 'pulsar_admin_sinks', 'pulsar_admin_sources', and 'kafka_admin_connect'"),
+			"This tool is used to help you debug the issues of resources in StreamNative Cloud. You can use `sncloud_context_use_cluster` to change the context to a specific cluster first, then use this tool to get the logs of resources in the cluster. This tool is suggested to be used with 'pulsar_admin_functions', 'pulsar_admin_sinks', 'pulsar_admin_sources', and 'kafka_admin_connect'"),
 		mcp.WithString("component", mcp.Required(),
 			mcp.Description("The component to get logs from, including "+strings.Join(FunctionConnectorList, ", ")),
 			mcp.Enum(FunctionConnectorList...),
@@ -115,7 +115,7 @@ func handleStreamNativeResourcesLog(ctx context.Context, request mcp.CallToolReq
 	snConfig := getOptions(ctx)
 	instance, cluster, organization := GetMcpContext()
 	if instance == "" || cluster == "" || organization == "" {
-		return mcp.NewToolResultError("No context is set, please use `streamnative_cloud_context_use_cluster` to set the context first."), nil
+		return mcp.NewToolResultError("No context is set, please use `sncloud_context_use_cluster` to set the context first."), nil
 	}
 
 	// Extract required parameters with validation
