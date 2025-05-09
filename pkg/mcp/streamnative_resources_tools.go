@@ -12,7 +12,7 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/config"
-	sncloud "github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserve"
+	sncloud "github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserver"
 )
 
 // StreamNativeAddResourceTools adds StreamNative resources tools
