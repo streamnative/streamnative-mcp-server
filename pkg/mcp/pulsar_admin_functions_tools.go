@@ -137,12 +137,12 @@ func PulsarAdminAddFunctionsTools(s *server.MCPServer, readOnly bool, features [
 				"For simple values, specify as a string. For complex objects, use JSON-serialized strings. "+
 				"State values are typically limited to 1MB in size.")),
 		mcp.WithString("topic",
-			mcp.Description("The specific topic name that the function should consume from. Optional for 'trigger' operation. "+
+			mcp.Description("The specific topic name that the function should consume from. Required for 'trigger' operation. "+
 				"Specified in the format 'persistent://tenant/namespace/topic'. "+
 				"Used when triggering a function that consumes from multiple topics. "+
 				"If not provided, the first input topic will be used.")),
 		mcp.WithString("triggerValue",
-			mcp.Description("The value with which to trigger the function. Optional for 'trigger' operation. "+
+			mcp.Description("The value with which to trigger the function. Required for 'trigger' operation. "+
 				"This value will be passed to the function as if it were a message from the input topic. "+
 				"String values are sent as is; for typed values, ensure proper formatting based on function expectations. "+
 				"The function processes this value just like a normal message.")),
@@ -411,11 +411,19 @@ func handleFunctionCreate(_ context.Context, client cmdutils.Client, tenant, nam
 		functionConfig.UserConfig = userConfigMap
 	}
 
-	// Create function
-	err = client.Functions().CreateFunc(functionConfig, fileName)
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to create function '%s' in tenant '%s' namespace '%s': %v. Verify all parameters are correct and required resources exist.",
-			name, tenant, namespace, err)), nil
+	if IsPackageURLSupported(fileName) {
+		err = client.Functions().CreateFuncWithURL(functionConfig, fileName)
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to create function '%s' in tenant '%s' namespace '%s': %v. Verify all parameters are correct and required resources exist.",
+				name, tenant, namespace, err)), nil
+		}
+	} else {
+		// Create function
+		err = client.Functions().CreateFunc(functionConfig, fileName)
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to create function '%s' in tenant '%s' namespace '%s': %v. Verify all parameters are correct and required resources exist.",
+				name, tenant, namespace, err)), nil
+		}
 	}
 
 	return mcp.NewToolResultText(fmt.Sprintf("Created function '%s' successfully in tenant '%s' namespace '%s'. The function will start processing messages from input topics.",
@@ -488,7 +496,12 @@ func handleFunctionUpdate(_ context.Context, client cmdutils.Client, tenant, nam
 	}
 
 	// Update function
-	err := client.Functions().UpdateFunction(functionConfig, fileName, updateOptions)
+	var err error
+	if IsPackageURLSupported(fileName) {
+		err = client.Functions().UpdateFunctionWithURL(functionConfig, fileName, updateOptions)
+	} else {
+		err = client.Functions().UpdateFunction(functionConfig, fileName, updateOptions)
+	}
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to update function '%s' in tenant '%s' namespace '%s': %v. Verify the function exists and all parameters are valid.",
 			name, tenant, namespace, err)), nil

@@ -367,7 +367,7 @@ func handleSourceCreate(_ context.Context, admin cmdutils.Client, arguments map[
 	}
 
 	// Create the source
-	if sourceData.Archive != "" && isPackageURLSupported(sourceData.Archive) {
+	if sourceData.Archive != "" && IsPackageURLSupported(sourceData.Archive) {
 		err = admin.Sources().CreateSourceWithURL(sourceData.SourceConf, sourceData.Archive)
 	} else {
 		err = admin.Sources().CreateSource(sourceData.SourceConf, sourceData.Archive)
@@ -480,7 +480,7 @@ func handleSourceUpdate(_ context.Context, admin cmdutils.Client, arguments map[
 	}
 
 	// Update the source
-	if sourceData.Archive != "" && isPackageURLSupported(sourceData.Archive) {
+	if sourceData.Archive != "" && IsPackageURLSupported(sourceData.Archive) {
 		err = admin.Sources().UpdateSourceWithURL(sourceData.SourceConf, sourceData.Archive, updateOptions)
 	} else {
 		err = admin.Sources().UpdateSource(sourceData.SourceConf, sourceData.Archive, updateOptions)
