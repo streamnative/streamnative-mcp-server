@@ -6,6 +6,7 @@ require (
 	github.com/99designs/keyring v1.2.2
 	github.com/apache/pulsar-client-go v0.13.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/hamba/avro/v2 v2.28.0
 	github.com/mark3labs/mcp-go v0.26.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pkg/errors v0.9.1
@@ -43,7 +44,6 @@ require (
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gsterjov/go-libsecret v0.0.0-20161001094733-a6f4afe4910c // indirect
-	github.com/hamba/avro/v2 v2.28.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
