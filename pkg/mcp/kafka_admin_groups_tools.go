@@ -109,7 +109,7 @@ func KafkaAdminAddGroupsTools(s *server.MCPServer, readOnly bool, features []str
 			mcp.Description("The name of the Kafka topic to operate on. "+
 				"Required for the 'delete' operation. "+
 				"Must be an existing topic name in the Kafka cluster.")),
-		mcp.WithString("partition",
+		mcp.WithNumber("partition",
 			mcp.Description("The partition number to set offset for. "+
 				"Required for the 'set-offset' operation. "+
 				"Must be a valid partition number for the specified topic.")),

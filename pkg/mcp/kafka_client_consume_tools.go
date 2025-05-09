@@ -24,11 +24,13 @@ import (
 	"slices"
 	"time"
 
+	"github.com/hamba/avro/v2"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/sirupsen/logrus"
 	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
 	"github.com/twmb/franz-go/pkg/kgo"
+	"github.com/twmb/franz-go/pkg/sr"
 )
 
 var logger *logrus.Logger
@@ -52,7 +54,7 @@ func KafkaClientAddConsumeTools(s *server.MCPServer, _ bool, logrusLogger *logru
 		"1. Basic consumption - Get 10 earliest messages from a topic:\n" +
 		"   topic: \"my-topic\"\n" +
 		"   max-messages: 10\n\n" +
-		"2. Consume from beginning - Get messages from the start of a topic:\n" +
+		"2. Consumer group - Join an existing consumer group and resume from committed offset:\n" +
 		"   topic: \"my-topic\"\n" +
 		"   offset: \"atstart\"\n" +
 		"   max-messages: 20\n\n" +
@@ -132,6 +134,14 @@ func handleKafkaConsume(ctx context.Context, request mcp.CallToolRequest) (*mcp.
 		timeoutSec = 10 // Default to 10 seconds
 	}
 
+	group, hasGroup := optionalParam[string](request.Params.Arguments, "group")
+	if !hasGroup {
+		group = ""
+	}
+	if group != "" {
+		opts = append(opts, kgo.ConsumerGroup(group))
+	}
+
 	offsetStr, hasOffset := optionalParam[string](request.Params.Arguments, "offset")
 	if !hasOffset {
 		offsetStr = "atstart" // Default to starting at the beginning
@@ -148,10 +158,8 @@ func handleKafkaConsume(ctx context.Context, request mcp.CallToolRequest) (*mcp.
 	default:
 		offset = kgo.NewOffset().AtStart()
 	}
-
 	opts = append(opts, kgo.ConsumeResetOffset(offset))
-
-	logger.Infof("Consuming from topic: %s, offset: %s, max-messages: %d, timeout: %d", topicName, offsetStr, int(maxMessages), int(timeoutSec))
+	logger.Infof("Consuming from topic: %s, group: %s, max-messages: %d, timeout: %d", topicName, group, int(maxMessages), int(timeoutSec))
 
 	// Create Kafka client using the new Kafka package
 	kafkaClient, err := kafka.GetKafkaClient(opts...)
@@ -159,6 +167,13 @@ func handleKafkaConsume(ctx context.Context, request mcp.CallToolRequest) (*mcp.
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to create Kafka client: %v", err)), nil
 	}
 	defer kafkaClient.Close()
+
+	srClient, err := kafka.GetKafkaSchemaRegistryClient()
+	schemaReady := false
+	var serde sr.Serde
+	if err == nil && srClient != nil {
+		schemaReady = true
+	}
 
 	// Set timeout
 	timeoutCtx, cancel := context.WithTimeout(ctx, time.Duration(timeoutSec)*time.Second)
@@ -168,10 +183,44 @@ func handleKafkaConsume(ctx context.Context, request mcp.CallToolRequest) (*mcp.
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to ping Kafka cluster: %v", err)), nil
 	}
 
-	topics := kafkaClient.OptValue("ConsumeTopics")
-	logger.Infof("Consuming from topics: %v\n", topics)
+	if schemaReady {
+		subjSchema, err := srClient.SchemaByVersion(timeoutCtx, topicName+"-value", -1)
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get schema: %v", err)), nil
+		}
+		logger.Infof("Schema ID: %d", subjSchema.ID)
+		switch subjSchema.Type {
+		case sr.TypeAvro:
+			avroSchema, err := avro.Parse(subjSchema.Schema.Schema)
+			if err != nil {
+				return mcp.NewToolResultError(fmt.Sprintf("Failed to parse avro schema: %v", err)), nil
+			}
+			serde.Register(
+				subjSchema.ID,
+				map[string]any{},
+				sr.EncodeFn(func(v any) ([]byte, error) {
+					return avro.Marshal(avroSchema, v)
+				}),
+				sr.DecodeFn(func(data []byte, v any) error {
+					return avro.Unmarshal(avroSchema, data, v)
+				}),
+			)
+		case sr.TypeJSON:
+			serde.Register(
+				subjSchema.ID,
+				map[string]any{},
+				sr.EncodeFn(json.Marshal),
+				sr.DecodeFn(json.Unmarshal),
+			)
+		case sr.TypeProtobuf:
+		default:
+			// TODO: support other schema types
+			logger.Infof("Unsupported schema type: %s", subjSchema.Type)
+			schemaReady = false
+		}
+	}
 
-	results := make([]*kgo.Record, 0)
+	results := make([]any, 0)
 consumerLoop:
 	for {
 		fetches := kafkaClient.PollRecords(timeoutCtx, int(maxMessages))
@@ -186,10 +235,28 @@ consumerLoop:
 
 		for !iter.Done() {
 			record := iter.Next()
-			results = append(results, record)
+			if schemaReady {
+				var value map[string]any
+				err := serde.Decode(record.Value, &value)
+				if err != nil {
+					logger.Infof("Failed to decode value: %v", err)
+					results = append(results, record.Value)
+				} else {
+					results = append(results, value)
+				}
+			} else {
+				results = append(results, record.Value)
+			}
 			if len(results) >= int(maxMessages) {
 				break consumerLoop
 			}
+		}
+	}
+
+	err = kafkaClient.CommitUncommittedOffsets(timeoutCtx)
+	if err != nil {
+		if err != context.Canceled {
+			logger.Infof("Failed to commit offsets: %v", err)
 		}
 	}
 
