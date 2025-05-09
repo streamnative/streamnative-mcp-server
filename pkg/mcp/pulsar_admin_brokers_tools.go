@@ -31,7 +31,7 @@ import (
 
 // PulsarAdminAddBrokersTools adds broker-related tools to the MCP server
 func PulsarAdminAddBrokersTools(s *server.MCPServer, readOnly bool, features []string) {
-	if !slices.Contains(features, string(FeaturePulsarAdminBrokers)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) {
+	if !slices.Contains(features, string(FeaturePulsarAdminBrokers)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) && !slices.Contains(features, string(FeaturePulsarAdmin)) {
 		return
 	}
 	// Create a single unified broker tool to replace multiple individual tools
