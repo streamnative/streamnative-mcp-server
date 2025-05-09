@@ -137,7 +137,7 @@ func PulsarAdminAddFunctionsTools(s *server.MCPServer, readOnly bool, features [
 				"For simple values, specify as a string. For complex objects, use JSON-serialized strings. "+
 				"State values are typically limited to 1MB in size.")),
 		mcp.WithString("topic",
-			mcp.Description("The specific topic name that the function should consume from. Required for 'trigger' operation. "+
+			mcp.Description("The specific topic name that the function should consume from. Optional for 'trigger' operation. "+
 				"Specified in the format 'persistent://tenant/namespace/topic'. "+
 				"Used when triggering a function that consumes from multiple topics. "+
 				"If not provided, the first input topic will be used.")),
