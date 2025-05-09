@@ -23,8 +23,8 @@ func StreamNativeAddResourceTools(s *server.MCPServer, readOnly bool, features [
 
 	if !readOnly {
 		// Add Apply tool
-		applyTool := mcp.NewTool("streamnative_cloud_resources_apply",
-			mcp.WithDescription("Apply StreamNative Cloud resources from YAML definitions. This tool allows you to apply (create or update) StreamNative Cloud resources such as PulsarInstances and PulsarClusters using YAML definitions."),
+		applyTool := mcp.NewTool("sncloud_resources_apply",
+			mcp.WithDescription("Apply StreamNative Cloud resources from JSON definitions. This tool allows you to apply (create or update) StreamNative Cloud resources such as PulsarInstances and PulsarClusters using JSON definitions. Please give feedback to USER if the resource is applied with error, and ask USER to check the resource definition."),
 			mcp.WithString("json_content", mcp.Required(),
 				mcp.Description("The JSON content to apply."),
 			),
@@ -32,8 +32,27 @@ func StreamNativeAddResourceTools(s *server.MCPServer, readOnly bool, features [
 				mcp.Description("If true, only validate the resource without applying it to the server."),
 				mcp.DefaultBool(false),
 			),
+			mcp.WithToolAnnotation(mcp.ToolAnnotation{
+				Title: "Apply StreamNative Cloud Resources",
+			}),
+		)
+		// Add delete tool
+		deleteTool := mcp.NewTool("sncloud_resources_delete",
+			mcp.WithDescription("Delete StreamNative Cloud resources. This tool allows you to delete StreamNative Cloud resources such as PulsarInstances and PulsarClusters."),
+			mcp.WithString("name", mcp.Required(),
+				mcp.Description("The name of the resource to delete."),
+			),
+			mcp.WithString("type", mcp.Required(),
+				mcp.Description("The type of the resource to delete, it can be PulsarInstance or PulsarCluster."),
+				mcp.Enum("PulsarInstance", "PulsarCluster"),
+			),
+			mcp.WithToolAnnotation(mcp.ToolAnnotation{
+				Title:           "Delete StreamNative Cloud Resources",
+				DestructiveHint: true,
+			}),
 		)
 		s.AddTool(applyTool, handleStreamNativeResourcesApply)
+		s.AddTool(deleteTool, handleStreamNativeResourcesDelete)
 	}
 }
 
@@ -71,7 +90,6 @@ func handleStreamNativeResourcesApply(ctx context.Context, request mcp.CallToolR
 	if !hasDryRun {
 		dryRun = false
 	}
-	dryRun = false
 
 	// Get API client
 	apiClient, err := config.GetAPIClient()
@@ -301,4 +319,43 @@ func applyPulsarCluster(ctx context.Context, apiClient *sncloud.APIClient, jsonC
 		return fmt.Sprintf("PulsarCluster %q would be %s (dry run)", name, verb), nil
 	}
 	return fmt.Sprintf("PulsarCluster %q %s", name, verb), nil
+}
+
+// handleStreamNativeResourcesDelete handles the streaming_cloud_resources_delete tool
+func handleStreamNativeResourcesDelete(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	snConfig := getOptions(ctx)
+	organization := snConfig.Organization
+
+	name, err := requiredParam[string](request.Params.Arguments, "name")
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to get name: %v", err)), nil
+	}
+
+	resourceType, err := requiredParam[string](request.Params.Arguments, "type")
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to get type: %v", err)), nil
+	}
+
+	apiClient, err := config.GetAPIClient()
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to get API client: %v", err)), nil
+	}
+
+	switch resourceType {
+	case "PulsarInstance":
+		//nolint:bodyclose
+		_, _, err = apiClient.CloudStreamnativeIoV1alpha1Api.DeleteCloudStreamnativeIoV1alpha1NamespacedPulsarInstance(ctx, name, organization).Execute()
+	case "PulsarCluster":
+		//nolint:bodyclose
+		_, _, err = apiClient.CloudStreamnativeIoV1alpha1Api.DeleteCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(ctx, name, organization).Execute()
+	default:
+		return mcp.NewToolResultError(fmt.Sprintf("Unsupported resource type: %s", resourceType)), nil
+	}
+
+	// the delete operation will return a V1Status object, which is not handled by the SDK
+	if err != nil && !strings.Contains(err.Error(), "json: cannot unmarshal") {
+		return mcp.NewToolResultError(fmt.Sprintf("failed to delete resource: %v", err)), nil
+	}
+
+	return mcp.NewToolResultText(fmt.Sprintf("Resource %q %s deleted", name, resourceType)), nil
 }
