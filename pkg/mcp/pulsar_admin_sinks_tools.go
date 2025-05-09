@@ -33,7 +33,7 @@ import (
 
 // PulsarAdminAddSinksTools adds a unified sink-related tool to the MCP server
 func PulsarAdminAddSinksTools(s *server.MCPServer, readOnly bool, features []string) {
-	if !slices.Contains(features, string(FeaturePulsarAdminSinks)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) {
+	if !slices.Contains(features, string(FeaturePulsarAdminSinks)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) && !slices.Contains(features, string(FeaturePulsarAdmin)) {
 		return
 	}
 

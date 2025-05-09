@@ -33,7 +33,7 @@ import (
 
 // PulsarAdminAddSubscriptionTools adds subscription-related tools to the MCP server
 func PulsarAdminAddSubscriptionTools(s *server.MCPServer, readOnly bool, features []string) {
-	if !slices.Contains(features, string(FeaturePulsarAdminSubscriptions)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) {
+	if !slices.Contains(features, string(FeaturePulsarAdminSubscriptions)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) && !slices.Contains(features, string(FeaturePulsarAdmin)) {
 		return
 	}
 

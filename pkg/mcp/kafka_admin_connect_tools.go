@@ -30,7 +30,7 @@ import (
 )
 
 func KafkaAdminAddKafkaConnectTools(s *server.MCPServer, readOnly bool, features []string) {
-	if !slices.Contains(features, string(FeatureKafkaAdminKafkaConnect)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllKafka)) {
+	if !slices.Contains(features, string(FeatureKafkaAdminKafkaConnect)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllKafka)) && !slices.Contains(features, string(FeatureKafkaAdmin)) {
 		return
 	}
 

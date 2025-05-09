@@ -31,7 +31,7 @@ import (
 
 // PulsarAdminAddFunctionsWorkerTools adds functions worker-related tools to the MCP server
 func PulsarAdminAddFunctionsWorkerTools(s *server.MCPServer, readOnly bool, features []string) {
-	if !slices.Contains(features, string(FeaturePulsarAdminFunctionsWorker)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) {
+	if !slices.Contains(features, string(FeaturePulsarAdminFunctionsWorker)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) && !slices.Contains(features, string(FeaturePulsarAdmin)) {
 		return
 	}
 	// Create a single unified functions worker tool

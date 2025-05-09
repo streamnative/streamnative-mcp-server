@@ -33,7 +33,7 @@ import (
 
 // PulsarAdminAddResourceQuotasTools adds resource quotas-related tools to the MCP server
 func PulsarAdminAddResourceQuotasTools(s *server.MCPServer, readOnly bool, features []string) {
-	if !slices.Contains(features, string(FeaturePulsarAdminResourceQuotas)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) {
+	if !slices.Contains(features, string(FeaturePulsarAdminResourceQuotas)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) && !slices.Contains(features, string(FeaturePulsarAdmin)) {
 		return
 	}
 	// Add unified resource quotas management tool

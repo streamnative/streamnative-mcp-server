@@ -32,7 +32,7 @@ import (
 
 // PulsarAdminAddFunctionsTools adds a unified function-related tool to the MCP server
 func PulsarAdminAddFunctionsTools(s *server.MCPServer, readOnly bool, features []string) {
-	if !slices.Contains(features, string(FeaturePulsarAdminFunctions)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) {
+	if !slices.Contains(features, string(FeaturePulsarAdminFunctions)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) && !slices.Contains(features, string(FeaturePulsarAdmin)) {
 		return
 	}
 	// Create a single unified tool for all function operations
