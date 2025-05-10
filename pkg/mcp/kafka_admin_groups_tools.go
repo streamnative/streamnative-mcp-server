@@ -191,7 +191,17 @@ func handleKafkaGroupDescribe(ctx context.Context, admin *kadm.Client, request m
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to describe group: %v", err)), nil
 	}
 
-	jsonBytes, err := json.Marshal(response)
+	lags, err := admin.Lag(ctx, groupName)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to get lag: %v", err)), nil
+	}
+
+	result := map[string]interface{}{
+		"group": response,
+		"lag":   lags,
+	}
+
+	jsonBytes, err := json.Marshal(result)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to marshal response: %v", err)), nil
 	}
