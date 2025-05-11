@@ -6,7 +6,7 @@ require (
 	github.com/99designs/keyring v1.2.2
 	github.com/apache/pulsar-client-go v0.13.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/mark3labs/mcp-go v0.25.0
+	github.com/mark3labs/mcp-go v0.27.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.3
