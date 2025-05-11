@@ -54,6 +54,8 @@ If you want to access to your StreamNative Cloud, you will need to have followin
 
 ### Start the MCP Server
 
+#### Using stdio Server
+
 ```bash
 # Start MCP server with StreamNative Cloud authentication
 snmcp stdio --organization my-org --key-file /path/to/key-file.json
@@ -64,6 +66,19 @@ bin/snmcp stdio --use-external-kafka --kafka-bootstrap-servers localhost:9092 --
 # Start MCP server with external Pulsar
 snmcp stdio --use-external-pulsar --pulsar-web-service-url http://pulsar.example.com:8080
 bin/snmcp stdio --use-external-pulsar --pulsar-web-service-url http://pulsar.example.com:8080  --pulsar-token "xxx"
+```
+
+#### Using SSE (Server-Sent Events) Server
+
+```bash
+# Start MCP server with SSE and StreamNative Cloud authentication
+snmcp sse --http-addr :9090 --http-path /mcp --organization my-org --key-file /path/to/key-file.json
+
+# Start MCP server with SSE and external Kafka
+snmcp sse --http-addr :9090 --http-path /mcp --use-external-kafka --kafka-bootstrap-servers localhost:9092
+
+# Start MCP server with SSE and external Pulsar
+snmcp sse --http-addr :9090 --http-path /mcp --use-external-pulsar --pulsar-web-service-url http://pulsar.example.com:8080
 ```
 
 ### Command-line Options
@@ -115,6 +130,8 @@ Flags:
       --server string                          The server to connect to (default "https://api.streamnative.cloud")
       --use-external-kafka                     Use external Kafka
       --use-external-pulsar                    Use external Pulsar
+      --http-addr string                       HTTP server address (default ":9090")
+      --http-path string                       HTTP server path for SSE endpoint (default "/mcp")
   -v, --version                                version for snmcp
 ```
 
@@ -168,6 +185,32 @@ To enable only specific feature sets:
 snmcp stdio --organization my-org --key-file /path/to/key-file.json --features pulsar-client
 ```
 
+## Inspecting the MCP Server
+
+You can use the [@modelcontextprotocol/inspector](https://www.npmjs.com/package/@modelcontextprotocol/inspector) tool to inspect and test your MCP server. This is particularly useful for debugging and verifying your server's configuration.
+
+### Installation
+
+```bash
+npm install -g @modelcontextprotocol/inspector
+```
+
+### Usage
+
+```bash
+# Inspect a stdio server
+mcp-inspector stdio --command "snmcp stdio --organization my-org --key-file /path/to/key-file.json"
+
+# Inspect an SSE server
+mcp-inspector sse --url "http://localhost:9090/mcp"
+```
+
+The inspector provides a web interface where you can:
+- View available tools and their schemas
+- Test tool invocations
+- Monitor server responses
+- Debug connection issues
+
 ## Integration with MCP Clients
 
 This server can be used with any MCP-compatible client, such as:
@@ -178,10 +221,12 @@ This server can be used with any MCP-compatible client, such as:
 
 ### Usage with Claude Desktop
 
+#### Using stdio Server
+
 ```json
 {
   "mcpServers": {
-    "github": {
+    "mcp-streamnative": {
       "command": "snmcp",
       "args": [
         "stdio",
@@ -189,11 +234,39 @@ This server can be used with any MCP-compatible client, such as:
         "my-org",
         "--key-file",
         "/path/to/key-file.json"
-      ],
+      ]
     }
   }
 }
 ```
+
+#### Using SSE Server
+
+First, install the mcp-proxy tool:
+
+```bash
+pip install mcp-proxy
+```
+
+Then configure Claude Desktop to use the SSE server:
+
+```json
+{
+  "mcpServers": {
+    "mcp-streamnative-proxy": {
+      "command": "mcp-proxy",
+      "args": [
+        "http://localhost:9090/mcp/sse"
+      ]
+    }
+  }
+}
+```
+
+Note: If mcp-proxy is not in your system PATH, you'll need to provide the full path to the executable. For example:
+- On macOS: `/Library/Frameworks/Python.framework/Versions/3.11/bin/mcp-proxy`
+- On Linux: `/usr/local/bin/mcp-proxy`
+- On Windows: `C:\Python311\Scripts\mcp-proxy.exe`
 
 ## About Model Context Protocol (MCP)
 
