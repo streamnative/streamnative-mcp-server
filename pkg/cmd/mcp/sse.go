@@ -50,8 +50,8 @@ func NewCmdMcpSseServer(configOpts *ServerOptions) *cobra.Command {
 	}
 
 	// Add SSE server specific flags
-	sseCmd.Flags().StringVar(&configOpts.HttpAddr, "http-addr", ":9090", "HTTP server address")
-	sseCmd.Flags().StringVar(&configOpts.HttpPath, "http-path", "/mcp", "HTTP server path for SSE endpoint")
+	sseCmd.Flags().StringVar(&configOpts.HTTPAddr, "http-addr", ":9090", "HTTP server address")
+	sseCmd.Flags().StringVar(&configOpts.HTTPPath, "http-path", "/mcp", "HTTP server path for SSE endpoint")
 
 	return sseCmd
 }
@@ -71,8 +71,8 @@ func runSseServer(configOpts *ServerOptions) error {
 	ctx = context.WithValue(ctx, mcp.OptionsKey, configOpts.Options)
 	mcpServer := server.NewSSEServer(
 		newMcpServer(configOpts, logger),
-		server.WithBasePath(configOpts.HttpPath),
-		server.WithSSEContextFunc(func(ctx context.Context, r *http.Request) context.Context {
+		server.WithStaticBasePath(configOpts.HTTPPath),
+		server.WithSSEContextFunc(func(ctx context.Context, _ *http.Request) context.Context {
 			return context.WithValue(ctx, mcp.OptionsKey, configOpts.Options)
 		}),
 	)
@@ -80,12 +80,12 @@ func runSseServer(configOpts *ServerOptions) error {
 	// 4. Expose the full SSE URL to the user
 	ssePath := mcpServer.CompleteSsePath()
 	fmt.Fprintf(os.Stderr, "StreamNative Cloud MCP Server listening on http://%s%s\n",
-		configOpts.HttpAddr, ssePath)
+		configOpts.HTTPAddr, ssePath)
 
 	// 5. Run the HTTP listener in a goroutine
 	errCh := make(chan error, 1)
 	go func() {
-		if err := mcpServer.Start(configOpts.HttpAddr); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		if err := mcpServer.Start(configOpts.HTTPAddr); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			errCh <- err // bubble up real crashes
 		}
 	}()
