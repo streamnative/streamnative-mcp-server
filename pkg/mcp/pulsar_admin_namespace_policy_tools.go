@@ -35,7 +35,7 @@ import (
 
 // PulsarAdminAddNamespacePolicyTools adds namespace policy-related tools to the MCP server
 func PulsarAdminAddNamespacePolicyTools(s *server.MCPServer, readOnly bool, features []string) {
-	if !slices.Contains(features, string(FeaturePulsarAdminNamespacePolicy)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) {
+	if !slices.Contains(features, string(FeaturePulsarAdminNamespacePolicy)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) && !slices.Contains(features, string(FeaturePulsarAdmin)) {
 		return
 	}
 	namespaceGetPoliciesTool := mcp.NewTool("pulsar_admin_namespace_policy_get",

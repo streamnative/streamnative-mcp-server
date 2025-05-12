@@ -32,7 +32,7 @@ import (
 
 // PulsarAdminAddTopicPolicyTools adds topic policy-related tools to the MCP server
 func PulsarAdminAddTopicPolicyTools(s *server.MCPServer, readOnly bool, features []string) {
-	if !slices.Contains(features, string(FeaturePulsarAdminTopicPolicy)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) {
+	if !slices.Contains(features, string(FeaturePulsarAdminTopicPolicy)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) && !slices.Contains(features, string(FeaturePulsarAdmin)) {
 		return
 	}
 

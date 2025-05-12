@@ -33,7 +33,7 @@ import (
 
 // PulsarAdminAddNsIsolationPolicyTools adds namespace isolation policy related tools to the MCP server
 func PulsarAdminAddNsIsolationPolicyTools(s *server.MCPServer, readOnly bool, features []string) {
-	if !slices.Contains(features, string(FeaturePulsarAdminNsIsolationPolicy)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) {
+	if !slices.Contains(features, string(FeaturePulsarAdminNsIsolationPolicy)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) && !slices.Contains(features, string(FeaturePulsarAdmin)) {
 		return
 	}
 

@@ -49,6 +49,7 @@ func newMcpServer(configOpts *ServerOptions, logrusLogger *logrus.Logger) *serve
 			mcp.RegisterPrompts(s)
 			mcp.RegisterContextTools(s, configOpts.Features)
 			mcp.StreamNativeAddLogTools(s, configOpts.ReadOnly, configOpts.Features)
+			mcp.StreamNativeAddResourceTools(s, configOpts.ReadOnly, configOpts.Features)
 		}
 	case snConfig.ExternalKafka != nil:
 		{
