@@ -19,9 +19,22 @@ package mcp
 
 import (
 	"fmt"
+
+	"github.com/streamnative/streamnative-mcp-server/pkg/config"
 )
 
-func GetStreamNativeCloudServerInstructions(userName string) string {
+func GetStreamNativeCloudServerInstructions(userName string, snConfig *config.SnConfig) string {
+	contextInformation := ""
+	if snConfig.Context.PulsarCluster != "" && snConfig.Context.PulsarInstance != "" {
+		contextInformation = fmt.Sprintf(`
+		You are currently logged in to StreamNative Cloud with the following context:
+		- Pulsar Cluster: %s
+		- Pulsar Instance: %s
+		`, snConfig.Context.PulsarCluster, snConfig.Context.PulsarInstance)
+	} else {
+		contextInformation = `No context is set, use 'sncloud_context_available_clusters' to list the available clusters and 'sncloud_context_use_cluster' to set the context to a specific cluster.
+		`
+	}
 	return fmt.Sprintf(`StreamNative Cloud MCP Server provides resources and tools for AI agents to interact with StreamNative Cloud resources and services.
 
 	### StreamNative Cloud API Server Resources
@@ -55,13 +68,14 @@ func GetStreamNativeCloudServerInstructions(userName string) string {
 	7. **Data Streaming Engine**  
 		 - **Concept**: The Data Streaming Engine is the core technology that runs StreamNative Cloud clusters. There are two options: Classic Engine and Ursa Engine.
 			 - **Classic Engine**: The default engine, based on ZooKeeper and BookKeeper, offering low-latency storage suitable for latency-sensitive workloads. It supports Pulsar, Kafka, and MQTT protocols. For Classic Engine, Pulsar protocol will be the default protocol.
-			 - **Ursa Engine**: A next-generation engine based on Oxia and object storage (like S3), providing cost-optimized storage for latency-relaxed scenarios. It currently focuses on Kafka protocol support. For Ursa Engine, you can only uses 'kafka-client-*' or 'kafka-admin-*' tools, do not use 'pulsar-client-*' or 'pulsar-admin-*' tools.
+			 - **Ursa Engine**: A next-generation engine based on Oxia and object storage (like S3), providing cost-optimized storage for latency-relaxed scenarios. It currently focuses on Kafka protocol support. For Ursa Engine, you can only uses 'kafka-client-*' or 'kafka-admin-*' tools, do not use 'pulsar-client-*' or 'pulsar-admin-*' tools on Ursa Engine clusters.
 		 - **Relationship**: The Data Streaming Engine is associated with an instance, determining how clusters within that instance operate and what features they support.
 	
 	### Protocol-Specific Tools
 	- When working with **Pulsar protocol resources**, you should only use 'pulsar-admin-*' or 'pulsar-client-*' tools. Do not use 'kafka-client-*' or 'kafka-admin-*' tools for Pulsar protocol operations.
 	- When working with **Kafka protocol resources**, you should only use 'kafka-client-*' or 'kafka-admin-*' tools. Do not use 'pulsar-admin-*' or 'pulsar-client-*' tools for Kafka protocol operations.
 	- Using the appropriate protocol-specific tools ensures correct functionality and prevents errors when interacting with different protocol resources.
+	- Avoid mixing different protocol tools: When working with a specific protocol (Pulsar or Kafka), consistently use only the tools designated for that protocol throughout your entire workflow. Mixing different protocol tools in the same operation sequence may lead to inconsistent behavior, data format incompatibilities, or authentication issues. Always maintain protocol consistency for reliable and predictable results.
 	
 	### Hierarchical Relationship Summary of Resources
 	- **Organization** is the top level, containing all other resources.
@@ -71,7 +85,7 @@ func GetStreamNativeCloudServerInstructions(userName string) string {
 	- **Secrets** belong to an organization and can be shared across instances for securely storing sensitive data.
 	- **Data Streaming Engine** is associated with an instance, defining the technical architecture and feature support for clusters.
 	
-	Logged in as %s.`, userName)
+	Logged in as %s. %s`, userName, contextInformation)
 }
 
 func GetExternalKafkaServerInstructions(bootstrapServers string) string {
