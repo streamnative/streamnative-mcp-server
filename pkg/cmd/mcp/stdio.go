@@ -138,7 +138,7 @@ func newStdioServer(configOpts *ServerOptions, logrusLogger *logrus.Logger) *ser
 				"streamnative-mcp-server",
 				"0.0.1",
 				server.WithResourceCapabilities(true, true),
-				server.WithInstructions(mcp.GetStreamNativeCloudServerInstructions(userName)),
+				server.WithInstructions(mcp.GetStreamNativeCloudServerInstructions(userName, snConfig)),
 				server.WithLogging())
 
 			mcp.RegisterPrompts(s)
