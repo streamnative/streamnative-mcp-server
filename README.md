@@ -1,10 +1,10 @@
 # StreamNative MCP Server
 
-A Model Context Protocol (MCP) server for integrating AI agents with StreamNative Cloud resources and Apache Pulsar/Kafka messaging systems.
+A Model Context Protocol (MCP) server for integrating AI agents with StreamNative Cloud resources and Apache Kafka/Pulsar messaging systems.
 
 ## Overview
 
-StreamNative MCP Server provides a standard interface for LLMs (Large Language Models) and AI agents to interact with StreamNative Cloud services, Apache Pulsar, and Apache Kafka. This implementation follows the [Model Context Protocol](https://modelcontextprotocol.io/introduction) specification, enabling AI applications to access messaging services through a standardized interface.
+StreamNative MCP Server provides a standard interface for LLMs (Large Language Models) and AI agents to interact with StreamNative Cloud services, Apache Kafka, and Apache Pulsar. This implementation follows the [Model Context Protocol](https://modelcontextprotocol.io/introduction) specification, enabling AI applications to access messaging services through a standardized interface.
 
 ## Features
 
@@ -12,19 +12,21 @@ StreamNative MCP Server provides a standard interface for LLMs (Large Language M
   - Connect to StreamNative Cloud resources with authentication
   - Switch to clusters available in your organization
   - Describe the status of clusters resources
-- **Apache Pulsar Support**: Interact with Pulsar resources including:
+- **Apache Kafka Support**: Interact with Apache Kafka resources including:
+  - Kafka Admin operations (topics, partitions, consumer groups)
+  - Schema Registry operations
+  - Kafka Connect operations (*)
+  - Kafka Client operations (producers, consumers)
+- **Apache Pulsar Support**: Interact with Apache Pulsar resources including:
   - Pulsar Admin operations (topics, namespaces, tenants, schemas, etc.)
   - Pulsar Client operations (producers, consumers)
   - Functions, Sources, and Sinks management
-- **Apache Kafka Support**: Interact with Kafka resources including:
-  - Kafka Admin operations (topics, partitions, consumer groups)
-  - Schema Registry operations
-  - Kafka Connect operations
-  - Kafka Client operations (producers, consumers)
 - **Multiple Connection Options**:
   - Connect to StreamNative Cloud with service account authentication
-  - Connect directly to external Pulsar clusters
-  - Connect directly to external Kafka clusters
+  - Connect directly to external Apache Kafka clusters
+  - Connect directly to external Apache Pulsar clusters
+
+> *: The Kafka Connect operations are only tested and verfied on StreamNative Cloud. 
 
 ## Installation
 
@@ -124,49 +126,240 @@ The StreamNative MCP Server supports enabling or disabling specific groups of fu
 
 ### Available Features
 
-The following sets of tools are available (all available by default on StreamNative Cloud)
+The StreamNative MCP Server allows you to enable or disable specific groups of features using the `--features` flag. This helps you control which tools are available to your AI agents and can reduce context size for LLMs.
 
-| Features | Description |
-| ------|-------|
-| `all` | All tools, including StreamNative Cloud tools, Pulsar tools and Kafka tools |
-| `all-pulsar` | All Pulsar admin and Pulsar client tools |
-| `all-kafka` | All Kafka admin and Kafka client tools |
-| `pulsar-admin` | Pulsar administrative operations (including all `pulsar-admin-*`) |
-| `pulsar-client` | Pulsar client operations (produce and consume messages) |
-| `pulsar-admin-brokers` | Manage Pulsar brokers |
-| `pulsar-admin-broker-stats` | Access Pulsar broker statistics |
-| `pulsar-admin-clusters` | Manage Pulsar clusters |
-| `pulsar-admin-functions-worker` | Manage Pulsar Function workers |
-| `pulsar-admin-namespaces` | Manage Pulsar namespaces |
-| `pulsar-admin-namespace-policy` | Configure Pulsar namespace policies |
-| `pulsar-admin-isolation-policy` | Manage namespace isolation policies |
-| `pulsar-admin-packages` | Manage Pulsar packages |
-| `pulsar-admin-resource-quotas` | Configure resource quotas |
-| `pulsar-admin-schemas` | Manage Pulsar schemas |
-| `pulsar-admin-subscriptions` | Manage Pulsar subscriptions |
-| `pulsar-admin-tenants` | Manage Pulsar tenants |
-| `pulsar-admin-topics` | Manage Pulsar topics |
-| `pulsar-admin-sinks` | Manage Pulsar IO sinks |
-| `pulsar-admin-functions` | Manage Pulsar Functions |
-| `pulsar-admin-sources` | Manage Pulsar IO sources |
-| `pulsar-admin-topic-policy` | Configure Pulsar topic policies |
-| `kafka-admin` | Kafka administrative operations (including all `kafka-admin-*`) |
-| `kafka-client` | Kafka client operations (produce and consume messages) |
-| `kafka-admin-topics` | Manage Kafka partitions |
-| `kafka-admin-partitions` | Manage Kafka partitions |
-| `kafka-admin-groups` | Manage Kafka consumer groups |
-| `kafka-admin-schema-registry` | Interact with Kafka Schema Registry |
-| `kafka-admin-connect` | Manage Kafka Connect connectors |
-| `streamnative-cloud` | Manage the context, check resources logs of StreamNative Cloud |
+#### Combination Feature Sets
 
-### Usage Examples
+| Feature        | Description                                                                 |
+|---------------|-----------------------------------------------------------------------------|
+| `all`         | Enables all features: StreamNative Cloud, Pulsar, and Kafka tools            |
 
-To enable only specific feature sets:
+---
+
+#### Kafka Features
+
+| Feature                   | Description                                      |
+|--------------------------|--------------------------------------------------|
+| `all-kafka`   | Enables all Kafka admin and client tools, without Apache Pulsar and StreamNative Cloud tools                                    |
+| `kafka-admin`             | Kafka administrative operations (all admin tools) |
+| `kafka-client`            | Kafka client operations (produce/consume)         |
+| `kafka-admin-topics`      | Manage Kafka topics                              |
+| `kafka-admin-partitions`  | Manage Kafka partitions                          |
+| `kafka-admin-groups`      | Manage Kafka consumer groups                     |
+| `kafka-admin-schema-registry` | Interact with Kafka Schema Registry           |
+| `kafka-admin-connect`     | Manage Kafka Connect connectors                  |
+
+---
+
+#### Pulsar Features
+
+| Feature                        | Description                                      |
+|-------------------------------|--------------------------------------------------|
+| `all-pulsar`  | Enables all Pulsar admin and client tools, without Apache Kafka and StreamNative Cloud tools                                    |
+| `pulsar-admin`                 | Pulsar administrative operations (all admin tools)|
+| `pulsar-client`                | Pulsar client operations (produce/consume)        |
+| `pulsar-admin-brokers`         | Manage Pulsar brokers                            |
+| `pulsar-admin-broker-stats`    | Access Pulsar broker statistics                   |
+| `pulsar-admin-clusters`        | Manage Pulsar clusters                            |
+| `pulsar-admin-functions-worker`| Manage Pulsar Function workers                    |
+| `pulsar-admin-namespaces`      | Manage Pulsar namespaces                          |
+| `pulsar-admin-namespace-policy`| Configure Pulsar namespace policies               |
+| `pulsar-admin-isolation-policy`| Manage namespace isolation policies               |
+| `pulsar-admin-packages`        | Manage Pulsar packages                            |
+| `pulsar-admin-resource-quotas` | Configure resource quotas                         |
+| `pulsar-admin-schemas`         | Manage Pulsar schemas                             |
+| `pulsar-admin-subscriptions`   | Manage Pulsar subscriptions                       |
+| `pulsar-admin-tenants`         | Manage Pulsar tenants                             |
+| `pulsar-admin-topics`          | Manage Pulsar topics                              |
+| `pulsar-admin-sinks`           | Manage Pulsar IO sinks                            |
+| `pulsar-admin-functions`       | Manage Pulsar Functions                           |
+| `pulsar-admin-sources`         | Manage Pulsar IO sources                          |
+| `pulsar-admin-topic-policy`    | Configure Pulsar topic policies                   |
+
+---
+
+#### StreamNative Cloud Features
+
+| Feature              | Description                                                      |
+|---------------------|------------------------------------------------------------------|
+| `streamnative-cloud`| Manage StreamNative Cloud context and check resource logs         |
+
+You can combine these features as needed using the `--features` flag. For example, to enable only Pulsar client features:
 
 ```bash
-# Enable only Pulsar client features
 snmcp stdio --organization my-org --key-file /path/to/key-file.json --features pulsar-client
 ```
+
+### MCP Tools per feature
+
+#### kafka-admin-topics
+
+This tool provides access to various Kafka topic operations, including creation, deletion, listing, and configuration retrieval.
+
+- **topics**
+  - **list**: List all topics in the Kafka cluster
+    - `include-internal` (boolean, optional): Whether to include internal Kafka topics (those starting with an underscore). Default: false
+
+- **topic**
+  - **get**: Get detailed configuration for a specific topic
+    - `name` (string, required): The name of the Kafka topic
+  - **create**: Create a new topic
+    - `name` (string, required): The name of the Kafka topic
+    - `partitions` (number, optional): Number of partitions. Default: 1
+    - `replication-factor` (number, optional): Replication factor. Default: 1
+    - `configs` (array of string, optional): Topic configuration overrides as key-value strings, e.g. ["cleanup.policy=compact", "retention.ms=604800000"]
+  - **delete**: Delete an existing topic
+    - `name` (string, required): The name of the Kafka topic
+  - **metadata**: Get metadata for a specific topic
+    - `name` (string, required): The name of the Kafka topic
+
+---
+
+#### kafka-admin-partitions
+
+This tool provides access to Kafka partition operations, particularly adding partitions to existing topics.
+
+- **partition**
+  - **update**: Update the number of partitions for an existing Kafka topic (can only increase, not decrease)
+    - `topic` (string, required): The name of the Kafka topic
+    - `new-total` (number, required): The new total number of partitions (must be greater than current)
+
+---
+
+#### kafka-admin-groups
+
+This tool provides access to Kafka consumer group operations including listing, describing, and managing group membership.
+
+- **groups**
+  - **list**: List all Kafka Consumer Groups in the cluster
+    - _Parameters_: None
+
+- **group**
+  - **describe**: Get detailed information about a specific Consumer Group
+    - `group` (string, required): The name of the Kafka Consumer Group
+  - **remove-members**: Remove specific members from a Consumer Group
+    - `group` (string, required): The name of the Kafka Consumer Group
+    - `members` (string, required): Comma-separated list of member instance IDs (e.g. "consumer-instance-1,consumer-instance-2")
+  - **offsets**: Get offsets for a specific consumer group
+    - `group` (string, required): The name of the Kafka Consumer Group
+  - **delete-offset**: Delete a specific offset for a consumer group of a topic
+    - `group` (string, required): The name of the Kafka Consumer Group
+    - `topic` (string, required): The name of the Kafka topic
+  - **set-offset**: Set a specific offset for a consumer group's topic-partition
+    - `group` (string, required): The name of the Kafka Consumer Group
+    - `topic` (string, required): The name of the Kafka topic
+    - `partition` (number, required): The partition number
+    - `offset` (number, required): The offset value to set (use -1 for earliest, -2 for latest, or a specific value)
+
+---
+
+#### kafka-admin-schema-registry
+
+This tool provides access to Kafka Schema Registry operations, including managing subjects, versions, and compatibility settings.
+
+- **subjects**
+  - **list**: List all schema subjects in the Schema Registry
+    - _Parameters_: None
+
+- **subject**
+  - **get**: Get the latest schema for a subject
+    - `subject` (string, required): The subject name
+  - **create**: Register a new schema for a subject
+    - `subject` (string, required): The subject name
+    - `schema` (string, required): The schema definition (in AVRO/JSON/PROTOBUF, etc.)
+    - `type` (string, optional): The schema type (e.g. AVRO, JSON, PROTOBUF)
+  - **delete**: Delete a schema subject
+    - `subject` (string, required): The subject name
+
+- **versions**
+  - **list**: List all versions for a specific subject
+    - `subject` (string, required): The subject name
+  - **get**: Get a specific version of a subject's schema
+    - `subject` (string, required): The subject name
+    - `version` (number, required): The version number
+  - **delete**: Delete a specific version of a subject's schema
+    - `subject` (string, required): The subject name
+    - `version` (number, required): The version number
+
+- **compatibility**
+  - **get**: Get compatibility setting for a subject
+    - `subject` (string, required): The subject name
+  - **set**: Set compatibility level for a subject
+    - `subject` (string, required): The subject name
+    - `level` (string, required): The compatibility level (e.g. BACKWARD, FORWARD, FULL, NONE)
+
+- **types**
+  - **list**: List supported schema types (e.g. AVRO, JSON, PROTOBUF)
+    - _Parameters_: None
+
+---
+
+#### kafka-admin-connect
+
+Kafka Connect is a framework for integrating Kafka with external systems. The following resources and operations are supported:
+
+- **kafka-connect-cluster**
+  - **get**: Get information about the Kafka Connect cluster
+    - _Parameters_: None
+
+- **connectors**
+  - **list**: List all connectors in the cluster
+    - _Parameters_: None
+
+- **connector**
+  - **get**: Get details of a specific connector
+    - `name` (string, required): The connector name
+  - **create**: Create a new connector
+    - `name` (string, required): The connector name
+    - `config` (object, required): Connector configuration
+      - Must include at least `connector.class` and other required fields for the connector type
+  - **update**: Update an existing connector
+    - `name` (string, required): The connector name
+    - `config` (object, required): Updated configuration
+  - **delete**: Delete a connector
+    - `name` (string, required): The connector name
+  - **restart**: Restart a connector
+    - `name` (string, required): The connector name
+  - **pause**: Pause a connector
+    - `name` (string, required): The connector name
+  - **resume**: Resume a paused connector
+    - `name` (string, required): The connector name
+
+- **connector-plugins**
+  - **list**: List all available connector plugins
+    - _Parameters_: None
+
+#### kafka-client-consume
+
+Consume messages from a Kafka topic. This tool allows you to read messages from Kafka topics with various consumption options.
+
+- **kafka_client_consume**
+  - **Description**: Read messages from a Kafka topic, with support for consumer groups, offset control, and timeouts. If schema registry integration enabled, and the topic have schema with `topicName-value`, the consume tool will try to use the schema to decode the messages.
+  - **Parameters**:
+    - `topic` (string, required): The name of the Kafka topic to consume messages from.
+    - `group` (string, optional): The consumer group ID to use. If provided, offsets are tracked and committed; otherwise, a random group is used and offsets are not committed.
+    - `offset` (string, optional): The offset position to start consuming from. One of:
+      - 'atstart': Begin from the earliest available message (default)
+      - 'atend': Begin from the next message after the consumer starts
+      - 'atcommitted': Begin from the last committed offset (only works with specified 'group')
+    - `max-messages` (number, optional): Maximum number of messages to consume in this request. Default: 10
+    - `timeout` (number, optional): Maximum time in seconds to wait for messages. Default: 10
+
+---
+
+#### kafka-client-produce
+
+Produce messages to a Kafka topic. This tool allows you to send single or multiple messages with various options.
+
+- **kafka_client_produce**
+  - **Description**: Send messages to a Kafka topic, supporting keys, headers, partitions, batching, and file-based payloads.
+  - **Parameters**:
+    - `topic` (string, required): The name of the Kafka topic to produce messages to.
+    - `key` (string, optional): The key for the message. Used for partition assignment and ordering.
+    - `value` (string, required if 'messages' is not provided): The value/content of the message to send.
+    - `headers` (array, optional): Message headers in the format of [{"key": "header-key", "value": "header-value"}].
+    - `sync` (boolean, optional): Whether to wait for server acknowledgment before returning. Default: true.
+    
 
 ## Integration with MCP Clients
 
