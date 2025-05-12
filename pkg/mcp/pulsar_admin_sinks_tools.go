@@ -350,7 +350,7 @@ func handleSinkCreate(_ context.Context, admin cmdutils.Client, arguments map[st
 	}
 
 	// Create the sink
-	if sinkData.Archive != "" && isPackageURLSupported(sinkData.Archive) {
+	if sinkData.Archive != "" && IsPackageURLSupported(sinkData.Archive) {
 		err = admin.Sinks().CreateSinkWithURL(sinkData.SinkConf, sinkData.Archive)
 	} else {
 		err = admin.Sinks().CreateSink(sinkData.SinkConf, sinkData.Archive)
@@ -453,7 +453,7 @@ func handleSinkUpdate(_ context.Context, admin cmdutils.Client, arguments map[st
 	}
 
 	// Update the sink
-	if sinkData.Archive != "" && isPackageURLSupported(sinkData.Archive) {
+	if sinkData.Archive != "" && IsPackageURLSupported(sinkData.Archive) {
 		err = admin.Sinks().UpdateSinkWithURL(sinkData.SinkConf, sinkData.Archive, updateOptions)
 	} else {
 		err = admin.Sinks().UpdateSink(sinkData.SinkConf, sinkData.Archive, updateOptions)

@@ -30,6 +30,27 @@ import (
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
+const (
+	HTTP    = "http"
+	FILE    = "file"
+	BUILTIN = "builtin"
+
+	FUNCTION = "function"
+	SINK     = "sink"
+	SOURCE   = "source"
+
+	PublicTenant     = "public"
+	DefaultNamespace = "default"
+)
+
+func IsPackageURLSupported(functionPkgURL string) bool {
+	return functionPkgURL != "" && (strings.HasPrefix(functionPkgURL, HTTP) ||
+		strings.HasPrefix(functionPkgURL, FILE) ||
+		strings.HasPrefix(functionPkgURL, FUNCTION) ||
+		strings.HasPrefix(functionPkgURL, SINK) ||
+		strings.HasPrefix(functionPkgURL, SOURCE))
+}
+
 // PulsarAdminAddPackagesTools adds package-related tools to the MCP server
 func PulsarAdminAddPackagesTools(s *server.MCPServer, readOnly bool, features []string) {
 	if !slices.Contains(features, string(FeaturePulsarAdminPackages)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) && !slices.Contains(features, string(FeaturePulsarAdmin)) {
