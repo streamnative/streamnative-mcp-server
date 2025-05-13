@@ -59,34 +59,16 @@ func PulsarClientAddConsumerTools(s *server.MCPServer, _ bool, features []string
 				", earliest (consume from the earliest message) (default: latest)"),
 		),
 		mcp.WithNumber("num-messages",
-			mcp.Description("Number of messages to consume (0 for unlimited, default: 0)"),
+			mcp.Description("Number of messages to consume (default: 10)"),
 		),
 		mcp.WithNumber("timeout",
 			mcp.Description("Timeout for consuming messages in seconds (default: 30)"),
-		),
-		mcp.WithBoolean("regex",
-			mcp.Description("Treat the topic as a regex pattern (default: false)"),
-		),
-		mcp.WithString("schema",
-			mcp.Description("Schema type: string, json, avro, protobuf"),
-		),
-		mcp.WithNumber("max-redeliver-count",
-			mcp.Description("Maximum redelivery count for dead letter queue (0 to disable, default: 0)"),
-		),
-		mcp.WithString("dlq-topic",
-			mcp.Description("Dead letter queue topic"),
 		),
 		mcp.WithBoolean("show-properties",
 			mcp.Description("Show message properties (default: false)"),
 		),
 		mcp.WithBoolean("hide-payload",
 			mcp.Description("Hide message payload (default: false)"),
-		),
-		mcp.WithBoolean("read-compacted",
-			mcp.Description("Read compacted topic (default: false)"),
-		),
-		mcp.WithNumber("receiver-queue-size",
-			mcp.Description("Size of the consumer receive queue (default: 1000)"),
 		),
 	)
 	s.AddTool(consumeTool, handleClientConsume)
@@ -120,7 +102,7 @@ func handleClientConsume(ctx context.Context, request mcp.CallToolRequest) (*mcp
 		initialPosition = val
 	}
 
-	numMessages := 0
+	numMessages := 10
 	if val, exists := optionalParam[float64](request.Params.Arguments, "num-messages"); exists {
 		numMessages = int(val)
 	}
@@ -128,21 +110,6 @@ func handleClientConsume(ctx context.Context, request mcp.CallToolRequest) (*mcp
 	timeout := 30
 	if val, exists := optionalParam[float64](request.Params.Arguments, "timeout"); exists {
 		timeout = int(val)
-	}
-
-	regex := false
-	if val, exists := optionalParam[bool](request.Params.Arguments, "regex"); exists {
-		regex = val
-	}
-
-	var maxRedeliverCount int32
-	if val, exists := optionalParam[float64](request.Params.Arguments, "max-redeliver-count"); exists {
-		maxRedeliverCount = int32(val)
-	}
-
-	dlqTopic := ""
-	if val, exists := optionalParam[string](request.Params.Arguments, "dlq-topic"); exists {
-		dlqTopic = val
 	}
 
 	showProperties := false
@@ -155,16 +122,6 @@ func handleClientConsume(ctx context.Context, request mcp.CallToolRequest) (*mcp
 		hidePayload = val
 	}
 
-	readCompacted := false
-	if val, exists := optionalParam[bool](request.Params.Arguments, "read-compacted"); exists {
-		readCompacted = val
-	}
-
-	receiverQueueSize := 1000
-	if val, exists := optionalParam[float64](request.Params.Arguments, "receiver-queue-size"); exists {
-		receiverQueueSize = int(val)
-	}
-
 	// Setup client
 	client, err := mcppulsar.GetPulsarClient()
 	if err != nil {
@@ -174,18 +131,11 @@ func handleClientConsume(ctx context.Context, request mcp.CallToolRequest) (*mcp
 
 	// Prepare consumer options
 	consumerOpts := pulsar.ConsumerOptions{
-		Name:              "snmcp-consumer",
-		ReceiverQueueSize: receiverQueueSize,
-		ReadCompacted:     readCompacted,
-		SubscriptionName:  subscriptionName,
+		Name:             "snmcp-consumer",
+		SubscriptionName: subscriptionName,
 	}
 
-	// Set topic or topics pattern
-	if regex {
-		consumerOpts.TopicsPattern = topic
-	} else {
-		consumerOpts.Topic = topic
-	}
+	consumerOpts.Topic = topic
 
 	// Set subscription type
 	switch strings.ToLower(subscriptionType) {
@@ -219,19 +169,6 @@ func handleClientConsume(ctx context.Context, request mcp.CallToolRequest) (*mcp
 		consumerOpts.SubscriptionInitialPosition = pulsar.SubscriptionPositionEarliest
 	default:
 		return mcp.NewToolResultError(fmt.Sprintf("Invalid initial position: %s", initialPosition)), nil
-	}
-
-	// Set DLQ policy if specified
-	if maxRedeliverCount > 0 {
-		if dlqTopic == "" {
-			return mcp.NewToolResultError("DLQ topic is required when max-redeliver-count is specified"), nil
-		}
-		consumerOpts.DLQ = &pulsar.DLQPolicy{
-			//nolint:gosec
-			MaxDeliveries:    uint32(maxRedeliverCount),
-			DeadLetterTopic:  dlqTopic,
-			RetryLetterTopic: fmt.Sprintf("%s-retry", dlqTopic),
-		}
 	}
 
 	// Create consumer

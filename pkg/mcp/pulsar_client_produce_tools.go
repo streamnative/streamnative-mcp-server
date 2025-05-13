@@ -21,7 +21,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
 	"slices"
 	"strings"
 	"time"
@@ -48,9 +47,6 @@ func PulsarClientAddProducerTools(s *server.MCPServer, _ bool, features []string
 		),
 		mcp.WithArray("messages",
 			mcp.Description("Messages to send. Specify multiple times for multiple messages. IMPORTANT: Use this parameter to provide message content."),
-		),
-		mcp.WithArray("files",
-			mcp.Description("Files to send as message content. Specify multiple times for multiple files."),
 		),
 		mcp.WithNumber("num-produce",
 			mcp.Description("Number of times to send message(s) (default: 1)"),
@@ -94,16 +90,7 @@ func handleClientProduce(ctx context.Context, request mcp.CallToolRequest) (*mcp
 		}
 	}
 
-	files := []string{}
-	if val, exists := optionalParam[[]interface{}](request.Params.Arguments, "files"); exists && len(val) > 0 {
-		for _, f := range val {
-			if strFile, ok := f.(string); ok {
-				files = append(files, strFile)
-			}
-		}
-	}
-
-	if len(messages) == 0 && len(files) == 0 {
+	if len(messages) == 0 {
 		return mcp.NewToolResultError("Please supply message content with 'messages' parameter."), nil
 	}
 
@@ -187,7 +174,7 @@ func handleClientProduce(ctx context.Context, request mcp.CallToolRequest) (*mcp
 	defer producer.Close()
 
 	// Generate message bodies from messages and files
-	messagePayloads, err := generateMessagePayloads(messages, files)
+	messagePayloads, err := generateMessagePayloads(messages)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to generate message payloads: %v", err)), nil
 	}
@@ -262,22 +249,13 @@ func handleClientProduce(ctx context.Context, request mcp.CallToolRequest) (*mcp
 	return mcp.NewToolResultText(string(jsonBytes)), nil
 }
 
-// generateMessagePayloads generates message payloads from message strings and files
-func generateMessagePayloads(messages []string, files []string) ([][]byte, error) {
+// generateMessagePayloads generates message payloads from message strings
+func generateMessagePayloads(messages []string) ([][]byte, error) {
 	var payloads [][]byte
 
 	// Add message strings
 	for _, msg := range messages {
 		payloads = append(payloads, []byte(msg))
-	}
-
-	// Add file contents
-	for _, file := range files {
-		data, err := os.ReadFile(file)
-		if err != nil {
-			return nil, fmt.Errorf("failed to read file %s: %w", file, err)
-		}
-		payloads = append(payloads, data)
 	}
 
 	return payloads, nil

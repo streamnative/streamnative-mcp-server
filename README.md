@@ -1,10 +1,10 @@
 # StreamNative MCP Server
 
-A Model Context Protocol (MCP) server for integrating AI agents with StreamNative Cloud resources and Apache Pulsar/Kafka messaging systems.
+A Model Context Protocol (MCP) server for integrating AI agents with StreamNative Cloud resources and Apache Kafka/Pulsar messaging systems.
 
 ## Overview
 
-StreamNative MCP Server provides a standard interface for LLMs (Large Language Models) and AI agents to interact with StreamNative Cloud services, Apache Pulsar, and Apache Kafka. This implementation follows the [Model Context Protocol](https://modelcontextprotocol.io/introduction) specification, enabling AI applications to access messaging services through a standardized interface.
+StreamNative MCP Server provides a standard interface for LLMs (Large Language Models) and AI agents to interact with StreamNative Cloud services, Apache Kafka, and Apache Pulsar. This implementation follows the [Model Context Protocol](https://modelcontextprotocol.io/introduction) specification, enabling AI applications to access messaging services through a standardized interface.
 
 ## Features
 
@@ -12,19 +12,21 @@ StreamNative MCP Server provides a standard interface for LLMs (Large Language M
   - Connect to StreamNative Cloud resources with authentication
   - Switch to clusters available in your organization
   - Describe the status of clusters resources
-- **Apache Pulsar Support**: Interact with Pulsar resources including:
+- **Apache Kafka Support**: Interact with Apache Kafka resources including:
+  - Kafka Admin operations (topics, partitions, consumer groups)
+  - Schema Registry operations
+  - Kafka Connect operations (*)
+  - Kafka Client operations (producers, consumers)
+- **Apache Pulsar Support**: Interact with Apache Pulsar resources including:
   - Pulsar Admin operations (topics, namespaces, tenants, schemas, etc.)
   - Pulsar Client operations (producers, consumers)
   - Functions, Sources, and Sinks management
-- **Apache Kafka Support**: Interact with Kafka resources including:
-  - Kafka Admin operations (topics, partitions, consumer groups)
-  - Schema Registry operations
-  - Kafka Connect operations
-  - Kafka Client operations (producers, consumers)
 - **Multiple Connection Options**:
   - Connect to StreamNative Cloud with service account authentication
-  - Connect directly to external Pulsar clusters
-  - Connect directly to external Kafka clusters
+  - Connect directly to external Apache Kafka clusters
+  - Connect directly to external Apache Pulsar clusters
+
+> *: The Kafka Connect operations are only tested and verfied on StreamNative Cloud. 
 
 ## Installation
 
@@ -124,45 +126,65 @@ The StreamNative MCP Server supports enabling or disabling specific groups of fu
 
 ### Available Features
 
-The following sets of tools are available (all available by default on StreamNative Cloud)
+The StreamNative MCP Server allows you to enable or disable specific groups of features using the `--features` flag. This helps you control which tools are available to your AI agents and can reduce context size for LLMs.
 
-| Features | Description |
-| ------|-------|
-| `all` | All tools, including StreamNative Cloud tools, Pulsar tools and Kafka tools |
-| `all-pulsar` | All Pulsar admin and Pulsar client tools |
-| `all-kafka` | All Kafka admin and Kafka client tools |
-| `pulsar-admin` | Pulsar administrative operations (including all `pulsar-admin-*`) |
-| `pulsar-client` | Pulsar client operations (produce and consume messages) |
-| `pulsar-admin-brokers` | Manage Pulsar brokers |
-| `pulsar-admin-broker-stats` | Access Pulsar broker statistics |
-| `pulsar-admin-clusters` | Manage Pulsar clusters |
-| `pulsar-admin-functions-worker` | Manage Pulsar Function workers |
-| `pulsar-admin-namespaces` | Manage Pulsar namespaces |
-| `pulsar-admin-namespace-policy` | Configure Pulsar namespace policies |
-| `pulsar-admin-isolation-policy` | Manage namespace isolation policies |
-| `pulsar-admin-packages` | Manage Pulsar packages |
-| `pulsar-admin-resource-quotas` | Configure resource quotas |
-| `pulsar-admin-schemas` | Manage Pulsar schemas |
-| `pulsar-admin-subscriptions` | Manage Pulsar subscriptions |
-| `pulsar-admin-tenants` | Manage Pulsar tenants |
-| `pulsar-admin-topics` | Manage Pulsar topics |
-| `pulsar-admin-sinks` | Manage Pulsar IO sinks |
-| `pulsar-admin-functions` | Manage Pulsar Functions |
-| `pulsar-admin-sources` | Manage Pulsar IO sources |
-| `pulsar-admin-topic-policy` | Configure Pulsar topic policies |
-| `kafka-admin` | Kafka administrative operations (including all `kafka-admin-*`) |
-| `kafka-client` | Kafka client operations (produce and consume messages) |
-| `kafka-admin-topics` | Manage Kafka partitions |
-| `kafka-admin-partitions` | Manage Kafka partitions |
-| `kafka-admin-groups` | Manage Kafka consumer groups |
-| `kafka-admin-schema-registry` | Interact with Kafka Schema Registry |
-| `kafka-admin-connect` | Manage Kafka Connect connectors |
-| `streamnative-cloud` | Manage the context, check resources logs of StreamNative Cloud |
+#### Combination Feature Sets
 
-### Usage Examples
+| Feature        | Description                                                                 |
+|---------------|-----------------------------------------------------------------------------|
+| `all`         | Enables all features: StreamNative Cloud, Pulsar, and Kafka tools            |
 
-To enable only specific feature sets:
+---
 
+#### Kafka Features
+
+| Feature                   | Description                                      | Docs |
+|--------------------------|--------------------------------------------------|------|
+| `all-kafka`   | Enables all Kafka admin and client tools, without Apache Pulsar and StreamNative Cloud tools                                    |
+| `kafka-admin`             | Kafka administrative operations (all admin tools) | |
+| `kafka-client`            | Kafka client operations (produce/consume)         |[kafka_client_consume.md](docs/tools/kafka_client_consume.md), [kafka_client_produce.md](docs/tools/kafka_client_produce.md)  |
+| `kafka-admin-topics`      | Manage Kafka topics                              | [kafka_admin_topics.md](docs/tools/kafka_admin_topics.md) |
+| `kafka-admin-partitions`  | Manage Kafka partitions                          | [kafka_admin_partitions.md](docs/tools/kafka_admin_partitions.md) |
+| `kafka-admin-groups`      | Manage Kafka consumer groups                     | [kafka_admin_groups.md](docs/tools/kafka_admin_groups.md) |
+| `kafka-admin-schema-registry` | Interact with Kafka Schema Registry          | [kafka_admin_schema_registry.md](docs/tools/kafka_admin_schema_registry.md) |
+| `kafka-admin-connect`     | Manage Kafka Connect connectors                  | [kafka_admin_connect.md](docs/tools/kafka_admin_connect.md) |
+
+---
+
+#### Pulsar Features
+
+| Feature                   | Description                                      | Docs |
+|--------------------------|--------------------------------------------------|------|
+| `all-pulsar`  | Enables all Pulsar admin and client tools, without Apache Kafka and StreamNative Cloud tools                                    | |
+| `pulsar-admin`                 | Pulsar administrative operations (all admin tools)|  |
+| `pulsar-client`                | Pulsar client operations (produce/consume)        | [pulsar_client_consume.md](docs/tools/pulsar_client_consume.md), [pulsar_client_produce.md](docs/tools/pulsar_client_produce.md) |
+| `pulsar-admin-brokers`         | Manage Pulsar brokers                            | [pulsar_admin_brokers.md](docs/tools/pulsar_admin_brokers.md) |
+| `pulsar-admin-broker-stats`    | Access Pulsar broker statistics                   | [pulsar_admin_broker_stats.md](docs/tools/pulsar_admin_broker_stats.md) |
+| `pulsar-admin-clusters`        | Manage Pulsar clusters                            | [pulsar_admin_clusters.md](docs/tools/pulsar_admin_clusters.md) |
+| `pulsar-admin-functions-worker`| Manage Pulsar Function workers                    | [pulsar_admin_functions_worker.md](docs/tools/pulsar_admin_functions_worker.md) |
+| `pulsar-admin-namespaces`      | Manage Pulsar namespaces                          | [pulsar_admin_namespaces.md](docs/tools/pulsar_admin_namespaces.md) |
+| `pulsar-admin-namespace-policy`| Configure Pulsar namespace policies               | [pulsar_admin_namespace_policy.md](docs/tools/pulsar_admin_namespace_policy.md) |
+| `pulsar-admin-isolation-policy`| Manage namespace isolation policies               | [pulsar_admin_isolation_policy.md](docs/tools/pulsar_admin_isolation_policy.md) |
+| `pulsar-admin-packages`        | Manage Pulsar packages                            | [pulsar_admin_packages.md](docs/tools/pulsar_admin_packages.md) |
+| `pulsar-admin-resource-quotas` | Configure resource quotas                         | [pulsar_admin_resource_quotas.md](docs/tools/pulsar_admin_resource_quotas.md) |
+| `pulsar-admin-schemas`         | Manage Pulsar schemas                             | [pulsar_admin_schemas.md](docs/tools/pulsar_admin_schemas.md) |
+| `pulsar-admin-subscriptions`   | Manage Pulsar subscriptions                       | [pulsar_admin_subscriptions.md](docs/tools/pulsar_admin_subscriptions.md) |
+| `pulsar-admin-tenants`         | Manage Pulsar tenants                             | [pulsar_admin_tenants.md](docs/tools/pulsar_admin_tenants.md) |
+| `pulsar-admin-topics`          | Manage Pulsar topics                              | [pulsar_admin_topics.md](docs/tools/pulsar_admin_topics.md) |
+| `pulsar-admin-sinks`           | Manage Pulsar IO sinks                            | [pulsar_admin_sinks.md](docs/tools/pulsar_admin_sinks.md) |
+| `pulsar-admin-functions`       | Manage Pulsar Functions                           | [pulsar_admin_functions.md](docs/tools/pulsar_admin_functions.md) |
+| `pulsar-admin-sources`         | Manage Pulsar Sources                           | [pulsar_admin_sources.md](docs/tools/pulsar_admin_sources.md) |
+| `pulsar-admin-topic-policy`    | Configure Pulsar topic policies                   | [pulsar_admin_topic_policy.md](docs/tools/pulsar_admin_topic_policy.md) |
+
+---
+
+#### StreamNative Cloud Features
+
+| Feature              | Description                                                      | Docs |
+|---------------------|------------------------------------------------------------------|------|
+| `streamnative-cloud`| Manage StreamNative Cloud context and check resource logs         | [streamnative_cloud.md](docs/tools/streamnative_cloud.md) |
+
+You can combine these features as needed using the `--features` flag. For example, to enable only Pulsar client features:
 ```bash
 # Enable only Pulsar client features
 bin/snmcp stdio --organization my-org --key-file /path/to/key-file.json --features pulsar-client
@@ -244,3 +266,5 @@ This project uses [semver](https://semver.org/) semantics.
 ## License
 
 Licensed under the Apache License Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
+
+
