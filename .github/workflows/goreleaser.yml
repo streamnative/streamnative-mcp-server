@@ -15,6 +15,13 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v4
+      
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -34,7 +41,7 @@ jobs:
           args: release --clean
           workdir: .
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.SNBOT_GITHUB_TOKEN }}
 
       - name: Generate signed build provenance attestations for workflow artifacts
         uses: actions/attest-build-provenance@v2
@@ -43,3 +50,25 @@ jobs:
             dist/*.tar.gz
             dist/*.zip
             dist/*.txt
+
+      - name: Init homebrew repository
+        uses: actions/checkout@v3
+        with:
+          repository: streamnative/homebrew-streamnative
+          token: ${{ secrets.SNBOT_GITHUB_TOKEN }}
+          ref: master
+          path: homebrew-streamnative
+
+      - name: Prepare Homebrew formula
+        run: |
+          cp ./dist/homebrew/Formula/snmcp.rb homebrew-streamnative/Formula/snmcp.rb
+
+      - name: Create Homebrew PR
+        uses: peter-evans/create-pull-request@v3
+        with:
+          token: ${{ secrets.SNBOT_GITHUB_TOKEN }}
+          path: homebrew-streamnative
+          branch: snmcp/${{ env.tag }}
+          title: Update snmcp to ${{ env.tag }}
+          body: Automated changes by Release workflow in streamnative/streamnative-mcp-server repository.
+          delete-branch: true
