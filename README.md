@@ -164,7 +164,7 @@ The StreamNative MCP Server allows you to enable or disable specific groups of f
 | `pulsar-admin-functions-worker`| Manage Pulsar Function workers                    | [pulsar_admin_functions_worker.md](docs/tools/pulsar_admin_functions_worker.md) |
 | `pulsar-admin-namespaces`      | Manage Pulsar namespaces                          | [pulsar_admin_namespaces.md](docs/tools/pulsar_admin_namespaces.md) |
 | `pulsar-admin-namespace-policy`| Configure Pulsar namespace policies               | [pulsar_admin_namespace_policy.md](docs/tools/pulsar_admin_namespace_policy.md) |
-| `pulsar-admin-isolation-policy`| Manage namespace isolation policies               | [pulsar_admin_isolation_policy.md](docs/tools/pulsar_admin_isolation_policy.md) |
+| `pulsar-admin-isolation-policy`| Manage namespace isolation policies               | [pulsar_admin_nsisolationpolicy.md](docs/tools/pulsar_admin_nsisolationpolicy.md) |
 | `pulsar-admin-packages`        | Manage Pulsar packages                            | [pulsar_admin_packages.md](docs/tools/pulsar_admin_packages.md) |
 | `pulsar-admin-resource-quotas` | Configure resource quotas                         | [pulsar_admin_resource_quotas.md](docs/tools/pulsar_admin_resource_quotas.md) |
 | `pulsar-admin-schemas`         | Manage Pulsar schemas                             | [pulsar_admin_schemas.md](docs/tools/pulsar_admin_schemas.md) |
