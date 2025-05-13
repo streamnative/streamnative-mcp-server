@@ -58,7 +58,7 @@ If you want to access to your StreamNative Cloud, you will need to have followin
 
 ```bash
 # Start MCP server with StreamNative Cloud authentication
-snmcp stdio --organization my-org --key-file /path/to/key-file.json
+bin/snmcp stdio --organization my-org --key-file /path/to/key-file.json
 
 # Start MCP server with external Kafka
 bin/snmcp stdio --use-external-kafka --kafka-bootstrap-servers localhost:9092 --kafka-auth-type SASL_SSL --kafka-auth-mechanism PLAIN --kafka-auth-user user --kafka-auth-pass pass --kafka-use-tls --kafka-schema-registry-url https://sr.local --kafka-schema-registry-auth-user user --kafka-schema-registry-auth-pass pass
@@ -182,7 +182,7 @@ To enable only specific feature sets:
 
 ```bash
 # Enable only Pulsar client features
-snmcp stdio --organization my-org --key-file /path/to/key-file.json --features pulsar-client
+bin/snmcp stdio --organization my-org --key-file /path/to/key-file.json --features pulsar-client
 ```
 
 ## Inspecting the MCP Server
@@ -219,6 +219,10 @@ This server can be used with any MCP-compatible client, such as:
 - Other AI assistants supporting the MCP protocol
 - Custom applications built with MCP client libraries
 
+> ⚠️ Reminder: Please ensure you have an active paid plan with your LLM provider to fully utilize the MCP server.
+Without it, you may encounter the error: `message will exceed the length limit for this chat`.
+
+
 ### Usage with Claude Desktop
 
 #### Using stdio Server
@@ -227,18 +231,20 @@ This server can be used with any MCP-compatible client, such as:
 {
   "mcpServers": {
     "mcp-streamnative": {
-      "command": "snmcp",
+      "command": "${PATH_TO_SNMCP}/bin/snmcp",
       "args": [
         "stdio",
         "--organization",
-        "my-org",
+        "${STREAMNATIVE_CLOUD_ORGANIZATION_ID}",
         "--key-file",
-        "/path/to/key-file.json"
+        "${STREAMNATIVE_CLOUD_KEY_FILE}"
       ]
     }
   }
 }
 ```
+
+Please remember to replace `${PATH_TO_SNMCP}` with the actual path to the `snmcp` binary and `${STREAMNATIVE_CLOUD_ORGANIZATION_ID}` and `${STREAMNATIVE_CLOUD_KEY_FILE}` with your StreamNative Cloud organization ID and key file path, respectively.
 
 #### Using SSE Server
 
@@ -267,6 +273,8 @@ Note: If mcp-proxy is not in your system PATH, you'll need to provide the full p
 - On macOS: `/Library/Frameworks/Python.framework/Versions/3.11/bin/mcp-proxy`
 - On Linux: `/usr/local/bin/mcp-proxy`
 - On Windows: `C:\Python311\Scripts\mcp-proxy.exe`
+
+Please remember to replace `http://localhost:9090/mcp/sse` with the right URL.
 
 ## About Model Context Protocol (MCP)
 

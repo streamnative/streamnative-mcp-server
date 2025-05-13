@@ -43,7 +43,7 @@ func newMcpServer(configOpts *ServerOptions, logrusLogger *logrus.Logger) *serve
 				"streamnative-mcp-server",
 				"0.0.1",
 				server.WithResourceCapabilities(true, true),
-				server.WithInstructions(mcp.GetStreamNativeCloudServerInstructions(userName)),
+				server.WithInstructions(mcp.GetStreamNativeCloudServerInstructions(userName, snConfig)),
 				server.WithLogging())
 
 			mcp.RegisterPrompts(s)

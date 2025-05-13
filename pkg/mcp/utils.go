@@ -246,18 +246,6 @@ func isTokenAboutToExpire(cachedGrant *auth.AuthorizationGrant, window time.Dura
 	return timeUntilExpiry <= window, nil
 }
 
-// isPackageURLSupported checks if the provided URL protocol is supported for package download
-func isPackageURLSupported(packageURL string) bool {
-	// Check if the URL has a supported protocol: http, https, file
-	supportedProtocols := []string{"http://", "https://", "file://"}
-	for _, protocol := range supportedProtocols {
-		if strings.HasPrefix(packageURL, protocol) {
-			return true
-		}
-	}
-	return false
-}
-
 // parseMessageConfigs parses a list of key=value strings into a map
 func parseMessageConfigs(configs []string) (map[string]*string, error) {
 	result := make(map[string]*string)
