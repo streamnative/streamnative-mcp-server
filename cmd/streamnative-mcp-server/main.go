@@ -66,6 +66,7 @@ to interact with StreamNative Cloud resources and services.`,
 	o.AddFlags(rootCmd)
 	// Add subcommands
 	rootCmd.AddCommand(mcp.NewCmdMcpStdioServer(o))
+	rootCmd.AddCommand(mcp.NewCmdMcpSseServer(o))
 
 	rootCmd.SetVersionTemplate("{{.Short}}\n{{.Version}}\n")
 
