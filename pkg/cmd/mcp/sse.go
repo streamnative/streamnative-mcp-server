@@ -72,7 +72,7 @@ func runSseServer(configOpts *ServerOptions) error {
 	mcpServer := server.NewSSEServer(
 		newMcpServer(configOpts, logger),
 		server.WithStaticBasePath(configOpts.HTTPPath),
-		server.WithSSEContextFunc(func(ctx context.Context, _ *http.Request) context.Context {
+		server.WithHTTPContextFunc(func(ctx context.Context, _ *http.Request) context.Context {
 			return context.WithValue(ctx, mcp.OptionsKey, configOpts.Options)
 		}),
 	)
