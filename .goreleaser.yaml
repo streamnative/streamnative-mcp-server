@@ -6,7 +6,8 @@ before:
     - go generate ./...
 
 builds:
-  - env:
+  - id: snmcp
+    env:
       - CGO_ENABLED=0
     ldflags:
       - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
@@ -18,9 +19,11 @@ builds:
       - amd64
       - arm64
     main: ./cmd/streamnative-mcp-server
+    binary: snmcp
 
 archives:
-  - formats: tar.gz
+  - id: snmcp
+    formats: tar.gz
     # this name template makes the OS and Arch compatible with the results of `uname`.
     name_template: >-
       {{ .ProjectName }}_
@@ -42,6 +45,25 @@ changelog:
       - "^test:"
 
 release:
-  draft: true
+  draft: false
   prerelease: auto
   name_template: "StreamNative MCP Server {{.Version}}"
+
+dockers:
+  - image_templates:
+      - "streamnative/snmcp:{{ .Tag }}"
+      - "streamnative/snmcp:latest"
+
+brews:
+  - name: snmcp
+    skip_upload: true
+    repository:
+      owner: streamnative
+      name: homebrew-streamnative
+    commit_author:
+      name: streamnativebot
+      email: streamnativebot@streamnative.io
+    directory: Formula
+    homepage: "https://streamnative.io/"
+    description: "StreamNative MCP Server (snmcp)"
+    license: "Apache-2.0"
