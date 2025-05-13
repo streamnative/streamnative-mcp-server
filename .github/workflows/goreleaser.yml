@@ -61,8 +61,6 @@ jobs:
 
       - name: Prepare Homebrew formula
         run: |
-          ref=${{ github.ref }}
-          tag=${ref#refs/tags/}
           cp ./dist/homebrew/Formula/snmcp.rb homebrew-streamnative/Formula/snmcp.rb
 
       - name: Create Homebrew PR
@@ -70,7 +68,8 @@ jobs:
         with:
           token: ${{ secrets.SNBOT_GITHUB_TOKEN }}
           path: homebrew-streamnative
-          branch: snmcp/${{ env.tag }}
+          branch: snmcp/release
+          branch-suffix: short-commit-hash
           title: Update snmcp to ${{ env.tag }}
           body: Automated changes by Release workflow in streamnative/streamnative-mcp-server repository.
           delete-branch: true
