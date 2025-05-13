@@ -30,6 +30,33 @@ StreamNative MCP Server provides a standard interface for LLMs (Large Language M
 
 ## Installation
 
+### Homebrew (macOS and Linux)
+
+The easiest way to install streamnative-mcp-server is using Homebrew:
+
+```bash
+# Add the tap repository
+brew tap streamnative/streamnative
+
+# Install streamnative-mcp-server
+brew install streamnative/streamnative/snmcp
+```
+
+### Docker Image
+
+StreamNative MCP Server releases the Docker Image to [streamnative/snmcp](https://hub.docker.com/r/streamnative/snmcp), and it can be used to run both stdio server and sse server via docker command.
+
+```bash
+# Pull image from Docker Hub
+docker pull streamnative/snmcp 
+```
+
+### From Github Release
+
+Visit https://github.com/streamnative/streamnative-mcp-server/releases to get the latest binary of StreamNative MCP Server.
+
+### From Source
+
 ```bash
 # Clone the repository
 git clone https://github.com/streamnative/streamnative-mcp-server.git
@@ -68,6 +95,9 @@ bin/snmcp stdio --use-external-kafka --kafka-bootstrap-servers localhost:9092 --
 # Start MCP server with external Pulsar
 snmcp stdio --use-external-pulsar --pulsar-web-service-url http://pulsar.example.com:8080
 bin/snmcp stdio --use-external-pulsar --pulsar-web-service-url http://pulsar.example.com:8080  --pulsar-token "xxx"
+
+# Start MCP server with SSE by docker with StreamNative Cloud authentication
+docker run -i --rm -e SNMCP_ORGANIZATION=my-org -e SNMCP_KEY_FILE=/key.json -v /path/to/key-file.json:/key.json -p 9090:9090 streamnative/snmcp stdio
 ```
 
 #### Using SSE (Server-Sent Events) Server
@@ -81,6 +111,9 @@ snmcp sse --http-addr :9090 --http-path /mcp --use-external-kafka --kafka-bootst
 
 # Start MCP server with SSE and external Pulsar
 snmcp sse --http-addr :9090 --http-path /mcp --use-external-pulsar --pulsar-web-service-url http://pulsar.example.com:8080
+
+# Start MCP server with SSE by docker with StreamNative Cloud authentication
+docker run -i --rm -e SNMCP_ORGANIZATION=my-org -e SNMCP_KEY_FILE=/key.json -v /path/to/key-file.json:/key.json -p 9090:9090 streamnative/snmcp sse
 ```
 
 ### Command-line Options
@@ -267,6 +300,35 @@ Without it, you may encounter the error: `message will exceed the length limit f
 ```
 
 Please remember to replace `${PATH_TO_SNMCP}` with the actual path to the `snmcp` binary and `${STREAMNATIVE_CLOUD_ORGANIZATION_ID}` and `${STREAMNATIVE_CLOUD_KEY_FILE}` with your StreamNative Cloud organization ID and key file path, respectively.
+
+Optionally, you can use docker image to start the stdio server if you have [Docker](https://www.docker.com/) installed.
+
+```json
+{
+  "mcpServers": {
+    "mcp-streamnative": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "SNMCP_ORGANIZATION",
+        "-e",
+        "SNMCP_KEY_FILE",
+        "-v",
+        "${STREAMNATIVE_CLOUD_KEY_FILE}:/key.json",
+        "streamnative/snmcp",
+        "stdio"
+      ],
+      "env": {
+        "SNMCP_ORGANIZATION": "${STREAMNATIVE_CLOUD_ORGANIZATION_ID}",
+        "SNMCP_KEY_FILE": "/key.json"
+      }
+    }
+  }
+}
+```
 
 #### Using SSE Server
 
