@@ -42,6 +42,11 @@ changelog:
       - "^test:"
 
 release:
-  draft: true
+  draft: false
   prerelease: auto
   name_template: "StreamNative MCP Server {{.Version}}"
+
+dockers:
+  - image_templates:
+      - "streamnative/snmcp:{{ .Tag }}"
+      - "streamnative/snmcp:latest"
