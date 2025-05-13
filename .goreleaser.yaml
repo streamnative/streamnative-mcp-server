@@ -50,3 +50,17 @@ dockers:
   - image_templates:
       - "streamnative/snmcp:{{ .Tag }}"
       - "streamnative/snmcp:latest"
+
+brews:
+  - name: snmcp
+    skip_upload: true
+    repository:
+      owner: streamnative
+      name: homebrew-streamnative
+    commit_author:
+      name: streamnativebot
+      email: streamnativebot@streamnative.io
+    directory: Formula
+    homepage: "https://streamnative.io/"
+    description: "StreamNative MCP Server (snmcp)"
+    license: "Apache-2.0"
