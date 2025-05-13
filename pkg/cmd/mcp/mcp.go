@@ -36,6 +36,8 @@ type ServerOptions struct {
 	LogFile     string
 	LogCommands bool
 	Features    []string
+	HTTPAddr    string
+	HTTPPath    string
 	*config.Options
 }
 
@@ -160,6 +162,8 @@ func (o *ServerOptions) AddFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().StringVar(&o.LogFile, "log-file", "", "Path to log file")
 	cmd.PersistentFlags().BoolVar(&o.LogCommands, "enable-command-logging", false, "When enabled, the server will log all command requests and responses to the log file")
 	cmd.PersistentFlags().StringSliceVar(&o.Features, "features", []string{}, "Features to enable, defaults to `all`")
+	cmd.PersistentFlags().StringVar(&o.HTTPAddr, "http-addr", "", "HTTP address")
+	cmd.PersistentFlags().StringVar(&o.HTTPPath, "http-path", "", "HTTP path")
 }
 
 func (o *ServerOptions) newClientCredentialsFlow(

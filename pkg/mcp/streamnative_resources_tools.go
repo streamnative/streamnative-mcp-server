@@ -48,7 +48,7 @@ func StreamNativeAddResourceTools(s *server.MCPServer, readOnly bool, features [
 			),
 			mcp.WithToolAnnotation(mcp.ToolAnnotation{
 				Title:           "Delete StreamNative Cloud Resources",
-				DestructiveHint: true,
+				DestructiveHint: &[]bool{true}[0],
 			}),
 		)
 		s.AddTool(applyTool, handleStreamNativeResourcesApply)
