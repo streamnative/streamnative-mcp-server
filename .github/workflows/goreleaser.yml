@@ -70,7 +70,7 @@ jobs:
           path: homebrew-streamnative
           branch: snmcp/release
           branch-suffix: short-commit-hash
-          title: Update snmcp to ${{ env.tag }}
+          title: Update snmcp to ${{github.ref_name}}
           body: Automated changes by Release workflow in streamnative/streamnative-mcp-server repository.
           delete-branch: true
           committer: StreamNative Bot <streamnativebot@streamnative.io>
