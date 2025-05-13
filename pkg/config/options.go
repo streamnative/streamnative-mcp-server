@@ -75,6 +75,8 @@ func NewConfigOptions() *Options {
 }
 
 // AddFlags adds command-line flags for Options
+//
+//nolint:errcheck
 func (o *Options) AddFlags(cmd *cobra.Command) {
 	// Setup viper with environment variables
 	viper.SetEnvPrefix(EnvPrefix)
