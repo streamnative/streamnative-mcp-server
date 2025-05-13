@@ -30,6 +30,33 @@ StreamNative MCP Server provides a standard interface for LLMs (Large Language M
 
 ## Installation
 
+### Homebrew (macOS and Linux)
+
+The easiest way to install streamnative-mcp-server is using Homebrew:
+
+```bash
+# Add the tap repository
+brew tap streamnative/streamnative
+
+# Install streamnative-mcp-server
+brew install streamnative/streamnative/snmcp
+```
+
+### Docker Image
+
+StreamNative MCP Server releases the Docker Image to [streamnative/snmcp](https://hub.docker.com/r/streamnative/snmcp), and it can be used to run both stdio server and sse server via docker command.
+
+```bash
+# Pull image from Docker Hub
+docker pull streamnative/snmcp 
+```
+
+### From Github Release
+
+Visit https://github.com/streamnative/streamnative-mcp-server/releases to get the latest binary of StreamNative MCP Server.
+
+### From Source
+
 ```bash
 # Clone the repository
 git clone https://github.com/streamnative/streamnative-mcp-server.git
