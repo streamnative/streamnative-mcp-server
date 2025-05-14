@@ -93,6 +93,12 @@ func KafkaClientAddProduceTools(s *server.MCPServer, readOnly bool, features []s
 			mcp.Description("Message headers in the format of [{\"key\": \"value\"}]. "+
 				"Optional. Headers allow you to attach metadata to messages without modifying the payload. "+
 				"They are passed along with the message to consumers."),
+			mcp.Items(
+				map[string]interface{}{
+					"type":        "string",
+					"description": "header entry",
+				},
+			),
 		),
 		mcp.WithBoolean("sync",
 			mcp.Description("Whether to wait for server acknowledgment before returning. "+

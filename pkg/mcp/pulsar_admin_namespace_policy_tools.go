@@ -172,12 +172,30 @@ func PulsarAdminAddNamespacePolicyTools(s *server.MCPServer, readOnly bool, feat
 			),
 			mcp.WithArray("actions",
 				mcp.Description("Actions to grant for permission policies (e.g., produce, consume)"),
+				mcp.Items(
+					map[string]interface{}{
+						"type":        "string",
+						"description": "action",
+					},
+				),
 			),
 			mcp.WithArray("clusters",
 				mcp.Description("List of clusters for replication policies"),
+				mcp.Items(
+					map[string]interface{}{
+						"type":        "string",
+						"description": "cluster",
+					},
+				),
 			),
 			mcp.WithArray("roles",
 				mcp.Description("List of roles for subscription permission policies"),
+				mcp.Items(
+					map[string]interface{}{
+						"type":        "string",
+						"description": "role",
+					},
+				),
 			),
 			mcp.WithString("ttl",
 				mcp.Description("Message TTL in seconds (or 0 to disable TTL)"),

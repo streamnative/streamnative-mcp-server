@@ -94,7 +94,14 @@ func PulsarAdminAddSinksTools(s *server.MCPServer, readOnly bool, features []str
 				"Topics must be specified in the format 'persistent://tenant/namespace/topic'. "+
 				"Sinks can consume from multiple topics, but they should have compatible schemas. "+
 				"All input topics should exist before the sink is created. "+
-				"Either inputs or topics-pattern must be specified.")),
+				"Either inputs or topics-pattern must be specified."),
+			mcp.Items(
+				map[string]interface{}{
+					"type":        "string",
+					"description": "input topic",
+				},
+			),
+		),
 		mcp.WithString("topics-pattern",
 			mcp.Description("TopicsPattern to consume from list of topics that match the pattern. Optional for 'create' and 'update' operations. "+
 				"Specified as a regular expression, e.g., 'persistent://tenant/namespace/prefix.*'. "+
