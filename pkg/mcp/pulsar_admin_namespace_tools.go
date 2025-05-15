@@ -64,6 +64,12 @@ func PulsarAdminAddNamespaceTools(s *server.MCPServer, readOnly bool, features [
 		),
 		mcp.WithArray("clusters",
 			mcp.Description("List of clusters to assign when creating a namespace. Used with 'create' operation."),
+			mcp.Items(
+				map[string]interface{}{
+					"type":        "string",
+					"description": "Cluster name",
+				},
+			),
 		),
 		mcp.WithString("subscription",
 			mcp.Description("Subscription name. Required for 'unsubscribe' operation, optional for 'clear_backlog'."),

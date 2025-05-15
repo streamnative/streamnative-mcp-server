@@ -178,6 +178,12 @@ func PulsarAdminAddTopicPolicyTools(s *server.MCPServer, readOnly bool, features
 			),
 			mcp.WithArray("actions",
 				mcp.Description("Actions to grant for permission policies. Valid values are: produce, consume"),
+				mcp.Items(
+					map[string]interface{}{
+						"type":        "string",
+						"description": "action",
+					},
+				),
 			),
 			mcp.WithString("ttl",
 				mcp.Description("Message TTL in seconds (or 0 to disable TTL)"),

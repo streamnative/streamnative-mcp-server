@@ -70,12 +70,30 @@ func PulsarAdminAddNsIsolationPolicyTools(s *server.MCPServer, readOnly bool, fe
 		),
 		mcp.WithArray("namespaces",
 			mcp.Description("List of namespaces to apply the isolation policy. Required for policy.set"),
+			mcp.Items(
+				map[string]interface{}{
+					"type":        "string",
+					"description": "namespace",
+				},
+			),
 		),
 		mcp.WithArray("primary",
 			mcp.Description("List of primary brokers for the namespaces. Required for policy.set"),
+			mcp.Items(
+				map[string]interface{}{
+					"type":        "string",
+					"description": "primary broker",
+				},
+			),
 		),
 		mcp.WithArray("secondary",
 			mcp.Description("List of secondary brokers for the namespaces. Optional for policy.set"),
+			mcp.Items(
+				map[string]interface{}{
+					"type":        "string",
+					"description": "secondary broker",
+				},
+			),
 		),
 		mcp.WithString("autoFailoverPolicyType",
 			mcp.Description("Auto failover policy type (e.g., min_available). Optional for policy.set"),

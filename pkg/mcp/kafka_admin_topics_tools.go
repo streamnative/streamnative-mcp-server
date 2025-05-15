@@ -113,6 +113,12 @@ func KafkaAdminAddTopicTools(s *server.MCPServer, readOnly bool, features []stri
 				"Each entry should be in the format 'key=value'. "+
 				"Example configs include 'cleanup.policy', 'retention.ms', 'compression.type'. "+
 				"Optional."),
+			mcp.Items(
+				map[string]interface{}{
+					"type":        "string",
+					"description": "config entry",
+				},
+			),
 		),
 	)
 	s.AddTool(kafkaTopicTool, handleKafkaTopicTool(readOnly))

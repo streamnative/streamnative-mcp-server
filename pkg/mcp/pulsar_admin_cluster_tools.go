@@ -84,9 +84,21 @@ func PulsarAdminAddClusterTools(s *server.MCPServer, readOnly bool, features []s
 			mcp.Description("List of clusters to be registered as peer-clusters, used when:\n"+
 				"- resource=cluster and operation is create or update\n"+
 				"- resource=peer_clusters and operation is update"),
+			mcp.Items(
+				map[string]interface{}{
+					"type":        "string",
+					"description": "peer cluster name",
+				},
+			),
 		),
 		mcp.WithArray("brokers",
 			mcp.Description("List of broker names to include in a failure domain, required when resource=failure_domain and operation is create or update"),
+			mcp.Items(
+				map[string]interface{}{
+					"type":        "string",
+					"description": "broker",
+				},
+			),
 		),
 	)
 	s.AddTool(clusterTool, handleClusterTool(readOnly))
