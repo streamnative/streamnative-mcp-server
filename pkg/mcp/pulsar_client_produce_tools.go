@@ -47,6 +47,12 @@ func PulsarClientAddProducerTools(s *server.MCPServer, _ bool, features []string
 		),
 		mcp.WithArray("messages",
 			mcp.Description("Messages to send. Specify multiple times for multiple messages. IMPORTANT: Use this parameter to provide message content."),
+			mcp.Items(
+				map[string]interface{}{
+					"type":        "string",
+					"description": "message",
+				},
+			),
 		),
 		mcp.WithNumber("num-produce",
 			mcp.Description("Number of times to send message(s) (default: 1)"),
@@ -65,6 +71,12 @@ func PulsarClientAddProducerTools(s *server.MCPServer, _ bool, features []string
 		),
 		mcp.WithArray("properties",
 			mcp.Description("Properties to add, key=value format. Specify multiple times for multiple properties."),
+			mcp.Items(
+				map[string]interface{}{
+					"type":        "string",
+					"description": "property",
+				},
+			),
 		),
 		mcp.WithString("key",
 			mcp.Description("Partitioning key to add to each message"),

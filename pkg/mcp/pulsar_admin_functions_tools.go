@@ -90,7 +90,14 @@ func PulsarAdminAddFunctionsTools(s *server.MCPServer, readOnly bool, features [
 			mcp.Description("The input topics for the function (array of strings). Optional for 'create' and 'update' operations. "+
 				"Topics must be specified in the format 'persistent://tenant/namespace/topic'. "+
 				"Functions can consume from multiple topics, each with potentially different serialization types. "+
-				"All input topics should exist before the function is created.")),
+				"All input topics should exist before the function is created."),
+			mcp.Items(
+				map[string]interface{}{
+					"type":        "string",
+					"description": "input topic",
+				},
+			),
+		),
 		mcp.WithString("output",
 			mcp.Description("The output topic for the function results. Optional for 'create' and 'update' operations. "+
 				"Specified in the format 'persistent://tenant/namespace/topic'. "+

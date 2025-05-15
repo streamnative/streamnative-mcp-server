@@ -77,12 +77,24 @@ func PulsarAdminAddTenantTools(s *server.MCPServer, readOnly bool, features []st
 				"namespaces within the tenant, and can manage topic configurations. "+
 				"Format: array of role strings, e.g., ['admin1', 'orgAdmin']. "+
 				"Use empty array [] to remove all admin roles."),
+			mcp.Items(
+				map[string]interface{}{
+					"type":        "string",
+					"description": "role",
+				},
+			),
 		),
 		mcp.WithArray("allowedClusters",
 			mcp.Description("List of clusters that this tenant can access. Required for 'create' and 'update' operations. "+
 				"Restricts the tenant to only use specified clusters, enabling geographic or infrastructure isolation. "+
 				"Format: array of cluster names, e.g., ['us-west', 'us-east']. "+
 				"An empty list means no clusters are accessible to this tenant."),
+			mcp.Items(
+				map[string]interface{}{
+					"type":        "string",
+					"description": "cluster",
+				},
+			),
 		),
 	)
 	s.AddTool(tenantTool, handleTenantTool(readOnly))
