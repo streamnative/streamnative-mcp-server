@@ -307,6 +307,25 @@ func handleTopicStats(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.
 		return mcp.NewToolResultError(fmt.Sprintf("Invalid topic name '%s': %v", topic, err)), nil
 	}
 
+	namespaceName, err := utils.GetNamespaceName(topicName.GetTenant() + "/" + topicName.GetNamespace())
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Invalid namespace name '%s': %v", namespaceName, err)), nil
+	}
+
+	// List topics
+	partitionedTopics, nonPartitionedTopics, err := admin.Topics().List(*namespaceName)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to list topics in namespace '%s': %v",
+			namespaceName, err)), nil
+	}
+
+	if slices.Contains(partitionedTopics, topicName.String()) {
+		partitioned = true
+	}
+	if slices.Contains(nonPartitionedTopics, topicName.String()) {
+		partitioned = false
+	}
+
 	var jsonBytes []byte
 	if partitioned {
 		// Get partitioned topic stats
