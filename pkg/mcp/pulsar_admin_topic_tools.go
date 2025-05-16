@@ -110,7 +110,7 @@ func PulsarAdminAddTopicTools(s *server.MCPServer, readOnly bool, features []str
 		),
 		mcp.WithBoolean("partitioned",
 			mcp.Description("Get stats for a partitioned topic. Optional for 'stats' operation. "+
-				"When true, returns aggregated statistics for the partitioned topic."),
+				"It has to be true if the topic is partitioned. Leave it empty or false for non-partitioned topic."),
 		),
 		mcp.WithBoolean("per-partition",
 			mcp.Description("Include per-partition stats. Optional for 'stats' operation. "+
@@ -305,6 +305,25 @@ func handleTopicStats(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.
 	topicName, err := utils.GetTopicName(topic)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Invalid topic name '%s': %v", topic, err)), nil
+	}
+
+	namespaceName, err := utils.GetNamespaceName(topicName.GetTenant() + "/" + topicName.GetNamespace())
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Invalid namespace name '%s': %v", namespaceName, err)), nil
+	}
+
+	// List topics
+	partitionedTopics, nonPartitionedTopics, err := admin.Topics().List(*namespaceName)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to list topics in namespace '%s': %v",
+			namespaceName, err)), nil
+	}
+
+	if slices.Contains(partitionedTopics, topicName.String()) {
+		partitioned = true
+	}
+	if slices.Contains(nonPartitionedTopics, topicName.String()) {
+		partitioned = false
 	}
 
 	var jsonBytes []byte
