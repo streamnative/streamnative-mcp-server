@@ -110,7 +110,7 @@ func PulsarAdminAddTopicTools(s *server.MCPServer, readOnly bool, features []str
 		),
 		mcp.WithBoolean("partitioned",
 			mcp.Description("Get stats for a partitioned topic. Optional for 'stats' operation. "+
-				"When true, returns aggregated statistics for the partitioned topic."),
+				"It has to be true if the topic is partitioned. Leave it empty or false for non-partitioned topic."),
 		),
 		mcp.WithBoolean("per-partition",
 			mcp.Description("Include per-partition stats. Optional for 'stats' operation. "+
