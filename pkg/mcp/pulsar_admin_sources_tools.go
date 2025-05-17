@@ -28,6 +28,7 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
+	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 )
 
 // PulsarAdminAddSourcesTools adds a unified source-related tool to the MCP server
@@ -135,7 +136,7 @@ func PulsarAdminAddSourcesTools(s *server.MCPServer, readOnly bool, features []s
 func handleSourcesTool(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Extract and validate operation parameter
-		operation, err := requiredParam[string](request.Params.Arguments, "operation")
+		operation, err := common.RequiredParam[string](request.Params.Arguments, "operation")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'operation': %v", err)), nil
 		}
@@ -169,12 +170,12 @@ func handleSourcesTool(readOnly bool) func(context.Context, mcp.CallToolRequest)
 		}
 
 		// Extract common parameters (all operations except list-built-in require tenant and namespace)
-		tenant, err := requiredParam[string](request.Params.Arguments, "tenant")
+		tenant, err := common.RequiredParam[string](request.Params.Arguments, "tenant")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'tenant': %v. A tenant is required for operation '%s'.", err, operation)), nil
 		}
 
-		namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+		namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'namespace': %v. A namespace is required for operation '%s'.", err, operation)), nil
 		}
@@ -182,7 +183,7 @@ func handleSourcesTool(readOnly bool) func(context.Context, mcp.CallToolRequest)
 		// For all operations except 'list', name is required
 		var name string
 		if operation != "list" {
-			name, err = requiredParam[string](request.Params.Arguments, "name")
+			name, err = common.RequiredParam[string](request.Params.Arguments, "name")
 			if err != nil {
 				return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'name' for operation '%s': %v. The source name must be specified for this operation.", operation, err)), nil
 			}
@@ -268,17 +269,17 @@ func handleSourceStatus(_ context.Context, admin cmdutils.Client, tenant, namesp
 
 // handleSourceCreate handles creating a new source
 func handleSourceCreate(_ context.Context, admin cmdutils.Client, arguments map[string]interface{}) (*mcp.CallToolResult, error) {
-	tenant, err := requiredParam[string](arguments, "tenant")
+	tenant, err := common.RequiredParam[string](arguments, "tenant")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get tenant: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](arguments, "namespace")
+	namespace, err := common.RequiredParam[string](arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace: %v", err)), nil
 	}
 
-	name, err := requiredParam[string](arguments, "name")
+	name, err := common.RequiredParam[string](arguments, "name")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get name: %v", err)), nil
 	}
@@ -292,42 +293,42 @@ func handleSourceCreate(_ context.Context, admin cmdutils.Client, arguments map[
 	}
 
 	// Get optional parameters
-	archive, hasArchive := optionalParam[string](arguments, "archive")
+	archive, hasArchive := common.OptionalParam[string](arguments, "archive")
 	if hasArchive && archive != "" {
 		sourceData.Archive = archive
 	}
 
-	sourceType, hasSourceType := optionalParam[string](arguments, "source-type")
+	sourceType, hasSourceType := common.OptionalParam[string](arguments, "source-type")
 	if hasSourceType && sourceType != "" {
 		sourceData.SourceType = sourceType
 	}
 
-	destTopic, hasDestTopic := optionalParam[string](arguments, "destination-topic-name")
+	destTopic, hasDestTopic := common.OptionalParam[string](arguments, "destination-topic-name")
 	if hasDestTopic && destTopic != "" {
 		sourceData.DestinationTopicName = destTopic
 	}
 
-	deserializationClassName, hasDeserialization := optionalParam[string](arguments, "deserialization-classname")
+	deserializationClassName, hasDeserialization := common.OptionalParam[string](arguments, "deserialization-classname")
 	if hasDeserialization && deserializationClassName != "" {
 		sourceData.DeserializationClassName = deserializationClassName
 	}
 
-	schemaType, hasSchemaType := optionalParam[string](arguments, "schema-type")
+	schemaType, hasSchemaType := common.OptionalParam[string](arguments, "schema-type")
 	if hasSchemaType && schemaType != "" {
 		sourceData.SchemaType = schemaType
 	}
 
-	className, hasClassName := optionalParam[string](arguments, "classname")
+	className, hasClassName := common.OptionalParam[string](arguments, "classname")
 	if hasClassName && className != "" {
 		sourceData.ClassName = className
 	}
 
-	processingGuarantees, hasProcessingGuarantees := optionalParam[string](arguments, "processing-guarantees")
+	processingGuarantees, hasProcessingGuarantees := common.OptionalParam[string](arguments, "processing-guarantees")
 	if hasProcessingGuarantees && processingGuarantees != "" {
 		sourceData.ProcessingGuarantees = processingGuarantees
 	}
 
-	parallelismFloat, hasParallelism := optionalParam[float64](arguments, "parallelism")
+	parallelismFloat, hasParallelism := common.OptionalParam[float64](arguments, "parallelism")
 	if hasParallelism {
 		sourceData.Parallelism = int(parallelismFloat)
 	}
@@ -384,17 +385,17 @@ func handleSourceCreate(_ context.Context, admin cmdutils.Client, arguments map[
 
 // handleSourceUpdate handles updating an existing source
 func handleSourceUpdate(_ context.Context, admin cmdutils.Client, arguments map[string]interface{}) (*mcp.CallToolResult, error) {
-	tenant, err := requiredParam[string](arguments, "tenant")
+	tenant, err := common.RequiredParam[string](arguments, "tenant")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get tenant: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](arguments, "namespace")
+	namespace, err := common.RequiredParam[string](arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace: %v", err)), nil
 	}
 
-	name, err := requiredParam[string](arguments, "name")
+	name, err := common.RequiredParam[string](arguments, "name")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get name: %v", err)), nil
 	}
@@ -408,42 +409,42 @@ func handleSourceUpdate(_ context.Context, admin cmdutils.Client, arguments map[
 	}
 
 	// Get optional parameters
-	archive, hasArchive := optionalParam[string](arguments, "archive")
+	archive, hasArchive := common.OptionalParam[string](arguments, "archive")
 	if hasArchive && archive != "" {
 		sourceData.Archive = archive
 	}
 
-	sourceType, hasSourceType := optionalParam[string](arguments, "source-type")
+	sourceType, hasSourceType := common.OptionalParam[string](arguments, "source-type")
 	if hasSourceType && sourceType != "" {
 		sourceData.SourceType = sourceType
 	}
 
-	destTopic, hasDestTopic := optionalParam[string](arguments, "destination-topic-name")
+	destTopic, hasDestTopic := common.OptionalParam[string](arguments, "destination-topic-name")
 	if hasDestTopic && destTopic != "" {
 		sourceData.DestinationTopicName = destTopic
 	}
 
-	deserializationClassName, hasDeserialization := optionalParam[string](arguments, "deserialization-classname")
+	deserializationClassName, hasDeserialization := common.OptionalParam[string](arguments, "deserialization-classname")
 	if hasDeserialization && deserializationClassName != "" {
 		sourceData.DeserializationClassName = deserializationClassName
 	}
 
-	schemaType, hasSchemaType := optionalParam[string](arguments, "schema-type")
+	schemaType, hasSchemaType := common.OptionalParam[string](arguments, "schema-type")
 	if hasSchemaType && schemaType != "" {
 		sourceData.SchemaType = schemaType
 	}
 
-	className, hasClassName := optionalParam[string](arguments, "classname")
+	className, hasClassName := common.OptionalParam[string](arguments, "classname")
 	if hasClassName && className != "" {
 		sourceData.ClassName = className
 	}
 
-	processingGuarantees, hasProcessingGuarantees := optionalParam[string](arguments, "processing-guarantees")
+	processingGuarantees, hasProcessingGuarantees := common.OptionalParam[string](arguments, "processing-guarantees")
 	if hasProcessingGuarantees && processingGuarantees != "" {
 		sourceData.ProcessingGuarantees = processingGuarantees
 	}
 
-	parallelismFloat, hasParallelism := optionalParam[float64](arguments, "parallelism")
+	parallelismFloat, hasParallelism := common.OptionalParam[float64](arguments, "parallelism")
 	if hasParallelism {
 		sourceData.Parallelism = int(parallelismFloat)
 	}

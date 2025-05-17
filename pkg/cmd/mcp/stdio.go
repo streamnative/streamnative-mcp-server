@@ -30,8 +30,8 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/log"
-	"github.com/streamnative/streamnative-mcp-server/pkg/mcp"
 )
 
 func NewCmdMcpStdioServer(configOpts *ServerOptions) *cobra.Command {
@@ -63,7 +63,7 @@ func runStdioServer(configOpts *ServerOptions) error {
 	}
 
 	// Create a new MCP server
-	ctx = context.WithValue(ctx, mcp.OptionsKey, configOpts.Options)
+	ctx = context.WithValue(ctx, common.OptionsKey, configOpts.Options)
 	stdLogger := stdlog.New(logger.Writer(), "snmcp-server", 0)
 	stdioServer := server.NewStdioServer(newMcpServer(configOpts, logger))
 

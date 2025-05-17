@@ -26,7 +26,9 @@ import (
 	"time"
 
 	"github.com/apache/pulsar-client-go/pulsar"
+	cliutils "github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
 	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 )
 
 // FunctionInvoker handles function invocation and result tracking
@@ -38,7 +40,7 @@ type FunctionInvoker struct {
 
 // FunctionResult represents the result of a function invocation
 type FunctionResult struct {
-	Data  interface{}
+	Data  string
 	Error error
 }
 
@@ -53,30 +55,27 @@ func NewFunctionInvoker(client pulsar.Client) *FunctionInvoker {
 
 // InvokeFunctionAndWait sends a message to the function and waits for the result
 func (fi *FunctionInvoker) InvokeFunctionAndWait(ctx context.Context, fnTool *FunctionTool, params map[string]interface{}) (*mcp.CallToolResult, error) {
-	// Convert params to JSON
-	jsonData, err := json.Marshal(params)
+	payload, err := common.RequiredParam[string](params, "payload")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to marshal params to JSON: %v", err)), nil
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to get payload: %v", err)), nil
 	}
-
-	// Create a unique message ID for tracking the request
-	messageID := generateMessageID(fnTool.Name)
 
 	// Create a result channel for this request
 	resultChan := make(chan FunctionResult, 1)
-	fi.registerResultChannel(messageID, resultChan)
-	defer fi.unregisterResultChannel(messageID)
-
-	// Set up consumer for output topic
-	err = fi.setupConsumer(ctx, fnTool.OutputTopic, messageID)
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to set up consumer: %v", err)), nil
-	}
 
 	// Send message to input topic
-	err = fi.sendMessage(ctx, fnTool.InputTopic, messageID, string(jsonData))
+	msgID, err := fi.sendMessage(ctx, fnTool.InputTopic, payload, fnTool.InputSchema)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to send message: %v", err)), nil
+	}
+
+	fi.registerResultChannel(msgID, resultChan)
+	defer fi.unregisterResultChannel(msgID)
+
+	// Set up consumer for output topic
+	err = fi.setupConsumer(ctx, fnTool.InputTopic, fnTool.OutputTopic, msgID, fnTool.OutputSchema)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to set up consumer: %v", err)), nil
 	}
 
 	// Wait for result or timeout
@@ -86,20 +85,14 @@ func (fi *FunctionInvoker) InvokeFunctionAndWait(ctx context.Context, fnTool *Fu
 			return mcp.NewToolResultError(fmt.Sprintf("Function execution failed: %v", result.Error)), nil
 		}
 
-		// Convert result to JSON
-		jsonResult, err := json.Marshal(result.Data)
-		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to marshal result to JSON: %v", err)), nil
-		}
-
-		return mcp.NewToolResultText(string(jsonResult)), nil
+		return mcp.NewToolResultText(result.Data), nil
 	case <-ctx.Done():
 		return mcp.NewToolResultError(fmt.Sprintf("Function invocation timed out after %v", ctx.Value("timeout"))), nil
 	}
 }
 
 // setupConsumer creates a consumer for the output topic
-func (fi *FunctionInvoker) setupConsumer(ctx context.Context, outputTopic, messageID string) error {
+func (fi *FunctionInvoker) setupConsumer(ctx context.Context, inputTopic, outputTopic, messageID string, schema *SchemaInfo) error {
 	consumerOptions := pulsar.ConsumerOptions{
 		Topic:            outputTopic,
 		SubscriptionName: fmt.Sprintf("mcp-tool-consumer-%s", messageID),
@@ -142,10 +135,14 @@ func (fi *FunctionInvoker) setupConsumer(ctx context.Context, outputTopic, messa
 				}
 
 				// Process the message
-				fi.processMessage(msg, messageID)
+				err = fi.processMessage(inputTopic, msg, messageID, schema)
+				if err != nil {
+					log.Printf("Failed to process message: %v", err)
+					continue
+				}
 
 				// Acknowledge the message
-				consumer.Ack(msg)
+				_ = consumer.Ack(msg)
 
 				// Stop after processing one message
 				return
@@ -157,48 +154,51 @@ func (fi *FunctionInvoker) setupConsumer(ctx context.Context, outputTopic, messa
 }
 
 // sendMessage sends a message to the input topic
-func (fi *FunctionInvoker) sendMessage(ctx context.Context, inputTopic, messageID, payload string) error {
+func (fi *FunctionInvoker) sendMessage(ctx context.Context, inputTopic, payload string, schema *SchemaInfo) (string, error) {
 	// Create a producer
 	producer, err := fi.client.CreateProducer(pulsar.ProducerOptions{
 		Topic: inputTopic,
 	})
 	if err != nil {
-		return fmt.Errorf("failed to create producer: %w", err)
+		return "", fmt.Errorf("failed to create producer: %w", err)
 	}
 	defer producer.Close()
 
-	// Create message properties with correlation ID
-	properties := map[string]string{
-		"correlationId": messageID,
-	}
-
 	// Send the message with properties
-	_, err = producer.Send(ctx, &pulsar.ProducerMessage{
-		Payload:    []byte(payload),
-		Properties: properties,
+	msgID, err := producer.Send(ctx, &pulsar.ProducerMessage{
+		Payload: []byte(payload),
 	})
 
 	if err != nil {
-		return fmt.Errorf("failed to send message: %w", err)
+		return "", fmt.Errorf("failed to send message: %w", err)
 	}
 
-	return nil
+	return msgID.String(), nil
 }
 
 // processMessage processes a message received from the output topic
-func (fi *FunctionInvoker) processMessage(msg pulsar.Message, messageID string) {
+func (fi *FunctionInvoker) processMessage(inputTopic string, msg pulsar.Message, messageID string, schema *SchemaInfo) error {
 	// Check if the message has our correlation ID
-	if msg.Properties()["correlationId"] != messageID {
-		// Not our message, ignore
-		return
+	correlationID := msg.Properties()["__pfn_input_msg_id__"]
+	correlationInputTopic := msg.Properties()["__pfn_input_topic__"]
+	correlationInputTopicName, err := cliutils.GetTopicName(correlationInputTopic)
+	if err != nil {
+		log.Printf("Failed to get topic name: %v", err)
+		return fmt.Errorf("failed to get topic name: %w", err)
+	}
+	inputTopicName, err := cliutils.GetTopicName(inputTopic)
+	if err != nil {
+		log.Printf("Failed to get topic name: %v", err)
+		return fmt.Errorf("failed to get topic name: %w", err)
 	}
 
-	// Parse the message payload
-	var result interface{}
-	err := json.Unmarshal(msg.Payload(), &result)
-	if err != nil {
-		// If JSON parsing fails, use the raw payload as a string
-		result = string(msg.Payload())
+	if correlationInputTopicName.String() != inputTopicName.String() {
+		// Not our message, ignore
+		return nil
+	}
+	if correlationID != messageID {
+		// Not our message, ignore
+		return nil
 	}
 
 	// Get the result channel
@@ -206,13 +206,37 @@ func (fi *FunctionInvoker) processMessage(msg pulsar.Message, messageID string) 
 	resultChan, exists := fi.resultChannels[messageID]
 	fi.mutex.RUnlock()
 
-	if exists {
+	if !exists {
+		return fmt.Errorf("result channel not found for message ID: %s", messageID)
+	}
+
+	switch schema.Type {
+	case "STRING":
+		result := string(msg.Payload())
 		// Send the result to the channel
 		resultChan <- FunctionResult{
 			Data:  result,
 			Error: nil,
 		}
+	case "JSON":
+		var result map[string]interface{}
+		err = json.Unmarshal(msg.Payload(), &result)
+		if err != nil {
+			return fmt.Errorf("failed to unmarshal message payload: %w", err)
+		}
+		resultString, err := json.Marshal(result)
+		if err != nil {
+			return fmt.Errorf("failed to marshal result to JSON: %w", err)
+		}
+		resultChan <- FunctionResult{
+			Data:  string(resultString),
+			Error: nil,
+		}
+	default:
+		return fmt.Errorf("unsupported schema type: %s", schema.Type)
 	}
+
+	return nil
 }
 
 // registerResultChannel registers a result channel for a message ID

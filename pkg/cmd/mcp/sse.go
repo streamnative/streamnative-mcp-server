@@ -31,6 +31,7 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp"
 )
 
@@ -68,7 +69,7 @@ func runSseServer(configOpts *ServerOptions) error {
 	}
 
 	// 3. Create a new MCP server
-	ctx = context.WithValue(ctx, mcp.OptionsKey, configOpts.Options)
+	ctx = context.WithValue(ctx, common.OptionsKey, configOpts.Options)
 	mcpServer := newMcpServer(configOpts, logger)
 
 	// add Pulsar Functions as MCP tools
@@ -78,7 +79,7 @@ func runSseServer(configOpts *ServerOptions) error {
 		mcpServer,
 		server.WithStaticBasePath(configOpts.HTTPPath),
 		server.WithHTTPContextFunc(func(ctx context.Context, _ *http.Request) context.Context {
-			return context.WithValue(ctx, mcp.OptionsKey, configOpts.Options)
+			return context.WithValue(ctx, common.OptionsKey, configOpts.Options)
 		}),
 	)
 

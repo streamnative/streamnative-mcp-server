@@ -27,6 +27,7 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
+	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
@@ -112,12 +113,12 @@ func PulsarAdminAddPackagesTools(s *server.MCPServer, readOnly bool, features []
 func handlePackageTool(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get required parameters
-		resource, err := requiredParam[string](request.Params.Arguments, "resource")
+		resource, err := common.RequiredParam[string](request.Params.Arguments, "resource")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get resource: %v", err)), nil
 		}
 
-		operation, err := requiredParam[string](request.Params.Arguments, "operation")
+		operation, err := common.RequiredParam[string](request.Params.Arguments, "operation")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get operation: %v", err)), nil
 		}
@@ -151,7 +152,7 @@ func handlePackageTool(readOnly bool) func(context.Context, mcp.CallToolRequest)
 
 // handlePackageResource handles operations on a specific package
 func handlePackageResource(client cmdutils.Client, operation string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	packageName, err := requiredParam[string](request.Params.Arguments, "packageName")
+	packageName, err := common.RequiredParam[string](request.Params.Arguments, "packageName")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'packageName' for package operations: %v", err)), nil
 	}
@@ -188,12 +189,12 @@ func handlePackageResource(client cmdutils.Client, operation string, request mcp
 		return mcp.NewToolResultText(string(metadataJSON)), nil
 
 	case "update":
-		description, err := requiredParam[string](request.Params.Arguments, "description")
+		description, err := common.RequiredParam[string](request.Params.Arguments, "description")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'description' for package.update: %v", err)), nil
 		}
 
-		contact, _ := optionalParam[string](request.Params.Arguments, "contact")
+		contact, _ := common.OptionalParam[string](request.Params.Arguments, "contact")
 		properties := extractProperties(request.Params.Arguments)
 
 		// Update package metadata
@@ -214,7 +215,7 @@ func handlePackageResource(client cmdutils.Client, operation string, request mcp
 		return mcp.NewToolResultText(fmt.Sprintf("The package '%s' deleted successfully", packageName)), nil
 
 	case "download":
-		path, err := requiredParam[string](request.Params.Arguments, "path")
+		path, err := common.RequiredParam[string](request.Params.Arguments, "path")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'path' for package.download: %v", err)), nil
 		}
@@ -230,17 +231,17 @@ func handlePackageResource(client cmdutils.Client, operation string, request mcp
 		), nil
 
 	case "upload":
-		path, err := requiredParam[string](request.Params.Arguments, "path")
+		path, err := common.RequiredParam[string](request.Params.Arguments, "path")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'path' for package.upload: %v", err)), nil
 		}
 
-		description, err := requiredParam[string](request.Params.Arguments, "description")
+		description, err := common.RequiredParam[string](request.Params.Arguments, "description")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'description' for package.upload: %v", err)), nil
 		}
 
-		contact, _ := optionalParam[string](request.Params.Arguments, "contact")
+		contact, _ := common.OptionalParam[string](request.Params.Arguments, "contact")
 		properties := extractProperties(request.Params.Arguments)
 
 		// Upload package
@@ -262,12 +263,12 @@ func handlePackageResource(client cmdutils.Client, operation string, request mcp
 func handlePackagesResource(client cmdutils.Client, operation string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	switch operation {
 	case "list":
-		packageType, err := requiredParam[string](request.Params.Arguments, "type")
+		packageType, err := common.RequiredParam[string](request.Params.Arguments, "type")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'type' for packages.list: %v", err)), nil
 		}
 
-		namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+		namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'namespace' for packages.list: %v", err)), nil
 		}

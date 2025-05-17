@@ -28,6 +28,7 @@ import (
 	"github.com/apache/pulsar-client-go/pulsar"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
+	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	mcppulsar "github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
@@ -87,14 +88,14 @@ func PulsarClientAddProducerTools(s *server.MCPServer, _ bool, features []string
 
 func handleClientProduce(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Extract required parameters with validation
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
 
 	// Set default values and extract optional parameters
 	messages := []string{}
-	if val, exists := optionalParam[[]interface{}](request.Params.Arguments, "messages"); exists && len(val) > 0 {
+	if val, exists := common.OptionalParam[[]interface{}](request.Params.Arguments, "messages"); exists && len(val) > 0 {
 		for _, m := range val {
 			if strMsg, ok := m.(string); ok {
 				messages = append(messages, strMsg)
@@ -107,32 +108,32 @@ func handleClientProduce(ctx context.Context, request mcp.CallToolRequest) (*mcp
 	}
 
 	numProduce := 1
-	if val, exists := optionalParam[float64](request.Params.Arguments, "num-produce"); exists {
+	if val, exists := common.OptionalParam[float64](request.Params.Arguments, "num-produce"); exists {
 		numProduce = int(val)
 	}
 
 	rate := 0.0
-	if val, exists := optionalParam[float64](request.Params.Arguments, "rate"); exists {
+	if val, exists := common.OptionalParam[float64](request.Params.Arguments, "rate"); exists {
 		rate = val
 	}
 
 	disableBatching := false
-	if val, exists := optionalParam[bool](request.Params.Arguments, "disable-batching"); exists {
+	if val, exists := common.OptionalParam[bool](request.Params.Arguments, "disable-batching"); exists {
 		disableBatching = val
 	}
 
 	chunkingAllowed := false
-	if val, exists := optionalParam[bool](request.Params.Arguments, "chunking"); exists {
+	if val, exists := common.OptionalParam[bool](request.Params.Arguments, "chunking"); exists {
 		chunkingAllowed = val
 	}
 
 	separator := ""
-	if val, exists := optionalParam[string](request.Params.Arguments, "separator"); exists && val != "" {
+	if val, exists := common.OptionalParam[string](request.Params.Arguments, "separator"); exists && val != "" {
 		separator = val
 	}
 
 	properties := []string{}
-	if val, exists := optionalParam[[]interface{}](request.Params.Arguments, "properties"); exists && len(val) > 0 {
+	if val, exists := common.OptionalParam[[]interface{}](request.Params.Arguments, "properties"); exists && len(val) > 0 {
 		for _, p := range val {
 			if strProp, ok := p.(string); ok {
 				properties = append(properties, strProp)
@@ -141,7 +142,7 @@ func handleClientProduce(ctx context.Context, request mcp.CallToolRequest) (*mcp
 	}
 
 	key := ""
-	if val, exists := optionalParam[string](request.Params.Arguments, "key"); exists {
+	if val, exists := common.OptionalParam[string](request.Params.Arguments, "key"); exists {
 		key = val
 	}
 

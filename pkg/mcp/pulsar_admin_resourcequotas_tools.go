@@ -28,6 +28,7 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
+	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
@@ -100,12 +101,12 @@ func PulsarAdminAddResourceQuotasTools(s *server.MCPServer, readOnly bool, featu
 func handleResourceQuotaTool(readOnly bool) func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get required parameters
-		resource, err := requiredParam[string](request.Params.Arguments, "resource")
+		resource, err := common.RequiredParam[string](request.Params.Arguments, "resource")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get resource: %v", err)), nil
 		}
 
-		operation, err := requiredParam[string](request.Params.Arguments, "operation")
+		operation, err := common.RequiredParam[string](request.Params.Arguments, "operation")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get operation: %v", err)), nil
 		}
@@ -147,8 +148,8 @@ func handleResourceQuotaTool(readOnly bool) func(_ context.Context, request mcp.
 // handleQuotaGet handles getting a resource quota
 func handleQuotaGet(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get optional parameters
-	namespace, hasNamespace := optionalParam[string](request.Params.Arguments, "namespace")
-	bundle, hasBundle := optionalParam[string](request.Params.Arguments, "bundle")
+	namespace, hasNamespace := common.OptionalParam[string](request.Params.Arguments, "namespace")
+	bundle, hasBundle := common.OptionalParam[string](request.Params.Arguments, "bundle")
 
 	// Check if both namespace and bundle are provided or neither is provided
 	if (hasNamespace && !hasBundle) || (!hasNamespace && hasBundle) {
@@ -191,35 +192,35 @@ func handleQuotaGet(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.Ca
 // handleQuotaSet handles setting a resource quota
 func handleQuotaSet(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters for set operation
-	msgRateIn, err := requiredParam[float64](request.Params.Arguments, "msgRateIn")
+	msgRateIn, err := common.RequiredParam[float64](request.Params.Arguments, "msgRateIn")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'msgRateIn' for quota.set: %v", err)), nil
 	}
 
-	msgRateOut, err := requiredParam[float64](request.Params.Arguments, "msgRateOut")
+	msgRateOut, err := common.RequiredParam[float64](request.Params.Arguments, "msgRateOut")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'msgRateOut' for quota.set: %v", err)), nil
 	}
 
-	bandwidthIn, err := requiredParam[float64](request.Params.Arguments, "bandwidthIn")
+	bandwidthIn, err := common.RequiredParam[float64](request.Params.Arguments, "bandwidthIn")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'bandwidthIn' for quota.set: %v", err)), nil
 	}
 
-	bandwidthOut, err := requiredParam[float64](request.Params.Arguments, "bandwidthOut")
+	bandwidthOut, err := common.RequiredParam[float64](request.Params.Arguments, "bandwidthOut")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'bandwidthOut' for quota.set: %v", err)), nil
 	}
 
-	memory, err := requiredParam[float64](request.Params.Arguments, "memory")
+	memory, err := common.RequiredParam[float64](request.Params.Arguments, "memory")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'memory' for quota.set: %v", err)), nil
 	}
 
 	// Get optional parameters
-	namespace, hasNamespace := optionalParam[string](request.Params.Arguments, "namespace")
-	bundle, hasBundle := optionalParam[string](request.Params.Arguments, "bundle")
-	dynamic, hasDynamic := optionalParam[bool](request.Params.Arguments, "dynamic")
+	namespace, hasNamespace := common.OptionalParam[string](request.Params.Arguments, "namespace")
+	bundle, hasBundle := common.OptionalParam[string](request.Params.Arguments, "bundle")
+	dynamic, hasDynamic := common.OptionalParam[bool](request.Params.Arguments, "dynamic")
 
 	if !hasDynamic {
 		dynamic = false
@@ -263,12 +264,12 @@ func handleQuotaSet(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.Ca
 // handleQuotaReset handles resetting a resource quota
 func handleQuotaReset(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters for reset operation
-	namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'namespace' for quota.reset: %v", err)), nil
 	}
 
-	bundle, err := requiredParam[string](request.Params.Arguments, "bundle")
+	bundle, err := common.RequiredParam[string](request.Params.Arguments, "bundle")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'bundle' for quota.reset: %v", err)), nil
 	}

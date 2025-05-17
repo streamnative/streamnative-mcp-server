@@ -26,6 +26,7 @@ import (
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
+	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
 	"github.com/twmb/franz-go/pkg/kadm"
 )
@@ -127,12 +128,12 @@ func KafkaAdminAddTopicTools(s *server.MCPServer, readOnly bool, features []stri
 func handleKafkaTopicTool(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get required parameters
-		resource, err := requiredParam[string](request.Params.Arguments, "resource")
+		resource, err := common.RequiredParam[string](request.Params.Arguments, "resource")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get resource: %v", err)), nil
 		}
 
-		operation, err := requiredParam[string](request.Params.Arguments, "operation")
+		operation, err := common.RequiredParam[string](request.Params.Arguments, "operation")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get operation: %v", err)), nil
 		}
@@ -182,7 +183,7 @@ func handleKafkaTopicTool(readOnly bool) func(context.Context, mcp.CallToolReque
 
 func handleKafkaTopicGet(ctx context.Context, admin *kadm.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topicName, err := requiredParam[string](request.Params.Arguments, "name")
+	topicName, err := common.RequiredParam[string](request.Params.Arguments, "name")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic name: %v", err)), nil
 	}
@@ -204,27 +205,27 @@ func handleKafkaTopicGet(ctx context.Context, admin *kadm.Client, request mcp.Ca
 
 func handleKafkaTopicCreate(ctx context.Context, admin *kadm.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topicName, err := requiredParam[string](request.Params.Arguments, "name")
+	topicName, err := common.RequiredParam[string](request.Params.Arguments, "name")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic name: %v", err)), nil
 	}
 
 	// Get optional parameters
-	partitions, ok := optionalParam[float64](request.Params.Arguments, "partitions")
+	partitions, ok := common.OptionalParam[float64](request.Params.Arguments, "partitions")
 	if !ok {
 		partitions = 1 // Default to 1 partition
 	}
 
-	replicationFactor, ok := optionalParam[float64](request.Params.Arguments, "replication-factor")
+	replicationFactor, ok := common.OptionalParam[float64](request.Params.Arguments, "replication-factor")
 	if !ok {
 		replicationFactor = 1 // Default to replication factor 1
 	}
 
 	// Get configs if provided
 	var configEntries map[string]*string
-	configsArray, ok := optionalParamConfigs(request.Params.Arguments, "configs")
+	configsArray, ok := common.OptionalParamConfigs(request.Params.Arguments, "configs")
 	if ok {
-		configEntries, err = parseMessageConfigs(configsArray)
+		configEntries, err = common.ParseMessageConfigs(configsArray)
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to parse configs: %v", err)), nil
 		}
@@ -241,7 +242,7 @@ func handleKafkaTopicCreate(ctx context.Context, admin *kadm.Client, request mcp
 
 func handleKafkaTopicDelete(ctx context.Context, admin *kadm.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topicName, err := requiredParam[string](request.Params.Arguments, "name")
+	topicName, err := common.RequiredParam[string](request.Params.Arguments, "name")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic name: %v", err)), nil
 	}
@@ -257,7 +258,7 @@ func handleKafkaTopicDelete(ctx context.Context, admin *kadm.Client, request mcp
 
 func handleKafkaTopicsList(ctx context.Context, admin *kadm.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	includeInternal, ok := optionalParam[bool](request.Params.Arguments, "include-internal")
+	includeInternal, ok := common.OptionalParam[bool](request.Params.Arguments, "include-internal")
 	if !ok {
 		includeInternal = false
 	}
@@ -292,7 +293,7 @@ func handleKafkaTopicsList(ctx context.Context, admin *kadm.Client, request mcp.
 
 func handleKafkaTopicMetadata(ctx context.Context, admin *kadm.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topicName, err := requiredParam[string](request.Params.Arguments, "name")
+	topicName, err := common.RequiredParam[string](request.Params.Arguments, "name")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic name: %v", err)), nil
 	}

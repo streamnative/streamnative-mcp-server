@@ -11,6 +11,7 @@ import (
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
+	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/config"
 	sncloud "github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserver"
 )
@@ -73,20 +74,20 @@ type Metadata struct {
 // handleStreamNativeResourcesApply handles the streaming_cloud_resources_apply tool
 func handleStreamNativeResourcesApply(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get necessary parameters
-	snConfig := getOptions(ctx)
+	snConfig := common.GetOptions(ctx)
 	organization := snConfig.Organization
 	if organization == "" {
 		return mcp.NewToolResultError("No organization is set. Please set the organization using the appropriate context tool."), nil
 	}
 
 	// Get YAML content
-	jsonContent, err := requiredParam[string](request.Params.Arguments, "json_content")
+	jsonContent, err := common.RequiredParam[string](request.Params.Arguments, "json_content")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get json_content: %v", err)), nil
 	}
 
 	// Get dry_run flag
-	dryRun, hasDryRun := optionalParam[bool](request.Params.Arguments, "dry_run")
+	dryRun, hasDryRun := common.OptionalParam[bool](request.Params.Arguments, "dry_run")
 	if !hasDryRun {
 		dryRun = false
 	}
@@ -323,15 +324,15 @@ func applyPulsarCluster(ctx context.Context, apiClient *sncloud.APIClient, jsonC
 
 // handleStreamNativeResourcesDelete handles the streaming_cloud_resources_delete tool
 func handleStreamNativeResourcesDelete(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	snConfig := getOptions(ctx)
+	snConfig := common.GetOptions(ctx)
 	organization := snConfig.Organization
 
-	name, err := requiredParam[string](request.Params.Arguments, "name")
+	name, err := common.RequiredParam[string](request.Params.Arguments, "name")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get name: %v", err)), nil
 	}
 
-	resourceType, err := requiredParam[string](request.Params.Arguments, "type")
+	resourceType, err := common.RequiredParam[string](request.Params.Arguments, "type")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get type: %v", err)), nil
 	}

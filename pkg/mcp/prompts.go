@@ -25,6 +25,7 @@ import (
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
+	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/config"
 	sncloud "github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserver"
 	"k8s.io/utils/ptr"
@@ -81,7 +82,7 @@ func RegisterPrompts(s *server.MCPServer) {
 }
 
 func handleListPulsarClusters(ctx context.Context, _ mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
-	options := getOptions(ctx)
+	options := common.GetOptions(ctx)
 	apiClient, err := config.GetAPIClient()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get API client: %v", err)
@@ -118,11 +119,11 @@ func handleListPulsarClusters(ctx context.Context, _ mcp.GetPromptRequest) (*mcp
 		}
 
 		status := "Not Ready"
-		if isClusterAvailable(cluster) {
+		if common.IsClusterAvailable(cluster) {
 			status = "Ready"
 		}
 
-		engineType := getEngineType(cluster)
+		engineType := common.GetEngineType(cluster)
 
 		messages[i+1] = mcp.PromptMessage{
 			Content: mcp.TextContent{
@@ -147,13 +148,13 @@ func handleListPulsarClusters(ctx context.Context, _ mcp.GetPromptRequest) (*mcp
 }
 
 func handleReadPulsarCluster(ctx context.Context, request mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
-	options := getOptions(ctx)
+	options := common.GetOptions(ctx)
 	apiClient, err := config.GetAPIClient()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get API client: %v", err)
 	}
 
-	name, err := requiredParam[string](convertToMapInterface(request.Params.Arguments), "name")
+	name, err := common.RequiredParam[string](common.ConvertToMapInterface(request.Params.Arguments), "name")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get name: %v", err)
 	}
@@ -204,24 +205,24 @@ func handleReadPulsarCluster(ctx context.Context, request mcp.GetPromptRequest) 
 }
 
 func handleBuildServerlessPulsarCluster(ctx context.Context, request mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
-	options := getOptions(ctx)
+	options := common.GetOptions(ctx)
 	apiClient, err := config.GetAPIClient()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get API client: %v", err)
 	}
-	arguments := convertToMapInterface(request.Params.Arguments)
+	arguments := common.ConvertToMapInterface(request.Params.Arguments)
 
-	instanceName, err := requiredParam[string](arguments, "instance-name")
+	instanceName, err := common.RequiredParam[string](arguments, "instance-name")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get instance name: %v", err)
 	}
 
-	clusterName, err := requiredParam[string](arguments, "cluster-name")
+	clusterName, err := common.RequiredParam[string](arguments, "cluster-name")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get cluster name: %v", err)
 	}
 
-	provider, hasProvider := optionalParam[string](arguments, "provider")
+	provider, hasProvider := common.OptionalParam[string](arguments, "provider")
 	if !hasProvider {
 		provider = ""
 	}
