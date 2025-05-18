@@ -20,6 +20,7 @@ package mcp
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/streamnative/streamnative-mcp-server/pkg/config"
 	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
@@ -88,9 +89,17 @@ func SetContext(options *config.Options, instanceName, clusterName string) error
 	clusterUID := string(*cluster.Metadata.Uid)
 	dnsName := ""
 	for _, endpoint := range cluster.Spec.ServiceEndpoints {
-		if *endpoint.Type == "service" {
+		if endpoint.Type != nil && strings.ToLower(*endpoint.Type) == "service" && !strings.Contains(endpoint.DnsName, "svc.cluster.local") {
 			dnsName = endpoint.DnsName
 			break
+		}
+	}
+	if dnsName == "" {
+		for _, endpoint := range cluster.Spec.ServiceEndpoints {
+			if endpoint.Type != nil && strings.ToLower(*endpoint.Type) == "service" {
+				dnsName = endpoint.DnsName
+				break
+			}
 		}
 	}
 
