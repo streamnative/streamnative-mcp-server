@@ -388,7 +388,6 @@ func (m *PulsarFunctionManager) handleToolCall(fnTool *FunctionTool) func(ctx co
 
 		// Create context with timeout
 		timeoutCtx, cancel := context.WithTimeout(ctx, m.defaultTimeout)
-		timeoutCtx = context.WithValue(timeoutCtx, "timeout", m.defaultTimeout)
 		defer cancel()
 
 		// Register call
