@@ -165,7 +165,7 @@ func (m *PulsarFunctionManager) updateFunctions() {
 	m.mutex.Lock()
 	for fullName, fnTool := range m.fnToToolMap {
 		if !seenFunctions[fullName] {
-			removeTool(m.mcpServer, fnTool.Tool.Name)
+			m.mcpServer.DeleteTools(fnTool.Tool.Name)
 			delete(m.fnToToolMap, fullName)
 			log.Printf("Removed function %s from MCP tools", fullName)
 		}
@@ -372,7 +372,7 @@ func (m *PulsarFunctionManager) handleToolCall(fnTool *FunctionTool) func(ctx co
 		result, err := invoker.InvokeFunctionAndWait(timeoutCtx, fnTool, request.Params.Arguments)
 
 		// Record success or failure
-		if err != nil || IsResultError(result) {
+		if err != nil {
 			cb.RecordFailure()
 		} else {
 			cb.RecordSuccess()

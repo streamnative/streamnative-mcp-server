@@ -31,40 +31,37 @@ import (
 
 // PulsarFunctionManager manages the lifecycle of Pulsar Functions as MCP tools
 type PulsarFunctionManager struct {
-	adminClient       cmdutils.Client               // Pulsar Admin 客户端
-	v2adminClient     cmdutils.Client               // Pulsar Admin 客户端
-	pulsarClient      pulsar.Client                 // Pulsar 客户端
-	fnToToolMap       map[string]*FunctionTool      // 函数到工具的映射
-	mutex             sync.RWMutex                  // 用于保护共享数据
-	pollInterval      time.Duration                 // 轮询间隔
-	stopCh            chan struct{}                 // 用于停止轮询
-	callInProgressMap map[string]context.CancelFunc // 正在处理的调用
-	mcpServer         *server.MCPServer             // MCP 服务器引用
-	readOnly          bool                          // 是否只读模式
-	defaultTimeout    time.Duration                 // 默认超时时间
-	circuitBreakers   map[string]*CircuitBreaker    // 断路器映射
-	tenantNamespaces  []string                      // 需要监听的租户和命名空间列表
+	adminClient       cmdutils.Client
+	v2adminClient     cmdutils.Client
+	pulsarClient      pulsar.Client
+	fnToToolMap       map[string]*FunctionTool
+	mutex             sync.RWMutex
+	pollInterval      time.Duration
+	stopCh            chan struct{}
+	callInProgressMap map[string]context.CancelFunc
+	mcpServer         *server.MCPServer
+	readOnly          bool
+	defaultTimeout    time.Duration
+	circuitBreakers   map[string]*CircuitBreaker
+	tenantNamespaces  []string
 }
 
-// FunctionTool 表示一个函数工具
 type FunctionTool struct {
-	Name               string                // 工具名称
-	Function           *utils.FunctionConfig // Pulsar Function 信息
-	InputSchema        *SchemaInfo           // 输入 Schema
-	OutputSchema       *SchemaInfo           // 输出 Schema
-	InputTopic         string                // 输入 Topic
-	OutputTopic        string                // 输出 Topic
-	Tool               mcp.Tool              // MCP 工具定义
+	Name               string
+	Function           *utils.FunctionConfig
+	InputSchema        *SchemaInfo
+	OutputSchema       *SchemaInfo
+	InputTopic         string
+	OutputTopic        string
+	Tool               mcp.Tool
 	SchemaFetchSuccess bool
 }
 
-// SchemaInfo 用于保存 Schema 信息
 type SchemaInfo struct {
-	Type       string                 // Schema 类型
-	Definition map[string]interface{} // Schema 定义
+	Type       string
+	Definition map[string]interface{}
 }
 
-// CircuitBreaker 实现断路器模式
 type CircuitBreaker struct {
 	failureCount     int
 	failureThreshold int
@@ -74,19 +71,14 @@ type CircuitBreaker struct {
 	mutex            sync.RWMutex
 }
 
-// CircuitState 表示断路器状态
 type CircuitState int
 
 const (
-	// StateOpen 表示断路器打开状态，不允许调用
 	StateOpen CircuitState = iota
-	// StateHalfOpen 表示断路器半开状态，允许有限调用
 	StateHalfOpen
-	// StateClosed 表示断路器关闭状态，允许正常调用
 	StateClosed
 )
 
-// ManagerOptions 配置PulsarFunctionManager的选项
 type ManagerOptions struct {
 	PollInterval     time.Duration
 	DefaultTimeout   time.Duration
@@ -95,7 +87,6 @@ type ManagerOptions struct {
 	TenantNamespaces []string
 }
 
-// DefaultManagerOptions 返回默认的管理器选项
 func DefaultManagerOptions() *ManagerOptions {
 	return &ManagerOptions{
 		PollInterval:     30 * time.Second,
