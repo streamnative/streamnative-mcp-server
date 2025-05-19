@@ -22,7 +22,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"log"
 	"strings"
 	"sync"
 	"time"
@@ -67,7 +66,7 @@ func (fi *FunctionInvoker) InvokeFunctionAndWait(ctx context.Context, fnTool *Fu
 
 	// Send message to input topic
 	msgID, err := fi.sendMessage(ctx, fnTool.InputTopic, payload, fnTool.InputSchema)
-	if err != nil {
+	if err != nil || msgID == "" {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to send message: %v", err)), nil
 	}
 
@@ -128,14 +127,11 @@ func (fi *FunctionInvoker) setupConsumer(ctx context.Context, inputTopic, output
 				defer cancel()
 
 				if err != nil {
-					fmt.Printf("Error receiving message: %v\n", err)
-					log.Printf("[L]Error receiving message: %v\n", err)
 					if err == context.DeadlineExceeded || err == context.Canceled {
 						// Timeout or cancellation, but keep trying unless the parent context is done
 						continue
 					}
 
-					log.Printf("Error receiving message: %v", err)
 					continue
 				}
 
@@ -146,7 +142,6 @@ func (fi *FunctionInvoker) setupConsumer(ctx context.Context, inputTopic, output
 						_ = consumer.Ack(msg)
 						continue
 					}
-					log.Printf("Failed to process message: %v", err)
 					continue
 				}
 
@@ -163,10 +158,15 @@ func (fi *FunctionInvoker) setupConsumer(ctx context.Context, inputTopic, output
 }
 
 // sendMessage sends a message to the input topic
-func (fi *FunctionInvoker) sendMessage(ctx context.Context, inputTopic, payload string, schema *SchemaInfo) (string, error) {
+func (fi *FunctionInvoker) sendMessage(ctx context.Context, inputTopic, payload string, sc *SchemaInfo) (string, error) {
 	// Create a producer
+	pschema, err := GetPulsarTypeSchema(sc)
+	if err != nil {
+		return "", fmt.Errorf("failed to get pulsar schema: %w", err)
+	}
 	producer, err := fi.client.CreateProducer(pulsar.ProducerOptions{
-		Topic: inputTopic,
+		Topic:  inputTopic,
+		Schema: pschema,
 	})
 	if err != nil {
 		return "", fmt.Errorf("failed to create producer: %w", err)
@@ -188,8 +188,6 @@ func (fi *FunctionInvoker) sendMessage(ctx context.Context, inputTopic, payload 
 // processMessage processes a message received from the output topic
 func (fi *FunctionInvoker) processMessage(inputTopic string, msg pulsar.Message, messageID string, schema *SchemaInfo) error {
 	// Check if the message has our correlation ID
-	fmt.Printf("Processing message: %s, %s\n", messageID, msg.Properties())
-	log.Printf("[L]Processing message: %s, %s\n", messageID, msg.Properties())
 	correlationIDbytes, err := base64.StdEncoding.DecodeString(msg.Properties()["__pfn_input_msg_id__"])
 	if err != nil {
 		return fmt.Errorf("failed to decode correlation ID: %w", err)
@@ -202,12 +200,10 @@ func (fi *FunctionInvoker) processMessage(inputTopic string, msg pulsar.Message,
 
 	if !isCorrelationInputTopic(correlationInputTopic, inputTopic) {
 		// Not our message, ignore
-		fmt.Printf("Not our message, ignore: %s, %s\n", correlationInputTopic, inputTopic)
 		return ErrNotOurMessage
 	}
 	if correlationID.String() != messageID {
 		// Not our message, ignore
-		fmt.Printf("Not our message, ignore: %s, %s\n", correlationID.String(), messageID)
 		return ErrNotOurMessage
 	}
 
@@ -261,11 +257,6 @@ func (fi *FunctionInvoker) unregisterResultChannel(messageID string) {
 	fi.mutex.Lock()
 	defer fi.mutex.Unlock()
 	delete(fi.resultChannels, messageID)
-}
-
-// generateMessageID generates a unique message ID
-func generateMessageID(functionName string) string {
-	return fmt.Sprintf("%s-%d", functionName, time.Now().UnixNano())
 }
 
 func isCorrelationInputTopic(correlationInputTopic string, inputTopic string) bool {

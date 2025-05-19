@@ -143,8 +143,12 @@ func (m *PulsarFunctionManager) updateFunctions() {
 
 		// Convert function to tool
 		fnTool, err := m.convertFunctionToTool(fn)
-		if err != nil {
-			log.Printf("Failed to convert function %s to tool: %v", fullName, err)
+		if err != nil || !fnTool.SchemaFetchSuccess {
+			if err != nil {
+				log.Printf("Failed to convert function %s to tool: %v", fullName, err)
+			} else {
+				log.Printf("Failed to fetch schema for function %s, retry later...", fullName)
+			}
 			continue
 		}
 
@@ -158,7 +162,11 @@ func (m *PulsarFunctionManager) updateFunctions() {
 		m.fnToToolMap[fullName] = fnTool
 		m.mutex.Unlock()
 
-		log.Printf("Added function %s as MCP tool", fullName)
+		if changed {
+			log.Printf("Updated function %s as MCP tool [%s]", fullName, fnTool.Tool.Name)
+		} else {
+			log.Printf("Added function %s as MCP tool [%s]", fullName, fnTool.Tool.Name)
+		}
 	}
 
 	// Remove deleted functions
@@ -167,7 +175,7 @@ func (m *PulsarFunctionManager) updateFunctions() {
 		if !seenFunctions[fullName] {
 			m.mcpServer.DeleteTools(fnTool.Tool.Name)
 			delete(m.fnToToolMap, fullName)
-			log.Printf("Removed function %s from MCP tools", fullName)
+			log.Printf("Removed function %s from MCP tools [%s]", fullName, fnTool.Tool.Name)
 		}
 	}
 	m.mutex.Unlock()
@@ -176,6 +184,7 @@ func (m *PulsarFunctionManager) updateFunctions() {
 // getFunctionsList retrieves all functions from the specified tenants/namespaces
 func (m *PulsarFunctionManager) getFunctionsList() ([]*utils.FunctionConfig, error) {
 	var allFunctions []*utils.FunctionConfig
+	var runningFunctions []*utils.FunctionConfig
 
 	if len(m.tenantNamespaces) == 0 {
 		// This is StreamNative supported way to get all functions when using Function Mesh
@@ -207,7 +216,31 @@ func (m *PulsarFunctionManager) getFunctionsList() ([]*utils.FunctionConfig, err
 		}
 	}
 
-	return allFunctions, nil
+	for _, fn := range allFunctions {
+		status, err := m.adminClient.Functions().GetFunctionStatus(fn.Tenant, fn.Namespace, fn.Name)
+		if err != nil {
+			continue
+		}
+		if status.NumRunning <= 0 {
+			continue
+		}
+		running := false
+		for _, instance := range status.Instances {
+			if instance.Status.Err != "" {
+				continue
+			}
+			if instance.Status.Running {
+				running = true
+				break
+			}
+		}
+		if !running {
+			continue
+		}
+		runningFunctions = append(runningFunctions, fn)
+	}
+
+	return runningFunctions, nil
 }
 
 // getFunctionsInNamespace retrieves all functions in a namespace
@@ -396,21 +429,14 @@ func retrieveToolName(fn *utils.FunctionConfig) string {
 	if fn.CustomRuntimeOptions != "" {
 		option := make(map[string]interface{})
 		if err := json.Unmarshal([]byte(fn.CustomRuntimeOptions), &option); err != nil {
-			log.Printf("Failed to unmarshal custom runtime options for function %s: %v", fn.Name, err)
 			return fallbackName
 		}
-		log.Printf("Custom runtime options: %v", option)
 		if envs, ok := option["env"]; ok {
 			if envsMap, ok := envs.(map[string]interface{}); ok {
 				if name, ok := envsMap[CustomRuntimeOptionsEnvMcpToolNameKey]; ok {
-					log.Printf("MCP tool name: %s", name)
 					return name.(string)
 				}
-			} else {
-				log.Printf("Custom runtime options for function %s is not a map[string]string", fn.Name)
 			}
-		} else {
-			log.Printf("No MCP tool name found for function %s", fn.Name)
 		}
 	}
 	return fallbackName
@@ -425,7 +451,6 @@ func retrieveToolDescription(fn *utils.FunctionConfig) string {
 	if fn.CustomRuntimeOptions != "" {
 		option := make(map[string]interface{})
 		if err := json.Unmarshal([]byte(fn.CustomRuntimeOptions), &option); err != nil {
-			log.Printf("Failed to unmarshal custom runtime options for function %s: %v", fn.Name, err)
 			return fallbackDescription
 		}
 		if envs, ok := option["env"]; ok {
@@ -433,11 +458,7 @@ func retrieveToolDescription(fn *utils.FunctionConfig) string {
 				if description, ok := envsMap[CustomRuntimeOptionsEnvMcpToolDescriptionKey]; ok {
 					return description.(string) + " " + fallbackDescription
 				}
-			} else {
-				log.Printf("Custom runtime options for function %s is not a map[string]string", fn.Name)
 			}
-		} else {
-			log.Printf("No MCP tool description found for function %s", fn.Name)
 		}
 	}
 	return fallbackDescription

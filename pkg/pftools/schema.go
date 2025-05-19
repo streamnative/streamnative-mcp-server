@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/apache/pulsar-client-go/pulsar"
 	cliutils "github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
@@ -122,4 +123,23 @@ func convertComplexSchemaToToolInput(schemaInfo *SchemaInfo) (*mcp.ToolInputSche
 			},
 		},
 	}, nil
+}
+
+func GetPulsarTypeSchema(schemaInfo *SchemaInfo) (pulsar.Schema, error) {
+	if schemaInfo == nil || schemaInfo.Definition == nil {
+		return pulsar.NewStringSchema(nil), nil
+	}
+
+	switch schemaInfo.Type {
+	case "JSON":
+		schemaData, err := json.Marshal(schemaInfo.Definition)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal schema definition: %w", err)
+		}
+		return pulsar.NewJSONSchema(string(schemaData), nil), nil
+	case "AVRO", "PROTOBUF", "PROTOBUF_NATIVE":
+		return nil, fmt.Errorf("AVRO, PROTOBUF and PROTOBUF_NATIVE schema is not supported")
+	default:
+		return pulsar.NewStringSchema(nil), nil
+	}
 }
