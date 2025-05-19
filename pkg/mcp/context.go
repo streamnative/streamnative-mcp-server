@@ -27,7 +27,13 @@ func SetMcpContext(instance, cluster, organization string) {
 	McpContextOrganization = &organization
 }
 
+// GetMcpContext returns the currently configured StreamNative Cloud context.
+// If the context has not been fully configured, it returns empty strings.
 func GetMcpContext() (string, string, string) {
+	if McpContextPulsarInstance == nil || McpContextPulsarCluster == nil || McpContextOrganization == nil {
+		return "", "", ""
+	}
+
 	return *McpContextPulsarInstance, *McpContextPulsarCluster, *McpContextOrganization
 }
 
