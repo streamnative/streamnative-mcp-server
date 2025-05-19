@@ -102,7 +102,12 @@ func convertComplexSchemaToToolInput(schemaInfo *SchemaInfo) (*mcp.ToolInputSche
 		return DefaultStringSchema, nil
 	}
 
-	definitionString, err := json.Marshal(schemaInfo.Definition)
+	fields, hasFields := schemaInfo.Definition["fields"].([]any)
+	if !hasFields {
+		return nil, fmt.Errorf("failed to get fields from schema definition")
+	}
+
+	definitionString, err := json.Marshal(fields)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal schema definition: %w", err)
 	}
@@ -113,7 +118,7 @@ func convertComplexSchemaToToolInput(schemaInfo *SchemaInfo) (*mcp.ToolInputSche
 		Properties: map[string]interface{}{
 			"payload": map[string]interface{}{
 				"type":        "string",
-				"description": "The payload of the message, in JSON String format, the schema of the payload is: " + string(definitionString),
+				"description": "The payload of the message, in JSON String format, the schema of the payload in AVRO format is: " + string(definitionString),
 			},
 		},
 	}, nil
