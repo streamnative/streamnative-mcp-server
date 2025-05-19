@@ -19,6 +19,7 @@ package pftools
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"strings"
@@ -32,6 +33,11 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
+)
+
+const (
+	CustomRuntimeOptionsEnvMcpToolNameKey        = "MCP_TOOL_NAME"
+	CustomRuntimeOptionsEnvMcpToolDescriptionKey = "MCP_TOOL_DESCRIPTION"
 )
 
 // NewPulsarFunctionManager creates a new PulsarFunctionManager
@@ -126,6 +132,9 @@ func (m *PulsarFunctionManager) updateFunctions() {
 				if !cmp.Equal(*existingFn.Function, *fn) {
 					changed = true
 				}
+				if !existingFn.SchemaFetchSuccess {
+					changed = true
+				}
 			}
 			if !changed {
 				continue
@@ -156,7 +165,6 @@ func (m *PulsarFunctionManager) updateFunctions() {
 	m.mutex.Lock()
 	for fullName, fnTool := range m.fnToToolMap {
 		if !seenFunctions[fullName] {
-			// Function no longer exists, remove tool
 			removeTool(m.mcpServer, fnTool.Tool.Name)
 			delete(m.fnToToolMap, fullName)
 			log.Printf("Removed function %s from MCP tools", fullName)
@@ -170,6 +178,7 @@ func (m *PulsarFunctionManager) getFunctionsList() ([]*utils.FunctionConfig, err
 	var allFunctions []*utils.FunctionConfig
 
 	if len(m.tenantNamespaces) == 0 {
+		// This is StreamNative supported way to get all functions when using Function Mesh
 		functions, err := m.getFunctionsInNamespace("tenant@all", "namespace@all")
 		if err != nil {
 			return nil, fmt.Errorf("failed to get functions in all namespaces: %w", err)
@@ -233,6 +242,7 @@ func (m *PulsarFunctionManager) getFunctionsInNamespace(tenant, namespace string
 
 // convertFunctionToTool converts a Pulsar Function to an MCP Tool
 func (m *PulsarFunctionManager) convertFunctionToTool(fn *utils.FunctionConfig) (*FunctionTool, error) {
+	schemaFetchSuccess := true
 	// Determine input and output topics
 	if len(fn.InputSpecs) == 0 {
 		return nil, fmt.Errorf("function has no input topics")
@@ -259,6 +269,7 @@ func (m *PulsarFunctionManager) convertFunctionToTool(fn *utils.FunctionConfig) 
 				"type": "string",
 			},
 		}
+		schemaFetchSuccess = false
 	}
 
 	// Get output topic and schema
@@ -275,6 +286,7 @@ func (m *PulsarFunctionManager) convertFunctionToTool(fn *utils.FunctionConfig) 
 					"type": "string",
 				},
 			}
+			schemaFetchSuccess = false
 		}
 	}
 
@@ -284,14 +296,13 @@ func (m *PulsarFunctionManager) convertFunctionToTool(fn *utils.FunctionConfig) 
 		return nil, fmt.Errorf("failed to convert input schema: %w", err)
 	}
 
-	// Create tool name
-	toolName := fmt.Sprintf("pulsar_function_%s_%s_%s", fn.Tenant, fn.Namespace, fn.Name)
+	toolName := retrieveToolName(fn)
 	// Replace non-alphanumeric characters
 	toolName = strings.ReplaceAll(toolName, "-", "_")
 	toolName = strings.ReplaceAll(toolName, ".", "_")
 
 	// Create description
-	description := fmt.Sprintf("Pulsar Function: %s/%s/%s", fn.Tenant, fn.Namespace, fn.Name)
+	description := retrieveToolDescription(fn)
 
 	// Create the tool
 	tool := mcp.NewTool(toolName,
@@ -308,24 +319,20 @@ func (m *PulsarFunctionManager) convertFunctionToTool(fn *utils.FunctionConfig) 
 	m.mutex.Unlock()
 
 	return &FunctionTool{
-		Name:         toolName,
-		Function:     fn,
-		InputSchema:  inputSchema,
-		OutputSchema: outputSchema,
-		InputTopic:   inputTopic,
-		OutputTopic:  outputTopic,
-		Tool:         tool,
+		Name:               toolName,
+		Function:           fn,
+		InputSchema:        inputSchema,
+		OutputSchema:       outputSchema,
+		InputTopic:         inputTopic,
+		OutputTopic:        outputTopic,
+		Tool:               tool,
+		SchemaFetchSuccess: schemaFetchSuccess,
 	}, nil
 }
 
 // handleToolCall returns a handler function for a specific function tool
 func (m *PulsarFunctionManager) handleToolCall(fnTool *FunctionTool) func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		// Check if the function is in read-only mode
-		if m.readOnly {
-			return mcp.NewToolResultError(fmt.Sprintf("Function %s cannot be called in read-only mode", fnTool.Name)), nil
-		}
-
 		// Get the circuit breaker
 		m.mutex.RLock()
 		cb, exists := m.circuitBreakers[fnTool.Name]
@@ -378,4 +385,60 @@ func (m *PulsarFunctionManager) handleToolCall(fnTool *FunctionTool) func(ctx co
 // getFunctionFullName returns the full name of a function
 func getFunctionFullName(tenant, namespace, name string) string {
 	return fmt.Sprintf("%s/%s/%s", tenant, namespace, name)
+}
+
+// retrieveToolName retrieves the tool name from a function
+func retrieveToolName(fn *utils.FunctionConfig) string {
+	if fn == nil {
+		return ""
+	}
+	fallbackName := fmt.Sprintf("pulsar_function_%s_%s_%s", fn.Tenant, fn.Namespace, fn.Name)
+	if fn.CustomRuntimeOptions != "" {
+		option := make(map[string]interface{})
+		if err := json.Unmarshal([]byte(fn.CustomRuntimeOptions), &option); err != nil {
+			log.Printf("Failed to unmarshal custom runtime options for function %s: %v", fn.Name, err)
+			return fallbackName
+		}
+		log.Printf("Custom runtime options: %v", option)
+		if envs, ok := option["env"]; ok {
+			if envsMap, ok := envs.(map[string]interface{}); ok {
+				if name, ok := envsMap[CustomRuntimeOptionsEnvMcpToolNameKey]; ok {
+					log.Printf("MCP tool name: %s", name)
+					return name.(string)
+				}
+			} else {
+				log.Printf("Custom runtime options for function %s is not a map[string]string", fn.Name)
+			}
+		} else {
+			log.Printf("No MCP tool name found for function %s", fn.Name)
+		}
+	}
+	return fallbackName
+}
+
+// retrieveToolDescription retrieves the tool description from a function
+func retrieveToolDescription(fn *utils.FunctionConfig) string {
+	if fn == nil {
+		return ""
+	}
+	fallbackDescription := fmt.Sprintf("Linked to Pulsar Function: %s/%s/%s", fn.Tenant, fn.Namespace, fn.Name)
+	if fn.CustomRuntimeOptions != "" {
+		option := make(map[string]interface{})
+		if err := json.Unmarshal([]byte(fn.CustomRuntimeOptions), &option); err != nil {
+			log.Printf("Failed to unmarshal custom runtime options for function %s: %v", fn.Name, err)
+			return fallbackDescription
+		}
+		if envs, ok := option["env"]; ok {
+			if envsMap, ok := envs.(map[string]interface{}); ok {
+				if description, ok := envsMap[CustomRuntimeOptionsEnvMcpToolDescriptionKey]; ok {
+					return description.(string) + " " + fallbackDescription
+				}
+			} else {
+				log.Printf("Custom runtime options for function %s is not a map[string]string", fn.Name)
+			}
+		} else {
+			log.Printf("No MCP tool description found for function %s", fn.Name)
+		}
+	}
+	return fallbackDescription
 }

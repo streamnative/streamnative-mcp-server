@@ -48,13 +48,14 @@ type PulsarFunctionManager struct {
 
 // FunctionTool 表示一个函数工具
 type FunctionTool struct {
-	Name         string                // 工具名称
-	Function     *utils.FunctionConfig // Pulsar Function 信息
-	InputSchema  *SchemaInfo           // 输入 Schema
-	OutputSchema *SchemaInfo           // 输出 Schema
-	InputTopic   string                // 输入 Topic
-	OutputTopic  string                // 输出 Topic
-	Tool         mcp.Tool              // MCP 工具定义
+	Name               string                // 工具名称
+	Function           *utils.FunctionConfig // Pulsar Function 信息
+	InputSchema        *SchemaInfo           // 输入 Schema
+	OutputSchema       *SchemaInfo           // 输出 Schema
+	InputTopic         string                // 输入 Topic
+	OutputTopic        string                // 输出 Topic
+	Tool               mcp.Tool              // MCP 工具定义
+	SchemaFetchSuccess bool
 }
 
 // SchemaInfo 用于保存 Schema 信息
