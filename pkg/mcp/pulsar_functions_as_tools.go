@@ -58,11 +58,9 @@ func StopAllPulsarFunctionManagers() {
 
 // PulsarFunctionManagedMcpTools 将运行中的Pulsar Functions集成为MCP工具
 func PulsarFunctionManagedMcpTools(s *server.MCPServer, readOnly bool, features []string) {
-	if !slices.Contains(features, string(FeaturePulsarAdminTopics)) &&
-		!slices.Contains(features, string(FeatureAll)) &&
-		!slices.Contains(features, string(FeatureAllPulsar)) &&
-		!slices.Contains(features, string(FeaturePulsarAdmin)) &&
-		!slices.Contains(features, string(FeaturePulsarFunctions)) {
+	if !slices.Contains(features, string(FeatureAll)) &&
+		!slices.Contains(features, string(FeatureFunctionsAsTools)) &&
+		!slices.Contains(features, string(FeatureStreamNativeCloud)) {
 		return
 	}
 

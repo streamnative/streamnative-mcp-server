@@ -32,6 +32,7 @@ import (
 // PulsarFunctionManager manages the lifecycle of Pulsar Functions as MCP tools
 type PulsarFunctionManager struct {
 	adminClient       cmdutils.Client               // Pulsar Admin 客户端
+	v2adminClient     cmdutils.Client               // Pulsar Admin 客户端
 	pulsarClient      pulsar.Client                 // Pulsar 客户端
 	fnToToolMap       map[string]*FunctionTool      // 函数到工具的映射
 	mutex             sync.RWMutex                  // 用于保护共享数据

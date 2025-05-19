@@ -27,6 +27,7 @@ import (
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/admin/config"
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
+	"github.com/google/go-cmp/cmp"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
@@ -42,7 +43,7 @@ func NewPulsarFunctionManager(mcpServer *server.MCPServer, readOnly bool, option
 	}
 
 	adminClient := cmdutils.NewPulsarClientWithAPIVersion(config.V3)
-
+	v2adminClient := cmdutils.NewPulsarClientWithAPIVersion(config.V2)
 	if options == nil {
 		options = DefaultManagerOptions()
 	}
@@ -50,6 +51,7 @@ func NewPulsarFunctionManager(mcpServer *server.MCPServer, readOnly bool, option
 	// Create the manager
 	manager := &PulsarFunctionManager{
 		adminClient:       adminClient,
+		v2adminClient:     v2adminClient,
 		pulsarClient:      pulsarClient,
 		fnToToolMap:       make(map[string]*FunctionTool),
 		mutex:             sync.RWMutex{},
@@ -116,10 +118,18 @@ func (m *PulsarFunctionManager) updateFunctions() {
 		_, exists := m.fnToToolMap[fullName]
 		m.mutex.RUnlock()
 
+		changed := false
 		if exists {
-			// Function already exists, no need to update unless changed
-			// For simplicity, we'll skip checking for changes for now
-			continue
+			// Check if the function has changed
+			existingFn, exists := m.fnToToolMap[fullName]
+			if exists {
+				if !cmp.Equal(*existingFn.Function, *fn) {
+					changed = true
+				}
+			}
+			if !changed {
+				continue
+			}
 		}
 
 		// Convert function to tool
@@ -129,7 +139,9 @@ func (m *PulsarFunctionManager) updateFunctions() {
 			continue
 		}
 
-		// Add tool to MCP server
+		if changed {
+			m.mcpServer.DeleteTools(fnTool.Tool.Name)
+		}
 		m.mcpServer.AddTool(fnTool.Tool, m.handleToolCall(fnTool))
 
 		// Add function to map
@@ -237,7 +249,7 @@ func (m *PulsarFunctionManager) convertFunctionToTool(fn *utils.FunctionConfig) 
 	}
 
 	// Get schema for input topic
-	inputSchema, err := GetSchemaFromTopic(m.adminClient, inputTopic)
+	inputSchema, err := GetSchemaFromTopic(m.v2adminClient, inputTopic)
 	if err != nil {
 		log.Printf("Failed to get schema for input topic %s: %v", inputTopic, err)
 		// Continue with a default schema
@@ -253,7 +265,7 @@ func (m *PulsarFunctionManager) convertFunctionToTool(fn *utils.FunctionConfig) 
 	outputTopic := fn.Output
 	var outputSchema *SchemaInfo
 	if outputTopic != "" {
-		outputSchema, err = GetSchemaFromTopic(m.adminClient, outputTopic)
+		outputSchema, err = GetSchemaFromTopic(m.v2adminClient, outputTopic)
 		if err != nil {
 			log.Printf("Failed to get schema for output topic %s: %v", outputTopic, err)
 			// Continue with a default schema

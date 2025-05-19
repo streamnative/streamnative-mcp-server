@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	cliutils "github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 )
@@ -40,21 +41,25 @@ func GetSchemaFromTopic(admin cmdutils.Client, topic string) (*SchemaInfo, error
 	if admin == nil {
 		return nil, fmt.Errorf("failed to get schema from topic '%s': mcp server is not initialized", topic)
 	}
-
-	// Get schema info from topic
-	schemaInfoWithVersion, err := admin.Schemas().GetSchemaInfoWithVersion(topic)
+	topicName, err := cliutils.GetTopicName(topic)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get schema for topic '%s': %w", topic, err)
+		return nil, fmt.Errorf("failed to get topic name from topic '%s': %w", topic, err)
 	}
 
-	if schemaInfoWithVersion == nil || schemaInfoWithVersion.SchemaInfo == nil {
+	// Get schema info from topic
+	si, err := admin.Schemas().GetSchemaInfo(topicName.String())
+	if err != nil {
+		return nil, fmt.Errorf("failed to get schema for topic '%s': %w", topicName.String(), err)
+	}
+
+	if si == nil {
 		return nil, fmt.Errorf("no schema found for topic '%s'", topic)
 	}
 
 	// Parse schema definition
 	var definition map[string]interface{}
-	if schemaInfoWithVersion.SchemaInfo.Schema != nil {
-		if err := json.Unmarshal(schemaInfoWithVersion.SchemaInfo.Schema, &definition); err != nil {
+	if si.Schema != nil {
+		if err := json.Unmarshal(si.Schema, &definition); err != nil {
 			// If it's not a valid JSON, just create a string type schema
 			definition = map[string]interface{}{
 				"type": "string",
@@ -68,7 +73,7 @@ func GetSchemaFromTopic(admin cmdutils.Client, topic string) (*SchemaInfo, error
 	}
 
 	return &SchemaInfo{
-		Type:       string(schemaInfoWithVersion.SchemaInfo.Type),
+		Type:       string(si.Type),
 		Definition: definition,
 	}, nil
 }

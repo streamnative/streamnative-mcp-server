@@ -47,5 +47,5 @@ const (
 	FeaturePulsarAdminTopicPolicy       Feature = "pulsar-admin-topic-policy"
 	FeaturePulsarClient                 Feature = "pulsar-client"
 	FeatureStreamNativeCloud            Feature = "streamnative-cloud"
-	FeaturePulsarFunctions              Feature = "pulsar-functions"
+	FeatureFunctionsAsTools             Feature = "functions-as-tools"
 )

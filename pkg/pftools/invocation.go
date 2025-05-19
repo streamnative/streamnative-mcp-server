@@ -19,9 +19,11 @@ package pftools
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 	"sync"
 	"time"
 
@@ -94,9 +96,10 @@ func (fi *FunctionInvoker) InvokeFunctionAndWait(ctx context.Context, fnTool *Fu
 // setupConsumer creates a consumer for the output topic
 func (fi *FunctionInvoker) setupConsumer(ctx context.Context, inputTopic, outputTopic, messageID string, schema *SchemaInfo) error {
 	consumerOptions := pulsar.ConsumerOptions{
-		Topic:            outputTopic,
-		SubscriptionName: fmt.Sprintf("mcp-tool-consumer-%s", messageID),
-		Type:             pulsar.Exclusive,
+		Topic:                       outputTopic,
+		SubscriptionName:            fmt.Sprintf("mcp-tool-consumer-%s", messageID),
+		Type:                        pulsar.Exclusive,
+		SubscriptionInitialPosition: pulsar.SubscriptionPositionEarliest,
 	}
 
 	// Create the consumer
@@ -122,9 +125,11 @@ func (fi *FunctionInvoker) setupConsumer(ctx context.Context, inputTopic, output
 				// Set a short timeout for Receive to make it responsive to context cancellation
 				receiveCtx, cancel := context.WithTimeout(ctx, 1*time.Second)
 				msg, err := consumer.Receive(receiveCtx)
-				cancel()
+				defer cancel()
 
 				if err != nil {
+					fmt.Printf("Error receiving message: %v\n", err)
+					log.Printf("[L]Error receiving message: %v\n", err)
 					if err == context.DeadlineExceeded || err == context.Canceled {
 						// Timeout or cancellation, but keep trying unless the parent context is done
 						continue
@@ -137,6 +142,10 @@ func (fi *FunctionInvoker) setupConsumer(ctx context.Context, inputTopic, output
 				// Process the message
 				err = fi.processMessage(inputTopic, msg, messageID, schema)
 				if err != nil {
+					if err == ErrNotOurMessage {
+						_ = consumer.Ack(msg)
+						continue
+					}
 					log.Printf("Failed to process message: %v", err)
 					continue
 				}
@@ -179,26 +188,27 @@ func (fi *FunctionInvoker) sendMessage(ctx context.Context, inputTopic, payload 
 // processMessage processes a message received from the output topic
 func (fi *FunctionInvoker) processMessage(inputTopic string, msg pulsar.Message, messageID string, schema *SchemaInfo) error {
 	// Check if the message has our correlation ID
-	correlationID := msg.Properties()["__pfn_input_msg_id__"]
+	fmt.Printf("Processing message: %s, %s\n", messageID, msg.Properties())
+	log.Printf("[L]Processing message: %s, %s\n", messageID, msg.Properties())
+	correlationIDbytes, err := base64.StdEncoding.DecodeString(msg.Properties()["__pfn_input_msg_id__"])
+	if err != nil {
+		return fmt.Errorf("failed to decode correlation ID: %w", err)
+	}
+	correlationID, err := pulsar.DeserializeMessageID(correlationIDbytes)
+	if err != nil {
+		return fmt.Errorf("failed to deserialize correlation ID: %w", err)
+	}
 	correlationInputTopic := msg.Properties()["__pfn_input_topic__"]
-	correlationInputTopicName, err := cliutils.GetTopicName(correlationInputTopic)
-	if err != nil {
-		log.Printf("Failed to get topic name: %v", err)
-		return fmt.Errorf("failed to get topic name: %w", err)
-	}
-	inputTopicName, err := cliutils.GetTopicName(inputTopic)
-	if err != nil {
-		log.Printf("Failed to get topic name: %v", err)
-		return fmt.Errorf("failed to get topic name: %w", err)
-	}
 
-	if correlationInputTopicName.String() != inputTopicName.String() {
+	if !isCorrelationInputTopic(correlationInputTopic, inputTopic) {
 		// Not our message, ignore
-		return nil
+		fmt.Printf("Not our message, ignore: %s, %s\n", correlationInputTopic, inputTopic)
+		return ErrNotOurMessage
 	}
-	if correlationID != messageID {
+	if correlationID.String() != messageID {
 		// Not our message, ignore
-		return nil
+		fmt.Printf("Not our message, ignore: %s, %s\n", correlationID.String(), messageID)
+		return ErrNotOurMessage
 	}
 
 	// Get the result channel
@@ -220,7 +230,7 @@ func (fi *FunctionInvoker) processMessage(inputTopic string, msg pulsar.Message,
 		}
 	case "JSON":
 		var result map[string]interface{}
-		err = json.Unmarshal(msg.Payload(), &result)
+		err := json.Unmarshal(msg.Payload(), &result)
 		if err != nil {
 			return fmt.Errorf("failed to unmarshal message payload: %w", err)
 		}
@@ -256,4 +266,27 @@ func (fi *FunctionInvoker) unregisterResultChannel(messageID string) {
 // generateMessageID generates a unique message ID
 func generateMessageID(functionName string) string {
 	return fmt.Sprintf("%s-%d", functionName, time.Now().UnixNano())
+}
+
+func isCorrelationInputTopic(correlationInputTopic string, inputTopic string) bool {
+	// remove the partition index from the input topic
+	if strings.Contains(correlationInputTopic, cliutils.PARTITIONEDTOPICSUFFIX) {
+		correlationInputTopic = strings.Split(correlationInputTopic, cliutils.PARTITIONEDTOPICSUFFIX)[0]
+	}
+
+	// remove the partition index from the input topic
+	if strings.Contains(inputTopic, cliutils.PARTITIONEDTOPICSUFFIX) {
+		inputTopic = strings.Split(inputTopic, cliutils.PARTITIONEDTOPICSUFFIX)[0]
+	}
+
+	correlationInputTopicName, err := cliutils.GetTopicName(correlationInputTopic)
+	if err != nil {
+		return false
+	}
+	inputTopicName, err := cliutils.GetTopicName(inputTopic)
+	if err != nil {
+		return false
+	}
+
+	return correlationInputTopicName.String() == inputTopicName.String()
 }
