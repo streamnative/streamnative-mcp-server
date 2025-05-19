@@ -26,7 +26,7 @@ StreamNative MCP Server provides a standard interface for LLMs (Large Language M
   - Connect directly to external Apache Kafka clusters
   - Connect directly to external Apache Pulsar clusters
 
-> *: The Kafka Connect operations are only tested and verfied on StreamNative Cloud. 
+> *: The Kafka Connect operations are only tested and verified on StreamNative Cloud. 
 
 ## Installation
 
