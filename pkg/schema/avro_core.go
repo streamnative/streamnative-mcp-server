@@ -1,8 +1,10 @@
 package schema
 
 import (
+	"encoding/base64"
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/hamba/avro/v2"
 	"github.com/mark3labs/mcp-go/mcp"
@@ -43,7 +45,7 @@ func avroFieldToMcpOption(field *avro.Field) (mcp.ToolOption, error) {
 	if field.Doc() != "" {
 		description = field.Doc()
 	} else {
-		description = fmt.Sprintf("%s (type: %s)", fieldName, fieldType.String()) // Default description
+		description = fmt.Sprintf("%s (type: %s)", fieldName, strings.ReplaceAll(fieldType.String(), "\"", "")) // Default description
 	}
 
 	isRequired := true
@@ -73,7 +75,7 @@ func avroFieldToMcpOption(field *avro.Field) (mcp.ToolOption, error) {
 			// Complex union (e.g., ["string", "int"]), for MCP, describe as string and mention union nature.
 			// Default values for complex unions are tricky with current MCP options.
 			// MCP schema might need to be a string with a description of the union.
-			props := []mcp.PropertyOption{mcp.Description(description + " (union type: " + fieldType.String() + ")")}
+			props := []mcp.PropertyOption{mcp.Description(description + " (union type: " + strings.ReplaceAll(fieldType.String(), "\"", "") + ")")}
 			if isRequired {
 				props = append(props, mcp.Required())
 			}
@@ -132,16 +134,20 @@ func avroFieldToMcpOption(field *avro.Field) (mcp.ToolOption, error) {
 			}
 		}
 		opt = mcp.WithBoolean(fieldName, prop...)
-	case avro.Bytes: // MCP represents bytes typically as a base64 encoded string or just string
+	case avro.Bytes, avro.Fixed:
 		if field.HasDefault() {
-			// Default for bytes is also string in Avro JSON schema
 			if defaultVal, ok := field.Default().(string); ok {
 				prop = append(prop, mcp.DefaultString(defaultVal))
 			} else if defaultBytes, ok := field.Default().([]byte); ok {
-				prop = append(prop, mcp.DefaultString(string(defaultBytes))) // Or base64, TBD by MCP spec
+				prop = append(prop, mcp.DefaultString(string(defaultBytes))) // Or base64
 			}
 		}
-		opt = mcp.WithString(fieldName, prop...) // Or a specific mcp.WithBytes if available/required
+		// For Fixed type, add size information to description
+		if fixedSchema, ok := underlyingTypeForDefault.(*avro.FixedSchema); ok {
+			description += fmt.Sprintf(" (fixed size: %d bytes)", fixedSchema.Size())
+			prop[0] = mcp.Description(description) // Update description in prop
+		}
+		opt = mcp.WithString(fieldName, prop...) // Always use WithString for Bytes/Fixed in MCP options
 	case avro.Array:
 		arraySchema, _ := underlyingTypeForDefault.(*avro.ArraySchema) // Safe due to switch
 		itemsDef, err := avroSchemaDefinitionToMcpProperties("item", arraySchema.Items(), "Array items")
@@ -183,7 +189,7 @@ func avroFieldToMcpOption(field *avro.Field) (mcp.ToolOption, error) {
 			if subField.Doc() != "" {
 				subFieldDescription = subField.Doc()
 			} else {
-				subFieldDescription = fmt.Sprintf("%s (type: %s)", subField.Name(), subField.Type().String()) // Default description
+				subFieldDescription = fmt.Sprintf("%s (type: %s)", subField.Name(), strings.ReplaceAll(subField.Type().String(), "\"", "")) // Default description
 			}
 			subFieldDef, err := avroSchemaDefinitionToMcpProperties(subField.Name(), subField.Type(), subFieldDescription)
 			if err != nil {
@@ -202,18 +208,6 @@ func avroFieldToMcpOption(field *avro.Field) (mcp.ToolOption, error) {
 			}
 		}
 		opt = mcp.WithString(fieldName, prop...) // Enum is represented as string in MCP
-	case avro.Fixed: // Fixed is like bytes but with a fixed size
-		fixedSchema, _ := underlyingTypeForDefault.(*avro.FixedSchema)
-		prop = append(prop, mcp.Description(description+fmt.Sprintf(" (fixed size: %d bytes)", fixedSchema.Size())))
-		if field.HasDefault() {
-			// Default for fixed is also string in Avro JSON schema
-			if defaultVal, ok := field.Default().(string); ok {
-				prop = append(prop, mcp.DefaultString(defaultVal))
-			} else if defaultBytes, ok := field.Default().([]byte); ok {
-				prop = append(prop, mcp.DefaultString(string(defaultBytes)))
-			}
-		}
-		opt = mcp.WithString(fieldName, prop...)
 	case avro.Null:
 		// This case should ideally be handled by the union logic making the field not required.
 		// If a field is solely "null", it's an odd schema. For MCP, maybe a string with note.
@@ -262,7 +256,7 @@ func avroSchemaDefinitionToMcpProperties(name string, avroDef avro.Schema, descr
 			props["description"] = props["description"].(string) + " (nullable)"
 		} else if len(nonNullTypes) > 1 {
 			props["type"] = "string" // Represent complex union as string
-			props["description"] = props["description"].(string) + " (union type: " + avroDef.String() + ")"
+			props["description"] = props["description"].(string) + " (union type: " + strings.ReplaceAll(avroDef.String(), "\"", "") + ")"
 			return props, nil
 		} else { // Only null in union or empty union (invalid)
 			props["type"] = "string" // Fallback for null type
@@ -315,7 +309,7 @@ func avroSchemaDefinitionToMcpProperties(name string, avroDef avro.Schema, descr
 			if field.Doc() != "" {
 				fieldDescription = field.Doc()
 			} else {
-				fieldDescription = fmt.Sprintf("%s (type: %s)", field.Name(), field.Type().String()) // Default description
+				fieldDescription = fmt.Sprintf("%s (type: %s)", field.Name(), strings.ReplaceAll(field.Type().String(), "\"", "")) // Default description
 			}
 			fieldProp, err := avroSchemaDefinitionToMcpProperties(field.Name(), field.Type(), fieldDescription)
 			if err != nil {
@@ -359,42 +353,55 @@ func validateArgumentsAgainstAvroSchemaString(arguments map[string]any, avroSche
 	// Check for missing required fields
 	for _, field := range recordSchema.Fields() {
 		fieldName := field.Name()
-		isRequired := true // Assume required unless it's a union with null
-
-		if unionSchema, okF := field.Type().(*avro.UnionSchema); okF {
-			isNullable := false
-			for _, t := range unionSchema.Types() {
+		// Determine if the field is effectively required for validation purposes
+		// (not nullable in a union, or a non-union type without a default that makes it implicitly optional)
+		// This `isReq` is used to check if a field *must* be present in the arguments map if it *doesn't* have a default.
+		isReq := true // Assume required unless part of a nullable union
+		if unionSchemaVal, ok := field.Type().(*avro.UnionSchema); ok {
+			isNullableInUnion := false
+			for _, t := range unionSchemaVal.Types() {
 				if t.Type() == avro.Null {
-					isNullable = true
+					isNullableInUnion = true
 					break
 				}
 			}
-			if isNullable {
-				isRequired = false
-			}
+			isReq = !isNullableInUnion
 		}
 
-		if _, exists := arguments[fieldName]; !exists && isRequired {
-			return fmt.Errorf("required field '%s' is missing", fieldName)
+		// Check if the field is present in the arguments map
+		value, valueOk := arguments[fieldName]
+
+		// If field is not in arguments map
+		if !valueOk {
+			// If it's considered required (isReq is true) AND it does not have a default value,
+			// then it's an error for it to be missing from arguments.
+			if isReq && !field.HasDefault() {
+				return fmt.Errorf("required field '%s' is missing and has no default value", fieldName)
+			}
+			// If not required (isReq is false), or if it has a default value, it's okay for it to be missing.
+			// The Avro library itself will handle applying the default during actual serialization/deserialization.
+			// Our validator's job here is primarily to ensure that if values ARE provided, they are correct,
+			// and that truly mandatory fields (required and no default) are present.
+			continue // Move to the next field in the schema
+		}
+
+		// If field is present in arguments, validate its value against its schema type
+		if err := validateValueAgainstAvroType(value, field.Type(), fieldName); err != nil {
+			return err
 		}
 	}
 
-	// Validate provided arguments against their schema types
-	for argName, argValue := range arguments {
-		var field *avro.Field
-		for _, f := range recordSchema.Fields() {
-			if f.Name() == argName {
-				field = f
+	// After validating all fields defined in the schema, check for any extra fields in the arguments.
+	for argName := range arguments {
+		foundInSchema := false
+		for _, field := range recordSchema.Fields() {
+			if field.Name() == argName {
+				foundInSchema = true
 				break
 			}
 		}
-		if field == nil {
-			// Allow extra fields? Or be strict? For now, let's be strict as per common schema validation.
-			// Depending on Pulsar's behavior, this might need to be more lenient.
+		if !foundInSchema {
 			return fmt.Errorf("unknown field '%s' provided in arguments", argName)
-		}
-		if err := validateValueAgainstAvroType(argValue, field.Type(), argName); err != nil {
-			return err
 		}
 	}
 
@@ -447,28 +454,25 @@ func validateValueAgainstAvroType(value any, avroDef avro.Schema, path string) e
 			return fmt.Errorf("field '%s': expected string, got %T (value: %v)", path, value, value)
 		}
 	case avro.Int:
-		// JSON unmarshals numbers into float64. Avro library might expect specific int types or handle conversion.
-		// We should be flexible with input types that can reasonably convert to int.
 		switch value.(type) {
-		case int, int8, int16, int32, int64, float32, float64: // float32/64 if they are whole numbers
-			// Further check if float64 is a whole number
+		case int, int8, int16, int32, int64, float32, float64:
 			if fVal, ok := value.(float64); ok && fVal != float64(int64(fVal)) {
 				return fmt.Errorf("field '%s': expected int, got float64 with fractional part (value: %v)", path, value)
 			}
 			if fVal, ok := value.(float32); ok && fVal != float32(int32(fVal)) {
 				return fmt.Errorf("field '%s': expected int, got float32 with fractional part (value: %v)", path, value)
 			}
-			return nil // Acceptable numeric types
+			return nil
 		default:
 			return fmt.Errorf("field '%s': expected int, got %T (value: %v)", path, value, value)
 		}
 	case avro.Long:
 		switch value.(type) {
-		case int, int8, int16, int32, int64, float32, float64: // float32/64 if they are whole numbers
+		case int, int8, int16, int32, int64, float32, float64:
 			if fVal, ok := value.(float64); ok && fVal != float64(int64(fVal)) {
 				return fmt.Errorf("field '%s': expected long, got float64 with fractional part (value: %v)", path, value)
 			}
-			if fVal, ok := value.(float32); ok && fVal != float32(int64(fVal)) { // Note: int64 cast might be too large for float32 precision
+			if fVal, ok := value.(float32); ok && fVal != float32(int64(fVal)) { // float32 to int64 comparison can be tricky with precision
 				return fmt.Errorf("field '%s': expected long, got float32 with fractional part (value: %v)", path, value)
 			}
 			return nil
@@ -477,14 +481,14 @@ func validateValueAgainstAvroType(value any, avroDef avro.Schema, path string) e
 		}
 	case avro.Float:
 		switch value.(type) {
-		case float32, float64, int, int8, int16, int32, int64: // int types are fine
+		case float32, float64, int, int8, int16, int32, int64:
 			return nil
 		default:
 			return fmt.Errorf("field '%s': expected float, got %T (value: %v)", path, value, value)
 		}
 	case avro.Double:
 		switch value.(type) {
-		case float32, float64, int, int8, int16, int32, int64: // int types are fine
+		case float32, float64, int, int8, int16, int32, int64:
 			return nil
 		default:
 			return fmt.Errorf("field '%s': expected double, got %T (value: %v)", path, value, value)
@@ -493,19 +497,20 @@ func validateValueAgainstAvroType(value any, avroDef avro.Schema, path string) e
 		if _, ok := value.(bool); !ok {
 			return fmt.Errorf("field '%s': expected boolean, got %T (value: %v)", path, value, value)
 		}
-	case avro.Bytes, avro.Fixed: // Bytes and Fixed are []byte in Avro Go, but string might come from JSON
-		if _, okStr := value.(string); okStr { // Allow string (e.g. base64 encoded) for bytes if that's the convention
-			return nil // Assume string is an acceptable representation for bytes here.
-		}
-		// Native []byte is not directly produced by json.Unmarshal into map[string]any
-		// This needs alignment on how bytes are passed in `arguments`.
-		// If arguments come from JSON, bytes are likely base64 strings.
-		// For now, we primarily expect string.
-		// if _, okBytes := value.([]byte); !okBytes {
-		//	 return fmt.Errorf("field '%s': expected bytes (string or []byte), got %T (value: %v)", path, value, value)
-		// }
-		return fmt.Errorf("field '%s': expected string for bytes/fixed, got %T (value: %v)", path, value, value)
 
+	case avro.Bytes:
+		if _, okStr := value.(string); okStr {
+			return nil // Allow string for bytes/fixed as per previous logic
+		}
+		if _, okBytes := value.([]byte); okBytes {
+			return nil // Also allow []byte directly
+		}
+		return fmt.Errorf("field '%s': expected string or []byte for bytes, got %T (value: %v)", path, value, value)
+	case avro.Fixed:
+		if _, ok := value.(uint64); ok {
+			return nil // Allow uint64 for fixed as per previous logic
+		}
+		return fmt.Errorf("field '%s': expected uint64 for fixed, got %T (value: %v)", path, value, value)
 	case avro.Array:
 		arrSchema, _ := avroDef.(*avro.ArraySchema)
 		sliceVal, ok := value.([]any) // JSON unmarshals to []any
@@ -586,9 +591,23 @@ func validateValueAgainstAvroType(value any, avroDef avro.Schema, path string) e
 			}
 		}
 		if !isValidSymbol {
-			return fmt.Errorf("field '%s': value '%s' is not a valid symbol for enum %s. Valid symbols: %v", path, strVal, enumSchema.Name(), enumSchema.Symbols())
+			return fmt.Errorf("field '%s': value '%s' is not a valid symbol for enum %s. Valid symbols: %v", path, strVal, enumSchema.FullName(), enumSchema.Symbols())
 		}
-	case avro.Null: // This case should be hit if a non-union field is explicitly "null" type.
+	case avro.Null:
+		if value == nil {
+			// If value is nil, check if avroDef allows null
+			if avroDef.Type() == avro.Null {
+				return nil // Explicitly null type allows nil
+			}
+			if unionSchema, ok := avroDef.(*avro.UnionSchema); ok {
+				for _, t := range unionSchema.Types() {
+					if t.Type() == avro.Null {
+						return nil // Union includes null type
+					}
+				}
+			}
+			return fmt.Errorf("field '%s' is null, but schema type '%s' does not permit null", path, avroDef.Type())
+		}
 		// If value is not nil, it's an error. Nil value handled at the start of the function.
 		// This means value is non-nil here.
 		return fmt.Errorf("field '%s': schema type is explicitly 'null' but received non-nil value %T (value: %v)", path, value, value)
@@ -596,7 +615,7 @@ func validateValueAgainstAvroType(value any, avroDef avro.Schema, path string) e
 	default:
 		return fmt.Errorf("field '%s': unsupported AVRO type '%s' for validation", path, avroDef.Type())
 	}
-	return nil
+	return nil // Should be unreachable if all cases are handled or return, but as a fallback
 }
 
 // serializeArgumentsToAvroBinary validates arguments against an AVRO schema string
@@ -615,10 +634,98 @@ func serializeArgumentsToAvroBinary(arguments map[string]any, avroSchemaString s
 		return nil, fmt.Errorf("failed to parse AVRO schema for serialization (should have been caught by validation): %w", err)
 	}
 
-	// Marshal to AVRO binary
-	data, err := avro.Marshal(schema, arguments)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal arguments to AVRO binary: %w", err)
+	// Before marshalling, we might need to coerce some types, e.g., string to []byte for "bytes" type if convention is base64 string.
+	coercedArgs := make(map[string]any, len(arguments))
+	for k, v := range arguments {
+		coercedArgs[k] = v // Copy existing
 	}
-	return data, nil
+
+	recordSchema, ok := schema.(*avro.RecordSchema)
+	if !ok {
+		// This should ideally not happen if validation passed, but as a safeguard:
+		return nil, fmt.Errorf("parsed schema is not a record schema, cannot prepare arguments for serialization")
+	}
+
+	for _, field := range recordSchema.Fields() {
+		fieldName := field.Name()
+		val, argExists := arguments[fieldName]
+		if !argExists {
+			continue // If arg doesn't exist, skip (defaults or optional handled by avro lib or previous validation)
+		}
+
+		fieldType := field.Type().Type() // Get the base type, handles unions by checking underlying
+		if unionSchema, isUnion := field.Type().(*avro.UnionSchema); isUnion {
+			// If it's a union, we need to find the actual non-null type for coercion logic
+			// This part can be complex if multiple non-null types are in union with bytes/fixed.
+			// For simplicity, assuming if 'bytes' or 'fixed' is a possibility, we check for string coercion.
+			// A more robust solution would inspect the actual type of 'val' against union possibilities.
+			for _, unionMemberType := range unionSchema.Types() {
+				if unionMemberType.Type() == avro.Bytes || unionMemberType.Type() == avro.Fixed {
+					fieldType = unionMemberType.Type()
+					break
+				}
+			}
+		}
+
+		if fieldType == avro.Bytes {
+			if strVal, isStr := val.(string); isStr {
+				// Attempt to decode if it's a string, assuming base64 for bytes encoded as string
+				decodedBytes, err := base64.StdEncoding.DecodeString(strVal)
+				if err == nil {
+					coercedArgs[fieldName] = decodedBytes
+				} else {
+					coercedArgs[fieldName] = []byte(strVal)
+				}
+			}
+		} else if fieldType == avro.Fixed {
+			if strVal, isStr := val.(string); isStr {
+				// For fixed, if it's a string, it must be base64 decodable to the correct length array
+				fixedSchema, _ := field.Type().(*avro.FixedSchema) // Or resolve from union if necessary
+				if actualUnionFieldSchema, okUnion := field.Type().(*avro.UnionSchema); okUnion {
+					for _, ut := range actualUnionFieldSchema.Types() {
+						if fs, okUFS := ut.(*avro.FixedSchema); okUFS {
+							fixedSchema = fs
+							break
+						}
+					}
+				}
+				if fixedSchema != nil {
+					decodedBytes, err := base64.StdEncoding.DecodeString(strVal)
+					if err == nil {
+						if len(decodedBytes) == fixedSchema.Size() {
+							// Convert []byte to [N]byte array for fixed type
+							fixedArray := reflect.New(reflect.ArrayOf(fixedSchema.Size(), reflect.TypeOf(byte(0)))).Elem()
+							reflect.Copy(fixedArray, reflect.ValueOf(decodedBytes))
+							coercedArgs[fieldName] = fixedArray.Interface()
+						} else {
+							// Length mismatch after decoding
+							return nil, fmt.Errorf("field '%s' (fixed[%d]): base64 decoded string has length %d, expected %d", fieldName, fixedSchema.Size(), len(decodedBytes), fixedSchema.Size())
+						}
+					} // else: base64 decoding error, let avro.Marshal handle or error out
+				}
+			} else if byteSlice, isSlice := val.([]byte); isSlice {
+				// If it's already a []byte, check if it's for a Fixed type and needs conversion to [N]byte
+				fixedSchema, _ := field.Type().(*avro.FixedSchema)
+				if actualUnionFieldSchema, okUnion := field.Type().(*avro.UnionSchema); okUnion {
+					for _, ut := range actualUnionFieldSchema.Types() {
+						if fs, okUFS := ut.(*avro.FixedSchema); okUFS {
+							fixedSchema = fs
+							break
+						}
+					}
+				}
+				if fixedSchema != nil && len(byteSlice) == fixedSchema.Size() {
+					fixedArray := reflect.New(reflect.ArrayOf(fixedSchema.Size(), reflect.TypeOf(byte(0)))).Elem()
+					reflect.Copy(fixedArray, reflect.ValueOf(byteSlice))
+					coercedArgs[fieldName] = fixedArray.Interface()
+				} else if fixedSchema != nil && len(byteSlice) != fixedSchema.Size() {
+					return nil, fmt.Errorf("field '%s' (fixed[%d]): provided []byte has length %d, expected %d", fieldName, fixedSchema.Size(), len(byteSlice), fixedSchema.Size())
+				} // else it's not for a fixed schema or length mismatch, or it's for 'bytes' type, keep as []byte
+
+			}
+		}
+	}
+
+	// Marshal the potentially coerced arguments
+	return avro.Marshal(schema, coercedArgs)
 }

@@ -55,9 +55,22 @@ func RequiredParam[T comparable](arguments map[string]interface{}, p string) (T,
 		return zero, fmt.Errorf("parameter %s is not of type %T", p, zero)
 	}
 
-	if arguments[p].(T) == zero {
-		return zero, fmt.Errorf("missing required parameter: %s", p)
-
+	_, isBool := interface{}(zero).(bool)
+	_, isInt := interface{}(zero).(int)
+	_, isInt8 := interface{}(zero).(int8)
+	_, isInt16 := interface{}(zero).(int16)
+	_, isInt32 := interface{}(zero).(int32)
+	_, isInt64 := interface{}(zero).(int64)
+	_, isFloat32 := interface{}(zero).(float32)
+	_, isFloat64 := interface{}(zero).(float64)
+	_, isUint8 := interface{}(zero).(uint8)
+	_, isUint16 := interface{}(zero).(uint16)
+	_, isUint32 := interface{}(zero).(uint32)
+	_, isUint64 := interface{}(zero).(uint64)
+	if !isBool && !isInt && !isInt8 && !isInt16 && !isInt32 && !isInt64 && !isFloat32 && !isFloat64 && !isUint8 && !isUint16 && !isUint32 && !isUint64 {
+		if arguments[p].(T) == zero {
+			return zero, fmt.Errorf("missing required parameter: %s", p)
+		}
 	}
 
 	return arguments[p].(T), nil

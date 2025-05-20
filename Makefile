@@ -19,7 +19,11 @@ build:
 		-X ${VERSION_PATH}.date=${BUILD_DATE}" \
 		-o bin/snmcp cmd/streamnative-mcp-server/main.go
 
-# go install github.com/elastic/go-licenser@latest
-.PHONY: fix-license
-fix-license:
-	go-licenser -license ASL2 -exclude sdk
+.PHONY: license-check
+license-check:
+	license-eye header check
+
+# go install github.com/apache/skywalking-eyes/cmd/license-eye@latest
+.PHONY: license-fix
+license-fix:
+	license-eye header fix
