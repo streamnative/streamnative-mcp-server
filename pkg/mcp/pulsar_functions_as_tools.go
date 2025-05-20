@@ -30,14 +30,11 @@ import (
 	"github.com/streamnative/streamnative-mcp-server/pkg/pftools"
 )
 
-// 管理器跟踪
 var (
 	functionManagers     = make(map[string]*pftools.PulsarFunctionManager)
 	functionManagersLock sync.RWMutex
 )
 
-// StopAllPulsarFunctionManagers 停止所有注册的Pulsar Function管理器
-// 可在程序退出前调用
 func StopAllPulsarFunctionManagers() {
 	functionManagersLock.Lock()
 	defer functionManagersLock.Unlock()
@@ -48,7 +45,6 @@ func StopAllPulsarFunctionManagers() {
 		delete(functionManagers, id)
 	}
 
-	// 给一些时间让管理器清理资源
 	if len(functionManagers) > 0 {
 		time.Sleep(500 * time.Millisecond)
 	}
@@ -56,7 +52,6 @@ func StopAllPulsarFunctionManagers() {
 	log.Println("All Pulsar Function managers stopped")
 }
 
-// PulsarFunctionManagedMcpTools 将运行中的Pulsar Functions集成为MCP工具
 func PulsarFunctionManagedMcpTools(s *server.MCPServer, readOnly bool, features []string) {
 	if !slices.Contains(features, string(FeatureAll)) &&
 		!slices.Contains(features, string(FeatureFunctionsAsTools)) &&
@@ -64,10 +59,8 @@ func PulsarFunctionManagedMcpTools(s *server.MCPServer, readOnly bool, features 
 		return
 	}
 
-	// 创建新的管理器选项
 	options := pftools.DefaultManagerOptions()
 
-	// 从环境变量读取配置
 	if pollIntervalStr := os.Getenv("PULSAR_FUNCTIONS_POLL_INTERVAL"); pollIntervalStr != "" {
 		if seconds, err := strconv.Atoi(pollIntervalStr); err == nil && seconds > 0 {
 			options.PollInterval = time.Duration(seconds) * time.Second
@@ -96,23 +89,19 @@ func PulsarFunctionManagedMcpTools(s *server.MCPServer, readOnly bool, features 
 		}
 	}
 
-	// 设置要监听的租户和命名空间
 	if tenantNamespacesStr := os.Getenv("PULSAR_FUNCTIONS_TENANT_NAMESPACES"); tenantNamespacesStr != "" {
 		options.TenantNamespaces = strings.Split(tenantNamespacesStr, ",")
 		log.Printf("Setting Pulsar Functions tenant namespaces to %v", options.TenantNamespaces)
 	}
 
-	// 创建管理器
 	manager, err := pftools.NewPulsarFunctionManager(s, readOnly, options)
 	if err != nil {
 		log.Printf("Failed to create Pulsar Function manager: %v", err)
 		return
 	}
 
-	// 启动管理器
 	manager.Start()
 
-	// 将管理器添加到全局跟踪中
 	managerID := "pulsar_functions_manager_" + strconv.FormatInt(time.Now().UnixNano(), 10)
 	functionManagersLock.Lock()
 	functionManagers[managerID] = manager
