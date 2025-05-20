@@ -58,8 +58,9 @@ type FunctionTool struct {
 }
 
 type SchemaInfo struct {
-	Type       string
-	Definition map[string]interface{}
+	Type             string
+	Definition       map[string]interface{}
+	PulsarSchemaInfo *utils.SchemaInfo
 }
 
 type CircuitBreaker struct {

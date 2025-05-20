@@ -29,7 +29,7 @@ import (
 	"github.com/apache/pulsar-client-go/pulsar"
 	cliutils "github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
 	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/streamnative/streamnative-mcp-server/pkg/common"
+	"github.com/streamnative/streamnative-mcp-server/pkg/schema"
 )
 
 // FunctionInvoker handles function invocation and result tracking
@@ -56,16 +56,21 @@ func NewFunctionInvoker(client pulsar.Client) *FunctionInvoker {
 
 // InvokeFunctionAndWait sends a message to the function and waits for the result
 func (fi *FunctionInvoker) InvokeFunctionAndWait(ctx context.Context, fnTool *FunctionTool, params map[string]interface{}) (*mcp.CallToolResult, error) {
-	payload, err := common.RequiredParam[string](params, "payload")
+	schemaConverter, err := schema.ConverterFactory(fnTool.OutputSchema.Type)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get payload: %v", err)), nil
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to get schema converter: %v", err)), nil
+	}
+
+	payload, err := schemaConverter.SerializeMCPRequestToPulsarPayload(params, fnTool.OutputSchema.PulsarSchemaInfo)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to serialize payload: %v", err)), nil
 	}
 
 	// Create a result channel for this request
 	resultChan := make(chan FunctionResult, 1)
 
 	// Send message to input topic
-	msgID, err := fi.sendMessage(ctx, fnTool.InputTopic, payload, fnTool.InputSchema)
+	msgID, err := fi.sendMessage(ctx, fnTool.InputTopic, payload)
 	if err != nil || msgID == "" {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to send message: %v", err)), nil
 	}
@@ -158,15 +163,9 @@ func (fi *FunctionInvoker) setupConsumer(ctx context.Context, inputTopic, output
 }
 
 // sendMessage sends a message to the input topic
-func (fi *FunctionInvoker) sendMessage(ctx context.Context, inputTopic, payload string, sc *SchemaInfo) (string, error) {
-	// Create a producer
-	pschema, err := GetPulsarTypeSchema(sc)
-	if err != nil {
-		return "", fmt.Errorf("failed to get pulsar schema: %w", err)
-	}
+func (fi *FunctionInvoker) sendMessage(ctx context.Context, inputTopic string, payload []byte) (string, error) {
 	producer, err := fi.client.CreateProducer(pulsar.ProducerOptions{
-		Topic:  inputTopic,
-		Schema: pschema,
+		Topic: inputTopic,
 	})
 	if err != nil {
 		return "", fmt.Errorf("failed to create producer: %w", err)
@@ -175,7 +174,7 @@ func (fi *FunctionInvoker) sendMessage(ctx context.Context, inputTopic, payload 
 
 	// Send the message with properties
 	msgID, err := producer.Send(ctx, &pulsar.ProducerMessage{
-		Payload: []byte(payload),
+		Payload: payload,
 	})
 
 	if err != nil {

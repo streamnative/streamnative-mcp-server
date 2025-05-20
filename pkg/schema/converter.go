@@ -3,40 +3,39 @@ package schema
 import (
 	"fmt"
 
-	"github.com/apache/pulsar-client-go/pulsar"
+	cliutils "github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
 	"github.com/mark3labs/mcp-go/mcp"
 )
 
-type SchemaConverter interface {
-	// ToMCPToolInputSchemaProperties 将给定的Pulsar SchemaInfo转换为
-	// 一系列mcp.ToolOption，用于构建mcp.Tool的输入模式
-	ToMCPToolInputSchemaProperties(pulsarSchemaInfo *pulsar.SchemaInfo) ([]mcp.ToolOption, error)
+const (
+	ParamName = "payload"
+)
 
-	// SerializeMCPRequestToPulsarPayload 将来自MCP工具调用的参数(map[string]any)
-	// 根据目标Pulsar SchemaInfo序列化为字节切片，作为Pulsar消息的负载
-	SerializeMCPRequestToPulsarPayload(arguments map[string]any, targetPulsarSchemaInfo *pulsar.SchemaInfo) ([]byte, error)
+type Converter interface {
+	ToMCPToolInputSchemaProperties(pulsarSchemaInfo *cliutils.SchemaInfo) ([]mcp.ToolOption, error)
 
-	// ValidateArguments 验证参数是否符合目标Pulsar模式要求
-	ValidateArguments(arguments map[string]any, targetPulsarSchemaInfo *pulsar.SchemaInfo) error
+	SerializeMCPRequestToPulsarPayload(arguments map[string]any, targetPulsarSchemaInfo *cliutils.SchemaInfo) ([]byte, error)
+
+	ValidateArguments(arguments map[string]any, targetPulsarSchemaInfo *cliutils.SchemaInfo) error
 }
 
-func ConverterFactory(schemaType pulsar.SchemaType) (SchemaConverter, error) {
+func ConverterFactory(schemaType string) (Converter, error) {
 	switch schemaType {
-	case pulsar.AVRO:
+	case "AVRO":
 		return NewAvroConverter(), nil
-	case pulsar.JSON:
+	case "JSON":
 		return NewJSONConverter(), nil
-	case pulsar.STRING:
+	case "STRING", "BYTES":
 		return NewStringConverter(), nil
-	case pulsar.INT8, pulsar.INT16, pulsar.INT32, pulsar.INT64, pulsar.FLOAT, pulsar.DOUBLE:
+	case "INT8", "INT16", "INT32", "INT64", "FLOAT", "DOUBLE":
 		return NewNumberConverter(), nil
-	case pulsar.BOOLEAN:
+	case "BOOLEAN":
 		return NewBooleanConverter(), nil
-	case pulsar.BYTES:
-		return NewBytesConverter(), nil
 	default:
 		return nil, fmt.Errorf("unsupported schema type: %v", schemaType)
 	}
 }
 
-type BaseConverter struct{}
+type BaseConverter struct {
+	ParamName string
+}

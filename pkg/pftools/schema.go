@@ -74,8 +74,9 @@ func GetSchemaFromTopic(admin cmdutils.Client, topic string) (*SchemaInfo, error
 	}
 
 	return &SchemaInfo{
-		Type:       string(si.Type),
-		Definition: definition,
+		Type:             string(si.Type),
+		Definition:       definition,
+		PulsarSchemaInfo: si,
 	}, nil
 }
 

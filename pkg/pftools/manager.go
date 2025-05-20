@@ -33,6 +33,7 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
+	"github.com/streamnative/streamnative-mcp-server/pkg/schema"
 )
 
 const (
@@ -323,12 +324,6 @@ func (m *PulsarFunctionManager) convertFunctionToTool(fn *utils.FunctionConfig) 
 		}
 	}
 
-	// Generate tool input schema from input topic schema
-	toolInputSchema, err := ConvertSchemaToToolInput(inputSchema)
-	if err != nil {
-		return nil, fmt.Errorf("failed to convert input schema: %w", err)
-	}
-
 	toolName := retrieveToolName(fn)
 	// Replace non-alphanumeric characters
 	toolName = strings.ReplaceAll(toolName, "-", "_")
@@ -337,11 +332,22 @@ func (m *PulsarFunctionManager) convertFunctionToTool(fn *utils.FunctionConfig) 
 	// Create description
 	description := retrieveToolDescription(fn)
 
+	schemaConverter, err := schema.ConverterFactory(inputSchema.Type)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create schema converter: %w", err)
+	}
+
+	toolInputSchemaProperties, err := schemaConverter.ToMCPToolInputSchemaProperties(inputSchema.PulsarSchemaInfo)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert input schema to MCP tool input schema properties: %w", err)
+	}
+
+	toolInputSchemaProperties = append(toolInputSchemaProperties, mcp.WithDescription(description))
+
 	// Create the tool
 	tool := mcp.NewTool(toolName,
-		mcp.WithDescription(description),
+		toolInputSchemaProperties...,
 	)
-	tool.InputSchema = *toolInputSchema
 
 	// Create circuit breaker for this function
 	circuitBreaker := NewCircuitBreaker(5, 60*time.Second)
