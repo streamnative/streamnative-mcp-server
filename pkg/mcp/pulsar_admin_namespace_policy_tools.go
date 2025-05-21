@@ -30,6 +30,7 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	pulsarctlutils "github.com/streamnative/pulsarctl/pkg/ctl/utils"
+	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
@@ -331,7 +332,7 @@ func handleNamespaceGetPolicies(_ context.Context, request mcp.CallToolRequest) 
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
@@ -359,12 +360,12 @@ func handleSetMessageTTL(_ context.Context, request mcp.CallToolRequest) (*mcp.C
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
 
-	ttlStr, err := requiredParam[string](request.Params.Arguments, "ttl")
+	ttlStr, err := common.RequiredParam[string](request.Params.Arguments, "ttl")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get TTL: %v", err)), nil
 	}
@@ -391,13 +392,13 @@ func handleSetRetention(_ context.Context, request mcp.CallToolRequest) (*mcp.Ca
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
 
-	timeStr, hasTime := optionalParam[string](request.Params.Arguments, "time")
-	sizeStr, hasSize := optionalParam[string](request.Params.Arguments, "size")
+	timeStr, hasTime := common.OptionalParam[string](request.Params.Arguments, "time")
+	sizeStr, hasSize := common.OptionalParam[string](request.Params.Arguments, "size")
 
 	if !hasTime && !hasSize {
 		return mcp.NewToolResultError("At least one of 'time' or 'size' must be specified"), nil
@@ -470,17 +471,17 @@ func handleGrantPermission(_ context.Context, request mcp.CallToolRequest) (*mcp
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
 
-	role, err := requiredParam[string](request.Params.Arguments, "role")
+	role, err := common.RequiredParam[string](request.Params.Arguments, "role")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get role: %v", err)), nil
 	}
 
-	actions, err := requiredParamArray[string](request.Params.Arguments, "actions")
+	actions, err := common.RequiredParamArray[string](request.Params.Arguments, "actions")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get actions: %v", err)), nil
 	}
@@ -524,12 +525,12 @@ func handleRevokePermission(_ context.Context, request mcp.CallToolRequest) (*mc
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
 
-	role, err := requiredParam[string](request.Params.Arguments, "role")
+	role, err := common.RequiredParam[string](request.Params.Arguments, "role")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get role: %v", err)), nil
 	}
@@ -556,12 +557,12 @@ func handleSetReplicationClusters(_ context.Context, request mcp.CallToolRequest
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
 
-	clusters, err := requiredParamArray[string](request.Params.Arguments, "clusters")
+	clusters, err := common.RequiredParamArray[string](request.Params.Arguments, "clusters")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get clusters: %v", err)), nil
 	}
@@ -589,17 +590,17 @@ func handleSetBacklogQuota(_ context.Context, request mcp.CallToolRequest) (*mcp
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
 
-	limitSizeStr, err := requiredParam[string](request.Params.Arguments, "limit-size")
+	limitSizeStr, err := common.RequiredParam[string](request.Params.Arguments, "limit-size")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get limit size: %v", err)), nil
 	}
 
-	policyStr, err := requiredParam[string](request.Params.Arguments, "policy")
+	policyStr, err := common.RequiredParam[string](request.Params.Arguments, "policy")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get policy: %v", err)), nil
 	}
@@ -611,7 +612,7 @@ func handleSetBacklogQuota(_ context.Context, request mcp.CallToolRequest) (*mcp
 	}
 
 	// Parse time limit (optional)
-	limitTimeStr, hasLimitTime := optionalParam[string](request.Params.Arguments, "limit-time")
+	limitTimeStr, hasLimitTime := common.OptionalParam[string](request.Params.Arguments, "limit-time")
 	var limitTime int64 = -1 // Default to -1 (infinite)
 	if hasLimitTime && limitTimeStr != "" {
 		limitTimeVal, err := strconv.ParseInt(limitTimeStr, 10, 64)
@@ -635,7 +636,7 @@ func handleSetBacklogQuota(_ context.Context, request mcp.CallToolRequest) (*mcp
 	}
 
 	// Parse quota type (optional)
-	quotaTypeStr, hasQuotaType := optionalParam[string](request.Params.Arguments, "type")
+	quotaTypeStr, hasQuotaType := common.OptionalParam[string](request.Params.Arguments, "type")
 	quotaType := utils.DestinationStorage // Default
 	if hasQuotaType && quotaTypeStr != "" {
 		parsedType, err := utils.ParseBacklogQuotaType(quotaTypeStr)
@@ -663,7 +664,7 @@ func handleRemoveBacklogQuota(_ context.Context, request mcp.CallToolRequest) (*
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
@@ -685,7 +686,7 @@ func handleSetTopicAutoCreation(_ context.Context, request mcp.CallToolRequest) 
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
@@ -697,7 +698,7 @@ func handleSetTopicAutoCreation(_ context.Context, request mcp.CallToolRequest) 
 	}
 
 	// Check if disabled
-	disableStr, hasDisable := optionalParam[string](request.Params.Arguments, "disable")
+	disableStr, hasDisable := common.OptionalParam[string](request.Params.Arguments, "disable")
 	disable := false
 	if hasDisable && disableStr == "true" {
 		disable = true
@@ -711,7 +712,7 @@ func handleSetTopicAutoCreation(_ context.Context, request mcp.CallToolRequest) 
 	// Only set topic type and partitions if not disabled
 	if !disable {
 		// Get topic type (optional)
-		topicTypeStr, hasType := optionalParam[string](request.Params.Arguments, "type")
+		topicTypeStr, hasType := common.OptionalParam[string](request.Params.Arguments, "type")
 		if hasType && topicTypeStr != "" {
 			parsedType, err := utils.ParseTopicType(topicTypeStr)
 			if err != nil {
@@ -721,7 +722,7 @@ func handleSetTopicAutoCreation(_ context.Context, request mcp.CallToolRequest) 
 		}
 
 		// Get partitions (optional)
-		partitionsStr, hasPartitions := optionalParam[string](request.Params.Arguments, "partitions")
+		partitionsStr, hasPartitions := common.OptionalParam[string](request.Params.Arguments, "partitions")
 		if hasPartitions && partitionsStr != "" {
 			partitions, err := strconv.Atoi(partitionsStr)
 			if err != nil {
@@ -748,7 +749,7 @@ func handleRemoveTopicAutoCreation(_ context.Context, request mcp.CallToolReques
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
@@ -776,7 +777,7 @@ func handleSetSchemaValidationEnforced(_ context.Context, request mcp.CallToolRe
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
@@ -788,7 +789,7 @@ func handleSetSchemaValidationEnforced(_ context.Context, request mcp.CallToolRe
 	}
 
 	// Check if disabled
-	disableStr, hasDisable := optionalParam[string](request.Params.Arguments, "disable")
+	disableStr, hasDisable := common.OptionalParam[string](request.Params.Arguments, "disable")
 	disable := false
 	if hasDisable && disableStr == "true" {
 		disable = true
@@ -815,12 +816,12 @@ func handleSetSchemaAutoUpdateStrategy(_ context.Context, request mcp.CallToolRe
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
 
-	strategyStr, err := requiredParam[string](request.Params.Arguments, "compatibility")
+	strategyStr, err := common.RequiredParam[string](request.Params.Arguments, "compatibility")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get compatibility strategy: %v", err)), nil
 	}
@@ -856,7 +857,7 @@ func handleSetIsAllowAutoUpdateSchema(_ context.Context, request mcp.CallToolReq
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
@@ -868,8 +869,8 @@ func handleSetIsAllowAutoUpdateSchema(_ context.Context, request mcp.CallToolReq
 	}
 
 	// Check if enabled or disabled
-	enableStr, hasEnable := optionalParam[string](request.Params.Arguments, "enable")
-	disableStr, hasDisable := optionalParam[string](request.Params.Arguments, "disable")
+	enableStr, hasEnable := common.OptionalParam[string](request.Params.Arguments, "enable")
+	disableStr, hasDisable := common.OptionalParam[string](request.Params.Arguments, "disable")
 
 	if (hasEnable && enableStr == "true") && (hasDisable && disableStr == "true") {
 		return mcp.NewToolResultError("Specify only one of 'enable' or 'disable'"), nil
@@ -906,12 +907,12 @@ func handleSetOffloadThreshold(_ context.Context, request mcp.CallToolRequest) (
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
 
-	thresholdStr, err := requiredParam[string](request.Params.Arguments, "threshold")
+	thresholdStr, err := common.RequiredParam[string](request.Params.Arguments, "threshold")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get threshold: %v", err)), nil
 	}
@@ -947,12 +948,12 @@ func handleSetOffloadDeletionLag(_ context.Context, request mcp.CallToolRequest)
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
 
-	lagStr, err := requiredParam[string](request.Params.Arguments, "lag")
+	lagStr, err := common.RequiredParam[string](request.Params.Arguments, "lag")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get lag: %v", err)), nil
 	}
@@ -991,7 +992,7 @@ func handleClearOffloadDeletionLag(_ context.Context, request mcp.CallToolReques
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
@@ -1021,12 +1022,12 @@ func handleSetCompactionThreshold(_ context.Context, request mcp.CallToolRequest
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
 
-	thresholdStr, err := requiredParam[string](request.Params.Arguments, "threshold")
+	thresholdStr, err := common.RequiredParam[string](request.Params.Arguments, "threshold")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get threshold: %v", err)), nil
 	}
@@ -1062,12 +1063,12 @@ func handleSetMaxProducersPerTopic(_ context.Context, request mcp.CallToolReques
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
 
-	maxStr, err := requiredParam[string](request.Params.Arguments, "max")
+	maxStr, err := common.RequiredParam[string](request.Params.Arguments, "max")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get max value: %v", err)), nil
 	}
@@ -1107,12 +1108,12 @@ func handleSetMaxConsumersPerTopic(_ context.Context, request mcp.CallToolReques
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
 
-	maxStr, err := requiredParam[string](request.Params.Arguments, "max")
+	maxStr, err := common.RequiredParam[string](request.Params.Arguments, "max")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get max value: %v", err)), nil
 	}
@@ -1152,12 +1153,12 @@ func handleSetMaxConsumersPerSubscription(_ context.Context, request mcp.CallToo
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
 
-	maxStr, err := requiredParam[string](request.Params.Arguments, "max")
+	maxStr, err := common.RequiredParam[string](request.Params.Arguments, "max")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get max value: %v", err)), nil
 	}
@@ -1197,12 +1198,12 @@ func handleSetAntiAffinityGroup(_ context.Context, request mcp.CallToolRequest) 
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
 
-	group, err := requiredParam[string](request.Params.Arguments, "group")
+	group, err := common.RequiredParam[string](request.Params.Arguments, "group")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get anti-affinity group: %v", err)), nil
 	}
@@ -1226,7 +1227,7 @@ func handleDeleteAntiAffinityGroup(_ context.Context, request mcp.CallToolReques
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
@@ -1250,22 +1251,22 @@ func handleSetPersistence(_ context.Context, request mcp.CallToolRequest) (*mcp.
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
 
-	ensembleSizeStr, err := requiredParam[string](request.Params.Arguments, "ensemble-size")
+	ensembleSizeStr, err := common.RequiredParam[string](request.Params.Arguments, "ensemble-size")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get ensemble size: %v", err)), nil
 	}
 
-	writeQuorumSizeStr, err := requiredParam[string](request.Params.Arguments, "write-quorum-size")
+	writeQuorumSizeStr, err := common.RequiredParam[string](request.Params.Arguments, "write-quorum-size")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get write quorum size: %v", err)), nil
 	}
 
-	ackQuorumSizeStr, err := requiredParam[string](request.Params.Arguments, "ack-quorum-size")
+	ackQuorumSizeStr, err := common.RequiredParam[string](request.Params.Arguments, "ack-quorum-size")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get ack quorum size: %v", err)), nil
 	}
@@ -1293,7 +1294,7 @@ func handleSetPersistence(_ context.Context, request mcp.CallToolRequest) (*mcp.
 
 	// Parse optional rate parameter
 	markDeleteMaxRate := 0.0
-	markDeleteMaxRateStr, hasRate := optionalParam[string](request.Params.Arguments, "ml-mark-delete-max-rate")
+	markDeleteMaxRateStr, hasRate := common.OptionalParam[string](request.Params.Arguments, "ml-mark-delete-max-rate")
 	if hasRate && markDeleteMaxRateStr != "" {
 		rate, err := strconv.ParseFloat(markDeleteMaxRateStr, 64)
 		if err != nil {
@@ -1324,13 +1325,13 @@ func handleSetDeduplication(_ context.Context, request mcp.CallToolRequest) (*mc
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
 
 	// Get enable flag, default to false if not specified
-	enable, _ := optionalParam[string](request.Params.Arguments, "enable")
+	enable, _ := common.OptionalParam[string](request.Params.Arguments, "enable")
 	enableBool := false
 	if enable == "true" {
 		enableBool = true
@@ -1355,13 +1356,13 @@ func handleSetEncryptionRequired(_ context.Context, request mcp.CallToolRequest)
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
 
 	// Get disable flag, default to false if not specified
-	disable, _ := optionalParam[string](request.Params.Arguments, "disable")
+	disable, _ := common.OptionalParam[string](request.Params.Arguments, "disable")
 	disableFlag := disable == "true"
 
 	// Get namespace name
@@ -1394,12 +1395,12 @@ func handleSetSubscriptionAuthMode(_ context.Context, request mcp.CallToolReques
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
 
-	mode, err := requiredParam[string](request.Params.Arguments, "mode")
+	mode, err := common.RequiredParam[string](request.Params.Arguments, "mode")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get subscription auth mode: %v", err)), nil
 	}
@@ -1436,17 +1437,17 @@ func handleGrantSubscriptionPermission(_ context.Context, request mcp.CallToolRe
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
 
-	subscription, err := requiredParam[string](request.Params.Arguments, "subscription")
+	subscription, err := common.RequiredParam[string](request.Params.Arguments, "subscription")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get subscription name: %v", err)), nil
 	}
 
-	roles, err := requiredParamArray[string](request.Params.Arguments, "roles")
+	roles, err := common.RequiredParamArray[string](request.Params.Arguments, "roles")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get roles: %v", err)), nil
 	}
@@ -1481,17 +1482,17 @@ func handleRevokeSubscriptionPermission(_ context.Context, request mcp.CallToolR
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
 
-	subscription, err := requiredParam[string](request.Params.Arguments, "subscription")
+	subscription, err := common.RequiredParam[string](request.Params.Arguments, "subscription")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get subscription name: %v", err)), nil
 	}
 
-	role, err := requiredParam[string](request.Params.Arguments, "role")
+	role, err := common.RequiredParam[string](request.Params.Arguments, "role")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get role: %v", err)), nil
 	}
@@ -1522,13 +1523,13 @@ func handleSetDispatchRate(_ context.Context, request mcp.CallToolRequest) (*mcp
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
 
 	// Get rate parameters
-	msgRateStr, _ := optionalParam[string](request.Params.Arguments, "dispatchThrottlingRateInMsg")
+	msgRateStr, _ := common.OptionalParam[string](request.Params.Arguments, "dispatchThrottlingRateInMsg")
 	msgRate := -1 // Default value
 	if msgRateStr != "" {
 		parsedMsgRate, err := strconv.Atoi(msgRateStr)
@@ -1538,7 +1539,7 @@ func handleSetDispatchRate(_ context.Context, request mcp.CallToolRequest) (*mcp
 		msgRate = parsedMsgRate
 	}
 
-	byteRateStr, _ := optionalParam[string](request.Params.Arguments, "dispatchThrottlingRateInByte")
+	byteRateStr, _ := common.OptionalParam[string](request.Params.Arguments, "dispatchThrottlingRateInByte")
 	byteRate := int64(-1) // Default value
 	if byteRateStr != "" {
 		parsedByteRate, err := strconv.ParseInt(byteRateStr, 10, 64)
@@ -1548,7 +1549,7 @@ func handleSetDispatchRate(_ context.Context, request mcp.CallToolRequest) (*mcp
 		byteRate = parsedByteRate
 	}
 
-	ratePeriodStr, _ := optionalParam[string](request.Params.Arguments, "ratePeriodInSecond")
+	ratePeriodStr, _ := common.OptionalParam[string](request.Params.Arguments, "ratePeriodInSecond")
 	ratePeriod := 1 // Default value
 	if ratePeriodStr != "" {
 		parsedRatePeriod, err := strconv.Atoi(ratePeriodStr)
@@ -1590,13 +1591,13 @@ func handleSetReplicatorDispatchRate(_ context.Context, request mcp.CallToolRequ
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
 
 	// Get rate parameters
-	msgRateStr, _ := optionalParam[string](request.Params.Arguments, "dispatchThrottlingRateInMsg")
+	msgRateStr, _ := common.OptionalParam[string](request.Params.Arguments, "dispatchThrottlingRateInMsg")
 	msgRate := -1 // Default value
 	if msgRateStr != "" {
 		parsedMsgRate, err := strconv.Atoi(msgRateStr)
@@ -1606,7 +1607,7 @@ func handleSetReplicatorDispatchRate(_ context.Context, request mcp.CallToolRequ
 		msgRate = parsedMsgRate
 	}
 
-	byteRateStr, _ := optionalParam[string](request.Params.Arguments, "dispatchThrottlingRateInByte")
+	byteRateStr, _ := common.OptionalParam[string](request.Params.Arguments, "dispatchThrottlingRateInByte")
 	byteRate := int64(-1) // Default value
 	if byteRateStr != "" {
 		parsedByteRate, err := strconv.ParseInt(byteRateStr, 10, 64)
@@ -1616,7 +1617,7 @@ func handleSetReplicatorDispatchRate(_ context.Context, request mcp.CallToolRequ
 		byteRate = parsedByteRate
 	}
 
-	ratePeriodStr, _ := optionalParam[string](request.Params.Arguments, "ratePeriodInSecond")
+	ratePeriodStr, _ := common.OptionalParam[string](request.Params.Arguments, "ratePeriodInSecond")
 	ratePeriod := 1 // Default value
 	if ratePeriodStr != "" {
 		parsedRatePeriod, err := strconv.Atoi(ratePeriodStr)
@@ -1658,13 +1659,13 @@ func handleSetSubscribeRate(_ context.Context, request mcp.CallToolRequest) (*mc
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
 
 	// Get rate parameters
-	subRateStr, _ := optionalParam[string](request.Params.Arguments, "subscribeThrottlingRatePerConsumer")
+	subRateStr, _ := common.OptionalParam[string](request.Params.Arguments, "subscribeThrottlingRatePerConsumer")
 	subRate := -1 // Default value
 	if subRateStr != "" {
 		parsedSubRate, err := strconv.Atoi(subRateStr)
@@ -1674,7 +1675,7 @@ func handleSetSubscribeRate(_ context.Context, request mcp.CallToolRequest) (*mc
 		subRate = parsedSubRate
 	}
 
-	periodStr, _ := optionalParam[string](request.Params.Arguments, "ratePeriodInSecond")
+	periodStr, _ := common.OptionalParam[string](request.Params.Arguments, "ratePeriodInSecond")
 	period := 30 // Default value
 	if periodStr != "" {
 		parsedPeriod, err := strconv.Atoi(periodStr)
@@ -1713,13 +1714,13 @@ func handleSetSubscriptionDispatchRate(_ context.Context, request mcp.CallToolRe
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
 
 	// Get rate parameters
-	msgRateStr, _ := optionalParam[string](request.Params.Arguments, "dispatchThrottlingRateInMsg")
+	msgRateStr, _ := common.OptionalParam[string](request.Params.Arguments, "dispatchThrottlingRateInMsg")
 	msgRate := -1 // Default value
 	if msgRateStr != "" {
 		parsedMsgRate, err := strconv.Atoi(msgRateStr)
@@ -1729,7 +1730,7 @@ func handleSetSubscriptionDispatchRate(_ context.Context, request mcp.CallToolRe
 		msgRate = parsedMsgRate
 	}
 
-	byteRateStr, _ := optionalParam[string](request.Params.Arguments, "dispatchThrottlingRateInByte")
+	byteRateStr, _ := common.OptionalParam[string](request.Params.Arguments, "dispatchThrottlingRateInByte")
 	byteRate := int64(-1) // Default value
 	if byteRateStr != "" {
 		parsedByteRate, err := strconv.ParseInt(byteRateStr, 10, 64)
@@ -1739,7 +1740,7 @@ func handleSetSubscriptionDispatchRate(_ context.Context, request mcp.CallToolRe
 		byteRate = parsedByteRate
 	}
 
-	periodStr, _ := optionalParam[string](request.Params.Arguments, "ratePeriodInSecond")
+	periodStr, _ := common.OptionalParam[string](request.Params.Arguments, "ratePeriodInSecond")
 	period := 1 // Default value
 	if periodStr != "" {
 		parsedPeriod, err := strconv.Atoi(periodStr)
@@ -1781,7 +1782,7 @@ func handleSetPublishRate(_ context.Context, request mcp.CallToolRequest) (*mcp.
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
@@ -1799,7 +1800,7 @@ func handleSetPublishRate(_ context.Context, request mcp.CallToolRequest) (*mcp.
 	}
 
 	// Get message rate if provided
-	msgRateStr, hasMsgRate := optionalParam[string](request.Params.Arguments, "publishThrottlingRateInMsg")
+	msgRateStr, hasMsgRate := common.OptionalParam[string](request.Params.Arguments, "publishThrottlingRateInMsg")
 	if hasMsgRate && msgRateStr != "" {
 		msgRate, err := strconv.Atoi(msgRateStr)
 		if err != nil {
@@ -1809,7 +1810,7 @@ func handleSetPublishRate(_ context.Context, request mcp.CallToolRequest) (*mcp.
 	}
 
 	// Get byte rate if provided
-	byteRateStr, hasByteRate := optionalParam[string](request.Params.Arguments, "publishThrottlingRateInByte")
+	byteRateStr, hasByteRate := common.OptionalParam[string](request.Params.Arguments, "publishThrottlingRateInByte")
 	if hasByteRate && byteRateStr != "" {
 		byteRate, err := strconv.ParseInt(byteRateStr, 10, 64)
 		if err != nil {
@@ -1831,12 +1832,12 @@ func handleSetPublishRate(_ context.Context, request mcp.CallToolRequest) (*mcp.
 
 // handleNamespaceSetPolicy handles setting policies for a namespace using the unified tool
 func handleNamespaceSetPolicy(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	_, err := requiredParam[string](request.Params.Arguments, "namespace")
+	_, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
 
-	policyType, err := requiredParam[string](request.Params.Arguments, "policy")
+	policyType, err := common.RequiredParam[string](request.Params.Arguments, "policy")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get policy type: %v", err)), nil
 	}
@@ -1902,12 +1903,12 @@ func handleNamespaceSetPolicy(ctx context.Context, request mcp.CallToolRequest) 
 
 // handleNamespaceRemovePolicy handles removing policies from a namespace using the unified tool
 func handleNamespaceRemovePolicy(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	_, err := requiredParam[string](request.Params.Arguments, "namespace")
+	_, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
 
-	policyType, err := requiredParam[string](request.Params.Arguments, "policy")
+	policyType, err := common.RequiredParam[string](request.Params.Arguments, "policy")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get policy type: %v", err)), nil
 	}

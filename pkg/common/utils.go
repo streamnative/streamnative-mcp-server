@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package mcp
+package common
 
 import (
 	"context"
@@ -37,12 +37,12 @@ const (
 	TokenRefreshWindow                           = 5 * time.Minute
 )
 
-// requiredParam is a helper function that can be used to fetch a requested parameter from the request.
+// RequiredParam is a helper function that can be used to fetch a requested parameter from the request.
 // It does the following checks:
 // 1. Checks if the parameter is present in the request.
 // 2. Checks if the parameter is of the expected type.
 // 3. Checks if the parameter is not empty, i.e: non-zero value
-func requiredParam[T comparable](arguments map[string]interface{}, p string) (T, error) {
+func RequiredParam[T comparable](arguments map[string]interface{}, p string) (T, error) {
 	var zero T
 
 	// Check if the parameter is present in the request
@@ -55,16 +55,29 @@ func requiredParam[T comparable](arguments map[string]interface{}, p string) (T,
 		return zero, fmt.Errorf("parameter %s is not of type %T", p, zero)
 	}
 
-	if arguments[p].(T) == zero {
-		return zero, fmt.Errorf("missing required parameter: %s", p)
-
+	_, isBool := interface{}(zero).(bool)
+	_, isInt := interface{}(zero).(int)
+	_, isInt8 := interface{}(zero).(int8)
+	_, isInt16 := interface{}(zero).(int16)
+	_, isInt32 := interface{}(zero).(int32)
+	_, isInt64 := interface{}(zero).(int64)
+	_, isFloat32 := interface{}(zero).(float32)
+	_, isFloat64 := interface{}(zero).(float64)
+	_, isUint8 := interface{}(zero).(uint8)
+	_, isUint16 := interface{}(zero).(uint16)
+	_, isUint32 := interface{}(zero).(uint32)
+	_, isUint64 := interface{}(zero).(uint64)
+	if !isBool && !isInt && !isInt8 && !isInt16 && !isInt32 && !isInt64 && !isFloat32 && !isFloat64 && !isUint8 && !isUint16 && !isUint32 && !isUint64 {
+		if arguments[p].(T) == zero {
+			return zero, fmt.Errorf("missing required parameter: %s", p)
+		}
 	}
 
 	return arguments[p].(T), nil
 }
 
 // Helper function to get an optional parameter from the request
-func optionalParam[T any](arguments map[string]interface{}, paramName string) (T, bool) {
+func OptionalParam[T any](arguments map[string]interface{}, paramName string) (T, bool) {
 	var empty T
 	param, ok := arguments[paramName]
 	if !ok {
@@ -80,7 +93,7 @@ func optionalParam[T any](arguments map[string]interface{}, paramName string) (T
 }
 
 // Helper function to get a required array parameter from the request
-func requiredParamArray[T any](arguments map[string]interface{}, paramName string) ([]T, error) {
+func RequiredParamArray[T any](arguments map[string]interface{}, paramName string) ([]T, error) {
 	var empty []T
 	param, ok := arguments[paramName]
 	if !ok {
@@ -104,7 +117,7 @@ func requiredParamArray[T any](arguments map[string]interface{}, paramName strin
 	return result, nil
 }
 
-func optionalParamArray[T any](arguments map[string]interface{}, paramName string) ([]T, bool) {
+func OptionalParamArray[T any](arguments map[string]interface{}, paramName string) ([]T, bool) {
 	var empty []T
 	param, ok := arguments[paramName]
 	if !ok {
@@ -128,8 +141,8 @@ func optionalParamArray[T any](arguments map[string]interface{}, paramName strin
 	return result, true
 }
 
-// optionalParamConfigs gets an optional parameter as a list of key=value strings
-func optionalParamConfigs(arguments map[string]interface{}, paramName string) ([]string, bool) {
+// OptionalParamConfigs gets an optional parameter as a list of key=value strings
+func OptionalParamConfigs(arguments map[string]interface{}, paramName string) ([]string, bool) {
 
 	param, ok := arguments[paramName]
 	if !ok {
@@ -151,8 +164,8 @@ func optionalParamConfigs(arguments map[string]interface{}, paramName string) ([
 	return result, true
 }
 
-// requiredParamObject gets a required object parameter from the request
-func requiredParamObject(arguments map[string]interface{}, name string) (map[string]interface{}, error) {
+// RequiredParamObject gets a required object parameter from the request
+func RequiredParamObject(arguments map[string]interface{}, name string) (map[string]interface{}, error) {
 	// Get the parameter value
 	paramValue, found := arguments[name]
 	if !found || paramValue == nil {
@@ -167,12 +180,12 @@ func requiredParamObject(arguments map[string]interface{}, name string) (map[str
 	return nil, fmt.Errorf("%s parameter must be an object", name)
 }
 
-func getOptions(ctx context.Context) *config.Options {
+func GetOptions(ctx context.Context) *config.Options {
 	return ctx.Value(OptionsKey).(*config.Options)
 }
 
-// isClusterAvailable checks if a PulsarCluster is available (ready)
-func isClusterAvailable(cluster sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarCluster) bool {
+// IsClusterAvailable checks if a PulsarCluster is available (ready)
+func IsClusterAvailable(cluster sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarCluster) bool {
 	// Check if broker has ready replicas
 	if cluster.Status.Broker == nil || cluster.Status.Broker.ReadyReplicas == nil || *cluster.Status.Broker.ReadyReplicas == 0 {
 		return false
@@ -187,8 +200,8 @@ func isClusterAvailable(cluster sncloud.ComGithubStreamnativeCloudApiServerPkgAp
 	return false
 }
 
-// getEngineType returns the Pulsar cluster is an Ursa engine or a Classic engine
-func getEngineType(cluster sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarCluster) string {
+// GetEngineType returns the Pulsar cluster is an Ursa engine or a Classic engine
+func GetEngineType(cluster sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarCluster) string {
 	if cluster.Metadata.Annotations != nil {
 		if v, has := (*cluster.Metadata.Annotations)[AnnotationStreamNativeCloudEngine]; has && v == "ursa" {
 			return "ursa"
@@ -197,7 +210,7 @@ func getEngineType(cluster sncloud.ComGithubStreamnativeCloudApiServerPkgApisClo
 	return "classic"
 }
 
-func convertToMapInterface(m map[string]string) map[string]interface{} {
+func ConvertToMapInterface(m map[string]string) map[string]interface{} {
 	result := make(map[string]interface{})
 	for k, v := range m {
 		result[k] = v
@@ -205,7 +218,7 @@ func convertToMapInterface(m map[string]string) map[string]interface{} {
 	return result
 }
 
-func convertToMapString(m map[string]interface{}) map[string]string {
+func ConvertToMapString(m map[string]interface{}) map[string]string {
 	result := make(map[string]string)
 	for k, v := range m {
 		result[k] = fmt.Sprintf("%v", v)
@@ -213,15 +226,15 @@ func convertToMapString(m map[string]interface{}) map[string]string {
 	return result
 }
 
-// isInstanceValid checks if PulsarInstance has valid OAuth2 authentication configuration
-func isInstanceValid(instance sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarInstance) bool {
+// IsInstanceValid checks if PulsarInstance has valid OAuth2 authentication configuration
+func IsInstanceValid(instance sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarInstance) bool {
 	return instance.Status != nil &&
 		(instance.Status.Auth.Type == "oauth2" || instance.Status.Auth.Type == "apikey") &&
 		instance.Status.Auth.Oauth2.IssuerURL != "" &&
 		instance.Status.Auth.Oauth2.Audience != ""
 }
 
-func hasCachedValidToken(cachedGrant *auth.AuthorizationGrant) (bool, error) {
+func HasCachedValidToken(cachedGrant *auth.AuthorizationGrant) (bool, error) {
 	if cachedGrant == nil || cachedGrant.Token == nil {
 		return false, nil
 	}
@@ -230,7 +243,7 @@ func hasCachedValidToken(cachedGrant *auth.AuthorizationGrant) (bool, error) {
 	return cachedGrant.Token.Valid(), nil
 }
 
-func isTokenAboutToExpire(cachedGrant *auth.AuthorizationGrant, window time.Duration) (bool, error) {
+func IsTokenAboutToExpire(cachedGrant *auth.AuthorizationGrant, window time.Duration) (bool, error) {
 	if cachedGrant == nil || cachedGrant.Token == nil {
 		return true, nil
 	}
@@ -246,8 +259,8 @@ func isTokenAboutToExpire(cachedGrant *auth.AuthorizationGrant, window time.Dura
 	return timeUntilExpiry <= window, nil
 }
 
-// parseMessageConfigs parses a list of key=value strings into a map
-func parseMessageConfigs(configs []string) (map[string]*string, error) {
+// ParseMessageConfigs parses a list of key=value strings into a map
+func ParseMessageConfigs(configs []string) (map[string]*string, error) {
 	result := make(map[string]*string)
 
 	for _, config := range configs {

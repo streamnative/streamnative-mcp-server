@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/config"
 	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
@@ -52,7 +53,7 @@ func SetContext(options *config.Options, instanceName, clusterName string) error
 	foundInstance := false
 	for _, i := range instances.Items {
 		if *i.Metadata.Name == instanceName {
-			if isInstanceValid(i) {
+			if common.IsInstanceValid(i) {
 				instance = i
 				foundInstance = true
 				break
@@ -73,7 +74,7 @@ func SetContext(options *config.Options, instanceName, clusterName string) error
 	foundCluster := false
 	for _, c := range clusters.Items {
 		if *c.Metadata.Name == clusterName && c.Spec.InstanceName == instanceName {
-			if isClusterAvailable(c) {
+			if common.IsClusterAvailable(c) {
 				cluster = c
 				foundCluster = true
 				break
@@ -110,13 +111,13 @@ func SetContext(options *config.Options, instanceName, clusterName string) error
 	cachedGrant, err := options.AuthOptions.LoadGrant(tokenKey)
 	if err == nil && cachedGrant != nil {
 
-		cacheHasValidToken, err := hasCachedValidToken(cachedGrant)
+		cacheHasValidToken, err := common.HasCachedValidToken(cachedGrant)
 		if err != nil {
 			cacheHasValidToken = false
 		}
 
 		if cacheHasValidToken {
-			tokenAboutToExpire, err := isTokenAboutToExpire(cachedGrant, TokenRefreshWindow)
+			tokenAboutToExpire, err := common.IsTokenAboutToExpire(cachedGrant, common.TokenRefreshWindow)
 			if err != nil {
 				tokenAboutToExpire = true
 			}

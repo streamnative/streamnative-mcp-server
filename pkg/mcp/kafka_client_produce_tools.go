@@ -27,6 +27,7 @@ import (
 	"github.com/hamba/avro/v2"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
+	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
 	"github.com/twmb/franz-go/pkg/kgo"
 	"github.com/twmb/franz-go/pkg/sr"
@@ -112,23 +113,23 @@ func KafkaClientAddProduceTools(s *server.MCPServer, readOnly bool, features []s
 // handleKafkaProduce handles producing messages to a Kafka topic
 func handleKafkaProduce(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topicName, err := requiredParam[string](request.Params.Arguments, "topic")
+	topicName, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic name: %v", err)), nil
 	}
 
 	// Handle single message case
 	// Get value from parameter or file
-	value, err := requiredParam[string](request.Params.Arguments, "value")
+	value, err := common.RequiredParam[string](request.Params.Arguments, "value")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get value: %v", err)), nil
 	}
 
 	// Get optional parameters
-	key, hasKey := optionalParam[string](request.Params.Arguments, "key")
-	headers, hasHeaders := optionalParam[[]interface{}](request.Params.Arguments, "headers")
+	key, hasKey := common.OptionalParam[string](request.Params.Arguments, "key")
+	headers, hasHeaders := common.OptionalParam[[]interface{}](request.Params.Arguments, "headers")
 	sync := true
-	if syncVal, hasSync := optionalParam[bool](request.Params.Arguments, "sync"); hasSync {
+	if syncVal, hasSync := common.OptionalParam[bool](request.Params.Arguments, "sync"); hasSync {
 		sync = syncVal
 	}
 

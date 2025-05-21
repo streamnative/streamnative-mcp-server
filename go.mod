@@ -6,8 +6,9 @@ require (
 	github.com/99designs/keyring v1.2.2
 	github.com/apache/pulsar-client-go v0.13.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/google/go-cmp v0.7.0
 	github.com/hamba/avro/v2 v2.28.0
-	github.com/mark3labs/mcp-go v0.27.0
+	github.com/mark3labs/mcp-go v0.28.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.3
@@ -16,6 +17,7 @@ require (
 	github.com/streamnative/pulsarctl v0.4.3-0.20250312214758-e472faec284b
 	github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserver v0.0.0-20250506174209-b67ea08ddd82
 	github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect v0.0.0-00010101000000-000000000000
+	github.com/stretchr/testify v1.10.0
 	github.com/twmb/franz-go v1.18.1
 	github.com/twmb/franz-go/pkg/kadm v1.16.0
 	github.com/twmb/franz-go/pkg/sr v1.3.0

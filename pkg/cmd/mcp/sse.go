@@ -31,6 +31,7 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp"
 )
 
@@ -68,24 +69,29 @@ func runSseServer(configOpts *ServerOptions) error {
 	}
 
 	// 3. Create a new MCP server
-	ctx = context.WithValue(ctx, mcp.OptionsKey, configOpts.Options)
-	mcpServer := server.NewSSEServer(
-		newMcpServer(configOpts, logger),
+	ctx = context.WithValue(ctx, common.OptionsKey, configOpts.Options)
+	mcpServer := newMcpServer(configOpts, logger)
+
+	// add Pulsar Functions as MCP tools
+	mcp.PulsarFunctionManagedMcpTools(mcpServer, false, configOpts.Features)
+
+	sseServer := server.NewSSEServer(
+		mcpServer,
 		server.WithStaticBasePath(configOpts.HTTPPath),
 		server.WithHTTPContextFunc(func(ctx context.Context, _ *http.Request) context.Context {
-			return context.WithValue(ctx, mcp.OptionsKey, configOpts.Options)
+			return context.WithValue(ctx, common.OptionsKey, configOpts.Options)
 		}),
 	)
 
 	// 4. Expose the full SSE URL to the user
-	ssePath := mcpServer.CompleteSsePath()
+	ssePath := sseServer.CompleteSsePath()
 	fmt.Fprintf(os.Stderr, "StreamNative Cloud MCP Server listening on http://%s%s\n",
 		configOpts.HTTPAddr, ssePath)
 
 	// 5. Run the HTTP listener in a goroutine
 	errCh := make(chan error, 1)
 	go func() {
-		if err := mcpServer.Start(configOpts.HTTPAddr); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		if err := sseServer.Start(configOpts.HTTPAddr); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			errCh <- err // bubble up real crashes
 		}
 	}()
@@ -108,7 +114,7 @@ func runSseServer(configOpts *ServerOptions) error {
 	defer cancel()
 
 	// First try to shut down the SSE server
-	if err := mcpServer.Shutdown(shCtx); err != nil {
+	if err := sseServer.Shutdown(shCtx); err != nil {
 		if !errors.Is(err, http.ErrServerClosed) {
 			logger.Errorf("Error shutting down SSE server: %v", err)
 		}

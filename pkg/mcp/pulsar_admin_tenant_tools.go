@@ -28,6 +28,7 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
+	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
@@ -104,12 +105,12 @@ func PulsarAdminAddTenantTools(s *server.MCPServer, readOnly bool, features []st
 func handleTenantTool(readOnly bool) func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get required parameters
-		resource, err := requiredParam[string](request.Params.Arguments, "resource")
+		resource, err := common.RequiredParam[string](request.Params.Arguments, "resource")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get resource: %v", err)), nil
 		}
 
-		operation, err := requiredParam[string](request.Params.Arguments, "operation")
+		operation, err := common.RequiredParam[string](request.Params.Arguments, "operation")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get operation: %v", err)), nil
 		}
@@ -171,7 +172,7 @@ func handleTenantsList(admin cmdutils.Client) (*mcp.CallToolResult, error) {
 
 // handleTenantGet handles getting a tenant's configuration
 func handleTenantGet(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	tenant, err := requiredParam[string](request.Params.Arguments, "tenant")
+	tenant, err := common.RequiredParam[string](request.Params.Arguments, "tenant")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'tenant' for tenant.get: %v", err)), nil
 	}
@@ -193,17 +194,17 @@ func handleTenantGet(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.C
 
 // handleTenantCreate handles creating a new tenant
 func handleTenantCreate(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	tenant, err := requiredParam[string](request.Params.Arguments, "tenant")
+	tenant, err := common.RequiredParam[string](request.Params.Arguments, "tenant")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'tenant' for tenant.create: %v", err)), nil
 	}
 
-	adminRoles, hasAdminRoles := optionalParamArray[string](request.Params.Arguments, "adminRoles")
+	adminRoles, hasAdminRoles := common.OptionalParamArray[string](request.Params.Arguments, "adminRoles")
 	if !hasAdminRoles {
 		adminRoles = []string{}
 	}
 
-	allowedClusters, hasAllowedClusters := optionalParamArray[string](request.Params.Arguments, "allowedClusters")
+	allowedClusters, hasAllowedClusters := common.OptionalParamArray[string](request.Params.Arguments, "allowedClusters")
 	if !hasAllowedClusters {
 		allowedClusters = []string{""}
 	}
@@ -238,7 +239,7 @@ func handleTenantCreate(admin cmdutils.Client, request mcp.CallToolRequest) (*mc
 
 // handleTenantUpdate handles updating an existing tenant
 func handleTenantUpdate(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	tenant, err := requiredParam[string](request.Params.Arguments, "tenant")
+	tenant, err := common.RequiredParam[string](request.Params.Arguments, "tenant")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'tenant' for tenant.update: %v", err)), nil
 	}
@@ -250,8 +251,8 @@ func handleTenantUpdate(admin cmdutils.Client, request mcp.CallToolRequest) (*mc
 	}
 
 	// Get update parameters
-	adminRoles, hasAdminRoles := optionalParamArray[string](request.Params.Arguments, "adminRoles")
-	allowedClusters, hasAllowedClusters := optionalParamArray[string](request.Params.Arguments, "allowedClusters")
+	adminRoles, hasAdminRoles := common.OptionalParamArray[string](request.Params.Arguments, "adminRoles")
+	allowedClusters, hasAllowedClusters := common.OptionalParamArray[string](request.Params.Arguments, "allowedClusters")
 
 	// If parameters not provided, keep existing values
 	if !hasAdminRoles {
@@ -292,7 +293,7 @@ func handleTenantUpdate(admin cmdutils.Client, request mcp.CallToolRequest) (*mc
 
 // handleTenantDelete handles deleting an existing tenant
 func handleTenantDelete(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	tenant, err := requiredParam[string](request.Params.Arguments, "tenant")
+	tenant, err := common.RequiredParam[string](request.Params.Arguments, "tenant")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'tenant' for tenant.delete: %v", err)), nil
 	}

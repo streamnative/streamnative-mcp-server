@@ -26,6 +26,7 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
+	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
@@ -96,13 +97,13 @@ func handleBrokerTool(readOnly bool) func(context.Context, mcp.CallToolRequest) 
 		}
 
 		// Get required parameters
-		resource, err := requiredParam[string](request.Params.Arguments, "resource")
+		resource, err := common.RequiredParam[string](request.Params.Arguments, "resource")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required resource parameter. " +
 				"Please specify one of: brokers, health, config, namespaces.")), nil
 		}
 
-		operation, err := requiredParam[string](request.Params.Arguments, "operation")
+		operation, err := common.RequiredParam[string](request.Params.Arguments, "operation")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required operation parameter. " +
 				"Please specify one of: list, get, update, delete based on the resource type.")), nil
@@ -162,7 +163,7 @@ func validateResourceOperation(resource, operation string) (bool, string) {
 func handleBrokersResource(client cmdutils.Client, operation string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	switch operation {
 	case "list":
-		clusterName, err := requiredParam[string](request.Params.Arguments, "clusterName")
+		clusterName, err := common.RequiredParam[string](request.Params.Arguments, "clusterName")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'clusterName'. " +
 				"Please provide the name of the Pulsar cluster to list brokers for.")), nil
@@ -207,7 +208,7 @@ func handleHealthResource(client cmdutils.Client, operation string, _ mcp.CallTo
 func handleConfigResource(client cmdutils.Client, operation string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	switch operation {
 	case "get":
-		configType, err := requiredParam[string](request.Params.Arguments, "configType")
+		configType, err := common.RequiredParam[string](request.Params.Arguments, "configType")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'configType'. " +
 				"Please specify one of: dynamic, runtime, internal, all_dynamic.")), nil
@@ -242,13 +243,13 @@ func handleConfigResource(client cmdutils.Client, operation string, request mcp.
 		return mcp.NewToolResultText(string(resultJSON)), nil
 
 	case "update":
-		configName, err := requiredParam[string](request.Params.Arguments, "configName")
+		configName, err := common.RequiredParam[string](request.Params.Arguments, "configName")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'configName'. " +
 				"Please provide the name of the configuration parameter to update.")), nil
 		}
 
-		configValue, err := requiredParam[string](request.Params.Arguments, "configValue")
+		configValue, err := common.RequiredParam[string](request.Params.Arguments, "configValue")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'configValue'. " +
 				"Please provide the new value for the configuration parameter.")), nil
@@ -264,7 +265,7 @@ func handleConfigResource(client cmdutils.Client, operation string, request mcp.
 			configName, configValue)), nil
 
 	case "delete":
-		configName, err := requiredParam[string](request.Params.Arguments, "configName")
+		configName, err := common.RequiredParam[string](request.Params.Arguments, "configName")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'configName'. " +
 				"Please provide the name of the configuration parameter to delete.")), nil
@@ -288,13 +289,13 @@ func handleConfigResource(client cmdutils.Client, operation string, request mcp.
 func handleNamespacesResource(client cmdutils.Client, operation string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	switch operation {
 	case "get":
-		clusterName, err := requiredParam[string](request.Params.Arguments, "clusterName")
+		clusterName, err := common.RequiredParam[string](request.Params.Arguments, "clusterName")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'clusterName'. " +
 				"Please provide the name of the Pulsar cluster.")), nil
 		}
 
-		brokerURL, err := requiredParam[string](request.Params.Arguments, "brokerUrl")
+		brokerURL, err := common.RequiredParam[string](request.Params.Arguments, "brokerUrl")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'brokerUrl'. " +
 				"Please provide the URL of the broker (e.g., '127.0.0.1:8080').")), nil

@@ -28,6 +28,7 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
+	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 )
 
 // PulsarAdminAddFunctionsTools adds a unified function-related tool to the MCP server
@@ -166,7 +167,7 @@ func handleFunctionsTool(readOnly bool) func(ctx context.Context, request mcp.Ca
 		client := cmdutils.NewPulsarClientWithAPIVersion(config.V3)
 
 		// Extract and validate operation parameter
-		operation, err := requiredParam[string](request.Params.Arguments, "operation")
+		operation, err := common.RequiredParam[string](request.Params.Arguments, "operation")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'operation': %v", err)), nil
 		}
@@ -193,12 +194,12 @@ func handleFunctionsTool(readOnly bool) func(ctx context.Context, request mcp.Ca
 		}
 
 		// Extract common parameters
-		tenant, err := requiredParam[string](request.Params.Arguments, "tenant")
+		tenant, err := common.RequiredParam[string](request.Params.Arguments, "tenant")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'tenant': %v. A tenant is required for all Pulsar Functions operations.", err)), nil
 		}
 
-		namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+		namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'namespace': %v. A namespace is required for all Pulsar Functions operations.", err)), nil
 		}
@@ -206,7 +207,7 @@ func handleFunctionsTool(readOnly bool) func(ctx context.Context, request mcp.Ca
 		// For all operations except 'list', name is required
 		var name string
 		if operation != "list" {
-			name, err = requiredParam[string](request.Params.Arguments, "name")
+			name, err = common.RequiredParam[string](request.Params.Arguments, "name")
 			if err != nil {
 				return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'name' for operation '%s': %v. The function name must be specified for this operation.", operation, err)), nil
 			}
@@ -223,7 +224,7 @@ func handleFunctionsTool(readOnly bool) func(ctx context.Context, request mcp.Ca
 		case "stats":
 			return handleFunctionStats(ctx, client, tenant, namespace, name)
 		case "querystate":
-			key, err := requiredParam[string](request.Params.Arguments, "key")
+			key, err := common.RequiredParam[string](request.Params.Arguments, "key")
 			if err != nil {
 				return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'key' for operation 'querystate': %v. A key is required to look up state in the function's state store.", err)), nil
 			}
@@ -241,18 +242,18 @@ func handleFunctionsTool(readOnly bool) func(ctx context.Context, request mcp.Ca
 		case "restart":
 			return handleFunctionRestart(ctx, client, tenant, namespace, name)
 		case "putstate":
-			key, err := requiredParam[string](request.Params.Arguments, "key")
+			key, err := common.RequiredParam[string](request.Params.Arguments, "key")
 			if err != nil {
 				return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'key' for operation 'putstate': %v. A key is required to store state in the function's state store.", err)), nil
 			}
-			value, err := requiredParam[string](request.Params.Arguments, "value")
+			value, err := common.RequiredParam[string](request.Params.Arguments, "value")
 			if err != nil {
 				return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'value' for operation 'putstate': %v. A value is required to store state in the function's state store.", err)), nil
 			}
 			return handleFunctionPutstate(ctx, client, tenant, namespace, name, key, value)
 		case "trigger":
-			topic, _ := optionalParam[string](request.Params.Arguments, "topic")
-			triggerValue, _ := optionalParam[string](request.Params.Arguments, "triggerValue")
+			topic, _ := common.OptionalParam[string](request.Params.Arguments, "topic")
+			triggerValue, _ := common.OptionalParam[string](request.Params.Arguments, "triggerValue")
 			return handleFunctionTrigger(ctx, client, tenant, namespace, name, topic, triggerValue)
 		default:
 			// This should never happen due to the valid operations check above
@@ -354,18 +355,18 @@ func handleFunctionQuerystate(_ context.Context, client cmdutils.Client, tenant,
 // handleFunctionCreate handles creating a new function
 func handleFunctionCreate(_ context.Context, client cmdutils.Client, tenant, namespace, name string, arguments map[string]interface{}) (*mcp.CallToolResult, error) {
 	// Extract required parameters
-	classname, err := requiredParam[string](arguments, "classname")
+	classname, err := common.RequiredParam[string](arguments, "classname")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get classname (required for function creation): %v. The classname must specify the fully qualified class implementing the function.", err)), nil
 	}
 
 	// Extract optional parameters
-	inputTopics, _ := optionalParamArray[string](arguments, "inputs")
-	output, _ := optionalParam[string](arguments, "output")
-	jar, _ := optionalParam[string](arguments, "jar")
-	py, _ := optionalParam[string](arguments, "py")
-	goPath, _ := optionalParam[string](arguments, "go")
-	parallelismFloat, _ := optionalParam[float64](arguments, "parallelism")
+	inputTopics, _ := common.OptionalParamArray[string](arguments, "inputs")
+	output, _ := common.OptionalParam[string](arguments, "output")
+	jar, _ := common.OptionalParam[string](arguments, "jar")
+	py, _ := common.OptionalParam[string](arguments, "py")
+	goPath, _ := common.OptionalParam[string](arguments, "go")
+	parallelismFloat, _ := common.OptionalParam[float64](arguments, "parallelism")
 	parallelism := int(parallelismFloat)
 
 	// Get user config if available
@@ -440,13 +441,13 @@ func handleFunctionCreate(_ context.Context, client cmdutils.Client, tenant, nam
 // handleFunctionUpdate handles updating an existing function
 func handleFunctionUpdate(_ context.Context, client cmdutils.Client, tenant, namespace, name string, arguments map[string]interface{}) (*mcp.CallToolResult, error) {
 	// Extract optional parameters
-	classname, _ := optionalParam[string](arguments, "classname")
-	inputTopics, _ := optionalParamArray[string](arguments, "inputs")
-	output, _ := optionalParam[string](arguments, "output")
-	jar, _ := optionalParam[string](arguments, "jar")
-	py, _ := optionalParam[string](arguments, "py")
-	goPath, _ := optionalParam[string](arguments, "go")
-	parallelismFloat, _ := optionalParam[float64](arguments, "parallelism")
+	classname, _ := common.OptionalParam[string](arguments, "classname")
+	inputTopics, _ := common.OptionalParamArray[string](arguments, "inputs")
+	output, _ := common.OptionalParam[string](arguments, "output")
+	jar, _ := common.OptionalParam[string](arguments, "jar")
+	py, _ := common.OptionalParam[string](arguments, "py")
+	goPath, _ := common.OptionalParam[string](arguments, "go")
+	parallelismFloat, _ := common.OptionalParam[float64](arguments, "parallelism")
 	parallelism := int(parallelismFloat)
 
 	// Get user config if available
