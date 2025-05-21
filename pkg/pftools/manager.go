@@ -27,7 +27,9 @@ import (
 	"time"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/admin/config"
+	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/rest"
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
+	cliutils "github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
 	"github.com/google/go-cmp/cmp"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
@@ -40,6 +42,16 @@ const (
 	CustomRuntimeOptionsEnvMcpToolNameKey        = "MCP_TOOL_NAME"
 	CustomRuntimeOptionsEnvMcpToolDescriptionKey = "MCP_TOOL_DESCRIPTION"
 )
+
+var DefaultStringSchemaInfo = &SchemaInfo{
+	Type: "STRING",
+	Definition: map[string]interface{}{
+		"type": "string",
+	},
+	PulsarSchemaInfo: &cliutils.SchemaInfo{
+		Type: "STRING",
+	},
+}
 
 // NewPulsarFunctionManager creates a new PulsarFunctionManager
 func NewPulsarFunctionManager(mcpServer *server.MCPServer, readOnly bool, options *ManagerOptions) (*PulsarFunctionManager, error) {
@@ -295,15 +307,14 @@ func (m *PulsarFunctionManager) convertFunctionToTool(fn *utils.FunctionConfig) 
 	// Get schema for input topic
 	inputSchema, err := GetSchemaFromTopic(m.v2adminClient, inputTopic)
 	if err != nil {
-		log.Printf("Failed to get schema for input topic %s: %v", inputTopic, err)
 		// Continue with a default schema
-		inputSchema = &SchemaInfo{
-			Type: "STRING",
-			Definition: map[string]interface{}{
-				"type": "string",
-			},
+		inputSchema = DefaultStringSchemaInfo
+		if restError, ok := err.(rest.Error); ok {
+			if restError.Code != 404 {
+				log.Printf("Failed to get schema for input topic %s: %v", inputTopic, err)
+				schemaFetchSuccess = false
+			}
 		}
-		schemaFetchSuccess = false
 	}
 
 	// Get output topic and schema
@@ -312,15 +323,14 @@ func (m *PulsarFunctionManager) convertFunctionToTool(fn *utils.FunctionConfig) 
 	if outputTopic != "" {
 		outputSchema, err = GetSchemaFromTopic(m.v2adminClient, outputTopic)
 		if err != nil {
-			log.Printf("Failed to get schema for output topic %s: %v", outputTopic, err)
 			// Continue with a default schema
-			outputSchema = &SchemaInfo{
-				Type: "STRING",
-				Definition: map[string]interface{}{
-					"type": "string",
-				},
+			outputSchema = DefaultStringSchemaInfo
+			if restError, ok := err.(rest.Error); ok {
+				if restError.Code != 404 {
+					log.Printf("Failed to get schema for output topic %s: %v", outputTopic, err)
+					schemaFetchSuccess = false
+				}
 			}
-			schemaFetchSuccess = false
 		}
 	}
 
