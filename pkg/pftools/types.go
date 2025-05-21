@@ -36,6 +36,8 @@ type PulsarFunctionManager struct {
 	pulsarClient      pulsar.Client
 	fnToToolMap       map[string]*FunctionTool
 	mutex             sync.RWMutex
+	producerCache     map[string]pulsar.Producer
+	producerMutex     sync.RWMutex
 	pollInterval      time.Duration
 	stopCh            chan struct{}
 	callInProgressMap map[string]context.CancelFunc

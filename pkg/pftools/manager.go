@@ -26,6 +26,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/apache/pulsar-client-go/pulsar"
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/admin/config"
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/rest"
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
@@ -34,7 +35,7 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
-	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
+	pulsarutils "github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 	"github.com/streamnative/streamnative-mcp-server/pkg/schema"
 )
 
@@ -56,7 +57,7 @@ var DefaultStringSchemaInfo = &SchemaInfo{
 // NewPulsarFunctionManager creates a new PulsarFunctionManager
 func NewPulsarFunctionManager(mcpServer *server.MCPServer, readOnly bool, options *ManagerOptions) (*PulsarFunctionManager, error) {
 	// Get Pulsar client and admin client
-	pulsarClient, err := pulsar.GetPulsarClient()
+	pulsarClient, err := pulsarutils.GetPulsarClient()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get Pulsar client: %w", err)
 	}
@@ -74,6 +75,8 @@ func NewPulsarFunctionManager(mcpServer *server.MCPServer, readOnly bool, option
 		pulsarClient:      pulsarClient,
 		fnToToolMap:       make(map[string]*FunctionTool),
 		mutex:             sync.RWMutex{},
+		producerCache:     make(map[string]pulsar.Producer),
+		producerMutex:     sync.RWMutex{},
 		pollInterval:      options.PollInterval,
 		stopCh:            make(chan struct{}),
 		callInProgressMap: make(map[string]context.CancelFunc),
@@ -96,6 +99,15 @@ func (m *PulsarFunctionManager) Start() {
 // Stop stops polling for functions
 func (m *PulsarFunctionManager) Stop() {
 	close(m.stopCh)
+
+	m.producerMutex.Lock()
+	defer m.producerMutex.Unlock()
+	for topic, producer := range m.producerCache {
+		log.Printf("Closing producer for topic: %s", topic)
+		producer.Close()
+	}
+	m.producerCache = make(map[string]pulsar.Producer)
+	log.Println("All cached producers closed and cache cleared.")
 }
 
 // pollFunctions polls for functions periodically
@@ -406,7 +418,7 @@ func (m *PulsarFunctionManager) handleToolCall(fnTool *FunctionTool) func(ctx co
 		}
 
 		// Create function invoker
-		invoker := NewFunctionInvoker(m.pulsarClient)
+		invoker := NewFunctionInvoker(m)
 
 		// Create context with timeout
 		timeoutCtx, cancel := context.WithTimeout(ctx, m.defaultTimeout)
@@ -483,4 +495,34 @@ func retrieveToolDescription(fn *utils.FunctionConfig) string {
 		}
 	}
 	return fallbackDescription
+}
+
+// GetProducer retrieves a producer from the cache or creates a new one if not found.
+func (m *PulsarFunctionManager) GetProducer(topic string) (pulsar.Producer, error) {
+	m.producerMutex.RLock()
+	producer, found := m.producerCache[topic]
+	m.producerMutex.RUnlock()
+
+	if found {
+		return producer, nil
+	}
+
+	m.producerMutex.Lock()
+	defer m.producerMutex.Unlock()
+
+	producer, found = m.producerCache[topic]
+	if found {
+		return producer, nil
+	}
+
+	newProducer, err := m.pulsarClient.CreateProducer(pulsar.ProducerOptions{
+		Topic: topic,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create producer for topic %s: %w", topic, err)
+	}
+
+	m.producerCache[topic] = newProducer
+	log.Printf("Created and cached producer for topic: %s", topic)
+	return newProducer, nil
 }

@@ -37,6 +37,7 @@ type FunctionInvoker struct {
 	client         pulsar.Client
 	resultChannels map[string]chan FunctionResult
 	mutex          sync.RWMutex
+	manager        *PulsarFunctionManager
 }
 
 // FunctionResult represents the result of a function invocation
@@ -46,11 +47,12 @@ type FunctionResult struct {
 }
 
 // NewFunctionInvoker creates a new FunctionInvoker
-func NewFunctionInvoker(client pulsar.Client) *FunctionInvoker {
+func NewFunctionInvoker(manager *PulsarFunctionManager) *FunctionInvoker {
 	return &FunctionInvoker{
-		client:         client,
+		client:         manager.pulsarClient,
 		resultChannels: make(map[string]chan FunctionResult),
 		mutex:          sync.RWMutex{},
+		manager:        manager,
 	}
 }
 
@@ -164,13 +166,10 @@ func (fi *FunctionInvoker) setupConsumer(ctx context.Context, inputTopic, output
 
 // sendMessage sends a message to the input topic
 func (fi *FunctionInvoker) sendMessage(ctx context.Context, inputTopic string, payload []byte) (string, error) {
-	producer, err := fi.client.CreateProducer(pulsar.ProducerOptions{
-		Topic: inputTopic,
-	})
+	producer, err := fi.manager.GetProducer(inputTopic)
 	if err != nil {
-		return "", fmt.Errorf("failed to create producer: %w", err)
+		return "", fmt.Errorf("failed to get producer for topic %s: %w", inputTopic, err)
 	}
-	defer producer.Close()
 
 	// Send the message with properties
 	msgID, err := producer.Send(ctx, &pulsar.ProducerMessage{
