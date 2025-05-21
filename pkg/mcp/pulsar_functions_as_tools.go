@@ -61,37 +61,42 @@ func PulsarFunctionManagedMcpTools(s *server.MCPServer, readOnly bool, features 
 
 	options := pftools.DefaultManagerOptions()
 
-	if pollIntervalStr := os.Getenv("PULSAR_FUNCTIONS_POLL_INTERVAL"); pollIntervalStr != "" {
+	if pollIntervalStr := os.Getenv("FUNCTIONS_AS_TOOLS_POLL_INTERVAL"); pollIntervalStr != "" {
 		if seconds, err := strconv.Atoi(pollIntervalStr); err == nil && seconds > 0 {
 			options.PollInterval = time.Duration(seconds) * time.Second
 			log.Printf("Setting Pulsar Functions poll interval to %v", options.PollInterval)
 		}
 	}
 
-	if timeoutStr := os.Getenv("PULSAR_FUNCTIONS_TIMEOUT"); timeoutStr != "" {
+	if timeoutStr := os.Getenv("FUNCTIONS_AS_TOOLS_TIMEOUT"); timeoutStr != "" {
 		if seconds, err := strconv.Atoi(timeoutStr); err == nil && seconds > 0 {
 			options.DefaultTimeout = time.Duration(seconds) * time.Second
 			log.Printf("Setting Pulsar Functions default timeout to %v", options.DefaultTimeout)
 		}
 	}
 
-	if failureThresholdStr := os.Getenv("PULSAR_FUNCTIONS_FAILURE_THRESHOLD"); failureThresholdStr != "" {
+	if failureThresholdStr := os.Getenv("FUNCTIONS_AS_TOOLS_FAILURE_THRESHOLD"); failureThresholdStr != "" {
 		if threshold, err := strconv.Atoi(failureThresholdStr); err == nil && threshold > 0 {
 			options.FailureThreshold = threshold
 			log.Printf("Setting Pulsar Functions failure threshold to %d", options.FailureThreshold)
 		}
 	}
 
-	if resetTimeoutStr := os.Getenv("PULSAR_FUNCTIONS_RESET_TIMEOUT"); resetTimeoutStr != "" {
+	if resetTimeoutStr := os.Getenv("FUNCTIONS_AS_TOOLS_RESET_TIMEOUT"); resetTimeoutStr != "" {
 		if seconds, err := strconv.Atoi(resetTimeoutStr); err == nil && seconds > 0 {
 			options.ResetTimeout = time.Duration(seconds) * time.Second
 			log.Printf("Setting Pulsar Functions reset timeout to %v", options.ResetTimeout)
 		}
 	}
 
-	if tenantNamespacesStr := os.Getenv("PULSAR_FUNCTIONS_TENANT_NAMESPACES"); tenantNamespacesStr != "" {
+	if tenantNamespacesStr := os.Getenv("FUNCTIONS_AS_TOOLS_TENANT_NAMESPACES"); tenantNamespacesStr != "" {
 		options.TenantNamespaces = strings.Split(tenantNamespacesStr, ",")
 		log.Printf("Setting Pulsar Functions tenant namespaces to %v", options.TenantNamespaces)
+	}
+
+	if strictExportStr := os.Getenv("FUNCTIONS_AS_TOOLS_STRICT_EXPORT"); strictExportStr != "" {
+		options.StrictExport = strictExportStr == "true"
+		log.Printf("Setting Pulsar Functions strict export to %v", options.StrictExport)
 	}
 
 	manager, err := pftools.NewPulsarFunctionManager(s, readOnly, options)
@@ -102,7 +107,7 @@ func PulsarFunctionManagedMcpTools(s *server.MCPServer, readOnly bool, features 
 
 	manager.Start()
 
-	managerID := "pulsar_functions_manager_" + strconv.FormatInt(time.Now().UnixNano(), 10)
+	managerID := "FUNCTIONS_AS_TOOLS_manager_" + strconv.FormatInt(time.Now().UnixNano(), 10)
 	functionManagersLock.Lock()
 	functionManagers[managerID] = manager
 	functionManagersLock.Unlock()

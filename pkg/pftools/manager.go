@@ -82,6 +82,7 @@ func NewPulsarFunctionManager(mcpServer *server.MCPServer, readOnly bool, option
 		defaultTimeout:    options.DefaultTimeout,
 		circuitBreakers:   make(map[string]*CircuitBreaker),
 		tenantNamespaces:  options.TenantNamespaces,
+		strictExport:      options.StrictExport,
 	}
 
 	return manager, nil
@@ -230,6 +231,11 @@ func (m *PulsarFunctionManager) getFunctionsList() ([]*utils.FunctionConfig, err
 	}
 
 	for _, fn := range allFunctions {
+		if m.strictExport &&
+			!strings.Contains(fn.CustomRuntimeOptions, CustomRuntimeOptionsEnvMcpToolNameKey) &&
+			!strings.Contains(fn.CustomRuntimeOptions, CustomRuntimeOptionsEnvMcpToolDescriptionKey) {
+			continue
+		}
 		status, err := m.adminClient.Functions().GetFunctionStatus(fn.Tenant, fn.Namespace, fn.Name)
 		if err != nil {
 			continue

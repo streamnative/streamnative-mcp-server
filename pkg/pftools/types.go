@@ -44,6 +44,7 @@ type PulsarFunctionManager struct {
 	defaultTimeout    time.Duration
 	circuitBreakers   map[string]*CircuitBreaker
 	tenantNamespaces  []string
+	strictExport      bool
 }
 
 type FunctionTool struct {
@@ -86,6 +87,7 @@ type ManagerOptions struct {
 	FailureThreshold int
 	ResetTimeout     time.Duration
 	TenantNamespaces []string
+	StrictExport     bool
 }
 
 func DefaultManagerOptions() *ManagerOptions {
@@ -95,5 +97,6 @@ func DefaultManagerOptions() *ManagerOptions {
 		FailureThreshold: 5,
 		ResetTimeout:     60 * time.Second,
 		TenantNamespaces: []string{},
+		StrictExport:     false,
 	}
 }

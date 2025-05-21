@@ -71,27 +71,32 @@ If these custom options are not provided, the MCP tool name might default to a d
 
 Beyond customizing individual tool properties at the function deployment level, you can also configure the overall behavior of the "Functions as Tools" feature on the StreamNative MCP Server side using the following environment variables. These variables are typically set when starting the MCP server.
 
-*   `PULSAR_FUNCTIONS_POLL_INTERVAL`
+*   `FUNCTIONS_AS_TOOLS_POLL_INTERVAL`
     *   **Description**: Controls how frequently the MCP Server polls the Pulsar cluster to discover or update available Pulsar Functions. Setting a lower value means functions are discovered faster, but it may increase the load on the Pulsar cluster.
     *   **Unit**: Seconds
     *   **Default**: Defaults to the value specified in `pftools.DefaultManagerOptions()`. Refer to the `pkg/pftools` package for the precise default (e.g., if the internal default is 60 seconds, it will be `60`).
-*   `PULSAR_FUNCTIONS_TIMEOUT`
+*   `FUNCTIONS_AS_TOOLS_TIMEOUT`
     *   **Description**: Sets the default timeout for invoking a Pulsar Function as an MCP tool. If a function execution exceeds this duration, the call will be considered timed out.
     *   **Unit**: Seconds
     *   **Default**: Defaults to the value specified in `pftools.DefaultManagerOptions()` (e.g., if the internal default is 30 seconds, it will be `30`).
-*   `PULSAR_FUNCTIONS_FAILURE_THRESHOLD`
-    *   **Description**: Defines the number of consecutive failures for a specific Pulsar Function tool before it is temporarily moved to a "circuit breaker open" state. In this state, further calls to this specific function tool will be immediately rejected without attempting to execute the function, until the `PULSAR_FUNCTIONS_RESET_TIMEOUT` is reached.
+*   `FUNCTIONS_AS_TOOLS_FAILURE_THRESHOLD`
+    *   **Description**: Defines the number of consecutive failures for a specific Pulsar Function tool before it is temporarily moved to a "circuit breaker open" state. In this state, further calls to this specific function tool will be immediately rejected without attempting to execute the function, until the `FUNCTIONS_AS_TOOLS_RESET_TIMEOUT` is reached.
     *   **Unit**: Integer (number of failures)
     *   **Default**: Defaults to the value specified in `pftools.DefaultManagerOptions()` (e.g., if the internal default is 5, it will be `5`).
-*   `PULSAR_FUNCTIONS_RESET_TIMEOUT`
+*   `FUNCTIONS_AS_TOOLS_RESET_TIMEOUT`
     *   **Description**: Specifies the duration for which a Pulsar Function tool remains in the "circuit breaker open" state (due to exceeding the failure threshold) before the MCP server attempts to reset the circuit and allow calls again.
     *   **Unit**: Seconds
     *   **Default**: Defaults to the value specified in `pftools.DefaultManagerOptions()` (e.g., if the internal default is 60 seconds, it will be `60`).
-*   `PULSAR_FUNCTIONS_TENANT_NAMESPACES`
+*   `FUNCTIONS_AS_TOOLS_TENANT_NAMESPACES`
     *   **Description**: A comma-separated list of Pulsar `tenant/namespace` strings that the MCP Server should scan for Pulsar Functions. This allows you to restrict function discovery to specific namespaces. If not set, the server might attempt to discover functions from all namespaces it has access to, as permitted by its Pulsar client configuration.
     *   **Format**: `tenant1/namespace1,tenant2/namespace2`
     *   **Example**: `public/default,my-tenant/app-functions`
     *   **Default**: Empty (meaning discover from all accessible namespaces (only on StreamNative Cloud)).
+*   `FUNCTIONS_AS_TOOLS_STRICT_EXPORT`
+    *   **Description**: Only export functions with `MCP_TOOL_NAME` and `MCP_TOOL_DESCRIPTION` defined. 
+    *   **Format**: `true` or `false`
+    *   **Example**: `false`
+    *   **Default**: `true`
 
 ## Considerations and Limitations
 
