@@ -27,6 +27,7 @@ import (
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
+	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
@@ -336,7 +337,7 @@ func PulsarAdminAddTopicPolicyTools(s *server.MCPServer, readOnly bool, features
 // handleTopicsGetPublishRate gets the publish rate for a topic
 func handleTopicsGetPublishRate(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
@@ -376,7 +377,7 @@ func handleTopicsGetPublishRate(_ context.Context, request mcp.CallToolRequest) 
 // handleTopicsSetPublishRate sets the publish rate for a topic
 func handleTopicsSetPublishRate(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
@@ -398,13 +399,13 @@ func handleTopicsSetPublishRate(_ context.Context, request mcp.CallToolRequest) 
 	publishRateInByte := int64(-1) // unlimited
 
 	// Get publish rate in messages if provided
-	msgRateParam, hasMsgRate := optionalParam[float64](request.Params.Arguments, "publishThrottlingRateInMsg")
+	msgRateParam, hasMsgRate := common.OptionalParam[float64](request.Params.Arguments, "publishThrottlingRateInMsg")
 	if hasMsgRate {
 		publishRateInMsg = int64(msgRateParam)
 	}
 
 	// Get publish rate in bytes if provided
-	byteRateParam, hasByteRate := optionalParam[float64](request.Params.Arguments, "publishThrottlingRateInByte")
+	byteRateParam, hasByteRate := common.OptionalParam[float64](request.Params.Arguments, "publishThrottlingRateInByte")
 	if hasByteRate {
 		publishRateInByte = int64(byteRateParam)
 	}
@@ -447,7 +448,7 @@ func handleTopicsSetPublishRate(_ context.Context, request mcp.CallToolRequest) 
 // handleTopicsRemovePublishRate removes the publish rate for a topic
 func handleTopicsRemovePublishRate(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
@@ -476,7 +477,7 @@ func handleTopicsRemovePublishRate(_ context.Context, request mcp.CallToolReques
 // handleTopicsGetPermissions gets the permissions on a topic
 func handleTopicsGetPermissions(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
@@ -511,17 +512,17 @@ func handleTopicsGetPermissions(_ context.Context, request mcp.CallToolRequest) 
 // handleTopicsGrantPermissions grants a new permission to a role on a topic
 func handleTopicsGrantPermissions(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
 
-	role, err := requiredParam[string](request.Params.Arguments, "role")
+	role, err := common.RequiredParam[string](request.Params.Arguments, "role")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get role: %v", err)), nil
 	}
 
-	actions, err := requiredParamArray[string](request.Params.Arguments, "actions")
+	actions, err := common.RequiredParamArray[string](request.Params.Arguments, "actions")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get actions: %v", err)), nil
 	}
@@ -566,12 +567,12 @@ func handleTopicsGrantPermissions(_ context.Context, request mcp.CallToolRequest
 // handleTopicsRevokePermissions revokes all permissions for a role on a topic
 func handleTopicsRevokePermissions(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
 
-	role, err := requiredParam[string](request.Params.Arguments, "role")
+	role, err := common.RequiredParam[string](request.Params.Arguments, "role")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get role: %v", err)), nil
 	}
@@ -620,7 +621,7 @@ func grantTopicPermission(admin interface{}, topicName utils.TopicName, role str
 // handleTopicsGetMessageTTL gets the message TTL for a topic
 func handleTopicsGetMessageTTL(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
@@ -654,12 +655,12 @@ func handleTopicsGetMessageTTL(_ context.Context, request mcp.CallToolRequest) (
 // handleTopicsSetMessageTTL sets the message TTL for a topic
 func handleTopicsSetMessageTTL(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
 
-	ttl, err := requiredParam[float64](request.Params.Arguments, "ttl")
+	ttl, err := common.RequiredParam[float64](request.Params.Arguments, "ttl")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get TTL: %v", err)), nil
 	}
@@ -700,7 +701,7 @@ func handleTopicsSetMessageTTL(_ context.Context, request mcp.CallToolRequest) (
 // handleTopicsRemoveMessageTTL removes the message TTL for a topic
 func handleTopicsRemoveMessageTTL(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
@@ -729,7 +730,7 @@ func handleTopicsRemoveMessageTTL(_ context.Context, request mcp.CallToolRequest
 // handleTopicsGetMaxProducers gets the maximum number of producers allowed for a topic
 func handleTopicsGetMaxProducers(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
@@ -764,12 +765,12 @@ func handleTopicsGetMaxProducers(_ context.Context, request mcp.CallToolRequest)
 // handleTopicsSetMaxProducers sets the maximum number of producers allowed for a topic
 func handleTopicsSetMaxProducers(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
 
-	maxProducers, err := requiredParam[float64](request.Params.Arguments, "maxProducers")
+	maxProducers, err := common.RequiredParam[float64](request.Params.Arguments, "maxProducers")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get maxProducers: %v", err)), nil
 	}
@@ -810,7 +811,7 @@ func handleTopicsSetMaxProducers(_ context.Context, request mcp.CallToolRequest)
 // handleTopicsRemoveMaxProducers removes the maximum producers limit for a topic
 func handleTopicsRemoveMaxProducers(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
@@ -839,7 +840,7 @@ func handleTopicsRemoveMaxProducers(_ context.Context, request mcp.CallToolReque
 // handleTopicsGetMaxConsumers gets the maximum number of consumers allowed for a topic
 func handleTopicsGetMaxConsumers(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
@@ -874,12 +875,12 @@ func handleTopicsGetMaxConsumers(_ context.Context, request mcp.CallToolRequest)
 // handleTopicsSetMaxConsumers sets the maximum number of consumers allowed for a topic
 func handleTopicsSetMaxConsumers(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
 
-	maxConsumers, err := requiredParam[float64](request.Params.Arguments, "maxConsumers")
+	maxConsumers, err := common.RequiredParam[float64](request.Params.Arguments, "maxConsumers")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get maxConsumers: %v", err)), nil
 	}
@@ -920,7 +921,7 @@ func handleTopicsSetMaxConsumers(_ context.Context, request mcp.CallToolRequest)
 // handleTopicsRemoveMaxConsumers removes the maximum consumers limit for a topic
 func handleTopicsRemoveMaxConsumers(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
@@ -950,7 +951,7 @@ func handleTopicsRemoveMaxConsumers(_ context.Context, request mcp.CallToolReque
 // gets the maximum number of unacknowledged messages allowed for a consumer on a topic
 func handleTopicsGetMaxUnackMessagesPerConsumer(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
@@ -988,12 +989,12 @@ func handleTopicsGetMaxUnackMessagesPerConsumer(_ context.Context, request mcp.C
 // sets the maximum number of unacknowledged messages allowed for a consumer on a topic
 func handleTopicsSetMaxUnackMessagesPerConsumer(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
 
-	maxUnack, err := requiredParam[float64](request.Params.Arguments, "maxUnackMessagesPerConsumer")
+	maxUnack, err := common.RequiredParam[float64](request.Params.Arguments, "maxUnackMessagesPerConsumer")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get maxUnackMessagesPerConsumer: %v", err)), nil
 	}
@@ -1035,7 +1036,7 @@ func handleTopicsSetMaxUnackMessagesPerConsumer(_ context.Context, request mcp.C
 // removes the maximum unacknowledged messages per consumer limit for a topic
 func handleTopicsRemoveMaxUnackMessagesPerConsumer(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
@@ -1070,7 +1071,7 @@ func handleTopicsRemoveMaxUnackMessagesPerConsumer(_ context.Context, request mc
 // gets the maximum number of unacknowledged messages allowed for a subscription on a topic
 func handleTopicsGetMaxUnackMessagesPerSubscription(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
@@ -1110,12 +1111,12 @@ func handleTopicsGetMaxUnackMessagesPerSubscription(_ context.Context, request m
 // sets the maximum number of unacknowledged messages allowed for a subscription on a topic
 func handleTopicsSetMaxUnackMessagesPerSubscription(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
 
-	maxUnack, err := requiredParam[float64](request.Params.Arguments, "maxUnackMessagesPerSubscription")
+	maxUnack, err := common.RequiredParam[float64](request.Params.Arguments, "maxUnackMessagesPerSubscription")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get maxUnackMessagesPerSubscription: %v", err)), nil
 	}
@@ -1161,7 +1162,7 @@ func handleTopicsSetMaxUnackMessagesPerSubscription(_ context.Context, request m
 // removes the maximum unacknowledged messages per subscription limit for a topic
 func handleTopicsRemoveMaxUnackMessagesPerSubscription(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
@@ -1195,7 +1196,7 @@ func handleTopicsRemoveMaxUnackMessagesPerSubscription(_ context.Context, reques
 // handleTopicsGetPersistence gets the persistence policy for a topic
 func handleTopicsGetPersistence(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
@@ -1230,22 +1231,22 @@ func handleTopicsGetPersistence(_ context.Context, request mcp.CallToolRequest) 
 // handleTopicsSetPersistence sets the persistence policy for a topic
 func handleTopicsSetPersistence(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
 
-	ensembleSize, err := requiredParam[float64](request.Params.Arguments, "ensembleSize")
+	ensembleSize, err := common.RequiredParam[float64](request.Params.Arguments, "ensembleSize")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get ensembleSize: %v", err)), nil
 	}
 
-	writeQuorum, err := requiredParam[float64](request.Params.Arguments, "writeQuorum")
+	writeQuorum, err := common.RequiredParam[float64](request.Params.Arguments, "writeQuorum")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get writeQuorum: %v", err)), nil
 	}
 
-	ackQuorum, err := requiredParam[float64](request.Params.Arguments, "ackQuorum")
+	ackQuorum, err := common.RequiredParam[float64](request.Params.Arguments, "ackQuorum")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get ackQuorum: %v", err)), nil
 	}
@@ -1298,7 +1299,7 @@ func handleTopicsSetPersistence(_ context.Context, request mcp.CallToolRequest) 
 // handleTopicsRemovePersistence removes the persistence policy for a topic
 func handleTopicsRemovePersistence(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
@@ -1327,7 +1328,7 @@ func handleTopicsRemovePersistence(_ context.Context, request mcp.CallToolReques
 // handleTopicsGetDelayedDelivery gets the delayed delivery policy for a topic
 func handleTopicsGetDelayedDelivery(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
@@ -1362,12 +1363,12 @@ func handleTopicsGetDelayedDelivery(_ context.Context, request mcp.CallToolReque
 // handleTopicsSetDelayedDelivery sets the delayed delivery policy for a topic
 func handleTopicsSetDelayedDelivery(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
 
-	delayInMillis, err := requiredParam[float64](request.Params.Arguments, "delayInMillis")
+	delayInMillis, err := common.RequiredParam[float64](request.Params.Arguments, "delayInMillis")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get delayInMillis: %v", err)), nil
 	}
@@ -1379,7 +1380,7 @@ func handleTopicsSetDelayedDelivery(_ context.Context, request mcp.CallToolReque
 
 	// Default tick time is 1 second (1000ms)
 	tickTime := 1000.0
-	tickTimeParam, hasTickTime := optionalParam[float64](request.Params.Arguments, "tickTime")
+	tickTimeParam, hasTickTime := common.OptionalParam[float64](request.Params.Arguments, "tickTime")
 	if hasTickTime && tickTimeParam > 0 {
 		tickTime = tickTimeParam
 	}
@@ -1420,7 +1421,7 @@ func handleTopicsSetDelayedDelivery(_ context.Context, request mcp.CallToolReque
 // handleTopicsRemoveDelayedDelivery removes the delayed delivery policy for a topic
 func handleTopicsRemoveDelayedDelivery(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
@@ -1449,7 +1450,7 @@ func handleTopicsRemoveDelayedDelivery(_ context.Context, request mcp.CallToolRe
 // handleTopicsGetDispatchRate gets the message dispatch rate for a topic
 func handleTopicsGetDispatchRate(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
@@ -1489,7 +1490,7 @@ func handleTopicsGetDispatchRate(_ context.Context, request mcp.CallToolRequest)
 // handleTopicsSetDispatchRate sets the message dispatch rate for a topic
 func handleTopicsSetDispatchRate(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
@@ -1512,19 +1513,19 @@ func handleTopicsSetDispatchRate(_ context.Context, request mcp.CallToolRequest)
 	ratePeriodInSecond := int64(1)  // default 1 second
 
 	// Get dispatch rate in messages if provided
-	msgRateParam, hasMsgRate := optionalParam[float64](request.Params.Arguments, "dispatchThrottlingRateInMsg")
+	msgRateParam, hasMsgRate := common.OptionalParam[float64](request.Params.Arguments, "dispatchThrottlingRateInMsg")
 	if hasMsgRate {
 		dispatchRateInMsg = int64(msgRateParam)
 	}
 
 	// Get dispatch rate in bytes if provided
-	byteRateParam, hasByteRate := optionalParam[float64](request.Params.Arguments, "dispatchThrottlingRateInByte")
+	byteRateParam, hasByteRate := common.OptionalParam[float64](request.Params.Arguments, "dispatchThrottlingRateInByte")
 	if hasByteRate {
 		dispatchRateInByte = int64(byteRateParam)
 	}
 
 	// Get rate period if provided
-	ratePeriodParam, hasRatePeriod := optionalParam[float64](request.Params.Arguments, "ratePeriodInSecond")
+	ratePeriodParam, hasRatePeriod := common.OptionalParam[float64](request.Params.Arguments, "ratePeriodInSecond")
 	if hasRatePeriod && ratePeriodParam > 0 {
 		ratePeriodInSecond = int64(ratePeriodParam)
 	} else if hasRatePeriod && ratePeriodParam <= 0 {
@@ -1571,7 +1572,7 @@ func handleTopicsSetDispatchRate(_ context.Context, request mcp.CallToolRequest)
 // handleTopicsRemoveDispatchRate removes the message dispatch rate for a topic
 func handleTopicsRemoveDispatchRate(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
@@ -1600,7 +1601,7 @@ func handleTopicsRemoveDispatchRate(_ context.Context, request mcp.CallToolReque
 // handleTopicsGetDeduplicationStatus gets the deduplication status for a topic
 func handleTopicsGetDeduplicationStatus(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
@@ -1634,12 +1635,12 @@ func handleTopicsGetDeduplicationStatus(_ context.Context, request mcp.CallToolR
 // handleTopicsSetDeduplicationStatus sets the deduplication status for a topic
 func handleTopicsSetDeduplicationStatus(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
 
-	enabled, err := requiredParam[bool](request.Params.Arguments, "enabled")
+	enabled, err := common.RequiredParam[bool](request.Params.Arguments, "enabled")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get enabled parameter: %v", err)), nil
 	}
@@ -1673,7 +1674,7 @@ func handleTopicsSetDeduplicationStatus(_ context.Context, request mcp.CallToolR
 // handleTopicsRemoveDeduplicationStatus removes the deduplication status for a topic
 func handleTopicsRemoveDeduplicationStatus(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
@@ -1702,7 +1703,7 @@ func handleTopicsRemoveDeduplicationStatus(_ context.Context, request mcp.CallTo
 // handleTopicsGetRetention gets the retention policy for a topic
 func handleTopicsGetRetention(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
@@ -1715,7 +1716,7 @@ func handleTopicsGetRetention(_ context.Context, request mcp.CallToolRequest) (*
 
 	// Check if applied policies should be included
 	applied := false
-	appliedParam, hasApplied := optionalParam[bool](request.Params.Arguments, "applied")
+	appliedParam, hasApplied := common.OptionalParam[bool](request.Params.Arguments, "applied")
 	if hasApplied {
 		applied = appliedParam
 	}
@@ -1768,17 +1769,17 @@ func handleTopicsGetRetention(_ context.Context, request mcp.CallToolRequest) (*
 // handleTopicsSetRetention sets the retention policy for a topic
 func handleTopicsSetRetention(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
 
-	retentionTimeInMinutes, err := requiredParam[float64](request.Params.Arguments, "retentionTimeInMinutes")
+	retentionTimeInMinutes, err := common.RequiredParam[float64](request.Params.Arguments, "retentionTimeInMinutes")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get retentionTimeInMinutes: %v", err)), nil
 	}
 
-	retentionSizeInMB, err := requiredParam[float64](request.Params.Arguments, "retentionSizeInMB")
+	retentionSizeInMB, err := common.RequiredParam[float64](request.Params.Arguments, "retentionSizeInMB")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get retentionSizeInMB: %v", err)), nil
 	}
@@ -1835,7 +1836,7 @@ func handleTopicsSetRetention(_ context.Context, request mcp.CallToolRequest) (*
 // handleTopicsRemoveRetention removes the retention policy for a topic
 func handleTopicsRemoveRetention(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
@@ -1864,7 +1865,7 @@ func handleTopicsRemoveRetention(_ context.Context, request mcp.CallToolRequest)
 // handleTopicsGetBacklogQuota gets the backlog quota policy for a topic
 func handleTopicsGetBacklogQuota(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
@@ -1877,7 +1878,7 @@ func handleTopicsGetBacklogQuota(_ context.Context, request mcp.CallToolRequest)
 
 	// Check if applied policies should be included
 	applied := false
-	appliedParam, hasApplied := optionalParam[bool](request.Params.Arguments, "applied")
+	appliedParam, hasApplied := common.OptionalParam[bool](request.Params.Arguments, "applied")
 	if hasApplied {
 		applied = appliedParam
 	}
@@ -1910,17 +1911,17 @@ func handleTopicsGetBacklogQuota(_ context.Context, request mcp.CallToolRequest)
 // handleTopicsSetBacklogQuota sets the backlog quota policy for a topic
 func handleTopicsSetBacklogQuota(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
 
-	limitSize, err := requiredParam[float64](request.Params.Arguments, "limitSize")
+	limitSize, err := common.RequiredParam[float64](request.Params.Arguments, "limitSize")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get limitSize: %v", err)), nil
 	}
 
-	policy, err := requiredParam[string](request.Params.Arguments, "policy")
+	policy, err := common.RequiredParam[string](request.Params.Arguments, "policy")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get policy: %v", err)), nil
 	}
@@ -1941,7 +1942,7 @@ func handleTopicsSetBacklogQuota(_ context.Context, request mcp.CallToolRequest)
 	limitTime := int64(-1) // unlimited by default
 
 	// Get limit time if provided
-	limitTimeParam, hasLimitTime := optionalParam[float64](request.Params.Arguments, "limitTime")
+	limitTimeParam, hasLimitTime := common.OptionalParam[float64](request.Params.Arguments, "limitTime")
 	if hasLimitTime {
 		limitTime = int64(limitTimeParam)
 	}
@@ -1956,7 +1957,7 @@ func handleTopicsSetBacklogQuota(_ context.Context, request mcp.CallToolRequest)
 	backlogQuotaType := utils.DestinationStorage
 
 	// Get quota type if provided
-	quotaTypeStr, hasQuotaType := optionalParam[string](request.Params.Arguments, "type")
+	quotaTypeStr, hasQuotaType := common.OptionalParam[string](request.Params.Arguments, "type")
 	if hasQuotaType {
 		parsedType, err := utils.ParseBacklogQuotaType(quotaTypeStr)
 		if err != nil {
@@ -1981,7 +1982,7 @@ func handleTopicsSetBacklogQuota(_ context.Context, request mcp.CallToolRequest)
 // handleTopicsRemoveBacklogQuota removes the backlog quota policy from a topic
 func handleTopicsRemoveBacklogQuota(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
@@ -2002,7 +2003,7 @@ func handleTopicsRemoveBacklogQuota(_ context.Context, request mcp.CallToolReque
 	backlogQuotaType := utils.DestinationStorage
 
 	// Get quota type if provided
-	quotaTypeStr, hasQuotaType := optionalParam[string](request.Params.Arguments, "type")
+	quotaTypeStr, hasQuotaType := common.OptionalParam[string](request.Params.Arguments, "type")
 	if hasQuotaType {
 		parsedType, err := utils.ParseBacklogQuotaType(quotaTypeStr)
 		if err != nil {
@@ -2023,7 +2024,7 @@ func handleTopicsRemoveBacklogQuota(_ context.Context, request mcp.CallToolReque
 // handleTopicsGetCompactionThreshold gets the compaction threshold for a topic
 func handleTopicsGetCompactionThreshold(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
@@ -2036,7 +2037,7 @@ func handleTopicsGetCompactionThreshold(_ context.Context, request mcp.CallToolR
 
 	// Check if applied policies should be included
 	applied := false
-	appliedParam, hasApplied := optionalParam[bool](request.Params.Arguments, "applied")
+	appliedParam, hasApplied := common.OptionalParam[bool](request.Params.Arguments, "applied")
 	if hasApplied {
 		applied = appliedParam
 	}
@@ -2065,12 +2066,12 @@ func handleTopicsGetCompactionThreshold(_ context.Context, request mcp.CallToolR
 // handleTopicsSetCompactionThreshold sets the compaction threshold for a topic
 func handleTopicsSetCompactionThreshold(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
 
-	threshold, err := requiredParam[float64](request.Params.Arguments, "threshold")
+	threshold, err := common.RequiredParam[float64](request.Params.Arguments, "threshold")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get threshold: %v", err)), nil
 	}
@@ -2111,7 +2112,7 @@ func handleTopicsSetCompactionThreshold(_ context.Context, request mcp.CallToolR
 // handleTopicsRemoveCompactionThreshold removes the compaction threshold for a topic
 func handleTopicsRemoveCompactionThreshold(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
@@ -2141,7 +2142,7 @@ func handleTopicsRemoveCompactionThreshold(_ context.Context, request mcp.CallTo
 // handleTopicsGetInactiveTopic gets the inactive topic policies for a topic
 func handleTopicsGetInactiveTopic(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
@@ -2154,7 +2155,7 @@ func handleTopicsGetInactiveTopic(_ context.Context, request mcp.CallToolRequest
 
 	// Check if applied policies should be included
 	applied := false
-	appliedParam, hasApplied := optionalParam[bool](request.Params.Arguments, "applied")
+	appliedParam, hasApplied := common.OptionalParam[bool](request.Params.Arguments, "applied")
 	if hasApplied {
 		applied = appliedParam
 	}
@@ -2183,22 +2184,22 @@ func handleTopicsGetInactiveTopic(_ context.Context, request mcp.CallToolRequest
 // handleTopicsSetInactiveTopic sets the inactive topic policies for a topic
 func handleTopicsSetInactiveTopic(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
 
-	enableDelete, err := requiredParam[bool](request.Params.Arguments, "enableDeleteWhileInactive")
+	enableDelete, err := common.RequiredParam[bool](request.Params.Arguments, "enableDeleteWhileInactive")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get enableDeleteWhileInactive: %v", err)), nil
 	}
 
-	maxInactiveDuration, err := requiredParam[float64](request.Params.Arguments, "maxInactiveDurationSeconds")
+	maxInactiveDuration, err := common.RequiredParam[float64](request.Params.Arguments, "maxInactiveDurationSeconds")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get maxInactiveDurationSeconds: %v", err)), nil
 	}
 
-	deleteModeStr, err := requiredParam[string](request.Params.Arguments, "deleteMode")
+	deleteModeStr, err := common.RequiredParam[string](request.Params.Arguments, "deleteMode")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get deleteMode: %v", err)), nil
 	}
@@ -2246,7 +2247,7 @@ func handleTopicsSetInactiveTopic(_ context.Context, request mcp.CallToolRequest
 // handleTopicsRemoveInactiveTopic removes the inactive topic policies from a topic
 func handleTopicsRemoveInactiveTopic(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
@@ -2276,12 +2277,12 @@ func handleTopicsRemoveInactiveTopic(_ context.Context, request mcp.CallToolRequ
 // handleTopicGetPolicy handles getting policies for a topic using the unified tool
 func handleTopicGetPolicy(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	_, err := requiredParam[string](request.Params.Arguments, "topic")
+	_, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic name: %v", err)), nil
 	}
 
-	policyType, err := requiredParam[string](request.Params.Arguments, "policy")
+	policyType, err := common.RequiredParam[string](request.Params.Arguments, "policy")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get policy type: %v", err)), nil
 	}
@@ -2326,12 +2327,12 @@ func handleTopicGetPolicy(ctx context.Context, request mcp.CallToolRequest) (*mc
 // handleTopicSetPolicy handles setting policies for a topic using the unified tool
 func handleTopicSetPolicy(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	_, err := requiredParam[string](request.Params.Arguments, "topic")
+	_, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic name: %v", err)), nil
 	}
 
-	policyType, err := requiredParam[string](request.Params.Arguments, "policy")
+	policyType, err := common.RequiredParam[string](request.Params.Arguments, "policy")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get policy type: %v", err)), nil
 	}
@@ -2376,12 +2377,12 @@ func handleTopicSetPolicy(ctx context.Context, request mcp.CallToolRequest) (*mc
 // handleTopicRemovePolicy handles removing policies for a topic using the unified tool
 func handleTopicRemovePolicy(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	_, err := requiredParam[string](request.Params.Arguments, "topic")
+	_, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic name: %v", err)), nil
 	}
 
-	policyType, err := requiredParam[string](request.Params.Arguments, "policy")
+	policyType, err := common.RequiredParam[string](request.Params.Arguments, "policy")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get policy type: %v", err)), nil
 	}

@@ -26,6 +26,7 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
+	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
@@ -66,7 +67,7 @@ func handleFunctionsWorkerTool(_ bool) func(context.Context, mcp.CallToolRequest
 		admin := pulsar.AdminClient
 
 		// Get required resource parameter
-		resource, err := requiredParam[string](request.Params.Arguments, "resource")
+		resource, err := common.RequiredParam[string](request.Params.Arguments, "resource")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'resource'. " +
 				"Please specify one of: function_stats, monitoring_metrics, cluster, cluster_leader, function_assignments.")), nil

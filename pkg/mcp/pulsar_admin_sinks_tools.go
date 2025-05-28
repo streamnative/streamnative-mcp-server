@@ -29,6 +29,7 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
+	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 )
 
 // PulsarAdminAddSinksTools adds a unified sink-related tool to the MCP server
@@ -135,7 +136,7 @@ func PulsarAdminAddSinksTools(s *server.MCPServer, readOnly bool, features []str
 func handleSinksTool(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Extract and validate operation parameter
-		operation, err := requiredParam[string](request.Params.Arguments, "operation")
+		operation, err := common.RequiredParam[string](request.Params.Arguments, "operation")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'operation': %v", err)), nil
 		}
@@ -169,12 +170,12 @@ func handleSinksTool(readOnly bool) func(context.Context, mcp.CallToolRequest) (
 		}
 
 		// Extract common parameters (all operations except list-built-in require tenant and namespace)
-		tenant, err := requiredParam[string](request.Params.Arguments, "tenant")
+		tenant, err := common.RequiredParam[string](request.Params.Arguments, "tenant")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'tenant': %v. A tenant is required for operation '%s'.", err, operation)), nil
 		}
 
-		namespace, err := requiredParam[string](request.Params.Arguments, "namespace")
+		namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'namespace': %v. A namespace is required for operation '%s'.", err, operation)), nil
 		}
@@ -182,7 +183,7 @@ func handleSinksTool(readOnly bool) func(context.Context, mcp.CallToolRequest) (
 		// For all operations except 'list', name is required
 		var name string
 		if operation != "list" {
-			name, err = requiredParam[string](request.Params.Arguments, "name")
+			name, err = common.RequiredParam[string](request.Params.Arguments, "name")
 			if err != nil {
 				return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'name' for operation '%s': %v. The sink name must be specified for this operation.", operation, err)), nil
 			}
@@ -268,17 +269,17 @@ func handleSinkStatus(_ context.Context, admin cmdutils.Client, tenant, namespac
 
 // handleSinkCreate handles creating a new sink
 func handleSinkCreate(_ context.Context, admin cmdutils.Client, arguments map[string]interface{}) (*mcp.CallToolResult, error) {
-	tenant, err := requiredParam[string](arguments, "tenant")
+	tenant, err := common.RequiredParam[string](arguments, "tenant")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get tenant: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](arguments, "namespace")
+	namespace, err := common.RequiredParam[string](arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace: %v", err)), nil
 	}
 
-	name, err := requiredParam[string](arguments, "name")
+	name, err := common.RequiredParam[string](arguments, "name")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get name: %v", err)), nil
 	}
@@ -292,32 +293,32 @@ func handleSinkCreate(_ context.Context, admin cmdutils.Client, arguments map[st
 	}
 
 	// Get optional parameters
-	archive, hasArchive := optionalParam[string](arguments, "archive")
+	archive, hasArchive := common.OptionalParam[string](arguments, "archive")
 	if hasArchive && archive != "" {
 		sinkData.Archive = archive
 	}
 
-	sinkType, hasSinkType := optionalParam[string](arguments, "sink-type")
+	sinkType, hasSinkType := common.OptionalParam[string](arguments, "sink-type")
 	if hasSinkType && sinkType != "" {
 		sinkData.SinkType = sinkType
 	}
 
-	inputsArray, hasInputs := optionalParamArray[string](arguments, "inputs")
+	inputsArray, hasInputs := common.OptionalParamArray[string](arguments, "inputs")
 	if hasInputs && len(inputsArray) > 0 {
 		sinkData.Inputs = strings.Join(inputsArray, ",")
 	}
 
-	topicsPattern, hasTopicsPattern := optionalParam[string](arguments, "topics-pattern")
+	topicsPattern, hasTopicsPattern := common.OptionalParam[string](arguments, "topics-pattern")
 	if hasTopicsPattern && topicsPattern != "" {
 		sinkData.TopicsPattern = topicsPattern
 	}
 
-	subsName, hasSubsName := optionalParam[string](arguments, "subs-name")
+	subsName, hasSubsName := common.OptionalParam[string](arguments, "subs-name")
 	if hasSubsName && subsName != "" {
 		sinkData.SubsName = subsName
 	}
 
-	parallelismFloat, hasParallelism := optionalParam[float64](arguments, "parallelism")
+	parallelismFloat, hasParallelism := common.OptionalParam[float64](arguments, "parallelism")
 	if hasParallelism {
 		sinkData.Parallelism = int(parallelismFloat)
 	}
@@ -374,17 +375,17 @@ func handleSinkCreate(_ context.Context, admin cmdutils.Client, arguments map[st
 
 // handleSinkUpdate handles updating an existing sink
 func handleSinkUpdate(_ context.Context, admin cmdutils.Client, arguments map[string]interface{}) (*mcp.CallToolResult, error) {
-	tenant, err := requiredParam[string](arguments, "tenant")
+	tenant, err := common.RequiredParam[string](arguments, "tenant")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get tenant: %v", err)), nil
 	}
 
-	namespace, err := requiredParam[string](arguments, "namespace")
+	namespace, err := common.RequiredParam[string](arguments, "namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace: %v", err)), nil
 	}
 
-	name, err := requiredParam[string](arguments, "name")
+	name, err := common.RequiredParam[string](arguments, "name")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get name: %v", err)), nil
 	}
@@ -398,32 +399,32 @@ func handleSinkUpdate(_ context.Context, admin cmdutils.Client, arguments map[st
 	}
 
 	// Get optional parameters
-	archive, hasArchive := optionalParam[string](arguments, "archive")
+	archive, hasArchive := common.OptionalParam[string](arguments, "archive")
 	if hasArchive && archive != "" {
 		sinkData.Archive = archive
 	}
 
-	sinkType, hasSinkType := optionalParam[string](arguments, "sink-type")
+	sinkType, hasSinkType := common.OptionalParam[string](arguments, "sink-type")
 	if hasSinkType && sinkType != "" {
 		sinkData.SinkType = sinkType
 	}
 
-	inputsArray, hasInputs := optionalParamArray[string](arguments, "inputs")
+	inputsArray, hasInputs := common.OptionalParamArray[string](arguments, "inputs")
 	if hasInputs && len(inputsArray) > 0 {
 		sinkData.Inputs = strings.Join(inputsArray, ",")
 	}
 
-	topicsPattern, hasTopicsPattern := optionalParam[string](arguments, "topics-pattern")
+	topicsPattern, hasTopicsPattern := common.OptionalParam[string](arguments, "topics-pattern")
 	if hasTopicsPattern && topicsPattern != "" {
 		sinkData.TopicsPattern = topicsPattern
 	}
 
-	subsName, hasSubsName := optionalParam[string](arguments, "subs-name")
+	subsName, hasSubsName := common.OptionalParam[string](arguments, "subs-name")
 	if hasSubsName && subsName != "" {
 		sinkData.SubsName = subsName
 	}
 
-	parallelismFloat, hasParallelism := optionalParam[float64](arguments, "parallelism")
+	parallelismFloat, hasParallelism := common.OptionalParam[float64](arguments, "parallelism")
 	if hasParallelism {
 		sinkData.Parallelism = int(parallelismFloat)
 	}

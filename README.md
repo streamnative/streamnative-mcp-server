@@ -233,6 +233,7 @@ The StreamNative MCP Server allows you to enable or disable specific groups of f
 | Feature              | Description                                                      | Docs |
 |---------------------|------------------------------------------------------------------|------|
 | `streamnative-cloud`| Manage StreamNative Cloud context and check resource logs         | [streamnative_cloud.md](docs/tools/streamnative_cloud.md) |
+| `functions-as-tools`     | Dynamically exposes deployed Pulsar Functions as invokable MCP tools, with automatic input/output schema handling. | [functions_as_tools.md](docs/tools/functions_as_tools.md)  |
 
 You can combine these features as needed using the `--features` flag. For example, to enable only Pulsar client features:
 ```bash

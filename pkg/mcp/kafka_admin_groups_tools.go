@@ -26,6 +26,7 @@ import (
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
+	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
 	"github.com/twmb/franz-go/pkg/kadm"
 )
@@ -83,7 +84,6 @@ func KafkaAdminAddGroupsTools(s *server.MCPServer, readOnly bool, features []str
 		"   topic: \"my-topic\"\n" +
 		"   partition: 0\n" +
 		"   offset: 1000\n\n" +
-
 		"This tool requires Kafka super-user permissions."
 
 	kafkaGroupsTool := mcp.NewTool("kafka_admin_groups",
@@ -125,12 +125,12 @@ func KafkaAdminAddGroupsTools(s *server.MCPServer, readOnly bool, features []str
 func handleKafkaGroupsTool(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get required parameters
-		resource, err := requiredParam[string](request.Params.Arguments, "resource")
+		resource, err := common.RequiredParam[string](request.Params.Arguments, "resource")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get resource: %v", err)), nil
 		}
 
-		operation, err := requiredParam[string](request.Params.Arguments, "operation")
+		operation, err := common.RequiredParam[string](request.Params.Arguments, "operation")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get operation: %v", err)), nil
 		}
@@ -181,7 +181,7 @@ func handleKafkaGroupsTool(readOnly bool) func(context.Context, mcp.CallToolRequ
 }
 
 func handleKafkaGroupDescribe(ctx context.Context, admin *kadm.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	groupName, err := requiredParam[string](request.Params.Arguments, "group")
+	groupName, err := common.RequiredParam[string](request.Params.Arguments, "group")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get group name: %v", err)), nil
 	}
@@ -210,12 +210,12 @@ func handleKafkaGroupDescribe(ctx context.Context, admin *kadm.Client, request m
 }
 
 func handleKafkaGroupRemoveMembers(ctx context.Context, admin *kadm.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	groupName, err := requiredParam[string](request.Params.Arguments, "group")
+	groupName, err := common.RequiredParam[string](request.Params.Arguments, "group")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get group name: %v", err)), nil
 	}
 
-	members, err := requiredParam[string](request.Params.Arguments, "members")
+	members, err := common.RequiredParam[string](request.Params.Arguments, "members")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get members: %v", err)), nil
 	}
@@ -248,7 +248,7 @@ func handleKafkaGroupsList(ctx context.Context, admin *kadm.Client, _ mcp.CallTo
 }
 
 func handleKafkaGroupOffsets(ctx context.Context, admin *kadm.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	groupName, err := requiredParam[string](request.Params.Arguments, "group")
+	groupName, err := common.RequiredParam[string](request.Params.Arguments, "group")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get group name: %v", err)), nil
 	}
@@ -267,12 +267,12 @@ func handleKafkaGroupOffsets(ctx context.Context, admin *kadm.Client, request mc
 }
 
 func handleKafkaGroupDeleteOffset(ctx context.Context, admin *kadm.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	groupName, err := requiredParam[string](request.Params.Arguments, "group")
+	groupName, err := common.RequiredParam[string](request.Params.Arguments, "group")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get group name: %v", err)), nil
 	}
 
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic name: %v", err)), nil
 	}
@@ -303,23 +303,23 @@ func handleKafkaGroupDeleteOffset(ctx context.Context, admin *kadm.Client, reque
 
 func handleKafkaGroupSetOffset(ctx context.Context, admin *kadm.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	groupName, err := requiredParam[string](request.Params.Arguments, "group")
+	groupName, err := common.RequiredParam[string](request.Params.Arguments, "group")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get group name: %v", err)), nil
 	}
 
-	topic, err := requiredParam[string](request.Params.Arguments, "topic")
+	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic name: %v", err)), nil
 	}
 
-	partition, err := requiredParam[float64](request.Params.Arguments, "partition")
+	partition, err := common.RequiredParam[float64](request.Params.Arguments, "partition")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get partition number: %v", err)), nil
 	}
 	partitionInt := int32(partition)
 
-	offset, err := requiredParam[float64](request.Params.Arguments, "offset")
+	offset, err := common.RequiredParam[float64](request.Params.Arguments, "offset")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get offset value: %v", err)), nil
 	}

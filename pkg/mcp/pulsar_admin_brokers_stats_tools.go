@@ -26,6 +26,7 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
+	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
@@ -70,7 +71,7 @@ func handleBrokerStats(_ bool) func(context.Context, mcp.CallToolRequest) (*mcp.
 		}
 
 		// Get required resource parameter
-		resource, err := requiredParam[string](request.Params.Arguments, "resource")
+		resource, err := common.RequiredParam[string](request.Params.Arguments, "resource")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'resource'. " +
 				"Please specify one of: monitoring_metrics, mbeans, topics, allocator_stats, load_report.")), nil
@@ -85,7 +86,7 @@ func handleBrokerStats(_ bool) func(context.Context, mcp.CallToolRequest) (*mcp.
 		case "topics":
 			return handleTopics(client)
 		case "allocator_stats":
-			allocatorName, err := requiredParam[string](request.Params.Arguments, "allocator_name")
+			allocatorName, err := common.RequiredParam[string](request.Params.Arguments, "allocator_name")
 			if err != nil {
 				return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'allocator_name' for allocator_stats resource. " +
 					"Please provide the name of the allocator to get statistics for.")), nil

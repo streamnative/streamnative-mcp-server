@@ -27,6 +27,7 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
+	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
@@ -113,13 +114,13 @@ func handleClusterTool(readOnly bool) func(context.Context, mcp.CallToolRequest)
 		}
 
 		// Get required parameters
-		resource, err := requiredParam[string](request.Params.Arguments, "resource")
+		resource, err := common.RequiredParam[string](request.Params.Arguments, "resource")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required resource parameter. " +
 				"Please specify one of: cluster, peer_clusters, failure_domain.")), nil
 		}
 
-		operation, err := requiredParam[string](request.Params.Arguments, "operation")
+		operation, err := common.RequiredParam[string](request.Params.Arguments, "operation")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required operation parameter. " +
 				"Please specify one of: list, get, create, update, delete based on the resource type.")), nil
@@ -179,7 +180,7 @@ func handleClusterResource(client cmdutils.Client, operation string, request mcp
 	case "list":
 		return handleClusterList(client)
 	case "get":
-		clusterName, err := requiredParam[string](request.Params.Arguments, "cluster_name")
+		clusterName, err := common.RequiredParam[string](request.Params.Arguments, "cluster_name")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'cluster_name'. " +
 				"Please provide the name of the cluster to get information for.")), nil
@@ -190,7 +191,7 @@ func handleClusterResource(client cmdutils.Client, operation string, request mcp
 	case "update":
 		return updateCluster(client, request)
 	case "delete":
-		clusterName, err := requiredParam[string](request.Params.Arguments, "cluster_name")
+		clusterName, err := common.RequiredParam[string](request.Params.Arguments, "cluster_name")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'cluster_name'. " +
 				"Please provide the name of the cluster to delete.")), nil
@@ -204,7 +205,7 @@ func handleClusterResource(client cmdutils.Client, operation string, request mcp
 
 // Handle peer_clusters resource operations
 func handlePeerClustersResource(client cmdutils.Client, operation string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	clusterName, err := requiredParam[string](request.Params.Arguments, "cluster_name")
+	clusterName, err := common.RequiredParam[string](request.Params.Arguments, "cluster_name")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'cluster_name'. " +
 			"Please provide the name of the cluster to operate on.")), nil
@@ -214,7 +215,7 @@ func handlePeerClustersResource(client cmdutils.Client, operation string, reques
 	case "get":
 		return getPeerClusters(client, clusterName)
 	case "update":
-		peerClusters, err := requiredParamArray[string](request.Params.Arguments, "peer_cluster_names")
+		peerClusters, err := common.RequiredParamArray[string](request.Params.Arguments, "peer_cluster_names")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'peer_cluster_names'. " +
 				"Please provide an array of peer cluster names to set.")), nil
@@ -228,7 +229,7 @@ func handlePeerClustersResource(client cmdutils.Client, operation string, reques
 
 // Handle failure_domain resource operations
 func handleFailureDomainResource(client cmdutils.Client, operation string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	clusterName, err := requiredParam[string](request.Params.Arguments, "cluster_name")
+	clusterName, err := common.RequiredParam[string](request.Params.Arguments, "cluster_name")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'cluster_name'. " +
 			"Please provide the name of the cluster to operate on.")), nil
@@ -238,7 +239,7 @@ func handleFailureDomainResource(client cmdutils.Client, operation string, reque
 	case "list":
 		return listFailureDomains(client, clusterName)
 	case "get":
-		domainName, err := requiredParam[string](request.Params.Arguments, "domain_name")
+		domainName, err := common.RequiredParam[string](request.Params.Arguments, "domain_name")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'domain_name'. " +
 				"Please provide the name of the failure domain to get.")), nil
@@ -249,7 +250,7 @@ func handleFailureDomainResource(client cmdutils.Client, operation string, reque
 	case "update":
 		return updateFailureDomain(client, request)
 	case "delete":
-		domainName, err := requiredParam[string](request.Params.Arguments, "domain_name")
+		domainName, err := common.RequiredParam[string](request.Params.Arguments, "domain_name")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'domain_name'. " +
 				"Please provide the name of the failure domain to delete.")), nil
@@ -296,7 +297,7 @@ func getClusterData(client cmdutils.Client, clusterName string) (*mcp.CallToolRe
 
 // createCluster creates a new Pulsar cluster
 func createCluster(client cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	clusterName, err := requiredParam[string](request.Params.Arguments, "cluster_name")
+	clusterName, err := common.RequiredParam[string](request.Params.Arguments, "cluster_name")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'cluster_name'. " +
 			"Please provide the name of the cluster to create.")), nil
@@ -307,19 +308,19 @@ func createCluster(client cmdutils.Client, request mcp.CallToolRequest) (*mcp.Ca
 	}
 
 	// Set optional parameters if provided
-	if serviceURL, ok := optionalParam[string](request.Params.Arguments, "service_url"); ok {
+	if serviceURL, ok := common.OptionalParam[string](request.Params.Arguments, "service_url"); ok {
 		clusterData.ServiceURL = serviceURL
 	}
-	if serviceURLTls, ok := optionalParam[string](request.Params.Arguments, "service_url_tls"); ok {
+	if serviceURLTls, ok := common.OptionalParam[string](request.Params.Arguments, "service_url_tls"); ok {
 		clusterData.ServiceURLTls = serviceURLTls
 	}
-	if brokerServiceURL, ok := optionalParam[string](request.Params.Arguments, "broker_service_url"); ok {
+	if brokerServiceURL, ok := common.OptionalParam[string](request.Params.Arguments, "broker_service_url"); ok {
 		clusterData.BrokerServiceURL = brokerServiceURL
 	}
-	if brokerServiceURLTls, ok := optionalParam[string](request.Params.Arguments, "broker_service_url_tls"); ok {
+	if brokerServiceURLTls, ok := common.OptionalParam[string](request.Params.Arguments, "broker_service_url_tls"); ok {
 		clusterData.BrokerServiceURLTls = brokerServiceURLTls
 	}
-	if peerClusters, ok := optionalParamArray[string](request.Params.Arguments, "peer_cluster_names"); ok {
+	if peerClusters, ok := common.OptionalParamArray[string](request.Params.Arguments, "peer_cluster_names"); ok {
 		clusterData.PeerClusterNames = peerClusters
 	}
 
@@ -333,7 +334,7 @@ func createCluster(client cmdutils.Client, request mcp.CallToolRequest) (*mcp.Ca
 
 // updateCluster updates an existing Pulsar cluster
 func updateCluster(client cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	clusterName, err := requiredParam[string](request.Params.Arguments, "cluster_name")
+	clusterName, err := common.RequiredParam[string](request.Params.Arguments, "cluster_name")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'cluster_name'. " +
 			"Please provide the name of the cluster to update.")), nil
@@ -344,19 +345,19 @@ func updateCluster(client cmdutils.Client, request mcp.CallToolRequest) (*mcp.Ca
 	}
 
 	// Set optional parameters if provided
-	if serviceURL, ok := optionalParam[string](request.Params.Arguments, "service_url"); ok {
+	if serviceURL, ok := common.OptionalParam[string](request.Params.Arguments, "service_url"); ok {
 		clusterData.ServiceURL = serviceURL
 	}
-	if serviceURLTls, ok := optionalParam[string](request.Params.Arguments, "service_url_tls"); ok {
+	if serviceURLTls, ok := common.OptionalParam[string](request.Params.Arguments, "service_url_tls"); ok {
 		clusterData.ServiceURLTls = serviceURLTls
 	}
-	if brokerServiceURL, ok := optionalParam[string](request.Params.Arguments, "broker_service_url"); ok {
+	if brokerServiceURL, ok := common.OptionalParam[string](request.Params.Arguments, "broker_service_url"); ok {
 		clusterData.BrokerServiceURL = brokerServiceURL
 	}
-	if brokerServiceURLTls, ok := optionalParam[string](request.Params.Arguments, "broker_service_url_tls"); ok {
+	if brokerServiceURLTls, ok := common.OptionalParam[string](request.Params.Arguments, "broker_service_url_tls"); ok {
 		clusterData.BrokerServiceURLTls = brokerServiceURLTls
 	}
-	if peerClusters, ok := optionalParamArray[string](request.Params.Arguments, "peer_cluster_names"); ok {
+	if peerClusters, ok := common.OptionalParamArray[string](request.Params.Arguments, "peer_cluster_names"); ok {
 		clusterData.PeerClusterNames = peerClusters
 	}
 
@@ -438,19 +439,19 @@ func listFailureDomains(client cmdutils.Client, clusterName string) (*mcp.CallTo
 
 // createFailureDomain creates a new failure domain in the specified cluster
 func createFailureDomain(client cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	clusterName, err := requiredParam[string](request.Params.Arguments, "cluster_name")
+	clusterName, err := common.RequiredParam[string](request.Params.Arguments, "cluster_name")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'cluster_name'. " +
 			"Please provide the name of the cluster.")), nil
 	}
 
-	domainName, err := requiredParam[string](request.Params.Arguments, "domain_name")
+	domainName, err := common.RequiredParam[string](request.Params.Arguments, "domain_name")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'domain_name'. " +
 			"Please provide the name of the failure domain to create.")), nil
 	}
 
-	brokers, err := requiredParamArray[string](request.Params.Arguments, "brokers")
+	brokers, err := common.RequiredParamArray[string](request.Params.Arguments, "brokers")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'brokers'. " +
 			"Please provide an array of broker names to include in this failure domain.")), nil
@@ -472,19 +473,19 @@ func createFailureDomain(client cmdutils.Client, request mcp.CallToolRequest) (*
 
 // updateFailureDomain updates an existing failure domain in the specified cluster
 func updateFailureDomain(client cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	clusterName, err := requiredParam[string](request.Params.Arguments, "cluster_name")
+	clusterName, err := common.RequiredParam[string](request.Params.Arguments, "cluster_name")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'cluster_name'. " +
 			"Please provide the name of the cluster.")), nil
 	}
 
-	domainName, err := requiredParam[string](request.Params.Arguments, "domain_name")
+	domainName, err := common.RequiredParam[string](request.Params.Arguments, "domain_name")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'domain_name'. " +
 			"Please provide the name of the failure domain to update.")), nil
 	}
 
-	brokers, err := requiredParamArray[string](request.Params.Arguments, "brokers")
+	brokers, err := common.RequiredParamArray[string](request.Params.Arguments, "brokers")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'brokers'. " +
 			"Please provide an array of broker names to include in this failure domain.")), nil

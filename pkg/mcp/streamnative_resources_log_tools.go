@@ -31,6 +31,7 @@ import (
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
+	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/config"
 )
 
@@ -112,54 +113,54 @@ type LogContent struct {
 }
 
 func handleStreamNativeResourcesLog(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	snConfig := getOptions(ctx)
+	snConfig := common.GetOptions(ctx)
 	instance, cluster, organization := GetMcpContext()
 	if instance == "" || cluster == "" || organization == "" {
 		return mcp.NewToolResultError("No context is set, please use `sncloud_context_use_cluster` to set the context first."), nil
 	}
 
 	// Extract required parameters with validation
-	component, err := requiredParam[string](request.Params.Arguments, "component")
+	component, err := common.RequiredParam[string](request.Params.Arguments, "component")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get component: %v", err)), nil
 	}
 
-	name, err := requiredParam[string](request.Params.Arguments, "name")
+	name, err := common.RequiredParam[string](request.Params.Arguments, "name")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get name: %v", err)), nil
 	}
 
-	tenant, hasTenant := optionalParam[string](request.Params.Arguments, "tenant")
+	tenant, hasTenant := common.OptionalParam[string](request.Params.Arguments, "tenant")
 	if !hasTenant {
 		tenant = "public"
 	}
 
-	namespace, hasNamespace := optionalParam[string](request.Params.Arguments, "namespace")
+	namespace, hasNamespace := common.OptionalParam[string](request.Params.Arguments, "namespace")
 	if !hasNamespace {
 		namespace = "default"
 	}
 
-	size, hasSize := optionalParam[string](request.Params.Arguments, "size")
+	size, hasSize := common.OptionalParam[string](request.Params.Arguments, "size")
 	if !hasSize {
 		size = "20"
 	}
 
-	replicaID, hasreplicaID := optionalParam[int](request.Params.Arguments, "replica_id")
+	replicaID, hasreplicaID := common.OptionalParam[int](request.Params.Arguments, "replica_id")
 	if !hasreplicaID {
 		replicaID = -1
 	}
 
-	timestampStr, hasTimestamp := optionalParam[string](request.Params.Arguments, "timestamp")
+	timestampStr, hasTimestamp := common.OptionalParam[string](request.Params.Arguments, "timestamp")
 	if !hasTimestamp {
 		timestampStr = ""
 	}
 
-	sinceStr, hasSince := optionalParam[string](request.Params.Arguments, "since")
+	sinceStr, hasSince := common.OptionalParam[string](request.Params.Arguments, "since")
 	if !hasSince {
 		sinceStr = ""
 	}
 
-	previousContainer, hasPreviousContainer := optionalParam[bool](request.Params.Arguments, "previous_container")
+	previousContainer, hasPreviousContainer := common.OptionalParam[bool](request.Params.Arguments, "previous_container")
 	if !hasPreviousContainer {
 		previousContainer = false
 	}

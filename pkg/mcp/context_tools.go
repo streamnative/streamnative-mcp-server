@@ -26,6 +26,7 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/auth/store"
+	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/config"
 )
 
@@ -61,7 +62,7 @@ func RegisterContextTools(s *server.MCPServer, features []string) {
 
 // handleWhoami handles the whoami tool request
 func handleWhoami(ctx context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	options := ctx.Value(OptionsKey).(*config.Options)
+	options := ctx.Value(common.OptionsKey).(*config.Options)
 	issuer := options.LoadConfigOrDie().Auth.Issuer()
 
 	userName, err := options.WhoAmI(issuer.Audience)
@@ -90,14 +91,14 @@ func handleWhoami(ctx context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResu
 
 // handleSetContext handles the set-context tool request
 func handleSetContext(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	options := ctx.Value(OptionsKey).(*config.Options)
+	options := ctx.Value(common.OptionsKey).(*config.Options)
 
-	instanceName, err := requiredParam[string](request.Params.Arguments, "instanceName")
+	instanceName, err := common.RequiredParam[string](request.Params.Arguments, "instanceName")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get instance name: %v", err)), nil
 	}
 
-	clusterName, err := requiredParam[string](request.Params.Arguments, "clusterName")
+	clusterName, err := common.RequiredParam[string](request.Params.Arguments, "clusterName")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get cluster name: %v", err)), nil
 	}
