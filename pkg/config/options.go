@@ -139,6 +139,8 @@ func (o *Options) AddFlags(cmd *cobra.Command) {
 		"The bearer token to use for the schema registry [env: SNMCP_KAFKA_SCHEMA_REGISTRY_BEARER_TOKEN]")
 	cmd.PersistentFlags().StringVar(&o.Pulsar.WebServiceURL, "pulsar-web-service-url", "",
 		"The web service URL to use for Pulsar [env: SNMCP_PULSAR_WEB_SERVICE_URL]")
+	cmd.PersistentFlags().StringVar(&o.Pulsar.ServiceURL, "pulsar-service-url", "",
+		"The service URL to use for Pulsar [env: SNMCP_PULSAR_SERVICE_URL]")
 	cmd.PersistentFlags().StringVar(&o.Pulsar.AuthPlugin, "pulsar-auth-plugin", "",
 		"The auth plugin to use for Pulsar [env: SNMCP_PULSAR_AUTH_PLUGIN]")
 	cmd.PersistentFlags().StringVar(&o.Pulsar.AuthParams, "pulsar-auth-params", "",
@@ -190,6 +192,7 @@ func (o *Options) AddFlags(cmd *cobra.Command) {
 	viper.BindPFlag("kafka-schema-registry-auth-pass", cmd.PersistentFlags().Lookup("kafka-schema-registry-auth-pass"))
 	viper.BindPFlag("kafka-schema-registry-bearer-token", cmd.PersistentFlags().Lookup("kafka-schema-registry-bearer-token"))
 	viper.BindPFlag("pulsar-web-service-url", cmd.PersistentFlags().Lookup("pulsar-web-service-url"))
+	viper.BindPFlag("pulsar-service-url", cmd.PersistentFlags().Lookup("pulsar-service-url"))
 	viper.BindPFlag("pulsar-auth-plugin", cmd.PersistentFlags().Lookup("pulsar-auth-plugin"))
 	viper.BindPFlag("pulsar-auth-params", cmd.PersistentFlags().Lookup("pulsar-auth-params"))
 	viper.BindPFlag("pulsar-tls-allow-insecure-connection", cmd.PersistentFlags().Lookup("pulsar-tls-allow-insecure-connection"))
@@ -350,6 +353,13 @@ func (o *Options) Complete() error {
 			o.Pulsar.WebServiceURL = wsURL
 		}
 	}
+
+	if o.Pulsar.ServiceURL == "" {
+		if serviceURL := viper.GetString("pulsar-service-url"); serviceURL != "" {
+			o.Pulsar.ServiceURL = serviceURL
+		}
+	}
+
 	if o.Pulsar.AuthPlugin == "" {
 		if authPlugin := viper.GetString("pulsar-auth-plugin"); authPlugin != "" {
 			o.Pulsar.AuthPlugin = authPlugin
