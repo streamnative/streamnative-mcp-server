@@ -308,27 +308,3 @@ func handleNsIsolationBrokersResource(client cmdutils.Client, operation, cluster
 		return mcp.NewToolResultError(fmt.Sprintf("Invalid operation for resource 'brokers': %s. Available operations: list", operation)), nil
 	}
 }
-
-// getRequiredParamArray is a helper function to get a required array parameter with a specific type
-func getRequiredParamArray[T any](args map[string]interface{}, paramName string) ([]T, error) {
-	value, ok := args[paramName]
-	if !ok {
-		return nil, fmt.Errorf("missing required parameter: %s", paramName)
-	}
-
-	arrayValue, ok := value.([]interface{})
-	if !ok {
-		return nil, fmt.Errorf("parameter %s is not an array", paramName)
-	}
-
-	result := make([]T, 0, len(arrayValue))
-	for _, v := range arrayValue {
-		typedValue, ok := v.(T)
-		if !ok {
-			return nil, fmt.Errorf("array element in %s has incorrect type", paramName)
-		}
-		result = append(result, typedValue)
-	}
-
-	return result, nil
-}
