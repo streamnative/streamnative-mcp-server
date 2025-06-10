@@ -30,7 +30,6 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
-	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
@@ -87,17 +86,17 @@ func PulsarAdminAddSchemasTools(s *server.MCPServer, readOnly bool, features []s
 func handleSchemaTool(readOnly bool) func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get required parameters
-		resource, err := common.RequiredParam[string](request.Params.Arguments, "resource")
+		resource, err := request.RequireString("resource")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get resource: %v", err)), nil
 		}
 
-		operation, err := common.RequiredParam[string](request.Params.Arguments, "operation")
+		operation, err := request.RequireString("operation")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get operation: %v", err)), nil
 		}
 
-		topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
+		topic, err := request.RequireString("topic")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic'. Please provide the fully qualified topic name: %v", err)), nil
 		}
@@ -139,10 +138,10 @@ func handleSchemaTool(readOnly bool) func(_ context.Context, request mcp.CallToo
 // handleSchemaGet handles getting a schema
 func handleSchemaGet(admin cmdutils.Client, topic string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get optional version parameter
-	version, hasVersion := common.OptionalParam[float64](request.Params.Arguments, "version")
+	version := request.GetFloat("version", 0)
 
 	// Get schema info
-	if hasVersion {
+	if version != 0 {
 		// Get schema by version
 		info, err := admin.Schemas().GetSchemaInfoByVersion(topic, int64(version))
 		if err != nil {
@@ -195,7 +194,7 @@ func handleSchemaGet(admin cmdutils.Client, topic string, request mcp.CallToolRe
 
 // handleSchemaUpload handles uploading a schema
 func handleSchemaUpload(admin cmdutils.Client, topic string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	filename, err := common.RequiredParam[string](request.Params.Arguments, "filename")
+	filename, err := request.RequireString("filename")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'filename' for schema.upload. Please provide the path to the schema definition file: %v", err)), nil
 	}

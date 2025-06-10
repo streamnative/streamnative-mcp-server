@@ -93,12 +93,12 @@ func handleWhoami(ctx context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResu
 func handleSetContext(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	options := ctx.Value(common.OptionsKey).(*config.Options)
 
-	instanceName, err := common.RequiredParam[string](request.Params.Arguments, "instanceName")
+	instanceName, err := request.RequireString("instanceName")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get instance name: %v", err)), nil
 	}
 
-	clusterName, err := common.RequiredParam[string](request.Params.Arguments, "clusterName")
+	clusterName, err := request.RequireString("clusterName")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get cluster name: %v", err)), nil
 	}

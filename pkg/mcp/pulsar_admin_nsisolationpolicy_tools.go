@@ -116,17 +116,17 @@ func handleNsIsolationPolicy(readOnly bool) func(context.Context, mcp.CallToolRe
 		}
 
 		// Get required parameters
-		resource, err := common.RequiredParam[string](request.Params.Arguments, "resource")
+		resource, err := request.RequireString("resource")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get resource: %v", err)), nil
 		}
 
-		operation, err := common.RequiredParam[string](request.Params.Arguments, "operation")
+		operation, err := request.RequireString("operation")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get operation: %v", err)), nil
 		}
 
-		cluster, err := common.RequiredParam[string](request.Params.Arguments, "cluster")
+		cluster, err := request.RequireString("cluster")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get cluster name: %v", err)), nil
 		}
@@ -158,7 +158,7 @@ func handleNsIsolationPolicy(readOnly bool) func(context.Context, mcp.CallToolRe
 func handlePolicyResource(client cmdutils.Client, operation, cluster string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	switch operation {
 	case "get":
-		name, err := common.RequiredParam[string](request.Params.Arguments, "name")
+		name, err := request.RequireString("name")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'name' for policy.get: %v", err)), nil
 		}
@@ -193,7 +193,7 @@ func handlePolicyResource(client cmdutils.Client, operation, cluster string, req
 		return mcp.NewToolResultText(string(policiesJSON)), nil
 
 	case "delete":
-		name, err := common.RequiredParam[string](request.Params.Arguments, "name")
+		name, err := request.RequireString("name")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'name' for policy.delete: %v", err)), nil
 		}
@@ -207,26 +207,30 @@ func handlePolicyResource(client cmdutils.Client, operation, cluster string, req
 		return mcp.NewToolResultText(fmt.Sprintf("Delete namespace isolation policy %s successfully", name)), nil
 
 	case "set":
-		name, err := common.RequiredParam[string](request.Params.Arguments, "name")
+		name, err := request.RequireString("name")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'name' for policy.set: %v", err)), nil
 		}
 
-		namespaces, err := getRequiredParamArray[string](request.Params.Arguments, "namespaces")
+		namespaces, err := request.RequireStringSlice("namespaces")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'namespaces' for policy.set: %v", err)), nil
 		}
 
-		primary, err := getRequiredParamArray[string](request.Params.Arguments, "primary")
+		primary, err := request.RequireStringSlice("primary")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'primary' for policy.set: %v", err)), nil
 		}
 
-		secondary, _ := common.OptionalParamArray[string](request.Params.Arguments, "secondary")
-		autoFailoverPolicyType, _ := common.OptionalParam[string](request.Params.Arguments, "autoFailoverPolicyType")
+		secondary := request.GetStringSlice("secondary", []string{})
+		autoFailoverPolicyType := request.GetString("autoFailoverPolicyType", "")
 
 		// Parse autoFailoverPolicyParams as a map
-		autoFailoverPolicyParamsRaw, _ := common.OptionalParam[map[string]interface{}](request.Params.Arguments, "autoFailoverPolicyParams")
+		autoFailoverPolicyParamsRaw, ok := common.OptionalParamObject(request.GetArguments(), "autoFailoverPolicyParams")
+		if !ok {
+			return mcp.NewToolResultError("Failed to extract autoFailoverPolicyParams"), nil
+		}
+
 		autoFailoverPolicyParams := make(map[string]string)
 		for k, v := range autoFailoverPolicyParamsRaw {
 			if strVal, ok := v.(string); ok {
@@ -258,7 +262,7 @@ func handlePolicyResource(client cmdutils.Client, operation, cluster string, req
 func handleBrokerResource(client cmdutils.Client, operation, cluster string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	switch operation {
 	case "get":
-		name, err := common.RequiredParam[string](request.Params.Arguments, "name")
+		name, err := request.RequireString("name")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'name' for broker.get: %v", err)), nil
 		}

@@ -28,7 +28,6 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
-	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
@@ -94,7 +93,7 @@ func PulsarAdminAddNamespaceTools(s *server.MCPServer, readOnly bool, features [
 func handleNamespace(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get operation parameter
-		operation, err := common.RequiredParam[string](request.Params.Arguments, "operation")
+		operation, err := request.RequireString("operation")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get operation: %v", err)), nil
 		}
@@ -143,7 +142,7 @@ func handleNamespace(readOnly bool) func(context.Context, mcp.CallToolRequest) (
 
 // handleNamespaceList handles listing namespaces for a tenant
 func handleNamespaceList(_ context.Context, client cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	tenant, err := common.RequiredParam[string](request.Params.Arguments, "tenant")
+	tenant, err := request.RequireString("tenant")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get tenant name: %v", err)), nil
 	}
@@ -165,7 +164,7 @@ func handleNamespaceList(_ context.Context, client cmdutils.Client, request mcp.
 
 // handleNamespaceGetTopics handles getting topics for a namespace
 func handleNamespaceGetTopics(_ context.Context, client cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := request.RequireString("namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
@@ -187,15 +186,15 @@ func handleNamespaceGetTopics(_ context.Context, client cmdutils.Client, request
 
 // handleNamespaceCreate handles creating a new namespace
 func handleNamespaceCreate(_ context.Context, client cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := request.RequireString("namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
 
 	// Get optional parameters
-	bundlesStr, hasBundles := common.OptionalParam[string](request.Params.Arguments, "bundles")
+	bundlesStr := request.GetString("bundles", "")
 	bundles := 0
-	if hasBundles && bundlesStr != "" {
+	if bundlesStr != "" {
 		bundlesInt, err := strconv.Atoi(bundlesStr)
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Invalid bundles value, must be an integer: %v", err)), nil
@@ -203,13 +202,13 @@ func handleNamespaceCreate(_ context.Context, client cmdutils.Client, request mc
 		bundles = bundlesInt
 	}
 
-	clusters, _ := common.OptionalParamArray[string](request.Params.Arguments, "clusters")
+	clusters := request.GetStringSlice("clusters", []string{})
 
 	// Prepare policies
 	policies := utils.NewDefaultPolicies()
 
 	// Set bundles if provided
-	if hasBundles && bundles > 0 {
+	if bundles > 0 {
 		if bundles < 0 || bundles > int(^uint32(0)) { // MaxInt32
 			return mcp.NewToolResultError(
 				fmt.Sprintf("Invalid number of bundles. Number of bundles has to be in the range of (0, %d].", int(^uint32(0))),
@@ -239,7 +238,7 @@ func handleNamespaceCreate(_ context.Context, client cmdutils.Client, request mc
 
 // handleNamespaceDelete handles deleting a namespace
 func handleNamespaceDelete(_ context.Context, client cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := request.RequireString("namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
@@ -255,15 +254,15 @@ func handleNamespaceDelete(_ context.Context, client cmdutils.Client, request mc
 
 // handleClearBacklog handles clearing the backlog for all topics in a namespace
 func handleClearBacklog(_ context.Context, client cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := request.RequireString("namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
 
 	// Get optional parameters
-	subscription, _ := common.OptionalParam[string](request.Params.Arguments, "subscription")
-	bundle, _ := common.OptionalParam[string](request.Params.Arguments, "bundle")
-	force, _ := common.OptionalParam[string](request.Params.Arguments, "force")
+	subscription := request.GetString("subscription", "")
+	bundle := request.GetString("bundle", "")
+	force := request.GetString("force", "")
 	forceFlag := force == "true"
 
 	// If not forced, return an error requiring explicit force flag
@@ -305,18 +304,18 @@ func handleClearBacklog(_ context.Context, client cmdutils.Client, request mcp.C
 
 // handleUnsubscribe handles unsubscribing the specified subscription for all topics of a namespace
 func handleUnsubscribe(_ context.Context, client cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := request.RequireString("namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
 
-	subscription, err := common.RequiredParam[string](request.Params.Arguments, "subscription")
+	subscription, err := request.RequireString("subscription")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get subscription name: %v", err)), nil
 	}
 
 	// Get optional bundle
-	bundle, _ := common.OptionalParam[string](request.Params.Arguments, "bundle")
+	bundle := request.GetString("bundle", "")
 
 	// Get namespace name
 	ns, err := utils.GetNamespaceName(namespace)
@@ -351,13 +350,13 @@ func handleUnsubscribe(_ context.Context, client cmdutils.Client, request mcp.Ca
 
 // handleUnload handles unloading a namespace from the current serving broker
 func handleUnload(_ context.Context, client cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := request.RequireString("namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
 
 	// Get optional bundle
-	bundle, _ := common.OptionalParam[string](request.Params.Arguments, "bundle")
+	bundle := request.GetString("bundle", "")
 
 	// Unload namespace
 	var unloadErr error
@@ -384,19 +383,18 @@ func handleUnload(_ context.Context, client cmdutils.Client, request mcp.CallToo
 
 // handleSplitBundle handles splitting a namespace bundle
 func handleSplitBundle(_ context.Context, client cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := request.RequireString("namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
 	}
 
-	bundle, err := common.RequiredParam[string](request.Params.Arguments, "bundle")
+	bundle, err := request.RequireString("bundle")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get bundle: %v", err)), nil
 	}
 
 	// Get optional unload flag
-	unloadStr, _ := common.OptionalParam[string](request.Params.Arguments, "unload")
-	unload := unloadStr == "true"
+	unload := request.GetString("unload", "") == "true"
 
 	// Split namespace bundle
 	err = client.Namespaces().SplitNamespaceBundle(namespace, bundle, unload)

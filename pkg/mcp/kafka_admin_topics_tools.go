@@ -128,12 +128,12 @@ func KafkaAdminAddTopicTools(s *server.MCPServer, readOnly bool, features []stri
 func handleKafkaTopicTool(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get required parameters
-		resource, err := common.RequiredParam[string](request.Params.Arguments, "resource")
+		resource, err := request.RequireString("resource")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get resource: %v", err)), nil
 		}
 
-		operation, err := common.RequiredParam[string](request.Params.Arguments, "operation")
+		operation, err := request.RequireString("operation")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get operation: %v", err)), nil
 		}
@@ -183,7 +183,7 @@ func handleKafkaTopicTool(readOnly bool) func(context.Context, mcp.CallToolReque
 
 func handleKafkaTopicGet(ctx context.Context, admin *kadm.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topicName, err := common.RequiredParam[string](request.Params.Arguments, "name")
+	topicName, err := request.RequireString("name")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic name: %v", err)), nil
 	}
@@ -205,26 +205,20 @@ func handleKafkaTopicGet(ctx context.Context, admin *kadm.Client, request mcp.Ca
 
 func handleKafkaTopicCreate(ctx context.Context, admin *kadm.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topicName, err := common.RequiredParam[string](request.Params.Arguments, "name")
+	topicName, err := request.RequireString("name")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic name: %v", err)), nil
 	}
 
 	// Get optional parameters
-	partitions, ok := common.OptionalParam[float64](request.Params.Arguments, "partitions")
-	if !ok {
-		partitions = 1 // Default to 1 partition
-	}
+	partitions := request.GetFloat("partitions", 1)
 
-	replicationFactor, ok := common.OptionalParam[float64](request.Params.Arguments, "replication-factor")
-	if !ok {
-		replicationFactor = 1 // Default to replication factor 1
-	}
+	replicationFactor := request.GetFloat("replication-factor", 1)
 
 	// Get configs if provided
 	var configEntries map[string]*string
-	configsArray, ok := common.OptionalParamConfigs(request.Params.Arguments, "configs")
-	if ok {
+	configsArray := request.GetStringSlice("configs", []string{})
+	if len(configsArray) > 0 {
 		configEntries, err = common.ParseMessageConfigs(configsArray)
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to parse configs: %v", err)), nil
@@ -242,7 +236,7 @@ func handleKafkaTopicCreate(ctx context.Context, admin *kadm.Client, request mcp
 
 func handleKafkaTopicDelete(ctx context.Context, admin *kadm.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topicName, err := common.RequiredParam[string](request.Params.Arguments, "name")
+	topicName, err := request.RequireString("name")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic name: %v", err)), nil
 	}
@@ -258,10 +252,7 @@ func handleKafkaTopicDelete(ctx context.Context, admin *kadm.Client, request mcp
 
 func handleKafkaTopicsList(ctx context.Context, admin *kadm.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	includeInternal, ok := common.OptionalParam[bool](request.Params.Arguments, "include-internal")
-	if !ok {
-		includeInternal = false
-	}
+	includeInternal := request.GetBool("include-internal", false)
 
 	var topics kadm.TopicDetails
 	var err error
@@ -293,7 +284,7 @@ func handleKafkaTopicsList(ctx context.Context, admin *kadm.Client, request mcp.
 
 func handleKafkaTopicMetadata(ctx context.Context, admin *kadm.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topicName, err := common.RequiredParam[string](request.Params.Arguments, "name")
+	topicName, err := request.RequireString("name")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic name: %v", err)), nil
 	}

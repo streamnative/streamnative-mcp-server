@@ -28,7 +28,6 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
-	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
@@ -104,17 +103,17 @@ func PulsarAdminAddSubscriptionTools(s *server.MCPServer, readOnly bool, feature
 func handleSubscriptionTool(readOnly bool) func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get required parameters
-		resource, err := common.RequiredParam[string](request.Params.Arguments, "resource")
+		resource, err := request.RequireString("resource")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get resource: %v", err)), nil
 		}
 
-		operation, err := common.RequiredParam[string](request.Params.Arguments, "operation")
+		operation, err := request.RequireString("operation")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get operation: %v", err)), nil
 		}
 
-		topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
+		topic, err := request.RequireString("topic")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic'. Please provide the fully qualified topic name: %v", err)), nil
 		}
@@ -186,16 +185,13 @@ func handleSubsList(admin cmdutils.Client, topicName *utils.TopicName) (*mcp.Cal
 // handleSubsCreate handles creating a new subscription
 func handleSubsCreate(admin cmdutils.Client, topicName *utils.TopicName, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameter
-	subscription, err := common.RequiredParam[string](request.Params.Arguments, "subscription")
+	subscription, err := request.RequireString("subscription")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'subscription' for subscription.create: %v", err)), nil
 	}
 
 	// Get optional messageID parameter (default is "latest")
-	messageID, hasMessageID := common.OptionalParam[string](request.Params.Arguments, "messageId")
-	if !hasMessageID {
-		messageID = "latest"
-	}
+	messageID := request.GetString("messageId", "latest")
 
 	// Parse messageId
 	var messageIDObj utils.MessageID
@@ -231,16 +227,13 @@ func handleSubsCreate(admin cmdutils.Client, topicName *utils.TopicName, request
 // handleSubsDelete handles deleting a subscription
 func handleSubsDelete(admin cmdutils.Client, topicName *utils.TopicName, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameter
-	subscription, err := common.RequiredParam[string](request.Params.Arguments, "subscription")
+	subscription, err := request.RequireString("subscription")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'subscription' for subscription.delete: %v", err)), nil
 	}
 
 	// Get optional force parameter (default is false)
-	force, hasForce := common.OptionalParam[bool](request.Params.Arguments, "force")
-	if !hasForce {
-		force = false
-	}
+	force := request.GetBool("force", false)
 
 	// Delete subscription
 	if force {
@@ -268,12 +261,12 @@ func handleSubsDelete(admin cmdutils.Client, topicName *utils.TopicName, request
 // handleSubsSkip handles skipping messages for a subscription
 func handleSubsSkip(admin cmdutils.Client, topicName *utils.TopicName, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	subscription, err := common.RequiredParam[string](request.Params.Arguments, "subscription")
+	subscription, err := request.RequireString("subscription")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'subscription' for subscription.skip: %v", err)), nil
 	}
 
-	count, err := common.RequiredParam[float64](request.Params.Arguments, "count")
+	count, err := request.RequireFloat("count")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'count' for subscription.skip: %v", err)), nil
 	}
@@ -292,12 +285,12 @@ func handleSubsSkip(admin cmdutils.Client, topicName *utils.TopicName, request m
 // handleSubsExpire handles expiring messages for a subscription
 func handleSubsExpire(admin cmdutils.Client, topicName *utils.TopicName, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	subscription, err := common.RequiredParam[string](request.Params.Arguments, "subscription")
+	subscription, err := request.RequireString("subscription")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'subscription' for subscription.expire: %v", err)), nil
 	}
 
-	expireTime, err := common.RequiredParam[float64](request.Params.Arguments, "expireTimeInSeconds")
+	expireTime, err := request.RequireFloat("expireTimeInSeconds")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'expireTimeInSeconds' for subscription.expire: %v", err)), nil
 	}
@@ -318,12 +311,12 @@ func handleSubsExpire(admin cmdutils.Client, topicName *utils.TopicName, request
 // handleSubsResetCursor handles resetting a subscription cursor
 func handleSubsResetCursor(admin cmdutils.Client, topicName *utils.TopicName, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	subscription, err := common.RequiredParam[string](request.Params.Arguments, "subscription")
+	subscription, err := request.RequireString("subscription")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'subscription' for subscription.reset-cursor: %v", err)), nil
 	}
 
-	messageID, err := common.RequiredParam[string](request.Params.Arguments, "messageId")
+	messageID, err := request.RequireString("messageId")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'messageId' for subscription.reset-cursor: %v", err)), nil
 	}

@@ -151,12 +151,12 @@ func KafkaAdminAddKafkaConnectTools(s *server.MCPServer, readOnly bool, features
 func handleKafkaConnectTool(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get required parameters
-		resource, err := common.RequiredParam[string](request.Params.Arguments, "resource")
+		resource, err := request.RequireString("resource")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get resource: %v", err)), nil
 		}
 
-		operation, err := common.RequiredParam[string](request.Params.Arguments, "operation")
+		operation, err := request.RequireString("operation")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get operation: %v", err)), nil
 		}
@@ -256,7 +256,7 @@ func handleKafkaConnectorsList(ctx context.Context, admin kafka.Connect, _ mcp.C
 
 func handleKafkaConnectorGet(ctx context.Context, admin kafka.Connect, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get a specific connector
-	name, err := common.RequiredParam[string](request.Params.Arguments, "name")
+	name, err := request.RequireString("name")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get connector name: %v", err)), nil
 	}
@@ -276,12 +276,12 @@ func handleKafkaConnectorGet(ctx context.Context, admin kafka.Connect, request m
 
 func handleKafkaConnectorCreate(ctx context.Context, admin kafka.Connect, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create a new connector
-	name, err := common.RequiredParam[string](request.Params.Arguments, "name")
+	name, err := request.RequireString("name")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get connector name: %v", err)), nil
 	}
 
-	configMap, err := common.RequiredParamObject(request.Params.Arguments, "config")
+	configMap, err := common.RequiredParamObject(request.GetArguments(), "config")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get config: %v", err)), nil
 	}
@@ -305,12 +305,12 @@ func handleKafkaConnectorCreate(ctx context.Context, admin kafka.Connect, reques
 
 func handleKafkaConnectorUpdate(ctx context.Context, admin kafka.Connect, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Update a connector
-	name, err := common.RequiredParam[string](request.Params.Arguments, "name")
+	name, err := request.RequireString("name")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get connector name: %v", err)), nil
 	}
 
-	configMap, err := common.RequiredParamObject(request.Params.Arguments, "config")
+	configMap, err := common.RequiredParamObject(request.GetArguments(), "config")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get config: %v", err)), nil
 	}
@@ -334,7 +334,7 @@ func handleKafkaConnectorUpdate(ctx context.Context, admin kafka.Connect, reques
 
 func handleKafkaConnectorDelete(ctx context.Context, admin kafka.Connect, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Delete a connector
-	name, err := common.RequiredParam[string](request.Params.Arguments, "name")
+	name, err := request.RequireString("name")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get connector name: %v", err)), nil
 	}
@@ -349,7 +349,7 @@ func handleKafkaConnectorDelete(ctx context.Context, admin kafka.Connect, reques
 
 func handleKafkaConnectorRestart(ctx context.Context, admin kafka.Connect, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Restart a connector
-	name, err := common.RequiredParam[string](request.Params.Arguments, "name")
+	name, err := request.RequireString("name")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get connector name: %v", err)), nil
 	}
@@ -364,7 +364,7 @@ func handleKafkaConnectorRestart(ctx context.Context, admin kafka.Connect, reque
 
 func handleKafkaConnectorPause(ctx context.Context, admin kafka.Connect, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Pause a connector
-	name, err := common.RequiredParam[string](request.Params.Arguments, "name")
+	name, err := request.RequireString("name")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get connector name: %v", err)), nil
 	}
@@ -379,7 +379,7 @@ func handleKafkaConnectorPause(ctx context.Context, admin kafka.Connect, request
 
 func handleKafkaConnectorResume(ctx context.Context, admin kafka.Connect, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Resume a connector
-	name, err := common.RequiredParam[string](request.Params.Arguments, "name")
+	name, err := request.RequireString("name")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get connector name: %v", err)), nil
 	}

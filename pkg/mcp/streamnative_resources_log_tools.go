@@ -120,50 +120,31 @@ func handleStreamNativeResourcesLog(ctx context.Context, request mcp.CallToolReq
 	}
 
 	// Extract required parameters with validation
-	component, err := common.RequiredParam[string](request.Params.Arguments, "component")
+	component, err := request.RequireString("component")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get component: %v", err)), nil
 	}
 
-	name, err := common.RequiredParam[string](request.Params.Arguments, "name")
+	name, err := request.RequireString("name")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get name: %v", err)), nil
 	}
 
-	tenant, hasTenant := common.OptionalParam[string](request.Params.Arguments, "tenant")
-	if !hasTenant {
-		tenant = "public"
-	}
+	tenant := request.GetString("tenant", "public")
 
-	namespace, hasNamespace := common.OptionalParam[string](request.Params.Arguments, "namespace")
-	if !hasNamespace {
-		namespace = "default"
-	}
+	namespace := request.GetString("namespace", "default")
 
-	size, hasSize := common.OptionalParam[string](request.Params.Arguments, "size")
-	if !hasSize {
-		size = "20"
-	}
+	size := request.GetString("size", "20")
 
-	replicaID, hasreplicaID := common.OptionalParam[int](request.Params.Arguments, "replica_id")
-	if !hasreplicaID {
+	replicaID := request.GetInt("replica_id", -1)
+	if replicaID == 0 {
 		replicaID = -1
 	}
 
-	timestampStr, hasTimestamp := common.OptionalParam[string](request.Params.Arguments, "timestamp")
-	if !hasTimestamp {
-		timestampStr = ""
-	}
+	timestampStr := request.GetString("timestamp", "")
+	sinceStr := request.GetString("since", "")
 
-	sinceStr, hasSince := common.OptionalParam[string](request.Params.Arguments, "since")
-	if !hasSince {
-		sinceStr = ""
-	}
-
-	previousContainer, hasPreviousContainer := common.OptionalParam[bool](request.Params.Arguments, "previous_container")
-	if !hasPreviousContainer {
-		previousContainer = false
-	}
+	previousContainer := request.GetBool("previous_container", false)
 
 	if sinceStr != "" {
 		sinceStr = "-" + sinceStr

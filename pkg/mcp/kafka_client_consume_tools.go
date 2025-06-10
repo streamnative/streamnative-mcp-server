@@ -28,7 +28,6 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/sirupsen/logrus"
-	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
 	"github.com/twmb/franz-go/pkg/kgo"
 	"github.com/twmb/franz-go/pkg/sr"
@@ -115,7 +114,7 @@ func KafkaClientAddConsumeTools(s *server.MCPServer, _ bool, logrusLogger *logru
 func handleKafkaConsume(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	opts := []kgo.Opt{}
 	// Get required parameters
-	topicName, err := common.RequiredParam[string](request.Params.Arguments, "topic")
+	topicName, err := request.RequireString("topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic name: %v", err)), nil
 	}
@@ -125,28 +124,16 @@ func handleKafkaConsume(ctx context.Context, request mcp.CallToolRequest) (*mcp.
 	opts = append(opts, kgo.KeepRetryableFetchErrors())
 	w := logger.Writer()
 	opts = append(opts, kgo.WithLogger(kgo.BasicLogger(w, kgo.LogLevelInfo, nil)))
-	maxMessages, hasMaxMessages := common.OptionalParam[float64](request.Params.Arguments, "max-messages")
-	if !hasMaxMessages {
-		maxMessages = 10 // Default to 10 messages
-	}
+	maxMessages := request.GetFloat("max-messages", 10)
 
-	timeoutSec, hasTimeout := common.OptionalParam[float64](request.Params.Arguments, "timeout")
-	if !hasTimeout {
-		timeoutSec = 10 // Default to 10 seconds
-	}
+	timeoutSec := request.GetFloat("timeout", 10)
 
-	group, hasGroup := common.OptionalParam[string](request.Params.Arguments, "group")
-	if !hasGroup {
-		group = ""
-	}
+	group := request.GetString("group", "")
 	if group != "" {
 		opts = append(opts, kgo.ConsumerGroup(group))
 	}
 
-	offsetStr, hasOffset := common.OptionalParam[string](request.Params.Arguments, "offset")
-	if !hasOffset {
-		offsetStr = "atstart" // Default to starting at the beginning
-	}
+	offsetStr := request.GetString("offset", "atstart")
 
 	var offset kgo.Offset
 	switch offsetStr {
