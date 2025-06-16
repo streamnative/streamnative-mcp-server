@@ -66,7 +66,7 @@ func KafkaClientAddProduceTools(s *server.MCPServer, readOnly bool, features []s
 		"4. Message with headers - Include metadata with your message:\n" +
 		"   topic: \"my-topic\"\n" +
 		"   value: \"Message with headers\"\n" +
-		"   headers: [{\"key\": \"source\", \"value\": \"mcp-tool\"}, {\"key\": \"timestamp\", \"value\": \"2023-06-01\"}]\n\n" +
+		"   headers: [\"source=mcp-tool\", \"timestamp=2023-06-01\"]\n\n" +
 		"5. Specific partition - Send to a particular partition:\n" +
 		"   topic: \"my-topic\"\n" +
 		"   value: \"Targeted message\"\n" +
@@ -91,15 +91,13 @@ func KafkaClientAddProduceTools(s *server.MCPServer, readOnly bool, features []s
 				"This is the actual payload that will be delivered to consumers. It can be a JSON string, and the system will automatically serialize it to the appropriate format based on the schema registry if it is available."),
 		),
 		mcp.WithArray("headers",
-			mcp.Description("Message headers in the format of [{\"key\": \"value\"}]. "+
+			mcp.Description("Message headers in the format of [\"key=value\"]. "+
 				"Optional. Headers allow you to attach metadata to messages without modifying the payload. "+
 				"They are passed along with the message to consumers."),
-			mcp.Items(
-				map[string]interface{}{
-					"type":        "string",
-					"description": "header entry",
-				},
-			),
+			mcp.Items(map[string]interface{}{
+				"type":        "string",
+				"description": "key value pair in the format of \"key=value\"",
+			}),
 		),
 		mcp.WithBoolean("sync",
 			mcp.Description("Whether to wait for server acknowledgment before returning. "+
@@ -113,25 +111,22 @@ func KafkaClientAddProduceTools(s *server.MCPServer, readOnly bool, features []s
 // handleKafkaProduce handles producing messages to a Kafka topic
 func handleKafkaProduce(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topicName, err := common.RequiredParam[string](request.Params.Arguments, "topic")
+	topicName, err := request.RequireString("topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic name: %v", err)), nil
 	}
 
 	// Handle single message case
 	// Get value from parameter or file
-	value, err := common.RequiredParam[string](request.Params.Arguments, "value")
+	value, err := request.RequireString("value")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get value: %v", err)), nil
 	}
 
 	// Get optional parameters
-	key, hasKey := common.OptionalParam[string](request.Params.Arguments, "key")
-	headers, hasHeaders := common.OptionalParam[[]interface{}](request.Params.Arguments, "headers")
-	sync := true
-	if syncVal, hasSync := common.OptionalParam[bool](request.Params.Arguments, "sync"); hasSync {
-		sync = syncVal
-	}
+	key := request.GetString("key", "")
+	headers := request.GetStringSlice("headers", []string{})
+	sync := request.GetBool("sync", true)
 
 	// Create Kafka client
 	kafkaClient, err := kafka.GetKafkaClient()
@@ -194,13 +189,17 @@ func handleKafkaProduce(ctx context.Context, request mcp.CallToolRequest) (*mcp.
 	}
 
 	// Add key if provided
-	if hasKey {
+	if key != "" {
 		record.Key = []byte(key)
 	}
 
 	// Add headers if provided
-	if hasHeaders {
-		record.Headers = parseHeaders(headers)
+	if len(headers) > 0 {
+		headerEntries, err := common.ParseMessageConfigs(headers)
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to parse headers: %v", err)), nil
+		}
+		record.Headers = parseHeaders(headerEntries)
 	}
 
 	if schemaReady {
@@ -225,19 +224,19 @@ func handleKafkaProduce(ctx context.Context, request mcp.CallToolRequest) (*mcp.
 }
 
 // parseHeaders converts the headers array to kgo.RecordHeader format
-func parseHeaders(headers []interface{}) []kgo.RecordHeader {
+func parseHeaders(headers map[string]*string) []kgo.RecordHeader {
 	var recordHeaders []kgo.RecordHeader
 
-	for _, header := range headers {
-		headerMap, ok := header.(map[string]interface{})
-		if !ok {
-			continue
-		}
-
-		for key, value := range headerMap {
+	for key, value := range headers {
+		if value == nil {
 			recordHeaders = append(recordHeaders, kgo.RecordHeader{
 				Key:   key,
-				Value: []byte(value.(string)),
+				Value: []byte{},
+			})
+		} else {
+			recordHeaders = append(recordHeaders, kgo.RecordHeader{
+				Key:   key,
+				Value: []byte(*value),
 			})
 		}
 	}

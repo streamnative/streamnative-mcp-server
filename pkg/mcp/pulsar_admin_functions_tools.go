@@ -28,7 +28,6 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
-	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 )
 
 // PulsarAdminAddFunctionsTools adds a unified function-related tool to the MCP server
@@ -167,7 +166,7 @@ func handleFunctionsTool(readOnly bool) func(ctx context.Context, request mcp.Ca
 		client := cmdutils.NewPulsarClientWithAPIVersion(config.V3)
 
 		// Extract and validate operation parameter
-		operation, err := common.RequiredParam[string](request.Params.Arguments, "operation")
+		operation, err := request.RequireString("operation")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'operation': %v", err)), nil
 		}
@@ -194,12 +193,12 @@ func handleFunctionsTool(readOnly bool) func(ctx context.Context, request mcp.Ca
 		}
 
 		// Extract common parameters
-		tenant, err := common.RequiredParam[string](request.Params.Arguments, "tenant")
+		tenant, err := request.RequireString("tenant")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'tenant': %v. A tenant is required for all Pulsar Functions operations.", err)), nil
 		}
 
-		namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
+		namespace, err := request.RequireString("namespace")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'namespace': %v. A namespace is required for all Pulsar Functions operations.", err)), nil
 		}
@@ -207,7 +206,7 @@ func handleFunctionsTool(readOnly bool) func(ctx context.Context, request mcp.Ca
 		// For all operations except 'list', name is required
 		var name string
 		if operation != "list" {
-			name, err = common.RequiredParam[string](request.Params.Arguments, "name")
+			name, err = request.RequireString("name")
 			if err != nil {
 				return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'name' for operation '%s': %v. The function name must be specified for this operation.", operation, err)), nil
 			}
@@ -224,15 +223,15 @@ func handleFunctionsTool(readOnly bool) func(ctx context.Context, request mcp.Ca
 		case "stats":
 			return handleFunctionStats(ctx, client, tenant, namespace, name)
 		case "querystate":
-			key, err := common.RequiredParam[string](request.Params.Arguments, "key")
+			key, err := request.RequireString("key")
 			if err != nil {
 				return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'key' for operation 'querystate': %v. A key is required to look up state in the function's state store.", err)), nil
 			}
 			return handleFunctionQuerystate(ctx, client, tenant, namespace, name, key)
 		case "create":
-			return handleFunctionCreate(ctx, client, tenant, namespace, name, request.Params.Arguments)
+			return handleFunctionCreate(ctx, client, tenant, namespace, name, request)
 		case "update":
-			return handleFunctionUpdate(ctx, client, tenant, namespace, name, request.Params.Arguments)
+			return handleFunctionUpdate(ctx, client, tenant, namespace, name, request)
 		case "delete":
 			return handleFunctionDelete(ctx, client, tenant, namespace, name)
 		case "start":
@@ -242,18 +241,18 @@ func handleFunctionsTool(readOnly bool) func(ctx context.Context, request mcp.Ca
 		case "restart":
 			return handleFunctionRestart(ctx, client, tenant, namespace, name)
 		case "putstate":
-			key, err := common.RequiredParam[string](request.Params.Arguments, "key")
+			key, err := request.RequireString("key")
 			if err != nil {
 				return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'key' for operation 'putstate': %v. A key is required to store state in the function's state store.", err)), nil
 			}
-			value, err := common.RequiredParam[string](request.Params.Arguments, "value")
+			value, err := request.RequireString("value")
 			if err != nil {
 				return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'value' for operation 'putstate': %v. A value is required to store state in the function's state store.", err)), nil
 			}
 			return handleFunctionPutstate(ctx, client, tenant, namespace, name, key, value)
 		case "trigger":
-			topic, _ := common.OptionalParam[string](request.Params.Arguments, "topic")
-			triggerValue, _ := common.OptionalParam[string](request.Params.Arguments, "triggerValue")
+			topic := request.GetString("topic", "")
+			triggerValue := request.GetString("triggerValue", "")
 			return handleFunctionTrigger(ctx, client, tenant, namespace, name, topic, triggerValue)
 		default:
 			// This should never happen due to the valid operations check above
@@ -353,25 +352,25 @@ func handleFunctionQuerystate(_ context.Context, client cmdutils.Client, tenant,
 }
 
 // handleFunctionCreate handles creating a new function
-func handleFunctionCreate(_ context.Context, client cmdutils.Client, tenant, namespace, name string, arguments map[string]interface{}) (*mcp.CallToolResult, error) {
+func handleFunctionCreate(_ context.Context, client cmdutils.Client, tenant, namespace, name string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Extract required parameters
-	classname, err := common.RequiredParam[string](arguments, "classname")
+	classname, err := request.RequireString("classname")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get classname (required for function creation): %v. The classname must specify the fully qualified class implementing the function.", err)), nil
 	}
 
 	// Extract optional parameters
-	inputTopics, _ := common.OptionalParamArray[string](arguments, "inputs")
-	output, _ := common.OptionalParam[string](arguments, "output")
-	jar, _ := common.OptionalParam[string](arguments, "jar")
-	py, _ := common.OptionalParam[string](arguments, "py")
-	goPath, _ := common.OptionalParam[string](arguments, "go")
-	parallelismFloat, _ := common.OptionalParam[float64](arguments, "parallelism")
+	inputTopics := request.GetStringSlice("inputs", []string{})
+	output := request.GetString("output", "")
+	jar := request.GetString("jar", "")
+	py := request.GetString("py", "")
+	goPath := request.GetString("go", "")
+	parallelismFloat := request.GetFloat("parallelism", 1)
 	parallelism := int(parallelismFloat)
 
 	// Get user config if available
 	var userConfigMap map[string]interface{}
-	userConfigObj, ok := arguments["userConfig"]
+	userConfigObj, ok := request.GetArguments()["userConfig"]
 	if ok && userConfigObj != nil {
 		if configMap, isMap := userConfigObj.(map[string]interface{}); isMap {
 			userConfigMap = configMap
@@ -439,20 +438,20 @@ func handleFunctionCreate(_ context.Context, client cmdutils.Client, tenant, nam
 }
 
 // handleFunctionUpdate handles updating an existing function
-func handleFunctionUpdate(_ context.Context, client cmdutils.Client, tenant, namespace, name string, arguments map[string]interface{}) (*mcp.CallToolResult, error) {
+func handleFunctionUpdate(_ context.Context, client cmdutils.Client, tenant, namespace, name string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Extract optional parameters
-	classname, _ := common.OptionalParam[string](arguments, "classname")
-	inputTopics, _ := common.OptionalParamArray[string](arguments, "inputs")
-	output, _ := common.OptionalParam[string](arguments, "output")
-	jar, _ := common.OptionalParam[string](arguments, "jar")
-	py, _ := common.OptionalParam[string](arguments, "py")
-	goPath, _ := common.OptionalParam[string](arguments, "go")
-	parallelismFloat, _ := common.OptionalParam[float64](arguments, "parallelism")
+	classname := request.GetString("classname", "")
+	inputTopics := request.GetStringSlice("inputs", []string{})
+	output := request.GetString("output", "")
+	jar := request.GetString("jar", "")
+	py := request.GetString("py", "")
+	goPath := request.GetString("go", "")
+	parallelismFloat := request.GetFloat("parallelism", 1)
 	parallelism := int(parallelismFloat)
 
 	// Get user config if available
 	var userConfigMap map[string]interface{}
-	userConfigObj, ok := arguments["userConfig"]
+	userConfigObj, ok := request.GetArguments()["userConfig"]
 	if ok && userConfigObj != nil {
 		if configMap, isMap := userConfigObj.(map[string]interface{}); isMap {
 			userConfigMap = configMap

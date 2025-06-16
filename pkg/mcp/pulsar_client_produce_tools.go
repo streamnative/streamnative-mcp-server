@@ -28,7 +28,6 @@ import (
 	"github.com/apache/pulsar-client-go/pulsar"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
-	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	mcppulsar "github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
@@ -88,19 +87,15 @@ func PulsarClientAddProducerTools(s *server.MCPServer, _ bool, features []string
 
 func handleClientProduce(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Extract required parameters with validation
-	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
+	topic, err := request.RequireString("topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
 
 	// Set default values and extract optional parameters
 	messages := []string{}
-	if val, exists := common.OptionalParam[[]interface{}](request.Params.Arguments, "messages"); exists && len(val) > 0 {
-		for _, m := range val {
-			if strMsg, ok := m.(string); ok {
-				messages = append(messages, strMsg)
-			}
-		}
+	if val := request.GetStringSlice("messages", []string{}); len(val) > 0 {
+		messages = val
 	}
 
 	if len(messages) == 0 {
@@ -108,41 +103,37 @@ func handleClientProduce(ctx context.Context, request mcp.CallToolRequest) (*mcp
 	}
 
 	numProduce := 1
-	if val, exists := common.OptionalParam[float64](request.Params.Arguments, "num-produce"); exists {
+	if val := request.GetFloat("num-produce", 1); val != 0 {
 		numProduce = int(val)
 	}
 
 	rate := 0.0
-	if val, exists := common.OptionalParam[float64](request.Params.Arguments, "rate"); exists {
+	if val := request.GetFloat("rate", 0); val != 0 {
 		rate = val
 	}
 
 	disableBatching := false
-	if val, exists := common.OptionalParam[bool](request.Params.Arguments, "disable-batching"); exists {
+	if val := request.GetBool("disable-batching", false); val {
 		disableBatching = val
 	}
 
 	chunkingAllowed := false
-	if val, exists := common.OptionalParam[bool](request.Params.Arguments, "chunking"); exists {
+	if val := request.GetBool("chunking", false); val {
 		chunkingAllowed = val
 	}
 
 	separator := ""
-	if val, exists := common.OptionalParam[string](request.Params.Arguments, "separator"); exists && val != "" {
+	if val := request.GetString("separator", ""); val != "" {
 		separator = val
 	}
 
 	properties := []string{}
-	if val, exists := common.OptionalParam[[]interface{}](request.Params.Arguments, "properties"); exists && len(val) > 0 {
-		for _, p := range val {
-			if strProp, ok := p.(string); ok {
-				properties = append(properties, strProp)
-			}
-		}
+	if val := request.GetStringSlice("properties", []string{}); len(val) > 0 {
+		properties = val
 	}
 
 	key := ""
-	if val, exists := common.OptionalParam[string](request.Params.Arguments, "key"); exists {
+	if val := request.GetString("key", ""); val != "" {
 		key = val
 	}
 

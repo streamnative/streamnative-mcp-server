@@ -28,7 +28,6 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
-	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
@@ -136,12 +135,12 @@ func PulsarAdminAddTopicTools(s *server.MCPServer, readOnly bool, features []str
 func handleTopicTool(readOnly bool) func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get required parameters
-		resource, err := common.RequiredParam[string](request.Params.Arguments, "resource")
+		resource, err := request.RequireString("resource")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get resource: %v", err)), nil
 		}
 
-		operation, err := common.RequiredParam[string](request.Params.Arguments, "operation")
+		operation, err := request.RequireString("operation")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get operation: %v", err)), nil
 		}
@@ -217,7 +216,7 @@ func handleTopicTool(readOnly bool) func(_ context.Context, request mcp.CallTool
 // handleTopicsList lists all existing topics under the specified namespace
 func handleTopicsList(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
+	namespace, err := request.RequireString("namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'namespace' for topics.list: %v", err)), nil
 	}
@@ -255,7 +254,7 @@ func handleTopicsList(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.
 // handleTopicGet gets the metadata of an existing topic
 func handleTopicGet(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
+	topic, err := request.RequireString("topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.get: %v", err)), nil
 	}
@@ -285,20 +284,20 @@ func handleTopicGet(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.Ca
 // handleTopicStats gets the stats for an existing topic
 func handleTopicStats(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
+	topic, err := request.RequireString("topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.stats: %v", err)), nil
 	}
 
 	// Get optional parameters
-	partitioned, hasPartitioned := common.OptionalParam[bool](request.Params.Arguments, "partitioned")
-	perPartition, hasPerPartition := common.OptionalParam[bool](request.Params.Arguments, "per-partition")
+	partitioned := request.GetBool("partitioned", false)
+	perPartition := request.GetBool("per-partition", false)
 
-	if !hasPartitioned {
+	if !partitioned {
 		partitioned = false
 	}
 
-	if !hasPerPartition {
+	if !perPartition {
 		perPartition = false
 	}
 
@@ -362,7 +361,7 @@ func handleTopicStats(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.
 // handleTopicLookup looks up the owner broker of a topic
 func handleTopicLookup(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
+	topic, err := request.RequireString("topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.lookup: %v", err)), nil
 	}
@@ -392,12 +391,12 @@ func handleTopicLookup(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp
 // handleTopicCreate creates a topic with the specified number of partitions
 func handleTopicCreate(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
+	topic, err := request.RequireString("topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.create: %v", err)), nil
 	}
 
-	partitions, err := common.RequiredParam[float64](request.Params.Arguments, "partitions")
+	partitions, err := request.RequireFloat("partitions")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'partitions' for topic.create: %v", err)), nil
 	}
@@ -431,20 +430,20 @@ func handleTopicCreate(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp
 // handleTopicDelete deletes a topic
 func handleTopicDelete(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
+	topic, err := request.RequireString("topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.delete: %v", err)), nil
 	}
 
 	// Get optional parameters
-	force, hasForce := common.OptionalParam[bool](request.Params.Arguments, "force")
-	nonPartitioned, hasNonPartitioned := common.OptionalParam[bool](request.Params.Arguments, "non-partitioned")
+	force := request.GetBool("force", false)
+	nonPartitioned := request.GetBool("non-partitioned", false)
 
-	if !hasForce {
+	if !force {
 		force = false
 	}
 
-	if !hasNonPartitioned {
+	if !nonPartitioned {
 		nonPartitioned = false
 	}
 
@@ -477,7 +476,7 @@ func handleTopicDelete(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp
 // handleTopicUnload unloads a topic
 func handleTopicUnload(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
+	topic, err := request.RequireString("topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.unload: %v", err)), nil
 	}
@@ -500,7 +499,7 @@ func handleTopicUnload(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp
 // handleTopicTerminate terminates a topic
 func handleTopicTerminate(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
+	topic, err := request.RequireString("topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.terminate: %v", err)), nil
 	}
@@ -528,7 +527,7 @@ func handleTopicTerminate(admin cmdutils.Client, request mcp.CallToolRequest) (*
 // handleTopicCompact triggers compaction on a topic
 func handleTopicCompact(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
+	topic, err := request.RequireString("topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.compact: %v", err)), nil
 	}
@@ -552,7 +551,7 @@ func handleTopicCompact(admin cmdutils.Client, request mcp.CallToolRequest) (*mc
 // handleTopicInternalStats gets the internal stats for a topic
 func handleTopicInternalStats(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
+	topic, err := request.RequireString("topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.internal-stats: %v", err)), nil
 	}
@@ -581,7 +580,7 @@ func handleTopicInternalStats(admin cmdutils.Client, request mcp.CallToolRequest
 // handleTopicInternalInfo gets the internal info for a topic
 func handleTopicInternalInfo(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
+	topic, err := request.RequireString("topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.internal-info: %v", err)), nil
 	}
@@ -610,7 +609,7 @@ func handleTopicInternalInfo(admin cmdutils.Client, request mcp.CallToolRequest)
 // handleTopicBundleRange gets the bundle range of a topic
 func handleTopicBundleRange(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
+	topic, err := request.RequireString("topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.bundle-range: %v", err)), nil
 	}
@@ -633,7 +632,7 @@ func handleTopicBundleRange(admin cmdutils.Client, request mcp.CallToolRequest) 
 // handleTopicLastMessageID gets the last message ID of a topic
 func handleTopicLastMessageID(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
+	topic, err := request.RequireString("topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.last-message-id: %v", err)), nil
 	}
@@ -662,7 +661,7 @@ func handleTopicLastMessageID(admin cmdutils.Client, request mcp.CallToolRequest
 // handleTopicStatus gets the status of a topic
 func handleTopicStatus(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
+	topic, err := request.RequireString("topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.status: %v", err)), nil
 	}
@@ -700,12 +699,12 @@ func handleTopicStatus(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp
 // handleTopicUpdate updates a topic configuration
 func handleTopicUpdate(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
+	topic, err := request.RequireString("topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.update: %v", err)), nil
 	}
 
-	partitions, err := common.RequiredParam[float64](request.Params.Arguments, "partitions")
+	partitions, err := request.RequireFloat("partitions")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'partitions' for topic.update: %v", err)), nil
 	}
@@ -728,12 +727,12 @@ func handleTopicUpdate(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp
 // handleTopicOffload offloads data from a topic to long-term storage
 func handleTopicOffload(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
+	topic, err := request.RequireString("topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.offload: %v", err)), nil
 	}
 
-	messageIDStr, err := common.RequiredParam[string](request.Params.Arguments, "messageId")
+	messageIDStr, err := request.RequireString("messageId")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'messageId' for topic.offload: %v", err)), nil
 	}
@@ -771,7 +770,7 @@ func handleTopicOffload(admin cmdutils.Client, request mcp.CallToolRequest) (*mc
 // handleTopicOffloadStatus checks the status of data offloading for a topic
 func handleTopicOffloadStatus(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
-	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
+	topic, err := request.RequireString("topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.offload-status: %v", err)), nil
 	}

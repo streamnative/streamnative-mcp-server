@@ -26,7 +26,6 @@ import (
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
-	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
 	"github.com/twmb/franz-go/pkg/kadm"
 )
@@ -88,12 +87,12 @@ func KafkaAdminAddPartitionsTools(s *server.MCPServer, readOnly bool, features [
 func handleKafkaPartitionsTool(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get required parameters
-		resource, err := common.RequiredParam[string](request.Params.Arguments, "resource")
+		resource, err := request.RequireString("resource")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get resource: %v", err)), nil
 		}
 
-		operation, err := common.RequiredParam[string](request.Params.Arguments, "operation")
+		operation, err := request.RequireString("operation")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get operation: %v", err)), nil
 		}
@@ -129,12 +128,12 @@ func handleKafkaPartitionsTool(readOnly bool) func(context.Context, mcp.CallTool
 }
 
 func handleKafkaPartitionUpdate(ctx context.Context, admin *kadm.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	topicName, err := common.RequiredParam[string](request.Params.Arguments, "topic")
+	topicName, err := request.RequireString("topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic name: %v", err)), nil
 	}
 
-	newTotal, err := common.RequiredParam[int](request.Params.Arguments, "new-total")
+	newTotal, err := request.RequireInt("new-total")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get new total: %v", err)), nil
 	}
