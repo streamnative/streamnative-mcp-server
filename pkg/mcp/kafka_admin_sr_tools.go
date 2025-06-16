@@ -26,7 +26,6 @@ import (
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
-	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
 	"github.com/twmb/franz-go/pkg/sr"
 )
@@ -150,12 +149,12 @@ func KafkaAdminAddSchemaRegistryTools(s *server.MCPServer, readOnly bool, featur
 func handleKafkaSchemaRegistryTool(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get required parameters
-		resource, err := common.RequiredParam[string](request.Params.Arguments, "resource")
+		resource, err := request.RequireString("resource")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get resource: %v", err)), nil
 		}
 
-		operation, err := common.RequiredParam[string](request.Params.Arguments, "operation")
+		operation, err := request.RequireString("operation")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get operation: %v", err)), nil
 		}
@@ -246,7 +245,7 @@ func handleKafkaSubjectsList(ctx context.Context, admin *sr.Client, _ mcp.CallTo
 }
 
 func handleKafkaVersionsList(ctx context.Context, admin *sr.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	subject, err := common.RequiredParam[string](request.Params.Arguments, "subject")
+	subject, err := request.RequireString("subject")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get subject: %v", err)), nil
 	}
@@ -279,7 +278,7 @@ func handleKafkaTypesList(ctx context.Context, admin *sr.Client, _ mcp.CallToolR
 }
 
 func handleKafkaSubjectGet(ctx context.Context, admin *sr.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	subject, err := common.RequiredParam[string](request.Params.Arguments, "subject")
+	subject, err := request.RequireString("subject")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get subject: %v", err)), nil
 	}
@@ -298,17 +297,17 @@ func handleKafkaSubjectGet(ctx context.Context, admin *sr.Client, request mcp.Ca
 }
 
 func handleKafkaSubjectCreate(ctx context.Context, admin *sr.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	subject, err := common.RequiredParam[string](request.Params.Arguments, "subject")
+	subject, err := request.RequireString("subject")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get subject: %v", err)), nil
 	}
 
-	schema, err := common.RequiredParam[string](request.Params.Arguments, "schema")
+	schema, err := request.RequireString("schema")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get schema: %v", err)), nil
 	}
 
-	typeString, err := common.RequiredParam[string](request.Params.Arguments, "type")
+	typeString, err := request.RequireString("type")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get schema type: %v", err)), nil
 	}
@@ -338,12 +337,12 @@ func handleKafkaSubjectCreate(ctx context.Context, admin *sr.Client, request mcp
 }
 
 func handleKafkaSubjectDelete(ctx context.Context, admin *sr.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	subject, err := common.RequiredParam[string](request.Params.Arguments, "subject")
+	subject, err := request.RequireString("subject")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get subject: %v", err)), nil
 	}
 
-	version, err := common.RequiredParam[int](request.Params.Arguments, "version")
+	version, err := request.RequireInt("version")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get version: %v", err)), nil
 	}
@@ -357,12 +356,12 @@ func handleKafkaSubjectDelete(ctx context.Context, admin *sr.Client, request mcp
 }
 
 func handleKafkaVersionGet(ctx context.Context, admin *sr.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	subject, err := common.RequiredParam[string](request.Params.Arguments, "subject")
+	subject, err := request.RequireString("subject")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get subject: %v", err)), nil
 	}
 
-	version, err := common.RequiredParam[int](request.Params.Arguments, "version")
+	version, err := request.RequireInt("version")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get version: %v", err)), nil
 	}
@@ -381,7 +380,7 @@ func handleKafkaVersionGet(ctx context.Context, admin *sr.Client, request mcp.Ca
 }
 
 func handleKafkaCompatibilityGet(ctx context.Context, admin *sr.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	subject, err := common.RequiredParam[string](request.Params.Arguments, "subject")
+	subject, err := request.RequireString("subject")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get subject: %v", err)), nil
 	}
@@ -397,12 +396,12 @@ func handleKafkaCompatibilityGet(ctx context.Context, admin *sr.Client, request 
 }
 
 func handleKafkaCompatibilitySet(ctx context.Context, admin *sr.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	subject, err := common.RequiredParam[string](request.Params.Arguments, "subject")
+	subject, err := request.RequireString("subject")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get subject: %v", err)), nil
 	}
 
-	compatibility, err := common.RequiredParam[string](request.Params.Arguments, "compatibility")
+	compatibility, err := request.RequireString("compatibility")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get compatibility: %v", err)), nil
 	}

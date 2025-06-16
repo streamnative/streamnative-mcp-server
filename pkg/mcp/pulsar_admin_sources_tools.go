@@ -28,7 +28,6 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
-	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 )
 
 // PulsarAdminAddSourcesTools adds a unified source-related tool to the MCP server
@@ -136,7 +135,7 @@ func PulsarAdminAddSourcesTools(s *server.MCPServer, readOnly bool, features []s
 func handleSourcesTool(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Extract and validate operation parameter
-		operation, err := common.RequiredParam[string](request.Params.Arguments, "operation")
+		operation, err := request.RequireString("operation")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'operation': %v", err)), nil
 		}
@@ -170,12 +169,12 @@ func handleSourcesTool(readOnly bool) func(context.Context, mcp.CallToolRequest)
 		}
 
 		// Extract common parameters (all operations except list-built-in require tenant and namespace)
-		tenant, err := common.RequiredParam[string](request.Params.Arguments, "tenant")
+		tenant, err := request.RequireString("tenant")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'tenant': %v. A tenant is required for operation '%s'.", err, operation)), nil
 		}
 
-		namespace, err := common.RequiredParam[string](request.Params.Arguments, "namespace")
+		namespace, err := request.RequireString("namespace")
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'namespace': %v. A namespace is required for operation '%s'.", err, operation)), nil
 		}
@@ -183,7 +182,7 @@ func handleSourcesTool(readOnly bool) func(context.Context, mcp.CallToolRequest)
 		// For all operations except 'list', name is required
 		var name string
 		if operation != "list" {
-			name, err = common.RequiredParam[string](request.Params.Arguments, "name")
+			name, err = request.RequireString("name")
 			if err != nil {
 				return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'name' for operation '%s': %v. The source name must be specified for this operation.", operation, err)), nil
 			}
@@ -198,9 +197,9 @@ func handleSourcesTool(readOnly bool) func(context.Context, mcp.CallToolRequest)
 		case "status":
 			return handleSourceStatus(ctx, admin, tenant, namespace, name)
 		case "create":
-			return handleSourceCreate(ctx, admin, request.Params.Arguments)
+			return handleSourceCreate(ctx, admin, request)
 		case "update":
-			return handleSourceUpdate(ctx, admin, request.Params.Arguments)
+			return handleSourceUpdate(ctx, admin, request)
 		case "delete":
 			return handleSourceDelete(ctx, admin, tenant, namespace, name)
 		case "start":
@@ -268,18 +267,18 @@ func handleSourceStatus(_ context.Context, admin cmdutils.Client, tenant, namesp
 }
 
 // handleSourceCreate handles creating a new source
-func handleSourceCreate(_ context.Context, admin cmdutils.Client, arguments map[string]interface{}) (*mcp.CallToolResult, error) {
-	tenant, err := common.RequiredParam[string](arguments, "tenant")
+func handleSourceCreate(_ context.Context, admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	tenant, err := request.RequireString("tenant")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get tenant: %v", err)), nil
 	}
 
-	namespace, err := common.RequiredParam[string](arguments, "namespace")
+	namespace, err := request.RequireString("namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace: %v", err)), nil
 	}
 
-	name, err := common.RequiredParam[string](arguments, "name")
+	name, err := request.RequireString("name")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get name: %v", err)), nil
 	}
@@ -293,49 +292,49 @@ func handleSourceCreate(_ context.Context, admin cmdutils.Client, arguments map[
 	}
 
 	// Get optional parameters
-	archive, hasArchive := common.OptionalParam[string](arguments, "archive")
-	if hasArchive && archive != "" {
+	archive := request.GetString("archive", "")
+	if archive != "" {
 		sourceData.Archive = archive
 	}
 
-	sourceType, hasSourceType := common.OptionalParam[string](arguments, "source-type")
-	if hasSourceType && sourceType != "" {
+	sourceType := request.GetString("source-type", "")
+	if sourceType != "" {
 		sourceData.SourceType = sourceType
 	}
 
-	destTopic, hasDestTopic := common.OptionalParam[string](arguments, "destination-topic-name")
-	if hasDestTopic && destTopic != "" {
+	destTopic := request.GetString("destination-topic-name", "")
+	if destTopic != "" {
 		sourceData.DestinationTopicName = destTopic
 	}
 
-	deserializationClassName, hasDeserialization := common.OptionalParam[string](arguments, "deserialization-classname")
-	if hasDeserialization && deserializationClassName != "" {
+	deserializationClassName := request.GetString("deserialization-classname", "")
+	if deserializationClassName != "" {
 		sourceData.DeserializationClassName = deserializationClassName
 	}
 
-	schemaType, hasSchemaType := common.OptionalParam[string](arguments, "schema-type")
-	if hasSchemaType && schemaType != "" {
+	schemaType := request.GetString("schema-type", "")
+	if schemaType != "" {
 		sourceData.SchemaType = schemaType
 	}
 
-	className, hasClassName := common.OptionalParam[string](arguments, "classname")
-	if hasClassName && className != "" {
+	className := request.GetString("classname", "")
+	if className != "" {
 		sourceData.ClassName = className
 	}
 
-	processingGuarantees, hasProcessingGuarantees := common.OptionalParam[string](arguments, "processing-guarantees")
-	if hasProcessingGuarantees && processingGuarantees != "" {
+	processingGuarantees := request.GetString("processing-guarantees", "")
+	if processingGuarantees != "" {
 		sourceData.ProcessingGuarantees = processingGuarantees
 	}
 
-	parallelismFloat, hasParallelism := common.OptionalParam[float64](arguments, "parallelism")
-	if hasParallelism {
+	parallelismFloat := request.GetFloat("parallelism", 1)
+	if parallelismFloat >= 0 {
 		sourceData.Parallelism = int(parallelismFloat)
 	}
 
 	// Get source config if available
 	var sourceConfigMap map[string]interface{}
-	sourceConfigObj, ok := arguments["source-config"]
+	sourceConfigObj, ok := request.GetArguments()["source-config"]
 	if ok && sourceConfigObj != nil {
 		if configMap, isMap := sourceConfigObj.(map[string]interface{}); isMap {
 			sourceConfigMap = configMap
@@ -384,18 +383,18 @@ func handleSourceCreate(_ context.Context, admin cmdutils.Client, arguments map[
 }
 
 // handleSourceUpdate handles updating an existing source
-func handleSourceUpdate(_ context.Context, admin cmdutils.Client, arguments map[string]interface{}) (*mcp.CallToolResult, error) {
-	tenant, err := common.RequiredParam[string](arguments, "tenant")
+func handleSourceUpdate(_ context.Context, admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	tenant, err := request.RequireString("tenant")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get tenant: %v", err)), nil
 	}
 
-	namespace, err := common.RequiredParam[string](arguments, "namespace")
+	namespace, err := request.RequireString("namespace")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace: %v", err)), nil
 	}
 
-	name, err := common.RequiredParam[string](arguments, "name")
+	name, err := request.RequireString("name")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get name: %v", err)), nil
 	}
@@ -409,49 +408,49 @@ func handleSourceUpdate(_ context.Context, admin cmdutils.Client, arguments map[
 	}
 
 	// Get optional parameters
-	archive, hasArchive := common.OptionalParam[string](arguments, "archive")
-	if hasArchive && archive != "" {
+	archive := request.GetString("archive", "")
+	if archive != "" {
 		sourceData.Archive = archive
 	}
 
-	sourceType, hasSourceType := common.OptionalParam[string](arguments, "source-type")
-	if hasSourceType && sourceType != "" {
+	sourceType := request.GetString("source-type", "")
+	if sourceType != "" {
 		sourceData.SourceType = sourceType
 	}
 
-	destTopic, hasDestTopic := common.OptionalParam[string](arguments, "destination-topic-name")
-	if hasDestTopic && destTopic != "" {
+	destTopic := request.GetString("destination-topic-name", "")
+	if destTopic != "" {
 		sourceData.DestinationTopicName = destTopic
 	}
 
-	deserializationClassName, hasDeserialization := common.OptionalParam[string](arguments, "deserialization-classname")
-	if hasDeserialization && deserializationClassName != "" {
+	deserializationClassName := request.GetString("deserialization-classname", "")
+	if deserializationClassName != "" {
 		sourceData.DeserializationClassName = deserializationClassName
 	}
 
-	schemaType, hasSchemaType := common.OptionalParam[string](arguments, "schema-type")
-	if hasSchemaType && schemaType != "" {
+	schemaType := request.GetString("schema-type", "")
+	if schemaType != "" {
 		sourceData.SchemaType = schemaType
 	}
 
-	className, hasClassName := common.OptionalParam[string](arguments, "classname")
-	if hasClassName && className != "" {
+	className := request.GetString("classname", "")
+	if className != "" {
 		sourceData.ClassName = className
 	}
 
-	processingGuarantees, hasProcessingGuarantees := common.OptionalParam[string](arguments, "processing-guarantees")
-	if hasProcessingGuarantees && processingGuarantees != "" {
+	processingGuarantees := request.GetString("processing-guarantees", "")
+	if processingGuarantees != "" {
 		sourceData.ProcessingGuarantees = processingGuarantees
 	}
 
-	parallelismFloat, hasParallelism := common.OptionalParam[float64](arguments, "parallelism")
-	if hasParallelism {
+	parallelismFloat := request.GetFloat("parallelism", 1)
+	if parallelismFloat >= 0 {
 		sourceData.Parallelism = int(parallelismFloat)
 	}
 
 	// Get source config if available
 	var sourceConfigMap map[string]interface{}
-	sourceConfigObj, ok := arguments["source-config"]
+	sourceConfigObj, ok := request.GetArguments()["source-config"]
 	if ok && sourceConfigObj != nil {
 		if configMap, isMap := sourceConfigObj.(map[string]interface{}); isMap {
 			sourceConfigMap = configMap

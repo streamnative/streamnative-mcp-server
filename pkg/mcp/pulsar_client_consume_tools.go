@@ -28,7 +28,6 @@ import (
 	"github.com/apache/pulsar-client-go/pulsar"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
-	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	mcppulsar "github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
@@ -77,49 +76,49 @@ func PulsarClientAddConsumerTools(s *server.MCPServer, _ bool, features []string
 
 func handleClientConsume(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Extract required parameters with validation
-	topic, err := common.RequiredParam[string](request.Params.Arguments, "topic")
+	topic, err := request.RequireString("topic")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
 	}
 
-	subscriptionName, err := common.RequiredParam[string](request.Params.Arguments, "subscription-name")
+	subscriptionName, err := request.RequireString("subscription-name")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get subscription name: %v", err)), nil
 	}
 
 	// Set default values and extract optional parameters
 	subscriptionType := "exclusive"
-	if val, exists := common.OptionalParam[string](request.Params.Arguments, "subscription-type"); exists && val != "" {
+	if val := request.GetString("subscription-type", ""); val != "" {
 		subscriptionType = val
 	}
 
 	subscriptionMode := "durable"
-	if val, exists := common.OptionalParam[string](request.Params.Arguments, "subscription-mode"); exists && val != "" {
+	if val := request.GetString("subscription-mode", ""); val != "" {
 		subscriptionMode = val
 	}
 
 	initialPosition := "latest"
-	if val, exists := common.OptionalParam[string](request.Params.Arguments, "initial-position"); exists && val != "" {
+	if val := request.GetString("initial-position", ""); val != "" {
 		initialPosition = val
 	}
 
 	numMessages := 10
-	if val, exists := common.OptionalParam[float64](request.Params.Arguments, "num-messages"); exists {
+	if val := request.GetFloat("num-messages", 10); val != 0 {
 		numMessages = int(val)
 	}
 
 	timeout := 30
-	if val, exists := common.OptionalParam[float64](request.Params.Arguments, "timeout"); exists {
+	if val := request.GetFloat("timeout", 30); val != 0 {
 		timeout = int(val)
 	}
 
 	showProperties := false
-	if val, exists := common.OptionalParam[bool](request.Params.Arguments, "show-properties"); exists {
+	if val := request.GetBool("show-properties", false); val {
 		showProperties = val
 	}
 
 	hidePayload := false
-	if val, exists := common.OptionalParam[bool](request.Params.Arguments, "hide-payload"); exists {
+	if val := request.GetBool("hide-payload", false); val {
 		hidePayload = val
 	}
 

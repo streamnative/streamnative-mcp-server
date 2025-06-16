@@ -435,7 +435,7 @@ func (m *PulsarFunctionManager) handleToolCall(fnTool *FunctionTool) func(ctx co
 		}()
 
 		// Invoke function and wait for result
-		result, err := invoker.InvokeFunctionAndWait(timeoutCtx, fnTool, request.Params.Arguments)
+		result, err := invoker.InvokeFunctionAndWait(timeoutCtx, fnTool, request.GetArguments())
 
 		// Record success or failure
 		if err != nil {

@@ -180,6 +180,19 @@ func RequiredParamObject(arguments map[string]interface{}, name string) (map[str
 	return nil, fmt.Errorf("%s parameter must be an object", name)
 }
 
+func OptionalParamObject(arguments map[string]interface{}, name string) (map[string]interface{}, bool) {
+	paramValue, found := arguments[name]
+	if !found || paramValue == nil {
+		return nil, false
+	}
+
+	if mapVal, ok := paramValue.(map[string]interface{}); ok {
+		return mapVal, true
+	}
+
+	return nil, false
+}
+
 func GetOptions(ctx context.Context) *config.Options {
 	return ctx.Value(OptionsKey).(*config.Options)
 }

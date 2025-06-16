@@ -81,16 +81,13 @@ func handleStreamNativeResourcesApply(ctx context.Context, request mcp.CallToolR
 	}
 
 	// Get YAML content
-	jsonContent, err := common.RequiredParam[string](request.Params.Arguments, "json_content")
+	jsonContent, err := request.RequireString("json_content")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get json_content: %v", err)), nil
 	}
 
 	// Get dry_run flag
-	dryRun, hasDryRun := common.OptionalParam[bool](request.Params.Arguments, "dry_run")
-	if !hasDryRun {
-		dryRun = false
-	}
+	dryRun := request.GetBool("dry_run", false)
 
 	// Get API client
 	apiClient, err := config.GetAPIClient()
@@ -327,12 +324,12 @@ func handleStreamNativeResourcesDelete(ctx context.Context, request mcp.CallTool
 	snConfig := common.GetOptions(ctx)
 	organization := snConfig.Organization
 
-	name, err := common.RequiredParam[string](request.Params.Arguments, "name")
+	name, err := request.RequireString("name")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get name: %v", err)), nil
 	}
 
-	resourceType, err := common.RequiredParam[string](request.Params.Arguments, "type")
+	resourceType, err := request.RequireString("type")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get type: %v", err)), nil
 	}
