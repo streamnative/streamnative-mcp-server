@@ -80,23 +80,38 @@ func (pc *PulsarContext) SetPulsarContext() error {
 	// Configure pulsarctl with the token
 	if pc.Token != "" {
 		cmdutils.PulsarCtlConfig = &cmdutils.ClusterConfig{
-			WebServiceURL: pc.WebServiceURL,
-			AuthPlugin:    "org.apache.pulsar.client.impl.auth.AuthenticationToken",
-			AuthParams:    fmt.Sprintf("token:%s", pc.Token),
+			WebServiceURL:                 pc.WebServiceURL,
+			AuthPlugin:                    "org.apache.pulsar.client.impl.auth.AuthenticationToken",
+			AuthParams:                    fmt.Sprintf("token:%s", pc.Token),
+			TLSAllowInsecureConnection:    pc.TLSAllowInsecureConnection,
+			TLSEnableHostnameVerification: pc.TLSEnableHostnameVerification,
+			TLSTrustCertsFilePath:         pc.TLSTrustCertsFilePath,
+			TLSCertFile:                   pc.TLSCertFile,
+			TLSKeyFile:                    pc.TLSKeyFile,
 		}
 
 		// Set the global client options
 		CurrentPulsarClientOptions = pulsar.ClientOptions{
-			URL:               pc.ServiceURL,
-			Authentication:    pulsar.NewAuthenticationToken(pc.Token),
-			OperationTimeout:  DefaultClientTimeout,
-			ConnectionTimeout: DefaultClientTimeout,
+			URL:                        pc.ServiceURL,
+			Authentication:             pulsar.NewAuthenticationToken(pc.Token),
+			OperationTimeout:           DefaultClientTimeout,
+			ConnectionTimeout:          DefaultClientTimeout,
+			TLSAllowInsecureConnection: pc.TLSAllowInsecureConnection,
+			TLSValidateHostname:        pc.TLSEnableHostnameVerification,
+			TLSTrustCertsFilePath:      pc.TLSTrustCertsFilePath,
+			TLSCertificateFile:         pc.TLSCertFile,
+			TLSKeyFilePath:             pc.TLSKeyFile,
 		}
 	} else if pc.AuthPlugin != "" && pc.AuthParams != "" {
 		cmdutils.PulsarCtlConfig = &cmdutils.ClusterConfig{
-			WebServiceURL: pc.WebServiceURL,
-			AuthPlugin:    pc.AuthPlugin,
-			AuthParams:    pc.AuthParams,
+			WebServiceURL:                 pc.WebServiceURL,
+			AuthPlugin:                    pc.AuthPlugin,
+			AuthParams:                    pc.AuthParams,
+			TLSAllowInsecureConnection:    pc.TLSAllowInsecureConnection,
+			TLSEnableHostnameVerification: pc.TLSEnableHostnameVerification,
+			TLSTrustCertsFilePath:         pc.TLSTrustCertsFilePath,
+			TLSCertFile:                   pc.TLSCertFile,
+			TLSKeyFile:                    pc.TLSKeyFile,
 		}
 
 		authProvider, err := pulsar.NewAuthentication(pc.AuthPlugin, pc.AuthParams)
@@ -104,10 +119,37 @@ func (pc *PulsarContext) SetPulsarContext() error {
 			return fmt.Errorf("failed to create authentication provider: %w", err)
 		}
 		CurrentPulsarClientOptions = pulsar.ClientOptions{
-			URL:               pc.ServiceURL,
-			Authentication:    authProvider,
-			OperationTimeout:  DefaultClientTimeout,
-			ConnectionTimeout: DefaultClientTimeout,
+			URL:                        pc.ServiceURL,
+			Authentication:             authProvider,
+			OperationTimeout:           DefaultClientTimeout,
+			ConnectionTimeout:          DefaultClientTimeout,
+			TLSAllowInsecureConnection: pc.TLSAllowInsecureConnection,
+			TLSValidateHostname:        pc.TLSEnableHostnameVerification,
+			TLSTrustCertsFilePath:      pc.TLSTrustCertsFilePath,
+			TLSCertificateFile:         pc.TLSCertFile,
+			TLSKeyFilePath:             pc.TLSKeyFile,
+		}
+	} else {
+		// No authentication provided
+		cmdutils.PulsarCtlConfig = &cmdutils.ClusterConfig{
+			WebServiceURL:                 pc.WebServiceURL,
+			TLSAllowInsecureConnection:    pc.TLSAllowInsecureConnection,
+			TLSEnableHostnameVerification: pc.TLSEnableHostnameVerification,
+			TLSTrustCertsFilePath:         pc.TLSTrustCertsFilePath,
+			TLSCertFile:                   pc.TLSCertFile,
+			TLSKeyFile:                    pc.TLSKeyFile,
+		}
+
+		// Set the global client options without authentication
+		CurrentPulsarClientOptions = pulsar.ClientOptions{
+			URL:                        pc.ServiceURL,
+			OperationTimeout:           DefaultClientTimeout,
+			ConnectionTimeout:          DefaultClientTimeout,
+			TLSAllowInsecureConnection: pc.TLSAllowInsecureConnection,
+			TLSValidateHostname:        pc.TLSEnableHostnameVerification,
+			TLSTrustCertsFilePath:      pc.TLSTrustCertsFilePath,
+			TLSCertificateFile:         pc.TLSCertFile,
+			TLSKeyFilePath:             pc.TLSKeyFile,
 		}
 	}
 
