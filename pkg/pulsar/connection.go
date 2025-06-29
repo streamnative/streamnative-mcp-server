@@ -78,7 +78,8 @@ func init() {
 func (pc *PulsarContext) SetPulsarContext() error {
 	var err error
 	// Configure pulsarctl with the token
-	if pc.Token != "" {
+	switch {
+	case pc.Token != "":
 		cmdutils.PulsarCtlConfig = &cmdutils.ClusterConfig{
 			WebServiceURL:                 pc.WebServiceURL,
 			AuthPlugin:                    "org.apache.pulsar.client.impl.auth.AuthenticationToken",
@@ -102,7 +103,7 @@ func (pc *PulsarContext) SetPulsarContext() error {
 			TLSCertificateFile:         pc.TLSCertFile,
 			TLSKeyFilePath:             pc.TLSKeyFile,
 		}
-	} else if pc.AuthPlugin != "" && pc.AuthParams != "" {
+	case pc.AuthPlugin != "" && pc.AuthParams != "":
 		cmdutils.PulsarCtlConfig = &cmdutils.ClusterConfig{
 			WebServiceURL:                 pc.WebServiceURL,
 			AuthPlugin:                    pc.AuthPlugin,
@@ -129,7 +130,7 @@ func (pc *PulsarContext) SetPulsarContext() error {
 			TLSCertificateFile:         pc.TLSCertFile,
 			TLSKeyFilePath:             pc.TLSKeyFile,
 		}
-	} else {
+	default:
 		// No authentication provided
 		cmdutils.PulsarCtlConfig = &cmdutils.ClusterConfig{
 			WebServiceURL:                 pc.WebServiceURL,
