@@ -51,8 +51,33 @@ release:
 
 dockers:
   - image_templates:
-      - "streamnative/snmcp:{{ .Tag }}"
-      - "streamnative/snmcp:latest"
+      - "streamnative/snmcp:{{ .Tag }}-amd64"
+      - "streamnative/snmcp:latest-amd64"
+    dockerfile: Dockerfile.goreleaser
+    goos: linux
+    goarch: amd64
+    use: buildx
+    build_flag_templates:
+      - "--platform=linux/amd64"
+  - image_templates:
+      - "streamnative/snmcp:{{ .Tag }}-arm64"
+      - "streamnative/snmcp:latest-arm64"
+    dockerfile: Dockerfile.goreleaser
+    goos: linux
+    goarch: arm64
+    use: buildx
+    build_flag_templates:
+      - "--platform=linux/arm64"
+
+docker_manifests:
+  - name_template: "streamnative/snmcp:{{ .Tag }}"
+    image_templates:
+      - "streamnative/snmcp:{{ .Tag }}-amd64"
+      - "streamnative/snmcp:{{ .Tag }}-arm64"
+  - name_template: "streamnative/snmcp:latest"
+    image_templates:
+      - "streamnative/snmcp:latest-amd64"
+      - "streamnative/snmcp:latest-arm64"
 
 brews:
   - name: snmcp

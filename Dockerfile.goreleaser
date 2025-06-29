@@ -1,0 +1,29 @@
+# Minimal Alpine image for GoReleaser builds
+FROM alpine:3.21
+
+# Install CA certificates for HTTPS connections
+RUN apk --no-cache add ca-certificates
+
+# Create non-root user
+RUN addgroup -g 1000 snmcp && \
+    adduser -D -u 1000 -G snmcp snmcp
+
+# Set working directory
+WORKDIR /server
+
+# Copy pre-built binary from GoReleaser
+COPY snmcp /server/snmcp
+
+# Make binary executable
+RUN chmod +x /server/snmcp
+
+# Change ownership
+RUN chown -R snmcp:snmcp /server
+
+# Switch to non-root user
+USER snmcp
+
+# Expose port if needed (adjust based on your application)
+# EXPOSE 8080
+
+ENTRYPOINT ["/server/snmcp"]
