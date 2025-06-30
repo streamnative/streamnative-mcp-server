@@ -5,6 +5,13 @@ GIT_COMMIT=$(shell git rev-parse HEAD)
 BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 MKDIR_P = mkdir -p
 
+# Docker configuration
+DOCKER_REGISTRY ?= docker.io
+DOCKER_IMAGE ?= streamnative/mcp-server
+DOCKER_IMAGE_LEGACY ?= streamnative/snmcp
+DOCKER_TAG ?= $(GIT_VERSION)
+DOCKER_PLATFORMS ?= linux/amd64,linux/arm64
+
 export GOPRIVATE=github.com/streamnative
 
 .PHONY: all
@@ -18,6 +25,64 @@ build:
 		-X ${VERSION_PATH}.commit=${GIT_COMMIT} \
 		-X ${VERSION_PATH}.date=${BUILD_DATE}" \
 		-o bin/snmcp cmd/streamnative-mcp-server/main.go
+
+# Build Docker image for local platform with both names
+.PHONY: docker-build
+docker-build:
+	docker build \
+		--build-arg VERSION=$(GIT_VERSION) \
+		--build-arg COMMIT=$(GIT_COMMIT) \
+		--build-arg BUILD_DATE=$(BUILD_DATE) \
+		-t $(DOCKER_REGISTRY)/$(DOCKER_IMAGE):$(DOCKER_TAG) \
+		-t $(DOCKER_REGISTRY)/$(DOCKER_IMAGE):latest \
+		-t $(DOCKER_REGISTRY)/$(DOCKER_IMAGE_LEGACY):$(DOCKER_TAG) \
+		-t $(DOCKER_REGISTRY)/$(DOCKER_IMAGE_LEGACY):latest \
+		.
+
+# Build multi-platform Docker image and push to registry with both names
+.PHONY: docker-build-push
+docker-build-push: docker-buildx-setup
+	docker buildx build \
+		--platform $(DOCKER_PLATFORMS) \
+		--build-arg VERSION=$(GIT_VERSION) \
+		--build-arg COMMIT=$(GIT_COMMIT) \
+		--build-arg BUILD_DATE=$(BUILD_DATE) \
+		-t $(DOCKER_REGISTRY)/$(DOCKER_IMAGE):$(DOCKER_TAG) \
+		-t $(DOCKER_REGISTRY)/$(DOCKER_IMAGE):latest \
+		-t $(DOCKER_REGISTRY)/$(DOCKER_IMAGE_LEGACY):$(DOCKER_TAG) \
+		-t $(DOCKER_REGISTRY)/$(DOCKER_IMAGE_LEGACY):latest \
+		--push \
+		.
+
+# Build multi-platform Docker image without pushing (for testing) with both names
+.PHONY: docker-build-multiplatform
+docker-build-multiplatform: docker-buildx-setup
+	docker buildx build \
+		--platform $(DOCKER_PLATFORMS) \
+		--build-arg VERSION=$(GIT_VERSION) \
+		--build-arg COMMIT=$(GIT_COMMIT) \
+		--build-arg BUILD_DATE=$(BUILD_DATE) \
+		-t $(DOCKER_REGISTRY)/$(DOCKER_IMAGE):$(DOCKER_TAG) \
+		-t $(DOCKER_REGISTRY)/$(DOCKER_IMAGE):latest \
+		-t $(DOCKER_REGISTRY)/$(DOCKER_IMAGE_LEGACY):$(DOCKER_TAG) \
+		-t $(DOCKER_REGISTRY)/$(DOCKER_IMAGE_LEGACY):latest \
+		--load \
+		.
+
+# Setup Docker buildx for multi-platform builds
+.PHONY: docker-buildx-setup
+docker-buildx-setup:
+	@if ! docker buildx ls | grep -q mcp-builder; then \
+		docker buildx create --name mcp-builder --use; \
+		docker buildx inspect --bootstrap; \
+	else \
+		docker buildx use mcp-builder; \
+	fi
+
+# Clean Docker buildx builder
+.PHONY: docker-buildx-clean
+docker-buildx-clean:
+	-docker buildx rm mcp-builder
 
 .PHONY: license-check
 license-check:
