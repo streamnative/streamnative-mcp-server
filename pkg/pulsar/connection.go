@@ -53,6 +53,26 @@ var AdminClient cmdutils.Client
 var AdminV3Client cmdutils.Client
 var Client pulsar.Client
 
+// Session represents a Pulsar session
+type Session struct {
+	Ctx           PulsarContext
+	Client        pulsar.Client
+	AdminClient   cmdutils.Client
+	AdminV3Client cmdutils.Client
+}
+
+func GetSession() *Session {
+	if CurrentPulsarContext.ServiceURL == "" {
+		return nil
+	}
+	return &Session{
+		Ctx:           CurrentPulsarContext,
+		Client:        Client,
+		AdminClient:   AdminClient,
+		AdminV3Client: AdminV3Client,
+	}
+}
+
 func NewCurrentPulsarContext(pc PulsarContext, issuer *auth.Issuer, tokenStore *store.Store) error {
 	CurrentPulsarContext = pc
 	if issuer != nil && tokenStore != nil {

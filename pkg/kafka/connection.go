@@ -60,6 +60,30 @@ var KafkaSchemaRegistryClient *sr.Client
 var KafkaConnectClient Connect
 var options []kgo.Opt
 
+// Session represents a Kafka session
+type Session struct {
+	Ctx                  KafkaContext
+	Client               *kgo.Client
+	AdminClient          *kadm.Client
+	SchemaRegistryClient *sr.Client
+	ConnectClient        Connect
+	Options              []kgo.Opt
+}
+
+func GetSession() *Session {
+	if CurrentKafkaContext.BootstrapServers == "" {
+		return nil
+	}
+	return &Session{
+		Ctx:                  CurrentKafkaContext,
+		Client:               KafkaClient,
+		AdminClient:          KafkaAdminClient,
+		SchemaRegistryClient: KafkaSchemaRegistryClient,
+		ConnectClient:        KafkaConnectClient,
+		Options:              options,
+	}
+}
+
 func NewCurrentKafkaContext(kc KafkaContext) error {
 	CurrentKafkaContext = kc
 	return kc.SetKafkaContext()

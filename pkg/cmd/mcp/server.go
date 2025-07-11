@@ -23,6 +23,7 @@ import (
 
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/sirupsen/logrus"
+	"github.com/streamnative/streamnative-mcp-server/pkg/config"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp"
 )
 
@@ -38,14 +39,18 @@ func newMcpServer(configOpts *ServerOptions, logrusLogger *logrus.Logger) *serve
 				stdlog.Fatalf("failed to get user name: %v", err)
 				os.Exit(1)
 			}
-			// Create a new MCP server
-			s = server.NewMCPServer(
-				"streamnative-mcp-server",
-				"0.0.1",
-				server.WithResourceCapabilities(true, true),
-				server.WithInstructions(mcp.GetStreamNativeCloudServerInstructions(userName, snConfig)),
-				server.WithLogging())
-
+			sncloudClient, err := config.GetAPIClient()
+			if err != nil {
+				stdlog.Fatalf("failed to get SNCloud client: %v", err)
+				os.Exit(1)
+			}
+			sncloudLogClient, err := config.GetSNCloudLogClient()
+			if err != nil {
+				stdlog.Fatalf("failed to get SNCloud log client: %v", err)
+				os.Exit(1)
+			}
+			mcpserver := mcp.NewServer(sncloudClient, sncloudLogClient, "streamnative-mcp-server", "0.0.1", logrusLogger, server.WithInstructions(mcp.GetStreamNativeCloudServerInstructions(userName, snConfig)))
+			s = mcpserver.MCPServer
 			mcp.RegisterPrompts(s)
 			mcp.RegisterContextTools(s, configOpts.Features)
 			mcp.StreamNativeAddLogTools(s, configOpts.ReadOnly, configOpts.Features)
