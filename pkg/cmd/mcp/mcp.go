@@ -25,7 +25,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/streamnative/streamnative-mcp-server/pkg/auth"
 	"github.com/streamnative/streamnative-mcp-server/pkg/config"
-	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp"
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
@@ -108,24 +107,6 @@ func (o *ServerOptions) Complete() error {
 				return errors.New("kafka-only mode does not support additional features")
 			}
 			o.Features = []string{string(mcp.FeatureKafkaClient), string(mcp.FeatureKafkaAdmin), string(mcp.FeatureKafkaAdminSchemaRegistry)}
-			err := kafka.NewCurrentKafkaContext(kafka.KafkaContext{
-				BootstrapServers:          snConfig.ExternalKafka.BootstrapServers,
-				AuthType:                  snConfig.ExternalKafka.AuthType,
-				AuthMechanism:             snConfig.ExternalKafka.AuthMechanism,
-				AuthUser:                  snConfig.ExternalKafka.AuthUser,
-				AuthPass:                  snConfig.ExternalKafka.AuthPass,
-				UseTLS:                    snConfig.ExternalKafka.UseTLS,
-				ClientKeyFile:             snConfig.ExternalKafka.ClientKeyFile,
-				ClientCertFile:            snConfig.ExternalKafka.ClientCertFile,
-				CaFile:                    snConfig.ExternalKafka.CaFile,
-				SchemaRegistryURL:         snConfig.ExternalKafka.SchemaRegistryURL,
-				SchemaRegistryAuthUser:    snConfig.ExternalKafka.SchemaRegistryAuthUser,
-				SchemaRegistryAuthPass:    snConfig.ExternalKafka.SchemaRegistryAuthPass,
-				SchemaRegistryBearerToken: snConfig.ExternalKafka.SchemaRegistryBearerToken,
-			})
-			if err != nil {
-				return errors.Wrap(err, "failed to set external Kafka context")
-			}
 		}
 	case snConfig.ExternalPulsar != nil:
 		{

@@ -159,7 +159,7 @@ func SetContext(options *config.Options, instanceName, clusterName string) error
 		return fmt.Errorf("failed to set pulsar context: %v", err)
 	}
 
-	err = kafka.NewCurrentKafkaContext(kafka.KafkaContext{
+	kctx := kafka.KafkaContext{
 		BootstrapServers:       fmt.Sprintf("%s:%d", dnsName, DefaultKafkaPort),
 		SchemaRegistryURL:      fmt.Sprintf("https://%s/kafka", dnsName),
 		ConnectURL:             fmt.Sprintf("%s/admin/kafkaconnect/", snConfig.ProxyLocation),
@@ -172,9 +172,15 @@ func SetContext(options *config.Options, instanceName, clusterName string) error
 		SchemaRegistryAuthPass: accessToken,
 		ConnectAuthUser:        "public/default",
 		ConnectAuthPass:        accessToken,
-	})
+	}
+
+	ksession := GetKafkaSession(ctx)
+	if ksession == nil {
+		return fmt.Errorf("failed to get kafka session")
+	}
+	err = ksession.ChangeContext(kctx)
 	if err != nil {
-		return fmt.Errorf("failed to set kafka context: %v", err)
+		return fmt.Errorf("failed to change kafka context: %v", err)
 	}
 
 	SetMcpContext(instanceName, clusterName, options.Organization)
@@ -184,6 +190,5 @@ func SetContext(options *config.Options, instanceName, clusterName string) error
 
 func ResetContext() {
 	pulsar.ResetCurrentPulsarContext()
-	kafka.ResetCurrentKafkaContext()
 	ResetMcpContext()
 }

@@ -70,16 +70,21 @@ func runSseServer(configOpts *ServerOptions) error {
 
 	// 3. Create a new MCP server
 	ctx = context.WithValue(ctx, common.OptionsKey, configOpts.Options)
-	mcpServer := newMcpServer(configOpts, logger)
+	mcpServer, err := newMcpServer(ctx, configOpts, logger)
+	if err != nil {
+		return fmt.Errorf("failed to create MCP server: %w", err)
+	}
 
 	// add Pulsar Functions as MCP tools
-	mcp.PulsarFunctionManagedMcpTools(mcpServer, false, configOpts.Features)
+	mcp.PulsarFunctionManagedMcpTools(mcpServer.MCPServer, false, configOpts.Features)
 
 	sseServer := server.NewSSEServer(
-		mcpServer,
+		mcpServer.MCPServer,
 		server.WithStaticBasePath(configOpts.HTTPPath),
 		server.WithSSEContextFunc(func(ctx context.Context, _ *http.Request) context.Context {
-			return context.WithValue(ctx, common.OptionsKey, configOpts.Options)
+			c := context.WithValue(ctx, common.OptionsKey, configOpts.Options)
+			c = mcp.WithKafkaSession(c, mcpServer.KafkaSession)
+			return c
 		}),
 	)
 

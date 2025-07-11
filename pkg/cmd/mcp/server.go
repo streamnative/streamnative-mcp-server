@@ -18,18 +18,21 @@
 package mcp
 
 import (
+	"context"
 	stdlog "log"
 	"os"
 
 	"github.com/mark3labs/mcp-go/server"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/streamnative/streamnative-mcp-server/pkg/config"
+	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp"
 )
 
-func newMcpServer(configOpts *ServerOptions, logrusLogger *logrus.Logger) *server.MCPServer {
+func newMcpServer(ctx context.Context, configOpts *ServerOptions, logrusLogger *logrus.Logger) (*mcp.Server, error) {
 	snConfig := configOpts.Options.LoadConfigOrDie()
 	var s *server.MCPServer
+	var mcpServer *mcp.Server
 	switch {
 	case snConfig.KeyFile != "":
 		{
@@ -39,18 +42,18 @@ func newMcpServer(configOpts *ServerOptions, logrusLogger *logrus.Logger) *serve
 				stdlog.Fatalf("failed to get user name: %v", err)
 				os.Exit(1)
 			}
-			sncloudClient, err := config.GetAPIClient()
-			if err != nil {
-				stdlog.Fatalf("failed to get SNCloud client: %v", err)
-				os.Exit(1)
-			}
-			sncloudLogClient, err := config.GetSNCloudLogClient()
-			if err != nil {
-				stdlog.Fatalf("failed to get SNCloud log client: %v", err)
-				os.Exit(1)
-			}
-			mcpserver := mcp.NewServer(sncloudClient, sncloudLogClient, "streamnative-mcp-server", "0.0.1", logrusLogger, server.WithInstructions(mcp.GetStreamNativeCloudServerInstructions(userName, snConfig)))
-			s = mcpserver.MCPServer
+			// sncloudClient, err := config.GetAPIClient()
+			// if err != nil {
+			// 	stdlog.Fatalf("failed to get SNCloud client: %v", err)
+			// 	os.Exit(1)
+			// }
+			// sncloudLogClient, err := config.GetSNCloudLogClient()
+			// if err != nil {
+			// 	stdlog.Fatalf("failed to get SNCloud log client: %v", err)
+			// 	os.Exit(1)
+			// }
+			mcpServer = mcp.NewServer("streamnative-mcp-server", "0.0.1", logrusLogger, server.WithInstructions(mcp.GetStreamNativeCloudServerInstructions(userName, snConfig)))
+			s = mcpServer.MCPServer
 			mcp.RegisterPrompts(s)
 			mcp.RegisterContextTools(s, configOpts.Features)
 			mcp.StreamNativeAddLogTools(s, configOpts.ReadOnly, configOpts.Features)
@@ -58,12 +61,27 @@ func newMcpServer(configOpts *ServerOptions, logrusLogger *logrus.Logger) *serve
 		}
 	case snConfig.ExternalKafka != nil:
 		{
-			s = server.NewMCPServer(
-				"streamnative-mcp-server/kafka",
-				"0.0.1",
-				server.WithResourceCapabilities(true, true),
-				server.WithInstructions(mcp.GetExternalKafkaServerInstructions(snConfig.ExternalKafka.BootstrapServers)),
-				server.WithLogging())
+			ksession, err := kafka.NewSession(kafka.KafkaContext{
+				BootstrapServers:          snConfig.ExternalKafka.BootstrapServers,
+				AuthType:                  snConfig.ExternalKafka.AuthType,
+				AuthMechanism:             snConfig.ExternalKafka.AuthMechanism,
+				AuthUser:                  snConfig.ExternalKafka.AuthUser,
+				AuthPass:                  snConfig.ExternalKafka.AuthPass,
+				UseTLS:                    snConfig.ExternalKafka.UseTLS,
+				ClientKeyFile:             snConfig.ExternalKafka.ClientKeyFile,
+				ClientCertFile:            snConfig.ExternalKafka.ClientCertFile,
+				CaFile:                    snConfig.ExternalKafka.CaFile,
+				SchemaRegistryURL:         snConfig.ExternalKafka.SchemaRegistryURL,
+				SchemaRegistryAuthUser:    snConfig.ExternalKafka.SchemaRegistryAuthUser,
+				SchemaRegistryAuthPass:    snConfig.ExternalKafka.SchemaRegistryAuthPass,
+				SchemaRegistryBearerToken: snConfig.ExternalKafka.SchemaRegistryBearerToken,
+			})
+			if err != nil {
+				return nil, errors.Wrap(err, "failed to set external Kafka context")
+			}
+			mcpServer = mcp.NewServer("streamnative-mcp-server", "0.0.1", logrusLogger, server.WithInstructions(mcp.GetExternalKafkaServerInstructions(snConfig.ExternalKafka.BootstrapServers)))
+			mcpServer.KafkaSession = ksession
+			s = mcpServer.MCPServer
 		}
 	case snConfig.ExternalPulsar != nil:
 		{
@@ -108,5 +126,5 @@ func newMcpServer(configOpts *ServerOptions, logrusLogger *logrus.Logger) *serve
 	mcp.KafkaAdminAddKafkaConnectTools(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.KafkaClientAddConsumeTools(s, configOpts.ReadOnly, logrusLogger, configOpts.Features)
 	mcp.KafkaClientAddProduceTools(s, configOpts.ReadOnly, configOpts.Features)
-	return s
+	return mcpServer, nil
 }

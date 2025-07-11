@@ -18,25 +18,22 @@
 package mcp
 
 import (
-	"net/http"
-
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/sirupsen/logrus"
-	sncloud "github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserver"
+	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
 )
 
 type Server struct {
-	MCPServer        *server.MCPServer
-	sncloudClient    *sncloud.APIClient
-	sncloudLogClient *http.Client
-	logger           *logrus.Logger
+	MCPServer    *server.MCPServer
+	KafkaSession *kafka.Session
+	logger       *logrus.Logger
 }
 
-func NewServer(sncloudClient *sncloud.APIClient, sncloudLogClient *http.Client, name, version string, logger *logrus.Logger, opts ...server.ServerOption) *Server {
+func NewServer(name, version string, logger *logrus.Logger, opts ...server.ServerOption) *Server {
 	// Create a new MCP server
 	opts = addOpts(opts...)
 	s := server.NewMCPServer(name, version, opts...)
-	mcpserver := createSNCloudMCPServer(s, sncloudClient, sncloudLogClient, logger)
+	mcpserver := createSNCloudMCPServer(s, logger)
 	return mcpserver
 }
 
@@ -50,12 +47,10 @@ func addOpts(opts ...server.ServerOption) []server.ServerOption {
 	return opts
 }
 
-func createSNCloudMCPServer(s *server.MCPServer, sncloudClient *sncloud.APIClient, sncloudLogClient *http.Client, logger *logrus.Logger) *Server {
+func createSNCloudMCPServer(s *server.MCPServer, logger *logrus.Logger) *Server {
 	mcpserver := &Server{
-		MCPServer:        s,
-		sncloudClient:    sncloudClient,
-		sncloudLogClient: sncloudLogClient,
-		logger:           logger,
+		MCPServer: s,
+		logger:    logger,
 	}
 
 	return mcpserver

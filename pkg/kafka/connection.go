@@ -54,13 +54,6 @@ type KafkaContext struct {
 	ConnectAuthPass string
 }
 
-var CurrentKafkaContext KafkaContext
-var KafkaAdminClient *kadm.Client
-var KafkaClient *kgo.Client
-var KafkaSchemaRegistryClient *sr.Client
-var KafkaConnectClient Connect
-var options []kgo.Opt
-
 // Session represents a Kafka session
 type Session struct {
 	Ctx                  KafkaContext
@@ -70,20 +63,6 @@ type Session struct {
 	ConnectClient        Connect
 	Options              []kgo.Opt
 	mutex                sync.RWMutex
-}
-
-func GetSession() *Session {
-	if CurrentKafkaContext.BootstrapServers == "" {
-		return nil
-	}
-	return &Session{
-		Ctx:                  CurrentKafkaContext,
-		Client:               KafkaClient,
-		AdminClient:          KafkaAdminClient,
-		SchemaRegistryClient: KafkaSchemaRegistryClient,
-		ConnectClient:        KafkaConnectClient,
-		Options:              options,
-	}
 }
 
 // NewSession creates a new Kafka session with the given context
@@ -97,51 +76,16 @@ func NewSession(ctx KafkaContext) (*Session, error) {
 		Ctx: ctx,
 	}
 
-	// Build options for this session
-	var err error
-	opts := []kgo.Opt{}
-	opts = append(opts, kgo.SeedBrokers(strings.Split(ctx.BootstrapServers, ",")...))
-
-	tlsConfig := &TLSConfig{
-		Enabled:        ctx.UseTLS,
-		ClientKeyFile:  ctx.ClientKeyFile,
-		ClientCertFile: ctx.ClientCertFile,
-		CaFile:         ctx.CaFile,
+	if err := session.SetKafkaContext(); err != nil {
+		return nil, fmt.Errorf("failed to set kafka context: %w", err)
 	}
-
-	saslConfig := &SASLConfig{
-		Mechanism: ctx.AuthMechanism,
-		Username:  ctx.AuthUser,
-		Password:  ctx.AuthPass,
-	}
-
-	opts, err = tlsOpt(tlsConfig, opts)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create TLS config: %w", err)
-	}
-
-	opts, err = saslOpt(saslConfig, opts)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create SASL config: %w", err)
-	}
-
-	opts = append(opts, kgo.MaxVersions(kversion.V2_8_0()))
-	session.Options = opts
 
 	return session, nil
 }
 
-func NewCurrentKafkaContext(kc KafkaContext) error {
-	CurrentKafkaContext = kc
-	return kc.SetKafkaContext()
-}
-
-func ResetCurrentKafkaContext() {
-	CurrentKafkaContext = KafkaContext{}
-	KafkaAdminClient = nil
-	KafkaClient = nil
-	KafkaSchemaRegistryClient = nil
-	KafkaConnectClient = nil
+func (s *Session) ChangeContext(ctx KafkaContext) error {
+	s.Ctx = ctx
+	return s.SetKafkaContext()
 }
 
 type SASLConfig struct {
@@ -208,10 +152,11 @@ func saslOpt(config *SASLConfig, opts []kgo.Opt) ([]kgo.Opt, error) {
 	return opts, nil
 }
 
-func (kc *KafkaContext) SetKafkaContext() error {
+func (s *Session) SetKafkaContext() error {
+	kc := &s.Ctx
 	var err error
-	options = []kgo.Opt{}
-	options = append(options, kgo.SeedBrokers(strings.Split(kc.BootstrapServers, ",")...))
+	s.Options = []kgo.Opt{}
+	s.Options = append(s.Options, kgo.SeedBrokers(strings.Split(kc.BootstrapServers, ",")...))
 	tlsConfig := &TLSConfig{
 		Enabled:        kc.UseTLS,
 		ClientKeyFile:  kc.ClientKeyFile,
@@ -225,24 +170,24 @@ func (kc *KafkaContext) SetKafkaContext() error {
 		Password:  kc.AuthPass,
 	}
 
-	options, err = tlsOpt(tlsConfig, options)
+	s.Options, err = tlsOpt(tlsConfig, s.Options)
 	if err != nil {
 		return fmt.Errorf("failed to create TLS config: %w", err)
 	}
-	options, err = saslOpt(saslConfig, options)
+	s.Options, err = saslOpt(saslConfig, s.Options)
 	if err != nil {
 		return fmt.Errorf("failed to create SASL config: %w", err)
 	}
-	options = append(options, kgo.MaxVersions(kversion.V2_8_0()))
+	s.Options = append(s.Options, kgo.MaxVersions(kversion.V2_8_0()))
 
-	KafkaClient, err = kgo.NewClient(
-		options...,
+	s.Client, err = kgo.NewClient(
+		s.Options...,
 	)
 	if err != nil {
 		return fmt.Errorf("failed to create kafka client: %w", err)
 	}
 
-	KafkaAdminClient = kadm.NewClient(KafkaClient)
+	s.AdminClient = kadm.NewClient(s.Client)
 	if kc.SchemaRegistryURL != "" {
 		SrOpts := []sr.ClientOpt{}
 		SrOpts = append(SrOpts, sr.URLs(kc.SchemaRegistryURL))
@@ -252,14 +197,14 @@ func (kc *KafkaContext) SetKafkaContext() error {
 			SrOpts = append(SrOpts, sr.BearerToken(kc.SchemaRegistryBearerToken))
 		}
 		SrOpts = append(SrOpts, sr.UserAgent("streamnative-mcp-server"))
-		KafkaSchemaRegistryClient, err = sr.NewClient(SrOpts...)
+		s.SchemaRegistryClient, err = sr.NewClient(SrOpts...)
 		if err != nil {
 			return fmt.Errorf("failed to create kafka schema registry client: %w", err)
 		}
 	}
 
 	if kc.ConnectURL != "" {
-		KafkaConnectClient, err = NewConnect(kc)
+		s.ConnectClient, err = NewConnect(kc)
 		if err != nil {
 			return fmt.Errorf("failed to create kafka connect client: %w", err)
 		}
