@@ -28,7 +28,6 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/sirupsen/logrus"
-	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
 	"github.com/twmb/franz-go/pkg/kgo"
 	"github.com/twmb/franz-go/pkg/sr"
 )
@@ -149,14 +148,20 @@ func handleKafkaConsume(ctx context.Context, request mcp.CallToolRequest) (*mcp.
 	opts = append(opts, kgo.ConsumeResetOffset(offset))
 	logger.Infof("Consuming from topic: %s, group: %s, max-messages: %d, timeout: %d", topicName, group, int(maxMessages), int(timeoutSec))
 
-	// Create Kafka client using the new Kafka package
-	kafkaClient, err := kafka.GetKafkaClient(opts...)
+	// Get Kafka session from context
+	session := GetKafkaSession(ctx)
+	if session == nil {
+		return mcp.NewToolResultError("Kafka session not found in context"), nil
+	}
+
+	// Create Kafka client using the session
+	kafkaClient, err := session.GetClient(opts...)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to create Kafka client: %v", err)), nil
 	}
 	defer kafkaClient.Close()
 
-	srClient, err := kafka.GetKafkaSchemaRegistryClient()
+	srClient, err := session.GetSchemaRegistryClient()
 	schemaReady := false
 	var serde sr.Serde
 	if err == nil && srClient != nil {

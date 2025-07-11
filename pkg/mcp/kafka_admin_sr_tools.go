@@ -26,7 +26,6 @@ import (
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
-	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
 	"github.com/twmb/franz-go/pkg/sr"
 )
 
@@ -168,8 +167,14 @@ func handleKafkaSchemaRegistryTool(readOnly bool) func(context.Context, mcp.Call
 			return mcp.NewToolResultError("Write operations are not allowed in read-only mode"), nil
 		}
 
+		// Get Kafka session from context
+		session := GetKafkaSession(ctx)
+		if session == nil {
+			return mcp.NewToolResultError("Kafka session not found in context"), nil
+		}
+
 		// Create the admin client
-		admin, err := kafka.GetKafkaSchemaRegistryClient()
+		admin, err := session.GetSchemaRegistryClient()
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 		}

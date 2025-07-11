@@ -21,6 +21,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/twmb/franz-go/pkg/kadm"
 	"github.com/twmb/franz-go/pkg/kgo"
@@ -68,6 +69,7 @@ type Session struct {
 	SchemaRegistryClient *sr.Client
 	ConnectClient        Connect
 	Options              []kgo.Opt
+	mutex                sync.RWMutex
 }
 
 func GetSession() *Session {
@@ -82,6 +84,51 @@ func GetSession() *Session {
 		ConnectClient:        KafkaConnectClient,
 		Options:              options,
 	}
+}
+
+// NewSession creates a new Kafka session with the given context
+// This function dynamically constructs clients without relying on global state
+func NewSession(ctx KafkaContext) (*Session, error) {
+	if ctx.BootstrapServers == "" {
+		return nil, fmt.Errorf("bootstrap servers are required")
+	}
+
+	session := &Session{
+		Ctx: ctx,
+	}
+
+	// Build options for this session
+	var err error
+	opts := []kgo.Opt{}
+	opts = append(opts, kgo.SeedBrokers(strings.Split(ctx.BootstrapServers, ",")...))
+
+	tlsConfig := &TLSConfig{
+		Enabled:        ctx.UseTLS,
+		ClientKeyFile:  ctx.ClientKeyFile,
+		ClientCertFile: ctx.ClientCertFile,
+		CaFile:         ctx.CaFile,
+	}
+
+	saslConfig := &SASLConfig{
+		Mechanism: ctx.AuthMechanism,
+		Username:  ctx.AuthUser,
+		Password:  ctx.AuthPass,
+	}
+
+	opts, err = tlsOpt(tlsConfig, opts)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create TLS config: %w", err)
+	}
+
+	opts, err = saslOpt(saslConfig, opts)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create SASL config: %w", err)
+	}
+
+	opts = append(opts, kgo.MaxVersions(kversion.V2_8_0()))
+	session.Options = opts
+
+	return session, nil
 }
 
 func NewCurrentKafkaContext(kc KafkaContext) error {
@@ -220,42 +267,92 @@ func (kc *KafkaContext) SetKafkaContext() error {
 	return nil
 }
 
-func GetKafkaClient(opts ...kgo.Opt) (*kgo.Client, error) {
-	if KafkaClient == nil {
-		return nil, fmt.Errorf("kafka client not initialized")
+func (s *Session) GetClient(opts ...kgo.Opt) (*kgo.Client, error) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	if len(opts) > 0 {
+		//nolint:gocritic
+		clientOpts := append(s.Options, opts...)
+		cli, err := kgo.NewClient(clientOpts...)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create kafka client with custom options: %w", err)
+		}
+		return cli, nil
 	}
-	//nolint:gocritic
-	clientOpts := append(options, opts...)
-	cli, err := kgo.NewClient(clientOpts...)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create kafka client: %w", err)
+
+	if s.Client == nil {
+		var err error
+		s.Client, err = kgo.NewClient(s.Options...)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create kafka client: %w", err)
+		}
 	}
-	return cli, nil
+
+	return s.Client, nil
 }
 
-func GetKafkaAdminClient() (*kadm.Client, error) {
-	if KafkaAdminClient == nil {
-		return nil, fmt.Errorf("kafka admin client not initialized")
+func (s *Session) GetAdminClient() (*kadm.Client, error) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	if s.AdminClient == nil {
+		if s.Client == nil {
+			var err error
+			s.Client, err = kgo.NewClient(s.Options...)
+			if err != nil {
+				return nil, fmt.Errorf("failed to create kafka client for admin: %w", err)
+			}
+		}
+		s.AdminClient = kadm.NewClient(s.Client)
 	}
-	return KafkaAdminClient, nil
+
+	return s.AdminClient, nil
 }
 
-func GetKafkaSchemaRegistryClient() (*sr.Client, error) {
-	if CurrentKafkaContext.SchemaRegistryURL == "" {
+func (s *Session) GetSchemaRegistryClient() (*sr.Client, error) {
+	if s.Ctx.SchemaRegistryURL == "" {
 		return nil, fmt.Errorf("schema registry not enabled on the current context")
 	}
-	if KafkaSchemaRegistryClient == nil {
-		return nil, fmt.Errorf("kafka schema registry client not initialized")
+
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	if s.SchemaRegistryClient == nil {
+		SrOpts := []sr.ClientOpt{}
+		SrOpts = append(SrOpts, sr.URLs(s.Ctx.SchemaRegistryURL))
+		if s.Ctx.SchemaRegistryAuthUser != "" && s.Ctx.SchemaRegistryAuthPass != "" {
+			SrOpts = append(SrOpts, sr.BasicAuth(s.Ctx.SchemaRegistryAuthUser, s.Ctx.SchemaRegistryAuthPass))
+		} else if s.Ctx.SchemaRegistryBearerToken != "" {
+			SrOpts = append(SrOpts, sr.BearerToken(s.Ctx.SchemaRegistryBearerToken))
+		}
+		SrOpts = append(SrOpts, sr.UserAgent("streamnative-mcp-server"))
+
+		var err error
+		s.SchemaRegistryClient, err = sr.NewClient(SrOpts...)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create kafka schema registry client: %w", err)
+		}
 	}
-	return KafkaSchemaRegistryClient, nil
+
+	return s.SchemaRegistryClient, nil
 }
 
-func GetKafkaConnectClient() (Connect, error) {
-	if CurrentKafkaContext.ConnectURL == "" {
+func (s *Session) GetConnectClient() (Connect, error) {
+	if s.Ctx.ConnectURL == "" {
 		return nil, fmt.Errorf("kafka connect not enabled on the current context")
 	}
-	if KafkaConnectClient == nil {
-		return nil, fmt.Errorf("kafka connect client not initialized")
+
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	if s.ConnectClient == nil {
+		var err error
+		s.ConnectClient, err = NewConnect(&s.Ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create kafka connect client: %w", err)
+		}
 	}
-	return KafkaConnectClient, nil
+
+	return s.ConnectClient, nil
 }
