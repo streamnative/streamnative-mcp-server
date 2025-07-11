@@ -27,7 +27,6 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/auth/store"
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
-	"github.com/streamnative/streamnative-mcp-server/pkg/config"
 )
 
 func RegisterContextTools(s *server.MCPServer, features []string) {
@@ -62,7 +61,7 @@ func RegisterContextTools(s *server.MCPServer, features []string) {
 
 // handleWhoami handles the whoami tool request
 func handleWhoami(ctx context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	options := ctx.Value(common.OptionsKey).(*config.Options)
+	options := common.GetOptions(ctx)
 	issuer := options.LoadConfigOrDie().Auth.Issuer()
 
 	userName, err := options.WhoAmI(issuer.Audience)
@@ -91,7 +90,7 @@ func handleWhoami(ctx context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResu
 
 // handleSetContext handles the set-context tool request
 func handleSetContext(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	options := ctx.Value(common.OptionsKey).(*config.Options)
+	options := common.GetOptions(ctx)
 
 	instanceName, err := request.RequireString("instanceName")
 	if err != nil {
