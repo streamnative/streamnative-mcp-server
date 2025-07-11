@@ -26,8 +26,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mark3labs/mcp-go/server"
-	"github.com/streamnative/streamnative-mcp-server/pkg/pftools"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/pftools"
 )
 
 var (
@@ -52,7 +51,7 @@ func StopAllPulsarFunctionManagers() {
 	log.Println("All Pulsar Function managers stopped")
 }
 
-func PulsarFunctionManagedMcpTools(s *server.MCPServer, readOnly bool, features []string) {
+func (s *Server) PulsarFunctionManagedMcpTools(readOnly bool, features []string) {
 	if !slices.Contains(features, string(FeatureAll)) &&
 		!slices.Contains(features, string(FeatureFunctionsAsTools)) &&
 		!slices.Contains(features, string(FeatureStreamNativeCloud)) {
@@ -99,7 +98,15 @@ func PulsarFunctionManagedMcpTools(s *server.MCPServer, readOnly bool, features 
 		log.Printf("Setting Pulsar Functions strict export to %v", options.StrictExport)
 	}
 
-	manager, err := pftools.NewPulsarFunctionManager(s, readOnly, options)
+	// Convert Server to the internal pftools.Server type
+	pftoolsServer := &pftools.Server{
+		MCPServer:     s.MCPServer,
+		KafkaSession:  s.KafkaSession,
+		PulsarSession: s.PulsarSession,
+		Logger:        s.logger,
+	}
+
+	manager, err := pftools.NewPulsarFunctionManager(pftoolsServer, readOnly, options)
 	if err != nil {
 		log.Printf("Failed to create Pulsar Function manager: %v", err)
 		return

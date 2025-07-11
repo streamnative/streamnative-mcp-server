@@ -30,7 +30,6 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	pulsarctlutils "github.com/streamnative/pulsarctl/pkg/ctl/utils"
-	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
 // PulsarAdminAddNamespacePolicyTools adds namespace policy-related tools to the MCP server
@@ -324,9 +323,15 @@ func PulsarAdminAddNamespacePolicyTools(s *server.MCPServer, readOnly bool, feat
 }
 
 // handleNamespaceGetPolicies handles getting policies for a namespace
-func handleNamespaceGetPolicies(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleNamespaceGetPolicies(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
-	client, err := pulsar.GetAdminClient()
+	// Get Pulsar session from context
+	session := GetPulsarSession(ctx)
+	if session == nil {
+		return mcp.NewToolResultError("Pulsar session not found in context"), nil
+	}
+
+	client, err := session.GetAdminClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
@@ -352,9 +357,15 @@ func handleNamespaceGetPolicies(_ context.Context, request mcp.CallToolRequest) 
 }
 
 // handleSetMessageTTL handles setting message TTL for a namespace
-func handleSetMessageTTL(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetMessageTTL(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
-	client, err := pulsar.GetAdminClient()
+	// Get Pulsar session from context
+	session := GetPulsarSession(ctx)
+	if session == nil {
+		return mcp.NewToolResultError("Pulsar session not found in context"), nil
+	}
+
+	client, err := session.GetAdminClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
@@ -384,9 +395,15 @@ func handleSetMessageTTL(_ context.Context, request mcp.CallToolRequest) (*mcp.C
 }
 
 // handleSetRetention handles setting retention for a namespace
-func handleSetRetention(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetRetention(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
-	client, err := pulsar.GetAdminClient()
+	// Get Pulsar session from context
+	session := GetPulsarSession(ctx)
+	if session == nil {
+		return mcp.NewToolResultError("Pulsar session not found in context"), nil
+	}
+
+	client, err := session.GetAdminClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
@@ -463,9 +480,15 @@ func handleSetRetention(_ context.Context, request mcp.CallToolRequest) (*mcp.Ca
 }
 
 // handleGrantPermission handles granting permissions on a namespace
-func handleGrantPermission(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleGrantPermission(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
-	client, err := pulsar.GetAdminClient()
+	// Get Pulsar session from context
+	session := GetPulsarSession(ctx)
+	if session == nil {
+		return mcp.NewToolResultError("Pulsar session not found in context"), nil
+	}
+
+	client, err := session.GetAdminClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
@@ -517,9 +540,15 @@ func parseActions(actions []string) ([]utils.AuthAction, error) {
 }
 
 // handleRevokePermission handles revoking permissions from a namespace
-func handleRevokePermission(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleRevokePermission(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
-	client, err := pulsar.GetAdminClient()
+	// Get Pulsar session from context
+	session := GetPulsarSession(ctx)
+	if session == nil {
+		return mcp.NewToolResultError("Pulsar session not found in context"), nil
+	}
+
+	client, err := session.GetAdminClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
@@ -549,9 +578,15 @@ func handleRevokePermission(_ context.Context, request mcp.CallToolRequest) (*mc
 }
 
 // handleSetReplicationClusters handles setting replication clusters for a namespace
-func handleSetReplicationClusters(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetReplicationClusters(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
-	client, err := pulsar.GetAdminClient()
+	// Get Pulsar session from context
+	session := GetPulsarSession(ctx)
+	if session == nil {
+		return mcp.NewToolResultError("Pulsar session not found in context"), nil
+	}
+
+	client, err := session.GetAdminClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
@@ -582,9 +617,15 @@ func handleSetReplicationClusters(_ context.Context, request mcp.CallToolRequest
 }
 
 // handleSetBacklogQuota handles setting backlog quota for a namespace
-func handleSetBacklogQuota(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetBacklogQuota(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
-	client, err := pulsar.GetAdminClient()
+	// Get Pulsar session from context
+	session := GetPulsarSession(ctx)
+	if session == nil {
+		return mcp.NewToolResultError("Pulsar session not found in context"), nil
+	}
+
+	client, err := session.GetAdminClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
@@ -656,9 +697,15 @@ func handleSetBacklogQuota(_ context.Context, request mcp.CallToolRequest) (*mcp
 }
 
 // handleRemoveBacklogQuota handles removing backlog quota from a namespace
-func handleRemoveBacklogQuota(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleRemoveBacklogQuota(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
-	client, err := pulsar.GetAdminClient()
+	// Get Pulsar session from context
+	session := GetPulsarSession(ctx)
+	if session == nil {
+		return mcp.NewToolResultError("Pulsar session not found in context"), nil
+	}
+
+	client, err := session.GetAdminClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
@@ -678,9 +725,15 @@ func handleRemoveBacklogQuota(_ context.Context, request mcp.CallToolRequest) (*
 }
 
 // handleSetTopicAutoCreation handles setting topic auto-creation for a namespace
-func handleSetTopicAutoCreation(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetTopicAutoCreation(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
-	client, err := pulsar.GetAdminClient()
+	// Get Pulsar session from context
+	session := GetPulsarSession(ctx)
+	if session == nil {
+		return mcp.NewToolResultError("Pulsar session not found in context"), nil
+	}
+
+	client, err := session.GetAdminClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
@@ -741,9 +794,15 @@ func handleSetTopicAutoCreation(_ context.Context, request mcp.CallToolRequest) 
 }
 
 // handleRemoveTopicAutoCreation handles removing topic auto-creation config from a namespace
-func handleRemoveTopicAutoCreation(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleRemoveTopicAutoCreation(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
-	client, err := pulsar.GetAdminClient()
+	// Get Pulsar session from context
+	session := GetPulsarSession(ctx)
+	if session == nil {
+		return mcp.NewToolResultError("Pulsar session not found in context"), nil
+	}
+
+	client, err := session.GetAdminClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
@@ -769,9 +828,15 @@ func handleRemoveTopicAutoCreation(_ context.Context, request mcp.CallToolReques
 }
 
 // handleSetSchemaValidationEnforced handles setting schema validation enforced status for a namespace
-func handleSetSchemaValidationEnforced(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetSchemaValidationEnforced(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
-	client, err := pulsar.GetAdminClient()
+	// Get Pulsar session from context
+	session := GetPulsarSession(ctx)
+	if session == nil {
+		return mcp.NewToolResultError("Pulsar session not found in context"), nil
+	}
+
+	client, err := session.GetAdminClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
@@ -808,9 +873,15 @@ func handleSetSchemaValidationEnforced(_ context.Context, request mcp.CallToolRe
 }
 
 // handleSetSchemaAutoUpdateStrategy handles setting schema auto-update strategy for a namespace
-func handleSetSchemaAutoUpdateStrategy(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetSchemaAutoUpdateStrategy(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
-	client, err := pulsar.GetAdminClient()
+	// Get Pulsar session from context
+	session := GetPulsarSession(ctx)
+	if session == nil {
+		return mcp.NewToolResultError("Pulsar session not found in context"), nil
+	}
+
+	client, err := session.GetAdminClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
@@ -849,9 +920,15 @@ func handleSetSchemaAutoUpdateStrategy(_ context.Context, request mcp.CallToolRe
 }
 
 // handleSetIsAllowAutoUpdateSchema handles setting auto update schema allowance for a namespace
-func handleSetIsAllowAutoUpdateSchema(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetIsAllowAutoUpdateSchema(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
-	client, err := pulsar.GetAdminClient()
+	// Get Pulsar session from context
+	session := GetPulsarSession(ctx)
+	if session == nil {
+		return mcp.NewToolResultError("Pulsar session not found in context"), nil
+	}
+
+	client, err := session.GetAdminClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
@@ -899,9 +976,15 @@ func handleSetIsAllowAutoUpdateSchema(_ context.Context, request mcp.CallToolReq
 }
 
 // handleSetOffloadThreshold handles setting offload threshold for a namespace
-func handleSetOffloadThreshold(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetOffloadThreshold(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
-	client, err := pulsar.GetAdminClient()
+	// Get Pulsar session from context
+	session := GetPulsarSession(ctx)
+	if session == nil {
+		return mcp.NewToolResultError("Pulsar session not found in context"), nil
+	}
+
+	client, err := session.GetAdminClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
@@ -940,9 +1023,15 @@ func handleSetOffloadThreshold(_ context.Context, request mcp.CallToolRequest) (
 }
 
 // handleSetOffloadDeletionLag handles setting offload deletion lag for a namespace
-func handleSetOffloadDeletionLag(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetOffloadDeletionLag(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
-	client, err := pulsar.GetAdminClient()
+	// Get Pulsar session from context
+	session := GetPulsarSession(ctx)
+	if session == nil {
+		return mcp.NewToolResultError("Pulsar session not found in context"), nil
+	}
+
+	client, err := session.GetAdminClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
@@ -984,9 +1073,15 @@ func handleSetOffloadDeletionLag(_ context.Context, request mcp.CallToolRequest)
 }
 
 // handleClearOffloadDeletionLag handles clearing offload deletion lag for a namespace
-func handleClearOffloadDeletionLag(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleClearOffloadDeletionLag(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
-	client, err := pulsar.GetAdminClient()
+	// Get Pulsar session from context
+	session := GetPulsarSession(ctx)
+	if session == nil {
+		return mcp.NewToolResultError("Pulsar session not found in context"), nil
+	}
+
+	client, err := session.GetAdminClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
@@ -1014,9 +1109,15 @@ func handleClearOffloadDeletionLag(_ context.Context, request mcp.CallToolReques
 }
 
 // handleSetCompactionThreshold handles setting compaction threshold for a namespace
-func handleSetCompactionThreshold(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetCompactionThreshold(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
-	client, err := pulsar.GetAdminClient()
+	// Get Pulsar session from context
+	session := GetPulsarSession(ctx)
+	if session == nil {
+		return mcp.NewToolResultError("Pulsar session not found in context"), nil
+	}
+
+	client, err := session.GetAdminClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
@@ -1055,9 +1156,15 @@ func handleSetCompactionThreshold(_ context.Context, request mcp.CallToolRequest
 }
 
 // handleSetMaxProducersPerTopic handles setting max producers per topic for a namespace
-func handleSetMaxProducersPerTopic(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetMaxProducersPerTopic(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
-	client, err := pulsar.GetAdminClient()
+	// Get Pulsar session from context
+	session := GetPulsarSession(ctx)
+	if session == nil {
+		return mcp.NewToolResultError("Pulsar session not found in context"), nil
+	}
+
+	client, err := session.GetAdminClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
@@ -1100,9 +1207,15 @@ func handleSetMaxProducersPerTopic(_ context.Context, request mcp.CallToolReques
 }
 
 // handleSetMaxConsumersPerTopic handles setting max consumers per topic for a namespace
-func handleSetMaxConsumersPerTopic(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetMaxConsumersPerTopic(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
-	client, err := pulsar.GetAdminClient()
+	// Get Pulsar session from context
+	session := GetPulsarSession(ctx)
+	if session == nil {
+		return mcp.NewToolResultError("Pulsar session not found in context"), nil
+	}
+
+	client, err := session.GetAdminClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
@@ -1145,9 +1258,15 @@ func handleSetMaxConsumersPerTopic(_ context.Context, request mcp.CallToolReques
 }
 
 // handleSetMaxConsumersPerSubscription handles setting max consumers per subscription for a namespace
-func handleSetMaxConsumersPerSubscription(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetMaxConsumersPerSubscription(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
-	client, err := pulsar.GetAdminClient()
+	// Get Pulsar session from context
+	session := GetPulsarSession(ctx)
+	if session == nil {
+		return mcp.NewToolResultError("Pulsar session not found in context"), nil
+	}
+
+	client, err := session.GetAdminClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
@@ -1190,9 +1309,15 @@ func handleSetMaxConsumersPerSubscription(_ context.Context, request mcp.CallToo
 }
 
 // handleSetAntiAffinityGroup handles setting the anti-affinity group for a namespace
-func handleSetAntiAffinityGroup(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetAntiAffinityGroup(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
-	client, err := pulsar.GetAdminClient()
+	// Get Pulsar session from context
+	session := GetPulsarSession(ctx)
+	if session == nil {
+		return mcp.NewToolResultError("Pulsar session not found in context"), nil
+	}
+
+	client, err := session.GetAdminClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
@@ -1219,9 +1344,15 @@ func handleSetAntiAffinityGroup(_ context.Context, request mcp.CallToolRequest) 
 }
 
 // handleDeleteAntiAffinityGroup handles deleting the anti-affinity group of a namespace
-func handleDeleteAntiAffinityGroup(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleDeleteAntiAffinityGroup(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
-	client, err := pulsar.GetAdminClient()
+	// Get Pulsar session from context
+	session := GetPulsarSession(ctx)
+	if session == nil {
+		return mcp.NewToolResultError("Pulsar session not found in context"), nil
+	}
+
+	client, err := session.GetAdminClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
@@ -1243,9 +1374,15 @@ func handleDeleteAntiAffinityGroup(_ context.Context, request mcp.CallToolReques
 }
 
 // handleSetPersistence handles setting persistence policy for a namespace
-func handleSetPersistence(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetPersistence(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
-	client, err := pulsar.GetAdminClient()
+	// Get Pulsar session from context
+	session := GetPulsarSession(ctx)
+	if session == nil {
+		return mcp.NewToolResultError("Pulsar session not found in context"), nil
+	}
+
+	client, err := session.GetAdminClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
@@ -1317,9 +1454,15 @@ func handleSetPersistence(_ context.Context, request mcp.CallToolRequest) (*mcp.
 }
 
 // handleSetDeduplication handles setting the deduplication status for a namespace
-func handleSetDeduplication(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetDeduplication(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
-	client, err := pulsar.GetAdminClient()
+	// Get Pulsar session from context
+	session := GetPulsarSession(ctx)
+	if session == nil {
+		return mcp.NewToolResultError("Pulsar session not found in context"), nil
+	}
+
+	client, err := session.GetAdminClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
@@ -1348,9 +1491,15 @@ func handleSetDeduplication(_ context.Context, request mcp.CallToolRequest) (*mc
 }
 
 // handleSetEncryptionRequired handles setting whether encryption is required for a namespace
-func handleSetEncryptionRequired(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetEncryptionRequired(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
-	client, err := pulsar.GetAdminClient()
+	// Get Pulsar session from context
+	session := GetPulsarSession(ctx)
+	if session == nil {
+		return mcp.NewToolResultError("Pulsar session not found in context"), nil
+	}
+
+	client, err := session.GetAdminClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
@@ -1387,9 +1536,15 @@ func handleSetEncryptionRequired(_ context.Context, request mcp.CallToolRequest)
 }
 
 // handleSetSubscriptionAuthMode handles setting the default subscription auth mode for a namespace
-func handleSetSubscriptionAuthMode(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetSubscriptionAuthMode(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
-	client, err := pulsar.GetAdminClient()
+	// Get Pulsar session from context
+	session := GetPulsarSession(ctx)
+	if session == nil {
+		return mcp.NewToolResultError("Pulsar session not found in context"), nil
+	}
+
+	client, err := session.GetAdminClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
@@ -1429,9 +1584,15 @@ func handleSetSubscriptionAuthMode(_ context.Context, request mcp.CallToolReques
 }
 
 // handleGrantSubscriptionPermission handles granting subscription permissions to roles
-func handleGrantSubscriptionPermission(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleGrantSubscriptionPermission(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
-	client, err := pulsar.GetAdminClient()
+	// Get Pulsar session from context
+	session := GetPulsarSession(ctx)
+	if session == nil {
+		return mcp.NewToolResultError("Pulsar session not found in context"), nil
+	}
+
+	client, err := session.GetAdminClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
@@ -1474,9 +1635,15 @@ func handleGrantSubscriptionPermission(_ context.Context, request mcp.CallToolRe
 }
 
 // handleRevokeSubscriptionPermission handles revoking subscription permissions from a role
-func handleRevokeSubscriptionPermission(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleRevokeSubscriptionPermission(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
-	client, err := pulsar.GetAdminClient()
+	// Get Pulsar session from context
+	session := GetPulsarSession(ctx)
+	if session == nil {
+		return mcp.NewToolResultError("Pulsar session not found in context"), nil
+	}
+
+	client, err := session.GetAdminClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
@@ -1515,9 +1682,15 @@ func handleRevokeSubscriptionPermission(_ context.Context, request mcp.CallToolR
 }
 
 // handleSetDispatchRate handles setting the default message dispatch rate for a namespace
-func handleSetDispatchRate(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetDispatchRate(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
-	client, err := pulsar.GetAdminClient()
+	// Get Pulsar session from context
+	session := GetPulsarSession(ctx)
+	if session == nil {
+		return mcp.NewToolResultError("Pulsar session not found in context"), nil
+	}
+
+	client, err := session.GetAdminClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
@@ -1583,9 +1756,15 @@ func handleSetDispatchRate(_ context.Context, request mcp.CallToolRequest) (*mcp
 }
 
 // handleSetReplicatorDispatchRate handles setting the default replicator message dispatch rate for a namespace
-func handleSetReplicatorDispatchRate(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetReplicatorDispatchRate(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
-	client, err := pulsar.GetAdminClient()
+	// Get Pulsar session from context
+	session := GetPulsarSession(ctx)
+	if session == nil {
+		return mcp.NewToolResultError("Pulsar session not found in context"), nil
+	}
+
+	client, err := session.GetAdminClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
@@ -1651,9 +1830,15 @@ func handleSetReplicatorDispatchRate(_ context.Context, request mcp.CallToolRequ
 }
 
 // handleSetSubscribeRate handles setting the default subscribe rate per consumer for a namespace
-func handleSetSubscribeRate(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetSubscribeRate(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
-	client, err := pulsar.GetAdminClient()
+	// Get Pulsar session from context
+	session := GetPulsarSession(ctx)
+	if session == nil {
+		return mcp.NewToolResultError("Pulsar session not found in context"), nil
+	}
+
+	client, err := session.GetAdminClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
@@ -1706,9 +1891,15 @@ func handleSetSubscribeRate(_ context.Context, request mcp.CallToolRequest) (*mc
 }
 
 // handleSetSubscriptionDispatchRate handles setting the default subscription message dispatch rate for a namespace
-func handleSetSubscriptionDispatchRate(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetSubscriptionDispatchRate(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
-	client, err := pulsar.GetAdminClient()
+	// Get Pulsar session from context
+	session := GetPulsarSession(ctx)
+	if session == nil {
+		return mcp.NewToolResultError("Pulsar session not found in context"), nil
+	}
+
+	client, err := session.GetAdminClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}
@@ -1774,9 +1965,15 @@ func handleSetSubscriptionDispatchRate(_ context.Context, request mcp.CallToolRe
 }
 
 // handleSetPublishRate handles setting the default message publish rate of a namespace
-func handleSetPublishRate(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSetPublishRate(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Create Pulsar client
-	client, err := pulsar.GetAdminClient()
+	// Get Pulsar session from context
+	session := GetPulsarSession(ctx)
+	if session == nil {
+		return mcp.NewToolResultError("Pulsar session not found in context"), nil
+	}
+
+	client, err := session.GetAdminClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 	}

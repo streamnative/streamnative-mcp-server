@@ -28,7 +28,6 @@ import (
 	"github.com/apache/pulsar-client-go/pulsar"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
-	mcppulsar "github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
 // PulsarClientAddConsumerTools adds Pulsar client consumer tools to the MCP server
@@ -123,7 +122,13 @@ func handleClientConsume(ctx context.Context, request mcp.CallToolRequest) (*mcp
 	}
 
 	// Setup client
-	client, err := mcppulsar.GetPulsarClient()
+	// Get Pulsar session from context
+	session := GetPulsarSession(ctx)
+	if session == nil {
+		return mcp.NewToolResultError("Pulsar session not found in context"), nil
+	}
+
+	client, err := session.GetPulsarClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to create Pulsar client: %v", err)), nil
 	}

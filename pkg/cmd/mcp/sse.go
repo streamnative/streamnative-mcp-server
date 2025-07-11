@@ -76,7 +76,7 @@ func runSseServer(configOpts *ServerOptions) error {
 	}
 
 	// add Pulsar Functions as MCP tools
-	mcp.PulsarFunctionManagedMcpTools(mcpServer.MCPServer, false, configOpts.Features)
+	mcpServer.PulsarFunctionManagedMcpTools(configOpts.ReadOnly, configOpts.Features)
 
 	sseServer := server.NewSSEServer(
 		mcpServer.MCPServer,
@@ -84,6 +84,7 @@ func runSseServer(configOpts *ServerOptions) error {
 		server.WithSSEContextFunc(func(ctx context.Context, _ *http.Request) context.Context {
 			c := context.WithValue(ctx, common.OptionsKey, configOpts.Options)
 			c = mcp.WithKafkaSession(c, mcpServer.KafkaSession)
+			c = mcp.WithPulsarSession(c, mcpServer.PulsarSession)
 			return c
 		}),
 	)

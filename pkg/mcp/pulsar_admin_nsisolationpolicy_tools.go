@@ -29,7 +29,6 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
-	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
 // PulsarAdminAddNsIsolationPolicyTools adds namespace isolation policy related tools to the MCP server
@@ -108,9 +107,15 @@ func PulsarAdminAddNsIsolationPolicyTools(s *server.MCPServer, readOnly bool, fe
 
 // handleNsIsolationPolicy returns a function that handles namespace isolation policy operations
 func handleNsIsolationPolicy(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Create Pulsar client
-		client, err := pulsar.GetAdminClient()
+		// Get Pulsar session from context
+		session := GetPulsarSession(ctx)
+		if session == nil {
+			return mcp.NewToolResultError("Pulsar session not found in context"), nil
+		}
+
+		client, err := session.GetAdminClient()
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 		}

@@ -150,13 +150,17 @@ func SetContext(options *config.Options, instanceName, clusterName string) error
 		return fmt.Errorf("failed to get access token")
 	}
 
-	err = pulsar.NewCurrentPulsarContext(pulsar.PulsarContext{
+	psession := GetPulsarSession(ctx)
+	if psession == nil {
+		return fmt.Errorf("failed to get pulsar session")
+	}
+	err = psession.ChangeContext(pulsar.PulsarContext{
 		WebServiceURL: getBasePath(snConfig.ProxyLocation, options.Organization, clusterUID),
 		ServiceURL:    getServiceURL(dnsName),
 		Token:         accessToken,
 	}, issuer, &options.AuthOptions.Store)
 	if err != nil {
-		return fmt.Errorf("failed to set pulsar context: %v", err)
+		return fmt.Errorf("failed to change pulsar context: %v", err)
 	}
 
 	kctx := kafka.KafkaContext{
@@ -189,6 +193,5 @@ func SetContext(options *config.Options, instanceName, clusterName string) error
 }
 
 func ResetContext() {
-	pulsar.ResetCurrentPulsarContext()
 	ResetMcpContext()
 }

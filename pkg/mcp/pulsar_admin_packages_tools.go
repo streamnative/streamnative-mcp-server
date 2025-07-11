@@ -27,7 +27,6 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
-	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
 const (
@@ -110,7 +109,7 @@ func PulsarAdminAddPackagesTools(s *server.MCPServer, readOnly bool, features []
 
 // handlePackageTool returns a function that handles package-related operations
 func handlePackageTool(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get required parameters
 		resource, err := request.RequireString("resource")
 		if err != nil {
@@ -132,7 +131,13 @@ func handlePackageTool(readOnly bool) func(context.Context, mcp.CallToolRequest)
 		}
 
 		// Create Pulsar client with API version V3
-		client, err := pulsar.GetAdminV3Client()
+		// Get Pulsar session from context
+		session := GetPulsarSession(ctx)
+		if session == nil {
+			return mcp.NewToolResultError("Pulsar session not found in context"), nil
+		}
+
+		client, err := session.GetAdminV3Client()
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get Pulsar client: %v", err)), nil
 		}

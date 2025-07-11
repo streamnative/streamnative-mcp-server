@@ -30,7 +30,6 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
-	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
 // PulsarAdminAddSchemasTools adds schema-related tools to the MCP server
@@ -84,7 +83,7 @@ func PulsarAdminAddSchemasTools(s *server.MCPServer, readOnly bool, features []s
 
 // handleSchemaTool returns a function that handles schema operations
 func handleSchemaTool(readOnly bool) func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get required parameters
 		resource, err := request.RequireString("resource")
 		if err != nil {
@@ -116,7 +115,13 @@ func handleSchemaTool(readOnly bool) func(_ context.Context, request mcp.CallToo
 		}
 
 		// Create the admin client
-		admin, err := pulsar.GetAdminClient()
+		// Get Pulsar session from context
+		session := GetPulsarSession(ctx)
+		if session == nil {
+			return mcp.NewToolResultError("Pulsar session not found in context"), nil
+		}
+
+		admin, err := session.GetAdminClient()
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 		}

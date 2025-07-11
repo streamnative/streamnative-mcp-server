@@ -27,7 +27,6 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
-	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
 // PulsarAdminAddClusterTools adds cluster-related tools to the MCP server
@@ -106,8 +105,14 @@ func PulsarAdminAddClusterTools(s *server.MCPServer, readOnly bool, features []s
 
 // handleClusterTool returns a function to handle cluster tool requests
 func handleClusterTool(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		client, err := pulsar.GetAdminClient()
+	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		// Get Pulsar session from context
+		session := GetPulsarSession(ctx)
+		if session == nil {
+			return mcp.NewToolResultError("Pulsar session not found in context"), nil
+		}
+
+		client, err := session.GetAdminClient()
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 		}

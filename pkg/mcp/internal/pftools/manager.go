@@ -35,7 +35,6 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
-	pulsarutils "github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 	"github.com/streamnative/streamnative-mcp-server/pkg/schema"
 )
 
@@ -54,12 +53,31 @@ var DefaultStringSchemaInfo = &SchemaInfo{
 	},
 }
 
+// Server is imported directly to avoid circular dependency
+type Server struct {
+	MCPServer     *server.MCPServer
+	KafkaSession  interface{}
+	PulsarSession interface{}
+	Logger        interface{}
+}
+
 // NewPulsarFunctionManager creates a new PulsarFunctionManager
-func NewPulsarFunctionManager(mcpServer *server.MCPServer, readOnly bool, options *ManagerOptions) (*PulsarFunctionManager, error) {
+func NewPulsarFunctionManager(snServer *Server, readOnly bool, options *ManagerOptions) (*PulsarFunctionManager, error) {
 	// Get Pulsar client and admin client
-	pulsarClient, err := pulsarutils.GetPulsarClient()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get Pulsar client: %w", err)
+	if snServer.PulsarSession == nil {
+		return nil, fmt.Errorf("Pulsar session not found in context")
+	}
+
+	// Get Pulsar client from session using interface assertion
+	var pulsarClient pulsar.Client
+	if ps, ok := snServer.PulsarSession.(interface{ GetPulsarClient() (pulsar.Client, error) }); ok {
+		var err error
+		pulsarClient, err = ps.GetPulsarClient()
+		if err != nil {
+			return nil, fmt.Errorf("failed to get Pulsar client: %w", err)
+		}
+	} else {
+		return nil, fmt.Errorf("Pulsar session does not support GetPulsarClient method")
 	}
 
 	adminClient := cmdutils.NewPulsarClientWithAPIVersion(config.V3)
@@ -80,7 +98,7 @@ func NewPulsarFunctionManager(mcpServer *server.MCPServer, readOnly bool, option
 		pollInterval:      options.PollInterval,
 		stopCh:            make(chan struct{}),
 		callInProgressMap: make(map[string]context.CancelFunc),
-		mcpServer:         mcpServer,
+		mcpServer:         snServer.MCPServer,
 		readOnly:          readOnly,
 		defaultTimeout:    options.DefaultTimeout,
 		circuitBreakers:   make(map[string]*CircuitBreaker),

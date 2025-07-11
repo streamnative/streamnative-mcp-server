@@ -28,7 +28,6 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
-	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
 // PulsarAdminAddTopicTools adds topic-related tools to the MCP server
@@ -132,8 +131,8 @@ func PulsarAdminAddTopicTools(s *server.MCPServer, readOnly bool, features []str
 }
 
 // handleTopicTool returns a function that handles topic operations
-func handleTopicTool(readOnly bool) func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleTopicTool(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get required parameters
 		resource, err := request.RequireString("resource")
 		if err != nil {
@@ -155,8 +154,14 @@ func handleTopicTool(readOnly bool) func(_ context.Context, request mcp.CallTool
 			return mcp.NewToolResultError("Write operations are not allowed in read-only mode"), nil
 		}
 
+		// Get Pulsar session from context
+		session := GetPulsarSession(ctx)
+		if session == nil {
+			return mcp.NewToolResultError("Pulsar session not found in context"), nil
+		}
+
 		// Create the admin client
-		admin, err := pulsar.GetAdminClient()
+		admin, err := session.GetAdminClient()
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 		}

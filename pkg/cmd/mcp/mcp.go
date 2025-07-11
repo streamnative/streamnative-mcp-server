@@ -26,7 +26,6 @@ import (
 	"github.com/streamnative/streamnative-mcp-server/pkg/auth"
 	"github.com/streamnative/streamnative-mcp-server/pkg/config"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp"
-	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
 // ServerOptions is the options for the MCP server commands
@@ -114,21 +113,6 @@ func (o *ServerOptions) Complete() error {
 				return errors.New("pulsar-only mode does not support additional features")
 			}
 			o.Features = []string{string(mcp.FeatureAllPulsar)}
-			err := pulsar.NewCurrentPulsarContext(pulsar.PulsarContext{
-				ServiceURL:                    snConfig.ExternalPulsar.ServiceURL,
-				WebServiceURL:                 snConfig.ExternalPulsar.WebServiceURL,
-				AuthPlugin:                    snConfig.ExternalPulsar.AuthPlugin,
-				AuthParams:                    snConfig.ExternalPulsar.AuthParams,
-				Token:                         snConfig.ExternalPulsar.Token,
-				TLSAllowInsecureConnection:    snConfig.ExternalPulsar.TLSAllowInsecureConnection,
-				TLSEnableHostnameVerification: snConfig.ExternalPulsar.TLSEnableHostnameVerification,
-				TLSTrustCertsFilePath:         snConfig.ExternalPulsar.TLSTrustCertsFilePath,
-				TLSCertFile:                   snConfig.ExternalPulsar.TLSCertFile,
-				TLSKeyFile:                    snConfig.ExternalPulsar.TLSKeyFile,
-			}, nil, nil)
-			if err != nil {
-				return errors.Wrap(err, "failed to set external Pulsar context")
-			}
 		}
 	default:
 		{

@@ -28,7 +28,6 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
-	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
 // PulsarAdminAddSubscriptionTools adds subscription-related tools to the MCP server
@@ -100,8 +99,8 @@ func PulsarAdminAddSubscriptionTools(s *server.MCPServer, readOnly bool, feature
 }
 
 // handleSubscriptionTool returns a function that handles subscription operations
-func handleSubscriptionTool(readOnly bool) func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleSubscriptionTool(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get required parameters
 		resource, err := request.RequireString("resource")
 		if err != nil {
@@ -139,7 +138,13 @@ func handleSubscriptionTool(readOnly bool) func(_ context.Context, request mcp.C
 		}
 
 		// Create the admin client
-		admin, err := pulsar.GetAdminClient()
+		// Get Pulsar session from context
+		session := GetPulsarSession(ctx)
+		if session == nil {
+			return mcp.NewToolResultError("Pulsar session not found in context"), nil
+		}
+
+		admin, err := session.GetAdminClient()
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 		}

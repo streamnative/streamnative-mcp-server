@@ -28,7 +28,6 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
-	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
 // PulsarAdminAddResourceQuotasTools adds resource quotas-related tools to the MCP server
@@ -98,7 +97,7 @@ func PulsarAdminAddResourceQuotasTools(s *server.MCPServer, readOnly bool, featu
 
 // handleResourceQuotaTool returns a function that handles resource quota operations
 func handleResourceQuotaTool(readOnly bool) func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get required parameters
 		resource, err := request.RequireString("resource")
 		if err != nil {
@@ -125,7 +124,13 @@ func handleResourceQuotaTool(readOnly bool) func(_ context.Context, request mcp.
 		}
 
 		// Create the admin client
-		admin, err := pulsar.GetAdminClient()
+		// Get Pulsar session from context
+		session := GetPulsarSession(ctx)
+		if session == nil {
+			return mcp.NewToolResultError("Pulsar session not found in context"), nil
+		}
+
+		admin, err := session.GetAdminClient()
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 		}
