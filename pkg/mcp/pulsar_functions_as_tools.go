@@ -51,7 +51,7 @@ func StopAllPulsarFunctionManagers() {
 	log.Println("All Pulsar Function managers stopped")
 }
 
-func (s *Server) PulsarFunctionManagedMcpTools(readOnly bool, features []string, sessionId string) {
+func (s *Server) PulsarFunctionManagedMcpTools(readOnly bool, features []string, sessionID string) {
 	if !slices.Contains(features, string(FeatureAll)) &&
 		!slices.Contains(features, string(FeatureFunctionsAsTools)) &&
 		!slices.Contains(features, string(FeatureStreamNativeCloud)) {
@@ -59,6 +59,11 @@ func (s *Server) PulsarFunctionManagedMcpTools(readOnly bool, features []string,
 	}
 
 	options := pftools.DefaultManagerOptions()
+
+	if s.SNCloudSession.Ctx.Organization == "" || s.SNCloudSession.Ctx.PulsarInstance == "" || s.SNCloudSession.Ctx.PulsarCluster == "" {
+		log.Printf("Skipping Pulsar Functions as MCP Tools because both organization, pulsar instance and pulsar cluster are not set")
+		return
+	}
 
 	if pollIntervalStr := os.Getenv("FUNCTIONS_AS_TOOLS_POLL_INTERVAL"); pollIntervalStr != "" {
 		if seconds, err := strconv.Atoi(pollIntervalStr); err == nil && seconds > 0 {
@@ -106,7 +111,7 @@ func (s *Server) PulsarFunctionManagedMcpTools(readOnly bool, features []string,
 		Logger:        s.logger,
 	}
 
-	manager, err := pftools.NewPulsarFunctionManager(pftoolsServer, readOnly, options, sessionId)
+	manager, err := pftools.NewPulsarFunctionManager(pftoolsServer, readOnly, options, sessionID)
 	if err != nil {
 		log.Printf("Failed to create Pulsar Function manager: %v", err)
 		return

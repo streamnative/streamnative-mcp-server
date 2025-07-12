@@ -47,7 +47,7 @@ type PulsarFunctionManager struct {
 	circuitBreakers   map[string]*CircuitBreaker
 	tenantNamespaces  []string
 	strictExport      bool
-	sessionId         string
+	sessionID         string
 }
 
 type FunctionTool struct {

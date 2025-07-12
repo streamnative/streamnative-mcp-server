@@ -76,16 +76,11 @@ func NewSession(ctx KafkaContext) (*Session, error) {
 		Ctx: ctx,
 	}
 
-	if err := session.SetKafkaContext(); err != nil {
+	if err := session.SetKafkaContext(ctx); err != nil {
 		return nil, fmt.Errorf("failed to set kafka context: %w", err)
 	}
 
 	return session, nil
-}
-
-func (s *Session) ChangeContext(ctx KafkaContext) error {
-	s.Ctx = ctx
-	return s.SetKafkaContext()
 }
 
 type SASLConfig struct {
@@ -152,7 +147,8 @@ func saslOpt(config *SASLConfig, opts []kgo.Opt) ([]kgo.Opt, error) {
 	return opts, nil
 }
 
-func (s *Session) SetKafkaContext() error {
+func (s *Session) SetKafkaContext(ctx KafkaContext) error {
+	s.Ctx = ctx
 	kc := &s.Ctx
 	var err error
 	s.Options = []kgo.Opt{}

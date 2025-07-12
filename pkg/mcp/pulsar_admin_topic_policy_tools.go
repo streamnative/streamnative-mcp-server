@@ -27,7 +27,6 @@ import (
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
-	
 )
 
 // PulsarAdminAddTopicPolicyTools adds topic policy-related tools to the MCP server

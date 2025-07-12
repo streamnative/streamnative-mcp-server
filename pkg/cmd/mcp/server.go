@@ -31,7 +31,7 @@ import (
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
-func newMcpServer(ctx context.Context, configOpts *ServerOptions, logrusLogger *logrus.Logger) (*mcp.Server, error) {
+func newMcpServer(_ context.Context, configOpts *ServerOptions, logrusLogger *logrus.Logger) (*mcp.Server, error) {
 	snConfig := configOpts.Options.LoadConfigOrDie()
 	var s *server.MCPServer
 	var mcpServer *mcp.Server
@@ -51,8 +51,6 @@ func newMcpServer(ctx context.Context, configOpts *ServerOptions, logrusLogger *
 			}
 			mcpServer = mcp.NewServer("streamnative-mcp-server", "0.0.1", logrusLogger, server.WithInstructions(mcp.GetStreamNativeCloudServerInstructions(userName, snConfig)))
 			mcpServer.SNCloudSession = session
-			mcpServer.KafkaSession = &kafka.Session{}
-			mcpServer.PulsarSession = &pulsar.Session{}
 
 			s = mcpServer.MCPServer
 			mcp.RegisterPrompts(s)
@@ -97,7 +95,7 @@ func newMcpServer(ctx context.Context, configOpts *ServerOptions, logrusLogger *
 				TLSTrustCertsFilePath:         snConfig.ExternalPulsar.TLSTrustCertsFilePath,
 				TLSCertFile:                   snConfig.ExternalPulsar.TLSCertFile,
 				TLSKeyFile:                    snConfig.ExternalPulsar.TLSKeyFile,
-			}, nil, nil)
+			})
 			if err != nil {
 				return nil, errors.Wrap(err, "failed to set external Pulsar context")
 			}

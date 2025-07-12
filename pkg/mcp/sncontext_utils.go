@@ -159,11 +159,11 @@ func SetContext(ctx context.Context, options *config.Options, instanceName, clus
 	if psession == nil {
 		return fmt.Errorf("failed to get pulsar session")
 	}
-	err = psession.ChangeContext(pulsar.PulsarContext{
+	err = psession.SetPulsarContext(pulsar.PulsarContext{
 		WebServiceURL: getBasePath(snConfig.ProxyLocation, options.Organization, clusterUID),
 		ServiceURL:    getServiceURL(dnsName),
 		Token:         accessToken,
-	}, issuer, &options.AuthOptions.Store)
+	})
 	if err != nil {
 		return fmt.Errorf("failed to change pulsar context: %v", err)
 	}
@@ -187,10 +187,14 @@ func SetContext(ctx context.Context, options *config.Options, instanceName, clus
 	if ksession == nil {
 		return fmt.Errorf("failed to get kafka session")
 	}
-	err = ksession.ChangeContext(kctx)
+	err = ksession.SetKafkaContext(kctx)
 	if err != nil {
 		return fmt.Errorf("failed to change kafka context: %v", err)
 	}
+
+	// TODO: check if need to set log client
+	// if issuer != nil && options.AuthOptions.Store != nil {
+	// }
 
 	return nil
 }

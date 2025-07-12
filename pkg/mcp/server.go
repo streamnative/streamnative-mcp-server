@@ -53,8 +53,11 @@ func addOpts(opts ...server.ServerOption) []server.ServerOption {
 
 func createSNCloudMCPServer(s *server.MCPServer, logger *logrus.Logger) *Server {
 	mcpserver := &Server{
-		MCPServer: s,
-		logger:    logger,
+		MCPServer:      s,
+		logger:         logger,
+		SNCloudSession: &config.Session{},
+		KafkaSession:   &kafka.Session{},
+		PulsarSession:  &pulsar.Session{},
 	}
 
 	return mcpserver
