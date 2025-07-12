@@ -76,7 +76,8 @@ func runSseServer(configOpts *ServerOptions) error {
 	}
 
 	// add Pulsar Functions as MCP tools
-	mcpServer.PulsarFunctionManagedMcpTools(configOpts.ReadOnly, configOpts.Features)
+	// SSE is not support session-based tools, so we pass an empty sessionId
+	mcpServer.PulsarFunctionManagedMcpTools(configOpts.ReadOnly, configOpts.Features, "")
 
 	sseServer := server.NewSSEServer(
 		mcpServer.MCPServer,

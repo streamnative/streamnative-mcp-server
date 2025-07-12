@@ -51,7 +51,7 @@ func StopAllPulsarFunctionManagers() {
 	log.Println("All Pulsar Function managers stopped")
 }
 
-func (s *Server) PulsarFunctionManagedMcpTools(readOnly bool, features []string) {
+func (s *Server) PulsarFunctionManagedMcpTools(readOnly bool, features []string, sessionId string) {
 	if !slices.Contains(features, string(FeatureAll)) &&
 		!slices.Contains(features, string(FeatureFunctionsAsTools)) &&
 		!slices.Contains(features, string(FeatureStreamNativeCloud)) {
@@ -106,7 +106,7 @@ func (s *Server) PulsarFunctionManagedMcpTools(readOnly bool, features []string)
 		Logger:        s.logger,
 	}
 
-	manager, err := pftools.NewPulsarFunctionManager(pftoolsServer, readOnly, options)
+	manager, err := pftools.NewPulsarFunctionManager(pftoolsServer, readOnly, options, sessionId)
 	if err != nil {
 		log.Printf("Failed to create Pulsar Function manager: %v", err)
 		return

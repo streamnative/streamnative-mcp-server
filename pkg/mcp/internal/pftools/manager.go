@@ -62,7 +62,7 @@ type Server struct {
 }
 
 // NewPulsarFunctionManager creates a new PulsarFunctionManager
-func NewPulsarFunctionManager(snServer *Server, readOnly bool, options *ManagerOptions) (*PulsarFunctionManager, error) {
+func NewPulsarFunctionManager(snServer *Server, readOnly bool, options *ManagerOptions, sessionId string) (*PulsarFunctionManager, error) {
 	// Get Pulsar client and admin client
 	if snServer.PulsarSession == nil {
 		return nil, fmt.Errorf("Pulsar session not found in context")
@@ -104,6 +104,7 @@ func NewPulsarFunctionManager(snServer *Server, readOnly bool, options *ManagerO
 		circuitBreakers:   make(map[string]*CircuitBreaker),
 		tenantNamespaces:  options.TenantNamespaces,
 		strictExport:      options.StrictExport,
+		sessionId:         sessionId,
 	}
 
 	return manager, nil
@@ -197,9 +198,23 @@ func (m *PulsarFunctionManager) updateFunctions() {
 		}
 
 		if changed {
-			m.mcpServer.DeleteTools(fnTool.Tool.Name)
+			if m.sessionId != "" {
+				err := m.mcpServer.DeleteSessionTools(m.sessionId, fnTool.Tool.Name)
+				if err != nil {
+					log.Printf("Failed to delete tool %s from session %s: %v", fnTool.Tool.Name, m.sessionId, err)
+				}
+			} else {
+				m.mcpServer.DeleteTools(fnTool.Tool.Name)
+			}
 		}
-		m.mcpServer.AddTool(fnTool.Tool, m.handleToolCall(fnTool))
+		if m.sessionId != "" {
+			err := m.mcpServer.AddSessionTool(m.sessionId, fnTool.Tool, m.handleToolCall(fnTool))
+			if err != nil {
+				log.Printf("Failed to add tool %s to session %s: %v", fnTool.Tool.Name, m.sessionId, err)
+			}
+		} else {
+			m.mcpServer.AddTool(fnTool.Tool, m.handleToolCall(fnTool))
+		}
 
 		// Add function to map
 		m.mutex.Lock()
@@ -217,7 +232,14 @@ func (m *PulsarFunctionManager) updateFunctions() {
 	m.mutex.Lock()
 	for fullName, fnTool := range m.fnToToolMap {
 		if !seenFunctions[fullName] {
-			m.mcpServer.DeleteTools(fnTool.Tool.Name)
+			if m.sessionId != "" {
+				err := m.mcpServer.DeleteSessionTools(m.sessionId, fnTool.Tool.Name)
+				if err != nil {
+					log.Printf("Failed to delete tool %s from session %s: %v", fnTool.Tool.Name, m.sessionId, err)
+				}
+			} else {
+				m.mcpServer.DeleteTools(fnTool.Tool.Name)
+			}
 			delete(m.fnToToolMap, fullName)
 			log.Printf("Removed function %s from MCP tools [%s]", fullName, fnTool.Tool.Name)
 		}
