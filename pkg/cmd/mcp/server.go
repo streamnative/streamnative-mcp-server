@@ -25,6 +25,7 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"github.com/streamnative/streamnative-mcp-server/pkg/config"
 	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp"
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
@@ -43,17 +44,16 @@ func newMcpServer(ctx context.Context, configOpts *ServerOptions, logrusLogger *
 				stdlog.Fatalf("failed to get user name: %v", err)
 				os.Exit(1)
 			}
-			// sncloudClient, err := config.GetAPIClient()
-			// if err != nil {
-			// 	stdlog.Fatalf("failed to get SNCloud client: %v", err)
-			// 	os.Exit(1)
-			// }
-			// sncloudLogClient, err := config.GetSNCloudLogClient()
-			// if err != nil {
-			// 	stdlog.Fatalf("failed to get SNCloud log client: %v", err)
-			// 	os.Exit(1)
-			// }
+			// Create StreamNative Cloud session and set as default
+			session, err := config.NewSNCloudSessionFromOptions(configOpts.Options)
+			if err != nil {
+				return nil, errors.Wrap(err, "failed to create StreamNative Cloud session")
+			}
 			mcpServer = mcp.NewServer("streamnative-mcp-server", "0.0.1", logrusLogger, server.WithInstructions(mcp.GetStreamNativeCloudServerInstructions(userName, snConfig)))
+			mcpServer.SNCloudSession = session
+			mcpServer.KafkaSession = &kafka.Session{}
+			mcpServer.PulsarSession = &pulsar.Session{}
+
 			s = mcpServer.MCPServer
 			mcp.RegisterPrompts(s)
 			mcp.RegisterContextTools(s, configOpts.Features)

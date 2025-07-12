@@ -19,7 +19,6 @@ package mcp
 
 import (
 	"slices"
-	"time"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -71,20 +70,6 @@ func (o *ServerOptions) Complete() error {
 			// persist the authorization data
 			if err = o.Options.SaveGrant(issuer.Audience, *grant); err != nil {
 				return errors.Wrap(err, "Unable to store the authorization data")
-			}
-
-			err = config.InitSNCloudClient(
-				issuer.IssuerEndpoint, issuer.Audience, o.KeyFile, o.Options.Server, 30*time.Second, o.Options.Store)
-			if err != nil {
-				return errors.Wrap(err, "failed to initialize StreamNative Cloud client")
-			}
-
-			if o.Options.PulsarInstance != "" && o.Options.PulsarCluster != "" {
-				err = mcp.SetContext(o.Options, o.Options.PulsarInstance, o.Options.PulsarCluster)
-				if err != nil {
-					mcp.ResetMcpContext()
-					return errors.Wrap(err, "failed to set StreamNative Cloud context")
-				}
 			}
 
 			if len(o.Features) != 0 {

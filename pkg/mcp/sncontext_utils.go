@@ -30,15 +30,20 @@ import (
 
 const DefaultKafkaPort = 9093
 
-func SetContext(options *config.Options, instanceName, clusterName string) error {
+func SetContext(ctx context.Context, options *config.Options, instanceName, clusterName string) error {
 	snConfig := options.LoadConfigOrDie()
 	myselfGrant, err := options.AuthOptions.LoadGrant(snConfig.Auth.Audience)
-	ctx := context.Background()
 	if err != nil || myselfGrant == nil {
 		return fmt.Errorf("failed to auth to StreamNative Cloud: %v", err)
 	}
 
-	apiClient, err := config.GetAPIClient()
+	// Get API client from session
+	session := GetSNCloudSession(ctx)
+	if session == nil {
+		return fmt.Errorf("failed to get StreamNative Cloud session")
+	}
+
+	apiClient, err := session.GetAPIClient()
 	if err != nil {
 		return fmt.Errorf("failed to get API client: %v", err)
 	}
@@ -187,11 +192,5 @@ func SetContext(options *config.Options, instanceName, clusterName string) error
 		return fmt.Errorf("failed to change kafka context: %v", err)
 	}
 
-	SetMcpContext(instanceName, clusterName, options.Organization)
-
 	return nil
-}
-
-func ResetContext() {
-	ResetMcpContext()
 }

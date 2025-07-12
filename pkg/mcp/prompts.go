@@ -26,7 +26,6 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
-	"github.com/streamnative/streamnative-mcp-server/pkg/config"
 	sncloud "github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserver"
 	"k8s.io/utils/ptr"
 )
@@ -83,7 +82,14 @@ func RegisterPrompts(s *server.MCPServer) {
 
 func handleListPulsarClusters(ctx context.Context, _ mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
 	options := common.GetOptions(ctx)
-	apiClient, err := config.GetAPIClient()
+
+	// Get API client from session
+	session := GetSNCloudSession(ctx)
+	if session == nil {
+		return nil, fmt.Errorf("failed to get StreamNative Cloud session")
+	}
+
+	apiClient, err := session.GetAPIClient()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get API client: %v", err)
 	}
@@ -149,7 +155,14 @@ func handleListPulsarClusters(ctx context.Context, _ mcp.GetPromptRequest) (*mcp
 
 func handleReadPulsarCluster(ctx context.Context, request mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
 	options := common.GetOptions(ctx)
-	apiClient, err := config.GetAPIClient()
+
+	// Get API client from session
+	session := GetSNCloudSession(ctx)
+	if session == nil {
+		return nil, fmt.Errorf("failed to get StreamNative Cloud session")
+	}
+
+	apiClient, err := session.GetAPIClient()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get API client: %v", err)
 	}
@@ -206,7 +219,14 @@ func handleReadPulsarCluster(ctx context.Context, request mcp.GetPromptRequest) 
 
 func handleBuildServerlessPulsarCluster(ctx context.Context, request mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
 	options := common.GetOptions(ctx)
-	apiClient, err := config.GetAPIClient()
+
+	// Get API client from session
+	session := GetSNCloudSession(ctx)
+	if session == nil {
+		return nil, fmt.Errorf("failed to get StreamNative Cloud session")
+	}
+
+	apiClient, err := session.GetAPIClient()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get API client: %v", err)
 	}

@@ -20,15 +20,17 @@ package mcp
 import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/sirupsen/logrus"
+	"github.com/streamnative/streamnative-mcp-server/pkg/config"
 	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
 type Server struct {
-	MCPServer     *server.MCPServer
-	KafkaSession  *kafka.Session
-	PulsarSession *pulsar.Session
-	logger        *logrus.Logger
+	MCPServer      *server.MCPServer
+	KafkaSession   *kafka.Session
+	PulsarSession  *pulsar.Session
+	SNCloudSession *config.Session
+	logger         *logrus.Logger
 }
 
 func NewServer(name, version string, logger *logrus.Logger, opts ...server.ServerOption) *Server {

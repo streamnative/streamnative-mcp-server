@@ -75,6 +75,19 @@ func runSseServer(configOpts *ServerOptions) error {
 		return fmt.Errorf("failed to create MCP server: %w", err)
 	}
 
+	// 4. Set the context
+	ctx = mcp.WithSNCloudSession(ctx, mcpServer.SNCloudSession)
+	ctx = mcp.WithPulsarSession(ctx, mcpServer.PulsarSession)
+	ctx = mcp.WithKafkaSession(ctx, mcpServer.KafkaSession)
+	if configOpts.Options.KeyFile != "" {
+		if configOpts.Options.PulsarInstance != "" && configOpts.Options.PulsarCluster != "" {
+			err = mcp.SetContext(ctx, configOpts.Options, configOpts.Options.PulsarInstance, configOpts.Options.PulsarCluster)
+			if err != nil {
+				return errors.Wrap(err, "failed to set StreamNative Cloud context")
+			}
+		}
+	}
+
 	// add Pulsar Functions as MCP tools
 	// SSE is not support session-based tools, so we pass an empty sessionId
 	mcpServer.PulsarFunctionManagedMcpTools(configOpts.ReadOnly, configOpts.Features, "")
@@ -86,6 +99,7 @@ func runSseServer(configOpts *ServerOptions) error {
 			c := context.WithValue(ctx, common.OptionsKey, configOpts.Options)
 			c = mcp.WithKafkaSession(c, mcpServer.KafkaSession)
 			c = mcp.WithPulsarSession(c, mcpServer.PulsarSession)
+			c = mcp.WithSNCloudSession(c, mcpServer.SNCloudSession)
 			return c
 		}),
 	)

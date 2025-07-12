@@ -102,9 +102,8 @@ func handleSetContext(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get cluster name: %v", err)), nil
 	}
 
-	err = SetContext(options, instanceName, clusterName)
+	err = SetContext(ctx, options, instanceName, clusterName)
 	if err != nil {
-		ResetMcpContext()
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to set context: %v", err)), nil
 	}
 

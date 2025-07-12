@@ -27,7 +27,6 @@ import (
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/auth"
 	"github.com/streamnative/streamnative-mcp-server/pkg/auth/store"
-	"github.com/streamnative/streamnative-mcp-server/pkg/config"
 )
 
 const (
@@ -69,12 +68,6 @@ func NewSession(ctx PulsarContext, issuer *auth.Issuer, tokenStore *store.Store)
 		Ctx: ctx,
 	}
 
-	if issuer != nil && tokenStore != nil {
-		_ = config.InitSNCloudLogClient(*issuer, *tokenStore)
-	} else {
-		config.ResetSNCloudLogClient()
-	}
-
 	if err := session.SetPulsarContext(); err != nil {
 		return nil, fmt.Errorf("failed to set pulsar context: %w", err)
 	}
@@ -87,11 +80,7 @@ func (s *Session) ChangeContext(ctx PulsarContext, issuer *auth.Issuer, tokenSto
 	defer s.mutex.Unlock()
 
 	s.Ctx = ctx
-	if issuer != nil && tokenStore != nil {
-		_ = config.InitSNCloudLogClient(*issuer, *tokenStore)
-	} else {
-		config.ResetSNCloudLogClient()
-	}
+
 	return s.SetPulsarContext()
 }
 
