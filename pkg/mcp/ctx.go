@@ -68,17 +68,32 @@ func WithKafkaSession(ctx context.Context, session *kafka.Session) context.Conte
 
 // GetSNCloudOrganization gets the SNCloud organization from the context
 func GetSNCloudOrganization(ctx context.Context) string {
-	return ctx.Value(SNCloudOrganizationContextKey).(string)
+	if val := ctx.Value(SNCloudOrganizationContextKey); val != nil {
+		if str, ok := val.(string); ok {
+			return str
+		}
+	}
+	return ""
 }
 
 // GetSNCloudInstance gets the SNCloud instance from the context
 func GetSNCloudInstance(ctx context.Context) string {
-	return ctx.Value(SNCloudInstanceContextKey).(string)
+	if val := ctx.Value(SNCloudInstanceContextKey); val != nil {
+		if str, ok := val.(string); ok {
+			return str
+		}
+	}
+	return ""
 }
 
 // GetSNCloudCluster gets the SNCloud cluster from the context
 func GetSNCloudCluster(ctx context.Context) string {
-	return ctx.Value(SNCloudClusterContextKey).(string)
+	if val := ctx.Value(SNCloudClusterContextKey); val != nil {
+		if str, ok := val.(string); ok {
+			return str
+		}
+	}
+	return ""
 }
 
 // GetSNCloudSession gets the SNCloud session from the context

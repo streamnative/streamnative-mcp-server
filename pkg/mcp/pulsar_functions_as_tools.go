@@ -58,6 +58,12 @@ func (s *Server) PulsarFunctionManagedMcpTools(readOnly bool, features []string,
 		return
 	}
 
+	// Validate sessionID
+	if sessionID == "" {
+		log.Printf("Skipping Pulsar Functions as MCP Tools because sessionID is empty")
+		return
+	}
+
 	options := pftools.DefaultManagerOptions()
 
 	if s.SNCloudSession.Ctx.Organization == "" || s.SNCloudSession.Ctx.PulsarInstance == "" || s.SNCloudSession.Ctx.PulsarCluster == "" {

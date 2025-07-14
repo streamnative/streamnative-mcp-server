@@ -55,6 +55,8 @@ type Session struct {
 	TokenRefresher *OAuth2TokenRefresher
 	Configuration  *sncloud.Configuration
 	mutex          sync.RWMutex
+	apiClientOnce  sync.Once
+	logClientOnce  sync.Once
 }
 
 // OAuth2TokenRefresher implements oauth2.TokenSource interface for refreshing OAuth2 tokens
@@ -182,27 +184,15 @@ func (s *Session) initializeTokenRefresher() error {
 
 // GetAPIClient returns the API client for the session, initializing it if necessary
 func (s *Session) GetAPIClient() (*sncloud.APIClient, error) {
-	s.mutex.RLock()
-	if s.APIClient != nil {
-		defer s.mutex.RUnlock()
-		return s.APIClient, nil
-	}
-	s.mutex.RUnlock()
-
-	// Need to initialize the client
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-
-	// Double check after acquiring write lock
-	if s.APIClient != nil {
-		return s.APIClient, nil
-	}
-
-	// Initialize the API client
-	if err := s.initializeAPIClient(); err != nil {
+	var err error
+	s.apiClientOnce.Do(func() {
+		err = s.initializeAPIClient()
+	})
+	
+	if err != nil {
 		return nil, errors.Wrap(err, "failed to initialize API client")
 	}
-
+	
 	return s.APIClient, nil
 }
 
@@ -245,27 +235,15 @@ func (s *Session) initializeAPIClient() error {
 
 // GetLogClient returns the log client for the session, initializing it if necessary
 func (s *Session) GetLogClient() (*http.Client, error) {
-	s.mutex.RLock()
-	if s.LogClient != nil {
-		defer s.mutex.RUnlock()
-		return s.LogClient, nil
-	}
-	s.mutex.RUnlock()
-
-	// Need to initialize the client
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-
-	// Double check after acquiring write lock
-	if s.LogClient != nil {
-		return s.LogClient, nil
-	}
-
-	// Initialize the log client
-	if err := s.initializeLogClient(); err != nil {
+	var err error
+	s.logClientOnce.Do(func() {
+		err = s.initializeLogClient()
+	})
+	
+	if err != nil {
 		return nil, errors.Wrap(err, "failed to initialize log client")
 	}
-
+	
 	return s.LogClient, nil
 }
 

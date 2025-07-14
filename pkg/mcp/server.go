@@ -35,13 +35,13 @@ type Server struct {
 
 func NewServer(name, version string, logger *logrus.Logger, opts ...server.ServerOption) *Server {
 	// Create a new MCP server
-	opts = addOpts(opts...)
+	opts = AddOpts(opts...)
 	s := server.NewMCPServer(name, version, opts...)
-	mcpserver := createSNCloudMCPServer(s, logger)
+	mcpserver := CreateSNCloudMCPServer(s, logger)
 	return mcpserver
 }
 
-func addOpts(opts ...server.ServerOption) []server.ServerOption {
+func AddOpts(opts ...server.ServerOption) []server.ServerOption {
 	defaultOpts := []server.ServerOption{
 		server.WithResourceCapabilities(true, true),
 		server.WithRecovery(),
@@ -51,7 +51,7 @@ func addOpts(opts ...server.ServerOption) []server.ServerOption {
 	return opts
 }
 
-func createSNCloudMCPServer(s *server.MCPServer, logger *logrus.Logger) *Server {
+func CreateSNCloudMCPServer(s *server.MCPServer, logger *logrus.Logger) *Server {
 	mcpserver := &Server{
 		MCPServer:      s,
 		logger:         logger,
