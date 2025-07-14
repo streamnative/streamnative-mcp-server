@@ -188,11 +188,11 @@ func (s *Session) GetAPIClient() (*sncloud.APIClient, error) {
 	s.apiClientOnce.Do(func() {
 		err = s.initializeAPIClient()
 	})
-	
+
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to initialize API client")
 	}
-	
+
 	return s.APIClient, nil
 }
 
@@ -239,11 +239,11 @@ func (s *Session) GetLogClient() (*http.Client, error) {
 	s.logClientOnce.Do(func() {
 		err = s.initializeLogClient()
 	})
-	
+
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to initialize log client")
 	}
-	
+
 	return s.LogClient, nil
 }
 
