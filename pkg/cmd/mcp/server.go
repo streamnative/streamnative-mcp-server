@@ -54,7 +54,9 @@ func newMcpServer(_ context.Context, configOpts *ServerOptions, logrusLogger *lo
 
 			s = mcpServer.MCPServer
 			mcp.RegisterPrompts(s)
-			mcp.RegisterContextTools(s, configOpts.Features)
+			// Skip context tools if pulsar instance and cluster are provided via CLI
+			skipContextTools := snConfig.Context.PulsarInstance != "" && snConfig.Context.PulsarCluster != ""
+			mcp.RegisterContextTools(s, configOpts.Features, skipContextTools)
 			mcp.StreamNativeAddLogTools(s, configOpts.ReadOnly, configOpts.Features)
 			mcp.StreamNativeAddResourceTools(s, configOpts.ReadOnly, configOpts.Features)
 		}

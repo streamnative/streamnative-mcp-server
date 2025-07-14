@@ -29,10 +29,11 @@ import (
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 )
 
-func RegisterContextTools(s *server.MCPServer, features []string) {
+func RegisterContextTools(s *server.MCPServer, features []string, skipContextTools bool) {
 	if !slices.Contains(features, string(FeatureStreamNativeCloud)) && !slices.Contains(features, string(FeatureAll)) {
 		return
 	}
+
 	// Add whoami tool
 	whoamiTool := mcp.NewTool("sncloud_context_whoami",
 		mcp.WithDescription("Display the currently logged-in service account. "+
@@ -50,7 +51,10 @@ func RegisterContextTools(s *server.MCPServer, features []string) {
 			mcp.Description("The name of the pulsar cluster to use"),
 		),
 	)
-	s.AddTool(setContextTool, handleSetContext)
+	// Skip registering context tools if context is already provided
+	if !skipContextTools {
+		s.AddTool(setContextTool, handleSetContext)
+	}
 
 	// Add available-contexts tool
 	availableContextsTool := mcp.NewTool("sncloud_context_available_clusters",
