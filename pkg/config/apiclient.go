@@ -38,6 +38,7 @@ type SNCloudContext struct {
 	IssuerURL      string
 	Audience       string
 	KeyFilePath    string
+	JWTToken       string
 	APIURL         string
 	LogAPIURL      string
 	Timeout        time.Duration
@@ -53,10 +54,12 @@ type Session struct {
 	APIClient      *sncloud.APIClient
 	LogClient      *http.Client
 	TokenRefresher *OAuth2TokenRefresher
+	TokenSource    oauth2.TokenSource
 	Configuration  *sncloud.Configuration
 	mutex          sync.RWMutex
 	apiClientOnce  sync.Once
 	logClientOnce  sync.Once
+	useJWT         bool
 }
 
 // OAuth2TokenRefresher implements oauth2.TokenSource interface for refreshing OAuth2 tokens
@@ -84,15 +87,42 @@ func (t *OAuth2TokenRefresher) Token() (*oauth2.Token, error) {
 	return t.source.Token()
 }
 
+// JWTTokenSource implements oauth2.TokenSource interface for static JWT tokens
+type JWTTokenSource struct {
+	token *oauth2.Token
+}
+
+// NewJWTTokenSource creates a new token source for static JWT tokens
+func NewJWTTokenSource(jwtToken string) *JWTTokenSource {
+	return &JWTTokenSource{
+		token: &oauth2.Token{
+			AccessToken: jwtToken,
+			TokenType:   "Bearer",
+		},
+	}
+}
+
+// Token implements the oauth2.TokenSource interface for static JWT tokens
+func (j *JWTTokenSource) Token() (*oauth2.Token, error) {
+	return j.token, nil
+}
+
 // NewSNCloudSession creates a new StreamNative Cloud session with the provided context
 func NewSNCloudSession(ctx SNCloudContext) (*Session, error) {
 	session := &Session{
 		Ctx: ctx,
 	}
 
-	// Initialize the session by setting up the token refresher
-	if err := session.initializeTokenRefresher(); err != nil {
-		return nil, errors.Wrap(err, "failed to initialize token refresher")
+	// Check if JWT token is provided
+	if ctx.JWTToken != "" {
+		// Use JWT token directly without refresh mechanism
+		session.useJWT = true
+		session.TokenSource = NewJWTTokenSource(ctx.JWTToken)
+	} else {
+		// Initialize the session by setting up the token refresher for OAuth flow
+		if err := session.initializeTokenRefresher(); err != nil {
+			return nil, errors.Wrap(err, "failed to initialize token refresher")
+		}
 	}
 
 	return session, nil
@@ -198,12 +228,18 @@ func (s *Session) GetAPIClient() (*sncloud.APIClient, error) {
 
 // initializeAPIClient initializes the API client for the session
 func (s *Session) initializeAPIClient() error {
-	if s.TokenRefresher == nil {
-		return errors.New("token refresher not initialized")
+	var tokenSource oauth2.TokenSource
+	
+	if s.useJWT {
+		// Use JWT token directly
+		tokenSource = s.TokenSource
+	} else {
+		// Use OAuth token with refresh
+		if s.TokenRefresher == nil {
+			return errors.New("token refresher not initialized")
+		}
+		tokenSource = oauth2.ReuseTokenSource(nil, s.TokenRefresher)
 	}
-
-	// Create token source with reuse
-	tokenSource := oauth2.ReuseTokenSource(nil, s.TokenRefresher)
 
 	// Create HTTP client with OAuth2 Transport
 	httpClient := &http.Client{
@@ -249,12 +285,18 @@ func (s *Session) GetLogClient() (*http.Client, error) {
 
 // initializeLogClient initializes the log client for the session
 func (s *Session) initializeLogClient() error {
-	if s.TokenRefresher == nil {
-		return errors.New("token refresher not initialized")
+	var tokenSource oauth2.TokenSource
+	
+	if s.useJWT {
+		// Use JWT token directly
+		tokenSource = s.TokenSource
+	} else {
+		// Use OAuth token with refresh
+		if s.TokenRefresher == nil {
+			return errors.New("token refresher not initialized")
+		}
+		tokenSource = oauth2.ReuseTokenSource(nil, s.TokenRefresher)
 	}
-
-	// Create token source with reuse
-	tokenSource := oauth2.ReuseTokenSource(nil, s.TokenRefresher)
 
 	// Create HTTP client with OAuth2 Transport
 	s.LogClient = &http.Client{
