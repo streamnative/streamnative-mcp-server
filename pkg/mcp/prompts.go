@@ -64,7 +64,7 @@ var (
 func RegisterPrompts(s *server.MCPServer) {
 	s.AddPrompt(mcp.NewPrompt("list-sncloud-clusters",
 		mcp.WithPromptDescription("List all clusters from the StreamNative Cloud"),
-	), handleListPulsarClusters)
+	), HandleListPulsarClusters)
 	s.AddPrompt(mcp.NewPrompt("read-sncloud-cluster",
 		mcp.WithPromptDescription("Read a cluster from the StreamNative Cloud"),
 		mcp.WithArgument("name", mcp.RequiredArgument(), mcp.ArgumentDescription("The name of the cluster")),
@@ -80,9 +80,7 @@ func RegisterPrompts(s *server.MCPServer) {
 	)
 }
 
-func handleListPulsarClusters(ctx context.Context, _ mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
-	options := common.GetOptions(ctx)
-
+func HandleListPulsarClusters(ctx context.Context, _ mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
 	// Get API client from session
 	session := GetSNCloudSession(ctx)
 	if session == nil {
@@ -94,7 +92,7 @@ func handleListPulsarClusters(ctx context.Context, _ mcp.GetPromptRequest) (*mcp
 		return nil, fmt.Errorf("failed to get API client: %v", err)
 	}
 
-	clusters, clustersBody, err := apiClient.CloudStreamnativeIoV1alpha1Api.ListCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(ctx, options.Organization).Execute()
+	clusters, clustersBody, err := apiClient.CloudStreamnativeIoV1alpha1Api.ListCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(ctx, session.Ctx.Organization).Execute()
 	if err != nil {
 		return nil, fmt.Errorf("failed to list pulsar clusters: %v", err)
 	}
@@ -111,7 +109,7 @@ func handleListPulsarClusters(ctx context.Context, _ mcp.GetPromptRequest) (*mcp
 			Text: fmt.Sprintf(
 				"There are %d Pulsar clusters in the StreamNative Cloud from organization %s:",
 				len(clusters.Items),
-				options.Organization,
+				session.Ctx.Organization,
 			),
 		},
 		Role: mcp.RoleUser,
@@ -148,14 +146,12 @@ func handleListPulsarClusters(ctx context.Context, _ mcp.GetPromptRequest) (*mcp
 	}
 
 	return &mcp.GetPromptResult{
-		Description: fmt.Sprintf("Pulsar clusters from StreamNative Cloud organization %s, you can use `sncloud_context_use_cluster` tool to switch to selected cluster, and use pulsar and kafka tools to interact with the cluster.", options.Organization),
+		Description: fmt.Sprintf("Pulsar clusters from StreamNative Cloud organization %s, you can use `sncloud_context_use_cluster` tool to switch to selected cluster, and use pulsar and kafka tools to interact with the cluster.", session.Ctx.Organization),
 		Messages:    messages,
 	}, nil
 }
 
 func handleReadPulsarCluster(ctx context.Context, request mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
-	options := common.GetOptions(ctx)
-
 	// Get API client from session
 	session := GetSNCloudSession(ctx)
 	if session == nil {
@@ -172,7 +168,7 @@ func handleReadPulsarCluster(ctx context.Context, request mcp.GetPromptRequest) 
 		return nil, fmt.Errorf("failed to get name: %v", err)
 	}
 
-	clusters, clustersBody, err := apiClient.CloudStreamnativeIoV1alpha1Api.ListCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(ctx, options.Organization).Execute()
+	clusters, clustersBody, err := apiClient.CloudStreamnativeIoV1alpha1Api.ListCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(ctx, session.Ctx.Organization).Execute()
 	if err != nil {
 		return nil, fmt.Errorf("failed to list pulsar clusters: %v", err)
 	}
@@ -218,8 +214,6 @@ func handleReadPulsarCluster(ctx context.Context, request mcp.GetPromptRequest) 
 }
 
 func handleBuildServerlessPulsarCluster(ctx context.Context, request mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
-	options := common.GetOptions(ctx)
-
 	// Get API client from session
 	session := GetSNCloudSession(ctx)
 	if session == nil {
@@ -252,7 +246,7 @@ func handleBuildServerlessPulsarCluster(ctx context.Context, request mcp.GetProm
 		}
 	}
 
-	poolOptions, poolOptionsBody, err := apiClient.CloudStreamnativeIoV1alpha1Api.ListCloudStreamnativeIoV1alpha1NamespacedPoolOption(ctx, options.Organization).Execute()
+	poolOptions, poolOptionsBody, err := apiClient.CloudStreamnativeIoV1alpha1Api.ListCloudStreamnativeIoV1alpha1NamespacedPoolOption(ctx, session.Ctx.Organization).Execute()
 	if err != nil {
 		return nil, fmt.Errorf("failed to list pool options: %v", err)
 	}
@@ -294,7 +288,7 @@ func handleBuildServerlessPulsarCluster(ctx context.Context, request mcp.GetProm
 	inst.Kind = ptr.To("PulsarInstance")
 	inst.Metadata = &sncloud.V1ObjectMeta{
 		Name:      &instanceName,
-		Namespace: &options.Organization,
+		Namespace: &session.Ctx.Organization,
 		Labels: &map[string]string{
 			"managed-by": "streamnative-mcp",
 		},
@@ -310,7 +304,7 @@ func handleBuildServerlessPulsarCluster(ctx context.Context, request mcp.GetProm
 	clus.Kind = ptr.To("PulsarCluster")
 	clus.Metadata = &sncloud.V1ObjectMeta{
 		Name:      ptr.To(""),
-		Namespace: &options.Organization,
+		Namespace: &session.Ctx.Organization,
 		Labels: &map[string]string{
 			"managed-by": "streamnative-mcp",
 		},
