@@ -26,11 +26,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/pftools"
+	pftools2 "github.com/streamnative/streamnative-mcp-server/pkg/mcp/pftools"
 )
 
 var (
-	functionManagers     = make(map[string]*pftools.PulsarFunctionManager)
+	functionManagers     = make(map[string]*pftools2.PulsarFunctionManager)
 	functionManagersLock sync.RWMutex
 )
 
@@ -64,7 +64,7 @@ func (s *Server) PulsarFunctionManagedMcpTools(readOnly bool, features []string,
 		return
 	}
 
-	options := pftools.DefaultManagerOptions()
+	options := pftools2.DefaultManagerOptions()
 
 	if s.SNCloudSession.Ctx.Organization == "" || s.SNCloudSession.Ctx.PulsarInstance == "" || s.SNCloudSession.Ctx.PulsarCluster == "" {
 		log.Printf("Skipping Pulsar Functions as MCP Tools because both organization, pulsar instance and pulsar cluster are not set")
@@ -110,14 +110,14 @@ func (s *Server) PulsarFunctionManagedMcpTools(readOnly bool, features []string,
 	}
 
 	// Convert Server to the internal pftools.Server type
-	pftoolsServer := &pftools.Server{
+	pftoolsServer := &pftools2.Server{
 		MCPServer:     s.MCPServer,
 		KafkaSession:  s.KafkaSession,
 		PulsarSession: s.PulsarSession,
 		Logger:        s.logger,
 	}
 
-	manager, err := pftools.NewPulsarFunctionManager(pftoolsServer, readOnly, options, sessionID)
+	manager, err := pftools2.NewPulsarFunctionManager(pftoolsServer, readOnly, options, sessionID)
 	if err != nil {
 		log.Printf("Failed to create Pulsar Function manager: %v", err)
 		return
