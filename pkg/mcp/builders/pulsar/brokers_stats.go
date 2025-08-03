@@ -26,7 +26,7 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
-	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
+	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
 
 // PulsarAdminBrokerStatsToolBuilder implements the ToolBuilder interface for Pulsar Broker Statistics
@@ -115,7 +115,11 @@ func (b *PulsarAdminBrokerStatsToolBuilder) buildBrokerStatsTool() mcp.Tool {
 func (b *PulsarAdminBrokerStatsToolBuilder) buildBrokerStatsHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get Pulsar admin client
-		client, err := b.getPulsarAdminClient(ctx)
+		session := mcpCtx.GetPulsarSession(ctx)
+		if session == nil {
+			return mcp.NewToolResultError("Pulsar session not found in context"), nil
+		}
+		client, err := session.GetAdminClient()
 		if err != nil {
 			return b.handleError("get admin client", err), nil
 		}
@@ -165,20 +169,6 @@ func (b *PulsarAdminBrokerStatsToolBuilder) marshalResponse(data interface{}) (*
 		return b.handleError("marshal response", err), nil
 	}
 	return mcp.NewToolResultText(string(jsonBytes)), nil
-}
-
-// getPulsarAdminClient retrieves the Pulsar admin client from context
-func (b *PulsarAdminBrokerStatsToolBuilder) getPulsarAdminClient(ctx context.Context) (cmdutils.Client, error) {
-	// Use the same context key as in the original implementation (pkg/mcp/ctx.go)
-	// This maintains consistency with the original approach
-	type contextKey string
-	const pulsarSessionContextKey contextKey = "pulsar_session"
-	
-	session, ok := ctx.Value(pulsarSessionContextKey).(*pulsar.Session)
-	if !ok || session == nil {
-		return nil, fmt.Errorf("Pulsar session not found in context")
-	}
-	return session.GetAdminClient()
 }
 
 // Specific operation handler functions

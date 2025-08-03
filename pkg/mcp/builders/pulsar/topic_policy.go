@@ -29,7 +29,7 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
-	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
+	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
 
 // PulsarAdminTopicPolicyToolBuilder implements the ToolBuilder interface for Pulsar admin topic policies
@@ -138,7 +138,7 @@ func (b *PulsarAdminTopicPolicyToolBuilder) buildTopicPolicyTool() mcp.Tool {
 func (b *PulsarAdminTopicPolicyToolBuilder) buildTopicPolicyHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get Pulsar session from context
-		session := b.getPulsarSession(ctx)
+		session := mcpCtx.GetPulsarSession(ctx)
 		if session == nil {
 			return mcp.NewToolResultError("Pulsar session not found in context"), nil
 		}
@@ -160,7 +160,7 @@ func (b *PulsarAdminTopicPolicyToolBuilder) buildTopicPolicyHandler(readOnly boo
 		}
 
 		// Check write operation permissions
-		writeOps := []string{"set_retention", "remove_retention", "set_ttl", "remove_ttl", 
+		writeOps := []string{"set_retention", "remove_retention", "set_ttl", "remove_ttl",
 			"set_compaction", "remove_compaction", "set_subscription_types", "remove_subscription_types"}
 		isWriteOp := false
 		for _, op := range writeOps {
@@ -217,17 +217,6 @@ func (b *PulsarAdminTopicPolicyToolBuilder) marshalResponse(data interface{}) (*
 		return b.handleError("marshal response", err), nil
 	}
 	return mcp.NewToolResultText(string(jsonBytes)), nil
-}
-
-func (b *PulsarAdminTopicPolicyToolBuilder) getPulsarSession(ctx context.Context) *pulsar.Session {
-	type contextKey string
-	const pulsarSessionContextKey contextKey = "pulsar_session"
-	
-	session, ok := ctx.Value(pulsarSessionContextKey).(*pulsar.Session)
-	if !ok {
-		return nil
-	}
-	return session
 }
 
 // Topic policy operation handlers
@@ -473,12 +462,12 @@ func (b *PulsarAdminTopicPolicyToolBuilder) handleGetTopicSubscriptionTypes(clie
 	// Check if the API supports subscription types management
 	// Some versions of pulsarctl may not have this functionality
 	topicsClient := client.Topics()
-	
+
 	// Try to use reflection or type assertion to check if the method exists
 	type SubscriptionTypesGetter interface {
 		GetSubscriptionTypesEnabled(utils.TopicName) ([]string, error)
 	}
-	
+
 	if getter, ok := topicsClient.(SubscriptionTypesGetter); ok {
 		subscriptionTypes, err := getter.GetSubscriptionTypesEnabled(*topicName)
 		if err != nil {
@@ -490,7 +479,7 @@ func (b *PulsarAdminTopicPolicyToolBuilder) handleGetTopicSubscriptionTypes(clie
 		}
 
 		return b.marshalResponse(map[string]interface{}{
-			"topic":            topicName.String(),
+			"topic":             topicName.String(),
 			"subscriptionTypes": subscriptionTypes,
 		})
 	}
@@ -536,19 +525,19 @@ func (b *PulsarAdminTopicPolicyToolBuilder) handleSetTopicSubscriptionTypes(clie
 
 	// Check if the API supports subscription types management
 	topicsClient := client.Topics()
-	
+
 	// Try to use reflection or type assertion to check if the method exists
 	type SubscriptionTypesSetter interface {
 		SetSubscriptionTypesEnabled(utils.TopicName, []string) error
 	}
-	
+
 	if setter, ok := topicsClient.(SubscriptionTypesSetter); ok {
 		err := setter.SetSubscriptionTypesEnabled(*topicName, validatedTypes)
 		if err != nil {
 			return b.handleError("set topic subscription types", err), nil
 		}
 
-		return mcp.NewToolResultText(fmt.Sprintf("Subscription types set for topic %s: %s", 
+		return mcp.NewToolResultText(fmt.Sprintf("Subscription types set for topic %s: %s",
 			topicName.String(), strings.Join(validatedTypes, ", "))), nil
 	}
 
@@ -566,12 +555,12 @@ func (b *PulsarAdminTopicPolicyToolBuilder) handleRemoveTopicSubscriptionTypes(c
 
 	// Check if the API supports subscription types management
 	topicsClient := client.Topics()
-	
+
 	// Try to use reflection or type assertion to check if the method exists
 	type SubscriptionTypesRemover interface {
 		RemoveSubscriptionTypesEnabled(utils.TopicName) error
 	}
-	
+
 	if remover, ok := topicsClient.(SubscriptionTypesRemover); ok {
 		err := remover.RemoveSubscriptionTypesEnabled(*topicName)
 		if err != nil {

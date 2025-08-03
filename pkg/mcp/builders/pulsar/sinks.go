@@ -23,13 +23,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/admin/config"
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
-	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
+	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
 
 // PulsarAdminSinksToolBuilder implements the ToolBuilder interface for Pulsar admin sinks
@@ -204,8 +203,16 @@ func (b *PulsarAdminSinksToolBuilder) buildSinksHandler(readOnly bool) func(cont
 			return mcp.NewToolResultError(fmt.Sprintf("Operation '%s' not allowed in read-only mode. Read-only mode restricts modifications to Pulsar Sinks.", operation)), nil
 		}
 
-		// Create admin client
-		admin := cmdutils.NewPulsarClientWithAPIVersion(config.V3)
+		// Get Pulsar session from context
+		session := mcpCtx.GetPulsarSession(ctx)
+		if session == nil {
+			return mcp.NewToolResultError("Pulsar session not found in context"), nil
+		}
+
+		admin, err := session.GetAdminV3Client()
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get Pulsar client: %v", err)), nil
+		}
 
 		// List built-in sinks doesn't require tenant, namespace or name
 		if operation == "list-built-in" {
@@ -260,19 +267,6 @@ func (b *PulsarAdminSinksToolBuilder) buildSinksHandler(readOnly bool) func(cont
 }
 
 // Helper functions
-
-// getPulsarSession gets the Pulsar session from context
-// Uses the same context key as defined in pkg/mcp/ctx.go to ensure consistency
-func (b *PulsarAdminSinksToolBuilder) getPulsarSession(ctx context.Context) *pulsar.Session {
-	type contextKey string
-	const pulsarSessionContextKey contextKey = "pulsar_session"
-
-	session, ok := ctx.Value(pulsarSessionContextKey).(*pulsar.Session)
-	if !ok {
-		return nil
-	}
-	return session
-}
 
 // handleSinkList handles listing all sinks under a namespace
 func (b *PulsarAdminSinksToolBuilder) handleSinkList(_ context.Context, admin cmdutils.Client, tenant, namespace string) (*mcp.CallToolResult, error) {
@@ -665,7 +659,7 @@ func (b *PulsarAdminSinksToolBuilder) isPackageURLSupported(archive string) bool
 	if archive == "" {
 		return false
 	}
-	
+
 	// Check for supported URL schemes for Pulsar sink packages
 	supportedSchemes := []string{
 		"http://",
@@ -674,13 +668,13 @@ func (b *PulsarAdminSinksToolBuilder) isPackageURLSupported(archive string) bool
 		"function://", // Pulsar function package URL
 		"sink://",     // Pulsar sink package URL
 	}
-	
+
 	for _, scheme := range supportedSchemes {
 		if strings.HasPrefix(archive, scheme) {
 			return true
 		}
 	}
-	
+
 	// Also check if it's a local file path (not a URL)
 	return !strings.Contains(archive, "://")
 }

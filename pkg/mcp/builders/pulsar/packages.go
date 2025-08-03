@@ -27,7 +27,7 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
-	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
+	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
 
 // PulsarAdminPackagesToolBuilder implements the ToolBuilder interface for Pulsar admin packages
@@ -156,7 +156,7 @@ func (b *PulsarAdminPackagesToolBuilder) buildPackagesHandler(readOnly bool) fun
 		}
 
 		// Get Pulsar session from context
-		session := b.getPulsarSession(ctx)
+		session := mcpCtx.GetPulsarSession(ctx)
 		if session == nil {
 			return mcp.NewToolResultError("Pulsar session not found in context"), nil
 		}
@@ -179,19 +179,6 @@ func (b *PulsarAdminPackagesToolBuilder) buildPackagesHandler(readOnly bool) fun
 }
 
 // Helper functions
-
-// getPulsarSession gets the Pulsar session from context
-// Uses the same context key as defined in pkg/mcp/ctx.go to ensure consistency
-func (b *PulsarAdminPackagesToolBuilder) getPulsarSession(ctx context.Context) *pulsar.Session {
-	type contextKey string
-	const pulsarSessionContextKey contextKey = "pulsar_session"
-
-	session, ok := ctx.Value(pulsarSessionContextKey).(*pulsar.Session)
-	if !ok {
-		return nil
-	}
-	return session
-}
 
 // handlePackageResource handles operations on a specific package
 func (b *PulsarAdminPackagesToolBuilder) handlePackageResource(client cmdutils.Client, operation string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {

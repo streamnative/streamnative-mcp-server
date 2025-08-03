@@ -26,7 +26,7 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
-	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
+	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
 
 // PulsarAdminFunctionsWorkerToolBuilder implements the ToolBuilder interface for Pulsar Admin Functions Worker tools
@@ -114,7 +114,7 @@ func (b *PulsarAdminFunctionsWorkerToolBuilder) buildFunctionsWorkerTool() mcp.T
 func (b *PulsarAdminFunctionsWorkerToolBuilder) buildFunctionsWorkerHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get Pulsar session from context
-		session := b.getPulsarSession(ctx)
+		session := mcpCtx.GetPulsarSession(ctx)
 		if session == nil {
 			return mcp.NewToolResultError("Pulsar session not found in context"), nil
 		}
@@ -165,19 +165,6 @@ func (b *PulsarAdminFunctionsWorkerToolBuilder) marshalResponse(data interface{}
 		return b.handleError("marshal response", err), nil
 	}
 	return mcp.NewToolResultText(string(jsonBytes)), nil
-}
-
-// getPulsarSession retrieves the Pulsar session from context
-func (b *PulsarAdminFunctionsWorkerToolBuilder) getPulsarSession(ctx context.Context) *pulsar.Session {
-	// Define context key locally to avoid circular imports
-	type contextKey string
-	const pulsarSessionContextKey contextKey = "pulsar_session"
-
-	session, ok := ctx.Value(pulsarSessionContextKey).(*pulsar.Session)
-	if !ok {
-		return nil
-	}
-	return session
 }
 
 // Operation handler functions - migrated from the original implementation

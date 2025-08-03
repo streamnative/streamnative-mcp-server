@@ -23,13 +23,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/admin/config"
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
-	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
+	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
 
 // PulsarAdminSourcesToolBuilder implements the ToolBuilder interface for Pulsar admin sources
@@ -205,8 +204,16 @@ func (b *PulsarAdminSourcesToolBuilder) buildSourcesHandler(readOnly bool) func(
 			return mcp.NewToolResultError(fmt.Sprintf("Operation '%s' not allowed in read-only mode. Read-only mode restricts modifications to Pulsar Sources.", operation)), nil
 		}
 
-		// Create admin client
-		admin := cmdutils.NewPulsarClientWithAPIVersion(config.V3)
+		// Get Pulsar session from context
+		session := mcpCtx.GetPulsarSession(ctx)
+		if session == nil {
+			return mcp.NewToolResultError("Pulsar session not found in context"), nil
+		}
+
+		admin, err := session.GetAdminV3Client()
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get Pulsar client: %v", err)), nil
+		}
 
 		// List built-in sources doesn't require tenant, namespace or name
 		if operation == "list-built-in" {
@@ -261,19 +268,6 @@ func (b *PulsarAdminSourcesToolBuilder) buildSourcesHandler(readOnly bool) func(
 }
 
 // Helper functions
-
-// getPulsarSession gets the Pulsar session from context
-// Uses the same context key as defined in pkg/mcp/ctx.go to ensure consistency
-func (b *PulsarAdminSourcesToolBuilder) getPulsarSession(ctx context.Context) *pulsar.Session {
-	type contextKey string
-	const pulsarSessionContextKey contextKey = "pulsar_session"
-
-	session, ok := ctx.Value(pulsarSessionContextKey).(*pulsar.Session)
-	if !ok {
-		return nil
-	}
-	return session
-}
 
 // handleSourceList handles listing all sources under a namespace
 func (b *PulsarAdminSourcesToolBuilder) handleSourceList(_ context.Context, admin cmdutils.Client, tenant, namespace string) (*mcp.CallToolResult, error) {
@@ -695,7 +689,7 @@ func (b *PulsarAdminSourcesToolBuilder) isPackageURLSupported(archive string) bo
 	if archive == "" {
 		return false
 	}
-	
+
 	// Check for supported URL schemes for Pulsar source packages
 	supportedSchemes := []string{
 		"http://",
@@ -704,13 +698,13 @@ func (b *PulsarAdminSourcesToolBuilder) isPackageURLSupported(archive string) bo
 		"function://", // Pulsar function package URL
 		"source://",   // Pulsar source package URL
 	}
-	
+
 	for _, scheme := range supportedSchemes {
 		if strings.HasPrefix(archive, scheme) {
 			return true
 		}
 	}
-	
+
 	// Also check if it's a local file path (not a URL)
 	return !strings.Contains(archive, "://")
 }

@@ -26,7 +26,7 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
-	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
+	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
 
 // PulsarAdminBrokersToolBuilder implements the ToolBuilder interface for Pulsar admin brokers
@@ -137,7 +137,7 @@ func (b *PulsarAdminBrokersToolBuilder) buildPulsarAdminBrokersTool() mcp.Tool {
 func (b *PulsarAdminBrokersToolBuilder) buildPulsarAdminBrokersHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get Pulsar session from context
-		session := b.getPulsarSession(ctx)
+		session := mcpCtx.GetPulsarSession(ctx)
 		if session == nil {
 			return mcp.NewToolResultError("Pulsar session not found in context"), nil
 		}
@@ -151,13 +151,13 @@ func (b *PulsarAdminBrokersToolBuilder) buildPulsarAdminBrokersHandler(readOnly 
 		// Get required parameters
 		resource, err := request.RequireString("resource")
 		if err != nil {
-			return mcp.NewToolResultError("Missing required resource parameter. "+
+			return mcp.NewToolResultError("Missing required resource parameter. " +
 				"Please specify one of: brokers, health, config, namespaces."), nil
 		}
 
 		operation, err := request.RequireString("operation")
 		if err != nil {
-			return mcp.NewToolResultError("Missing required operation parameter. "+
+			return mcp.NewToolResultError("Missing required operation parameter. " +
 				"Please specify one of: list, get, update, delete based on the resource type."), nil
 		}
 
@@ -190,19 +190,6 @@ func (b *PulsarAdminBrokersToolBuilder) buildPulsarAdminBrokersHandler(readOnly 
 }
 
 // Helper functions
-
-// getPulsarSession gets the Pulsar session from context
-// Uses the same context key as defined in pkg/mcp/ctx.go to ensure consistency
-func (b *PulsarAdminBrokersToolBuilder) getPulsarSession(ctx context.Context) *pulsar.Session {
-	type contextKey string
-	const pulsarSessionContextKey contextKey = "pulsar_session"
-	
-	session, ok := ctx.Value(pulsarSessionContextKey).(*pulsar.Session)
-	if !ok {
-		return nil
-	}
-	return session
-}
 
 // validateResourceOperation validates if the resource and operation combination is valid
 func (b *PulsarAdminBrokersToolBuilder) validateResourceOperation(resource, operation string) (bool, string) {

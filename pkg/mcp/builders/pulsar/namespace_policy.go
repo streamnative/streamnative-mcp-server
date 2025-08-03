@@ -30,7 +30,7 @@ import (
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	pulsarctlutils "github.com/streamnative/pulsarctl/pkg/ctl/utils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
-	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
+	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
 
 // PulsarAdminNamespacePolicyToolBuilder implements the ToolBuilder interface for Pulsar admin namespace policies
@@ -181,13 +181,13 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceSetPolicyTool() mc
 			mcp.Description("The namespace name (tenant/namespace) to set the policy for"),
 		),
 		mcp.WithString("policy", mcp.Required(),
-			mcp.Description("Type of policy to set. Available options: " +
-				"message-ttl, retention, permission, replication-clusters, backlog-quota, " +
-				"topic-auto-creation, schema-validation, schema-auto-update, auto-update-schema, " +
-				"offload-threshold, offload-deletion-lag, compaction-threshold, " +
-				"max-producers-per-topic, max-consumers-per-topic, max-consumers-per-subscription, " +
-				"anti-affinity-group, persistence, deduplication, encryption-required, " +
-				"subscription-auth-mode, subscription-permission, dispatch-rate, " +
+			mcp.Description("Type of policy to set. Available options: "+
+				"message-ttl, retention, permission, replication-clusters, backlog-quota, "+
+				"topic-auto-creation, schema-validation, schema-auto-update, auto-update-schema, "+
+				"offload-threshold, offload-deletion-lag, compaction-threshold, "+
+				"max-producers-per-topic, max-consumers-per-topic, max-consumers-per-subscription, "+
+				"anti-affinity-group, persistence, deduplication, encryption-required, "+
+				"subscription-auth-mode, subscription-permission, dispatch-rate, "+
 				"replicator-dispatch-rate, subscribe-rate, subscription-dispatch-rate, publish-rate"),
 		),
 		// Generic policy parameters - specific ones will be used based on the policy type
@@ -270,8 +270,8 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceRemovePolicyTool()
 			mcp.Description("The namespace name (tenant/namespace) to remove the policy from"),
 		),
 		mcp.WithString("policy", mcp.Required(),
-			mcp.Description("Type of policy to remove. Available options: " +
-				"backlog-quota, topic-auto-creation, offload-deletion-lag, anti-affinity-group, " +
+			mcp.Description("Type of policy to remove. Available options: "+
+				"backlog-quota, topic-auto-creation, offload-deletion-lag, anti-affinity-group, "+
 				"permission, subscription-permission"),
 		),
 		mcp.WithString("role",
@@ -290,7 +290,7 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceRemovePolicyTool()
 func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceGetPoliciesHandler() func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get Pulsar session from context
-		session := b.getPulsarSession(ctx)
+		session := mcpCtx.GetPulsarSession(ctx)
 		if session == nil {
 			return mcp.NewToolResultError("Pulsar session not found in context"), nil
 		}
@@ -319,7 +319,7 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceGetPoliciesHandler
 func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceSetPolicyHandler() func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get Pulsar session from context
-		session := b.getPulsarSession(ctx)
+		session := mcpCtx.GetPulsarSession(ctx)
 		if session == nil {
 			return mcp.NewToolResultError("Pulsar session not found in context"), nil
 		}
@@ -362,7 +362,7 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceSetPolicyHandler()
 func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceRemovePolicyHandler() func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get Pulsar session from context
-		session := b.getPulsarSession(ctx)
+		session := mcpCtx.GetPulsarSession(ctx)
 		if session == nil {
 			return mcp.NewToolResultError("Pulsar session not found in context"), nil
 		}
@@ -406,18 +406,6 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) marshalResponse(data interface{}
 		return b.handleError("marshal response", err), nil
 	}
 	return mcp.NewToolResultText(string(jsonBytes)), nil
-}
-
-// getPulsarSession retrieves the Pulsar session from context
-func (b *PulsarAdminNamespacePolicyToolBuilder) getPulsarSession(ctx context.Context) *pulsar.Session {
-	type contextKey string
-	const pulsarSessionContextKey contextKey = "pulsar_session"
-	
-	session, ok := ctx.Value(pulsarSessionContextKey).(*pulsar.Session)
-	if !ok {
-		return nil
-	}
-	return session
 }
 
 // Policy-specific handler functions

@@ -28,7 +28,7 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
-	pulsarPkg "github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
+	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
 
 // PulsarClientProduceToolBuilder implements the ToolBuilder interface for Pulsar Client Producer tools
@@ -208,7 +208,7 @@ func (b *PulsarClientProduceToolBuilder) buildProduceHandler(readOnly bool) func
 		}
 
 		// Get Pulsar session from context
-		session := b.getPulsarSession(ctx)
+		session := mcpCtx.GetPulsarSession(ctx)
 		if session == nil {
 			return mcp.NewToolResultError("Pulsar session not found in context"), nil
 		}
@@ -322,19 +322,6 @@ func (b *PulsarClientProduceToolBuilder) marshalResponse(data interface{}) (*mcp
 		return b.handleError("marshal response", err), nil
 	}
 	return mcp.NewToolResultText(string(jsonBytes)), nil
-}
-
-// getPulsarSession retrieves the Pulsar session from context
-func (b *PulsarClientProduceToolBuilder) getPulsarSession(ctx context.Context) *pulsarPkg.Session {
-	// Define context key locally to avoid circular imports
-	type contextKey string
-	const pulsarSessionContextKey contextKey = "pulsar_session"
-
-	session, ok := ctx.Value(pulsarSessionContextKey).(*pulsarPkg.Session)
-	if !ok {
-		return nil
-	}
-	return session
 }
 
 // generateMessagePayloads generates message payloads from message strings
