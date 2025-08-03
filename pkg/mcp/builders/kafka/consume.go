@@ -27,8 +27,8 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/sirupsen/logrus"
-	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
+	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 	"github.com/twmb/franz-go/pkg/kgo"
 	"github.com/twmb/franz-go/pkg/sr"
 )
@@ -206,9 +206,9 @@ func (b *KafkaConsumeToolBuilder) buildKafkaConsumeHandler() func(context.Contex
 		}
 
 		// Get Kafka session from context
-		session, err := b.getKafkaSession(ctx)
-		if err != nil {
-			return b.handleError("get Kafka session", err), nil
+		session := mcpCtx.GetKafkaSession(ctx)
+		if session == nil {
+			return b.handleError("get Kafka session not found in context", nil), nil
 		}
 
 		// Create Kafka client using the session
@@ -338,18 +338,4 @@ func (b *KafkaConsumeToolBuilder) marshalResponse(data interface{}) (*mcp.CallTo
 		return b.handleError("marshal response", err), nil
 	}
 	return mcp.NewToolResultText(string(jsonBytes)), nil
-}
-
-// getKafkaSession retrieves the Kafka session from context
-func (b *KafkaConsumeToolBuilder) getKafkaSession(ctx context.Context) (*kafka.Session, error) {
-	// Get Kafka session from context using the same key as in ctx.go
-	// We define the key locally to avoid circular import
-	type contextKey string
-	const kafkaSessionContextKey contextKey = "kafka_session"
-
-	session, ok := ctx.Value(kafkaSessionContextKey).(*kafka.Session)
-	if !ok || session == nil {
-		return nil, fmt.Errorf("Kafka session not found in context")
-	}
-	return session, nil
 }

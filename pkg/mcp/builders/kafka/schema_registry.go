@@ -26,8 +26,8 @@ import (
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
-	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
+	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 	"github.com/twmb/franz-go/pkg/sr"
 )
 
@@ -187,7 +187,11 @@ func (b *KafkaSchemaRegistryToolBuilder) buildKafkaSchemaRegistryHandler(readOnl
 		}
 
 		// Get Schema Registry client
-		client, err := b.getSchemaRegistryClient(ctx)
+		session := mcpCtx.GetKafkaSession(ctx)
+		if session == nil {
+			return b.handleError("get Kafka session not found in context", nil), nil
+		}
+		client, err := session.GetSchemaRegistryClient()
 		if err != nil {
 			return b.handleError("get Schema Registry client", err), nil
 		}
@@ -264,19 +268,6 @@ func (b *KafkaSchemaRegistryToolBuilder) marshalResponse(data interface{}) (*mcp
 		return b.handleError("marshal response", err), nil
 	}
 	return mcp.NewToolResultText(string(jsonBytes)), nil
-}
-
-// getSchemaRegistryClient retrieves the Schema Registry client from context
-func (b *KafkaSchemaRegistryToolBuilder) getSchemaRegistryClient(ctx context.Context) (*sr.Client, error) {
-	// Get Kafka session from context using the same key as in ctx.go
-	type contextKey string
-	const kafkaSessionContextKey contextKey = "kafka_session"
-
-	session, ok := ctx.Value(kafkaSessionContextKey).(*kafka.Session)
-	if !ok || session == nil {
-		return nil, fmt.Errorf("Kafka session not found in context")
-	}
-	return session.GetSchemaRegistryClient()
 }
 
 // Specific operation handler functions
@@ -422,7 +413,7 @@ func (b *KafkaSchemaRegistryToolBuilder) handleSchemaVersionDelete(ctx context.C
 	if err != nil {
 		return b.handleError("delete schema version", err), nil
 	}
-	
+
 	return mcp.NewToolResultText(fmt.Sprintf("Schema version %d for subject %s deleted successfully", version, subject)), nil
 }
 

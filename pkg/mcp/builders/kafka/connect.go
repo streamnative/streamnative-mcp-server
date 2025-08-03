@@ -28,6 +28,7 @@ import (
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
+	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
 
 // KafkaConnectToolBuilder implements the ToolBuilder interface for Kafka Connect
@@ -222,7 +223,11 @@ func (b *KafkaConnectToolBuilder) buildKafkaConnectHandler(readOnly bool) func(c
 		}
 
 		// Get Kafka Connect client
-		admin, err := b.getKafkaConnectClient(ctx)
+		session := mcpCtx.GetKafkaSession(ctx)
+		if session == nil {
+			return mcp.NewToolResultError("Kafka session not found in context"), nil
+		}
+		admin, err := session.GetConnectClient()
 		if err != nil {
 			return b.handleError("get admin client", err), nil
 		}

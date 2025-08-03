@@ -25,8 +25,8 @@ import (
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
-	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
+	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 	"github.com/twmb/franz-go/pkg/kadm"
 )
 
@@ -198,7 +198,11 @@ func (b *KafkaTopicsToolBuilder) buildKafkaTopicsHandler(readOnly bool) func(con
 		}
 
 		// Get Kafka admin client
-		admin, err := b.getKafkaAdminClient(ctx)
+		session := mcpCtx.GetKafkaSession(ctx)
+		if session == nil {
+			return b.handleError("get Kafka session not found in context", nil), nil
+		}
+		admin, err := session.GetAdminClient()
 		if err != nil {
 			return b.handleError("get admin client", err), nil
 		}
@@ -246,21 +250,6 @@ func (b *KafkaTopicsToolBuilder) marshalResponse(data interface{}) (*mcp.CallToo
 	}
 	return mcp.NewToolResultText(string(jsonBytes)), nil
 }
-
-// getKafkaAdminClient retrieves the Kafka admin client from context
-func (b *KafkaTopicsToolBuilder) getKafkaAdminClient(ctx context.Context) (*kadm.Client, error) {
-	// Get Kafka session from context using the same key as in ctx.go
-	type contextKey string
-	const kafkaSessionContextKey contextKey = "kafka_session"
-
-	session, ok := ctx.Value(kafkaSessionContextKey).(*kafka.Session)
-	if !ok || session == nil {
-		return nil, fmt.Errorf("Kafka session not found in context")
-	}
-	return session.GetAdminClient()
-}
-
-// Specific operation handler functions
 
 // handleKafkaTopicsList handles listing all topics
 func (b *KafkaTopicsToolBuilder) handleKafkaTopicsList(ctx context.Context, admin *kadm.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
