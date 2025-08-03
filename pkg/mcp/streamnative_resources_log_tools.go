@@ -31,6 +31,7 @@ import (
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
+	context2 "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
 
 var FunctionConnectorList = []string{"sink", "source", "function", "kafka-connect"}
@@ -112,7 +113,7 @@ type LogContent struct {
 
 func handleStreamNativeResourcesLog(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get log client from session
-	session := GetSNCloudSession(ctx)
+	session := context2.GetSNCloudSession(ctx)
 	if session == nil {
 		return nil, fmt.Errorf("failed to get StreamNative Cloud session")
 	}

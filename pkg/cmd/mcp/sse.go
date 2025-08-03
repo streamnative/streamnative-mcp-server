@@ -33,6 +33,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp"
+	context2 "github.com/streamnative/streamnative-mcp-server/pkg/mcp"
 )
 
 func NewCmdMcpSseServer(configOpts *ServerOptions) *cobra.Command {
@@ -76,9 +77,9 @@ func runSseServer(configOpts *ServerOptions) error {
 	}
 
 	// 4. Set the context
-	ctx = mcp.WithSNCloudSession(ctx, mcpServer.SNCloudSession)
-	ctx = mcp.WithPulsarSession(ctx, mcpServer.PulsarSession)
-	ctx = mcp.WithKafkaSession(ctx, mcpServer.KafkaSession)
+	ctx = context2.WithSNCloudSession(ctx, mcpServer.SNCloudSession)
+	ctx = context2.WithPulsarSession(ctx, mcpServer.PulsarSession)
+	ctx = context2.WithKafkaSession(ctx, mcpServer.KafkaSession)
 	if configOpts.Options.KeyFile != "" {
 		if configOpts.Options.PulsarInstance != "" && configOpts.Options.PulsarCluster != "" {
 			err = mcp.SetContext(ctx, configOpts.Options, configOpts.Options.PulsarInstance, configOpts.Options.PulsarCluster)
@@ -97,9 +98,9 @@ func runSseServer(configOpts *ServerOptions) error {
 		server.WithStaticBasePath(configOpts.HTTPPath),
 		server.WithSSEContextFunc(func(ctx context.Context, _ *http.Request) context.Context {
 			c := context.WithValue(ctx, common.OptionsKey, configOpts.Options)
-			c = mcp.WithKafkaSession(c, mcpServer.KafkaSession)
-			c = mcp.WithPulsarSession(c, mcpServer.PulsarSession)
-			c = mcp.WithSNCloudSession(c, mcpServer.SNCloudSession)
+			c = context2.WithKafkaSession(c, mcpServer.KafkaSession)
+			c = context2.WithPulsarSession(c, mcpServer.PulsarSession)
+			c = context2.WithSNCloudSession(c, mcpServer.SNCloudSession)
 			return c
 		}),
 	)

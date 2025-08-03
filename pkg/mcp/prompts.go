@@ -26,6 +26,7 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
+	context2 "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 	sncloud "github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserver"
 	"k8s.io/utils/ptr"
 )
@@ -82,7 +83,7 @@ func RegisterPrompts(s *server.MCPServer) {
 
 func HandleListPulsarClusters(ctx context.Context, _ mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
 	// Get API client from session
-	session := GetSNCloudSession(ctx)
+	session := context2.GetSNCloudSession(ctx)
 	if session == nil {
 		return nil, fmt.Errorf("failed to get StreamNative Cloud session")
 	}
@@ -153,7 +154,7 @@ func HandleListPulsarClusters(ctx context.Context, _ mcp.GetPromptRequest) (*mcp
 
 func handleReadPulsarCluster(ctx context.Context, request mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
 	// Get API client from session
-	session := GetSNCloudSession(ctx)
+	session := context2.GetSNCloudSession(ctx)
 	if session == nil {
 		return nil, fmt.Errorf("failed to get StreamNative Cloud session")
 	}
@@ -215,7 +216,7 @@ func handleReadPulsarCluster(ctx context.Context, request mcp.GetPromptRequest) 
 
 func handleBuildServerlessPulsarCluster(ctx context.Context, request mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
 	// Get API client from session
-	session := GetSNCloudSession(ctx)
+	session := context2.GetSNCloudSession(ctx)
 	if session == nil {
 		return nil, fmt.Errorf("failed to get StreamNative Cloud session")
 	}

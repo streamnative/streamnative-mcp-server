@@ -12,6 +12,7 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
+	context2 "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 	sncloud "github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserver"
 )
 
@@ -89,7 +90,7 @@ func handleStreamNativeResourcesApply(ctx context.Context, request mcp.CallToolR
 	dryRun := request.GetBool("dry_run", false)
 
 	// Get API client from session
-	session := GetSNCloudSession(ctx)
+	session := context2.GetSNCloudSession(ctx)
 	if session == nil {
 		return nil, fmt.Errorf("failed to get StreamNative Cloud session")
 	}
@@ -339,7 +340,7 @@ func handleStreamNativeResourcesDelete(ctx context.Context, request mcp.CallTool
 	}
 
 	// Get API client from session
-	session := GetSNCloudSession(ctx)
+	session := context2.GetSNCloudSession(ctx)
 	if session == nil {
 		return nil, fmt.Errorf("failed to get StreamNative Cloud session")
 	}

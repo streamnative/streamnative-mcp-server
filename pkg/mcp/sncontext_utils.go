@@ -24,6 +24,7 @@ import (
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/config"
 	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
+	context2 "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 	sncloud "github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserver"
 )
@@ -38,7 +39,7 @@ func SetContext(ctx context.Context, options *config.Options, instanceName, clus
 	}
 
 	// Get API client from session
-	session := GetSNCloudSession(ctx)
+	session := context2.GetSNCloudSession(ctx)
 	if session == nil {
 		return fmt.Errorf("failed to get StreamNative Cloud session")
 	}
@@ -155,7 +156,7 @@ func SetContext(ctx context.Context, options *config.Options, instanceName, clus
 		return fmt.Errorf("failed to get access token")
 	}
 
-	psession := GetPulsarSession(ctx)
+	psession := context2.GetPulsarSession(ctx)
 	if psession == nil {
 		return fmt.Errorf("failed to get pulsar session")
 	}
@@ -183,7 +184,7 @@ func SetContext(ctx context.Context, options *config.Options, instanceName, clus
 		ConnectAuthPass:        accessToken,
 	}
 
-	ksession := GetKafkaSession(ctx)
+	ksession := context2.GetKafkaSession(ctx)
 	if ksession == nil {
 		return fmt.Errorf("failed to get kafka session")
 	}
