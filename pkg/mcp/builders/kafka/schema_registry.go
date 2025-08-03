@@ -348,7 +348,8 @@ func (b *KafkaSchemaRegistryToolBuilder) handleSchemaSubjectDelete(ctx context.C
 		return b.handleError("get subject name", err), nil
 	}
 
-	versions, err := client.DeleteSubject(ctx, subject)
+	// Delete subject using correct API signature (soft delete by default)
+	versions, err := client.DeleteSubject(ctx, subject, sr.SoftDelete)
 	if err != nil {
 		return b.handleError("delete schema subject", err), nil
 	}
@@ -416,30 +417,41 @@ func (b *KafkaSchemaRegistryToolBuilder) handleSchemaVersionDelete(ctx context.C
 		return b.handleError("parse version number", err), nil
 	}
 
-	deletedVersion, err := client.DeleteSchemaVersion(ctx, subject, version)
+	// Delete schema version using correct API signature (soft delete by default)
+	err = client.DeleteSchema(ctx, subject, version, sr.SoftDelete)
 	if err != nil {
 		return b.handleError("delete schema version", err), nil
 	}
-	return b.marshalResponse(deletedVersion)
+	
+	return mcp.NewToolResultText(fmt.Sprintf("Schema version %d for subject %s deleted successfully", version, subject)), nil
 }
 
 // handleSchemaCompatibilityGet handles getting compatibility setting
 func (b *KafkaSchemaRegistryToolBuilder) handleSchemaCompatibilityGet(ctx context.Context, client *sr.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	subject := request.GetString("subject") // Optional for global compatibility
+	subject := request.GetString("subject", "") // Optional for global compatibility
 
-	var compatibility sr.CompatibilityLevel
-	var err error
-
+	var results []sr.CompatibilityResult
 	if subject != "" {
-		compatibility, err = client.Compatibility(ctx, subject)
+		// Get compatibility for specific subject
+		results = client.Compatibility(ctx, subject)
 	} else {
-		compatibility, err = client.Config(ctx)
+		// Get global compatibility
+		results = client.Compatibility(ctx)
 	}
 
-	if err != nil {
-		return b.handleError("get compatibility setting", err), nil
+	// Check for errors in results
+	for _, result := range results {
+		if result.Err != nil {
+			return b.handleError("get compatibility setting", result.Err), nil
+		}
 	}
-	return b.marshalResponse(map[string]string{"compatibility": string(compatibility)})
+
+	// Return the first result (there should only be one)
+	if len(results) > 0 {
+		return b.marshalResponse(map[string]string{"compatibility": results[0].Level.String()})
+	}
+
+	return mcp.NewToolResultError("No compatibility result returned"), nil
 }
 
 // handleSchemaCompatibilitySet handles setting compatibility level
@@ -449,31 +461,42 @@ func (b *KafkaSchemaRegistryToolBuilder) handleSchemaCompatibilitySet(ctx contex
 		return b.handleError("get compatibility level", err), nil
 	}
 
-	subject := request.GetString("subject") // Optional for global compatibility
+	subject := request.GetString("subject", "") // Optional for global compatibility
 
 	// Parse compatibility level
 	var compatibility sr.CompatibilityLevel
 	switch strings.ToUpper(compatibilityStr) {
 	case "BACKWARD":
-		compatibility = sr.CompatibilityBackward
+		compatibility = sr.CompatBackward
 	case "FORWARD":
-		compatibility = sr.CompatibilityForward
+		compatibility = sr.CompatForward
 	case "FULL":
-		compatibility = sr.CompatibilityFull
+		compatibility = sr.CompatFull
 	case "NONE":
-		compatibility = sr.CompatibilityNone
+		compatibility = sr.CompatNone
 	default:
 		return mcp.NewToolResultError(fmt.Sprintf("Invalid compatibility level: %s. Valid levels: BACKWARD, FORWARD, FULL, NONE", compatibilityStr)), nil
 	}
 
-	if subject != "" {
-		_, err = client.SetCompatibility(ctx, subject, compatibility)
-	} else {
-		_, err = client.SetConfig(ctx, compatibility)
+	// Create SetCompatibility request
+	setCompat := sr.SetCompatibility{
+		Level: compatibility,
 	}
 
-	if err != nil {
-		return b.handleError("set compatibility level", err), nil
+	var results []sr.CompatibilityResult
+	if subject != "" {
+		// Set compatibility for specific subject
+		results = client.SetCompatibility(ctx, setCompat, subject)
+	} else {
+		// Set global compatibility
+		results = client.SetCompatibility(ctx, setCompat)
+	}
+
+	// Check for errors in results
+	for _, result := range results {
+		if result.Err != nil {
+			return b.handleError("set compatibility level", result.Err), nil
+		}
 	}
 
 	return mcp.NewToolResultText(fmt.Sprintf("Compatibility level set to %s", compatibilityStr)), nil

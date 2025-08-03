@@ -21,12 +21,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
-	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	"github.com/twmb/franz-go/pkg/kadm"
@@ -266,12 +264,7 @@ func (b *KafkaTopicsToolBuilder) getKafkaAdminClient(ctx context.Context) (*kadm
 
 // handleKafkaTopicsList handles listing all topics
 func (b *KafkaTopicsToolBuilder) handleKafkaTopicsList(ctx context.Context, admin *kadm.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	includeInternal := false
-	if val, exists := request.Arguments["includeInternal"]; exists {
-		if boolVal, ok := val.(bool); ok {
-			includeInternal = boolVal
-		}
-	}
+	includeInternal := request.GetBool("includeInternal", false)
 
 	topics, err := admin.ListTopics(ctx)
 	if err != nil {
@@ -314,12 +307,12 @@ func (b *KafkaTopicsToolBuilder) handleKafkaTopicCreate(ctx context.Context, adm
 		return b.handleError("get topic name", err), nil
 	}
 
-	partitionsNum, err := request.RequireNumber("partitions")
+	partitionsNum, err := request.RequireInt("partitions")
 	if err != nil {
 		return b.handleError("get partitions", err), nil
 	}
 
-	replicationFactorNum, err := request.RequireNumber("replicationFactor")
+	replicationFactorNum, err := request.RequireInt("replicationFactor")
 	if err != nil {
 		return b.handleError("get replication factor", err), nil
 	}
@@ -329,7 +322,8 @@ func (b *KafkaTopicsToolBuilder) handleKafkaTopicCreate(ctx context.Context, adm
 
 	// Parse optional configs
 	var configs map[string]*string
-	if configsParam, exists := request.Arguments["configs"]; exists {
+	arguments := request.GetArguments()
+	if configsParam, exists := arguments["configs"]; exists {
 		if configsMap, ok := configsParam.(map[string]interface{}); ok {
 			configs = make(map[string]*string)
 			for key, value := range configsMap {
@@ -344,15 +338,8 @@ func (b *KafkaTopicsToolBuilder) handleKafkaTopicCreate(ctx context.Context, adm
 		}
 	}
 
-	// Create topic request
-	req := kadm.TopicRequest{
-		Topic:             topicName,
-		NumPartitions:     partitions,
-		ReplicationFactor: replicationFactor,
-		Configs:           configs,
-	}
-
-	results, err := admin.CreateTopics(ctx, req)
+	// Create topic using the correct CreateTopics API
+	results, err := admin.CreateTopics(ctx, partitions, replicationFactor, configs, topicName)
 	if err != nil {
 		return b.handleError("create Kafka topic", err), nil
 	}

@@ -19,253 +19,36 @@ package mcp
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"slices"
-	"strings"
-	"time"
 
-	"github.com/apache/pulsar-client-go/pulsar"
-	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
+	pulsarBuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/pulsar"
 )
 
+// PulsarClientProduceTools creates Pulsar Client Producer tool list using the new builder pattern
+func PulsarClientProduceTools(readOnly bool, features []string) []server.ServerTool {
+	builder := pulsarBuilders.NewPulsarClientProduceToolBuilder()
+	config := builders.ToolBuildConfig{
+		ReadOnly: readOnly,
+		Features: features,
+	}
+
+	tools, err := builder.BuildTools(context.Background(), config)
+	if err != nil {
+		// In production environment, this should use proper logging
+		fmt.Printf("Failed to build Pulsar Client Producer tools: %v\n", err)
+		return nil
+	}
+
+	return tools
+}
+
 // PulsarClientAddProducerTools adds Pulsar client producer tools to the MCP server
-func PulsarClientAddProducerTools(s *server.MCPServer, _ bool, features []string) {
-	if !slices.Contains(features, string(FeaturePulsarClient)) && !slices.Contains(features, string(FeatureAll)) && !slices.Contains(features, string(FeatureAllPulsar)) {
-		return
+func PulsarClientAddProducerTools(s *server.MCPServer, readOnly bool, features []string) {
+	tools := PulsarClientProduceTools(readOnly, features)
+
+	for _, tool := range tools {
+		s.AddTool(tool.Tool, tool.Handler)
 	}
-
-	// Main produce tool
-	produceTool := mcp.NewTool("pulsar_client_produce",
-		mcp.WithDescription("Produce messages to a Pulsar topic. This tool allows you to send messages "+
-			"to a specified Pulsar topic with various options to control message format, "+
-			"batching, and properties. Do not use this tool for Kafka protocol operations. Use 'kafka_client_produce' instead."),
-		mcp.WithString("topic", mcp.Required(),
-			mcp.Description("Topic to produce to"),
-		),
-		mcp.WithArray("messages",
-			mcp.Description("Messages to send. Specify multiple times for multiple messages. IMPORTANT: Use this parameter to provide message content."),
-			mcp.Items(
-				map[string]interface{}{
-					"type":        "string",
-					"description": "message",
-				},
-			),
-		),
-		mcp.WithNumber("num-produce",
-			mcp.Description("Number of times to send message(s) (default: 1)"),
-		),
-		mcp.WithNumber("rate",
-			mcp.Description("Rate (in msg/sec) at which to produce, 0 means produce as fast as possible (default: 0)"),
-		),
-		mcp.WithBoolean("disable-batching",
-			mcp.Description("Disable batch sending of messages (default: false)"),
-		),
-		mcp.WithBoolean("chunking",
-			mcp.Description("Should split the message and publish in chunks if message size is larger than allowed max size (default: false)"),
-		),
-		mcp.WithString("separator",
-			mcp.Description("Character to split messages string on (default: none)"),
-		),
-		mcp.WithArray("properties",
-			mcp.Description("Properties to add, key=value format. Specify multiple times for multiple properties."),
-			mcp.Items(
-				map[string]interface{}{
-					"type":        "string",
-					"description": "property",
-				},
-			),
-		),
-		mcp.WithString("key",
-			mcp.Description("Partitioning key to add to each message"),
-		),
-	)
-	s.AddTool(produceTool, handleClientProduce)
-}
-
-func handleClientProduce(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	// Extract required parameters with validation
-	topic, err := request.RequireString("topic")
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
-	}
-
-	// Set default values and extract optional parameters
-	messages := []string{}
-	if val := request.GetStringSlice("messages", []string{}); len(val) > 0 {
-		messages = val
-	}
-
-	if len(messages) == 0 {
-		return mcp.NewToolResultError("Please supply message content with 'messages' parameter."), nil
-	}
-
-	numProduce := 1
-	if val := request.GetFloat("num-produce", 1); val != 0 {
-		numProduce = int(val)
-	}
-
-	rate := 0.0
-	if val := request.GetFloat("rate", 0); val != 0 {
-		rate = val
-	}
-
-	disableBatching := false
-	if val := request.GetBool("disable-batching", false); val {
-		disableBatching = val
-	}
-
-	chunkingAllowed := false
-	if val := request.GetBool("chunking", false); val {
-		chunkingAllowed = val
-	}
-
-	separator := ""
-	if val := request.GetString("separator", ""); val != "" {
-		separator = val
-	}
-
-	properties := []string{}
-	if val := request.GetStringSlice("properties", []string{}); len(val) > 0 {
-		properties = val
-	}
-
-	key := ""
-	if val := request.GetString("key", ""); val != "" {
-		key = val
-	}
-
-	// Split messages by separator if needed
-	if separator != "" && len(messages) > 0 {
-		var splitMessages []string
-		for _, msg := range messages {
-			parts := strings.Split(msg, separator)
-			for _, part := range parts {
-				if part != "" {
-					splitMessages = append(splitMessages, part)
-				}
-			}
-		}
-		messages = splitMessages
-	}
-
-	// Setup client
-	// Get Pulsar session from context
-	session := GetPulsarSession(ctx)
-	if session == nil {
-		return mcp.NewToolResultError("Pulsar session not found in context"), nil
-	}
-
-	client, err := session.GetPulsarClient()
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to create Pulsar client: %v", err)), nil
-	}
-	defer client.Close()
-
-	// Prepare producer options
-	producerOpts := pulsar.ProducerOptions{
-		Topic: topic,
-	}
-
-	// Set batching and chunking options
-	if chunkingAllowed {
-		producerOpts.EnableChunking = true
-		producerOpts.BatchingMaxPublishDelay = 0 * time.Millisecond
-	} else if disableBatching {
-		producerOpts.BatchingMaxPublishDelay = 0 * time.Millisecond
-	}
-
-	producer, err := client.CreateProducer(producerOpts)
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to create producer: %v", err)), nil
-	}
-	defer producer.Close()
-
-	// Generate message bodies from messages and files
-	messagePayloads, err := generateMessagePayloads(messages)
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to generate message payloads: %v", err)), nil
-	}
-
-	// Parse properties
-	propMap := make(map[string]string)
-	for _, prop := range properties {
-		parts := strings.SplitN(prop, "=", 2)
-		if len(parts) == 2 {
-			propMap[parts[0]] = parts[1]
-		}
-	}
-
-	// Setup rate limiter
-	var limiter *time.Ticker
-	if rate > 0 {
-		interval := time.Duration(1000/rate) * time.Millisecond
-		limiter = time.NewTicker(interval)
-		defer limiter.Stop()
-	}
-
-	// Send messages
-	numMessagesSent := 0
-	var lastMessageID pulsar.MessageID
-	for range numProduce {
-		for _, payload := range messagePayloads {
-			// Apply rate limiting if enabled
-			if limiter != nil {
-				<-limiter.C
-			}
-
-			// Create message to send
-			msg := &pulsar.ProducerMessage{
-				Payload: payload,
-			}
-
-			// Add properties if specified
-			if len(propMap) > 0 {
-				msg.Properties = propMap
-			}
-
-			// Standard message
-			if key != "" {
-				msg.Key = key
-			}
-
-			// Send the message
-			msgID, err := producer.Send(ctx, msg)
-			if err != nil {
-				return mcp.NewToolResultError(fmt.Sprintf("Failed to send message: %v", err)), nil
-			}
-
-			lastMessageID = msgID
-			numMessagesSent++
-		}
-	}
-
-	// Prepare response
-	response := map[string]interface{}{
-		"topic":           topic,
-		"messages_sent":   numMessagesSent,
-		"last_message_id": fmt.Sprintf("%v", lastMessageID),
-		"success":         true,
-	}
-
-	// Convert to JSON
-	jsonBytes, err := json.Marshal(response)
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to encode result: %v", err)), nil
-	}
-
-	return mcp.NewToolResultText(string(jsonBytes)), nil
-}
-
-// generateMessagePayloads generates message payloads from message strings
-func generateMessagePayloads(messages []string) ([][]byte, error) {
-	var payloads [][]byte
-
-	// Add message strings
-	for _, msg := range messages {
-		payloads = append(payloads, []byte(msg))
-	}
-
-	return payloads, nil
 }
