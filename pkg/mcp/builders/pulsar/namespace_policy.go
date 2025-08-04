@@ -499,7 +499,7 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) handleSetRetention(_ context.Con
 }
 
 // handleGrantPermission handles granting permissions on a namespace
-func (b *PulsarAdminNamespacePolicyToolBuilder) handleGrantPermission(ctx context.Context, client cmdutils.Client, namespace string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminNamespacePolicyToolBuilder) handleGrantPermission(_ context.Context, client cmdutils.Client, namespace string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	role, err := request.RequireString("role")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get role: %v", err)), nil
@@ -530,7 +530,7 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) handleGrantPermission(ctx contex
 }
 
 // handleRevokePermission handles revoking permissions from a namespace
-func (b *PulsarAdminNamespacePolicyToolBuilder) handleRevokePermission(ctx context.Context, client cmdutils.Client, namespace string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminNamespacePolicyToolBuilder) handleRevokePermission(_ context.Context, client cmdutils.Client, namespace string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	role, err := request.RequireString("role")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get role: %v", err)), nil
@@ -551,7 +551,7 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) handleRevokePermission(ctx conte
 }
 
 // handleSetReplicationClusters handles setting replication clusters for a namespace
-func (b *PulsarAdminNamespacePolicyToolBuilder) handleSetReplicationClusters(ctx context.Context, client cmdutils.Client, namespace string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminNamespacePolicyToolBuilder) handleSetReplicationClusters(_ context.Context, client cmdutils.Client, namespace string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	clusters, err := request.RequireStringSlice("clusters")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get clusters: %v", err)), nil
@@ -571,7 +571,7 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) handleSetReplicationClusters(ctx
 }
 
 // handleSetBacklogQuota handles setting backlog quota for a namespace
-func (b *PulsarAdminNamespacePolicyToolBuilder) handleSetBacklogQuota(ctx context.Context, client cmdutils.Client, namespace string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminNamespacePolicyToolBuilder) handleSetBacklogQuota(_ context.Context, client cmdutils.Client, namespace string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	limitSizeStr, err := request.RequireString("limit-size")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get limit size: %v", err)), nil
@@ -623,7 +623,7 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) handleSetBacklogQuota(ctx contex
 }
 
 // handleRemoveBacklogQuota handles removing backlog quota for a namespace
-func (b *PulsarAdminNamespacePolicyToolBuilder) handleRemoveBacklogQuota(ctx context.Context, client cmdutils.Client, namespace string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminNamespacePolicyToolBuilder) handleRemoveBacklogQuota(_ context.Context, client cmdutils.Client, namespace string, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Remove backlog quota (API doesn't require quota type for removal)
 	err := client.Namespaces().RemoveBacklogQuota(namespace)
 	if err != nil {

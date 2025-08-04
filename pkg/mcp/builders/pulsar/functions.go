@@ -23,6 +23,7 @@ import (
 	"fmt"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/admin/config"
+	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
@@ -330,7 +331,7 @@ func (b *PulsarAdminFunctionsToolBuilder) handleFunctionList(_ context.Context, 
 }
 
 // handleFunctionGet handles the get operation
-func (b *PulsarAdminFunctionsToolBuilder) handleFunctionGet(ctx context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminFunctionsToolBuilder) handleFunctionGet(_ context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
 	admin := client.Functions()
 
 	functionConfig, err := admin.GetFunction(tenant, namespace, name)
@@ -342,7 +343,7 @@ func (b *PulsarAdminFunctionsToolBuilder) handleFunctionGet(ctx context.Context,
 }
 
 // handleFunctionStatus handles the status operation
-func (b *PulsarAdminFunctionsToolBuilder) handleFunctionStatus(ctx context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminFunctionsToolBuilder) handleFunctionStatus(_ context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
 	admin := client.Functions()
 
 	status, err := admin.GetFunctionStatus(tenant, namespace, name)
@@ -354,59 +355,282 @@ func (b *PulsarAdminFunctionsToolBuilder) handleFunctionStatus(ctx context.Conte
 }
 
 // handleFunctionStats handles the stats operation
-func (b *PulsarAdminFunctionsToolBuilder) handleFunctionStats(ctx context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
-	// Note: GetStats method may not be available in current API
-	return b.handleError("get function stats", fmt.Errorf("function stats operation not yet implemented in current API version")), nil
+func (b *PulsarAdminFunctionsToolBuilder) handleFunctionStats(_ context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
+	admin := client.Functions()
+
+	stats, err := admin.GetFunctionStats(tenant, namespace, name)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to get stats for function '%s' in tenant '%s' namespace '%s': %v. Verify the function exists and is running.",
+			name, tenant, namespace, err)), nil
+	}
+
+	return b.marshalResponse(stats)
 }
 
 // handleFunctionQuerystate handles the querystate operation
-func (b *PulsarAdminFunctionsToolBuilder) handleFunctionQuerystate(ctx context.Context, client cmdutils.Client, tenant, namespace, name, key string) (*mcp.CallToolResult, error) {
-	// Note: GetFunctionState method may not be available in current API
-	return b.handleError("query function state", fmt.Errorf("function state query operation not yet implemented in current API version")), nil
+func (b *PulsarAdminFunctionsToolBuilder) handleFunctionQuerystate(_ context.Context, client cmdutils.Client, tenant, namespace, name, key string) (*mcp.CallToolResult, error) {
+	admin := client.Functions()
+
+	state, err := admin.GetFunctionState(tenant, namespace, name, key)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to query state for key '%s' in function '%s' (tenant '%s' namespace '%s'): %v. Verify the function exists and has state enabled.",
+			key, name, tenant, namespace, err)), nil
+	}
+
+	return b.marshalResponse(map[string]interface{}{
+		"key":   key,
+		"value": state,
+		"function": map[string]string{
+			"tenant":    tenant,
+			"namespace": namespace,
+			"name":      name,
+		},
+	})
 }
 
 // handleFunctionCreate handles the create operation
-func (b *PulsarAdminFunctionsToolBuilder) handleFunctionCreate(ctx context.Context, client cmdutils.Client, tenant, namespace, name string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	// Note: Function creation may require more complex implementation
-	return b.handleError("create function", fmt.Errorf("function creation operation not yet implemented - requires complex configuration and file upload handling")), nil
+func (b *PulsarAdminFunctionsToolBuilder) handleFunctionCreate(_ context.Context, client cmdutils.Client, tenant, namespace, name string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	// Build function configuration from request parameters to validate
+	functionConfig, err := b.buildFunctionConfig(tenant, namespace, name, request, false)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to build function configuration for '%s' in tenant '%s' namespace '%s': %v. Please verify all required parameters are provided correctly.",
+			name, tenant, namespace, err)), nil
+	}
+
+	admin := client.Functions()
+	packagePath := ""
+	//nolint:gocritic
+	if functionConfig.Jar != nil {
+		packagePath = *functionConfig.Jar
+	} else if functionConfig.Py != nil {
+		packagePath = *functionConfig.Py
+	} else if functionConfig.Go != nil {
+		packagePath = *functionConfig.Go
+	}
+
+	err = admin.CreateFuncWithURL(functionConfig, packagePath)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to create function '%s' in tenant '%s' namespace '%s': %v. Verify the function configuration is valid.",
+			name, tenant, namespace, err)), nil
+	}
+
+	return mcp.NewToolResultText(fmt.Sprintf("Created function '%s' successfully in tenant '%s' namespace '%s'. The function configuration has been created.",
+		name, tenant, namespace)), nil
 }
 
 // handleFunctionUpdate handles the update operation
-func (b *PulsarAdminFunctionsToolBuilder) handleFunctionUpdate(ctx context.Context, client cmdutils.Client, tenant, namespace, name string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return b.handleError("update function", fmt.Errorf("function update operation not yet implemented - requires complex configuration handling")), nil
+func (b *PulsarAdminFunctionsToolBuilder) handleFunctionUpdate(_ context.Context, client cmdutils.Client, tenant, namespace, name string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	admin := client.Functions()
+
+	// Build function configuration from request parameters
+	config, err := b.buildFunctionConfig(tenant, namespace, name, request, true)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to build function configuration for '%s' in tenant '%s' namespace '%s': %v. Please verify all parameters are provided correctly.",
+			name, tenant, namespace, err)), nil
+	}
+
+	// Update the function
+	updateOptions := &utils.UpdateOptions{
+		UpdateAuthData: true,
+	}
+	err = admin.UpdateFunction(config, "", updateOptions)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to update function '%s' in tenant '%s' namespace '%s': %v. Verify the function exists and the configuration is valid.",
+			name, tenant, namespace, err)), nil
+	}
+
+	return mcp.NewToolResultText(fmt.Sprintf("Updated function '%s' successfully in tenant '%s' namespace '%s'. The function configuration has been modified.",
+		name, tenant, namespace)), nil
 }
 
 // handleFunctionDelete handles the delete operation
-func (b *PulsarAdminFunctionsToolBuilder) handleFunctionDelete(ctx context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
-	return b.handleError("delete function", fmt.Errorf("function delete operation not yet implemented")), nil
+func (b *PulsarAdminFunctionsToolBuilder) handleFunctionDelete(_ context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
+	admin := client.Functions()
+
+	err := admin.DeleteFunction(tenant, namespace, name)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to delete function '%s' in tenant '%s' namespace '%s': %v. Verify the function exists and you have deletion permissions.",
+			name, tenant, namespace, err)), nil
+	}
+
+	return mcp.NewToolResultText(fmt.Sprintf("Deleted function '%s' successfully from tenant '%s' namespace '%s'. All running instances have been terminated.",
+		name, tenant, namespace)), nil
 }
 
 // handleFunctionStart handles the start operation
-func (b *PulsarAdminFunctionsToolBuilder) handleFunctionStart(ctx context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
-	return b.handleError("start function", fmt.Errorf("function start operation not yet implemented")), nil
+func (b *PulsarAdminFunctionsToolBuilder) handleFunctionStart(_ context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
+	admin := client.Functions()
+
+	err := admin.StartFunction(tenant, namespace, name)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to start function '%s' in tenant '%s' namespace '%s': %v. Verify the function exists and is not already running.",
+			name, tenant, namespace, err)), nil
+	}
+
+	return mcp.NewToolResultText(fmt.Sprintf("Started function '%s' successfully in tenant '%s' namespace '%s'. The function instances are now processing messages.",
+		name, tenant, namespace)), nil
 }
 
 // handleFunctionStop handles the stop operation
-func (b *PulsarAdminFunctionsToolBuilder) handleFunctionStop(ctx context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
-	return b.handleError("stop function", fmt.Errorf("function stop operation not yet implemented")), nil
+func (b *PulsarAdminFunctionsToolBuilder) handleFunctionStop(_ context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
+	admin := client.Functions()
+
+	err := admin.StopFunction(tenant, namespace, name)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to stop function '%s' in tenant '%s' namespace '%s': %v. Verify the function exists and is currently running.",
+			name, tenant, namespace, err)), nil
+	}
+
+	return mcp.NewToolResultText(fmt.Sprintf("Stopped function '%s' successfully in tenant '%s' namespace '%s'. The function will no longer process messages until restarted.",
+		name, tenant, namespace)), nil
 }
 
 // handleFunctionRestart handles the restart operation
-func (b *PulsarAdminFunctionsToolBuilder) handleFunctionRestart(ctx context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
-	return b.handleError("restart function", fmt.Errorf("function restart operation not yet implemented")), nil
+func (b *PulsarAdminFunctionsToolBuilder) handleFunctionRestart(_ context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
+	admin := client.Functions()
+
+	err := admin.RestartFunction(tenant, namespace, name)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to restart function '%s' in tenant '%s' namespace '%s': %v. Verify the function exists and is properly deployed.",
+			name, tenant, namespace, err)), nil
+	}
+
+	return mcp.NewToolResultText(fmt.Sprintf("Restarted function '%s' successfully in tenant '%s' namespace '%s'. All function instances have been restarted.",
+		name, tenant, namespace)), nil
 }
 
 // handleFunctionPutstate handles the putstate operation
-func (b *PulsarAdminFunctionsToolBuilder) handleFunctionPutstate(ctx context.Context, client cmdutils.Client, tenant, namespace, name, key, value string) (*mcp.CallToolResult, error) {
-	return b.handleError("put function state", fmt.Errorf("function state put operation not yet implemented")), nil
+func (b *PulsarAdminFunctionsToolBuilder) handleFunctionPutstate(_ context.Context, client cmdutils.Client, tenant, namespace, name, key, value string) (*mcp.CallToolResult, error) {
+	admin := client.Functions()
+
+	err := admin.PutFunctionState(tenant, namespace, name, utils.FunctionState{
+		Key:         key,
+		StringValue: value,
+	})
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to put state for key '%s' in function '%s' (tenant '%s' namespace '%s'): %v. Verify the function exists and has state enabled.",
+			key, name, tenant, namespace, err)), nil
+	}
+
+	return mcp.NewToolResultText(fmt.Sprintf("Successfully stored state for key '%s' in function '%s' (tenant '%s' namespace '%s'). State value has been updated.",
+		key, name, tenant, namespace)), nil
 }
 
 // handleFunctionTrigger handles the trigger operation
-func (b *PulsarAdminFunctionsToolBuilder) handleFunctionTrigger(ctx context.Context, client cmdutils.Client, tenant, namespace, name, triggerValue, topic string) (*mcp.CallToolResult, error) {
-	return b.handleError("trigger function", fmt.Errorf("function trigger operation not yet implemented")), nil
+func (b *PulsarAdminFunctionsToolBuilder) handleFunctionTrigger(_ context.Context, client cmdutils.Client, tenant, namespace, name, triggerValue, topic string) (*mcp.CallToolResult, error) {
+	admin := client.Functions()
+
+	var err error
+	var result string
+	if topic != "" {
+		// Trigger with specific topic
+		result, err = admin.TriggerFunction(tenant, namespace, name, topic, triggerValue, "")
+	} else {
+		// Trigger without specific topic (uses first input topic)
+		result, err = admin.TriggerFunction(tenant, namespace, name, "", triggerValue, "")
+	}
+
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to trigger function '%s' in tenant '%s' namespace '%s': %v. Verify the function exists and is running.",
+			name, tenant, namespace, err)), nil
+	}
+
+	var message string
+	if topic != "" {
+		message = fmt.Sprintf("Successfully triggered function '%s' in tenant '%s' namespace '%s' with topic '%s'. Result: %s",
+			name, tenant, namespace, topic, result)
+	} else {
+		message = fmt.Sprintf("Successfully triggered function '%s' in tenant '%s' namespace '%s'. Result: %s",
+			name, tenant, namespace, result)
+	}
+
+	return mcp.NewToolResultText(message), nil
 }
 
 // Helper functions
+
+// buildFunctionConfig builds a Pulsar Function configuration from MCP request parameters
+func (b *PulsarAdminFunctionsToolBuilder) buildFunctionConfig(tenant, namespace, name string, request mcp.CallToolRequest, isUpdate bool) (*utils.FunctionConfig, error) {
+	config := &utils.FunctionConfig{
+		Tenant:    tenant,
+		Namespace: namespace,
+		Name:      name,
+	}
+
+	// Get required classname parameter (for create operations)
+	if !isUpdate {
+		classname, err := request.RequireString("classname")
+		if err != nil {
+			return nil, fmt.Errorf("missing required parameter 'classname': %v", err)
+		}
+		config.ClassName = classname
+	} else {
+		// For update, classname is optional
+		if classname := request.GetString("classname", ""); classname != "" {
+			config.ClassName = classname
+		}
+	}
+
+	// Get inputs parameter (array of strings)
+	args := request.GetArguments()
+	if inputsInterface, exists := args["inputs"]; exists && inputsInterface != nil {
+		if inputsArray, ok := inputsInterface.([]interface{}); ok {
+			inputSpecs := make(map[string]utils.ConsumerConfig)
+			for _, input := range inputsArray {
+				if inputStr, ok := input.(string); ok {
+					inputSpecs[inputStr] = utils.ConsumerConfig{
+						SerdeClassName: "",
+						SchemaType:     "",
+					}
+				}
+			}
+			if len(inputSpecs) > 0 {
+				config.InputSpecs = inputSpecs
+			}
+		}
+	}
+
+	// Get optional output parameter
+	if output := request.GetString("output", ""); output != "" {
+		config.Output = output
+	}
+
+	// Get optional parallelism parameter
+	if parallelismInterface, exists := args["parallelism"]; exists && parallelismInterface != nil {
+		if parallelismFloat, ok := parallelismInterface.(float64); ok {
+			config.Parallelism = int(parallelismFloat)
+		}
+	}
+
+	// Set default parallelism if not specified
+	if config.Parallelism <= 0 {
+		config.Parallelism = 1
+	}
+
+	// Get optional jar parameter
+	if jar := request.GetString("jar", ""); jar != "" {
+		config.Jar = &jar
+	}
+
+	// Get optional py parameter
+	if py := request.GetString("py", ""); py != "" {
+		config.Py = &py
+	}
+
+	// Get optional go parameter
+	if goFile := request.GetString("go", ""); goFile != "" {
+		config.Go = &goFile
+	}
+
+	// Get optional userConfig parameter (JSON object)
+	if userConfigInterface, exists := args["userConfig"]; exists && userConfigInterface != nil {
+		if userConfigMap, ok := userConfigInterface.(map[string]interface{}); ok {
+			config.UserConfig = userConfigMap
+		}
+	}
+
+	return config, nil
+}
 
 // handleError provides unified error handling
 func (b *PulsarAdminFunctionsToolBuilder) handleError(operation string, err error) *mcp.CallToolResult {

@@ -67,4 +67,3 @@ func PulsarAdminAddPackagesTools(s *server.MCPServer, readOnly bool, features []
 		s.AddTool(tool.Tool, tool.Handler)
 	}
 }
-

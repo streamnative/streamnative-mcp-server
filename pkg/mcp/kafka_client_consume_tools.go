@@ -49,4 +49,3 @@ func KafkaClientAddConsumeTools(s *server.MCPServer, _ bool, logrusLogger *logru
 		s.AddTool(tool.Tool, tool.Handler)
 	}
 }
-
