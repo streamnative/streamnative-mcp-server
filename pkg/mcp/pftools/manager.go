@@ -26,7 +26,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/apache/pulsar-client-go/pulsar"
+	pulsarclient "github.com/apache/pulsar-client-go/pulsar"
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/admin/config"
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/rest"
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
@@ -35,6 +35,8 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
+	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
+	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 	"github.com/streamnative/streamnative-mcp-server/pkg/schema"
 )
 
@@ -56,8 +58,8 @@ var DefaultStringSchemaInfo = &SchemaInfo{
 // Server is imported directly to avoid circular dependency
 type Server struct {
 	MCPServer     *server.MCPServer
-	KafkaSession  interface{}
-	PulsarSession interface{}
+	KafkaSession  *kafka.Session
+	PulsarSession *pulsar.Session
 	Logger        interface{}
 }
 
@@ -68,16 +70,10 @@ func NewPulsarFunctionManager(snServer *Server, readOnly bool, options *ManagerO
 		return nil, fmt.Errorf("Pulsar session not found in context")
 	}
 
-	// Get Pulsar client from session using interface assertion
-	var pulsarClient pulsar.Client
-	if ps, ok := snServer.PulsarSession.(interface{ GetPulsarClient() (pulsar.Client, error) }); ok {
-		var err error
-		pulsarClient, err = ps.GetPulsarClient()
-		if err != nil {
-			return nil, fmt.Errorf("failed to get Pulsar client: %w", err)
-		}
-	} else {
-		return nil, fmt.Errorf("Pulsar session does not support GetPulsarClient method")
+	// Get Pulsar client from session using type-safe interface
+	pulsarClient, err := snServer.PulsarSession.GetPulsarClient()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get Pulsar client: %w", err)
 	}
 
 	adminClient := cmdutils.NewPulsarClientWithAPIVersion(config.V3)
@@ -93,7 +89,7 @@ func NewPulsarFunctionManager(snServer *Server, readOnly bool, options *ManagerO
 		pulsarClient:      pulsarClient,
 		fnToToolMap:       make(map[string]*FunctionTool),
 		mutex:             sync.RWMutex{},
-		producerCache:     make(map[string]pulsar.Producer),
+		producerCache:     make(map[string]pulsarclient.Producer),
 		producerMutex:     sync.RWMutex{},
 		pollInterval:      options.PollInterval,
 		stopCh:            make(chan struct{}),
@@ -125,7 +121,7 @@ func (m *PulsarFunctionManager) Stop() {
 		log.Printf("Closing producer for topic: %s", topic)
 		producer.Close()
 	}
-	m.producerCache = make(map[string]pulsar.Producer)
+	m.producerCache = make(map[string]pulsarclient.Producer)
 	log.Println("All cached producers closed and cache cleared.")
 }
 
@@ -538,7 +534,7 @@ func retrieveToolDescription(fn *utils.FunctionConfig) string {
 }
 
 // GetProducer retrieves a producer from the cache or creates a new one if not found.
-func (m *PulsarFunctionManager) GetProducer(topic string) (pulsar.Producer, error) {
+func (m *PulsarFunctionManager) GetProducer(topic string) (pulsarclient.Producer, error) {
 	m.producerMutex.RLock()
 	producer, found := m.producerCache[topic]
 	m.producerMutex.RUnlock()
@@ -555,7 +551,7 @@ func (m *PulsarFunctionManager) GetProducer(topic string) (pulsar.Producer, erro
 		return producer, nil
 	}
 
-	newProducer, err := m.pulsarClient.CreateProducer(pulsar.ProducerOptions{
+	newProducer, err := m.pulsarClient.CreateProducer(pulsarclient.ProducerOptions{
 		Topic: topic,
 	})
 	if err != nil {
