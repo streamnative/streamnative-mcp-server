@@ -22,9 +22,9 @@ import (
 	"testing"
 
 	"github.com/sirupsen/logrus"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 )
 
 func TestKafkaConsumeToolBuilder(t *testing.T) {

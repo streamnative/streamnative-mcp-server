@@ -21,9 +21,9 @@ import (
 	"context"
 	"testing"
 
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 )
 
 func TestKafkaProduceToolBuilder(t *testing.T) {
