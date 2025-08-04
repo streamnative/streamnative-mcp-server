@@ -22,7 +22,7 @@ require (
 	github.com/twmb/franz-go/pkg/kadm v1.16.0
 	github.com/twmb/franz-go/pkg/sr v1.3.0
 	github.com/twmb/tlscfg v1.2.1
-	golang.org/x/oauth2 v0.25.0
+	golang.org/x/oauth2 v0.27.0
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/utils v0.0.0-20241104100929-3ea5e8cea738
 )
