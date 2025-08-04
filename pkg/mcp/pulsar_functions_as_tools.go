@@ -26,12 +26,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mark3labs/mcp-go/server"
-	"github.com/streamnative/streamnative-mcp-server/pkg/pftools"
+	pftools2 "github.com/streamnative/streamnative-mcp-server/pkg/mcp/pftools"
 )
 
 var (
-	functionManagers     = make(map[string]*pftools.PulsarFunctionManager)
+	functionManagers     = make(map[string]*pftools2.PulsarFunctionManager)
 	functionManagersLock sync.RWMutex
 )
 
@@ -52,14 +51,25 @@ func StopAllPulsarFunctionManagers() {
 	log.Println("All Pulsar Function managers stopped")
 }
 
-func PulsarFunctionManagedMcpTools(s *server.MCPServer, readOnly bool, features []string) {
+func (s *Server) PulsarFunctionManagedMcpTools(readOnly bool, features []string, sessionID string) {
 	if !slices.Contains(features, string(FeatureAll)) &&
 		!slices.Contains(features, string(FeatureFunctionsAsTools)) &&
 		!slices.Contains(features, string(FeatureStreamNativeCloud)) {
 		return
 	}
 
-	options := pftools.DefaultManagerOptions()
+	// Validate sessionID
+	if sessionID == "" {
+		log.Printf("Skipping Pulsar Functions as MCP Tools because sessionID is empty")
+		return
+	}
+
+	options := pftools2.DefaultManagerOptions()
+
+	if s.SNCloudSession.Ctx.Organization == "" || s.SNCloudSession.Ctx.PulsarInstance == "" || s.SNCloudSession.Ctx.PulsarCluster == "" {
+		log.Printf("Skipping Pulsar Functions as MCP Tools because both organization, pulsar instance and pulsar cluster are not set")
+		return
+	}
 
 	if pollIntervalStr := os.Getenv("FUNCTIONS_AS_TOOLS_POLL_INTERVAL"); pollIntervalStr != "" {
 		if seconds, err := strconv.Atoi(pollIntervalStr); err == nil && seconds > 0 {
@@ -99,7 +109,15 @@ func PulsarFunctionManagedMcpTools(s *server.MCPServer, readOnly bool, features 
 		log.Printf("Setting Pulsar Functions strict export to %v", options.StrictExport)
 	}
 
-	manager, err := pftools.NewPulsarFunctionManager(s, readOnly, options)
+	// Convert Server to the internal pftools.Server type
+	pftoolsServer := &pftools2.Server{
+		MCPServer:     s.MCPServer,
+		KafkaSession:  s.KafkaSession,
+		PulsarSession: s.PulsarSession,
+		Logger:        s.logger,
+	}
+
+	manager, err := pftools2.NewPulsarFunctionManager(pftoolsServer, readOnly, options, sessionID)
 	if err != nil {
 		log.Printf("Failed to create Pulsar Function manager: %v", err)
 		return

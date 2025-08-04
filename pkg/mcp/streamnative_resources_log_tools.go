@@ -31,8 +31,7 @@ import (
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
-	"github.com/streamnative/streamnative-mcp-server/pkg/common"
-	"github.com/streamnative/streamnative-mcp-server/pkg/config"
+	context2 "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
 
 var FunctionConnectorList = []string{"sink", "source", "function", "kafka-connect"}
@@ -113,8 +112,12 @@ type LogContent struct {
 }
 
 func handleStreamNativeResourcesLog(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	snConfig := common.GetOptions(ctx)
-	instance, cluster, organization := GetMcpContext()
+	// Get log client from session
+	session := context2.GetSNCloudSession(ctx)
+	if session == nil {
+		return nil, fmt.Errorf("failed to get StreamNative Cloud session")
+	}
+	instance, cluster, organization := session.Ctx.PulsarInstance, session.Ctx.PulsarCluster, session.Ctx.Organization
 	if instance == "" || cluster == "" || organization == "" {
 		return mcp.NewToolResultError("No context is set, please use `sncloud_context_use_cluster` to set the context first."), nil
 	}
@@ -160,7 +163,7 @@ func handleStreamNativeResourcesLog(ctx context.Context, request mcp.CallToolReq
 	}
 
 	logOptions := &LogOptions{
-		ServiceURL:                   snConfig.LogLocation,
+		ServiceURL:                   session.Ctx.LogAPIURL,
 		Organization:                 organization,
 		Instance:                     instance,
 		Cluster:                      cluster,
@@ -177,7 +180,7 @@ func handleStreamNativeResourcesLog(ctx context.Context, request mcp.CallToolReq
 		Timestamp:                    timestampStr,
 	}
 
-	client, err := config.GetSNCloudLogClient()
+	client, err := session.GetLogClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get logging client: %v", err)), nil
 	}

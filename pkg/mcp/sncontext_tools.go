@@ -27,13 +27,13 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/auth/store"
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
-	"github.com/streamnative/streamnative-mcp-server/pkg/config"
 )
 
-func RegisterContextTools(s *server.MCPServer, features []string) {
+func RegisterContextTools(s *server.MCPServer, features []string, skipContextTools bool) {
 	if !slices.Contains(features, string(FeatureStreamNativeCloud)) && !slices.Contains(features, string(FeatureAll)) {
 		return
 	}
+
 	// Add whoami tool
 	whoamiTool := mcp.NewTool("sncloud_context_whoami",
 		mcp.WithDescription("Display the currently logged-in service account. "+
@@ -51,7 +51,10 @@ func RegisterContextTools(s *server.MCPServer, features []string) {
 			mcp.Description("The name of the pulsar cluster to use"),
 		),
 	)
-	s.AddTool(setContextTool, handleSetContext)
+	// Skip registering context tools if context is already provided
+	if !skipContextTools {
+		s.AddTool(setContextTool, handleSetContext)
+	}
 
 	// Add available-contexts tool
 	availableContextsTool := mcp.NewTool("sncloud_context_available_clusters",
@@ -62,7 +65,7 @@ func RegisterContextTools(s *server.MCPServer, features []string) {
 
 // handleWhoami handles the whoami tool request
 func handleWhoami(ctx context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	options := ctx.Value(common.OptionsKey).(*config.Options)
+	options := common.GetOptions(ctx)
 	issuer := options.LoadConfigOrDie().Auth.Issuer()
 
 	userName, err := options.WhoAmI(issuer.Audience)
@@ -91,7 +94,7 @@ func handleWhoami(ctx context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResu
 
 // handleSetContext handles the set-context tool request
 func handleSetContext(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	options := ctx.Value(common.OptionsKey).(*config.Options)
+	options := common.GetOptions(ctx)
 
 	instanceName, err := request.RequireString("instanceName")
 	if err != nil {
@@ -103,9 +106,8 @@ func handleSetContext(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get cluster name: %v", err)), nil
 	}
 
-	err = SetContext(options, instanceName, clusterName)
+	err = SetContext(ctx, options, instanceName, clusterName)
 	if err != nil {
-		ResetMcpContext()
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to set context: %v", err)), nil
 	}
 
@@ -113,7 +115,7 @@ func handleSetContext(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 }
 
 func handleAvailableContexts(ctx context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	promptResponse, err := handleListPulsarClusters(ctx, mcp.GetPromptRequest{})
+	promptResponse, err := HandleListPulsarClusters(ctx, mcp.GetPromptRequest{})
 	if err != nil || promptResponse == nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to list pulsar clusters: %v", err)), nil
 	}

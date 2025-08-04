@@ -65,8 +65,12 @@ func runStdioServer(configOpts *ServerOptions) error {
 	// Create a new MCP server
 	ctx = context.WithValue(ctx, common.OptionsKey, configOpts.Options)
 	stdLogger := stdlog.New(logger.Writer(), "snmcp-server", 0)
-	stdioServer := server.NewStdioServer(newMcpServer(configOpts, logger))
+	mcpServer, err := newMcpServer(ctx, configOpts, logger)
+	if err != nil {
+		return fmt.Errorf("failed to create MCP server: %w", err)
+	}
 
+	stdioServer := server.NewStdioServer(mcpServer.MCPServer)
 	stdioServer.SetErrorLogger(stdLogger)
 
 	// Start listening for messages
