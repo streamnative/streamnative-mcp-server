@@ -229,7 +229,7 @@ func (s *Session) GetAPIClient() (*sncloud.APIClient, error) {
 // initializeAPIClient initializes the API client for the session
 func (s *Session) initializeAPIClient() error {
 	var tokenSource oauth2.TokenSource
-	
+
 	if s.useJWT {
 		// Use JWT token directly
 		tokenSource = s.TokenSource
@@ -286,7 +286,7 @@ func (s *Session) GetLogClient() (*http.Client, error) {
 // initializeLogClient initializes the log client for the session
 func (s *Session) initializeLogClient() error {
 	var tokenSource oauth2.TokenSource
-	
+
 	if s.useJWT {
 		// Use JWT token directly
 		tokenSource = s.TokenSource

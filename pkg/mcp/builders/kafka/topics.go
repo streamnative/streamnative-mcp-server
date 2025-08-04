@@ -309,6 +309,7 @@ func (b *KafkaTopicsToolBuilder) handleKafkaTopicCreate(ctx context.Context, adm
 
 	///nolint:gosec
 	partitions := int32(partitionsNum)
+	///nolint:gosec
 	replicationFactor := int16(replicationFactorNum)
 
 	// Parse optional configs

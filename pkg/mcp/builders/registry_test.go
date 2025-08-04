@@ -52,7 +52,7 @@ func NewMockToolBuilder(name string, features []string) *MockToolBuilder {
 				Tool: mcp.NewTool(name,
 					mcp.WithDescription(fmt.Sprintf("Mock tool %s", name)),
 				),
-				Handler: func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+				Handler: func(_ context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 					return mcp.NewToolResultText(fmt.Sprintf("Mock response from %s", name)), nil
 				},
 			},
@@ -68,7 +68,7 @@ func (m *MockToolBuilder) GetRequiredFeatures() []string {
 	return m.features
 }
 
-func (m *MockToolBuilder) BuildTools(_ context.Context, config ToolBuildConfig) ([]server.ServerTool, error) {
+func (m *MockToolBuilder) BuildTools(_ context.Context, _ ToolBuildConfig) ([]server.ServerTool, error) {
 	if m.err != nil {
 		return nil, m.err
 	}
@@ -139,6 +139,7 @@ func TestToolRegistry(t *testing.T) {
 		registry := NewToolRegistry()
 		builder := NewMockToolBuilder("panic_tool", []string{"feature"})
 
+		///nolint:errcheck
 		registry.Register(builder) // First registration
 		assert.Panics(t, func() {
 			registry.MustRegister(builder) // Duplicate registration should panic
@@ -167,7 +168,9 @@ func TestToolRegistry(t *testing.T) {
 		builder1 := NewMockToolBuilder("tool1", []string{"feature1"})
 		builder2 := NewMockToolBuilder("tool2", []string{"feature2"})
 
+		///nolint:errcheck
 		registry.Register(builder1)
+		///nolint:errcheck
 		registry.Register(builder2)
 
 		names := registry.ListBuilders()

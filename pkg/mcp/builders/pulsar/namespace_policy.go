@@ -412,7 +412,7 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) marshalResponse(data interface{}
 // Policy-specific handler functions
 
 // handleSetMessageTTL handles setting message TTL for a namespace
-func (b *PulsarAdminNamespacePolicyToolBuilder) handleSetMessageTTL(ctx context.Context, client cmdutils.Client, namespace string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminNamespacePolicyToolBuilder) handleSetMessageTTL(_ context.Context, client cmdutils.Client, namespace string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	ttlStr, err := request.RequireString("ttl")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get TTL: %v", err)), nil
@@ -433,7 +433,7 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) handleSetMessageTTL(ctx context.
 }
 
 // handleSetRetention handles setting retention for a namespace
-func (b *PulsarAdminNamespacePolicyToolBuilder) handleSetRetention(ctx context.Context, client cmdutils.Client, namespace string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminNamespacePolicyToolBuilder) handleSetRetention(_ context.Context, client cmdutils.Client, namespace string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	timeStr := request.GetString("time", "")
 	sizeStr := request.GetString("size", "")
 

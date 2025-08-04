@@ -314,7 +314,7 @@ func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsHandler(readO
 // Helper functions - delegated operation handlers
 
 // handleFunctionList handles the list operation
-func (b *PulsarAdminFunctionsToolBuilder) handleFunctionList(ctx context.Context, client cmdutils.Client, tenant, namespace string) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminFunctionsToolBuilder) handleFunctionList(_ context.Context, client cmdutils.Client, tenant, namespace string) (*mcp.CallToolResult, error) {
 	admin := client.Functions()
 
 	functions, err := admin.GetFunctions(tenant, namespace)
