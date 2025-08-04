@@ -31,6 +31,7 @@ import (
 
 // PulsarAdminFunctionsWorkerToolBuilder implements the ToolBuilder interface for Pulsar Admin Functions Worker tools
 // It provides functionality to build Pulsar functions worker monitoring and management tools
+// /nolint:revive
 type PulsarAdminFunctionsWorkerToolBuilder struct {
 	*builders.BaseToolBuilder
 }
@@ -111,7 +112,7 @@ func (b *PulsarAdminFunctionsWorkerToolBuilder) buildFunctionsWorkerTool() mcp.T
 
 // buildFunctionsWorkerHandler builds the Pulsar Admin Functions Worker handler function
 // Migrated from the original handler logic
-func (b *PulsarAdminFunctionsWorkerToolBuilder) buildFunctionsWorkerHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminFunctionsWorkerToolBuilder) buildFunctionsWorkerHandler(_ bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get Pulsar session from context
 		session := mcpCtx.GetPulsarSession(ctx)

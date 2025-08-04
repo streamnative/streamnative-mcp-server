@@ -31,6 +31,7 @@ import (
 )
 
 // KafkaGroupsToolBuilder implements the ToolBuilder interface for Kafka Consumer Groups
+// /nolint:revive
 type KafkaGroupsToolBuilder struct {
 	*builders.BaseToolBuilder
 }

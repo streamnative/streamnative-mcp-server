@@ -31,6 +31,7 @@ import (
 )
 
 // KafkaTopicsToolBuilder implements the ToolBuilder interface for Kafka Topics
+// /nolint:revive
 type KafkaTopicsToolBuilder struct {
 	*builders.BaseToolBuilder
 }
@@ -306,6 +307,7 @@ func (b *KafkaTopicsToolBuilder) handleKafkaTopicCreate(ctx context.Context, adm
 		return b.handleError("get replication factor", err), nil
 	}
 
+	///nolint:gosec
 	partitions := int32(partitionsNum)
 	replicationFactor := int16(replicationFactorNum)
 

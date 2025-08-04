@@ -52,7 +52,7 @@ func NewMockToolBuilder(name string, features []string) *MockToolBuilder {
 				Tool: mcp.NewTool(name,
 					mcp.WithDescription(fmt.Sprintf("Mock tool %s", name)),
 				),
-				Handler: func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+				Handler: func(_ context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 					return mcp.NewToolResultText(fmt.Sprintf("Mock response from %s", name)), nil
 				},
 			},
@@ -68,7 +68,7 @@ func (m *MockToolBuilder) GetRequiredFeatures() []string {
 	return m.features
 }
 
-func (m *MockToolBuilder) BuildTools(ctx context.Context, config ToolBuildConfig) ([]server.ServerTool, error) {
+func (m *MockToolBuilder) BuildTools(_ context.Context, config ToolBuildConfig) ([]server.ServerTool, error) {
 	if m.err != nil {
 		return nil, m.err
 	}

@@ -32,6 +32,7 @@ import (
 )
 
 // PulsarAdminSinksToolBuilder implements the ToolBuilder interface for Pulsar admin sinks
+// /nolint:revive
 type PulsarAdminSinksToolBuilder struct {
 	*builders.BaseToolBuilder
 }

@@ -30,6 +30,7 @@ import (
 )
 
 // PulsarAdminBrokerStatsToolBuilder implements the ToolBuilder interface for Pulsar Broker Statistics
+// /nolint:revive
 type PulsarAdminBrokerStatsToolBuilder struct {
 	*builders.BaseToolBuilder
 }
@@ -112,7 +113,7 @@ func (b *PulsarAdminBrokerStatsToolBuilder) buildBrokerStatsTool() mcp.Tool {
 }
 
 // buildBrokerStatsHandler builds the Pulsar Admin Broker Stats handler function
-func (b *PulsarAdminBrokerStatsToolBuilder) buildBrokerStatsHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminBrokerStatsToolBuilder) buildBrokerStatsHandler(_ bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get Pulsar admin client
 		session := mcpCtx.GetPulsarSession(ctx)

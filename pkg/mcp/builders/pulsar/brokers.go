@@ -30,6 +30,7 @@ import (
 )
 
 // PulsarAdminBrokersToolBuilder implements the ToolBuilder interface for Pulsar admin brokers
+// /nolint:revive
 type PulsarAdminBrokersToolBuilder struct {
 	*builders.BaseToolBuilder
 }

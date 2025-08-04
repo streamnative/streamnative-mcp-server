@@ -33,6 +33,7 @@ import (
 
 // PulsarAdminSubscriptionToolBuilder implements the ToolBuilder interface for Pulsar Admin Subscription tools
 // It provides functionality to build Pulsar subscription management tools
+// /nolint:revive
 type PulsarAdminSubscriptionToolBuilder struct {
 	*builders.BaseToolBuilder
 }

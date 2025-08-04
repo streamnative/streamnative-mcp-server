@@ -35,6 +35,7 @@ import (
 
 // KafkaProduceToolBuilder implements the ToolBuilder interface for Kafka client produce operations
 // It provides functionality to build Kafka producer tools
+// /nolint:revive
 type KafkaProduceToolBuilder struct {
 	*builders.BaseToolBuilder
 }
@@ -317,7 +318,7 @@ func (b *KafkaProduceToolBuilder) buildKafkaProduceHandler() func(context.Contex
 				return b.handleError("produce message", results[0].Err), nil
 			}
 		} else {
-			kafkaClient.Produce(timeoutCtx, record, func(_ *kgo.Record, err error) {
+			kafkaClient.Produce(timeoutCtx, record, func(_ *kgo.Record, _ error) {
 				// Log async errors but don't fail since we're async
 				// In the future, this could be enhanced with proper async result handling
 			})

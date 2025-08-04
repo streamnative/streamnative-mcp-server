@@ -32,6 +32,7 @@ import (
 )
 
 // KafkaSchemaRegistryToolBuilder implements the ToolBuilder interface for Kafka Schema Registry
+// /nolint:revive
 type KafkaSchemaRegistryToolBuilder struct {
 	*builders.BaseToolBuilder
 }
@@ -494,7 +495,7 @@ func (b *KafkaSchemaRegistryToolBuilder) handleSchemaCompatibilitySet(ctx contex
 }
 
 // handleSchemaTypesList handles listing supported schema types
-func (b *KafkaSchemaRegistryToolBuilder) handleSchemaTypesList(ctx context.Context, client *sr.Client, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *KafkaSchemaRegistryToolBuilder) handleSchemaTypesList(_ context.Context, client *sr.Client, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	types := []string{"AVRO", "JSON", "PROTOBUF"}
 	return b.marshalResponse(types)
 }

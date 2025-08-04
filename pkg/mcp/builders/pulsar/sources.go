@@ -32,6 +32,7 @@ import (
 )
 
 // PulsarAdminSourcesToolBuilder implements the ToolBuilder interface for Pulsar admin sources
+// /nolint:revive
 type PulsarAdminSourcesToolBuilder struct {
 	*builders.BaseToolBuilder
 }

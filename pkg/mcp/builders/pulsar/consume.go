@@ -33,6 +33,7 @@ import (
 
 // PulsarClientConsumeToolBuilder implements the ToolBuilder interface for Pulsar Client Consumer tools
 // It provides functionality to build Pulsar message consumption tools
+// /nolint:revive
 type PulsarClientConsumeToolBuilder struct {
 	*builders.BaseToolBuilder
 }
@@ -145,7 +146,7 @@ func (b *PulsarClientConsumeToolBuilder) buildConsumeTool() mcp.Tool {
 
 // buildConsumeHandler builds the Pulsar Client Consumer handler function
 // Migrated from the original handler logic
-func (b *PulsarClientConsumeToolBuilder) buildConsumeHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarClientConsumeToolBuilder) buildConsumeHandler(_ bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Extract required parameters with validation
 		topic, err := request.RequireString("topic")

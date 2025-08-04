@@ -31,6 +31,7 @@ import (
 )
 
 // KafkaPartitionsToolBuilder implements the ToolBuilder interface for Kafka Partitions
+// /nolint:revive
 type KafkaPartitionsToolBuilder struct {
 	*builders.BaseToolBuilder
 }

@@ -19,10 +19,7 @@ package builders
 
 import (
 	"fmt"
-	"os"
 	"time"
-
-	"gopkg.in/yaml.v3"
 )
 
 // ToolsConfig represents the structure of the tools configuration file
@@ -36,35 +33,6 @@ type ToolConfig struct {
 	ReadOnly bool                   `yaml:"readOnly"`
 	Features []string               `yaml:"features"`
 	Options  map[string]interface{} `yaml:"options,omitempty"`
-}
-
-// LoadToolsConfig loads tool configuration from a file
-func LoadToolsConfig(filename string) (*ToolsConfig, error) {
-	data, err := os.ReadFile(filename)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read config file %s: %w", filename, err)
-	}
-
-	var config ToolsConfig
-	if err := yaml.Unmarshal(data, &config); err != nil {
-		return nil, fmt.Errorf("failed to parse config file %s: %w", filename, err)
-	}
-
-	return &config, nil
-}
-
-// SaveToolsConfig saves tool configuration to a file
-func SaveToolsConfig(config *ToolsConfig, filename string) error {
-	data, err := yaml.Marshal(config)
-	if err != nil {
-		return fmt.Errorf("failed to marshal config: %w", err)
-	}
-
-	if err := os.WriteFile(filename, data, 0644); err != nil {
-		return fmt.Errorf("failed to write config file %s: %w", filename, err)
-	}
-
-	return nil
 }
 
 // ToToolBuildConfigs converts tool configuration to build configurations

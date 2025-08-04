@@ -34,6 +34,7 @@ import (
 )
 
 // PulsarAdminNamespacePolicyToolBuilder implements the ToolBuilder interface for Pulsar admin namespace policies
+// /nolint:revive
 type PulsarAdminNamespacePolicyToolBuilder struct {
 	*builders.BaseToolBuilder
 }

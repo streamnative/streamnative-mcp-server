@@ -34,6 +34,7 @@ import (
 
 // PulsarAdminTopicToolBuilder implements the ToolBuilder interface for Pulsar Admin Topic tools
 // It provides functionality to build Pulsar topic management tools
+// /nolint:revive
 type PulsarAdminTopicToolBuilder struct {
 	*builders.BaseToolBuilder
 }

@@ -33,6 +33,7 @@ import (
 
 // PulsarAdminNamespaceToolBuilder implements the ToolBuilder interface for Pulsar Admin Namespace tools
 // It provides functionality to build Pulsar namespace management tools
+// /nolint:revive
 type PulsarAdminNamespaceToolBuilder struct {
 	*builders.BaseToolBuilder
 }

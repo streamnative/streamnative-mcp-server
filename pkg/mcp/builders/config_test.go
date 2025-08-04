@@ -18,8 +18,6 @@
 package builders
 
 import (
-	"os"
-	"path/filepath"
 	"testing"
 	"time"
 
@@ -167,61 +165,6 @@ func TestToolConfig(t *testing.T) {
 		err := config.Validate()
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "no features specified")
-	})
-}
-
-func TestConfigFileOperations(t *testing.T) {
-	tempDir := t.TempDir()
-	configFile := filepath.Join(tempDir, "test_config.yaml")
-
-	t.Run("SaveAndLoadConfig", func(t *testing.T) {
-		originalConfig := &ToolsConfig{
-			Tools: map[string]ToolConfig{
-				"test_tool": {
-					Enabled:  true,
-					ReadOnly: false,
-					Features: []string{"feature1", "feature2"},
-					Options: map[string]interface{}{
-						"timeout":    "30s",
-						"maxRetries": 3,
-					},
-				},
-			},
-		}
-
-		// Save config
-		err := SaveToolsConfig(originalConfig, configFile)
-		require.NoError(t, err)
-
-		// Verify file exists
-		_, err = os.Stat(configFile)
-		assert.NoError(t, err)
-
-		// Load config
-		loadedConfig, err := LoadToolsConfig(configFile)
-		require.NoError(t, err)
-
-		// Verify content
-		assert.Equal(t, originalConfig.Tools["test_tool"].Enabled, loadedConfig.Tools["test_tool"].Enabled)
-		assert.Equal(t, originalConfig.Tools["test_tool"].ReadOnly, loadedConfig.Tools["test_tool"].ReadOnly)
-		assert.Equal(t, originalConfig.Tools["test_tool"].Features, loadedConfig.Tools["test_tool"].Features)
-		assert.Equal(t, originalConfig.Tools["test_tool"].Options, loadedConfig.Tools["test_tool"].Options)
-	})
-
-	t.Run("LoadNonexistentFile", func(t *testing.T) {
-		_, err := LoadToolsConfig("/nonexistent/config.yaml")
-		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "failed to read config file")
-	})
-
-	t.Run("LoadInvalidYAML", func(t *testing.T) {
-		invalidFile := filepath.Join(tempDir, "invalid.yaml")
-		err := os.WriteFile(invalidFile, []byte("invalid: yaml: content: ["), 0644)
-		require.NoError(t, err)
-
-		_, err = LoadToolsConfig(invalidFile)
-		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "failed to parse config file")
 	})
 }
 

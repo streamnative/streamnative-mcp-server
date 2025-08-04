@@ -35,6 +35,7 @@ import (
 
 // PulsarAdminSchemaToolBuilder implements the ToolBuilder interface for Pulsar Admin Schema tools
 // It provides functionality to build Pulsar schema management tools
+// /nolint:revive
 type PulsarAdminSchemaToolBuilder struct {
 	*builders.BaseToolBuilder
 }
@@ -191,11 +192,6 @@ func (b *PulsarAdminSchemaToolBuilder) buildSchemaHandler(readOnly bool) func(co
 }
 
 // Unified error handling and utility functions
-
-// handleError provides unified error handling
-func (b *PulsarAdminSchemaToolBuilder) handleError(operation string, err error) *mcp.CallToolResult {
-	return mcp.NewToolResultError(fmt.Sprintf("Failed to %s: %v", operation, err))
-}
 
 // prettyPrint formats JSON bytes with indentation
 func (b *PulsarAdminSchemaToolBuilder) prettyPrint(data []byte) ([]byte, error) {

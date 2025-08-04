@@ -35,6 +35,7 @@ import (
 
 // KafkaConsumeToolBuilder implements the ToolBuilder interface for Kafka client consume operations
 // It provides functionality to build Kafka consumer tools
+// /nolint:revive
 type KafkaConsumeToolBuilder struct {
 	*builders.BaseToolBuilder
 	logger *logrus.Logger

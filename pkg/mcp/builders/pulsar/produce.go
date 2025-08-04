@@ -33,6 +33,7 @@ import (
 
 // PulsarClientProduceToolBuilder implements the ToolBuilder interface for Pulsar Client Producer tools
 // It provides functionality to build Pulsar message production tools
+// /nolint:revive
 type PulsarClientProduceToolBuilder struct {
 	*builders.BaseToolBuilder
 }

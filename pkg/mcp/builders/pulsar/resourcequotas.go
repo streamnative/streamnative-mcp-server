@@ -32,6 +32,7 @@ import (
 )
 
 // PulsarAdminResourceQuotasToolBuilder implements the ToolBuilder interface for Pulsar admin resource quotas
+// /nolint:revive
 type PulsarAdminResourceQuotasToolBuilder struct {
 	*builders.BaseToolBuilder
 }

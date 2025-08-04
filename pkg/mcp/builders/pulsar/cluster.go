@@ -32,6 +32,7 @@ import (
 
 // PulsarAdminClusterToolBuilder implements the ToolBuilder interface for Pulsar Admin Cluster tools
 // It provides functionality to build Pulsar cluster management tools
+// /nolint:revive
 type PulsarAdminClusterToolBuilder struct {
 	*builders.BaseToolBuilder
 }

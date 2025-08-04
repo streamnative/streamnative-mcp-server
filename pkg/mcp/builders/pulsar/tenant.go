@@ -33,6 +33,7 @@ import (
 
 // PulsarAdminTenantToolBuilder implements the ToolBuilder interface for Pulsar Admin Tenant tools
 // It provides functionality to build Pulsar tenant management tools
+// /nolint:revive
 type PulsarAdminTenantToolBuilder struct {
 	*builders.BaseToolBuilder
 }

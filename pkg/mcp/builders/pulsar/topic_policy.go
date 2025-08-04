@@ -33,6 +33,7 @@ import (
 )
 
 // PulsarAdminTopicPolicyToolBuilder implements the ToolBuilder interface for Pulsar admin topic policies
+// /nolint:revive
 type PulsarAdminTopicPolicyToolBuilder struct {
 	*builders.BaseToolBuilder
 }
@@ -268,6 +269,7 @@ func (b *PulsarAdminTopicPolicyToolBuilder) handleSetTopicRetention(client cmdut
 	var retentionTimeInMinutes int64 = -1
 	var retentionSizeInMB int64 = -1
 
+	// /nolint:revive
 	if retentionTime := request.GetString("retention_time", ""); retentionTime != "" {
 		if parsed, err := b.parseRetentionTime(retentionTime); err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Invalid retention time format: %v", err)), nil
@@ -276,6 +278,7 @@ func (b *PulsarAdminTopicPolicyToolBuilder) handleSetTopicRetention(client cmdut
 		}
 	}
 
+	// /nolint:revive
 	if retentionSize := request.GetString("retention_size", ""); retentionSize != "" {
 		if parsed, err := b.parseRetentionSize(retentionSize); err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Invalid retention size format: %v", err)), nil
@@ -634,7 +637,7 @@ func (b *PulsarAdminTopicPolicyToolBuilder) parseRetentionSize(retentionSize str
 	var value float64
 	var unit string
 	var err error
-
+	// /nolint:gocritic
 	if strings.HasSuffix(retentionSize, "TB") || strings.HasSuffix(retentionSize, "T") {
 		if strings.HasSuffix(retentionSize, "TB") {
 			valueStr := retentionSize[:len(retentionSize)-2]

@@ -33,6 +33,7 @@ import (
 
 // KafkaConnectToolBuilder implements the ToolBuilder interface for Kafka Connect
 // It provides functionality to build Kafka Connect administration tools
+// /nolint:revive
 type KafkaConnectToolBuilder struct {
 	*builders.BaseToolBuilder
 }
@@ -294,20 +295,6 @@ func (b *KafkaConnectToolBuilder) marshalResponse(data interface{}) (*mcp.CallTo
 		return b.handleError("marshal response", err), nil
 	}
 	return mcp.NewToolResultText(string(jsonBytes)), nil
-}
-
-// getKafkaConnectClient retrieves the Kafka Connect client from context
-func (b *KafkaConnectToolBuilder) getKafkaConnectClient(ctx context.Context) (kafka.Connect, error) {
-	// Get Kafka session from context using the same key as in ctx.go
-	// We define the key locally to avoid circular import
-	type contextKey string
-	const kafkaSessionContextKey contextKey = "kafka_session"
-
-	session, ok := ctx.Value(kafkaSessionContextKey).(*kafka.Session)
-	if !ok || session == nil {
-		return nil, fmt.Errorf("Kafka session not found in context")
-	}
-	return session.GetConnectClient()
 }
 
 // Specific operation handler functions - migrated from original implementation

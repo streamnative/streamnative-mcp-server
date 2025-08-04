@@ -31,6 +31,7 @@ import (
 
 // PulsarAdminFunctionsToolBuilder implements the ToolBuilder interface for Pulsar admin functions operations
 // It provides functionality to build Pulsar functions management tools
+// /nolint:revive
 type PulsarAdminFunctionsToolBuilder struct {
 	*builders.BaseToolBuilder
 }
@@ -315,7 +316,7 @@ func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsHandler(readO
 // handleFunctionList handles the list operation
 func (b *PulsarAdminFunctionsToolBuilder) handleFunctionList(ctx context.Context, client cmdutils.Client, tenant, namespace string) (*mcp.CallToolResult, error) {
 	admin := client.Functions()
-	
+
 	functions, err := admin.GetFunctions(tenant, namespace)
 	if err != nil {
 		return b.handleError("list functions", err), nil
@@ -331,7 +332,7 @@ func (b *PulsarAdminFunctionsToolBuilder) handleFunctionList(ctx context.Context
 // handleFunctionGet handles the get operation
 func (b *PulsarAdminFunctionsToolBuilder) handleFunctionGet(ctx context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
 	admin := client.Functions()
-	
+
 	functionConfig, err := admin.GetFunction(tenant, namespace, name)
 	if err != nil {
 		return b.handleError("get function config", err), nil
@@ -343,7 +344,7 @@ func (b *PulsarAdminFunctionsToolBuilder) handleFunctionGet(ctx context.Context,
 // handleFunctionStatus handles the status operation
 func (b *PulsarAdminFunctionsToolBuilder) handleFunctionStatus(ctx context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
 	admin := client.Functions()
-	
+
 	status, err := admin.GetFunctionStatus(tenant, namespace, name)
 	if err != nil {
 		return b.handleError("get function status", err), nil
@@ -370,7 +371,7 @@ func (b *PulsarAdminFunctionsToolBuilder) handleFunctionCreate(ctx context.Conte
 	return b.handleError("create function", fmt.Errorf("function creation operation not yet implemented - requires complex configuration and file upload handling")), nil
 }
 
-// handleFunctionUpdate handles the update operation  
+// handleFunctionUpdate handles the update operation
 func (b *PulsarAdminFunctionsToolBuilder) handleFunctionUpdate(ctx context.Context, client cmdutils.Client, tenant, namespace, name string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return b.handleError("update function", fmt.Errorf("function update operation not yet implemented - requires complex configuration handling")), nil
 }

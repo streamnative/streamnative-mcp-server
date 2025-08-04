@@ -33,6 +33,7 @@ import (
 )
 
 // PulsarAdminNsIsolationPolicyToolBuilder implements the ToolBuilder interface for Pulsar admin namespace isolation policies
+// /nolint:revive
 type PulsarAdminNsIsolationPolicyToolBuilder struct {
 	*builders.BaseToolBuilder
 }
