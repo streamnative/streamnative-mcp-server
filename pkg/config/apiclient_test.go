@@ -416,6 +416,7 @@ func TestSession_InitializationOnlyOnce(t *testing.T) {
 
 func TestJWTTokenSource(t *testing.T) {
 	// Test JWT token source implementation
+	//nolint:gosec
 	jwtToken := "test.jwt.token"
 	source := NewJWTTokenSource(jwtToken)
 
