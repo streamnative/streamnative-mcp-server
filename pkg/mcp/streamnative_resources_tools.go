@@ -12,7 +12,7 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
-	"github.com/streamnative/streamnative-mcp-server/pkg/config"
+	context2 "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 	sncloud "github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserver"
 )
 
@@ -89,8 +89,13 @@ func handleStreamNativeResourcesApply(ctx context.Context, request mcp.CallToolR
 	// Get dry_run flag
 	dryRun := request.GetBool("dry_run", false)
 
-	// Get API client
-	apiClient, err := config.GetAPIClient()
+	// Get API client from session
+	session := context2.GetSNCloudSession(ctx)
+	if session == nil {
+		return nil, fmt.Errorf("failed to get StreamNative Cloud session")
+	}
+
+	apiClient, err := session.GetAPIClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get API client: %v", err)), nil
 	}
@@ -334,7 +339,13 @@ func handleStreamNativeResourcesDelete(ctx context.Context, request mcp.CallTool
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get type: %v", err)), nil
 	}
 
-	apiClient, err := config.GetAPIClient()
+	// Get API client from session
+	session := context2.GetSNCloudSession(ctx)
+	if session == nil {
+		return nil, fmt.Errorf("failed to get StreamNative Cloud session")
+	}
+
+	apiClient, err := session.GetAPIClient()
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get API client: %v", err)), nil
 	}

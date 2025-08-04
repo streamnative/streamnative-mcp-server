@@ -89,6 +89,10 @@ If you want to access to your StreamNative Cloud, you will need to have followin
 # Start MCP server with StreamNative Cloud authentication
 bin/snmcp stdio --organization my-org --key-file /path/to/key-file.json
 
+# Start MCP server with StreamNative Cloud authentication and pre-configured context
+# When --pulsar-instance and --pulsar-cluster are provided, context management tools are disabled
+bin/snmcp stdio --organization my-org --key-file /path/to/key-file.json --pulsar-instance my-instance --pulsar-cluster my-cluster
+
 # Start MCP server with external Kafka
 bin/snmcp stdio --use-external-kafka --kafka-bootstrap-servers localhost:9092 --kafka-auth-type SASL_SSL --kafka-auth-mechanism PLAIN --kafka-auth-user user --kafka-auth-pass pass --kafka-use-tls --kafka-schema-registry-url https://sr.local --kafka-schema-registry-auth-user user --kafka-schema-registry-auth-pass pass
 
@@ -105,6 +109,10 @@ docker run -i --rm -e SNMCP_ORGANIZATION=my-org -e SNMCP_KEY_FILE=/key.json -v /
 ```bash
 # Start MCP server with SSE and StreamNative Cloud authentication
 snmcp sse --http-addr :9090 --http-path /mcp --organization my-org --key-file /path/to/key-file.json
+
+# Start MCP server with SSE and pre-configured StreamNative Cloud context
+# When --pulsar-instance and --pulsar-cluster are provided, context management tools are disabled
+snmcp sse --http-addr :9090 --http-path /mcp --organization my-org --key-file /path/to/key-file.json --pulsar-instance my-instance --pulsar-cluster my-cluster
 
 # Start MCP server with SSE and external Kafka
 snmcp sse --http-addr :9090 --http-path /mcp --use-external-kafka --kafka-bootstrap-servers localhost:9092
@@ -234,6 +242,8 @@ The StreamNative MCP Server allows you to enable or disable specific groups of f
 |---------------------|------------------------------------------------------------------|------|
 | `streamnative-cloud`| Manage StreamNative Cloud context and check resource logs         | [streamnative_cloud.md](docs/tools/streamnative_cloud.md) |
 | `functions-as-tools`     | Dynamically exposes deployed Pulsar Functions as invokable MCP tools, with automatic input/output schema handling. | [functions_as_tools.md](docs/tools/functions_as_tools.md)  |
+
+> **Note:** When using `--pulsar-instance` and `--pulsar-cluster` flags together, context management tools (`sncloud_context_use_cluster`) are automatically disabled since the context is pre-configured.
 
 You can combine these features as needed using the `--features` flag. For example, to enable only Pulsar client features:
 ```bash

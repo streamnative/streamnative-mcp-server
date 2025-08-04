@@ -33,6 +33,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp"
+	context2 "github.com/streamnative/streamnative-mcp-server/pkg/mcp"
 )
 
 func NewCmdMcpSseServer(configOpts *ServerOptions) *cobra.Command {
@@ -70,16 +71,37 @@ func runSseServer(configOpts *ServerOptions) error {
 
 	// 3. Create a new MCP server
 	ctx = context.WithValue(ctx, common.OptionsKey, configOpts.Options)
-	mcpServer := newMcpServer(configOpts, logger)
+	mcpServer, err := newMcpServer(ctx, configOpts, logger)
+	if err != nil {
+		return fmt.Errorf("failed to create MCP server: %w", err)
+	}
+
+	// 4. Set the context
+	ctx = context2.WithSNCloudSession(ctx, mcpServer.SNCloudSession)
+	ctx = context2.WithPulsarSession(ctx, mcpServer.PulsarSession)
+	ctx = context2.WithKafkaSession(ctx, mcpServer.KafkaSession)
+	if configOpts.Options.KeyFile != "" {
+		if configOpts.Options.PulsarInstance != "" && configOpts.Options.PulsarCluster != "" {
+			err = mcp.SetContext(ctx, configOpts.Options, configOpts.Options.PulsarInstance, configOpts.Options.PulsarCluster)
+			if err != nil {
+				return errors.Wrap(err, "failed to set StreamNative Cloud context")
+			}
+		}
+	}
 
 	// add Pulsar Functions as MCP tools
-	mcp.PulsarFunctionManagedMcpTools(mcpServer, false, configOpts.Features)
+	// SSE is not support session-based tools, so we pass an fixed sessionId
+	mcpServer.PulsarFunctionManagedMcpTools(configOpts.ReadOnly, configOpts.Features, "FIXED_SESSION_ID")
 
 	sseServer := server.NewSSEServer(
-		mcpServer,
+		mcpServer.MCPServer,
 		server.WithStaticBasePath(configOpts.HTTPPath),
 		server.WithSSEContextFunc(func(ctx context.Context, _ *http.Request) context.Context {
-			return context.WithValue(ctx, common.OptionsKey, configOpts.Options)
+			c := context.WithValue(ctx, common.OptionsKey, configOpts.Options)
+			c = context2.WithKafkaSession(c, mcpServer.KafkaSession)
+			c = context2.WithPulsarSession(c, mcpServer.PulsarSession)
+			c = context2.WithSNCloudSession(c, mcpServer.SNCloudSession)
+			return c
 		}),
 	)
 

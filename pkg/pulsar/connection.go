@@ -19,14 +19,12 @@ package pulsar
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/apache/pulsar-client-go/pulsar"
 	pulsaradminconfig "github.com/apache/pulsar-client-go/pulsaradmin/pkg/admin/config"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
-	"github.com/streamnative/streamnative-mcp-server/pkg/auth"
-	"github.com/streamnative/streamnative-mcp-server/pkg/auth/store"
-	"github.com/streamnative/streamnative-mcp-server/pkg/config"
 )
 
 const (
@@ -47,40 +45,41 @@ type PulsarContext struct {
 	TLSKeyFile                    string
 }
 
-var CurrentPulsarContext PulsarContext
-var CurrentPulsarClientOptions pulsar.ClientOptions
-var AdminClient cmdutils.Client
-var AdminV3Client cmdutils.Client
-var Client pulsar.Client
+// Session represents a Pulsar session
+type Session struct {
+	Ctx             PulsarContext
+	Client          pulsar.Client
+	AdminClient     cmdutils.Client
+	AdminV3Client   cmdutils.Client
+	ClientOptions   pulsar.ClientOptions
+	PulsarCtlConfig *cmdutils.ClusterConfig
+	mutex           sync.RWMutex
+}
 
-func NewCurrentPulsarContext(pc PulsarContext, issuer *auth.Issuer, tokenStore *store.Store) error {
-	CurrentPulsarContext = pc
-	if issuer != nil && tokenStore != nil {
-		_ = config.InitSNCloudLogClient(*issuer, *tokenStore)
-	} else {
-		config.ResetSNCloudLogClient()
+// NewSession creates a new Pulsar session with the given context
+// This function dynamically constructs clients without relying on global state
+func NewSession(ctx PulsarContext) (*Session, error) {
+	session := &Session{
+		Ctx: ctx,
 	}
-	return pc.SetPulsarContext()
+
+	if err := session.SetPulsarContext(ctx); err != nil {
+		return nil, fmt.Errorf("failed to set pulsar context: %w", err)
+	}
+
+	return session, nil
 }
 
-func ResetCurrentPulsarContext() {
-	CurrentPulsarContext = PulsarContext{}
-	CurrentPulsarClientOptions = pulsar.ClientOptions{}
-	AdminClient = nil
-	AdminV3Client = nil
-	Client = nil
-}
-
-func init() {
-	cmdutils.PulsarCtlConfig = &cmdutils.ClusterConfig{}
-}
-
-func (pc *PulsarContext) SetPulsarContext() error {
+func (s *Session) SetPulsarContext(ctx PulsarContext) error {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	s.Ctx = ctx
+	pc := &s.Ctx
 	var err error
 	// Configure pulsarctl with the token
 	switch {
 	case pc.Token != "":
-		cmdutils.PulsarCtlConfig = &cmdutils.ClusterConfig{
+		s.PulsarCtlConfig = &cmdutils.ClusterConfig{
 			WebServiceURL:                 pc.WebServiceURL,
 			AuthPlugin:                    "org.apache.pulsar.client.impl.auth.AuthenticationToken",
 			AuthParams:                    fmt.Sprintf("token:%s", pc.Token),
@@ -91,8 +90,8 @@ func (pc *PulsarContext) SetPulsarContext() error {
 			TLSKeyFile:                    pc.TLSKeyFile,
 		}
 
-		// Set the global client options
-		CurrentPulsarClientOptions = pulsar.ClientOptions{
+		// Set the client options
+		s.ClientOptions = pulsar.ClientOptions{
 			URL:                        pc.ServiceURL,
 			Authentication:             pulsar.NewAuthenticationToken(pc.Token),
 			OperationTimeout:           DefaultClientTimeout,
@@ -104,7 +103,7 @@ func (pc *PulsarContext) SetPulsarContext() error {
 			TLSKeyFilePath:             pc.TLSKeyFile,
 		}
 	case pc.AuthPlugin != "" && pc.AuthParams != "":
-		cmdutils.PulsarCtlConfig = &cmdutils.ClusterConfig{
+		s.PulsarCtlConfig = &cmdutils.ClusterConfig{
 			WebServiceURL:                 pc.WebServiceURL,
 			AuthPlugin:                    pc.AuthPlugin,
 			AuthParams:                    pc.AuthParams,
@@ -119,7 +118,7 @@ func (pc *PulsarContext) SetPulsarContext() error {
 		if err != nil {
 			return fmt.Errorf("failed to create authentication provider: %w", err)
 		}
-		CurrentPulsarClientOptions = pulsar.ClientOptions{
+		s.ClientOptions = pulsar.ClientOptions{
 			URL:                        pc.ServiceURL,
 			Authentication:             authProvider,
 			OperationTimeout:           DefaultClientTimeout,
@@ -132,7 +131,7 @@ func (pc *PulsarContext) SetPulsarContext() error {
 		}
 	default:
 		// No authentication provided
-		cmdutils.PulsarCtlConfig = &cmdutils.ClusterConfig{
+		s.PulsarCtlConfig = &cmdutils.ClusterConfig{
 			WebServiceURL:                 pc.WebServiceURL,
 			TLSAllowInsecureConnection:    pc.TLSAllowInsecureConnection,
 			TLSEnableHostnameVerification: pc.TLSEnableHostnameVerification,
@@ -141,8 +140,8 @@ func (pc *PulsarContext) SetPulsarContext() error {
 			TLSKeyFile:                    pc.TLSKeyFile,
 		}
 
-		// Set the global client options without authentication
-		CurrentPulsarClientOptions = pulsar.ClientOptions{
+		// Set the client options without authentication
+		s.ClientOptions = pulsar.ClientOptions{
 			URL:                        pc.ServiceURL,
 			OperationTimeout:           DefaultClientTimeout,
 			ConnectionTimeout:          DefaultClientTimeout,
@@ -154,10 +153,10 @@ func (pc *PulsarContext) SetPulsarContext() error {
 		}
 	}
 
-	AdminClient = cmdutils.NewPulsarClient()
-	AdminV3Client = cmdutils.NewPulsarClientWithAPIVersion(pulsaradminconfig.V3)
+	s.AdminClient = s.PulsarCtlConfig.Client(pulsaradminconfig.V2)
+	s.AdminV3Client = s.PulsarCtlConfig.Client(pulsaradminconfig.V3)
 
-	Client, err = pulsar.NewClient(CurrentPulsarClientOptions)
+	s.Client, err = pulsar.NewClient(s.ClientOptions)
 	if err != nil {
 		return fmt.Errorf("failed to create pulsar client: %w", err)
 	}
@@ -165,23 +164,32 @@ func (pc *PulsarContext) SetPulsarContext() error {
 	return nil
 }
 
-func GetAdminClient() (cmdutils.Client, error) {
-	if cmdutils.PulsarCtlConfig.WebServiceURL == "" {
+func (s *Session) GetAdminClient() (cmdutils.Client, error) {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	if s.PulsarCtlConfig.WebServiceURL == "" {
 		return nil, fmt.Errorf("err: ContextNotSetErr: Please set the cluster context first")
 	}
-	return AdminClient, nil
+	return s.AdminClient, nil
 }
 
-func GetAdminV3Client() (cmdutils.Client, error) {
-	if cmdutils.PulsarCtlConfig.WebServiceURL == "" {
+func (s *Session) GetAdminV3Client() (cmdutils.Client, error) {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	if s.PulsarCtlConfig.WebServiceURL == "" {
 		return nil, fmt.Errorf("err: ContextNotSetErr: Please set the cluster context first")
 	}
-	return AdminV3Client, nil
+	return s.AdminV3Client, nil
 }
 
-func GetPulsarClient() (pulsar.Client, error) {
-	if CurrentPulsarClientOptions.URL == "" {
+func (s *Session) GetPulsarClient() (pulsar.Client, error) {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	if s.ClientOptions.URL == "" {
 		return nil, fmt.Errorf("err: ContextNotSetErr: Please set the cluster context first")
 	}
-	return Client, nil
+	return s.Client, nil
 }

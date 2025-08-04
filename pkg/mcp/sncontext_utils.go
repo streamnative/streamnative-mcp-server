@@ -24,21 +24,27 @@ import (
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/config"
 	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
+	context2 "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 	sncloud "github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserver"
 )
 
 const DefaultKafkaPort = 9093
 
-func SetContext(options *config.Options, instanceName, clusterName string) error {
+func SetContext(ctx context.Context, options *config.Options, instanceName, clusterName string) error {
 	snConfig := options.LoadConfigOrDie()
 	myselfGrant, err := options.AuthOptions.LoadGrant(snConfig.Auth.Audience)
-	ctx := context.Background()
 	if err != nil || myselfGrant == nil {
 		return fmt.Errorf("failed to auth to StreamNative Cloud: %v", err)
 	}
 
-	apiClient, err := config.GetAPIClient()
+	// Get API client from session
+	session := context2.GetSNCloudSession(ctx)
+	if session == nil {
+		return fmt.Errorf("failed to get StreamNative Cloud session")
+	}
+
+	apiClient, err := session.GetAPIClient()
 	if err != nil {
 		return fmt.Errorf("failed to get API client: %v", err)
 	}
@@ -150,16 +156,20 @@ func SetContext(options *config.Options, instanceName, clusterName string) error
 		return fmt.Errorf("failed to get access token")
 	}
 
-	err = pulsar.NewCurrentPulsarContext(pulsar.PulsarContext{
+	psession := context2.GetPulsarSession(ctx)
+	if psession == nil {
+		return fmt.Errorf("failed to get pulsar session")
+	}
+	err = psession.SetPulsarContext(pulsar.PulsarContext{
 		WebServiceURL: getBasePath(snConfig.ProxyLocation, options.Organization, clusterUID),
 		ServiceURL:    getServiceURL(dnsName),
 		Token:         accessToken,
-	}, issuer, &options.AuthOptions.Store)
+	})
 	if err != nil {
-		return fmt.Errorf("failed to set pulsar context: %v", err)
+		return fmt.Errorf("failed to change pulsar context: %v", err)
 	}
 
-	err = kafka.NewCurrentKafkaContext(kafka.KafkaContext{
+	kctx := kafka.KafkaContext{
 		BootstrapServers:       fmt.Sprintf("%s:%d", dnsName, DefaultKafkaPort),
 		SchemaRegistryURL:      fmt.Sprintf("https://%s/kafka", dnsName),
 		ConnectURL:             fmt.Sprintf("%s/admin/kafkaconnect/", snConfig.ProxyLocation),
@@ -172,18 +182,20 @@ func SetContext(options *config.Options, instanceName, clusterName string) error
 		SchemaRegistryAuthPass: accessToken,
 		ConnectAuthUser:        "public/default",
 		ConnectAuthPass:        accessToken,
-	})
-	if err != nil {
-		return fmt.Errorf("failed to set kafka context: %v", err)
 	}
 
-	SetMcpContext(instanceName, clusterName, options.Organization)
+	ksession := context2.GetKafkaSession(ctx)
+	if ksession == nil {
+		return fmt.Errorf("failed to get kafka session")
+	}
+	err = ksession.SetKafkaContext(kctx)
+	if err != nil {
+		return fmt.Errorf("failed to change kafka context: %v", err)
+	}
+
+	// TODO: check if need to set log client
+	// if issuer != nil && options.AuthOptions.Store != nil {
+	// }
 
 	return nil
-}
-
-func ResetContext() {
-	pulsar.ResetCurrentPulsarContext()
-	kafka.ResetCurrentKafkaContext()
-	ResetMcpContext()
 }

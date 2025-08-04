@@ -22,7 +22,7 @@ import (
 	"fmt"
 
 	"github.com/apache/pulsar-client-go/pulsar"
-	cliutils "github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
+	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 )
@@ -42,7 +42,7 @@ func GetSchemaFromTopic(admin cmdutils.Client, topic string) (*SchemaInfo, error
 	if admin == nil {
 		return nil, fmt.Errorf("failed to get schema from topic '%s': mcp server is not initialized", topic)
 	}
-	topicName, err := cliutils.GetTopicName(topic)
+	topicName, err := utils.GetTopicName(topic)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get topic name from topic '%s': %w", topic, err)
 	}
