@@ -429,8 +429,9 @@ func TestJWTTokenSource(t *testing.T) {
 func TestNewSNCloudSession_JWT(t *testing.T) {
 	// Test session creation with JWT token
 	ctx := SNCloudContext{
-		APIURL:      "https://api.example.com",
-		LogAPIURL:   "https://logs.example.com",
+		APIURL:    "https://api.example.com",
+		LogAPIURL: "https://logs.example.com",
+		//nolint:gosec
 		JWTToken:    "test.jwt.token",
 		Timeout:     30 * time.Second,
 		Audience:    "test-audience",
