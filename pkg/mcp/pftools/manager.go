@@ -30,7 +30,6 @@ import (
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/admin/config"
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/rest"
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
-	cliutils "github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
 	"github.com/google/go-cmp/cmp"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
@@ -50,7 +49,7 @@ var DefaultStringSchemaInfo = &SchemaInfo{
 	Definition: map[string]interface{}{
 		"type": "string",
 	},
-	PulsarSchemaInfo: &cliutils.SchemaInfo{
+	PulsarSchemaInfo: &utils.SchemaInfo{
 		Type: "STRING",
 	},
 }

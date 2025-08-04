@@ -27,7 +27,7 @@ import (
 	"time"
 
 	"github.com/apache/pulsar-client-go/pulsar"
-	cliutils "github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
+	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/streamnative/streamnative-mcp-server/pkg/schema"
 )
@@ -259,20 +259,20 @@ func (fi *FunctionInvoker) unregisterResultChannel(messageID string) {
 
 func isCorrelationInputTopic(correlationInputTopic string, inputTopic string) bool {
 	// remove the partition index from the input topic
-	if strings.Contains(correlationInputTopic, cliutils.PARTITIONEDTOPICSUFFIX) {
-		correlationInputTopic = strings.Split(correlationInputTopic, cliutils.PARTITIONEDTOPICSUFFIX)[0]
+	if strings.Contains(correlationInputTopic, utils.PARTITIONEDTOPICSUFFIX) {
+		correlationInputTopic = strings.Split(correlationInputTopic, utils.PARTITIONEDTOPICSUFFIX)[0]
 	}
 
 	// remove the partition index from the input topic
-	if strings.Contains(inputTopic, cliutils.PARTITIONEDTOPICSUFFIX) {
-		inputTopic = strings.Split(inputTopic, cliutils.PARTITIONEDTOPICSUFFIX)[0]
+	if strings.Contains(inputTopic, utils.PARTITIONEDTOPICSUFFIX) {
+		inputTopic = strings.Split(inputTopic, utils.PARTITIONEDTOPICSUFFIX)[0]
 	}
 
-	correlationInputTopicName, err := cliutils.GetTopicName(correlationInputTopic)
+	correlationInputTopicName, err := utils.GetTopicName(correlationInputTopic)
 	if err != nil {
 		return false
 	}
-	inputTopicName, err := cliutils.GetTopicName(inputTopic)
+	inputTopicName, err := utils.GetTopicName(inputTopic)
 	if err != nil {
 		return false
 	}
