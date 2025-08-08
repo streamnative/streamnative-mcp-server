@@ -27,13 +27,11 @@ import (
 	"time"
 
 	pulsarclient "github.com/apache/pulsar-client-go/pulsar"
-	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/admin/config"
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/rest"
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
 	"github.com/google/go-cmp/cmp"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
-	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 	"github.com/streamnative/streamnative-mcp-server/pkg/schema"
@@ -75,8 +73,16 @@ func NewPulsarFunctionManager(snServer *Server, readOnly bool, options *ManagerO
 		return nil, fmt.Errorf("failed to get Pulsar client: %w", err)
 	}
 
-	adminClient := cmdutils.NewPulsarClientWithAPIVersion(config.V3)
-	v2adminClient := cmdutils.NewPulsarClientWithAPIVersion(config.V2)
+	adminClient, err := snServer.PulsarSession.GetAdminV3Client()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get Pulsar admin v3 client: %w", err)
+	}
+
+	v2adminClient, err := snServer.PulsarSession.GetAdminClient()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get Pulsar admin client: %w", err)
+	}
+
 	if options == nil {
 		options = DefaultManagerOptions()
 	}
