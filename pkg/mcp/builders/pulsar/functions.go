@@ -22,12 +22,12 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/admin/config"
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
+	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
 
 // PulsarAdminFunctionsToolBuilder implements the ToolBuilder interface for Pulsar admin functions operations
@@ -211,8 +211,16 @@ func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsTool() mcp.To
 // Migrated from the original handler logic
 func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		// Create Pulsar client with API version V3
-		client := cmdutils.NewPulsarClientWithAPIVersion(config.V3)
+		// Get Pulsar session from context
+		session := mcpCtx.GetPulsarSession(ctx)
+		if session == nil {
+			return mcp.NewToolResultError("Pulsar session not found in context"), nil
+		}
+
+		client, err := session.GetAdminV3Client()
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get Pulsar client: %v", err)), nil
+		}
 
 		// Extract and validate operation parameter
 		operation, err := request.RequireString("operation")
