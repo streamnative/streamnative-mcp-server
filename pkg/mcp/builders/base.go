@@ -26,6 +26,13 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 )
 
+// FeatureChecker defines the interface for checking feature requirements
+// It provides methods to determine if required features are available
+type FeatureChecker interface {
+	// HasAnyRequiredFeature checks if any of the required features are present in the provided list
+	HasAnyRequiredFeature(features []string) bool
+}
+
 // ToolBuilder defines the interface that all tool builders must implement
 // It specifies the methods required for building and managing MCP tools
 type ToolBuilder interface {
@@ -40,6 +47,9 @@ type ToolBuilder interface {
 
 	// Validate validates the builder configuration
 	Validate(config ToolBuildConfig) error
+
+	// Embed FeatureChecker interface
+	FeatureChecker
 }
 
 // ToolBuildConfig contains all configuration information needed to build tools

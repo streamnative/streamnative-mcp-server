@@ -188,11 +188,8 @@ func (r *ToolRegistry) BuildAllWithFeatures(readOnly bool, features []string) ([
 		}
 
 		// Check if the builder needs these features
-		// Use interface method instead of type assertion
-		if featureChecker, ok := builder.(interface{ HasAnyRequiredFeature([]string) bool }); ok {
-			if !featureChecker.HasAnyRequiredFeature(features) {
-				continue // Skip builders that don't need these features
-			}
+		if !builder.HasAnyRequiredFeature(features) {
+			continue // Skip builders that don't need these features
 		}
 
 		if err := builder.Validate(config); err != nil {

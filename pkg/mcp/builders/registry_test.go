@@ -87,6 +87,17 @@ func (m *MockToolBuilder) Validate(config ToolBuildConfig) error {
 	return fmt.Errorf("no matching features found")
 }
 
+func (m *MockToolBuilder) HasAnyRequiredFeature(features []string) bool {
+	for _, required := range m.features {
+		for _, provided := range features {
+			if required == provided {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func (m *MockToolBuilder) GetMetadata() ToolMetadata {
 	return m.metadata
 }
