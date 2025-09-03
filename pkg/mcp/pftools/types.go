@@ -31,23 +31,24 @@ import (
 
 // PulsarFunctionManager manages the lifecycle of Pulsar Functions as MCP tools
 type PulsarFunctionManager struct {
-	adminClient       cmdutils.Client
-	v2adminClient     cmdutils.Client
-	pulsarClient      pulsar.Client
-	fnToToolMap       map[string]*FunctionTool
-	mutex             sync.RWMutex
-	producerCache     map[string]pulsar.Producer
-	producerMutex     sync.RWMutex
-	pollInterval      time.Duration
-	stopCh            chan struct{}
-	callInProgressMap map[string]context.CancelFunc
-	mcpServer         *server.MCPServer
-	readOnly          bool
-	defaultTimeout    time.Duration
-	circuitBreakers   map[string]*CircuitBreaker
-	tenantNamespaces  []string
-	strictExport      bool
-	sessionID         string
+	adminClient         cmdutils.Client
+	v2adminClient       cmdutils.Client
+	pulsarClient        pulsar.Client
+	fnToToolMap         map[string]*FunctionTool
+	mutex               sync.RWMutex
+	producerCache       map[string]pulsar.Producer
+	producerMutex       sync.RWMutex
+	pollInterval        time.Duration
+	stopCh              chan struct{}
+	callInProgressMap   map[string]context.CancelFunc
+	mcpServer           *server.MCPServer
+	readOnly            bool
+	defaultTimeout      time.Duration
+	circuitBreakers     map[string]*CircuitBreaker
+	tenantNamespaces    []string
+	strictExport        bool
+	sessionID           string
+	clusterErrorHandler ClusterErrorHandler
 }
 
 type FunctionTool struct {
@@ -84,13 +85,16 @@ const (
 	StateClosed
 )
 
+type ClusterErrorHandler func(*PulsarFunctionManager, error)
+
 type ManagerOptions struct {
-	PollInterval     time.Duration
-	DefaultTimeout   time.Duration
-	FailureThreshold int
-	ResetTimeout     time.Duration
-	TenantNamespaces []string
-	StrictExport     bool
+	PollInterval        time.Duration
+	DefaultTimeout      time.Duration
+	FailureThreshold    int
+	ResetTimeout        time.Duration
+	TenantNamespaces    []string
+	StrictExport        bool
+	ClusterErrorHandler ClusterErrorHandler
 }
 
 func DefaultManagerOptions() *ManagerOptions {

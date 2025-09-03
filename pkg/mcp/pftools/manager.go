@@ -89,23 +89,24 @@ func NewPulsarFunctionManager(snServer *Server, readOnly bool, options *ManagerO
 
 	// Create the manager
 	manager := &PulsarFunctionManager{
-		adminClient:       adminClient,
-		v2adminClient:     v2adminClient,
-		pulsarClient:      pulsarClient,
-		fnToToolMap:       make(map[string]*FunctionTool),
-		mutex:             sync.RWMutex{},
-		producerCache:     make(map[string]pulsarclient.Producer),
-		producerMutex:     sync.RWMutex{},
-		pollInterval:      options.PollInterval,
-		stopCh:            make(chan struct{}),
-		callInProgressMap: make(map[string]context.CancelFunc),
-		mcpServer:         snServer.MCPServer,
-		readOnly:          readOnly,
-		defaultTimeout:    options.DefaultTimeout,
-		circuitBreakers:   make(map[string]*CircuitBreaker),
-		tenantNamespaces:  options.TenantNamespaces,
-		strictExport:      options.StrictExport,
-		sessionID:         sessionID,
+		adminClient:         adminClient,
+		v2adminClient:       v2adminClient,
+		pulsarClient:        pulsarClient,
+		fnToToolMap:         make(map[string]*FunctionTool),
+		mutex:               sync.RWMutex{},
+		producerCache:       make(map[string]pulsarclient.Producer),
+		producerMutex:       sync.RWMutex{},
+		pollInterval:        options.PollInterval,
+		stopCh:              make(chan struct{}),
+		callInProgressMap:   make(map[string]context.CancelFunc),
+		mcpServer:           snServer.MCPServer,
+		readOnly:            readOnly,
+		defaultTimeout:      options.DefaultTimeout,
+		circuitBreakers:     make(map[string]*CircuitBreaker),
+		tenantNamespaces:    options.TenantNamespaces,
+		strictExport:        options.StrictExport,
+		sessionID:           sessionID,
+		clusterErrorHandler: options.ClusterErrorHandler,
 	}
 
 	return manager, nil
@@ -154,6 +155,11 @@ func (m *PulsarFunctionManager) updateFunctions() {
 	functions, err := m.getFunctionsList()
 	if err != nil {
 		log.Printf("Failed to get functions list: %v", err)
+
+		// Check if this is a cluster health error and invoke callback if configured
+		if IsClusterUnhealthy(err) && m.clusterErrorHandler != nil {
+			go m.clusterErrorHandler(m, err)
+		}
 		return
 	}
 

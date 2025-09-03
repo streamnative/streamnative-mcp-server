@@ -66,6 +66,14 @@ func (s *Server) PulsarFunctionManagedMcpTools(readOnly bool, features []string,
 
 	options := pftools2.DefaultManagerOptions()
 
+	// Configure cluster error handler for graceful cleanup
+	options.ClusterErrorHandler = func(_ *pftools2.PulsarFunctionManager, err error) {
+		log.Printf("Cluster health error detected: %v", err)
+		log.Printf("Consider implementing cleanup logic here (e.g., stopping manager, notifying monitoring systems)")
+		// The calling service can implement specific cleanup logic here
+		// For example: stop the manager, send alerts, implement backoff strategies
+	}
+
 	if s.SNCloudSession.Ctx.Organization == "" || s.SNCloudSession.Ctx.PulsarInstance == "" || s.SNCloudSession.Ctx.PulsarCluster == "" {
 		log.Printf("Skipping Pulsar Functions as MCP Tools because both organization, pulsar instance and pulsar cluster are not set")
 		return
