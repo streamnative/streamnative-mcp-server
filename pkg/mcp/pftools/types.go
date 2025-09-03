@@ -48,7 +48,7 @@ type PulsarFunctionManager struct {
 	tenantNamespaces    []string
 	strictExport        bool
 	sessionID           string
-	clusterErrorHandler func(*PulsarFunctionManager, error)
+	clusterErrorHandler ClusterErrorHandler
 }
 
 type FunctionTool struct {
@@ -85,6 +85,8 @@ const (
 	StateClosed
 )
 
+type ClusterErrorHandler func(*PulsarFunctionManager, error)
+
 type ManagerOptions struct {
 	PollInterval        time.Duration
 	DefaultTimeout      time.Duration
@@ -92,7 +94,7 @@ type ManagerOptions struct {
 	ResetTimeout        time.Duration
 	TenantNamespaces    []string
 	StrictExport        bool
-	ClusterErrorHandler func(*PulsarFunctionManager, error)
+	ClusterErrorHandler ClusterErrorHandler
 }
 
 func DefaultManagerOptions() *ManagerOptions {
