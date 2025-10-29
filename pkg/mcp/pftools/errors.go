@@ -19,3 +19,10 @@ func IsClusterUnhealthy(err error) bool {
 	}
 	return false
 }
+
+func IsAuthError(err error) bool {
+	if restErr, ok := err.(rest.Error); ok {
+		return restErr.Code == 403
+	}
+	return false
+}

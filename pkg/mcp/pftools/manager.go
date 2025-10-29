@@ -157,7 +157,7 @@ func (m *PulsarFunctionManager) updateFunctions() {
 		log.Printf("Failed to get functions list: %v", err)
 
 		// Check if this is a cluster health error and invoke callback if configured
-		if IsClusterUnhealthy(err) && m.clusterErrorHandler != nil {
+		if (IsClusterUnhealthy(err) || IsAuthError(err)) && m.clusterErrorHandler != nil {
 			go m.clusterErrorHandler(m, err)
 		}
 		return
