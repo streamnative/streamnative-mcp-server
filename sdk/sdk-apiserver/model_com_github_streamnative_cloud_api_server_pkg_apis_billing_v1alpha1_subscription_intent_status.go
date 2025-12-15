@@ -34,10 +34,10 @@ import (
 // ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntentStatus SubscriptionIntentStatus defines the observed state of SubscriptionIntent
 type ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntentStatus struct {
 	// Conditions is an array of current observed conditions.
-	Conditions []V1Condition `json:"conditions,omitempty"`
-	PaymentIntentName *string `json:"paymentIntentName,omitempty"`
-	SetupIntentName *string `json:"setupIntentName,omitempty"`
-	SubscriptionName *string `json:"subscriptionName,omitempty"`
+	Conditions        []V1Condition `json:"conditions,omitempty"`
+	PaymentIntentName *string       `json:"paymentIntentName,omitempty"`
+	SetupIntentName   *string       `json:"setupIntentName,omitempty"`
+	SubscriptionName  *string       `json:"subscriptionName,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntentStatus instantiates a new ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntentStatus object
@@ -237,5 +237,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscr
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

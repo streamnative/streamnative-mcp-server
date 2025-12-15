@@ -34,10 +34,10 @@ import (
 // ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpCustomResourceStatus VvpCustomResourceStatus defines the observed state of VvpCustomResource
 type ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpCustomResourceStatus struct {
 	CustomResourceState *string `json:"customResourceState,omitempty"`
-	DeploymentId *string `json:"deploymentId,omitempty"`
+	DeploymentId        *string `json:"deploymentId,omitempty"`
 	DeploymentNamespace *string `json:"deploymentNamespace,omitempty"`
-	ObservedSpecState *string `json:"observedSpecState,omitempty"`
-	StatusState *string `json:"statusState,omitempty"`
+	ObservedSpecState   *string `json:"observedSpecState,omitempty"`
+	StatusState         *string `json:"statusState,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpCustomResourceStatus instantiates a new ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpCustomResourceStatus object
@@ -272,5 +272,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpCus
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

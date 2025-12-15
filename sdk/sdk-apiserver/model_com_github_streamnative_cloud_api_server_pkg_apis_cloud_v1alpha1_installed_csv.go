@@ -33,7 +33,7 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstalledCSV struct for ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstalledCSV
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstalledCSV struct {
-	Name string `json:"name"`
+	Name  string `json:"name"`
 	Phase string `json:"phase"`
 }
 
@@ -150,5 +150,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Installe
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

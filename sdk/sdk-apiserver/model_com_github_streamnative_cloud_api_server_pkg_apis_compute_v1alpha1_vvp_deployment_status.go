@@ -33,9 +33,9 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentStatus VvpDeploymentStatus defines the observed state of VvpDeployment
 type ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentStatus struct {
-	CustomResourceStatus *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpCustomResourceStatus `json:"customResourceStatus,omitempty"`
-	DeploymentStatus *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentStatusDeploymentStatus `json:"deploymentStatus,omitempty"`
-	DeploymentSystemMetadata *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentSystemMetadata `json:"deploymentSystemMetadata,omitempty"`
+	CustomResourceStatus     *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpCustomResourceStatus             `json:"customResourceStatus,omitempty"`
+	DeploymentStatus         *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentStatusDeploymentStatus `json:"deploymentStatus,omitempty"`
+	DeploymentSystemMetadata *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentSystemMetadata         `json:"deploymentSystemMetadata,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentStatus instantiates a new ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentStatus object
@@ -200,5 +200,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDep
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

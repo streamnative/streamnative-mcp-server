@@ -33,8 +33,8 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1OfferReference OfferReference references an offer object.
 type ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1OfferReference struct {
-	Kind string `json:"kind"`
-	Name string `json:"name"`
+	Kind      string  `json:"kind"`
+	Name      string  `json:"name"`
 	Namespace *string `json:"namespace,omitempty"`
 }
 
@@ -186,5 +186,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1OfferR
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

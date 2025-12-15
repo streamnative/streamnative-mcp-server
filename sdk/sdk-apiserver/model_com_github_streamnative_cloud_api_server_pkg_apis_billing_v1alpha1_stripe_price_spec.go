@@ -38,7 +38,7 @@ type ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1StripePriceSpec st
 	// Currency is the required three-letter ISO currency code The codes below were generated from https://stripe.com/docs/currencies
 	Currency *string `json:"currency,omitempty"`
 	// Name to be displayed in the Stripe dashboard, hidden from customers
-	Name *string `json:"name,omitempty"`
+	Name      *string                                                                         `json:"name,omitempty"`
 	Recurring *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1StripePriceRecurrence `json:"recurring,omitempty"`
 	// Tiers are Stripes billing tiers like
 	Tiers []ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Tier `json:"tiers,omitempty"`
@@ -350,5 +350,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Stripe
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

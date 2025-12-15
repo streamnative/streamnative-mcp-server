@@ -33,10 +33,10 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1UserRef struct for ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1UserRef
 type ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1UserRef struct {
-	ApiGroup string `json:"apiGroup"`
-	Kind string `json:"kind"`
-	Name string `json:"name"`
-	Namespace string `json:"namespace"`
+	ApiGroup     string                                                                      `json:"apiGroup"`
+	Kind         string                                                                      `json:"kind"`
+	Name         string                                                                      `json:"name"`
+	Namespace    string                                                                      `json:"namespace"`
 	Organization ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1Organization `json:"organization"`
 }
 
@@ -237,5 +237,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

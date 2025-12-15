@@ -34,13 +34,13 @@ import (
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemberStatus PoolMemberStatus defines the observed state of PoolMember
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemberStatus struct {
 	// Conditions is an array of current observed conditions.
-	Conditions []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition `json:"conditions,omitempty"`
-	DeploymentType string `json:"deploymentType"`
+	Conditions     []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition `json:"conditions,omitempty"`
+	DeploymentType string                                                             `json:"deploymentType"`
 	// InstalledCSVs shows the name and status of installed operator versions
 	InstalledCSVs []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstalledCSV `json:"installedCSVs,omitempty"`
 	// ObservedGeneration is the most recent generation observed by the PoolMember controller.
-	ObservedGeneration int64 `json:"observedGeneration"`
-	ServerVersion *string `json:"serverVersion,omitempty"`
+	ObservedGeneration int64   `json:"observedGeneration"`
+	ServerVersion      *string `json:"serverVersion,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemberStatus instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemberStatus object
@@ -261,5 +261,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemb
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

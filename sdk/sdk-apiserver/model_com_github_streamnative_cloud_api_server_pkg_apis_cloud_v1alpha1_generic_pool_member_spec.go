@@ -36,7 +36,7 @@ type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1GenericPoolMemberSpe
 	// Endpoint is *either* a full URL, or a hostname/port to point to the master
 	Endpoint *string `json:"endpoint,omitempty"`
 	// Location is the location of the cluster.
-	Location string `json:"location"`
+	Location   string                                                             `json:"location"`
 	MasterAuth *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1MasterAuth `json:"masterAuth,omitempty"`
 	// TLSServerName is the SNI header name to set, overridding the default. This is just the hostname and no port
 	TlsServerName *string `json:"tlsServerName,omitempty"`
@@ -232,5 +232,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1GenericP
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

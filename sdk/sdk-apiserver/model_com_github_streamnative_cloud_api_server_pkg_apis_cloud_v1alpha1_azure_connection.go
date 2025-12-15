@@ -33,10 +33,10 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1AzureConnection struct for ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1AzureConnection
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1AzureConnection struct {
-	ClientId string `json:"clientId"`
-	SubscriptionId string `json:"subscriptionId"`
+	ClientId        string `json:"clientId"`
+	SubscriptionId  string `json:"subscriptionId"`
 	SupportClientId string `json:"supportClientId"`
-	TenantId string `json:"tenantId"`
+	TenantId        string `json:"tenantId"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1AzureConnection instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1AzureConnection object
@@ -208,5 +208,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1AzureCon
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

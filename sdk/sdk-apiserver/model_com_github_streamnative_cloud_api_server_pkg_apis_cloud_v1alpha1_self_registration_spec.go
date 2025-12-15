@@ -33,12 +33,12 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1SelfRegistrationSpec SelfRegistrationSpec defines the desired state of SelfRegistration
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1SelfRegistrationSpec struct {
-	Aws *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1SelfRegistrationAws `json:"aws,omitempty"`
-	DisplayName string `json:"displayName"`
-	Metadata *map[string]string `json:"metadata,omitempty"`
-	Stripe map[string]interface{} `json:"stripe,omitempty"`
-	Suger *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1SelfRegistrationSuger `json:"suger,omitempty"`
-	Type string `json:"type"`
+	Aws         *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1SelfRegistrationAws   `json:"aws,omitempty"`
+	DisplayName string                                                                        `json:"displayName"`
+	Metadata    *map[string]string                                                            `json:"metadata,omitempty"`
+	Stripe      map[string]interface{}                                                        `json:"stripe,omitempty"`
+	Suger       *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1SelfRegistrationSuger `json:"suger,omitempty"`
+	Type        string                                                                        `json:"type"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1SelfRegistrationSpec instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1SelfRegistrationSpec object
@@ -294,5 +294,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1SelfRegi
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

@@ -36,20 +36,19 @@ import (
 	"strings"
 )
 
-
 // CustomObjectsApiService CustomObjectsApi service
 type CustomObjectsApiService service
 
 type ApiCreateClusterCustomObjectRequest struct {
-	ctx context.Context
-	ApiService *CustomObjectsApiService
-	group string
-	version string
-	plural string
-	body *map[string]interface{}
-	pretty *string
-	dryRun *string
-	fieldManager *string
+	ctx             context.Context
+	ApiService      *CustomObjectsApiService
+	group           string
+	version         string
+	plural          string
+	body            *map[string]interface{}
+	pretty          *string
+	dryRun          *string
+	fieldManager    *string
 	fieldValidation *string
 }
 
@@ -92,30 +91,31 @@ CreateClusterCustomObject Method for CreateClusterCustomObject
 
 Creates a cluster scoped Custom object
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param group The custom resource's group name
- @param version The custom resource's version
- @param plural The custom resource's plural name. For TPRs this would be lowercase plural kind.
- @return ApiCreateClusterCustomObjectRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param group The custom resource's group name
+	@param version The custom resource's version
+	@param plural The custom resource's plural name. For TPRs this would be lowercase plural kind.
+	@return ApiCreateClusterCustomObjectRequest
 */
 func (a *CustomObjectsApiService) CreateClusterCustomObject(ctx context.Context, group string, version string, plural string) ApiCreateClusterCustomObjectRequest {
 	return ApiCreateClusterCustomObjectRequest{
 		ApiService: a,
-		ctx: ctx,
-		group: group,
-		version: version,
-		plural: plural,
+		ctx:        ctx,
+		group:      group,
+		version:    version,
+		plural:     plural,
 	}
 }
 
 // Execute executes the request
-//  @return map[string]interface{}
+//
+//	@return map[string]interface{}
 func (a *CustomObjectsApiService) CreateClusterCustomObjectExecute(r ApiCreateClusterCustomObjectRequest) (map[string]interface{}, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  map[string]interface{}
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CustomObjectsApiService.CreateClusterCustomObject")
@@ -204,16 +204,16 @@ func (a *CustomObjectsApiService) CreateClusterCustomObjectExecute(r ApiCreateCl
 }
 
 type ApiCreateNamespacedCustomObjectRequest struct {
-	ctx context.Context
-	ApiService *CustomObjectsApiService
-	group string
-	version string
-	namespace string
-	plural string
-	body *map[string]interface{}
-	pretty *string
-	dryRun *string
-	fieldManager *string
+	ctx             context.Context
+	ApiService      *CustomObjectsApiService
+	group           string
+	version         string
+	namespace       string
+	plural          string
+	body            *map[string]interface{}
+	pretty          *string
+	dryRun          *string
+	fieldManager    *string
 	fieldValidation *string
 }
 
@@ -256,32 +256,33 @@ CreateNamespacedCustomObject Method for CreateNamespacedCustomObject
 
 Creates a namespace scoped Custom object
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param group The custom resource's group name
- @param version The custom resource's version
- @param namespace The custom resource's namespace
- @param plural The custom resource's plural name. For TPRs this would be lowercase plural kind.
- @return ApiCreateNamespacedCustomObjectRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param group The custom resource's group name
+	@param version The custom resource's version
+	@param namespace The custom resource's namespace
+	@param plural The custom resource's plural name. For TPRs this would be lowercase plural kind.
+	@return ApiCreateNamespacedCustomObjectRequest
 */
 func (a *CustomObjectsApiService) CreateNamespacedCustomObject(ctx context.Context, group string, version string, namespace string, plural string) ApiCreateNamespacedCustomObjectRequest {
 	return ApiCreateNamespacedCustomObjectRequest{
 		ApiService: a,
-		ctx: ctx,
-		group: group,
-		version: version,
-		namespace: namespace,
-		plural: plural,
+		ctx:        ctx,
+		group:      group,
+		version:    version,
+		namespace:  namespace,
+		plural:     plural,
 	}
 }
 
 // Execute executes the request
-//  @return map[string]interface{}
+//
+//	@return map[string]interface{}
 func (a *CustomObjectsApiService) CreateNamespacedCustomObjectExecute(r ApiCreateNamespacedCustomObjectRequest) (map[string]interface{}, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  map[string]interface{}
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CustomObjectsApiService.CreateNamespacedCustomObject")
@@ -371,17 +372,17 @@ func (a *CustomObjectsApiService) CreateNamespacedCustomObjectExecute(r ApiCreat
 }
 
 type ApiDeleteClusterCustomObjectRequest struct {
-	ctx context.Context
-	ApiService *CustomObjectsApiService
-	group string
-	version string
-	plural string
-	name string
+	ctx                context.Context
+	ApiService         *CustomObjectsApiService
+	group              string
+	version            string
+	plural             string
+	name               string
 	gracePeriodSeconds *int32
-	orphanDependents *bool
-	propagationPolicy *string
-	dryRun *string
-	body *V1DeleteOptions
+	orphanDependents   *bool
+	propagationPolicy  *string
+	dryRun             *string
+	body               *V1DeleteOptions
 }
 
 // The duration in seconds before the object should be deleted. Value must be non-negative integer. The value zero indicates delete immediately. If this value is nil, the default grace period for the specified type will be used. Defaults to a per object value if not specified. zero means delete immediately.
@@ -422,32 +423,33 @@ DeleteClusterCustomObject Method for DeleteClusterCustomObject
 
 Deletes the specified cluster scoped custom object
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param group the custom resource's group
- @param version the custom resource's version
- @param plural the custom object's plural name. For TPRs this would be lowercase plural kind.
- @param name the custom object's name
- @return ApiDeleteClusterCustomObjectRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param group the custom resource's group
+	@param version the custom resource's version
+	@param plural the custom object's plural name. For TPRs this would be lowercase plural kind.
+	@param name the custom object's name
+	@return ApiDeleteClusterCustomObjectRequest
 */
 func (a *CustomObjectsApiService) DeleteClusterCustomObject(ctx context.Context, group string, version string, plural string, name string) ApiDeleteClusterCustomObjectRequest {
 	return ApiDeleteClusterCustomObjectRequest{
 		ApiService: a,
-		ctx: ctx,
-		group: group,
-		version: version,
-		plural: plural,
-		name: name,
+		ctx:        ctx,
+		group:      group,
+		version:    version,
+		plural:     plural,
+		name:       name,
 	}
 }
 
 // Execute executes the request
-//  @return map[string]interface{}
+//
+//	@return map[string]interface{}
 func (a *CustomObjectsApiService) DeleteClusterCustomObjectExecute(r ApiDeleteClusterCustomObjectRequest) (map[string]interface{}, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  map[string]interface{}
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CustomObjectsApiService.DeleteClusterCustomObject")
@@ -534,18 +536,18 @@ func (a *CustomObjectsApiService) DeleteClusterCustomObjectExecute(r ApiDeleteCl
 }
 
 type ApiDeleteCollectionClusterCustomObjectRequest struct {
-	ctx context.Context
-	ApiService *CustomObjectsApiService
-	group string
-	version string
-	plural string
-	pretty *string
-	labelSelector *string
+	ctx                context.Context
+	ApiService         *CustomObjectsApiService
+	group              string
+	version            string
+	plural             string
+	pretty             *string
+	labelSelector      *string
 	gracePeriodSeconds *int32
-	orphanDependents *bool
-	propagationPolicy *string
-	dryRun *string
-	body *V1DeleteOptions
+	orphanDependents   *bool
+	propagationPolicy  *string
+	dryRun             *string
+	body               *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -598,30 +600,31 @@ DeleteCollectionClusterCustomObject Method for DeleteCollectionClusterCustomObje
 
 Delete collection of cluster scoped custom objects
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param group The custom resource's group name
- @param version The custom resource's version
- @param plural The custom resource's plural name. For TPRs this would be lowercase plural kind.
- @return ApiDeleteCollectionClusterCustomObjectRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param group The custom resource's group name
+	@param version The custom resource's version
+	@param plural The custom resource's plural name. For TPRs this would be lowercase plural kind.
+	@return ApiDeleteCollectionClusterCustomObjectRequest
 */
 func (a *CustomObjectsApiService) DeleteCollectionClusterCustomObject(ctx context.Context, group string, version string, plural string) ApiDeleteCollectionClusterCustomObjectRequest {
 	return ApiDeleteCollectionClusterCustomObjectRequest{
 		ApiService: a,
-		ctx: ctx,
-		group: group,
-		version: version,
-		plural: plural,
+		ctx:        ctx,
+		group:      group,
+		version:    version,
+		plural:     plural,
 	}
 }
 
 // Execute executes the request
-//  @return map[string]interface{}
+//
+//	@return map[string]interface{}
 func (a *CustomObjectsApiService) DeleteCollectionClusterCustomObjectExecute(r ApiDeleteCollectionClusterCustomObjectRequest) (map[string]interface{}, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  map[string]interface{}
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CustomObjectsApiService.DeleteCollectionClusterCustomObject")
@@ -713,20 +716,20 @@ func (a *CustomObjectsApiService) DeleteCollectionClusterCustomObjectExecute(r A
 }
 
 type ApiDeleteCollectionNamespacedCustomObjectRequest struct {
-	ctx context.Context
-	ApiService *CustomObjectsApiService
-	group string
-	version string
-	namespace string
-	plural string
-	pretty *string
-	labelSelector *string
+	ctx                context.Context
+	ApiService         *CustomObjectsApiService
+	group              string
+	version            string
+	namespace          string
+	plural             string
+	pretty             *string
+	labelSelector      *string
 	gracePeriodSeconds *int32
-	orphanDependents *bool
-	propagationPolicy *string
-	dryRun *string
-	fieldSelector *string
-	body *V1DeleteOptions
+	orphanDependents   *bool
+	propagationPolicy  *string
+	dryRun             *string
+	fieldSelector      *string
+	body               *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -785,32 +788,33 @@ DeleteCollectionNamespacedCustomObject Method for DeleteCollectionNamespacedCust
 
 Delete collection of namespace scoped custom objects
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param group The custom resource's group name
- @param version The custom resource's version
- @param namespace The custom resource's namespace
- @param plural The custom resource's plural name. For TPRs this would be lowercase plural kind.
- @return ApiDeleteCollectionNamespacedCustomObjectRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param group The custom resource's group name
+	@param version The custom resource's version
+	@param namespace The custom resource's namespace
+	@param plural The custom resource's plural name. For TPRs this would be lowercase plural kind.
+	@return ApiDeleteCollectionNamespacedCustomObjectRequest
 */
 func (a *CustomObjectsApiService) DeleteCollectionNamespacedCustomObject(ctx context.Context, group string, version string, namespace string, plural string) ApiDeleteCollectionNamespacedCustomObjectRequest {
 	return ApiDeleteCollectionNamespacedCustomObjectRequest{
 		ApiService: a,
-		ctx: ctx,
-		group: group,
-		version: version,
-		namespace: namespace,
-		plural: plural,
+		ctx:        ctx,
+		group:      group,
+		version:    version,
+		namespace:  namespace,
+		plural:     plural,
 	}
 }
 
 // Execute executes the request
-//  @return map[string]interface{}
+//
+//	@return map[string]interface{}
 func (a *CustomObjectsApiService) DeleteCollectionNamespacedCustomObjectExecute(r ApiDeleteCollectionNamespacedCustomObjectRequest) (map[string]interface{}, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  map[string]interface{}
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CustomObjectsApiService.DeleteCollectionNamespacedCustomObject")
@@ -906,18 +910,18 @@ func (a *CustomObjectsApiService) DeleteCollectionNamespacedCustomObjectExecute(
 }
 
 type ApiDeleteNamespacedCustomObjectRequest struct {
-	ctx context.Context
-	ApiService *CustomObjectsApiService
-	group string
-	version string
-	namespace string
-	plural string
-	name string
+	ctx                context.Context
+	ApiService         *CustomObjectsApiService
+	group              string
+	version            string
+	namespace          string
+	plural             string
+	name               string
 	gracePeriodSeconds *int32
-	orphanDependents *bool
-	propagationPolicy *string
-	dryRun *string
-	body *V1DeleteOptions
+	orphanDependents   *bool
+	propagationPolicy  *string
+	dryRun             *string
+	body               *V1DeleteOptions
 }
 
 // The duration in seconds before the object should be deleted. Value must be non-negative integer. The value zero indicates delete immediately. If this value is nil, the default grace period for the specified type will be used. Defaults to a per object value if not specified. zero means delete immediately.
@@ -958,34 +962,35 @@ DeleteNamespacedCustomObject Method for DeleteNamespacedCustomObject
 
 Deletes the specified namespace scoped custom object
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param group the custom resource's group
- @param version the custom resource's version
- @param namespace The custom resource's namespace
- @param plural the custom resource's plural name. For TPRs this would be lowercase plural kind.
- @param name the custom object's name
- @return ApiDeleteNamespacedCustomObjectRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param group the custom resource's group
+	@param version the custom resource's version
+	@param namespace The custom resource's namespace
+	@param plural the custom resource's plural name. For TPRs this would be lowercase plural kind.
+	@param name the custom object's name
+	@return ApiDeleteNamespacedCustomObjectRequest
 */
 func (a *CustomObjectsApiService) DeleteNamespacedCustomObject(ctx context.Context, group string, version string, namespace string, plural string, name string) ApiDeleteNamespacedCustomObjectRequest {
 	return ApiDeleteNamespacedCustomObjectRequest{
 		ApiService: a,
-		ctx: ctx,
-		group: group,
-		version: version,
-		namespace: namespace,
-		plural: plural,
-		name: name,
+		ctx:        ctx,
+		group:      group,
+		version:    version,
+		namespace:  namespace,
+		plural:     plural,
+		name:       name,
 	}
 }
 
 // Execute executes the request
-//  @return map[string]interface{}
+//
+//	@return map[string]interface{}
 func (a *CustomObjectsApiService) DeleteNamespacedCustomObjectExecute(r ApiDeleteNamespacedCustomObjectRequest) (map[string]interface{}, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  map[string]interface{}
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CustomObjectsApiService.DeleteNamespacedCustomObject")
@@ -1073,12 +1078,12 @@ func (a *CustomObjectsApiService) DeleteNamespacedCustomObjectExecute(r ApiDelet
 }
 
 type ApiGetClusterCustomObjectRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *CustomObjectsApiService
-	group string
-	version string
-	plural string
-	name string
+	group      string
+	version    string
+	plural     string
+	name       string
 }
 
 func (r ApiGetClusterCustomObjectRequest) Execute() (map[string]interface{}, *http.Response, error) {
@@ -1090,32 +1095,33 @@ GetClusterCustomObject Method for GetClusterCustomObject
 
 Returns a cluster scoped custom object
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param group the custom resource's group
- @param version the custom resource's version
- @param plural the custom object's plural name. For TPRs this would be lowercase plural kind.
- @param name the custom object's name
- @return ApiGetClusterCustomObjectRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param group the custom resource's group
+	@param version the custom resource's version
+	@param plural the custom object's plural name. For TPRs this would be lowercase plural kind.
+	@param name the custom object's name
+	@return ApiGetClusterCustomObjectRequest
 */
 func (a *CustomObjectsApiService) GetClusterCustomObject(ctx context.Context, group string, version string, plural string, name string) ApiGetClusterCustomObjectRequest {
 	return ApiGetClusterCustomObjectRequest{
 		ApiService: a,
-		ctx: ctx,
-		group: group,
-		version: version,
-		plural: plural,
-		name: name,
+		ctx:        ctx,
+		group:      group,
+		version:    version,
+		plural:     plural,
+		name:       name,
 	}
 }
 
 // Execute executes the request
-//  @return map[string]interface{}
+//
+//	@return map[string]interface{}
 func (a *CustomObjectsApiService) GetClusterCustomObjectExecute(r ApiGetClusterCustomObjectRequest) (map[string]interface{}, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  map[string]interface{}
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CustomObjectsApiService.GetClusterCustomObject")
@@ -1188,12 +1194,12 @@ func (a *CustomObjectsApiService) GetClusterCustomObjectExecute(r ApiGetClusterC
 }
 
 type ApiGetClusterCustomObjectScaleRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *CustomObjectsApiService
-	group string
-	version string
-	plural string
-	name string
+	group      string
+	version    string
+	plural     string
+	name       string
 }
 
 func (r ApiGetClusterCustomObjectScaleRequest) Execute() (map[string]interface{}, *http.Response, error) {
@@ -1205,32 +1211,33 @@ GetClusterCustomObjectScale Method for GetClusterCustomObjectScale
 
 read scale of the specified custom object
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param group the custom resource's group
- @param version the custom resource's version
- @param plural the custom resource's plural name. For TPRs this would be lowercase plural kind.
- @param name the custom object's name
- @return ApiGetClusterCustomObjectScaleRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param group the custom resource's group
+	@param version the custom resource's version
+	@param plural the custom resource's plural name. For TPRs this would be lowercase plural kind.
+	@param name the custom object's name
+	@return ApiGetClusterCustomObjectScaleRequest
 */
 func (a *CustomObjectsApiService) GetClusterCustomObjectScale(ctx context.Context, group string, version string, plural string, name string) ApiGetClusterCustomObjectScaleRequest {
 	return ApiGetClusterCustomObjectScaleRequest{
 		ApiService: a,
-		ctx: ctx,
-		group: group,
-		version: version,
-		plural: plural,
-		name: name,
+		ctx:        ctx,
+		group:      group,
+		version:    version,
+		plural:     plural,
+		name:       name,
 	}
 }
 
 // Execute executes the request
-//  @return map[string]interface{}
+//
+//	@return map[string]interface{}
 func (a *CustomObjectsApiService) GetClusterCustomObjectScaleExecute(r ApiGetClusterCustomObjectScaleRequest) (map[string]interface{}, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  map[string]interface{}
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CustomObjectsApiService.GetClusterCustomObjectScale")
@@ -1303,12 +1310,12 @@ func (a *CustomObjectsApiService) GetClusterCustomObjectScaleExecute(r ApiGetClu
 }
 
 type ApiGetClusterCustomObjectStatusRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *CustomObjectsApiService
-	group string
-	version string
-	plural string
-	name string
+	group      string
+	version    string
+	plural     string
+	name       string
 }
 
 func (r ApiGetClusterCustomObjectStatusRequest) Execute() (map[string]interface{}, *http.Response, error) {
@@ -1320,32 +1327,33 @@ GetClusterCustomObjectStatus Method for GetClusterCustomObjectStatus
 
 read status of the specified cluster scoped custom object
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param group the custom resource's group
- @param version the custom resource's version
- @param plural the custom resource's plural name. For TPRs this would be lowercase plural kind.
- @param name the custom object's name
- @return ApiGetClusterCustomObjectStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param group the custom resource's group
+	@param version the custom resource's version
+	@param plural the custom resource's plural name. For TPRs this would be lowercase plural kind.
+	@param name the custom object's name
+	@return ApiGetClusterCustomObjectStatusRequest
 */
 func (a *CustomObjectsApiService) GetClusterCustomObjectStatus(ctx context.Context, group string, version string, plural string, name string) ApiGetClusterCustomObjectStatusRequest {
 	return ApiGetClusterCustomObjectStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		group: group,
-		version: version,
-		plural: plural,
-		name: name,
+		ctx:        ctx,
+		group:      group,
+		version:    version,
+		plural:     plural,
+		name:       name,
 	}
 }
 
 // Execute executes the request
-//  @return map[string]interface{}
+//
+//	@return map[string]interface{}
 func (a *CustomObjectsApiService) GetClusterCustomObjectStatusExecute(r ApiGetClusterCustomObjectStatusRequest) (map[string]interface{}, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  map[string]interface{}
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CustomObjectsApiService.GetClusterCustomObjectStatus")
@@ -1418,10 +1426,10 @@ func (a *CustomObjectsApiService) GetClusterCustomObjectStatusExecute(r ApiGetCl
 }
 
 type ApiGetCustomObjectsAPIResourcesRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *CustomObjectsApiService
-	group string
-	version string
+	group      string
+	version    string
 }
 
 func (r ApiGetCustomObjectsAPIResourcesRequest) Execute() (*V1APIResourceList, *http.Response, error) {
@@ -1433,28 +1441,29 @@ GetCustomObjectsAPIResources Method for GetCustomObjectsAPIResources
 
 get available resources
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param group The custom resource's group name
- @param version The custom resource's version
- @return ApiGetCustomObjectsAPIResourcesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param group The custom resource's group name
+	@param version The custom resource's version
+	@return ApiGetCustomObjectsAPIResourcesRequest
 */
 func (a *CustomObjectsApiService) GetCustomObjectsAPIResources(ctx context.Context, group string, version string) ApiGetCustomObjectsAPIResourcesRequest {
 	return ApiGetCustomObjectsAPIResourcesRequest{
 		ApiService: a,
-		ctx: ctx,
-		group: group,
-		version: version,
+		ctx:        ctx,
+		group:      group,
+		version:    version,
 	}
 }
 
 // Execute executes the request
-//  @return V1APIResourceList
+//
+//	@return V1APIResourceList
 func (a *CustomObjectsApiService) GetCustomObjectsAPIResourcesExecute(r ApiGetCustomObjectsAPIResourcesRequest) (*V1APIResourceList, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1APIResourceList
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1APIResourceList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CustomObjectsApiService.GetCustomObjectsAPIResources")
@@ -1525,13 +1534,13 @@ func (a *CustomObjectsApiService) GetCustomObjectsAPIResourcesExecute(r ApiGetCu
 }
 
 type ApiGetNamespacedCustomObjectRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *CustomObjectsApiService
-	group string
-	version string
-	namespace string
-	plural string
-	name string
+	group      string
+	version    string
+	namespace  string
+	plural     string
+	name       string
 }
 
 func (r ApiGetNamespacedCustomObjectRequest) Execute() (map[string]interface{}, *http.Response, error) {
@@ -1543,34 +1552,35 @@ GetNamespacedCustomObject Method for GetNamespacedCustomObject
 
 Returns a namespace scoped custom object
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param group the custom resource's group
- @param version the custom resource's version
- @param namespace The custom resource's namespace
- @param plural the custom resource's plural name. For TPRs this would be lowercase plural kind.
- @param name the custom object's name
- @return ApiGetNamespacedCustomObjectRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param group the custom resource's group
+	@param version the custom resource's version
+	@param namespace The custom resource's namespace
+	@param plural the custom resource's plural name. For TPRs this would be lowercase plural kind.
+	@param name the custom object's name
+	@return ApiGetNamespacedCustomObjectRequest
 */
 func (a *CustomObjectsApiService) GetNamespacedCustomObject(ctx context.Context, group string, version string, namespace string, plural string, name string) ApiGetNamespacedCustomObjectRequest {
 	return ApiGetNamespacedCustomObjectRequest{
 		ApiService: a,
-		ctx: ctx,
-		group: group,
-		version: version,
-		namespace: namespace,
-		plural: plural,
-		name: name,
+		ctx:        ctx,
+		group:      group,
+		version:    version,
+		namespace:  namespace,
+		plural:     plural,
+		name:       name,
 	}
 }
 
 // Execute executes the request
-//  @return map[string]interface{}
+//
+//	@return map[string]interface{}
 func (a *CustomObjectsApiService) GetNamespacedCustomObjectExecute(r ApiGetNamespacedCustomObjectRequest) (map[string]interface{}, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  map[string]interface{}
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CustomObjectsApiService.GetNamespacedCustomObject")
@@ -1644,13 +1654,13 @@ func (a *CustomObjectsApiService) GetNamespacedCustomObjectExecute(r ApiGetNames
 }
 
 type ApiGetNamespacedCustomObjectScaleRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *CustomObjectsApiService
-	group string
-	version string
-	namespace string
-	plural string
-	name string
+	group      string
+	version    string
+	namespace  string
+	plural     string
+	name       string
 }
 
 func (r ApiGetNamespacedCustomObjectScaleRequest) Execute() (map[string]interface{}, *http.Response, error) {
@@ -1662,34 +1672,35 @@ GetNamespacedCustomObjectScale Method for GetNamespacedCustomObjectScale
 
 read scale of the specified namespace scoped custom object
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param group the custom resource's group
- @param version the custom resource's version
- @param namespace The custom resource's namespace
- @param plural the custom resource's plural name. For TPRs this would be lowercase plural kind.
- @param name the custom object's name
- @return ApiGetNamespacedCustomObjectScaleRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param group the custom resource's group
+	@param version the custom resource's version
+	@param namespace The custom resource's namespace
+	@param plural the custom resource's plural name. For TPRs this would be lowercase plural kind.
+	@param name the custom object's name
+	@return ApiGetNamespacedCustomObjectScaleRequest
 */
 func (a *CustomObjectsApiService) GetNamespacedCustomObjectScale(ctx context.Context, group string, version string, namespace string, plural string, name string) ApiGetNamespacedCustomObjectScaleRequest {
 	return ApiGetNamespacedCustomObjectScaleRequest{
 		ApiService: a,
-		ctx: ctx,
-		group: group,
-		version: version,
-		namespace: namespace,
-		plural: plural,
-		name: name,
+		ctx:        ctx,
+		group:      group,
+		version:    version,
+		namespace:  namespace,
+		plural:     plural,
+		name:       name,
 	}
 }
 
 // Execute executes the request
-//  @return map[string]interface{}
+//
+//	@return map[string]interface{}
 func (a *CustomObjectsApiService) GetNamespacedCustomObjectScaleExecute(r ApiGetNamespacedCustomObjectScaleRequest) (map[string]interface{}, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  map[string]interface{}
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CustomObjectsApiService.GetNamespacedCustomObjectScale")
@@ -1763,13 +1774,13 @@ func (a *CustomObjectsApiService) GetNamespacedCustomObjectScaleExecute(r ApiGet
 }
 
 type ApiGetNamespacedCustomObjectStatusRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *CustomObjectsApiService
-	group string
-	version string
-	namespace string
-	plural string
-	name string
+	group      string
+	version    string
+	namespace  string
+	plural     string
+	name       string
 }
 
 func (r ApiGetNamespacedCustomObjectStatusRequest) Execute() (map[string]interface{}, *http.Response, error) {
@@ -1781,34 +1792,35 @@ GetNamespacedCustomObjectStatus Method for GetNamespacedCustomObjectStatus
 
 read status of the specified namespace scoped custom object
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param group the custom resource's group
- @param version the custom resource's version
- @param namespace The custom resource's namespace
- @param plural the custom resource's plural name. For TPRs this would be lowercase plural kind.
- @param name the custom object's name
- @return ApiGetNamespacedCustomObjectStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param group the custom resource's group
+	@param version the custom resource's version
+	@param namespace The custom resource's namespace
+	@param plural the custom resource's plural name. For TPRs this would be lowercase plural kind.
+	@param name the custom object's name
+	@return ApiGetNamespacedCustomObjectStatusRequest
 */
 func (a *CustomObjectsApiService) GetNamespacedCustomObjectStatus(ctx context.Context, group string, version string, namespace string, plural string, name string) ApiGetNamespacedCustomObjectStatusRequest {
 	return ApiGetNamespacedCustomObjectStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		group: group,
-		version: version,
-		namespace: namespace,
-		plural: plural,
-		name: name,
+		ctx:        ctx,
+		group:      group,
+		version:    version,
+		namespace:  namespace,
+		plural:     plural,
+		name:       name,
 	}
 }
 
 // Execute executes the request
-//  @return map[string]interface{}
+//
+//	@return map[string]interface{}
 func (a *CustomObjectsApiService) GetNamespacedCustomObjectStatusExecute(r ApiGetNamespacedCustomObjectStatusRequest) (map[string]interface{}, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  map[string]interface{}
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CustomObjectsApiService.GetNamespacedCustomObjectStatus")
@@ -1882,21 +1894,21 @@ func (a *CustomObjectsApiService) GetNamespacedCustomObjectStatusExecute(r ApiGe
 }
 
 type ApiListClusterCustomObjectRequest struct {
-	ctx context.Context
-	ApiService *CustomObjectsApiService
-	group string
-	version string
-	plural string
-	pretty *string
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CustomObjectsApiService
+	group                string
+	version              string
+	plural               string
+	pretty               *string
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -1968,30 +1980,31 @@ ListClusterCustomObject Method for ListClusterCustomObject
 
 list or watch cluster scoped custom objects
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param group The custom resource's group name
- @param version The custom resource's version
- @param plural The custom resource's plural name. For TPRs this would be lowercase plural kind.
- @return ApiListClusterCustomObjectRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param group The custom resource's group name
+	@param version The custom resource's version
+	@param plural The custom resource's plural name. For TPRs this would be lowercase plural kind.
+	@return ApiListClusterCustomObjectRequest
 */
 func (a *CustomObjectsApiService) ListClusterCustomObject(ctx context.Context, group string, version string, plural string) ApiListClusterCustomObjectRequest {
 	return ApiListClusterCustomObjectRequest{
 		ApiService: a,
-		ctx: ctx,
-		group: group,
-		version: version,
-		plural: plural,
+		ctx:        ctx,
+		group:      group,
+		version:    version,
+		plural:     plural,
 	}
 }
 
 // Execute executes the request
-//  @return map[string]interface{}
+//
+//	@return map[string]interface{}
 func (a *CustomObjectsApiService) ListClusterCustomObjectExecute(r ApiListClusterCustomObjectRequest) (map[string]interface{}, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  map[string]interface{}
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CustomObjectsApiService.ListClusterCustomObject")
@@ -2093,21 +2106,21 @@ func (a *CustomObjectsApiService) ListClusterCustomObjectExecute(r ApiListCluste
 }
 
 type ApiListCustomObjectForAllNamespacesRequest struct {
-	ctx context.Context
-	ApiService *CustomObjectsApiService
-	group string
-	version string
-	plural string
-	pretty *string
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CustomObjectsApiService
+	group                string
+	version              string
+	plural               string
+	pretty               *string
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -2179,30 +2192,31 @@ ListCustomObjectForAllNamespaces Method for ListCustomObjectForAllNamespaces
 
 list or watch namespace scoped custom objects
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param group The custom resource's group name
- @param version The custom resource's version
- @param plural The custom resource's plural name. For TPRs this would be lowercase plural kind.
- @return ApiListCustomObjectForAllNamespacesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param group The custom resource's group name
+	@param version The custom resource's version
+	@param plural The custom resource's plural name. For TPRs this would be lowercase plural kind.
+	@return ApiListCustomObjectForAllNamespacesRequest
 */
 func (a *CustomObjectsApiService) ListCustomObjectForAllNamespaces(ctx context.Context, group string, version string, plural string) ApiListCustomObjectForAllNamespacesRequest {
 	return ApiListCustomObjectForAllNamespacesRequest{
 		ApiService: a,
-		ctx: ctx,
-		group: group,
-		version: version,
-		plural: plural,
+		ctx:        ctx,
+		group:      group,
+		version:    version,
+		plural:     plural,
 	}
 }
 
 // Execute executes the request
-//  @return map[string]interface{}
+//
+//	@return map[string]interface{}
 func (a *CustomObjectsApiService) ListCustomObjectForAllNamespacesExecute(r ApiListCustomObjectForAllNamespacesRequest) (map[string]interface{}, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  map[string]interface{}
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CustomObjectsApiService.ListCustomObjectForAllNamespaces")
@@ -2304,22 +2318,22 @@ func (a *CustomObjectsApiService) ListCustomObjectForAllNamespacesExecute(r ApiL
 }
 
 type ApiListNamespacedCustomObjectRequest struct {
-	ctx context.Context
-	ApiService *CustomObjectsApiService
-	group string
-	version string
-	namespace string
-	plural string
-	pretty *string
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CustomObjectsApiService
+	group                string
+	version              string
+	namespace            string
+	plural               string
+	pretty               *string
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -2391,32 +2405,33 @@ ListNamespacedCustomObject Method for ListNamespacedCustomObject
 
 list or watch namespace scoped custom objects
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param group The custom resource's group name
- @param version The custom resource's version
- @param namespace The custom resource's namespace
- @param plural The custom resource's plural name. For TPRs this would be lowercase plural kind.
- @return ApiListNamespacedCustomObjectRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param group The custom resource's group name
+	@param version The custom resource's version
+	@param namespace The custom resource's namespace
+	@param plural The custom resource's plural name. For TPRs this would be lowercase plural kind.
+	@return ApiListNamespacedCustomObjectRequest
 */
 func (a *CustomObjectsApiService) ListNamespacedCustomObject(ctx context.Context, group string, version string, namespace string, plural string) ApiListNamespacedCustomObjectRequest {
 	return ApiListNamespacedCustomObjectRequest{
 		ApiService: a,
-		ctx: ctx,
-		group: group,
-		version: version,
-		namespace: namespace,
-		plural: plural,
+		ctx:        ctx,
+		group:      group,
+		version:    version,
+		namespace:  namespace,
+		plural:     plural,
 	}
 }
 
 // Execute executes the request
-//  @return map[string]interface{}
+//
+//	@return map[string]interface{}
 func (a *CustomObjectsApiService) ListNamespacedCustomObjectExecute(r ApiListNamespacedCustomObjectRequest) (map[string]interface{}, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  map[string]interface{}
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CustomObjectsApiService.ListNamespacedCustomObject")
@@ -2519,17 +2534,17 @@ func (a *CustomObjectsApiService) ListNamespacedCustomObjectExecute(r ApiListNam
 }
 
 type ApiPatchClusterCustomObjectRequest struct {
-	ctx context.Context
-	ApiService *CustomObjectsApiService
-	group string
-	version string
-	plural string
-	name string
-	body *map[string]interface{}
-	dryRun *string
-	fieldManager *string
+	ctx             context.Context
+	ApiService      *CustomObjectsApiService
+	group           string
+	version         string
+	plural          string
+	name            string
+	body            *map[string]interface{}
+	dryRun          *string
+	fieldManager    *string
 	fieldValidation *string
-	force *bool
+	force           *bool
 }
 
 // The JSON schema of the Resource to patch.
@@ -2571,32 +2586,33 @@ PatchClusterCustomObject Method for PatchClusterCustomObject
 
 patch the specified cluster scoped custom object
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param group the custom resource's group
- @param version the custom resource's version
- @param plural the custom object's plural name. For TPRs this would be lowercase plural kind.
- @param name the custom object's name
- @return ApiPatchClusterCustomObjectRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param group the custom resource's group
+	@param version the custom resource's version
+	@param plural the custom object's plural name. For TPRs this would be lowercase plural kind.
+	@param name the custom object's name
+	@return ApiPatchClusterCustomObjectRequest
 */
 func (a *CustomObjectsApiService) PatchClusterCustomObject(ctx context.Context, group string, version string, plural string, name string) ApiPatchClusterCustomObjectRequest {
 	return ApiPatchClusterCustomObjectRequest{
 		ApiService: a,
-		ctx: ctx,
-		group: group,
-		version: version,
-		plural: plural,
-		name: name,
+		ctx:        ctx,
+		group:      group,
+		version:    version,
+		plural:     plural,
+		name:       name,
 	}
 }
 
 // Execute executes the request
-//  @return map[string]interface{}
+//
+//	@return map[string]interface{}
 func (a *CustomObjectsApiService) PatchClusterCustomObjectExecute(r ApiPatchClusterCustomObjectRequest) (map[string]interface{}, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPatch
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  map[string]interface{}
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CustomObjectsApiService.PatchClusterCustomObject")
@@ -2686,17 +2702,17 @@ func (a *CustomObjectsApiService) PatchClusterCustomObjectExecute(r ApiPatchClus
 }
 
 type ApiPatchClusterCustomObjectScaleRequest struct {
-	ctx context.Context
-	ApiService *CustomObjectsApiService
-	group string
-	version string
-	plural string
-	name string
-	body *map[string]interface{}
-	dryRun *string
-	fieldManager *string
+	ctx             context.Context
+	ApiService      *CustomObjectsApiService
+	group           string
+	version         string
+	plural          string
+	name            string
+	body            *map[string]interface{}
+	dryRun          *string
+	fieldManager    *string
 	fieldValidation *string
-	force *bool
+	force           *bool
 }
 
 func (r ApiPatchClusterCustomObjectScaleRequest) Body(body map[string]interface{}) ApiPatchClusterCustomObjectScaleRequest {
@@ -2737,32 +2753,33 @@ PatchClusterCustomObjectScale Method for PatchClusterCustomObjectScale
 
 partially update scale of the specified cluster scoped custom object
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param group the custom resource's group
- @param version the custom resource's version
- @param plural the custom resource's plural name. For TPRs this would be lowercase plural kind.
- @param name the custom object's name
- @return ApiPatchClusterCustomObjectScaleRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param group the custom resource's group
+	@param version the custom resource's version
+	@param plural the custom resource's plural name. For TPRs this would be lowercase plural kind.
+	@param name the custom object's name
+	@return ApiPatchClusterCustomObjectScaleRequest
 */
 func (a *CustomObjectsApiService) PatchClusterCustomObjectScale(ctx context.Context, group string, version string, plural string, name string) ApiPatchClusterCustomObjectScaleRequest {
 	return ApiPatchClusterCustomObjectScaleRequest{
 		ApiService: a,
-		ctx: ctx,
-		group: group,
-		version: version,
-		plural: plural,
-		name: name,
+		ctx:        ctx,
+		group:      group,
+		version:    version,
+		plural:     plural,
+		name:       name,
 	}
 }
 
 // Execute executes the request
-//  @return map[string]interface{}
+//
+//	@return map[string]interface{}
 func (a *CustomObjectsApiService) PatchClusterCustomObjectScaleExecute(r ApiPatchClusterCustomObjectScaleRequest) (map[string]interface{}, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPatch
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  map[string]interface{}
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CustomObjectsApiService.PatchClusterCustomObjectScale")
@@ -2852,17 +2869,17 @@ func (a *CustomObjectsApiService) PatchClusterCustomObjectScaleExecute(r ApiPatc
 }
 
 type ApiPatchClusterCustomObjectStatusRequest struct {
-	ctx context.Context
-	ApiService *CustomObjectsApiService
-	group string
-	version string
-	plural string
-	name string
-	body *map[string]interface{}
-	dryRun *string
-	fieldManager *string
+	ctx             context.Context
+	ApiService      *CustomObjectsApiService
+	group           string
+	version         string
+	plural          string
+	name            string
+	body            *map[string]interface{}
+	dryRun          *string
+	fieldManager    *string
 	fieldValidation *string
-	force *bool
+	force           *bool
 }
 
 func (r ApiPatchClusterCustomObjectStatusRequest) Body(body map[string]interface{}) ApiPatchClusterCustomObjectStatusRequest {
@@ -2903,32 +2920,33 @@ PatchClusterCustomObjectStatus Method for PatchClusterCustomObjectStatus
 
 partially update status of the specified cluster scoped custom object
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param group the custom resource's group
- @param version the custom resource's version
- @param plural the custom resource's plural name. For TPRs this would be lowercase plural kind.
- @param name the custom object's name
- @return ApiPatchClusterCustomObjectStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param group the custom resource's group
+	@param version the custom resource's version
+	@param plural the custom resource's plural name. For TPRs this would be lowercase plural kind.
+	@param name the custom object's name
+	@return ApiPatchClusterCustomObjectStatusRequest
 */
 func (a *CustomObjectsApiService) PatchClusterCustomObjectStatus(ctx context.Context, group string, version string, plural string, name string) ApiPatchClusterCustomObjectStatusRequest {
 	return ApiPatchClusterCustomObjectStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		group: group,
-		version: version,
-		plural: plural,
-		name: name,
+		ctx:        ctx,
+		group:      group,
+		version:    version,
+		plural:     plural,
+		name:       name,
 	}
 }
 
 // Execute executes the request
-//  @return map[string]interface{}
+//
+//	@return map[string]interface{}
 func (a *CustomObjectsApiService) PatchClusterCustomObjectStatusExecute(r ApiPatchClusterCustomObjectStatusRequest) (map[string]interface{}, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPatch
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  map[string]interface{}
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CustomObjectsApiService.PatchClusterCustomObjectStatus")
@@ -3018,18 +3036,18 @@ func (a *CustomObjectsApiService) PatchClusterCustomObjectStatusExecute(r ApiPat
 }
 
 type ApiPatchNamespacedCustomObjectRequest struct {
-	ctx context.Context
-	ApiService *CustomObjectsApiService
-	group string
-	version string
-	namespace string
-	plural string
-	name string
-	body *map[string]interface{}
-	dryRun *string
-	fieldManager *string
+	ctx             context.Context
+	ApiService      *CustomObjectsApiService
+	group           string
+	version         string
+	namespace       string
+	plural          string
+	name            string
+	body            *map[string]interface{}
+	dryRun          *string
+	fieldManager    *string
 	fieldValidation *string
-	force *bool
+	force           *bool
 }
 
 // The JSON schema of the Resource to patch.
@@ -3071,34 +3089,35 @@ PatchNamespacedCustomObject Method for PatchNamespacedCustomObject
 
 patch the specified namespace scoped custom object
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param group the custom resource's group
- @param version the custom resource's version
- @param namespace The custom resource's namespace
- @param plural the custom resource's plural name. For TPRs this would be lowercase plural kind.
- @param name the custom object's name
- @return ApiPatchNamespacedCustomObjectRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param group the custom resource's group
+	@param version the custom resource's version
+	@param namespace The custom resource's namespace
+	@param plural the custom resource's plural name. For TPRs this would be lowercase plural kind.
+	@param name the custom object's name
+	@return ApiPatchNamespacedCustomObjectRequest
 */
 func (a *CustomObjectsApiService) PatchNamespacedCustomObject(ctx context.Context, group string, version string, namespace string, plural string, name string) ApiPatchNamespacedCustomObjectRequest {
 	return ApiPatchNamespacedCustomObjectRequest{
 		ApiService: a,
-		ctx: ctx,
-		group: group,
-		version: version,
-		namespace: namespace,
-		plural: plural,
-		name: name,
+		ctx:        ctx,
+		group:      group,
+		version:    version,
+		namespace:  namespace,
+		plural:     plural,
+		name:       name,
 	}
 }
 
 // Execute executes the request
-//  @return map[string]interface{}
+//
+//	@return map[string]interface{}
 func (a *CustomObjectsApiService) PatchNamespacedCustomObjectExecute(r ApiPatchNamespacedCustomObjectRequest) (map[string]interface{}, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPatch
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  map[string]interface{}
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CustomObjectsApiService.PatchNamespacedCustomObject")
@@ -3189,18 +3208,18 @@ func (a *CustomObjectsApiService) PatchNamespacedCustomObjectExecute(r ApiPatchN
 }
 
 type ApiPatchNamespacedCustomObjectScaleRequest struct {
-	ctx context.Context
-	ApiService *CustomObjectsApiService
-	group string
-	version string
-	namespace string
-	plural string
-	name string
-	body *map[string]interface{}
-	dryRun *string
-	fieldManager *string
+	ctx             context.Context
+	ApiService      *CustomObjectsApiService
+	group           string
+	version         string
+	namespace       string
+	plural          string
+	name            string
+	body            *map[string]interface{}
+	dryRun          *string
+	fieldManager    *string
 	fieldValidation *string
-	force *bool
+	force           *bool
 }
 
 func (r ApiPatchNamespacedCustomObjectScaleRequest) Body(body map[string]interface{}) ApiPatchNamespacedCustomObjectScaleRequest {
@@ -3241,34 +3260,35 @@ PatchNamespacedCustomObjectScale Method for PatchNamespacedCustomObjectScale
 
 partially update scale of the specified namespace scoped custom object
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param group the custom resource's group
- @param version the custom resource's version
- @param namespace The custom resource's namespace
- @param plural the custom resource's plural name. For TPRs this would be lowercase plural kind.
- @param name the custom object's name
- @return ApiPatchNamespacedCustomObjectScaleRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param group the custom resource's group
+	@param version the custom resource's version
+	@param namespace The custom resource's namespace
+	@param plural the custom resource's plural name. For TPRs this would be lowercase plural kind.
+	@param name the custom object's name
+	@return ApiPatchNamespacedCustomObjectScaleRequest
 */
 func (a *CustomObjectsApiService) PatchNamespacedCustomObjectScale(ctx context.Context, group string, version string, namespace string, plural string, name string) ApiPatchNamespacedCustomObjectScaleRequest {
 	return ApiPatchNamespacedCustomObjectScaleRequest{
 		ApiService: a,
-		ctx: ctx,
-		group: group,
-		version: version,
-		namespace: namespace,
-		plural: plural,
-		name: name,
+		ctx:        ctx,
+		group:      group,
+		version:    version,
+		namespace:  namespace,
+		plural:     plural,
+		name:       name,
 	}
 }
 
 // Execute executes the request
-//  @return map[string]interface{}
+//
+//	@return map[string]interface{}
 func (a *CustomObjectsApiService) PatchNamespacedCustomObjectScaleExecute(r ApiPatchNamespacedCustomObjectScaleRequest) (map[string]interface{}, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPatch
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  map[string]interface{}
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CustomObjectsApiService.PatchNamespacedCustomObjectScale")
@@ -3359,18 +3379,18 @@ func (a *CustomObjectsApiService) PatchNamespacedCustomObjectScaleExecute(r ApiP
 }
 
 type ApiPatchNamespacedCustomObjectStatusRequest struct {
-	ctx context.Context
-	ApiService *CustomObjectsApiService
-	group string
-	version string
-	namespace string
-	plural string
-	name string
-	body *map[string]interface{}
-	dryRun *string
-	fieldManager *string
+	ctx             context.Context
+	ApiService      *CustomObjectsApiService
+	group           string
+	version         string
+	namespace       string
+	plural          string
+	name            string
+	body            *map[string]interface{}
+	dryRun          *string
+	fieldManager    *string
 	fieldValidation *string
-	force *bool
+	force           *bool
 }
 
 func (r ApiPatchNamespacedCustomObjectStatusRequest) Body(body map[string]interface{}) ApiPatchNamespacedCustomObjectStatusRequest {
@@ -3411,34 +3431,35 @@ PatchNamespacedCustomObjectStatus Method for PatchNamespacedCustomObjectStatus
 
 partially update status of the specified namespace scoped custom object
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param group the custom resource's group
- @param version the custom resource's version
- @param namespace The custom resource's namespace
- @param plural the custom resource's plural name. For TPRs this would be lowercase plural kind.
- @param name the custom object's name
- @return ApiPatchNamespacedCustomObjectStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param group the custom resource's group
+	@param version the custom resource's version
+	@param namespace The custom resource's namespace
+	@param plural the custom resource's plural name. For TPRs this would be lowercase plural kind.
+	@param name the custom object's name
+	@return ApiPatchNamespacedCustomObjectStatusRequest
 */
 func (a *CustomObjectsApiService) PatchNamespacedCustomObjectStatus(ctx context.Context, group string, version string, namespace string, plural string, name string) ApiPatchNamespacedCustomObjectStatusRequest {
 	return ApiPatchNamespacedCustomObjectStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		group: group,
-		version: version,
-		namespace: namespace,
-		plural: plural,
-		name: name,
+		ctx:        ctx,
+		group:      group,
+		version:    version,
+		namespace:  namespace,
+		plural:     plural,
+		name:       name,
 	}
 }
 
 // Execute executes the request
-//  @return map[string]interface{}
+//
+//	@return map[string]interface{}
 func (a *CustomObjectsApiService) PatchNamespacedCustomObjectStatusExecute(r ApiPatchNamespacedCustomObjectStatusRequest) (map[string]interface{}, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPatch
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  map[string]interface{}
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CustomObjectsApiService.PatchNamespacedCustomObjectStatus")
@@ -3529,15 +3550,15 @@ func (a *CustomObjectsApiService) PatchNamespacedCustomObjectStatusExecute(r Api
 }
 
 type ApiReplaceClusterCustomObjectRequest struct {
-	ctx context.Context
-	ApiService *CustomObjectsApiService
-	group string
-	version string
-	plural string
-	name string
-	body *map[string]interface{}
-	dryRun *string
-	fieldManager *string
+	ctx             context.Context
+	ApiService      *CustomObjectsApiService
+	group           string
+	version         string
+	plural          string
+	name            string
+	body            *map[string]interface{}
+	dryRun          *string
+	fieldManager    *string
 	fieldValidation *string
 }
 
@@ -3574,32 +3595,33 @@ ReplaceClusterCustomObject Method for ReplaceClusterCustomObject
 
 replace the specified cluster scoped custom object
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param group the custom resource's group
- @param version the custom resource's version
- @param plural the custom object's plural name. For TPRs this would be lowercase plural kind.
- @param name the custom object's name
- @return ApiReplaceClusterCustomObjectRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param group the custom resource's group
+	@param version the custom resource's version
+	@param plural the custom object's plural name. For TPRs this would be lowercase plural kind.
+	@param name the custom object's name
+	@return ApiReplaceClusterCustomObjectRequest
 */
 func (a *CustomObjectsApiService) ReplaceClusterCustomObject(ctx context.Context, group string, version string, plural string, name string) ApiReplaceClusterCustomObjectRequest {
 	return ApiReplaceClusterCustomObjectRequest{
 		ApiService: a,
-		ctx: ctx,
-		group: group,
-		version: version,
-		plural: plural,
-		name: name,
+		ctx:        ctx,
+		group:      group,
+		version:    version,
+		plural:     plural,
+		name:       name,
 	}
 }
 
 // Execute executes the request
-//  @return map[string]interface{}
+//
+//	@return map[string]interface{}
 func (a *CustomObjectsApiService) ReplaceClusterCustomObjectExecute(r ApiReplaceClusterCustomObjectRequest) (map[string]interface{}, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  map[string]interface{}
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CustomObjectsApiService.ReplaceClusterCustomObject")
@@ -3686,15 +3708,15 @@ func (a *CustomObjectsApiService) ReplaceClusterCustomObjectExecute(r ApiReplace
 }
 
 type ApiReplaceClusterCustomObjectScaleRequest struct {
-	ctx context.Context
-	ApiService *CustomObjectsApiService
-	group string
-	version string
-	plural string
-	name string
-	body *map[string]interface{}
-	dryRun *string
-	fieldManager *string
+	ctx             context.Context
+	ApiService      *CustomObjectsApiService
+	group           string
+	version         string
+	plural          string
+	name            string
+	body            *map[string]interface{}
+	dryRun          *string
+	fieldManager    *string
 	fieldValidation *string
 }
 
@@ -3730,32 +3752,33 @@ ReplaceClusterCustomObjectScale Method for ReplaceClusterCustomObjectScale
 
 replace scale of the specified cluster scoped custom object
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param group the custom resource's group
- @param version the custom resource's version
- @param plural the custom resource's plural name. For TPRs this would be lowercase plural kind.
- @param name the custom object's name
- @return ApiReplaceClusterCustomObjectScaleRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param group the custom resource's group
+	@param version the custom resource's version
+	@param plural the custom resource's plural name. For TPRs this would be lowercase plural kind.
+	@param name the custom object's name
+	@return ApiReplaceClusterCustomObjectScaleRequest
 */
 func (a *CustomObjectsApiService) ReplaceClusterCustomObjectScale(ctx context.Context, group string, version string, plural string, name string) ApiReplaceClusterCustomObjectScaleRequest {
 	return ApiReplaceClusterCustomObjectScaleRequest{
 		ApiService: a,
-		ctx: ctx,
-		group: group,
-		version: version,
-		plural: plural,
-		name: name,
+		ctx:        ctx,
+		group:      group,
+		version:    version,
+		plural:     plural,
+		name:       name,
 	}
 }
 
 // Execute executes the request
-//  @return map[string]interface{}
+//
+//	@return map[string]interface{}
 func (a *CustomObjectsApiService) ReplaceClusterCustomObjectScaleExecute(r ApiReplaceClusterCustomObjectScaleRequest) (map[string]interface{}, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  map[string]interface{}
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CustomObjectsApiService.ReplaceClusterCustomObjectScale")
@@ -3842,15 +3865,15 @@ func (a *CustomObjectsApiService) ReplaceClusterCustomObjectScaleExecute(r ApiRe
 }
 
 type ApiReplaceClusterCustomObjectStatusRequest struct {
-	ctx context.Context
-	ApiService *CustomObjectsApiService
-	group string
-	version string
-	plural string
-	name string
-	body *map[string]interface{}
-	dryRun *string
-	fieldManager *string
+	ctx             context.Context
+	ApiService      *CustomObjectsApiService
+	group           string
+	version         string
+	plural          string
+	name            string
+	body            *map[string]interface{}
+	dryRun          *string
+	fieldManager    *string
 	fieldValidation *string
 }
 
@@ -3886,32 +3909,33 @@ ReplaceClusterCustomObjectStatus Method for ReplaceClusterCustomObjectStatus
 
 replace status of the cluster scoped specified custom object
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param group the custom resource's group
- @param version the custom resource's version
- @param plural the custom resource's plural name. For TPRs this would be lowercase plural kind.
- @param name the custom object's name
- @return ApiReplaceClusterCustomObjectStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param group the custom resource's group
+	@param version the custom resource's version
+	@param plural the custom resource's plural name. For TPRs this would be lowercase plural kind.
+	@param name the custom object's name
+	@return ApiReplaceClusterCustomObjectStatusRequest
 */
 func (a *CustomObjectsApiService) ReplaceClusterCustomObjectStatus(ctx context.Context, group string, version string, plural string, name string) ApiReplaceClusterCustomObjectStatusRequest {
 	return ApiReplaceClusterCustomObjectStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		group: group,
-		version: version,
-		plural: plural,
-		name: name,
+		ctx:        ctx,
+		group:      group,
+		version:    version,
+		plural:     plural,
+		name:       name,
 	}
 }
 
 // Execute executes the request
-//  @return map[string]interface{}
+//
+//	@return map[string]interface{}
 func (a *CustomObjectsApiService) ReplaceClusterCustomObjectStatusExecute(r ApiReplaceClusterCustomObjectStatusRequest) (map[string]interface{}, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  map[string]interface{}
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CustomObjectsApiService.ReplaceClusterCustomObjectStatus")
@@ -3998,16 +4022,16 @@ func (a *CustomObjectsApiService) ReplaceClusterCustomObjectStatusExecute(r ApiR
 }
 
 type ApiReplaceNamespacedCustomObjectRequest struct {
-	ctx context.Context
-	ApiService *CustomObjectsApiService
-	group string
-	version string
-	namespace string
-	plural string
-	name string
-	body *map[string]interface{}
-	dryRun *string
-	fieldManager *string
+	ctx             context.Context
+	ApiService      *CustomObjectsApiService
+	group           string
+	version         string
+	namespace       string
+	plural          string
+	name            string
+	body            *map[string]interface{}
+	dryRun          *string
+	fieldManager    *string
 	fieldValidation *string
 }
 
@@ -4044,34 +4068,35 @@ ReplaceNamespacedCustomObject Method for ReplaceNamespacedCustomObject
 
 replace the specified namespace scoped custom object
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param group the custom resource's group
- @param version the custom resource's version
- @param namespace The custom resource's namespace
- @param plural the custom resource's plural name. For TPRs this would be lowercase plural kind.
- @param name the custom object's name
- @return ApiReplaceNamespacedCustomObjectRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param group the custom resource's group
+	@param version the custom resource's version
+	@param namespace The custom resource's namespace
+	@param plural the custom resource's plural name. For TPRs this would be lowercase plural kind.
+	@param name the custom object's name
+	@return ApiReplaceNamespacedCustomObjectRequest
 */
 func (a *CustomObjectsApiService) ReplaceNamespacedCustomObject(ctx context.Context, group string, version string, namespace string, plural string, name string) ApiReplaceNamespacedCustomObjectRequest {
 	return ApiReplaceNamespacedCustomObjectRequest{
 		ApiService: a,
-		ctx: ctx,
-		group: group,
-		version: version,
-		namespace: namespace,
-		plural: plural,
-		name: name,
+		ctx:        ctx,
+		group:      group,
+		version:    version,
+		namespace:  namespace,
+		plural:     plural,
+		name:       name,
 	}
 }
 
 // Execute executes the request
-//  @return map[string]interface{}
+//
+//	@return map[string]interface{}
 func (a *CustomObjectsApiService) ReplaceNamespacedCustomObjectExecute(r ApiReplaceNamespacedCustomObjectRequest) (map[string]interface{}, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  map[string]interface{}
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CustomObjectsApiService.ReplaceNamespacedCustomObject")
@@ -4159,16 +4184,16 @@ func (a *CustomObjectsApiService) ReplaceNamespacedCustomObjectExecute(r ApiRepl
 }
 
 type ApiReplaceNamespacedCustomObjectScaleRequest struct {
-	ctx context.Context
-	ApiService *CustomObjectsApiService
-	group string
-	version string
-	namespace string
-	plural string
-	name string
-	body *map[string]interface{}
-	dryRun *string
-	fieldManager *string
+	ctx             context.Context
+	ApiService      *CustomObjectsApiService
+	group           string
+	version         string
+	namespace       string
+	plural          string
+	name            string
+	body            *map[string]interface{}
+	dryRun          *string
+	fieldManager    *string
 	fieldValidation *string
 }
 
@@ -4204,34 +4229,35 @@ ReplaceNamespacedCustomObjectScale Method for ReplaceNamespacedCustomObjectScale
 
 replace scale of the specified namespace scoped custom object
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param group the custom resource's group
- @param version the custom resource's version
- @param namespace The custom resource's namespace
- @param plural the custom resource's plural name. For TPRs this would be lowercase plural kind.
- @param name the custom object's name
- @return ApiReplaceNamespacedCustomObjectScaleRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param group the custom resource's group
+	@param version the custom resource's version
+	@param namespace The custom resource's namespace
+	@param plural the custom resource's plural name. For TPRs this would be lowercase plural kind.
+	@param name the custom object's name
+	@return ApiReplaceNamespacedCustomObjectScaleRequest
 */
 func (a *CustomObjectsApiService) ReplaceNamespacedCustomObjectScale(ctx context.Context, group string, version string, namespace string, plural string, name string) ApiReplaceNamespacedCustomObjectScaleRequest {
 	return ApiReplaceNamespacedCustomObjectScaleRequest{
 		ApiService: a,
-		ctx: ctx,
-		group: group,
-		version: version,
-		namespace: namespace,
-		plural: plural,
-		name: name,
+		ctx:        ctx,
+		group:      group,
+		version:    version,
+		namespace:  namespace,
+		plural:     plural,
+		name:       name,
 	}
 }
 
 // Execute executes the request
-//  @return map[string]interface{}
+//
+//	@return map[string]interface{}
 func (a *CustomObjectsApiService) ReplaceNamespacedCustomObjectScaleExecute(r ApiReplaceNamespacedCustomObjectScaleRequest) (map[string]interface{}, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  map[string]interface{}
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CustomObjectsApiService.ReplaceNamespacedCustomObjectScale")
@@ -4319,16 +4345,16 @@ func (a *CustomObjectsApiService) ReplaceNamespacedCustomObjectScaleExecute(r Ap
 }
 
 type ApiReplaceNamespacedCustomObjectStatusRequest struct {
-	ctx context.Context
-	ApiService *CustomObjectsApiService
-	group string
-	version string
-	namespace string
-	plural string
-	name string
-	body *map[string]interface{}
-	dryRun *string
-	fieldManager *string
+	ctx             context.Context
+	ApiService      *CustomObjectsApiService
+	group           string
+	version         string
+	namespace       string
+	plural          string
+	name            string
+	body            *map[string]interface{}
+	dryRun          *string
+	fieldManager    *string
 	fieldValidation *string
 }
 
@@ -4364,34 +4390,35 @@ ReplaceNamespacedCustomObjectStatus Method for ReplaceNamespacedCustomObjectStat
 
 replace status of the specified namespace scoped custom object
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param group the custom resource's group
- @param version the custom resource's version
- @param namespace The custom resource's namespace
- @param plural the custom resource's plural name. For TPRs this would be lowercase plural kind.
- @param name the custom object's name
- @return ApiReplaceNamespacedCustomObjectStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param group the custom resource's group
+	@param version the custom resource's version
+	@param namespace The custom resource's namespace
+	@param plural the custom resource's plural name. For TPRs this would be lowercase plural kind.
+	@param name the custom object's name
+	@return ApiReplaceNamespacedCustomObjectStatusRequest
 */
 func (a *CustomObjectsApiService) ReplaceNamespacedCustomObjectStatus(ctx context.Context, group string, version string, namespace string, plural string, name string) ApiReplaceNamespacedCustomObjectStatusRequest {
 	return ApiReplaceNamespacedCustomObjectStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		group: group,
-		version: version,
-		namespace: namespace,
-		plural: plural,
-		name: name,
+		ctx:        ctx,
+		group:      group,
+		version:    version,
+		namespace:  namespace,
+		plural:     plural,
+		name:       name,
 	}
 }
 
 // Execute executes the request
-//  @return map[string]interface{}
+//
+//	@return map[string]interface{}
 func (a *CustomObjectsApiService) ReplaceNamespacedCustomObjectStatusExecute(r ApiReplaceNamespacedCustomObjectStatusRequest) (map[string]interface{}, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  map[string]interface{}
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CustomObjectsApiService.ReplaceNamespacedCustomObjectStatus")

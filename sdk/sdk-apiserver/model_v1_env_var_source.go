@@ -33,10 +33,10 @@ import (
 
 // V1EnvVarSource EnvVarSource represents a source for the value of an EnvVar.
 type V1EnvVarSource struct {
-	ConfigMapKeyRef *V1ConfigMapKeySelector `json:"configMapKeyRef,omitempty"`
-	FieldRef *V1ObjectFieldSelector `json:"fieldRef,omitempty"`
+	ConfigMapKeyRef  *V1ConfigMapKeySelector  `json:"configMapKeyRef,omitempty"`
+	FieldRef         *V1ObjectFieldSelector   `json:"fieldRef,omitempty"`
 	ResourceFieldRef *V1ResourceFieldSelector `json:"resourceFieldRef,omitempty"`
-	SecretKeyRef *V1SecretKeySelector `json:"secretKeyRef,omitempty"`
+	SecretKeyRef     *V1SecretKeySelector     `json:"secretKeyRef,omitempty"`
 }
 
 // NewV1EnvVarSource instantiates a new V1EnvVarSource object
@@ -236,5 +236,3 @@ func (v *NullableV1EnvVarSource) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

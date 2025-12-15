@@ -34,16 +34,16 @@ import (
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarClusterStatus PulsarClusterStatus defines the observed state of PulsarCluster
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarClusterStatus struct {
 	Bookkeeper *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarClusterComponentStatus `json:"bookkeeper,omitempty"`
-	Broker *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarClusterComponentStatus `json:"broker,omitempty"`
+	Broker     *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarClusterComponentStatus `json:"broker,omitempty"`
 	// Conditions is an array of current observed conditions.
 	Conditions []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition `json:"conditions,omitempty"`
 	// Deployment type set via associated pool
 	DeploymentType *string `json:"deploymentType,omitempty"`
 	// Instance type, i.e. serverless or default
-	InstanceType *string `json:"instanceType,omitempty"`
-	Oxia *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarClusterComponentStatus `json:"oxia,omitempty"`
-	RbacStatus *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RBACStatus `json:"rbacStatus,omitempty"`
-	Zookeeper *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarClusterComponentStatus `json:"zookeeper,omitempty"`
+	InstanceType *string                                                                              `json:"instanceType,omitempty"`
+	Oxia         *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarClusterComponentStatus `json:"oxia,omitempty"`
+	RbacStatus   *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RBACStatus                   `json:"rbacStatus,omitempty"`
+	Zookeeper    *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarClusterComponentStatus `json:"zookeeper,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarClusterStatus instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarClusterStatus object
@@ -383,5 +383,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarCl
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

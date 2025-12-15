@@ -33,7 +33,7 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionReference SubscriptionReference references a Subscription object.
 type ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionReference struct {
-	Name *string `json:"name,omitempty"`
+	Name      *string `json:"name,omitempty"`
 	Namespace *string `json:"namespace,omitempty"`
 }
 
@@ -164,5 +164,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscr
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

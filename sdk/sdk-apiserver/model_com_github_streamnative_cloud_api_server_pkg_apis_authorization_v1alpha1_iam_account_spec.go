@@ -33,10 +33,10 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccountSpec IamAccountSpec defines the desired state of IamAccount
 type ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccountSpec struct {
-	AdditionalCloudStorage []ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1CloudStorage `json:"additionalCloudStorage,omitempty"`
-	CloudStorage *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1CloudStorage `json:"cloudStorage,omitempty"`
-	DisableIamRoleCreation *bool `json:"disableIamRoleCreation,omitempty"`
-	PoolMemberRef *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1PoolMemberReference `json:"poolMemberRef,omitempty"`
+	AdditionalCloudStorage []ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1CloudStorage       `json:"additionalCloudStorage,omitempty"`
+	CloudStorage           *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1CloudStorage        `json:"cloudStorage,omitempty"`
+	DisableIamRoleCreation *bool                                                                               `json:"disableIamRoleCreation,omitempty"`
+	PoolMemberRef          *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1PoolMemberReference `json:"poolMemberRef,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccountSpec instantiates a new ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccountSpec object
@@ -236,5 +236,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-
