@@ -33,10 +33,10 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1UserSpec UserSpec defines the desired state of User
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1UserSpec struct {
-	Email string `json:"email"`
+	Email      string                                                             `json:"email"`
 	Invitation *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Invitation `json:"invitation,omitempty"`
-	Name *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1UserName `json:"name,omitempty"`
-	Type *string `json:"type,omitempty"`
+	Name       *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1UserName   `json:"name,omitempty"`
+	Type       *string                                                            `json:"type,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1UserSpec instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1UserSpec object
@@ -229,5 +229,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1UserSpec
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

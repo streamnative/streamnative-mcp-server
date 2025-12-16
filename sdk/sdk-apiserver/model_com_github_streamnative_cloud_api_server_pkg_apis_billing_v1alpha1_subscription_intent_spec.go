@@ -33,8 +33,8 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntentSpec SubscriptionIntentSpec defines the desired state of SubscriptionIntent
 type ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntentSpec struct {
-	OfferRef *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1OfferReference `json:"offerRef,omitempty"`
-	Suger *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SugerSubscriptionIntentSpec `json:"suger,omitempty"`
+	OfferRef *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1OfferReference              `json:"offerRef,omitempty"`
+	Suger    *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SugerSubscriptionIntentSpec `json:"suger,omitempty"`
 	// The type of the subscription intent. Validate values: stripe, suger Default to stripe.
 	Type *string `json:"type,omitempty"`
 }
@@ -201,5 +201,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscr
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

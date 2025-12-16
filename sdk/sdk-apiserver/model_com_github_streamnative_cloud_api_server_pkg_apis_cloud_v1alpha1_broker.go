@@ -37,9 +37,9 @@ type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Broker struct {
 	// Image name is the name of the image to deploy.
 	Image *string `json:"image,omitempty"`
 	// Replicas is the expected size of the broker cluster.
-	Replicas int32 `json:"replicas"`
+	Replicas     int32                                                                          `json:"replicas"`
 	ResourceSpec *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1BrokerNodeResourceSpec `json:"resourceSpec,omitempty"`
-	Resources *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1DefaultNodeResource `json:"resources,omitempty"`
+	Resources    *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1DefaultNodeResource    `json:"resources,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Broker instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Broker object
@@ -267,5 +267,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Broker) 
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

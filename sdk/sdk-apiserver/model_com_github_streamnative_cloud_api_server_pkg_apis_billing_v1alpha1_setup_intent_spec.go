@@ -34,7 +34,7 @@ import (
 // ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntentSpec SetupIntentSpec defines the desired state of SetupIntent
 type ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntentSpec struct {
 	Stripe *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1StripeSetupIntent `json:"stripe,omitempty"`
-	Type *string `json:"type,omitempty"`
+	Type   *string                                                                     `json:"type,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntentSpec instantiates a new ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntentSpec object
@@ -164,5 +164,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupI
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

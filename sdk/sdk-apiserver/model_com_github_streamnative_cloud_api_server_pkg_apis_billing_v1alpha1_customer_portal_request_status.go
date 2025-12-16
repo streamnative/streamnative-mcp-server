@@ -34,9 +34,9 @@ import (
 // ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1CustomerPortalRequestStatus CustomerPortalRequestStatus defines the observed state of CustomerPortalRequest
 type ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1CustomerPortalRequestStatus struct {
 	// Conditions is an array of current observed conditions.
-	Conditions []V1Condition `json:"conditions,omitempty"`
-	Stripe *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1StripeCustomerPortalRequestStatus `json:"stripe,omitempty"`
-	Url *string `json:"url,omitempty"`
+	Conditions []V1Condition                                                                               `json:"conditions,omitempty"`
+	Stripe     *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1StripeCustomerPortalRequestStatus `json:"stripe,omitempty"`
+	Url        *string                                                                                     `json:"url,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1CustomerPortalRequestStatus instantiates a new ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1CustomerPortalRequestStatus object
@@ -201,5 +201,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Custom
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

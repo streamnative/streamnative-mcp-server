@@ -33,11 +33,11 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolOptionSpec PoolOptionSpec defines a reference to a Pool
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolOptionSpec struct {
-	CloudType string `json:"cloudType"`
-	DeploymentType string `json:"deploymentType"`
-	Features *map[string]bool `json:"features,omitempty"`
-	Locations []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolOptionLocation `json:"locations"`
-	PoolRef ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolRef `json:"poolRef"`
+	CloudType      string                                                                      `json:"cloudType"`
+	DeploymentType string                                                                      `json:"deploymentType"`
+	Features       *map[string]bool                                                            `json:"features,omitempty"`
+	Locations      []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolOptionLocation `json:"locations"`
+	PoolRef        ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolRef              `json:"poolRef"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolOptionSpec instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolOptionSpec object
@@ -244,5 +244,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolOpti
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

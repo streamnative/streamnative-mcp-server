@@ -195,5 +195,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2Bookkeep
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

@@ -19,15 +19,14 @@ import (
 	"strings"
 )
 
-
 // DefaultAPIService DefaultAPI service
 type DefaultAPIService service
 
 type ApiAlterConnectorOffsetsRequest struct {
-	ctx context.Context
-	ApiService *DefaultAPIService
-	connector string
-	forward *bool
+	ctx                context.Context
+	ApiService         *DefaultAPIService
+	connector          string
+	forward            *bool
 	sNConnectorOffsets *SNConnectorOffsets
 }
 
@@ -48,24 +47,24 @@ func (r ApiAlterConnectorOffsetsRequest) Execute() (*http.Response, error) {
 /*
 AlterConnectorOffsets Method for AlterConnectorOffsets
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param connector
- @return ApiAlterConnectorOffsetsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param connector
+	@return ApiAlterConnectorOffsetsRequest
 */
 func (a *DefaultAPIService) AlterConnectorOffsets(ctx context.Context, connector string) ApiAlterConnectorOffsetsRequest {
 	return ApiAlterConnectorOffsetsRequest{
 		ApiService: a,
-		ctx: ctx,
-		connector: connector,
+		ctx:        ctx,
+		connector:  connector,
 	}
 }
 
 // Execute executes the request
 func (a *DefaultAPIService) AlterConnectorOffsetsExecute(r ApiAlterConnectorOffsetsRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPatch
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPatch
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.AlterConnectorOffsets")
@@ -131,9 +130,9 @@ func (a *DefaultAPIService) AlterConnectorOffsetsExecute(r ApiAlterConnectorOffs
 }
 
 type ApiCreateConnectorRequest struct {
-	ctx context.Context
-	ApiService *DefaultAPIService
-	forward *bool
+	ctx                    context.Context
+	ApiService             *DefaultAPIService
+	forward                *bool
 	createConnectorRequest *CreateConnectorRequest
 }
 
@@ -154,22 +153,22 @@ func (r ApiCreateConnectorRequest) Execute() (*http.Response, error) {
 /*
 CreateConnector Method for CreateConnector
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiCreateConnectorRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiCreateConnectorRequest
 */
 func (a *DefaultAPIService) CreateConnector(ctx context.Context) ApiCreateConnectorRequest {
 	return ApiCreateConnectorRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
 func (a *DefaultAPIService) CreateConnectorExecute(r ApiCreateConnectorRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.CreateConnector")
@@ -234,10 +233,10 @@ func (a *DefaultAPIService) CreateConnectorExecute(r ApiCreateConnectorRequest) 
 }
 
 type ApiDestroyConnectorRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *DefaultAPIService
-	connector string
-	forward *bool
+	connector  string
+	forward    *bool
 }
 
 func (r ApiDestroyConnectorRequest) Forward(forward bool) ApiDestroyConnectorRequest {
@@ -252,24 +251,24 @@ func (r ApiDestroyConnectorRequest) Execute() (*http.Response, error) {
 /*
 DestroyConnector Method for DestroyConnector
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param connector
- @return ApiDestroyConnectorRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param connector
+	@return ApiDestroyConnectorRequest
 */
 func (a *DefaultAPIService) DestroyConnector(ctx context.Context, connector string) ApiDestroyConnectorRequest {
 	return ApiDestroyConnectorRequest{
 		ApiService: a,
-		ctx: ctx,
-		connector: connector,
+		ctx:        ctx,
+		connector:  connector,
 	}
 }
 
 // Execute executes the request
 func (a *DefaultAPIService) DestroyConnectorExecute(r ApiDestroyConnectorRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.DestroyConnector")
@@ -333,9 +332,9 @@ func (a *DefaultAPIService) DestroyConnectorExecute(r ApiDestroyConnectorRequest
 }
 
 type ApiGetConnectorRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *DefaultAPIService
-	connector string
+	connector  string
 }
 
 func (r ApiGetConnectorRequest) Execute() (*ConnectorInfo, *http.Response, error) {
@@ -345,26 +344,27 @@ func (r ApiGetConnectorRequest) Execute() (*ConnectorInfo, *http.Response, error
 /*
 GetConnector Method for GetConnector
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param connector
- @return ApiGetConnectorRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param connector
+	@return ApiGetConnectorRequest
 */
 func (a *DefaultAPIService) GetConnector(ctx context.Context, connector string) ApiGetConnectorRequest {
 	return ApiGetConnectorRequest{
 		ApiService: a,
-		ctx: ctx,
-		connector: connector,
+		ctx:        ctx,
+		connector:  connector,
 	}
 }
 
 // Execute executes the request
-//  @return ConnectorInfo
+//
+//	@return ConnectorInfo
 func (a *DefaultAPIService) GetConnectorExecute(r ApiGetConnectorRequest) (*ConnectorInfo, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ConnectorInfo
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ConnectorInfo
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.GetConnector")
@@ -418,14 +418,14 @@ func (a *DefaultAPIService) GetConnectorExecute(r ApiGetConnectorRequest) (*Conn
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-			var v ConnectorInfo
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+		var v ConnectorInfo
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -442,9 +442,9 @@ func (a *DefaultAPIService) GetConnectorExecute(r ApiGetConnectorRequest) (*Conn
 }
 
 type ApiGetConnectorActiveTopicsRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *DefaultAPIService
-	connector string
+	connector  string
 }
 
 func (r ApiGetConnectorActiveTopicsRequest) Execute() (*http.Response, error) {
@@ -454,24 +454,24 @@ func (r ApiGetConnectorActiveTopicsRequest) Execute() (*http.Response, error) {
 /*
 GetConnectorActiveTopics Method for GetConnectorActiveTopics
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param connector
- @return ApiGetConnectorActiveTopicsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param connector
+	@return ApiGetConnectorActiveTopicsRequest
 */
 func (a *DefaultAPIService) GetConnectorActiveTopics(ctx context.Context, connector string) ApiGetConnectorActiveTopicsRequest {
 	return ApiGetConnectorActiveTopicsRequest{
 		ApiService: a,
-		ctx: ctx,
-		connector: connector,
+		ctx:        ctx,
+		connector:  connector,
 	}
 }
 
 // Execute executes the request
 func (a *DefaultAPIService) GetConnectorActiveTopicsExecute(r ApiGetConnectorActiveTopicsRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodGet
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.GetConnectorActiveTopics")
@@ -532,9 +532,9 @@ func (a *DefaultAPIService) GetConnectorActiveTopicsExecute(r ApiGetConnectorAct
 }
 
 type ApiGetConnectorConfigRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *DefaultAPIService
-	connector string
+	connector  string
 }
 
 func (r ApiGetConnectorConfigRequest) Execute() (map[string]string, *http.Response, error) {
@@ -544,26 +544,27 @@ func (r ApiGetConnectorConfigRequest) Execute() (map[string]string, *http.Respon
 /*
 GetConnectorConfig Method for GetConnectorConfig
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param connector
- @return ApiGetConnectorConfigRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param connector
+	@return ApiGetConnectorConfigRequest
 */
 func (a *DefaultAPIService) GetConnectorConfig(ctx context.Context, connector string) ApiGetConnectorConfigRequest {
 	return ApiGetConnectorConfigRequest{
 		ApiService: a,
-		ctx: ctx,
-		connector: connector,
+		ctx:        ctx,
+		connector:  connector,
 	}
 }
 
 // Execute executes the request
-//  @return map[string]string
+//
+//	@return map[string]string
 func (a *DefaultAPIService) GetConnectorConfigExecute(r ApiGetConnectorConfigRequest) (map[string]string, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  map[string]string
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue map[string]string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.GetConnectorConfig")
@@ -617,14 +618,14 @@ func (a *DefaultAPIService) GetConnectorConfigExecute(r ApiGetConnectorConfigReq
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-			var v map[string]string
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+		var v map[string]string
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -641,7 +642,7 @@ func (a *DefaultAPIService) GetConnectorConfigExecute(r ApiGetConnectorConfigReq
 }
 
 type ApiGetConnectorConfigDefRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *DefaultAPIService
 	pluginName string
 }
@@ -653,26 +654,27 @@ func (r ApiGetConnectorConfigDefRequest) Execute() ([]ConfigKeyInfo, *http.Respo
 /*
 GetConnectorConfigDef Get the configuration definition for the specified pluginName
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param pluginName
- @return ApiGetConnectorConfigDefRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param pluginName
+	@return ApiGetConnectorConfigDefRequest
 */
 func (a *DefaultAPIService) GetConnectorConfigDef(ctx context.Context, pluginName string) ApiGetConnectorConfigDefRequest {
 	return ApiGetConnectorConfigDefRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 		pluginName: pluginName,
 	}
 }
 
 // Execute executes the request
-//  @return []ConfigKeyInfo
+//
+//	@return []ConfigKeyInfo
 func (a *DefaultAPIService) GetConnectorConfigDefExecute(r ApiGetConnectorConfigDefRequest) ([]ConfigKeyInfo, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []ConfigKeyInfo
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []ConfigKeyInfo
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.GetConnectorConfigDef")
@@ -726,14 +728,14 @@ func (a *DefaultAPIService) GetConnectorConfigDefExecute(r ApiGetConnectorConfig
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-			var v []ConfigKeyInfo
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+		var v []ConfigKeyInfo
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -750,9 +752,9 @@ func (a *DefaultAPIService) GetConnectorConfigDefExecute(r ApiGetConnectorConfig
 }
 
 type ApiGetConnectorStatusRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *DefaultAPIService
-	connector string
+	connector  string
 }
 
 func (r ApiGetConnectorStatusRequest) Execute() (*ConnectorStateInfo, *http.Response, error) {
@@ -762,26 +764,27 @@ func (r ApiGetConnectorStatusRequest) Execute() (*ConnectorStateInfo, *http.Resp
 /*
 GetConnectorStatus Method for GetConnectorStatus
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param connector
- @return ApiGetConnectorStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param connector
+	@return ApiGetConnectorStatusRequest
 */
 func (a *DefaultAPIService) GetConnectorStatus(ctx context.Context, connector string) ApiGetConnectorStatusRequest {
 	return ApiGetConnectorStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		connector: connector,
+		ctx:        ctx,
+		connector:  connector,
 	}
 }
 
 // Execute executes the request
-//  @return ConnectorStateInfo
+//
+//	@return ConnectorStateInfo
 func (a *DefaultAPIService) GetConnectorStatusExecute(r ApiGetConnectorStatusRequest) (*ConnectorStateInfo, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ConnectorStateInfo
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ConnectorStateInfo
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.GetConnectorStatus")
@@ -835,14 +838,14 @@ func (a *DefaultAPIService) GetConnectorStatusExecute(r ApiGetConnectorStatusReq
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-			var v ConnectorStateInfo
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+		var v ConnectorStateInfo
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -859,9 +862,9 @@ func (a *DefaultAPIService) GetConnectorStatusExecute(r ApiGetConnectorStatusReq
 }
 
 type ApiGetOffsetsRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *DefaultAPIService
-	connector string
+	connector  string
 }
 
 func (r ApiGetOffsetsRequest) Execute() (*SNConnectorOffsets, *http.Response, error) {
@@ -871,26 +874,27 @@ func (r ApiGetOffsetsRequest) Execute() (*SNConnectorOffsets, *http.Response, er
 /*
 GetOffsets Method for GetOffsets
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param connector
- @return ApiGetOffsetsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param connector
+	@return ApiGetOffsetsRequest
 */
 func (a *DefaultAPIService) GetOffsets(ctx context.Context, connector string) ApiGetOffsetsRequest {
 	return ApiGetOffsetsRequest{
 		ApiService: a,
-		ctx: ctx,
-		connector: connector,
+		ctx:        ctx,
+		connector:  connector,
 	}
 }
 
 // Execute executes the request
-//  @return SNConnectorOffsets
+//
+//	@return SNConnectorOffsets
 func (a *DefaultAPIService) GetOffsetsExecute(r ApiGetOffsetsRequest) (*SNConnectorOffsets, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *SNConnectorOffsets
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *SNConnectorOffsets
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.GetOffsets")
@@ -944,14 +948,14 @@ func (a *DefaultAPIService) GetOffsetsExecute(r ApiGetOffsetsRequest) (*SNConnec
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-			var v SNConnectorOffsets
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+		var v SNConnectorOffsets
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -968,9 +972,9 @@ func (a *DefaultAPIService) GetOffsetsExecute(r ApiGetOffsetsRequest) (*SNConnec
 }
 
 type ApiGetTaskConfigsRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *DefaultAPIService
-	connector string
+	connector  string
 }
 
 func (r ApiGetTaskConfigsRequest) Execute() ([]TaskInfo, *http.Response, error) {
@@ -980,26 +984,27 @@ func (r ApiGetTaskConfigsRequest) Execute() ([]TaskInfo, *http.Response, error) 
 /*
 GetTaskConfigs Method for GetTaskConfigs
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param connector
- @return ApiGetTaskConfigsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param connector
+	@return ApiGetTaskConfigsRequest
 */
 func (a *DefaultAPIService) GetTaskConfigs(ctx context.Context, connector string) ApiGetTaskConfigsRequest {
 	return ApiGetTaskConfigsRequest{
 		ApiService: a,
-		ctx: ctx,
-		connector: connector,
+		ctx:        ctx,
+		connector:  connector,
 	}
 }
 
 // Execute executes the request
-//  @return []TaskInfo
+//
+//	@return []TaskInfo
 func (a *DefaultAPIService) GetTaskConfigsExecute(r ApiGetTaskConfigsRequest) ([]TaskInfo, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []TaskInfo
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []TaskInfo
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.GetTaskConfigs")
@@ -1053,14 +1058,14 @@ func (a *DefaultAPIService) GetTaskConfigsExecute(r ApiGetTaskConfigsRequest) ([
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-			var v []TaskInfo
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+		var v []TaskInfo
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -1077,10 +1082,10 @@ func (a *DefaultAPIService) GetTaskConfigsExecute(r ApiGetTaskConfigsRequest) ([
 }
 
 type ApiGetTaskStatusRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *DefaultAPIService
-	connector string
-	task int32
+	connector  string
+	task       int32
 }
 
 func (r ApiGetTaskStatusRequest) Execute() (*TaskState, *http.Response, error) {
@@ -1090,28 +1095,29 @@ func (r ApiGetTaskStatusRequest) Execute() (*TaskState, *http.Response, error) {
 /*
 GetTaskStatus Method for GetTaskStatus
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param connector
- @param task
- @return ApiGetTaskStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param connector
+	@param task
+	@return ApiGetTaskStatusRequest
 */
 func (a *DefaultAPIService) GetTaskStatus(ctx context.Context, connector string, task int32) ApiGetTaskStatusRequest {
 	return ApiGetTaskStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		connector: connector,
-		task: task,
+		ctx:        ctx,
+		connector:  connector,
+		task:       task,
 	}
 }
 
 // Execute executes the request
-//  @return TaskState
+//
+//	@return TaskState
 func (a *DefaultAPIService) GetTaskStatusExecute(r ApiGetTaskStatusRequest) (*TaskState, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *TaskState
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *TaskState
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.GetTaskStatus")
@@ -1166,14 +1172,14 @@ func (a *DefaultAPIService) GetTaskStatusExecute(r ApiGetTaskStatusRequest) (*Ta
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-			var v TaskState
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+		var v TaskState
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -1190,9 +1196,9 @@ func (a *DefaultAPIService) GetTaskStatusExecute(r ApiGetTaskStatusRequest) (*Ta
 }
 
 type ApiGetTasksConfigRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *DefaultAPIService
-	connector string
+	connector  string
 }
 
 func (r ApiGetTasksConfigRequest) Execute() (*map[string]map[string]string, *http.Response, error) {
@@ -1202,29 +1208,31 @@ func (r ApiGetTasksConfigRequest) Execute() (*map[string]map[string]string, *htt
 /*
 GetTasksConfig Method for GetTasksConfig
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param connector
- @return ApiGetTasksConfigRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param connector
+	@return ApiGetTasksConfigRequest
 
 Deprecated
 */
 func (a *DefaultAPIService) GetTasksConfig(ctx context.Context, connector string) ApiGetTasksConfigRequest {
 	return ApiGetTasksConfigRequest{
 		ApiService: a,
-		ctx: ctx,
-		connector: connector,
+		ctx:        ctx,
+		connector:  connector,
 	}
 }
 
 // Execute executes the request
-//  @return map[string]map[string]string
+//
+//	@return map[string]map[string]string
+//
 // Deprecated
 func (a *DefaultAPIService) GetTasksConfigExecute(r ApiGetTasksConfigRequest) (*map[string]map[string]string, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *map[string]map[string]string
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *map[string]map[string]string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.GetTasksConfig")
@@ -1278,14 +1286,14 @@ func (a *DefaultAPIService) GetTasksConfigExecute(r ApiGetTasksConfigRequest) (*
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-			var v map[string]map[string]string
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+		var v map[string]map[string]string
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -1302,7 +1310,7 @@ func (a *DefaultAPIService) GetTasksConfigExecute(r ApiGetTasksConfigRequest) (*
 }
 
 type ApiHealthCheckRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *DefaultAPIService
 }
 
@@ -1313,22 +1321,22 @@ func (r ApiHealthCheckRequest) Execute() (*http.Response, error) {
 /*
 HealthCheck Health check endpoint to verify worker readiness and liveness
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiHealthCheckRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiHealthCheckRequest
 */
 func (a *DefaultAPIService) HealthCheck(ctx context.Context) ApiHealthCheckRequest {
 	return ApiHealthCheckRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
 func (a *DefaultAPIService) HealthCheckExecute(r ApiHealthCheckRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodGet
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.HealthCheck")
@@ -1388,8 +1396,8 @@ func (a *DefaultAPIService) HealthCheckExecute(r ApiHealthCheckRequest) (*http.R
 }
 
 type ApiListConnectorPluginsRequest struct {
-	ctx context.Context
-	ApiService *DefaultAPIService
+	ctx            context.Context
+	ApiService     *DefaultAPIService
 	connectorsOnly *bool
 }
 
@@ -1406,24 +1414,25 @@ func (r ApiListConnectorPluginsRequest) Execute() ([]PluginInfo, *http.Response,
 /*
 ListConnectorPlugins List all connector plugins installed
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiListConnectorPluginsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiListConnectorPluginsRequest
 */
 func (a *DefaultAPIService) ListConnectorPlugins(ctx context.Context) ApiListConnectorPluginsRequest {
 	return ApiListConnectorPluginsRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return []PluginInfo
+//
+//	@return []PluginInfo
 func (a *DefaultAPIService) ListConnectorPluginsExecute(r ApiListConnectorPluginsRequest) ([]PluginInfo, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []PluginInfo
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []PluginInfo
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.ListConnectorPlugins")
@@ -1482,14 +1491,14 @@ func (a *DefaultAPIService) ListConnectorPluginsExecute(r ApiListConnectorPlugin
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-			var v []PluginInfo
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+		var v []PluginInfo
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -1506,7 +1515,7 @@ func (a *DefaultAPIService) ListConnectorPluginsExecute(r ApiListConnectorPlugin
 }
 
 type ApiListConnectorPluginsCatalogRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *DefaultAPIService
 }
 
@@ -1517,24 +1526,25 @@ func (r ApiListConnectorPluginsCatalogRequest) Execute() ([]FunctionMeshConnecto
 /*
 ListConnectorPluginsCatalog List all connector catalog
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiListConnectorPluginsCatalogRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiListConnectorPluginsCatalogRequest
 */
 func (a *DefaultAPIService) ListConnectorPluginsCatalog(ctx context.Context) ApiListConnectorPluginsCatalogRequest {
 	return ApiListConnectorPluginsCatalogRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return []FunctionMeshConnectorDefinition
+//
+//	@return []FunctionMeshConnectorDefinition
 func (a *DefaultAPIService) ListConnectorPluginsCatalogExecute(r ApiListConnectorPluginsCatalogRequest) ([]FunctionMeshConnectorDefinition, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []FunctionMeshConnectorDefinition
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []FunctionMeshConnectorDefinition
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.ListConnectorPluginsCatalog")
@@ -1587,14 +1597,14 @@ func (a *DefaultAPIService) ListConnectorPluginsCatalogExecute(r ApiListConnecto
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-			var v []FunctionMeshConnectorDefinition
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+		var v []FunctionMeshConnectorDefinition
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -1611,7 +1621,7 @@ func (a *DefaultAPIService) ListConnectorPluginsCatalogExecute(r ApiListConnecto
 }
 
 type ApiListConnectorsRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *DefaultAPIService
 }
 
@@ -1622,22 +1632,22 @@ func (r ApiListConnectorsRequest) Execute() (*http.Response, error) {
 /*
 ListConnectors Method for ListConnectors
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiListConnectorsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiListConnectorsRequest
 */
 func (a *DefaultAPIService) ListConnectors(ctx context.Context) ApiListConnectorsRequest {
 	return ApiListConnectorsRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
 func (a *DefaultAPIService) ListConnectorsExecute(r ApiListConnectorsRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodGet
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.ListConnectors")
@@ -1697,9 +1707,9 @@ func (a *DefaultAPIService) ListConnectorsExecute(r ApiListConnectorsRequest) (*
 }
 
 type ApiPauseConnectorRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *DefaultAPIService
-	connector string
+	connector  string
 }
 
 func (r ApiPauseConnectorRequest) Execute() (*http.Response, error) {
@@ -1709,24 +1719,24 @@ func (r ApiPauseConnectorRequest) Execute() (*http.Response, error) {
 /*
 PauseConnector Method for PauseConnector
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param connector
- @return ApiPauseConnectorRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param connector
+	@return ApiPauseConnectorRequest
 */
 func (a *DefaultAPIService) PauseConnector(ctx context.Context, connector string) ApiPauseConnectorRequest {
 	return ApiPauseConnectorRequest{
 		ApiService: a,
-		ctx: ctx,
-		connector: connector,
+		ctx:        ctx,
+		connector:  connector,
 	}
 }
 
 // Execute executes the request
 func (a *DefaultAPIService) PauseConnectorExecute(r ApiPauseConnectorRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.PauseConnector")
@@ -1787,10 +1797,10 @@ func (a *DefaultAPIService) PauseConnectorExecute(r ApiPauseConnectorRequest) (*
 }
 
 type ApiPutConnectorConfigRequest struct {
-	ctx context.Context
-	ApiService *DefaultAPIService
-	connector string
-	forward *bool
+	ctx         context.Context
+	ApiService  *DefaultAPIService
+	connector   string
+	forward     *bool
 	requestBody *map[string]string
 }
 
@@ -1811,24 +1821,24 @@ func (r ApiPutConnectorConfigRequest) Execute() (*http.Response, error) {
 /*
 PutConnectorConfig Method for PutConnectorConfig
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param connector
- @return ApiPutConnectorConfigRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param connector
+	@return ApiPutConnectorConfigRequest
 */
 func (a *DefaultAPIService) PutConnectorConfig(ctx context.Context, connector string) ApiPutConnectorConfigRequest {
 	return ApiPutConnectorConfigRequest{
 		ApiService: a,
-		ctx: ctx,
-		connector: connector,
+		ctx:        ctx,
+		connector:  connector,
 	}
 }
 
 // Execute executes the request
 func (a *DefaultAPIService) PutConnectorConfigExecute(r ApiPutConnectorConfigRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.PutConnectorConfig")
@@ -1894,9 +1904,9 @@ func (a *DefaultAPIService) PutConnectorConfigExecute(r ApiPutConnectorConfigReq
 }
 
 type ApiResetConnectorActiveTopicsRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *DefaultAPIService
-	connector string
+	connector  string
 }
 
 func (r ApiResetConnectorActiveTopicsRequest) Execute() (*http.Response, error) {
@@ -1906,24 +1916,24 @@ func (r ApiResetConnectorActiveTopicsRequest) Execute() (*http.Response, error) 
 /*
 ResetConnectorActiveTopics Method for ResetConnectorActiveTopics
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param connector
- @return ApiResetConnectorActiveTopicsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param connector
+	@return ApiResetConnectorActiveTopicsRequest
 */
 func (a *DefaultAPIService) ResetConnectorActiveTopics(ctx context.Context, connector string) ApiResetConnectorActiveTopicsRequest {
 	return ApiResetConnectorActiveTopicsRequest{
 		ApiService: a,
-		ctx: ctx,
-		connector: connector,
+		ctx:        ctx,
+		connector:  connector,
 	}
 }
 
 // Execute executes the request
 func (a *DefaultAPIService) ResetConnectorActiveTopicsExecute(r ApiResetConnectorActiveTopicsRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.ResetConnectorActiveTopics")
@@ -1984,10 +1994,10 @@ func (a *DefaultAPIService) ResetConnectorActiveTopicsExecute(r ApiResetConnecto
 }
 
 type ApiResetConnectorOffsetsRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *DefaultAPIService
-	connector string
-	forward *bool
+	connector  string
+	forward    *bool
 }
 
 func (r ApiResetConnectorOffsetsRequest) Forward(forward bool) ApiResetConnectorOffsetsRequest {
@@ -2002,24 +2012,24 @@ func (r ApiResetConnectorOffsetsRequest) Execute() (*http.Response, error) {
 /*
 ResetConnectorOffsets Method for ResetConnectorOffsets
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param connector
- @return ApiResetConnectorOffsetsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param connector
+	@return ApiResetConnectorOffsetsRequest
 */
 func (a *DefaultAPIService) ResetConnectorOffsets(ctx context.Context, connector string) ApiResetConnectorOffsetsRequest {
 	return ApiResetConnectorOffsetsRequest{
 		ApiService: a,
-		ctx: ctx,
-		connector: connector,
+		ctx:        ctx,
+		connector:  connector,
 	}
 }
 
 // Execute executes the request
 func (a *DefaultAPIService) ResetConnectorOffsetsExecute(r ApiResetConnectorOffsetsRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.ResetConnectorOffsets")
@@ -2083,12 +2093,12 @@ func (a *DefaultAPIService) ResetConnectorOffsetsExecute(r ApiResetConnectorOffs
 }
 
 type ApiRestartConnectorRequest struct {
-	ctx context.Context
-	ApiService *DefaultAPIService
-	connector string
+	ctx          context.Context
+	ApiService   *DefaultAPIService
+	connector    string
 	includeTasks *bool
-	onlyFailed *bool
-	forward *bool
+	onlyFailed   *bool
+	forward      *bool
 }
 
 func (r ApiRestartConnectorRequest) IncludeTasks(includeTasks bool) ApiRestartConnectorRequest {
@@ -2113,24 +2123,24 @@ func (r ApiRestartConnectorRequest) Execute() (*http.Response, error) {
 /*
 RestartConnector Method for RestartConnector
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param connector
- @return ApiRestartConnectorRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param connector
+	@return ApiRestartConnectorRequest
 */
 func (a *DefaultAPIService) RestartConnector(ctx context.Context, connector string) ApiRestartConnectorRequest {
 	return ApiRestartConnectorRequest{
 		ApiService: a,
-		ctx: ctx,
-		connector: connector,
+		ctx:        ctx,
+		connector:  connector,
 	}
 }
 
 // Execute executes the request
 func (a *DefaultAPIService) RestartConnectorExecute(r ApiRestartConnectorRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.RestartConnector")
@@ -2206,11 +2216,11 @@ func (a *DefaultAPIService) RestartConnectorExecute(r ApiRestartConnectorRequest
 }
 
 type ApiRestartTaskRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *DefaultAPIService
-	connector string
-	task int32
-	forward *bool
+	connector  string
+	task       int32
+	forward    *bool
 }
 
 func (r ApiRestartTaskRequest) Forward(forward bool) ApiRestartTaskRequest {
@@ -2225,26 +2235,26 @@ func (r ApiRestartTaskRequest) Execute() (*http.Response, error) {
 /*
 RestartTask Method for RestartTask
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param connector
- @param task
- @return ApiRestartTaskRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param connector
+	@param task
+	@return ApiRestartTaskRequest
 */
 func (a *DefaultAPIService) RestartTask(ctx context.Context, connector string, task int32) ApiRestartTaskRequest {
 	return ApiRestartTaskRequest{
 		ApiService: a,
-		ctx: ctx,
-		connector: connector,
-		task: task,
+		ctx:        ctx,
+		connector:  connector,
+		task:       task,
 	}
 }
 
 // Execute executes the request
 func (a *DefaultAPIService) RestartTaskExecute(r ApiRestartTaskRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.RestartTask")
@@ -2309,9 +2319,9 @@ func (a *DefaultAPIService) RestartTaskExecute(r ApiRestartTaskRequest) (*http.R
 }
 
 type ApiResumeConnectorRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *DefaultAPIService
-	connector string
+	connector  string
 }
 
 func (r ApiResumeConnectorRequest) Execute() (*http.Response, error) {
@@ -2321,24 +2331,24 @@ func (r ApiResumeConnectorRequest) Execute() (*http.Response, error) {
 /*
 ResumeConnector Method for ResumeConnector
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param connector
- @return ApiResumeConnectorRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param connector
+	@return ApiResumeConnectorRequest
 */
 func (a *DefaultAPIService) ResumeConnector(ctx context.Context, connector string) ApiResumeConnectorRequest {
 	return ApiResumeConnectorRequest{
 		ApiService: a,
-		ctx: ctx,
-		connector: connector,
+		ctx:        ctx,
+		connector:  connector,
 	}
 }
 
 // Execute executes the request
 func (a *DefaultAPIService) ResumeConnectorExecute(r ApiResumeConnectorRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.ResumeConnector")
@@ -2399,7 +2409,7 @@ func (a *DefaultAPIService) ResumeConnectorExecute(r ApiResumeConnectorRequest) 
 }
 
 type ApiServerInfoRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *DefaultAPIService
 }
 
@@ -2410,24 +2420,25 @@ func (r ApiServerInfoRequest) Execute() (*ServerInfo, *http.Response, error) {
 /*
 ServerInfo Method for ServerInfo
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiServerInfoRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiServerInfoRequest
 */
 func (a *DefaultAPIService) ServerInfo(ctx context.Context) ApiServerInfoRequest {
 	return ApiServerInfoRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return ServerInfo
+//
+//	@return ServerInfo
 func (a *DefaultAPIService) ServerInfoExecute(r ApiServerInfoRequest) (*ServerInfo, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ServerInfo
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ServerInfo
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.ServerInfo")
@@ -2480,14 +2491,14 @@ func (a *DefaultAPIService) ServerInfoExecute(r ApiServerInfoRequest) (*ServerIn
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-			var v ServerInfo
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+		var v ServerInfo
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -2504,10 +2515,10 @@ func (a *DefaultAPIService) ServerInfoExecute(r ApiServerInfoRequest) (*ServerIn
 }
 
 type ApiStopConnectorRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *DefaultAPIService
-	connector string
-	forward *bool
+	connector  string
+	forward    *bool
 }
 
 func (r ApiStopConnectorRequest) Forward(forward bool) ApiStopConnectorRequest {
@@ -2522,24 +2533,24 @@ func (r ApiStopConnectorRequest) Execute() (*http.Response, error) {
 /*
 StopConnector Method for StopConnector
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param connector
- @return ApiStopConnectorRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param connector
+	@return ApiStopConnectorRequest
 */
 func (a *DefaultAPIService) StopConnector(ctx context.Context, connector string) ApiStopConnectorRequest {
 	return ApiStopConnectorRequest{
 		ApiService: a,
-		ctx: ctx,
-		connector: connector,
+		ctx:        ctx,
+		connector:  connector,
 	}
 }
 
 // Execute executes the request
 func (a *DefaultAPIService) StopConnectorExecute(r ApiStopConnectorRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.StopConnector")
@@ -2603,9 +2614,9 @@ func (a *DefaultAPIService) StopConnectorExecute(r ApiStopConnectorRequest) (*ht
 }
 
 type ApiValidateConfigsRequest struct {
-	ctx context.Context
-	ApiService *DefaultAPIService
-	pluginName string
+	ctx         context.Context
+	ApiService  *DefaultAPIService
+	pluginName  string
 	requestBody *map[string]string
 }
 
@@ -2621,26 +2632,27 @@ func (r ApiValidateConfigsRequest) Execute() (*ConfigInfos, *http.Response, erro
 /*
 ValidateConfigs Validate the provided configuration against the configuration definition for the specified pluginName
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param pluginName
- @return ApiValidateConfigsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param pluginName
+	@return ApiValidateConfigsRequest
 */
 func (a *DefaultAPIService) ValidateConfigs(ctx context.Context, pluginName string) ApiValidateConfigsRequest {
 	return ApiValidateConfigsRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 		pluginName: pluginName,
 	}
 }
 
 // Execute executes the request
-//  @return ConfigInfos
+//
+//	@return ConfigInfos
 func (a *DefaultAPIService) ValidateConfigsExecute(r ApiValidateConfigsRequest) (*ConfigInfos, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ConfigInfos
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ConfigInfos
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.ValidateConfigs")
@@ -2696,14 +2708,14 @@ func (a *DefaultAPIService) ValidateConfigsExecute(r ApiValidateConfigsRequest) 
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-			var v ConfigInfos
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+		var v ConfigInfos
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 

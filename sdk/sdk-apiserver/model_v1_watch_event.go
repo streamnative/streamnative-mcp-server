@@ -35,7 +35,7 @@ import (
 type V1WatchEvent struct {
 	// Object is:  * If Type is Added or Modified: the new state of the object.  * If Type is Deleted: the state of the object immediately before deletion.  * If Type is Error: *Status is recommended; other types may make sense    depending on context.
 	Object map[string]interface{} `json:"object"`
-	Type string `json:"type"`
+	Type   string                 `json:"type"`
 }
 
 // NewV1WatchEvent instantiates a new V1WatchEvent object
@@ -151,5 +151,3 @@ func (v *NullableV1WatchEvent) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

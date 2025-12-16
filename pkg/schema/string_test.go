@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"encoding/json"
 	"fmt"
 	"testing"
 
@@ -67,9 +68,9 @@ func TestStringConverter_ToMCPToolInputSchemaProperties(t *testing.T) {
 			}
 			var expectedTool = mcp.NewTool("test", gotOpts...)
 			var actualTool = mcp.NewTool("test", tt.wantOpts...)
-			expectedToolInputSchemaJSON, _ := expectedTool.InputSchema.MarshalJSON()
-			actualToolInputSchemaJSON, _ := actualTool.InputSchema.MarshalJSON()
-			assert.Equal(t, string(expectedToolInputSchemaJSON), string(actualToolInputSchemaJSON))
+			expectedToolInputSchemaJSON, _ := json.Marshal(expectedTool.InputSchema)
+			actualToolInputSchemaJSON, _ := json.Marshal(actualTool.InputSchema)
+			assert.JSONEq(t, string(expectedToolInputSchemaJSON), string(actualToolInputSchemaJSON))
 			if tt.wantErr && err != nil {
 				assert.Contains(t, err.Error(), tt.errContain)
 			}

@@ -36,16 +36,16 @@ type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Secret struct {
 	// APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
 	ApiVersion *string `json:"apiVersion,omitempty"`
 	// the value should be base64 encoded
-	Data *map[string]string `json:"data,omitempty"`
-	InstanceName string `json:"instanceName"`
+	Data         *map[string]string `json:"data,omitempty"`
+	InstanceName string             `json:"instanceName"`
 	// Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
-	Kind *string `json:"kind,omitempty"`
-	Location string `json:"location"`
-	Metadata *V1ObjectMeta `json:"metadata,omitempty"`
+	Kind          *string                                                                     `json:"kind,omitempty"`
+	Location      string                                                                      `json:"location"`
+	Metadata      *V1ObjectMeta                                                               `json:"metadata,omitempty"`
 	PoolMemberRef *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemberReference `json:"poolMemberRef,omitempty"`
-	Spec map[string]interface{} `json:"spec,omitempty"`
-	Status map[string]interface{} `json:"status,omitempty"`
-	Tolerations []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Toleration `json:"tolerations,omitempty"`
+	Spec          map[string]interface{}                                                      `json:"spec,omitempty"`
+	Status        map[string]interface{}                                                      `json:"status,omitempty"`
+	Tolerations   []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Toleration         `json:"tolerations,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Secret instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Secret object
@@ -441,5 +441,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Secret) 
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

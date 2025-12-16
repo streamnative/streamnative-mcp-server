@@ -33,14 +33,14 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentDetails VvpDeploymentDetails
 type ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentDetails struct {
-	DeploymentTargetName *string `json:"deploymentTargetName,omitempty"`
-	JobFailureExpirationTime *string `json:"jobFailureExpirationTime,omitempty"`
-	MaxJobCreationAttempts *int32 `json:"maxJobCreationAttempts,omitempty"`
-	MaxSavepointCreationAttempts *int32 `json:"maxSavepointCreationAttempts,omitempty"`
-	RestoreStrategy *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpRestoreStrategy `json:"restoreStrategy,omitempty"`
-	SessionClusterName *string `json:"sessionClusterName,omitempty"`
-	State *string `json:"state,omitempty"`
-	Template ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentDetailsTemplate `json:"template"`
+	DeploymentTargetName         *string                                                                               `json:"deploymentTargetName,omitempty"`
+	JobFailureExpirationTime     *string                                                                               `json:"jobFailureExpirationTime,omitempty"`
+	MaxJobCreationAttempts       *int32                                                                                `json:"maxJobCreationAttempts,omitempty"`
+	MaxSavepointCreationAttempts *int32                                                                                `json:"maxSavepointCreationAttempts,omitempty"`
+	RestoreStrategy              *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpRestoreStrategy          `json:"restoreStrategy,omitempty"`
+	SessionClusterName           *string                                                                               `json:"sessionClusterName,omitempty"`
+	State                        *string                                                                               `json:"state,omitempty"`
+	Template                     ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentDetailsTemplate `json:"template"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentDetails instantiates a new ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentDetails object
@@ -373,5 +373,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDep
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

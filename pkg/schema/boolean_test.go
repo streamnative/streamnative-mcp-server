@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"encoding/json"
 	"fmt"
 	"testing"
 
@@ -58,9 +59,9 @@ func TestBooleanConverter_ToMCPToolInputSchemaProperties(t *testing.T) {
 			var expectedTool, actualTool mcp.Tool
 			expectedTool = mcp.NewTool("test", tt.wantOpts...)
 			actualTool = mcp.NewTool("test", gotOpts...)
-			expectedToolSchemaJSON, _ := expectedTool.InputSchema.MarshalJSON()
-			actualToolSchemaJSON, _ := actualTool.InputSchema.MarshalJSON()
-			assert.Equal(t, expectedToolSchemaJSON, actualToolSchemaJSON)
+			expectedToolSchemaJSON, _ := json.Marshal(expectedTool.InputSchema)
+			actualToolSchemaJSON, _ := json.Marshal(actualTool.InputSchema)
+			assert.JSONEq(t, string(expectedToolSchemaJSON), string(actualToolSchemaJSON))
 			if tt.wantErr && err != nil {
 				assert.Contains(t, err.Error(), "expected BOOLEAN schema, got")
 			}

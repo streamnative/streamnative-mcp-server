@@ -33,7 +33,7 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1ExecEnvVar ExecEnvVar is used for setting environment variables when executing an exec-based credential plugin.
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1ExecEnvVar struct {
-	Name string `json:"name"`
+	Name  string `json:"name"`
 	Value string `json:"value"`
 }
 
@@ -150,5 +150,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1ExecEnvV
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

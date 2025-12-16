@@ -35,12 +35,11 @@ import (
 	"net/url"
 )
 
-
 // VersionApiService VersionApi service
 type VersionApiService service
 
 type ApiGetCodeVersionRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *VersionApiService
 }
 
@@ -53,24 +52,25 @@ GetCodeVersion Method for GetCodeVersion
 
 get the code version
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiGetCodeVersionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetCodeVersionRequest
 */
 func (a *VersionApiService) GetCodeVersion(ctx context.Context) ApiGetCodeVersionRequest {
 	return ApiGetCodeVersionRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return VersionInfo
+//
+//	@return VersionInfo
 func (a *VersionApiService) GetCodeVersionExecute(r ApiGetCodeVersionRequest) (*VersionInfo, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *VersionInfo
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *VersionInfo
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "VersionApiService.GetCodeVersion")

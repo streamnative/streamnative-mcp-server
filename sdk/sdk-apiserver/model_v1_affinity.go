@@ -33,8 +33,8 @@ import (
 
 // V1Affinity Affinity is a group of affinity scheduling rules.
 type V1Affinity struct {
-	NodeAffinity *V1NodeAffinity `json:"nodeAffinity,omitempty"`
-	PodAffinity *V1PodAffinity `json:"podAffinity,omitempty"`
+	NodeAffinity    *V1NodeAffinity    `json:"nodeAffinity,omitempty"`
+	PodAffinity     *V1PodAffinity     `json:"podAffinity,omitempty"`
 	PodAntiAffinity *V1PodAntiAffinity `json:"podAntiAffinity,omitempty"`
 }
 
@@ -200,5 +200,3 @@ func (v *NullableV1Affinity) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

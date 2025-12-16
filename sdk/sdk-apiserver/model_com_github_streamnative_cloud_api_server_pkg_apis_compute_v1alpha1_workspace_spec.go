@@ -34,7 +34,7 @@ import (
 // ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1WorkspaceSpec WorkspaceSpec defines the desired state of Workspace
 type ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1WorkspaceSpec struct {
 	FlinkBlobStorage *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkBlobStorage `json:"flinkBlobStorage,omitempty"`
-	PoolRef ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1PoolRef `json:"poolRef"`
+	PoolRef          ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1PoolRef           `json:"poolRef"`
 	// PulsarClusterNames is the list of Pulsar clusters that the workspace will have access to.
 	PulsarClusterNames []string `json:"pulsarClusterNames"`
 	// UseExternalAccess is the flag to indicate whether the workspace will use external access.
@@ -224,5 +224,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Worksp
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

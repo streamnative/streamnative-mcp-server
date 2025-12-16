@@ -19,8 +19,8 @@ var _ MappedNullable = &ConfigInfo{}
 
 // ConfigInfo struct for ConfigInfo
 type ConfigInfo struct {
-	Definition *ConfigKeyInfo `json:"definition,omitempty"`
-	Value *ConfigValueInfo `json:"value,omitempty"`
+	Definition *ConfigKeyInfo   `json:"definition,omitempty"`
+	Value      *ConfigValueInfo `json:"value,omitempty"`
 }
 
 // NewConfigInfo instantiates a new ConfigInfo object
@@ -105,7 +105,7 @@ func (o *ConfigInfo) SetValue(v ConfigValueInfo) {
 }
 
 func (o ConfigInfo) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -158,5 +158,3 @@ func (v *NullableConfigInfo) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

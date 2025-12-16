@@ -36,10 +36,10 @@ import (
 type ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1Condition struct {
 	// Time is a wrapper around time.Time which supports correct marshaling to YAML and JSON.  Wrappers are provided for many of the factory methods that the time package offers.
 	LastTransitionTime *time.Time `json:"lastTransitionTime,omitempty"`
-	Message *string `json:"message,omitempty"`
-	Reason *string `json:"reason,omitempty"`
-	Status string `json:"status"`
-	Type string `json:"type"`
+	Message            *string    `json:"message,omitempty"`
+	Reason             *string    `json:"reason,omitempty"`
+	Status             string     `json:"status"`
+	Type               string     `json:"type"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1Condition instantiates a new ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1Condition object
@@ -260,5 +260,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

@@ -42,8 +42,8 @@ type V1DeleteOptions struct {
 	// Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
 	Kind *string `json:"kind,omitempty"`
 	// Deprecated: please use the PropagationPolicy, this field will be deprecated in 1.7. Should the dependent objects be orphaned. If true/false, the \"orphan\" finalizer will be added to/removed from the object's finalizers list. Either this field or PropagationPolicy may be set, but not both.
-	OrphanDependents *bool `json:"orphanDependents,omitempty"`
-	Preconditions *V1Preconditions `json:"preconditions,omitempty"`
+	OrphanDependents *bool            `json:"orphanDependents,omitempty"`
+	Preconditions    *V1Preconditions `json:"preconditions,omitempty"`
 	// Whether and how garbage collection will be performed. Either this field or OrphanDependents may be set, but not both. The default policy is decided by the existing finalizer set in the metadata.finalizers and the resource-specific default policy. Acceptable values are: 'Orphan' - orphan the dependents; 'Background' - allow the garbage collector to delete the dependents in the background; 'Foreground' - a cascading policy that deletes all dependents in the foreground.
 	PropagationPolicy *string `json:"propagationPolicy,omitempty"`
 }
@@ -350,5 +350,3 @@ func (v *NullableV1DeleteOptions) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

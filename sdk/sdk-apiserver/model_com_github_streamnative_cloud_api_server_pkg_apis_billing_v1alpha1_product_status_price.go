@@ -33,7 +33,7 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1ProductStatusPrice struct for ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1ProductStatusPrice
 type ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1ProductStatusPrice struct {
-	Key *string `json:"key,omitempty"`
+	Key      *string `json:"key,omitempty"`
 	StripeID *string `json:"stripeID,omitempty"`
 }
 
@@ -164,5 +164,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Produc
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

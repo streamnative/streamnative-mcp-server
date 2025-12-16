@@ -20,7 +20,7 @@ var _ MappedNullable = &ConnectorTaskId{}
 // ConnectorTaskId struct for ConnectorTaskId
 type ConnectorTaskId struct {
 	Connector *string `json:"connector,omitempty"`
-	Task *int32 `json:"task,omitempty"`
+	Task      *int32  `json:"task,omitempty"`
 }
 
 // NewConnectorTaskId instantiates a new ConnectorTaskId object
@@ -105,7 +105,7 @@ func (o *ConnectorTaskId) SetTask(v int32) {
 }
 
 func (o ConnectorTaskId) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -158,5 +158,3 @@ func (v *NullableConnectorTaskId) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

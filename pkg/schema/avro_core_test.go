@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/hamba/avro/v2"
@@ -394,9 +395,9 @@ func TestProcessAvroSchemaStringToMCPToolInput(t *testing.T) {
 				var actualTool, expectedTool mcp.Tool
 				actualTool = mcp.NewTool("test", opts...)
 				expectedTool = mcp.NewTool("test", tt.expectedOptions...)
-				actualToolInputSchemaJSON, _ := actualTool.InputSchema.MarshalJSON()
-				expectedToolInputSchemaJSON, _ := expectedTool.InputSchema.MarshalJSON()
-				assert.Equal(t, string(expectedToolInputSchemaJSON), string(actualToolInputSchemaJSON), "ToolOption did not produce the same property configuration. Expected: %+v, Got: %+v", expectedTool, actualTool)
+				actualToolInputSchemaJSON, _ := json.Marshal(actualTool.InputSchema)
+				expectedToolInputSchemaJSON, _ := json.Marshal(expectedTool.InputSchema)
+				assert.JSONEq(t, string(expectedToolInputSchemaJSON), string(actualToolInputSchemaJSON), "ToolOption did not produce the same property configuration. Expected: %+v, Got: %+v", expectedTool, actualTool)
 			}
 		})
 	}

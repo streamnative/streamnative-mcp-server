@@ -34,7 +34,7 @@ import (
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarInstanceStatusAuth struct for ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarInstanceStatusAuth
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarInstanceStatusAuth struct {
 	Oauth2 ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarInstanceStatusAuthOAuth2 `json:"oauth2"`
-	Type string `json:"type"`
+	Type   string                                                                                `json:"type"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarInstanceStatusAuth instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarInstanceStatusAuth object
@@ -150,5 +150,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarIn
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

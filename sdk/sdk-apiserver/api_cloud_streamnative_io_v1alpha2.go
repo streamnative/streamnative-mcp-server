@@ -36,16 +36,15 @@ import (
 	"strings"
 )
 
-
 // CloudStreamnativeIoV1alpha2ApiService CloudStreamnativeIoV1alpha2Api service
 type CloudStreamnativeIoV1alpha2ApiService service
 
 type ApiCreateCloudStreamnativeIoV1alpha2AWSSubscriptionRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	body *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *CloudStreamnativeIoV1alpha2ApiService
+	body         *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
 }
 
@@ -81,24 +80,25 @@ CreateCloudStreamnativeIoV1alpha2AWSSubscription Method for CreateCloudStreamnat
 
 create an AWSSubscription
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiCreateCloudStreamnativeIoV1alpha2AWSSubscriptionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiCreateCloudStreamnativeIoV1alpha2AWSSubscriptionRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) CreateCloudStreamnativeIoV1alpha2AWSSubscription(ctx context.Context) ApiCreateCloudStreamnativeIoV1alpha2AWSSubscriptionRequest {
 	return ApiCreateCloudStreamnativeIoV1alpha2AWSSubscriptionRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
 func (a *CloudStreamnativeIoV1alpha2ApiService) CreateCloudStreamnativeIoV1alpha2AWSSubscriptionExecute(r ApiCreateCloudStreamnativeIoV1alpha2AWSSubscriptionRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.CreateCloudStreamnativeIoV1alpha2AWSSubscription")
@@ -181,12 +181,12 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) CreateCloudStreamnativeIoV1alpha
 }
 
 type ApiCreateCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	body *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *CloudStreamnativeIoV1alpha2ApiService
+	name         string
+	body         *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
 }
 
@@ -222,26 +222,27 @@ CreateCloudStreamnativeIoV1alpha2AWSSubscriptionStatus Method for CreateCloudStr
 
 create status of an AWSSubscription
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the AWSSubscription
- @return ApiCreateCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the AWSSubscription
+	@return ApiCreateCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) CreateCloudStreamnativeIoV1alpha2AWSSubscriptionStatus(ctx context.Context, name string) ApiCreateCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest {
 	return ApiCreateCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
+		ctx:        ctx,
+		name:       name,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
 func (a *CloudStreamnativeIoV1alpha2ApiService) CreateCloudStreamnativeIoV1alpha2AWSSubscriptionStatusExecute(r ApiCreateCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.CreateCloudStreamnativeIoV1alpha2AWSSubscriptionStatus")
@@ -325,12 +326,12 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) CreateCloudStreamnativeIoV1alpha
 }
 
 type ApiCreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	namespace string
-	body *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *CloudStreamnativeIoV1alpha2ApiService
+	namespace    string
+	body         *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
 }
 
@@ -366,26 +367,27 @@ CreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSet Method for CreateCloudS
 
 create a BookKeeperSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiCreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiCreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) CreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSet(ctx context.Context, namespace string) ApiCreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest {
 	return ApiCreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest{
 		ApiService: a,
-		ctx: ctx,
-		namespace: namespace,
+		ctx:        ctx,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
 func (a *CloudStreamnativeIoV1alpha2ApiService) CreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetExecute(r ApiCreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.CreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSet")
@@ -469,12 +471,12 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) CreateCloudStreamnativeIoV1alpha
 }
 
 type ApiCreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	namespace string
-	body *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *CloudStreamnativeIoV1alpha2ApiService
+	namespace    string
+	body         *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
 }
 
@@ -510,26 +512,27 @@ CreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOption Method for Create
 
 create a BookKeeperSetOption
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiCreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiCreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) CreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOption(ctx context.Context, namespace string) ApiCreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest {
 	return ApiCreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest{
 		ApiService: a,
-		ctx: ctx,
-		namespace: namespace,
+		ctx:        ctx,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
 func (a *CloudStreamnativeIoV1alpha2ApiService) CreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionExecute(r ApiCreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.CreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOption")
@@ -613,13 +616,13 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) CreateCloudStreamnativeIoV1alpha
 }
 
 type ApiCreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	body *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *CloudStreamnativeIoV1alpha2ApiService
+	name         string
+	namespace    string
+	body         *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
 }
 
@@ -655,28 +658,29 @@ CreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatus Method for 
 
 create status of a BookKeeperSetOption
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the BookKeeperSetOption
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiCreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the BookKeeperSetOption
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiCreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) CreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatus(ctx context.Context, name string, namespace string) ApiCreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest {
 	return ApiCreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
 func (a *CloudStreamnativeIoV1alpha2ApiService) CreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusExecute(r ApiCreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.CreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatus")
@@ -761,13 +765,13 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) CreateCloudStreamnativeIoV1alpha
 }
 
 type ApiCreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	body *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *CloudStreamnativeIoV1alpha2ApiService
+	name         string
+	namespace    string
+	body         *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
 }
 
@@ -803,28 +807,29 @@ CreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatus Method for Create
 
 create status of a BookKeeperSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the BookKeeperSet
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiCreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the BookKeeperSet
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiCreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) CreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatus(ctx context.Context, name string, namespace string) ApiCreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest {
 	return ApiCreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
 func (a *CloudStreamnativeIoV1alpha2ApiService) CreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusExecute(r ApiCreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.CreateCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatus")
@@ -909,12 +914,12 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) CreateCloudStreamnativeIoV1alpha
 }
 
 type ApiCreateCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	namespace string
-	body *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *CloudStreamnativeIoV1alpha2ApiService
+	namespace    string
+	body         *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
 }
 
@@ -950,26 +955,27 @@ CreateCloudStreamnativeIoV1alpha2NamespacedMonitorSet Method for CreateCloudStre
 
 create a MonitorSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiCreateCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiCreateCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) CreateCloudStreamnativeIoV1alpha2NamespacedMonitorSet(ctx context.Context, namespace string) ApiCreateCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest {
 	return ApiCreateCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest{
 		ApiService: a,
-		ctx: ctx,
-		namespace: namespace,
+		ctx:        ctx,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
 func (a *CloudStreamnativeIoV1alpha2ApiService) CreateCloudStreamnativeIoV1alpha2NamespacedMonitorSetExecute(r ApiCreateCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.CreateCloudStreamnativeIoV1alpha2NamespacedMonitorSet")
@@ -1053,13 +1059,13 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) CreateCloudStreamnativeIoV1alpha
 }
 
 type ApiCreateCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	body *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *CloudStreamnativeIoV1alpha2ApiService
+	name         string
+	namespace    string
+	body         *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
 }
 
@@ -1095,28 +1101,29 @@ CreateCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatus Method for CreateClo
 
 create status of a MonitorSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the MonitorSet
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiCreateCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the MonitorSet
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiCreateCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) CreateCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatus(ctx context.Context, name string, namespace string) ApiCreateCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest {
 	return ApiCreateCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
 func (a *CloudStreamnativeIoV1alpha2ApiService) CreateCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusExecute(r ApiCreateCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.CreateCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatus")
@@ -1201,12 +1208,12 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) CreateCloudStreamnativeIoV1alpha
 }
 
 type ApiCreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	namespace string
-	body *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *CloudStreamnativeIoV1alpha2ApiService
+	namespace    string
+	body         *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
 }
 
@@ -1242,26 +1249,27 @@ CreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSet Method for CreateCloudSt
 
 create a ZooKeeperSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiCreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiCreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) CreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSet(ctx context.Context, namespace string) ApiCreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest {
 	return ApiCreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest{
 		ApiService: a,
-		ctx: ctx,
-		namespace: namespace,
+		ctx:        ctx,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
 func (a *CloudStreamnativeIoV1alpha2ApiService) CreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetExecute(r ApiCreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.CreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSet")
@@ -1345,12 +1353,12 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) CreateCloudStreamnativeIoV1alpha
 }
 
 type ApiCreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	namespace string
-	body *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *CloudStreamnativeIoV1alpha2ApiService
+	namespace    string
+	body         *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
 }
 
@@ -1386,26 +1394,27 @@ CreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOption Method for CreateC
 
 create a ZooKeeperSetOption
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiCreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiCreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) CreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOption(ctx context.Context, namespace string) ApiCreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest {
 	return ApiCreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest{
 		ApiService: a,
-		ctx: ctx,
-		namespace: namespace,
+		ctx:        ctx,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
 func (a *CloudStreamnativeIoV1alpha2ApiService) CreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionExecute(r ApiCreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.CreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOption")
@@ -1489,13 +1498,13 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) CreateCloudStreamnativeIoV1alpha
 }
 
 type ApiCreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	body *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *CloudStreamnativeIoV1alpha2ApiService
+	name         string
+	namespace    string
+	body         *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
 }
 
@@ -1531,28 +1540,29 @@ CreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatus Method for C
 
 create status of a ZooKeeperSetOption
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the ZooKeeperSetOption
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiCreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the ZooKeeperSetOption
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiCreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) CreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatus(ctx context.Context, name string, namespace string) ApiCreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest {
 	return ApiCreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
 func (a *CloudStreamnativeIoV1alpha2ApiService) CreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusExecute(r ApiCreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.CreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatus")
@@ -1637,13 +1647,13 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) CreateCloudStreamnativeIoV1alpha
 }
 
 type ApiCreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	body *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *CloudStreamnativeIoV1alpha2ApiService
+	name         string
+	namespace    string
+	body         *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
 }
 
@@ -1679,28 +1689,29 @@ CreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatus Method for CreateC
 
 create status of a ZooKeeperSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the ZooKeeperSet
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiCreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the ZooKeeperSet
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiCreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) CreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatus(ctx context.Context, name string, namespace string) ApiCreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest {
 	return ApiCreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
 func (a *CloudStreamnativeIoV1alpha2ApiService) CreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusExecute(r ApiCreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.CreateCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatus")
@@ -1785,15 +1796,15 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) CreateCloudStreamnativeIoV1alpha
 }
 
 type ApiDeleteCloudStreamnativeIoV1alpha2AWSSubscriptionRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	pretty *string
-	dryRun *string
+	ctx                context.Context
+	ApiService         *CloudStreamnativeIoV1alpha2ApiService
+	name               string
+	pretty             *string
+	dryRun             *string
 	gracePeriodSeconds *int32
-	orphanDependents *bool
-	propagationPolicy *string
-	body *V1DeleteOptions
+	orphanDependents   *bool
+	propagationPolicy  *string
+	body               *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -1840,26 +1851,27 @@ DeleteCloudStreamnativeIoV1alpha2AWSSubscription Method for DeleteCloudStreamnat
 
 delete an AWSSubscription
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the AWSSubscription
- @return ApiDeleteCloudStreamnativeIoV1alpha2AWSSubscriptionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the AWSSubscription
+	@return ApiDeleteCloudStreamnativeIoV1alpha2AWSSubscriptionRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha2AWSSubscription(ctx context.Context, name string) ApiDeleteCloudStreamnativeIoV1alpha2AWSSubscriptionRequest {
 	return ApiDeleteCloudStreamnativeIoV1alpha2AWSSubscriptionRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
+		ctx:        ctx,
+		name:       name,
 	}
 }
 
 // Execute executes the request
-//  @return V1Status
+//
+//	@return V1Status
 func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha2AWSSubscriptionExecute(r ApiDeleteCloudStreamnativeIoV1alpha2AWSSubscriptionRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1Status
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.DeleteCloudStreamnativeIoV1alpha2AWSSubscription")
@@ -1946,15 +1958,15 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha
 }
 
 type ApiDeleteCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	pretty *string
-	dryRun *string
+	ctx                context.Context
+	ApiService         *CloudStreamnativeIoV1alpha2ApiService
+	name               string
+	pretty             *string
+	dryRun             *string
 	gracePeriodSeconds *int32
-	orphanDependents *bool
-	propagationPolicy *string
-	body *V1DeleteOptions
+	orphanDependents   *bool
+	propagationPolicy  *string
+	body               *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -2001,26 +2013,27 @@ DeleteCloudStreamnativeIoV1alpha2AWSSubscriptionStatus Method for DeleteCloudStr
 
 delete status of an AWSSubscription
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the AWSSubscription
- @return ApiDeleteCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the AWSSubscription
+	@return ApiDeleteCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha2AWSSubscriptionStatus(ctx context.Context, name string) ApiDeleteCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest {
 	return ApiDeleteCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
+		ctx:        ctx,
+		name:       name,
 	}
 }
 
 // Execute executes the request
-//  @return V1Status
+//
+//	@return V1Status
 func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha2AWSSubscriptionStatusExecute(r ApiDeleteCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1Status
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.DeleteCloudStreamnativeIoV1alpha2AWSSubscriptionStatus")
@@ -2107,21 +2120,21 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha
 }
 
 type ApiDeleteCloudStreamnativeIoV1alpha2CollectionAWSSubscriptionRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	pretty *string
-	continue_ *string
-	dryRun *string
-	fieldSelector *string
-	gracePeriodSeconds *int32
-	labelSelector *string
-	limit *int32
-	orphanDependents *bool
-	propagationPolicy *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	pretty               *string
+	continue_            *string
+	dryRun               *string
+	fieldSelector        *string
+	gracePeriodSeconds   *int32
+	labelSelector        *string
+	limit                *int32
+	orphanDependents     *bool
+	propagationPolicy    *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	body *V1DeleteOptions
+	timeoutSeconds       *int32
+	body                 *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -2210,24 +2223,25 @@ DeleteCloudStreamnativeIoV1alpha2CollectionAWSSubscription Method for DeleteClou
 
 delete collection of AWSSubscription
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiDeleteCloudStreamnativeIoV1alpha2CollectionAWSSubscriptionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiDeleteCloudStreamnativeIoV1alpha2CollectionAWSSubscriptionRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha2CollectionAWSSubscription(ctx context.Context) ApiDeleteCloudStreamnativeIoV1alpha2CollectionAWSSubscriptionRequest {
 	return ApiDeleteCloudStreamnativeIoV1alpha2CollectionAWSSubscriptionRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return V1Status
+//
+//	@return V1Status
 func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha2CollectionAWSSubscriptionExecute(r ApiDeleteCloudStreamnativeIoV1alpha2CollectionAWSSubscriptionRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1Status
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.DeleteCloudStreamnativeIoV1alpha2CollectionAWSSubscription")
@@ -2334,22 +2348,22 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha
 }
 
 type ApiDeleteCloudStreamnativeIoV1alpha2CollectionNamespacedBookKeeperSetRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	namespace string
-	pretty *string
-	continue_ *string
-	dryRun *string
-	fieldSelector *string
-	gracePeriodSeconds *int32
-	labelSelector *string
-	limit *int32
-	orphanDependents *bool
-	propagationPolicy *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	namespace            string
+	pretty               *string
+	continue_            *string
+	dryRun               *string
+	fieldSelector        *string
+	gracePeriodSeconds   *int32
+	labelSelector        *string
+	limit                *int32
+	orphanDependents     *bool
+	propagationPolicy    *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	body *V1DeleteOptions
+	timeoutSeconds       *int32
+	body                 *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -2438,26 +2452,27 @@ DeleteCloudStreamnativeIoV1alpha2CollectionNamespacedBookKeeperSet Method for De
 
 delete collection of BookKeeperSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiDeleteCloudStreamnativeIoV1alpha2CollectionNamespacedBookKeeperSetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiDeleteCloudStreamnativeIoV1alpha2CollectionNamespacedBookKeeperSetRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha2CollectionNamespacedBookKeeperSet(ctx context.Context, namespace string) ApiDeleteCloudStreamnativeIoV1alpha2CollectionNamespacedBookKeeperSetRequest {
 	return ApiDeleteCloudStreamnativeIoV1alpha2CollectionNamespacedBookKeeperSetRequest{
 		ApiService: a,
-		ctx: ctx,
-		namespace: namespace,
+		ctx:        ctx,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1Status
+//
+//	@return V1Status
 func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha2CollectionNamespacedBookKeeperSetExecute(r ApiDeleteCloudStreamnativeIoV1alpha2CollectionNamespacedBookKeeperSetRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1Status
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.DeleteCloudStreamnativeIoV1alpha2CollectionNamespacedBookKeeperSet")
@@ -2565,22 +2580,22 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha
 }
 
 type ApiDeleteCloudStreamnativeIoV1alpha2CollectionNamespacedBookKeeperSetOptionRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	namespace string
-	pretty *string
-	continue_ *string
-	dryRun *string
-	fieldSelector *string
-	gracePeriodSeconds *int32
-	labelSelector *string
-	limit *int32
-	orphanDependents *bool
-	propagationPolicy *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	namespace            string
+	pretty               *string
+	continue_            *string
+	dryRun               *string
+	fieldSelector        *string
+	gracePeriodSeconds   *int32
+	labelSelector        *string
+	limit                *int32
+	orphanDependents     *bool
+	propagationPolicy    *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	body *V1DeleteOptions
+	timeoutSeconds       *int32
+	body                 *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -2669,26 +2684,27 @@ DeleteCloudStreamnativeIoV1alpha2CollectionNamespacedBookKeeperSetOption Method 
 
 delete collection of BookKeeperSetOption
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiDeleteCloudStreamnativeIoV1alpha2CollectionNamespacedBookKeeperSetOptionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiDeleteCloudStreamnativeIoV1alpha2CollectionNamespacedBookKeeperSetOptionRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha2CollectionNamespacedBookKeeperSetOption(ctx context.Context, namespace string) ApiDeleteCloudStreamnativeIoV1alpha2CollectionNamespacedBookKeeperSetOptionRequest {
 	return ApiDeleteCloudStreamnativeIoV1alpha2CollectionNamespacedBookKeeperSetOptionRequest{
 		ApiService: a,
-		ctx: ctx,
-		namespace: namespace,
+		ctx:        ctx,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1Status
+//
+//	@return V1Status
 func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha2CollectionNamespacedBookKeeperSetOptionExecute(r ApiDeleteCloudStreamnativeIoV1alpha2CollectionNamespacedBookKeeperSetOptionRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1Status
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.DeleteCloudStreamnativeIoV1alpha2CollectionNamespacedBookKeeperSetOption")
@@ -2796,22 +2812,22 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha
 }
 
 type ApiDeleteCloudStreamnativeIoV1alpha2CollectionNamespacedMonitorSetRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	namespace string
-	pretty *string
-	continue_ *string
-	dryRun *string
-	fieldSelector *string
-	gracePeriodSeconds *int32
-	labelSelector *string
-	limit *int32
-	orphanDependents *bool
-	propagationPolicy *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	namespace            string
+	pretty               *string
+	continue_            *string
+	dryRun               *string
+	fieldSelector        *string
+	gracePeriodSeconds   *int32
+	labelSelector        *string
+	limit                *int32
+	orphanDependents     *bool
+	propagationPolicy    *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	body *V1DeleteOptions
+	timeoutSeconds       *int32
+	body                 *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -2900,26 +2916,27 @@ DeleteCloudStreamnativeIoV1alpha2CollectionNamespacedMonitorSet Method for Delet
 
 delete collection of MonitorSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiDeleteCloudStreamnativeIoV1alpha2CollectionNamespacedMonitorSetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiDeleteCloudStreamnativeIoV1alpha2CollectionNamespacedMonitorSetRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha2CollectionNamespacedMonitorSet(ctx context.Context, namespace string) ApiDeleteCloudStreamnativeIoV1alpha2CollectionNamespacedMonitorSetRequest {
 	return ApiDeleteCloudStreamnativeIoV1alpha2CollectionNamespacedMonitorSetRequest{
 		ApiService: a,
-		ctx: ctx,
-		namespace: namespace,
+		ctx:        ctx,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1Status
+//
+//	@return V1Status
 func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha2CollectionNamespacedMonitorSetExecute(r ApiDeleteCloudStreamnativeIoV1alpha2CollectionNamespacedMonitorSetRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1Status
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.DeleteCloudStreamnativeIoV1alpha2CollectionNamespacedMonitorSet")
@@ -3027,22 +3044,22 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha
 }
 
 type ApiDeleteCloudStreamnativeIoV1alpha2CollectionNamespacedZooKeeperSetRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	namespace string
-	pretty *string
-	continue_ *string
-	dryRun *string
-	fieldSelector *string
-	gracePeriodSeconds *int32
-	labelSelector *string
-	limit *int32
-	orphanDependents *bool
-	propagationPolicy *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	namespace            string
+	pretty               *string
+	continue_            *string
+	dryRun               *string
+	fieldSelector        *string
+	gracePeriodSeconds   *int32
+	labelSelector        *string
+	limit                *int32
+	orphanDependents     *bool
+	propagationPolicy    *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	body *V1DeleteOptions
+	timeoutSeconds       *int32
+	body                 *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -3131,26 +3148,27 @@ DeleteCloudStreamnativeIoV1alpha2CollectionNamespacedZooKeeperSet Method for Del
 
 delete collection of ZooKeeperSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiDeleteCloudStreamnativeIoV1alpha2CollectionNamespacedZooKeeperSetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiDeleteCloudStreamnativeIoV1alpha2CollectionNamespacedZooKeeperSetRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha2CollectionNamespacedZooKeeperSet(ctx context.Context, namespace string) ApiDeleteCloudStreamnativeIoV1alpha2CollectionNamespacedZooKeeperSetRequest {
 	return ApiDeleteCloudStreamnativeIoV1alpha2CollectionNamespacedZooKeeperSetRequest{
 		ApiService: a,
-		ctx: ctx,
-		namespace: namespace,
+		ctx:        ctx,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1Status
+//
+//	@return V1Status
 func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha2CollectionNamespacedZooKeeperSetExecute(r ApiDeleteCloudStreamnativeIoV1alpha2CollectionNamespacedZooKeeperSetRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1Status
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.DeleteCloudStreamnativeIoV1alpha2CollectionNamespacedZooKeeperSet")
@@ -3258,22 +3276,22 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha
 }
 
 type ApiDeleteCloudStreamnativeIoV1alpha2CollectionNamespacedZooKeeperSetOptionRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	namespace string
-	pretty *string
-	continue_ *string
-	dryRun *string
-	fieldSelector *string
-	gracePeriodSeconds *int32
-	labelSelector *string
-	limit *int32
-	orphanDependents *bool
-	propagationPolicy *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	namespace            string
+	pretty               *string
+	continue_            *string
+	dryRun               *string
+	fieldSelector        *string
+	gracePeriodSeconds   *int32
+	labelSelector        *string
+	limit                *int32
+	orphanDependents     *bool
+	propagationPolicy    *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	body *V1DeleteOptions
+	timeoutSeconds       *int32
+	body                 *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -3362,26 +3380,27 @@ DeleteCloudStreamnativeIoV1alpha2CollectionNamespacedZooKeeperSetOption Method f
 
 delete collection of ZooKeeperSetOption
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiDeleteCloudStreamnativeIoV1alpha2CollectionNamespacedZooKeeperSetOptionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiDeleteCloudStreamnativeIoV1alpha2CollectionNamespacedZooKeeperSetOptionRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha2CollectionNamespacedZooKeeperSetOption(ctx context.Context, namespace string) ApiDeleteCloudStreamnativeIoV1alpha2CollectionNamespacedZooKeeperSetOptionRequest {
 	return ApiDeleteCloudStreamnativeIoV1alpha2CollectionNamespacedZooKeeperSetOptionRequest{
 		ApiService: a,
-		ctx: ctx,
-		namespace: namespace,
+		ctx:        ctx,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1Status
+//
+//	@return V1Status
 func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha2CollectionNamespacedZooKeeperSetOptionExecute(r ApiDeleteCloudStreamnativeIoV1alpha2CollectionNamespacedZooKeeperSetOptionRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1Status
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.DeleteCloudStreamnativeIoV1alpha2CollectionNamespacedZooKeeperSetOption")
@@ -3489,16 +3508,16 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha
 }
 
 type ApiDeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	pretty *string
-	dryRun *string
+	ctx                context.Context
+	ApiService         *CloudStreamnativeIoV1alpha2ApiService
+	name               string
+	namespace          string
+	pretty             *string
+	dryRun             *string
 	gracePeriodSeconds *int32
-	orphanDependents *bool
-	propagationPolicy *string
-	body *V1DeleteOptions
+	orphanDependents   *bool
+	propagationPolicy  *string
+	body               *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -3545,28 +3564,29 @@ DeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSet Method for DeleteCloudS
 
 delete a BookKeeperSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the BookKeeperSet
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiDeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the BookKeeperSet
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiDeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSet(ctx context.Context, name string, namespace string) ApiDeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest {
 	return ApiDeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1Status
+//
+//	@return V1Status
 func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetExecute(r ApiDeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1Status
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.DeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSet")
@@ -3654,16 +3674,16 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha
 }
 
 type ApiDeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	pretty *string
-	dryRun *string
+	ctx                context.Context
+	ApiService         *CloudStreamnativeIoV1alpha2ApiService
+	name               string
+	namespace          string
+	pretty             *string
+	dryRun             *string
 	gracePeriodSeconds *int32
-	orphanDependents *bool
-	propagationPolicy *string
-	body *V1DeleteOptions
+	orphanDependents   *bool
+	propagationPolicy  *string
+	body               *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -3710,28 +3730,29 @@ DeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOption Method for Delete
 
 delete a BookKeeperSetOption
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the BookKeeperSetOption
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiDeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the BookKeeperSetOption
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiDeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOption(ctx context.Context, name string, namespace string) ApiDeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest {
 	return ApiDeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1Status
+//
+//	@return V1Status
 func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionExecute(r ApiDeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1Status
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.DeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOption")
@@ -3819,16 +3840,16 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha
 }
 
 type ApiDeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	pretty *string
-	dryRun *string
+	ctx                context.Context
+	ApiService         *CloudStreamnativeIoV1alpha2ApiService
+	name               string
+	namespace          string
+	pretty             *string
+	dryRun             *string
 	gracePeriodSeconds *int32
-	orphanDependents *bool
-	propagationPolicy *string
-	body *V1DeleteOptions
+	orphanDependents   *bool
+	propagationPolicy  *string
+	body               *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -3875,28 +3896,29 @@ DeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatus Method for 
 
 delete status of a BookKeeperSetOption
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the BookKeeperSetOption
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiDeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the BookKeeperSetOption
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiDeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatus(ctx context.Context, name string, namespace string) ApiDeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest {
 	return ApiDeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1Status
+//
+//	@return V1Status
 func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusExecute(r ApiDeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1Status
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.DeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatus")
@@ -3984,16 +4006,16 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha
 }
 
 type ApiDeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	pretty *string
-	dryRun *string
+	ctx                context.Context
+	ApiService         *CloudStreamnativeIoV1alpha2ApiService
+	name               string
+	namespace          string
+	pretty             *string
+	dryRun             *string
 	gracePeriodSeconds *int32
-	orphanDependents *bool
-	propagationPolicy *string
-	body *V1DeleteOptions
+	orphanDependents   *bool
+	propagationPolicy  *string
+	body               *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -4040,28 +4062,29 @@ DeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatus Method for Delete
 
 delete status of a BookKeeperSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the BookKeeperSet
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiDeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the BookKeeperSet
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiDeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatus(ctx context.Context, name string, namespace string) ApiDeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest {
 	return ApiDeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1Status
+//
+//	@return V1Status
 func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusExecute(r ApiDeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1Status
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.DeleteCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatus")
@@ -4149,16 +4172,16 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha
 }
 
 type ApiDeleteCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	pretty *string
-	dryRun *string
+	ctx                context.Context
+	ApiService         *CloudStreamnativeIoV1alpha2ApiService
+	name               string
+	namespace          string
+	pretty             *string
+	dryRun             *string
 	gracePeriodSeconds *int32
-	orphanDependents *bool
-	propagationPolicy *string
-	body *V1DeleteOptions
+	orphanDependents   *bool
+	propagationPolicy  *string
+	body               *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -4205,28 +4228,29 @@ DeleteCloudStreamnativeIoV1alpha2NamespacedMonitorSet Method for DeleteCloudStre
 
 delete a MonitorSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the MonitorSet
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiDeleteCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the MonitorSet
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiDeleteCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha2NamespacedMonitorSet(ctx context.Context, name string, namespace string) ApiDeleteCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest {
 	return ApiDeleteCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1Status
+//
+//	@return V1Status
 func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha2NamespacedMonitorSetExecute(r ApiDeleteCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1Status
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.DeleteCloudStreamnativeIoV1alpha2NamespacedMonitorSet")
@@ -4314,16 +4338,16 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha
 }
 
 type ApiDeleteCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	pretty *string
-	dryRun *string
+	ctx                context.Context
+	ApiService         *CloudStreamnativeIoV1alpha2ApiService
+	name               string
+	namespace          string
+	pretty             *string
+	dryRun             *string
 	gracePeriodSeconds *int32
-	orphanDependents *bool
-	propagationPolicy *string
-	body *V1DeleteOptions
+	orphanDependents   *bool
+	propagationPolicy  *string
+	body               *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -4370,28 +4394,29 @@ DeleteCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatus Method for DeleteClo
 
 delete status of a MonitorSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the MonitorSet
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiDeleteCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the MonitorSet
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiDeleteCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatus(ctx context.Context, name string, namespace string) ApiDeleteCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest {
 	return ApiDeleteCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1Status
+//
+//	@return V1Status
 func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusExecute(r ApiDeleteCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1Status
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.DeleteCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatus")
@@ -4479,16 +4504,16 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha
 }
 
 type ApiDeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	pretty *string
-	dryRun *string
+	ctx                context.Context
+	ApiService         *CloudStreamnativeIoV1alpha2ApiService
+	name               string
+	namespace          string
+	pretty             *string
+	dryRun             *string
 	gracePeriodSeconds *int32
-	orphanDependents *bool
-	propagationPolicy *string
-	body *V1DeleteOptions
+	orphanDependents   *bool
+	propagationPolicy  *string
+	body               *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -4535,28 +4560,29 @@ DeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSet Method for DeleteCloudSt
 
 delete a ZooKeeperSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the ZooKeeperSet
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiDeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the ZooKeeperSet
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiDeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSet(ctx context.Context, name string, namespace string) ApiDeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest {
 	return ApiDeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1Status
+//
+//	@return V1Status
 func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetExecute(r ApiDeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1Status
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.DeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSet")
@@ -4644,16 +4670,16 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha
 }
 
 type ApiDeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	pretty *string
-	dryRun *string
+	ctx                context.Context
+	ApiService         *CloudStreamnativeIoV1alpha2ApiService
+	name               string
+	namespace          string
+	pretty             *string
+	dryRun             *string
 	gracePeriodSeconds *int32
-	orphanDependents *bool
-	propagationPolicy *string
-	body *V1DeleteOptions
+	orphanDependents   *bool
+	propagationPolicy  *string
+	body               *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -4700,28 +4726,29 @@ DeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOption Method for DeleteC
 
 delete a ZooKeeperSetOption
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the ZooKeeperSetOption
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiDeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the ZooKeeperSetOption
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiDeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOption(ctx context.Context, name string, namespace string) ApiDeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest {
 	return ApiDeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1Status
+//
+//	@return V1Status
 func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionExecute(r ApiDeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1Status
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.DeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOption")
@@ -4809,16 +4836,16 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha
 }
 
 type ApiDeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	pretty *string
-	dryRun *string
+	ctx                context.Context
+	ApiService         *CloudStreamnativeIoV1alpha2ApiService
+	name               string
+	namespace          string
+	pretty             *string
+	dryRun             *string
 	gracePeriodSeconds *int32
-	orphanDependents *bool
-	propagationPolicy *string
-	body *V1DeleteOptions
+	orphanDependents   *bool
+	propagationPolicy  *string
+	body               *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -4865,28 +4892,29 @@ DeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatus Method for D
 
 delete status of a ZooKeeperSetOption
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the ZooKeeperSetOption
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiDeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the ZooKeeperSetOption
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiDeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatus(ctx context.Context, name string, namespace string) ApiDeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest {
 	return ApiDeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1Status
+//
+//	@return V1Status
 func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusExecute(r ApiDeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1Status
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.DeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatus")
@@ -4974,16 +5002,16 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha
 }
 
 type ApiDeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	pretty *string
-	dryRun *string
+	ctx                context.Context
+	ApiService         *CloudStreamnativeIoV1alpha2ApiService
+	name               string
+	namespace          string
+	pretty             *string
+	dryRun             *string
 	gracePeriodSeconds *int32
-	orphanDependents *bool
-	propagationPolicy *string
-	body *V1DeleteOptions
+	orphanDependents   *bool
+	propagationPolicy  *string
+	body               *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -5030,28 +5058,29 @@ DeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatus Method for DeleteC
 
 delete status of a ZooKeeperSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the ZooKeeperSet
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiDeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the ZooKeeperSet
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiDeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatus(ctx context.Context, name string, namespace string) ApiDeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest {
 	return ApiDeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1Status
+//
+//	@return V1Status
 func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusExecute(r ApiDeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1Status
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.DeleteCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatus")
@@ -5139,7 +5168,7 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) DeleteCloudStreamnativeIoV1alpha
 }
 
 type ApiGetCloudStreamnativeIoV1alpha2APIResourcesRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *CloudStreamnativeIoV1alpha2ApiService
 }
 
@@ -5152,24 +5181,25 @@ GetCloudStreamnativeIoV1alpha2APIResources Method for GetCloudStreamnativeIoV1al
 
 get available resources
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiGetCloudStreamnativeIoV1alpha2APIResourcesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetCloudStreamnativeIoV1alpha2APIResourcesRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) GetCloudStreamnativeIoV1alpha2APIResources(ctx context.Context) ApiGetCloudStreamnativeIoV1alpha2APIResourcesRequest {
 	return ApiGetCloudStreamnativeIoV1alpha2APIResourcesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return V1APIResourceList
+//
+//	@return V1APIResourceList
 func (a *CloudStreamnativeIoV1alpha2ApiService) GetCloudStreamnativeIoV1alpha2APIResourcesExecute(r ApiGetCloudStreamnativeIoV1alpha2APIResourcesRequest) (*V1APIResourceList, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1APIResourceList
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1APIResourceList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.GetCloudStreamnativeIoV1alpha2APIResources")
@@ -5238,18 +5268,18 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) GetCloudStreamnativeIoV1alpha2AP
 }
 
 type ApiListCloudStreamnativeIoV1alpha2AWSSubscriptionRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	pretty *string
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	pretty               *string
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -5321,24 +5351,25 @@ ListCloudStreamnativeIoV1alpha2AWSSubscription Method for ListCloudStreamnativeI
 
 list or watch objects of kind AWSSubscription
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiListCloudStreamnativeIoV1alpha2AWSSubscriptionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiListCloudStreamnativeIoV1alpha2AWSSubscriptionRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) ListCloudStreamnativeIoV1alpha2AWSSubscription(ctx context.Context) ApiListCloudStreamnativeIoV1alpha2AWSSubscriptionRequest {
 	return ApiListCloudStreamnativeIoV1alpha2AWSSubscriptionRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscriptionList
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscriptionList
 func (a *CloudStreamnativeIoV1alpha2ApiService) ListCloudStreamnativeIoV1alpha2AWSSubscriptionExecute(r ApiListCloudStreamnativeIoV1alpha2AWSSubscriptionRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscriptionList, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscriptionList
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscriptionList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.ListCloudStreamnativeIoV1alpha2AWSSubscription")
@@ -5437,18 +5468,18 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) ListCloudStreamnativeIoV1alpha2A
 }
 
 type ApiListCloudStreamnativeIoV1alpha2BookKeeperSetForAllNamespacesRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -5520,24 +5551,25 @@ ListCloudStreamnativeIoV1alpha2BookKeeperSetForAllNamespaces Method for ListClou
 
 list or watch objects of kind BookKeeperSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiListCloudStreamnativeIoV1alpha2BookKeeperSetForAllNamespacesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiListCloudStreamnativeIoV1alpha2BookKeeperSetForAllNamespacesRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) ListCloudStreamnativeIoV1alpha2BookKeeperSetForAllNamespaces(ctx context.Context) ApiListCloudStreamnativeIoV1alpha2BookKeeperSetForAllNamespacesRequest {
 	return ApiListCloudStreamnativeIoV1alpha2BookKeeperSetForAllNamespacesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetList
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetList
 func (a *CloudStreamnativeIoV1alpha2ApiService) ListCloudStreamnativeIoV1alpha2BookKeeperSetForAllNamespacesExecute(r ApiListCloudStreamnativeIoV1alpha2BookKeeperSetForAllNamespacesRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetList, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetList
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.ListCloudStreamnativeIoV1alpha2BookKeeperSetForAllNamespaces")
@@ -5636,18 +5668,18 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) ListCloudStreamnativeIoV1alpha2B
 }
 
 type ApiListCloudStreamnativeIoV1alpha2BookKeeperSetOptionForAllNamespacesRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -5719,24 +5751,25 @@ ListCloudStreamnativeIoV1alpha2BookKeeperSetOptionForAllNamespaces Method for Li
 
 list or watch objects of kind BookKeeperSetOption
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiListCloudStreamnativeIoV1alpha2BookKeeperSetOptionForAllNamespacesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiListCloudStreamnativeIoV1alpha2BookKeeperSetOptionForAllNamespacesRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) ListCloudStreamnativeIoV1alpha2BookKeeperSetOptionForAllNamespaces(ctx context.Context) ApiListCloudStreamnativeIoV1alpha2BookKeeperSetOptionForAllNamespacesRequest {
 	return ApiListCloudStreamnativeIoV1alpha2BookKeeperSetOptionForAllNamespacesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOptionList
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOptionList
 func (a *CloudStreamnativeIoV1alpha2ApiService) ListCloudStreamnativeIoV1alpha2BookKeeperSetOptionForAllNamespacesExecute(r ApiListCloudStreamnativeIoV1alpha2BookKeeperSetOptionForAllNamespacesRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOptionList, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOptionList
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOptionList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.ListCloudStreamnativeIoV1alpha2BookKeeperSetOptionForAllNamespaces")
@@ -5835,18 +5868,18 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) ListCloudStreamnativeIoV1alpha2B
 }
 
 type ApiListCloudStreamnativeIoV1alpha2MonitorSetForAllNamespacesRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -5918,24 +5951,25 @@ ListCloudStreamnativeIoV1alpha2MonitorSetForAllNamespaces Method for ListCloudSt
 
 list or watch objects of kind MonitorSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiListCloudStreamnativeIoV1alpha2MonitorSetForAllNamespacesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiListCloudStreamnativeIoV1alpha2MonitorSetForAllNamespacesRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) ListCloudStreamnativeIoV1alpha2MonitorSetForAllNamespaces(ctx context.Context) ApiListCloudStreamnativeIoV1alpha2MonitorSetForAllNamespacesRequest {
 	return ApiListCloudStreamnativeIoV1alpha2MonitorSetForAllNamespacesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSetList
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSetList
 func (a *CloudStreamnativeIoV1alpha2ApiService) ListCloudStreamnativeIoV1alpha2MonitorSetForAllNamespacesExecute(r ApiListCloudStreamnativeIoV1alpha2MonitorSetForAllNamespacesRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSetList, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSetList
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSetList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.ListCloudStreamnativeIoV1alpha2MonitorSetForAllNamespaces")
@@ -6034,19 +6068,19 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) ListCloudStreamnativeIoV1alpha2M
 }
 
 type ApiListCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	namespace string
-	pretty *string
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	namespace            string
+	pretty               *string
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -6118,26 +6152,27 @@ ListCloudStreamnativeIoV1alpha2NamespacedBookKeeperSet Method for ListCloudStrea
 
 list or watch objects of kind BookKeeperSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiListCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiListCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) ListCloudStreamnativeIoV1alpha2NamespacedBookKeeperSet(ctx context.Context, namespace string) ApiListCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest {
 	return ApiListCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest{
 		ApiService: a,
-		ctx: ctx,
-		namespace: namespace,
+		ctx:        ctx,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetList
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetList
 func (a *CloudStreamnativeIoV1alpha2ApiService) ListCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetExecute(r ApiListCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetList, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetList
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.ListCloudStreamnativeIoV1alpha2NamespacedBookKeeperSet")
@@ -6237,19 +6272,19 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) ListCloudStreamnativeIoV1alpha2N
 }
 
 type ApiListCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	namespace string
-	pretty *string
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	namespace            string
+	pretty               *string
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -6321,26 +6356,27 @@ ListCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOption Method for ListClou
 
 list or watch objects of kind BookKeeperSetOption
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiListCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiListCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) ListCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOption(ctx context.Context, namespace string) ApiListCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest {
 	return ApiListCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest{
 		ApiService: a,
-		ctx: ctx,
-		namespace: namespace,
+		ctx:        ctx,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOptionList
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOptionList
 func (a *CloudStreamnativeIoV1alpha2ApiService) ListCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionExecute(r ApiListCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOptionList, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOptionList
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOptionList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.ListCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOption")
@@ -6440,19 +6476,19 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) ListCloudStreamnativeIoV1alpha2N
 }
 
 type ApiListCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	namespace string
-	pretty *string
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	namespace            string
+	pretty               *string
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -6524,26 +6560,27 @@ ListCloudStreamnativeIoV1alpha2NamespacedMonitorSet Method for ListCloudStreamna
 
 list or watch objects of kind MonitorSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiListCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiListCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) ListCloudStreamnativeIoV1alpha2NamespacedMonitorSet(ctx context.Context, namespace string) ApiListCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest {
 	return ApiListCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest{
 		ApiService: a,
-		ctx: ctx,
-		namespace: namespace,
+		ctx:        ctx,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSetList
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSetList
 func (a *CloudStreamnativeIoV1alpha2ApiService) ListCloudStreamnativeIoV1alpha2NamespacedMonitorSetExecute(r ApiListCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSetList, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSetList
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSetList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.ListCloudStreamnativeIoV1alpha2NamespacedMonitorSet")
@@ -6643,19 +6680,19 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) ListCloudStreamnativeIoV1alpha2N
 }
 
 type ApiListCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	namespace string
-	pretty *string
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	namespace            string
+	pretty               *string
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -6727,26 +6764,27 @@ ListCloudStreamnativeIoV1alpha2NamespacedZooKeeperSet Method for ListCloudStream
 
 list or watch objects of kind ZooKeeperSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiListCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiListCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) ListCloudStreamnativeIoV1alpha2NamespacedZooKeeperSet(ctx context.Context, namespace string) ApiListCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest {
 	return ApiListCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest{
 		ApiService: a,
-		ctx: ctx,
-		namespace: namespace,
+		ctx:        ctx,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetList
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetList
 func (a *CloudStreamnativeIoV1alpha2ApiService) ListCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetExecute(r ApiListCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetList, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetList
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.ListCloudStreamnativeIoV1alpha2NamespacedZooKeeperSet")
@@ -6846,19 +6884,19 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) ListCloudStreamnativeIoV1alpha2N
 }
 
 type ApiListCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	namespace string
-	pretty *string
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	namespace            string
+	pretty               *string
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -6930,26 +6968,27 @@ ListCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOption Method for ListCloud
 
 list or watch objects of kind ZooKeeperSetOption
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiListCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiListCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) ListCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOption(ctx context.Context, namespace string) ApiListCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest {
 	return ApiListCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest{
 		ApiService: a,
-		ctx: ctx,
-		namespace: namespace,
+		ctx:        ctx,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOptionList
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOptionList
 func (a *CloudStreamnativeIoV1alpha2ApiService) ListCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionExecute(r ApiListCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOptionList, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOptionList
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOptionList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.ListCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOption")
@@ -7049,18 +7088,18 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) ListCloudStreamnativeIoV1alpha2N
 }
 
 type ApiListCloudStreamnativeIoV1alpha2ZooKeeperSetForAllNamespacesRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -7132,24 +7171,25 @@ ListCloudStreamnativeIoV1alpha2ZooKeeperSetForAllNamespaces Method for ListCloud
 
 list or watch objects of kind ZooKeeperSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiListCloudStreamnativeIoV1alpha2ZooKeeperSetForAllNamespacesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiListCloudStreamnativeIoV1alpha2ZooKeeperSetForAllNamespacesRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) ListCloudStreamnativeIoV1alpha2ZooKeeperSetForAllNamespaces(ctx context.Context) ApiListCloudStreamnativeIoV1alpha2ZooKeeperSetForAllNamespacesRequest {
 	return ApiListCloudStreamnativeIoV1alpha2ZooKeeperSetForAllNamespacesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetList
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetList
 func (a *CloudStreamnativeIoV1alpha2ApiService) ListCloudStreamnativeIoV1alpha2ZooKeeperSetForAllNamespacesExecute(r ApiListCloudStreamnativeIoV1alpha2ZooKeeperSetForAllNamespacesRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetList, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetList
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.ListCloudStreamnativeIoV1alpha2ZooKeeperSetForAllNamespaces")
@@ -7248,18 +7288,18 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) ListCloudStreamnativeIoV1alpha2Z
 }
 
 type ApiListCloudStreamnativeIoV1alpha2ZooKeeperSetOptionForAllNamespacesRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -7331,24 +7371,25 @@ ListCloudStreamnativeIoV1alpha2ZooKeeperSetOptionForAllNamespaces Method for Lis
 
 list or watch objects of kind ZooKeeperSetOption
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiListCloudStreamnativeIoV1alpha2ZooKeeperSetOptionForAllNamespacesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiListCloudStreamnativeIoV1alpha2ZooKeeperSetOptionForAllNamespacesRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) ListCloudStreamnativeIoV1alpha2ZooKeeperSetOptionForAllNamespaces(ctx context.Context) ApiListCloudStreamnativeIoV1alpha2ZooKeeperSetOptionForAllNamespacesRequest {
 	return ApiListCloudStreamnativeIoV1alpha2ZooKeeperSetOptionForAllNamespacesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOptionList
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOptionList
 func (a *CloudStreamnativeIoV1alpha2ApiService) ListCloudStreamnativeIoV1alpha2ZooKeeperSetOptionForAllNamespacesExecute(r ApiListCloudStreamnativeIoV1alpha2ZooKeeperSetOptionForAllNamespacesRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOptionList, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOptionList
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOptionList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.ListCloudStreamnativeIoV1alpha2ZooKeeperSetOptionForAllNamespaces")
@@ -7447,14 +7488,14 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) ListCloudStreamnativeIoV1alpha2Z
 }
 
 type ApiPatchCloudStreamnativeIoV1alpha2AWSSubscriptionRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	body *map[string]interface{}
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *CloudStreamnativeIoV1alpha2ApiService
+	name         string
+	body         *map[string]interface{}
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
-	force *bool
+	force        *bool
 }
 
 func (r ApiPatchCloudStreamnativeIoV1alpha2AWSSubscriptionRequest) Body(body map[string]interface{}) ApiPatchCloudStreamnativeIoV1alpha2AWSSubscriptionRequest {
@@ -7495,26 +7536,27 @@ PatchCloudStreamnativeIoV1alpha2AWSSubscription Method for PatchCloudStreamnativ
 
 partially update the specified AWSSubscription
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the AWSSubscription
- @return ApiPatchCloudStreamnativeIoV1alpha2AWSSubscriptionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the AWSSubscription
+	@return ApiPatchCloudStreamnativeIoV1alpha2AWSSubscriptionRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) PatchCloudStreamnativeIoV1alpha2AWSSubscription(ctx context.Context, name string) ApiPatchCloudStreamnativeIoV1alpha2AWSSubscriptionRequest {
 	return ApiPatchCloudStreamnativeIoV1alpha2AWSSubscriptionRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
+		ctx:        ctx,
+		name:       name,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
 func (a *CloudStreamnativeIoV1alpha2ApiService) PatchCloudStreamnativeIoV1alpha2AWSSubscriptionExecute(r ApiPatchCloudStreamnativeIoV1alpha2AWSSubscriptionRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPatch
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.PatchCloudStreamnativeIoV1alpha2AWSSubscription")
@@ -7601,14 +7643,14 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) PatchCloudStreamnativeIoV1alpha2
 }
 
 type ApiPatchCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	body *map[string]interface{}
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *CloudStreamnativeIoV1alpha2ApiService
+	name         string
+	body         *map[string]interface{}
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
-	force *bool
+	force        *bool
 }
 
 func (r ApiPatchCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest) Body(body map[string]interface{}) ApiPatchCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest {
@@ -7649,26 +7691,27 @@ PatchCloudStreamnativeIoV1alpha2AWSSubscriptionStatus Method for PatchCloudStrea
 
 partially update status of the specified AWSSubscription
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the AWSSubscription
- @return ApiPatchCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the AWSSubscription
+	@return ApiPatchCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) PatchCloudStreamnativeIoV1alpha2AWSSubscriptionStatus(ctx context.Context, name string) ApiPatchCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest {
 	return ApiPatchCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
+		ctx:        ctx,
+		name:       name,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
 func (a *CloudStreamnativeIoV1alpha2ApiService) PatchCloudStreamnativeIoV1alpha2AWSSubscriptionStatusExecute(r ApiPatchCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPatch
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.PatchCloudStreamnativeIoV1alpha2AWSSubscriptionStatus")
@@ -7755,15 +7798,15 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) PatchCloudStreamnativeIoV1alpha2
 }
 
 type ApiPatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	body *map[string]interface{}
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *CloudStreamnativeIoV1alpha2ApiService
+	name         string
+	namespace    string
+	body         *map[string]interface{}
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
-	force *bool
+	force        *bool
 }
 
 func (r ApiPatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest) Body(body map[string]interface{}) ApiPatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest {
@@ -7804,28 +7847,29 @@ PatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSet Method for PatchCloudStr
 
 partially update the specified BookKeeperSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the BookKeeperSet
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiPatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the BookKeeperSet
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiPatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) PatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSet(ctx context.Context, name string, namespace string) ApiPatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest {
 	return ApiPatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
 func (a *CloudStreamnativeIoV1alpha2ApiService) PatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetExecute(r ApiPatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPatch
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.PatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSet")
@@ -7913,15 +7957,15 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) PatchCloudStreamnativeIoV1alpha2
 }
 
 type ApiPatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	body *map[string]interface{}
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *CloudStreamnativeIoV1alpha2ApiService
+	name         string
+	namespace    string
+	body         *map[string]interface{}
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
-	force *bool
+	force        *bool
 }
 
 func (r ApiPatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest) Body(body map[string]interface{}) ApiPatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest {
@@ -7962,28 +8006,29 @@ PatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOption Method for PatchCl
 
 partially update the specified BookKeeperSetOption
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the BookKeeperSetOption
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiPatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the BookKeeperSetOption
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiPatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) PatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOption(ctx context.Context, name string, namespace string) ApiPatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest {
 	return ApiPatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
 func (a *CloudStreamnativeIoV1alpha2ApiService) PatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionExecute(r ApiPatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPatch
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.PatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOption")
@@ -8071,15 +8116,15 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) PatchCloudStreamnativeIoV1alpha2
 }
 
 type ApiPatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	body *map[string]interface{}
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *CloudStreamnativeIoV1alpha2ApiService
+	name         string
+	namespace    string
+	body         *map[string]interface{}
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
-	force *bool
+	force        *bool
 }
 
 func (r ApiPatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest) Body(body map[string]interface{}) ApiPatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest {
@@ -8120,28 +8165,29 @@ PatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatus Method for P
 
 partially update status of the specified BookKeeperSetOption
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the BookKeeperSetOption
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiPatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the BookKeeperSetOption
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiPatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) PatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatus(ctx context.Context, name string, namespace string) ApiPatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest {
 	return ApiPatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
 func (a *CloudStreamnativeIoV1alpha2ApiService) PatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusExecute(r ApiPatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPatch
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.PatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatus")
@@ -8229,15 +8275,15 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) PatchCloudStreamnativeIoV1alpha2
 }
 
 type ApiPatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	body *map[string]interface{}
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *CloudStreamnativeIoV1alpha2ApiService
+	name         string
+	namespace    string
+	body         *map[string]interface{}
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
-	force *bool
+	force        *bool
 }
 
 func (r ApiPatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest) Body(body map[string]interface{}) ApiPatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest {
@@ -8278,28 +8324,29 @@ PatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatus Method for PatchCl
 
 partially update status of the specified BookKeeperSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the BookKeeperSet
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiPatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the BookKeeperSet
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiPatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) PatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatus(ctx context.Context, name string, namespace string) ApiPatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest {
 	return ApiPatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
 func (a *CloudStreamnativeIoV1alpha2ApiService) PatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusExecute(r ApiPatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPatch
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.PatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatus")
@@ -8387,15 +8434,15 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) PatchCloudStreamnativeIoV1alpha2
 }
 
 type ApiPatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	body *map[string]interface{}
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *CloudStreamnativeIoV1alpha2ApiService
+	name         string
+	namespace    string
+	body         *map[string]interface{}
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
-	force *bool
+	force        *bool
 }
 
 func (r ApiPatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest) Body(body map[string]interface{}) ApiPatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest {
@@ -8436,28 +8483,29 @@ PatchCloudStreamnativeIoV1alpha2NamespacedMonitorSet Method for PatchCloudStream
 
 partially update the specified MonitorSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the MonitorSet
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiPatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the MonitorSet
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiPatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) PatchCloudStreamnativeIoV1alpha2NamespacedMonitorSet(ctx context.Context, name string, namespace string) ApiPatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest {
 	return ApiPatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
 func (a *CloudStreamnativeIoV1alpha2ApiService) PatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetExecute(r ApiPatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPatch
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.PatchCloudStreamnativeIoV1alpha2NamespacedMonitorSet")
@@ -8545,15 +8593,15 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) PatchCloudStreamnativeIoV1alpha2
 }
 
 type ApiPatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	body *map[string]interface{}
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *CloudStreamnativeIoV1alpha2ApiService
+	name         string
+	namespace    string
+	body         *map[string]interface{}
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
-	force *bool
+	force        *bool
 }
 
 func (r ApiPatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest) Body(body map[string]interface{}) ApiPatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest {
@@ -8594,28 +8642,29 @@ PatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatus Method for PatchCloud
 
 partially update status of the specified MonitorSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the MonitorSet
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiPatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the MonitorSet
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiPatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) PatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatus(ctx context.Context, name string, namespace string) ApiPatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest {
 	return ApiPatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
 func (a *CloudStreamnativeIoV1alpha2ApiService) PatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusExecute(r ApiPatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPatch
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.PatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatus")
@@ -8703,15 +8752,15 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) PatchCloudStreamnativeIoV1alpha2
 }
 
 type ApiPatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	body *map[string]interface{}
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *CloudStreamnativeIoV1alpha2ApiService
+	name         string
+	namespace    string
+	body         *map[string]interface{}
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
-	force *bool
+	force        *bool
 }
 
 func (r ApiPatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest) Body(body map[string]interface{}) ApiPatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest {
@@ -8752,28 +8801,29 @@ PatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSet Method for PatchCloudStre
 
 partially update the specified ZooKeeperSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the ZooKeeperSet
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiPatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the ZooKeeperSet
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiPatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) PatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSet(ctx context.Context, name string, namespace string) ApiPatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest {
 	return ApiPatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
 func (a *CloudStreamnativeIoV1alpha2ApiService) PatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetExecute(r ApiPatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPatch
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.PatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSet")
@@ -8861,15 +8911,15 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) PatchCloudStreamnativeIoV1alpha2
 }
 
 type ApiPatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	body *map[string]interface{}
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *CloudStreamnativeIoV1alpha2ApiService
+	name         string
+	namespace    string
+	body         *map[string]interface{}
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
-	force *bool
+	force        *bool
 }
 
 func (r ApiPatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest) Body(body map[string]interface{}) ApiPatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest {
@@ -8910,28 +8960,29 @@ PatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOption Method for PatchClo
 
 partially update the specified ZooKeeperSetOption
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the ZooKeeperSetOption
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiPatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the ZooKeeperSetOption
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiPatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) PatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOption(ctx context.Context, name string, namespace string) ApiPatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest {
 	return ApiPatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
 func (a *CloudStreamnativeIoV1alpha2ApiService) PatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionExecute(r ApiPatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPatch
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.PatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOption")
@@ -9019,15 +9070,15 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) PatchCloudStreamnativeIoV1alpha2
 }
 
 type ApiPatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	body *map[string]interface{}
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *CloudStreamnativeIoV1alpha2ApiService
+	name         string
+	namespace    string
+	body         *map[string]interface{}
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
-	force *bool
+	force        *bool
 }
 
 func (r ApiPatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest) Body(body map[string]interface{}) ApiPatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest {
@@ -9068,28 +9119,29 @@ PatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatus Method for Pa
 
 partially update status of the specified ZooKeeperSetOption
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the ZooKeeperSetOption
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiPatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the ZooKeeperSetOption
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiPatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) PatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatus(ctx context.Context, name string, namespace string) ApiPatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest {
 	return ApiPatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
 func (a *CloudStreamnativeIoV1alpha2ApiService) PatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusExecute(r ApiPatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPatch
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.PatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatus")
@@ -9177,15 +9229,15 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) PatchCloudStreamnativeIoV1alpha2
 }
 
 type ApiPatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	body *map[string]interface{}
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *CloudStreamnativeIoV1alpha2ApiService
+	name         string
+	namespace    string
+	body         *map[string]interface{}
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
-	force *bool
+	force        *bool
 }
 
 func (r ApiPatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest) Body(body map[string]interface{}) ApiPatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest {
@@ -9226,28 +9278,29 @@ PatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatus Method for PatchClo
 
 partially update status of the specified ZooKeeperSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the ZooKeeperSet
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiPatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the ZooKeeperSet
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiPatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) PatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatus(ctx context.Context, name string, namespace string) ApiPatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest {
 	return ApiPatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
 func (a *CloudStreamnativeIoV1alpha2ApiService) PatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusExecute(r ApiPatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPatch
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.PatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatus")
@@ -9335,10 +9388,10 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) PatchCloudStreamnativeIoV1alpha2
 }
 
 type ApiReadCloudStreamnativeIoV1alpha2AWSSubscriptionRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	pretty *string
+	name       string
+	pretty     *string
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -9356,26 +9409,27 @@ ReadCloudStreamnativeIoV1alpha2AWSSubscription Method for ReadCloudStreamnativeI
 
 read the specified AWSSubscription
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the AWSSubscription
- @return ApiReadCloudStreamnativeIoV1alpha2AWSSubscriptionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the AWSSubscription
+	@return ApiReadCloudStreamnativeIoV1alpha2AWSSubscriptionRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReadCloudStreamnativeIoV1alpha2AWSSubscription(ctx context.Context, name string) ApiReadCloudStreamnativeIoV1alpha2AWSSubscriptionRequest {
 	return ApiReadCloudStreamnativeIoV1alpha2AWSSubscriptionRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
+		ctx:        ctx,
+		name:       name,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReadCloudStreamnativeIoV1alpha2AWSSubscriptionExecute(r ApiReadCloudStreamnativeIoV1alpha2AWSSubscriptionRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.ReadCloudStreamnativeIoV1alpha2AWSSubscription")
@@ -9448,10 +9502,10 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) ReadCloudStreamnativeIoV1alpha2A
 }
 
 type ApiReadCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	pretty *string
+	name       string
+	pretty     *string
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -9469,26 +9523,27 @@ ReadCloudStreamnativeIoV1alpha2AWSSubscriptionStatus Method for ReadCloudStreamn
 
 read status of the specified AWSSubscription
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the AWSSubscription
- @return ApiReadCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the AWSSubscription
+	@return ApiReadCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReadCloudStreamnativeIoV1alpha2AWSSubscriptionStatus(ctx context.Context, name string) ApiReadCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest {
 	return ApiReadCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
+		ctx:        ctx,
+		name:       name,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReadCloudStreamnativeIoV1alpha2AWSSubscriptionStatusExecute(r ApiReadCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.ReadCloudStreamnativeIoV1alpha2AWSSubscriptionStatus")
@@ -9561,11 +9616,11 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) ReadCloudStreamnativeIoV1alpha2A
 }
 
 type ApiReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	pretty *string
+	name       string
+	namespace  string
+	pretty     *string
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -9583,28 +9638,29 @@ ReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSet Method for ReadCloudStrea
 
 read the specified BookKeeperSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the BookKeeperSet
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the BookKeeperSet
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSet(ctx context.Context, name string, namespace string) ApiReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest {
 	return ApiReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetExecute(r ApiReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.ReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSet")
@@ -9678,11 +9734,11 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) ReadCloudStreamnativeIoV1alpha2N
 }
 
 type ApiReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	pretty *string
+	name       string
+	namespace  string
+	pretty     *string
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -9700,28 +9756,29 @@ ReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOption Method for ReadClou
 
 read the specified BookKeeperSetOption
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the BookKeeperSetOption
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the BookKeeperSetOption
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOption(ctx context.Context, name string, namespace string) ApiReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest {
 	return ApiReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionExecute(r ApiReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.ReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOption")
@@ -9795,11 +9852,11 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) ReadCloudStreamnativeIoV1alpha2N
 }
 
 type ApiReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	pretty *string
+	name       string
+	namespace  string
+	pretty     *string
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -9817,28 +9874,29 @@ ReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatus Method for Re
 
 read status of the specified BookKeeperSetOption
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the BookKeeperSetOption
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the BookKeeperSetOption
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatus(ctx context.Context, name string, namespace string) ApiReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest {
 	return ApiReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusExecute(r ApiReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.ReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatus")
@@ -9912,11 +9970,11 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) ReadCloudStreamnativeIoV1alpha2N
 }
 
 type ApiReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	pretty *string
+	name       string
+	namespace  string
+	pretty     *string
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -9934,28 +9992,29 @@ ReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatus Method for ReadClou
 
 read status of the specified BookKeeperSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the BookKeeperSet
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the BookKeeperSet
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatus(ctx context.Context, name string, namespace string) ApiReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest {
 	return ApiReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusExecute(r ApiReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.ReadCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatus")
@@ -10029,11 +10088,11 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) ReadCloudStreamnativeIoV1alpha2N
 }
 
 type ApiReadCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	pretty *string
+	name       string
+	namespace  string
+	pretty     *string
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -10051,28 +10110,29 @@ ReadCloudStreamnativeIoV1alpha2NamespacedMonitorSet Method for ReadCloudStreamna
 
 read the specified MonitorSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the MonitorSet
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiReadCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the MonitorSet
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiReadCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReadCloudStreamnativeIoV1alpha2NamespacedMonitorSet(ctx context.Context, name string, namespace string) ApiReadCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest {
 	return ApiReadCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReadCloudStreamnativeIoV1alpha2NamespacedMonitorSetExecute(r ApiReadCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.ReadCloudStreamnativeIoV1alpha2NamespacedMonitorSet")
@@ -10146,11 +10206,11 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) ReadCloudStreamnativeIoV1alpha2N
 }
 
 type ApiReadCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	pretty *string
+	name       string
+	namespace  string
+	pretty     *string
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -10168,28 +10228,29 @@ ReadCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatus Method for ReadCloudSt
 
 read status of the specified MonitorSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the MonitorSet
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiReadCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the MonitorSet
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiReadCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReadCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatus(ctx context.Context, name string, namespace string) ApiReadCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest {
 	return ApiReadCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReadCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusExecute(r ApiReadCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.ReadCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatus")
@@ -10263,11 +10324,11 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) ReadCloudStreamnativeIoV1alpha2N
 }
 
 type ApiReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	pretty *string
+	name       string
+	namespace  string
+	pretty     *string
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -10285,28 +10346,29 @@ ReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSet Method for ReadCloudStream
 
 read the specified ZooKeeperSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the ZooKeeperSet
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the ZooKeeperSet
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSet(ctx context.Context, name string, namespace string) ApiReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest {
 	return ApiReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetExecute(r ApiReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.ReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSet")
@@ -10380,11 +10442,11 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) ReadCloudStreamnativeIoV1alpha2N
 }
 
 type ApiReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	pretty *string
+	name       string
+	namespace  string
+	pretty     *string
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -10402,28 +10464,29 @@ ReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOption Method for ReadCloud
 
 read the specified ZooKeeperSetOption
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the ZooKeeperSetOption
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the ZooKeeperSetOption
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOption(ctx context.Context, name string, namespace string) ApiReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest {
 	return ApiReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionExecute(r ApiReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.ReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOption")
@@ -10497,11 +10560,11 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) ReadCloudStreamnativeIoV1alpha2N
 }
 
 type ApiReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	pretty *string
+	name       string
+	namespace  string
+	pretty     *string
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -10519,28 +10582,29 @@ ReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatus Method for Rea
 
 read status of the specified ZooKeeperSetOption
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the ZooKeeperSetOption
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the ZooKeeperSetOption
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatus(ctx context.Context, name string, namespace string) ApiReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest {
 	return ApiReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusExecute(r ApiReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.ReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatus")
@@ -10614,11 +10678,11 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) ReadCloudStreamnativeIoV1alpha2N
 }
 
 type ApiReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	pretty *string
+	name       string
+	namespace  string
+	pretty     *string
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -10636,28 +10700,29 @@ ReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatus Method for ReadCloud
 
 read status of the specified ZooKeeperSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the ZooKeeperSet
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the ZooKeeperSet
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatus(ctx context.Context, name string, namespace string) ApiReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest {
 	return ApiReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusExecute(r ApiReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.ReadCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatus")
@@ -10731,12 +10796,12 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) ReadCloudStreamnativeIoV1alpha2N
 }
 
 type ApiReplaceCloudStreamnativeIoV1alpha2AWSSubscriptionRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	body *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *CloudStreamnativeIoV1alpha2ApiService
+	name         string
+	body         *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
 }
 
@@ -10772,26 +10837,27 @@ ReplaceCloudStreamnativeIoV1alpha2AWSSubscription Method for ReplaceCloudStreamn
 
 replace the specified AWSSubscription
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the AWSSubscription
- @return ApiReplaceCloudStreamnativeIoV1alpha2AWSSubscriptionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the AWSSubscription
+	@return ApiReplaceCloudStreamnativeIoV1alpha2AWSSubscriptionRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReplaceCloudStreamnativeIoV1alpha2AWSSubscription(ctx context.Context, name string) ApiReplaceCloudStreamnativeIoV1alpha2AWSSubscriptionRequest {
 	return ApiReplaceCloudStreamnativeIoV1alpha2AWSSubscriptionRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
+		ctx:        ctx,
+		name:       name,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReplaceCloudStreamnativeIoV1alpha2AWSSubscriptionExecute(r ApiReplaceCloudStreamnativeIoV1alpha2AWSSubscriptionRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.ReplaceCloudStreamnativeIoV1alpha2AWSSubscription")
@@ -10875,12 +10941,12 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) ReplaceCloudStreamnativeIoV1alph
 }
 
 type ApiReplaceCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	body *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *CloudStreamnativeIoV1alpha2ApiService
+	name         string
+	body         *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
 }
 
@@ -10916,26 +10982,27 @@ ReplaceCloudStreamnativeIoV1alpha2AWSSubscriptionStatus Method for ReplaceCloudS
 
 replace status of the specified AWSSubscription
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the AWSSubscription
- @return ApiReplaceCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the AWSSubscription
+	@return ApiReplaceCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReplaceCloudStreamnativeIoV1alpha2AWSSubscriptionStatus(ctx context.Context, name string) ApiReplaceCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest {
 	return ApiReplaceCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
+		ctx:        ctx,
+		name:       name,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReplaceCloudStreamnativeIoV1alpha2AWSSubscriptionStatusExecute(r ApiReplaceCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscription
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.ReplaceCloudStreamnativeIoV1alpha2AWSSubscriptionStatus")
@@ -11019,13 +11086,13 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) ReplaceCloudStreamnativeIoV1alph
 }
 
 type ApiReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	body *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *CloudStreamnativeIoV1alpha2ApiService
+	name         string
+	namespace    string
+	body         *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
 }
 
@@ -11061,28 +11128,29 @@ ReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSet Method for ReplaceClou
 
 replace the specified BookKeeperSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the BookKeeperSet
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the BookKeeperSet
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSet(ctx context.Context, name string, namespace string) ApiReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest {
 	return ApiReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetExecute(r ApiReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.ReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSet")
@@ -11167,13 +11235,13 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) ReplaceCloudStreamnativeIoV1alph
 }
 
 type ApiReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	body *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *CloudStreamnativeIoV1alpha2ApiService
+	name         string
+	namespace    string
+	body         *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
 }
 
@@ -11209,28 +11277,29 @@ ReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOption Method for Repla
 
 replace the specified BookKeeperSetOption
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the BookKeeperSetOption
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the BookKeeperSetOption
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOption(ctx context.Context, name string, namespace string) ApiReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest {
 	return ApiReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionExecute(r ApiReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.ReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOption")
@@ -11315,13 +11384,13 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) ReplaceCloudStreamnativeIoV1alph
 }
 
 type ApiReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	body *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *CloudStreamnativeIoV1alpha2ApiService
+	name         string
+	namespace    string
+	body         *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
 }
 
@@ -11357,28 +11426,29 @@ ReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatus Method for
 
 replace status of the specified BookKeeperSetOption
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the BookKeeperSetOption
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the BookKeeperSetOption
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatus(ctx context.Context, name string, namespace string) ApiReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest {
 	return ApiReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusExecute(r ApiReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetOption
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.ReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatus")
@@ -11463,13 +11533,13 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) ReplaceCloudStreamnativeIoV1alph
 }
 
 type ApiReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	body *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *CloudStreamnativeIoV1alpha2ApiService
+	name         string
+	namespace    string
+	body         *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
 }
 
@@ -11505,28 +11575,29 @@ ReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatus Method for Repla
 
 replace status of the specified BookKeeperSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the BookKeeperSet
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the BookKeeperSet
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatus(ctx context.Context, name string, namespace string) ApiReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest {
 	return ApiReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusExecute(r ApiReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSet
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.ReplaceCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatus")
@@ -11611,13 +11682,13 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) ReplaceCloudStreamnativeIoV1alph
 }
 
 type ApiReplaceCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	body *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *CloudStreamnativeIoV1alpha2ApiService
+	name         string
+	namespace    string
+	body         *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
 }
 
@@ -11653,28 +11724,29 @@ ReplaceCloudStreamnativeIoV1alpha2NamespacedMonitorSet Method for ReplaceCloudSt
 
 replace the specified MonitorSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the MonitorSet
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiReplaceCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the MonitorSet
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiReplaceCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReplaceCloudStreamnativeIoV1alpha2NamespacedMonitorSet(ctx context.Context, name string, namespace string) ApiReplaceCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest {
 	return ApiReplaceCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReplaceCloudStreamnativeIoV1alpha2NamespacedMonitorSetExecute(r ApiReplaceCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.ReplaceCloudStreamnativeIoV1alpha2NamespacedMonitorSet")
@@ -11759,13 +11831,13 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) ReplaceCloudStreamnativeIoV1alph
 }
 
 type ApiReplaceCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	body *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *CloudStreamnativeIoV1alpha2ApiService
+	name         string
+	namespace    string
+	body         *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
 }
 
@@ -11801,28 +11873,29 @@ ReplaceCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatus Method for ReplaceC
 
 replace status of the specified MonitorSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the MonitorSet
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiReplaceCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the MonitorSet
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiReplaceCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReplaceCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatus(ctx context.Context, name string, namespace string) ApiReplaceCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest {
 	return ApiReplaceCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReplaceCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusExecute(r ApiReplaceCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSet
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.ReplaceCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatus")
@@ -11907,13 +11980,13 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) ReplaceCloudStreamnativeIoV1alph
 }
 
 type ApiReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	body *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *CloudStreamnativeIoV1alpha2ApiService
+	name         string
+	namespace    string
+	body         *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
 }
 
@@ -11949,28 +12022,29 @@ ReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSet Method for ReplaceCloud
 
 replace the specified ZooKeeperSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the ZooKeeperSet
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the ZooKeeperSet
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSet(ctx context.Context, name string, namespace string) ApiReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest {
 	return ApiReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetExecute(r ApiReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.ReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSet")
@@ -12055,13 +12129,13 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) ReplaceCloudStreamnativeIoV1alph
 }
 
 type ApiReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	body *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *CloudStreamnativeIoV1alpha2ApiService
+	name         string
+	namespace    string
+	body         *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
 }
 
@@ -12097,28 +12171,29 @@ ReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOption Method for Replac
 
 replace the specified ZooKeeperSetOption
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the ZooKeeperSetOption
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the ZooKeeperSetOption
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOption(ctx context.Context, name string, namespace string) ApiReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest {
 	return ApiReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionExecute(r ApiReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.ReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOption")
@@ -12203,13 +12278,13 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) ReplaceCloudStreamnativeIoV1alph
 }
 
 type ApiReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	body *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *CloudStreamnativeIoV1alpha2ApiService
+	name         string
+	namespace    string
+	body         *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
 }
 
@@ -12245,28 +12320,29 @@ ReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatus Method for 
 
 replace status of the specified ZooKeeperSetOption
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the ZooKeeperSetOption
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the ZooKeeperSetOption
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatus(ctx context.Context, name string, namespace string) ApiReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest {
 	return ApiReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusExecute(r ApiReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetOption
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.ReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatus")
@@ -12351,13 +12427,13 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) ReplaceCloudStreamnativeIoV1alph
 }
 
 type ApiReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	body *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *CloudStreamnativeIoV1alpha2ApiService
+	name         string
+	namespace    string
+	body         *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
 }
 
@@ -12393,28 +12469,29 @@ ReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatus Method for Replac
 
 replace status of the specified ZooKeeperSet
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the ZooKeeperSet
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the ZooKeeperSet
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatus(ctx context.Context, name string, namespace string) ApiReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest {
 	return ApiReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
 func (a *CloudStreamnativeIoV1alpha2ApiService) ReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusExecute(r ApiReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSet
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.ReplaceCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatus")
@@ -12499,19 +12576,19 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) ReplaceCloudStreamnativeIoV1alph
 }
 
 type ApiWatchCloudStreamnativeIoV1alpha2AWSSubscriptionRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	name                 string
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -12583,26 +12660,27 @@ WatchCloudStreamnativeIoV1alpha2AWSSubscription Method for WatchCloudStreamnativ
 
 watch changes to an object of kind AWSSubscription. deprecated: use the 'watch' parameter with a list operation instead, filtered to a single item with the 'fieldSelector' parameter.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the AWSSubscription
- @return ApiWatchCloudStreamnativeIoV1alpha2AWSSubscriptionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the AWSSubscription
+	@return ApiWatchCloudStreamnativeIoV1alpha2AWSSubscriptionRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2AWSSubscription(ctx context.Context, name string) ApiWatchCloudStreamnativeIoV1alpha2AWSSubscriptionRequest {
 	return ApiWatchCloudStreamnativeIoV1alpha2AWSSubscriptionRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
+		ctx:        ctx,
+		name:       name,
 	}
 }
 
 // Execute executes the request
-//  @return V1WatchEvent
+//
+//	@return V1WatchEvent
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2AWSSubscriptionExecute(r ApiWatchCloudStreamnativeIoV1alpha2AWSSubscriptionRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1WatchEvent
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.WatchCloudStreamnativeIoV1alpha2AWSSubscription")
@@ -12702,18 +12780,18 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2
 }
 
 type ApiWatchCloudStreamnativeIoV1alpha2AWSSubscriptionListRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -12785,24 +12863,25 @@ WatchCloudStreamnativeIoV1alpha2AWSSubscriptionList Method for WatchCloudStreamn
 
 watch individual changes to a list of AWSSubscription. deprecated: use the 'watch' parameter with a list operation instead.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiWatchCloudStreamnativeIoV1alpha2AWSSubscriptionListRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiWatchCloudStreamnativeIoV1alpha2AWSSubscriptionListRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2AWSSubscriptionList(ctx context.Context) ApiWatchCloudStreamnativeIoV1alpha2AWSSubscriptionListRequest {
 	return ApiWatchCloudStreamnativeIoV1alpha2AWSSubscriptionListRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return V1WatchEvent
+//
+//	@return V1WatchEvent
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2AWSSubscriptionListExecute(r ApiWatchCloudStreamnativeIoV1alpha2AWSSubscriptionListRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1WatchEvent
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.WatchCloudStreamnativeIoV1alpha2AWSSubscriptionList")
@@ -12901,19 +12980,19 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2
 }
 
 type ApiWatchCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	name                 string
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -12985,26 +13064,27 @@ WatchCloudStreamnativeIoV1alpha2AWSSubscriptionStatus Method for WatchCloudStrea
 
 watch changes to status of an object of kind AWSSubscription. deprecated: use the 'watch' parameter with a list operation instead, filtered to a single item with the 'fieldSelector' parameter.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the AWSSubscription
- @return ApiWatchCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the AWSSubscription
+	@return ApiWatchCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2AWSSubscriptionStatus(ctx context.Context, name string) ApiWatchCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest {
 	return ApiWatchCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
+		ctx:        ctx,
+		name:       name,
 	}
 }
 
 // Execute executes the request
-//  @return V1WatchEvent
+//
+//	@return V1WatchEvent
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2AWSSubscriptionStatusExecute(r ApiWatchCloudStreamnativeIoV1alpha2AWSSubscriptionStatusRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1WatchEvent
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.WatchCloudStreamnativeIoV1alpha2AWSSubscriptionStatus")
@@ -13104,18 +13184,18 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2
 }
 
 type ApiWatchCloudStreamnativeIoV1alpha2BookKeeperSetListForAllNamespacesRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -13187,24 +13267,25 @@ WatchCloudStreamnativeIoV1alpha2BookKeeperSetListForAllNamespaces Method for Wat
 
 watch individual changes to a list of BookKeeperSet. deprecated: use the 'watch' parameter with a list operation instead.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiWatchCloudStreamnativeIoV1alpha2BookKeeperSetListForAllNamespacesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiWatchCloudStreamnativeIoV1alpha2BookKeeperSetListForAllNamespacesRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2BookKeeperSetListForAllNamespaces(ctx context.Context) ApiWatchCloudStreamnativeIoV1alpha2BookKeeperSetListForAllNamespacesRequest {
 	return ApiWatchCloudStreamnativeIoV1alpha2BookKeeperSetListForAllNamespacesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return V1WatchEvent
+//
+//	@return V1WatchEvent
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2BookKeeperSetListForAllNamespacesExecute(r ApiWatchCloudStreamnativeIoV1alpha2BookKeeperSetListForAllNamespacesRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1WatchEvent
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.WatchCloudStreamnativeIoV1alpha2BookKeeperSetListForAllNamespaces")
@@ -13303,18 +13384,18 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2
 }
 
 type ApiWatchCloudStreamnativeIoV1alpha2BookKeeperSetOptionListForAllNamespacesRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -13386,24 +13467,25 @@ WatchCloudStreamnativeIoV1alpha2BookKeeperSetOptionListForAllNamespaces Method f
 
 watch individual changes to a list of BookKeeperSetOption. deprecated: use the 'watch' parameter with a list operation instead.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiWatchCloudStreamnativeIoV1alpha2BookKeeperSetOptionListForAllNamespacesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiWatchCloudStreamnativeIoV1alpha2BookKeeperSetOptionListForAllNamespacesRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2BookKeeperSetOptionListForAllNamespaces(ctx context.Context) ApiWatchCloudStreamnativeIoV1alpha2BookKeeperSetOptionListForAllNamespacesRequest {
 	return ApiWatchCloudStreamnativeIoV1alpha2BookKeeperSetOptionListForAllNamespacesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return V1WatchEvent
+//
+//	@return V1WatchEvent
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2BookKeeperSetOptionListForAllNamespacesExecute(r ApiWatchCloudStreamnativeIoV1alpha2BookKeeperSetOptionListForAllNamespacesRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1WatchEvent
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.WatchCloudStreamnativeIoV1alpha2BookKeeperSetOptionListForAllNamespaces")
@@ -13502,18 +13584,18 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2
 }
 
 type ApiWatchCloudStreamnativeIoV1alpha2MonitorSetListForAllNamespacesRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -13585,24 +13667,25 @@ WatchCloudStreamnativeIoV1alpha2MonitorSetListForAllNamespaces Method for WatchC
 
 watch individual changes to a list of MonitorSet. deprecated: use the 'watch' parameter with a list operation instead.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiWatchCloudStreamnativeIoV1alpha2MonitorSetListForAllNamespacesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiWatchCloudStreamnativeIoV1alpha2MonitorSetListForAllNamespacesRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2MonitorSetListForAllNamespaces(ctx context.Context) ApiWatchCloudStreamnativeIoV1alpha2MonitorSetListForAllNamespacesRequest {
 	return ApiWatchCloudStreamnativeIoV1alpha2MonitorSetListForAllNamespacesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return V1WatchEvent
+//
+//	@return V1WatchEvent
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2MonitorSetListForAllNamespacesExecute(r ApiWatchCloudStreamnativeIoV1alpha2MonitorSetListForAllNamespacesRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1WatchEvent
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.WatchCloudStreamnativeIoV1alpha2MonitorSetListForAllNamespaces")
@@ -13701,20 +13784,20 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2
 }
 
 type ApiWatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	name                 string
+	namespace            string
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -13786,28 +13869,29 @@ WatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSet Method for WatchCloudStr
 
 watch changes to an object of kind BookKeeperSet. deprecated: use the 'watch' parameter with a list operation instead, filtered to a single item with the 'fieldSelector' parameter.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the BookKeeperSet
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiWatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the BookKeeperSet
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiWatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSet(ctx context.Context, name string, namespace string) ApiWatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest {
 	return ApiWatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1WatchEvent
+//
+//	@return V1WatchEvent
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetExecute(r ApiWatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1WatchEvent
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.WatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSet")
@@ -13908,19 +13992,19 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2
 }
 
 type ApiWatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetListRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	namespace string
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	namespace            string
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -13992,26 +14076,27 @@ WatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetList Method for WatchClou
 
 watch individual changes to a list of BookKeeperSet. deprecated: use the 'watch' parameter with a list operation instead.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiWatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetListRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiWatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetListRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetList(ctx context.Context, namespace string) ApiWatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetListRequest {
 	return ApiWatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetListRequest{
 		ApiService: a,
-		ctx: ctx,
-		namespace: namespace,
+		ctx:        ctx,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1WatchEvent
+//
+//	@return V1WatchEvent
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetListExecute(r ApiWatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetListRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1WatchEvent
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.WatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetList")
@@ -14111,20 +14196,20 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2
 }
 
 type ApiWatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	name                 string
+	namespace            string
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -14196,28 +14281,29 @@ WatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOption Method for WatchCl
 
 watch changes to an object of kind BookKeeperSetOption. deprecated: use the 'watch' parameter with a list operation instead, filtered to a single item with the 'fieldSelector' parameter.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the BookKeeperSetOption
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiWatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the BookKeeperSetOption
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiWatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOption(ctx context.Context, name string, namespace string) ApiWatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest {
 	return ApiWatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1WatchEvent
+//
+//	@return V1WatchEvent
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionExecute(r ApiWatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1WatchEvent
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.WatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOption")
@@ -14318,19 +14404,19 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2
 }
 
 type ApiWatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionListRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	namespace string
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	namespace            string
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -14402,26 +14488,27 @@ WatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionList Method for Wat
 
 watch individual changes to a list of BookKeeperSetOption. deprecated: use the 'watch' parameter with a list operation instead.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiWatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionListRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiWatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionListRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionList(ctx context.Context, namespace string) ApiWatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionListRequest {
 	return ApiWatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionListRequest{
 		ApiService: a,
-		ctx: ctx,
-		namespace: namespace,
+		ctx:        ctx,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1WatchEvent
+//
+//	@return V1WatchEvent
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionListExecute(r ApiWatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionListRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1WatchEvent
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.WatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionList")
@@ -14521,20 +14608,20 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2
 }
 
 type ApiWatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	name                 string
+	namespace            string
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -14606,28 +14693,29 @@ WatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatus Method for W
 
 watch changes to status of an object of kind BookKeeperSetOption. deprecated: use the 'watch' parameter with a list operation instead, filtered to a single item with the 'fieldSelector' parameter.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the BookKeeperSetOption
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiWatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the BookKeeperSetOption
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiWatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatus(ctx context.Context, name string, namespace string) ApiWatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest {
 	return ApiWatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1WatchEvent
+//
+//	@return V1WatchEvent
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusExecute(r ApiWatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatusRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1WatchEvent
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.WatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetOptionStatus")
@@ -14728,20 +14816,20 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2
 }
 
 type ApiWatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	name                 string
+	namespace            string
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -14813,28 +14901,29 @@ WatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatus Method for WatchCl
 
 watch changes to status of an object of kind BookKeeperSet. deprecated: use the 'watch' parameter with a list operation instead, filtered to a single item with the 'fieldSelector' parameter.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the BookKeeperSet
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiWatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the BookKeeperSet
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiWatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatus(ctx context.Context, name string, namespace string) ApiWatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest {
 	return ApiWatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1WatchEvent
+//
+//	@return V1WatchEvent
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusExecute(r ApiWatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatusRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1WatchEvent
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.WatchCloudStreamnativeIoV1alpha2NamespacedBookKeeperSetStatus")
@@ -14935,20 +15024,20 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2
 }
 
 type ApiWatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	name                 string
+	namespace            string
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -15020,28 +15109,29 @@ WatchCloudStreamnativeIoV1alpha2NamespacedMonitorSet Method for WatchCloudStream
 
 watch changes to an object of kind MonitorSet. deprecated: use the 'watch' parameter with a list operation instead, filtered to a single item with the 'fieldSelector' parameter.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the MonitorSet
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiWatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the MonitorSet
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiWatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2NamespacedMonitorSet(ctx context.Context, name string, namespace string) ApiWatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest {
 	return ApiWatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1WatchEvent
+//
+//	@return V1WatchEvent
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetExecute(r ApiWatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1WatchEvent
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.WatchCloudStreamnativeIoV1alpha2NamespacedMonitorSet")
@@ -15142,19 +15232,19 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2
 }
 
 type ApiWatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetListRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	namespace string
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	namespace            string
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -15226,26 +15316,27 @@ WatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetList Method for WatchCloudSt
 
 watch individual changes to a list of MonitorSet. deprecated: use the 'watch' parameter with a list operation instead.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiWatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetListRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiWatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetListRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetList(ctx context.Context, namespace string) ApiWatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetListRequest {
 	return ApiWatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetListRequest{
 		ApiService: a,
-		ctx: ctx,
-		namespace: namespace,
+		ctx:        ctx,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1WatchEvent
+//
+//	@return V1WatchEvent
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetListExecute(r ApiWatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetListRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1WatchEvent
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.WatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetList")
@@ -15345,20 +15436,20 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2
 }
 
 type ApiWatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	name                 string
+	namespace            string
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -15430,28 +15521,29 @@ WatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatus Method for WatchCloud
 
 watch changes to status of an object of kind MonitorSet. deprecated: use the 'watch' parameter with a list operation instead, filtered to a single item with the 'fieldSelector' parameter.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the MonitorSet
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiWatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the MonitorSet
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiWatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatus(ctx context.Context, name string, namespace string) ApiWatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest {
 	return ApiWatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1WatchEvent
+//
+//	@return V1WatchEvent
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusExecute(r ApiWatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatusRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1WatchEvent
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.WatchCloudStreamnativeIoV1alpha2NamespacedMonitorSetStatus")
@@ -15552,20 +15644,20 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2
 }
 
 type ApiWatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	name                 string
+	namespace            string
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -15637,28 +15729,29 @@ WatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSet Method for WatchCloudStre
 
 watch changes to an object of kind ZooKeeperSet. deprecated: use the 'watch' parameter with a list operation instead, filtered to a single item with the 'fieldSelector' parameter.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the ZooKeeperSet
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiWatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the ZooKeeperSet
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiWatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSet(ctx context.Context, name string, namespace string) ApiWatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest {
 	return ApiWatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1WatchEvent
+//
+//	@return V1WatchEvent
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetExecute(r ApiWatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1WatchEvent
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.WatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSet")
@@ -15759,19 +15852,19 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2
 }
 
 type ApiWatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetListRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	namespace string
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	namespace            string
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -15843,26 +15936,27 @@ WatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetList Method for WatchCloud
 
 watch individual changes to a list of ZooKeeperSet. deprecated: use the 'watch' parameter with a list operation instead.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiWatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetListRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiWatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetListRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetList(ctx context.Context, namespace string) ApiWatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetListRequest {
 	return ApiWatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetListRequest{
 		ApiService: a,
-		ctx: ctx,
-		namespace: namespace,
+		ctx:        ctx,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1WatchEvent
+//
+//	@return V1WatchEvent
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetListExecute(r ApiWatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetListRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1WatchEvent
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.WatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetList")
@@ -15962,20 +16056,20 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2
 }
 
 type ApiWatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	name                 string
+	namespace            string
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -16047,28 +16141,29 @@ WatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOption Method for WatchClo
 
 watch changes to an object of kind ZooKeeperSetOption. deprecated: use the 'watch' parameter with a list operation instead, filtered to a single item with the 'fieldSelector' parameter.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the ZooKeeperSetOption
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiWatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the ZooKeeperSetOption
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiWatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOption(ctx context.Context, name string, namespace string) ApiWatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest {
 	return ApiWatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1WatchEvent
+//
+//	@return V1WatchEvent
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionExecute(r ApiWatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1WatchEvent
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.WatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOption")
@@ -16169,19 +16264,19 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2
 }
 
 type ApiWatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionListRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	namespace string
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	namespace            string
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -16253,26 +16348,27 @@ WatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionList Method for Watc
 
 watch individual changes to a list of ZooKeeperSetOption. deprecated: use the 'watch' parameter with a list operation instead.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiWatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionListRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiWatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionListRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionList(ctx context.Context, namespace string) ApiWatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionListRequest {
 	return ApiWatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionListRequest{
 		ApiService: a,
-		ctx: ctx,
-		namespace: namespace,
+		ctx:        ctx,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1WatchEvent
+//
+//	@return V1WatchEvent
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionListExecute(r ApiWatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionListRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1WatchEvent
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.WatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionList")
@@ -16372,20 +16468,20 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2
 }
 
 type ApiWatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	name                 string
+	namespace            string
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -16457,28 +16553,29 @@ WatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatus Method for Wa
 
 watch changes to status of an object of kind ZooKeeperSetOption. deprecated: use the 'watch' parameter with a list operation instead, filtered to a single item with the 'fieldSelector' parameter.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the ZooKeeperSetOption
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiWatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the ZooKeeperSetOption
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiWatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatus(ctx context.Context, name string, namespace string) ApiWatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest {
 	return ApiWatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1WatchEvent
+//
+//	@return V1WatchEvent
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusExecute(r ApiWatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatusRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1WatchEvent
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.WatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetOptionStatus")
@@ -16579,20 +16676,20 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2
 }
 
 type ApiWatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	name string
-	namespace string
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	name                 string
+	namespace            string
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -16664,28 +16761,29 @@ WatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatus Method for WatchClo
 
 watch changes to status of an object of kind ZooKeeperSet. deprecated: use the 'watch' parameter with a list operation instead, filtered to a single item with the 'fieldSelector' parameter.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the ZooKeeperSet
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiWatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the ZooKeeperSet
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiWatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatus(ctx context.Context, name string, namespace string) ApiWatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest {
 	return ApiWatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1WatchEvent
+//
+//	@return V1WatchEvent
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusExecute(r ApiWatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatusRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1WatchEvent
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.WatchCloudStreamnativeIoV1alpha2NamespacedZooKeeperSetStatus")
@@ -16786,18 +16884,18 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2
 }
 
 type ApiWatchCloudStreamnativeIoV1alpha2ZooKeeperSetListForAllNamespacesRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -16869,24 +16967,25 @@ WatchCloudStreamnativeIoV1alpha2ZooKeeperSetListForAllNamespaces Method for Watc
 
 watch individual changes to a list of ZooKeeperSet. deprecated: use the 'watch' parameter with a list operation instead.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiWatchCloudStreamnativeIoV1alpha2ZooKeeperSetListForAllNamespacesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiWatchCloudStreamnativeIoV1alpha2ZooKeeperSetListForAllNamespacesRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2ZooKeeperSetListForAllNamespaces(ctx context.Context) ApiWatchCloudStreamnativeIoV1alpha2ZooKeeperSetListForAllNamespacesRequest {
 	return ApiWatchCloudStreamnativeIoV1alpha2ZooKeeperSetListForAllNamespacesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return V1WatchEvent
+//
+//	@return V1WatchEvent
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2ZooKeeperSetListForAllNamespacesExecute(r ApiWatchCloudStreamnativeIoV1alpha2ZooKeeperSetListForAllNamespacesRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1WatchEvent
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.WatchCloudStreamnativeIoV1alpha2ZooKeeperSetListForAllNamespaces")
@@ -16985,18 +17084,18 @@ func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2
 }
 
 type ApiWatchCloudStreamnativeIoV1alpha2ZooKeeperSetOptionListForAllNamespacesRequest struct {
-	ctx context.Context
-	ApiService *CloudStreamnativeIoV1alpha2ApiService
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *CloudStreamnativeIoV1alpha2ApiService
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -17068,24 +17167,25 @@ WatchCloudStreamnativeIoV1alpha2ZooKeeperSetOptionListForAllNamespaces Method fo
 
 watch individual changes to a list of ZooKeeperSetOption. deprecated: use the 'watch' parameter with a list operation instead.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiWatchCloudStreamnativeIoV1alpha2ZooKeeperSetOptionListForAllNamespacesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiWatchCloudStreamnativeIoV1alpha2ZooKeeperSetOptionListForAllNamespacesRequest
 */
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2ZooKeeperSetOptionListForAllNamespaces(ctx context.Context) ApiWatchCloudStreamnativeIoV1alpha2ZooKeeperSetOptionListForAllNamespacesRequest {
 	return ApiWatchCloudStreamnativeIoV1alpha2ZooKeeperSetOptionListForAllNamespacesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return V1WatchEvent
+//
+//	@return V1WatchEvent
 func (a *CloudStreamnativeIoV1alpha2ApiService) WatchCloudStreamnativeIoV1alpha2ZooKeeperSetOptionListForAllNamespacesExecute(r ApiWatchCloudStreamnativeIoV1alpha2ZooKeeperSetOptionListForAllNamespacesRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1WatchEvent
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha2ApiService.WatchCloudStreamnativeIoV1alpha2ZooKeeperSetOptionListForAllNamespaces")

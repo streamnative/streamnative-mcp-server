@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"encoding/json"
 	"fmt"
 	"math"
 	"testing"
@@ -93,9 +94,9 @@ func TestNumberConverter_ToMCPToolInputSchemaProperties(t *testing.T) {
 				assert.NoError(t, err)
 				var expectedTool = mcp.NewTool("test", tt.expectedProps...)
 				var actualTool = mcp.NewTool("test", props...)
-				expectedToolSchemaJSON, _ := expectedTool.InputSchema.MarshalJSON()
-				actualToolSchemaJSON, _ := actualTool.InputSchema.MarshalJSON()
-				assert.Equal(t, string(expectedToolSchemaJSON), string(actualToolSchemaJSON), "ToolOptions mismatch")
+				expectedToolSchemaJSON, _ := json.Marshal(expectedTool.InputSchema)
+				actualToolSchemaJSON, _ := json.Marshal(actualTool.InputSchema)
+				assert.JSONEq(t, string(expectedToolSchemaJSON), string(actualToolSchemaJSON), "ToolOptions mismatch")
 			}
 		})
 	}

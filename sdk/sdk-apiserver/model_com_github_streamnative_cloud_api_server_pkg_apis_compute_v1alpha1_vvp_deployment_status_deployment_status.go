@@ -34,7 +34,7 @@ import (
 // ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentStatusDeploymentStatus VvpDeploymentStatusDeploymentStatus defines the observed state of VvpDeployment
 type ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentStatusDeploymentStatus struct {
 	Running *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentRunningStatus `json:"running,omitempty"`
-	State *string `json:"state,omitempty"`
+	State   *string                                                                              `json:"state,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentStatusDeploymentStatus instantiates a new ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentStatusDeploymentStatus object
@@ -164,5 +164,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDep
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

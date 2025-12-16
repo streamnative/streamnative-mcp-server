@@ -128,5 +128,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemb
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

@@ -34,7 +34,7 @@ import (
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolOptionLocation struct for ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolOptionLocation
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolOptionLocation struct {
 	DisplayName *string `json:"displayName,omitempty"`
-	Location string `json:"location"`
+	Location    string  `json:"location"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolOptionLocation instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolOptionLocation object
@@ -157,5 +157,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolOpti
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

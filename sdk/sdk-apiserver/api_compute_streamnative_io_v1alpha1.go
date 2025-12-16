@@ -36,17 +36,16 @@ import (
 	"strings"
 )
 
-
 // ComputeStreamnativeIoV1alpha1ApiService ComputeStreamnativeIoV1alpha1Api service
 type ComputeStreamnativeIoV1alpha1ApiService service
 
 type ApiCreateComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest struct {
-	ctx context.Context
-	ApiService *ComputeStreamnativeIoV1alpha1ApiService
-	namespace string
-	body *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *ComputeStreamnativeIoV1alpha1ApiService
+	namespace    string
+	body         *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
 }
 
@@ -82,26 +81,27 @@ CreateComputeStreamnativeIoV1alpha1NamespacedFlinkDeployment Method for CreateCo
 
 create a FlinkDeployment
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiCreateComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiCreateComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest
 */
 func (a *ComputeStreamnativeIoV1alpha1ApiService) CreateComputeStreamnativeIoV1alpha1NamespacedFlinkDeployment(ctx context.Context, namespace string) ApiCreateComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest {
 	return ApiCreateComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest{
 		ApiService: a,
-		ctx: ctx,
-		namespace: namespace,
+		ctx:        ctx,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
 func (a *ComputeStreamnativeIoV1alpha1ApiService) CreateComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentExecute(r ApiCreateComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest) (*ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputeStreamnativeIoV1alpha1ApiService.CreateComputeStreamnativeIoV1alpha1NamespacedFlinkDeployment")
@@ -185,13 +185,13 @@ func (a *ComputeStreamnativeIoV1alpha1ApiService) CreateComputeStreamnativeIoV1a
 }
 
 type ApiCreateComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest struct {
-	ctx context.Context
-	ApiService *ComputeStreamnativeIoV1alpha1ApiService
-	name string
-	namespace string
-	body *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *ComputeStreamnativeIoV1alpha1ApiService
+	name         string
+	namespace    string
+	body         *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
 }
 
@@ -227,28 +227,29 @@ CreateComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatus Method for Cr
 
 create status of a FlinkDeployment
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the FlinkDeployment
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiCreateComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the FlinkDeployment
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiCreateComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest
 */
 func (a *ComputeStreamnativeIoV1alpha1ApiService) CreateComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatus(ctx context.Context, name string, namespace string) ApiCreateComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest {
 	return ApiCreateComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
 func (a *ComputeStreamnativeIoV1alpha1ApiService) CreateComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusExecute(r ApiCreateComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputeStreamnativeIoV1alpha1ApiService.CreateComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatus")
@@ -333,12 +334,12 @@ func (a *ComputeStreamnativeIoV1alpha1ApiService) CreateComputeStreamnativeIoV1a
 }
 
 type ApiCreateComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest struct {
-	ctx context.Context
-	ApiService *ComputeStreamnativeIoV1alpha1ApiService
-	namespace string
-	body *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *ComputeStreamnativeIoV1alpha1ApiService
+	namespace    string
+	body         *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
 }
 
@@ -374,26 +375,27 @@ CreateComputeStreamnativeIoV1alpha1NamespacedWorkspace Method for CreateComputeS
 
 create a Workspace
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiCreateComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiCreateComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest
 */
 func (a *ComputeStreamnativeIoV1alpha1ApiService) CreateComputeStreamnativeIoV1alpha1NamespacedWorkspace(ctx context.Context, namespace string) ApiCreateComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest {
 	return ApiCreateComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest{
 		ApiService: a,
-		ctx: ctx,
-		namespace: namespace,
+		ctx:        ctx,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
 func (a *ComputeStreamnativeIoV1alpha1ApiService) CreateComputeStreamnativeIoV1alpha1NamespacedWorkspaceExecute(r ApiCreateComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest) (*ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputeStreamnativeIoV1alpha1ApiService.CreateComputeStreamnativeIoV1alpha1NamespacedWorkspace")
@@ -477,13 +479,13 @@ func (a *ComputeStreamnativeIoV1alpha1ApiService) CreateComputeStreamnativeIoV1a
 }
 
 type ApiCreateComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest struct {
-	ctx context.Context
-	ApiService *ComputeStreamnativeIoV1alpha1ApiService
-	name string
-	namespace string
-	body *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *ComputeStreamnativeIoV1alpha1ApiService
+	name         string
+	namespace    string
+	body         *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
 }
 
@@ -519,28 +521,29 @@ CreateComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatus Method for CreateCo
 
 create status of a Workspace
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the Workspace
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiCreateComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the Workspace
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiCreateComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest
 */
 func (a *ComputeStreamnativeIoV1alpha1ApiService) CreateComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatus(ctx context.Context, name string, namespace string) ApiCreateComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest {
 	return ApiCreateComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
 func (a *ComputeStreamnativeIoV1alpha1ApiService) CreateComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusExecute(r ApiCreateComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputeStreamnativeIoV1alpha1ApiService.CreateComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatus")
@@ -625,22 +628,22 @@ func (a *ComputeStreamnativeIoV1alpha1ApiService) CreateComputeStreamnativeIoV1a
 }
 
 type ApiDeleteComputeStreamnativeIoV1alpha1CollectionNamespacedFlinkDeploymentRequest struct {
-	ctx context.Context
-	ApiService *ComputeStreamnativeIoV1alpha1ApiService
-	namespace string
-	pretty *string
-	continue_ *string
-	dryRun *string
-	fieldSelector *string
-	gracePeriodSeconds *int32
-	labelSelector *string
-	limit *int32
-	orphanDependents *bool
-	propagationPolicy *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *ComputeStreamnativeIoV1alpha1ApiService
+	namespace            string
+	pretty               *string
+	continue_            *string
+	dryRun               *string
+	fieldSelector        *string
+	gracePeriodSeconds   *int32
+	labelSelector        *string
+	limit                *int32
+	orphanDependents     *bool
+	propagationPolicy    *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	body *V1DeleteOptions
+	timeoutSeconds       *int32
+	body                 *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -729,26 +732,27 @@ DeleteComputeStreamnativeIoV1alpha1CollectionNamespacedFlinkDeployment Method fo
 
 delete collection of FlinkDeployment
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiDeleteComputeStreamnativeIoV1alpha1CollectionNamespacedFlinkDeploymentRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiDeleteComputeStreamnativeIoV1alpha1CollectionNamespacedFlinkDeploymentRequest
 */
 func (a *ComputeStreamnativeIoV1alpha1ApiService) DeleteComputeStreamnativeIoV1alpha1CollectionNamespacedFlinkDeployment(ctx context.Context, namespace string) ApiDeleteComputeStreamnativeIoV1alpha1CollectionNamespacedFlinkDeploymentRequest {
 	return ApiDeleteComputeStreamnativeIoV1alpha1CollectionNamespacedFlinkDeploymentRequest{
 		ApiService: a,
-		ctx: ctx,
-		namespace: namespace,
+		ctx:        ctx,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1Status
+//
+//	@return V1Status
 func (a *ComputeStreamnativeIoV1alpha1ApiService) DeleteComputeStreamnativeIoV1alpha1CollectionNamespacedFlinkDeploymentExecute(r ApiDeleteComputeStreamnativeIoV1alpha1CollectionNamespacedFlinkDeploymentRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1Status
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputeStreamnativeIoV1alpha1ApiService.DeleteComputeStreamnativeIoV1alpha1CollectionNamespacedFlinkDeployment")
@@ -856,22 +860,22 @@ func (a *ComputeStreamnativeIoV1alpha1ApiService) DeleteComputeStreamnativeIoV1a
 }
 
 type ApiDeleteComputeStreamnativeIoV1alpha1CollectionNamespacedWorkspaceRequest struct {
-	ctx context.Context
-	ApiService *ComputeStreamnativeIoV1alpha1ApiService
-	namespace string
-	pretty *string
-	continue_ *string
-	dryRun *string
-	fieldSelector *string
-	gracePeriodSeconds *int32
-	labelSelector *string
-	limit *int32
-	orphanDependents *bool
-	propagationPolicy *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *ComputeStreamnativeIoV1alpha1ApiService
+	namespace            string
+	pretty               *string
+	continue_            *string
+	dryRun               *string
+	fieldSelector        *string
+	gracePeriodSeconds   *int32
+	labelSelector        *string
+	limit                *int32
+	orphanDependents     *bool
+	propagationPolicy    *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	body *V1DeleteOptions
+	timeoutSeconds       *int32
+	body                 *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -960,26 +964,27 @@ DeleteComputeStreamnativeIoV1alpha1CollectionNamespacedWorkspace Method for Dele
 
 delete collection of Workspace
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiDeleteComputeStreamnativeIoV1alpha1CollectionNamespacedWorkspaceRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiDeleteComputeStreamnativeIoV1alpha1CollectionNamespacedWorkspaceRequest
 */
 func (a *ComputeStreamnativeIoV1alpha1ApiService) DeleteComputeStreamnativeIoV1alpha1CollectionNamespacedWorkspace(ctx context.Context, namespace string) ApiDeleteComputeStreamnativeIoV1alpha1CollectionNamespacedWorkspaceRequest {
 	return ApiDeleteComputeStreamnativeIoV1alpha1CollectionNamespacedWorkspaceRequest{
 		ApiService: a,
-		ctx: ctx,
-		namespace: namespace,
+		ctx:        ctx,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1Status
+//
+//	@return V1Status
 func (a *ComputeStreamnativeIoV1alpha1ApiService) DeleteComputeStreamnativeIoV1alpha1CollectionNamespacedWorkspaceExecute(r ApiDeleteComputeStreamnativeIoV1alpha1CollectionNamespacedWorkspaceRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1Status
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputeStreamnativeIoV1alpha1ApiService.DeleteComputeStreamnativeIoV1alpha1CollectionNamespacedWorkspace")
@@ -1087,16 +1092,16 @@ func (a *ComputeStreamnativeIoV1alpha1ApiService) DeleteComputeStreamnativeIoV1a
 }
 
 type ApiDeleteComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest struct {
-	ctx context.Context
-	ApiService *ComputeStreamnativeIoV1alpha1ApiService
-	name string
-	namespace string
-	pretty *string
-	dryRun *string
+	ctx                context.Context
+	ApiService         *ComputeStreamnativeIoV1alpha1ApiService
+	name               string
+	namespace          string
+	pretty             *string
+	dryRun             *string
 	gracePeriodSeconds *int32
-	orphanDependents *bool
-	propagationPolicy *string
-	body *V1DeleteOptions
+	orphanDependents   *bool
+	propagationPolicy  *string
+	body               *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -1143,28 +1148,29 @@ DeleteComputeStreamnativeIoV1alpha1NamespacedFlinkDeployment Method for DeleteCo
 
 delete a FlinkDeployment
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the FlinkDeployment
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiDeleteComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the FlinkDeployment
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiDeleteComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest
 */
 func (a *ComputeStreamnativeIoV1alpha1ApiService) DeleteComputeStreamnativeIoV1alpha1NamespacedFlinkDeployment(ctx context.Context, name string, namespace string) ApiDeleteComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest {
 	return ApiDeleteComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1Status
+//
+//	@return V1Status
 func (a *ComputeStreamnativeIoV1alpha1ApiService) DeleteComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentExecute(r ApiDeleteComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1Status
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputeStreamnativeIoV1alpha1ApiService.DeleteComputeStreamnativeIoV1alpha1NamespacedFlinkDeployment")
@@ -1252,16 +1258,16 @@ func (a *ComputeStreamnativeIoV1alpha1ApiService) DeleteComputeStreamnativeIoV1a
 }
 
 type ApiDeleteComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest struct {
-	ctx context.Context
-	ApiService *ComputeStreamnativeIoV1alpha1ApiService
-	name string
-	namespace string
-	pretty *string
-	dryRun *string
+	ctx                context.Context
+	ApiService         *ComputeStreamnativeIoV1alpha1ApiService
+	name               string
+	namespace          string
+	pretty             *string
+	dryRun             *string
 	gracePeriodSeconds *int32
-	orphanDependents *bool
-	propagationPolicy *string
-	body *V1DeleteOptions
+	orphanDependents   *bool
+	propagationPolicy  *string
+	body               *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -1308,28 +1314,29 @@ DeleteComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatus Method for De
 
 delete status of a FlinkDeployment
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the FlinkDeployment
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiDeleteComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the FlinkDeployment
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiDeleteComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest
 */
 func (a *ComputeStreamnativeIoV1alpha1ApiService) DeleteComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatus(ctx context.Context, name string, namespace string) ApiDeleteComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest {
 	return ApiDeleteComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1Status
+//
+//	@return V1Status
 func (a *ComputeStreamnativeIoV1alpha1ApiService) DeleteComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusExecute(r ApiDeleteComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1Status
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputeStreamnativeIoV1alpha1ApiService.DeleteComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatus")
@@ -1417,16 +1424,16 @@ func (a *ComputeStreamnativeIoV1alpha1ApiService) DeleteComputeStreamnativeIoV1a
 }
 
 type ApiDeleteComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest struct {
-	ctx context.Context
-	ApiService *ComputeStreamnativeIoV1alpha1ApiService
-	name string
-	namespace string
-	pretty *string
-	dryRun *string
+	ctx                context.Context
+	ApiService         *ComputeStreamnativeIoV1alpha1ApiService
+	name               string
+	namespace          string
+	pretty             *string
+	dryRun             *string
 	gracePeriodSeconds *int32
-	orphanDependents *bool
-	propagationPolicy *string
-	body *V1DeleteOptions
+	orphanDependents   *bool
+	propagationPolicy  *string
+	body               *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -1473,28 +1480,29 @@ DeleteComputeStreamnativeIoV1alpha1NamespacedWorkspace Method for DeleteComputeS
 
 delete a Workspace
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the Workspace
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiDeleteComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the Workspace
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiDeleteComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest
 */
 func (a *ComputeStreamnativeIoV1alpha1ApiService) DeleteComputeStreamnativeIoV1alpha1NamespacedWorkspace(ctx context.Context, name string, namespace string) ApiDeleteComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest {
 	return ApiDeleteComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1Status
+//
+//	@return V1Status
 func (a *ComputeStreamnativeIoV1alpha1ApiService) DeleteComputeStreamnativeIoV1alpha1NamespacedWorkspaceExecute(r ApiDeleteComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1Status
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputeStreamnativeIoV1alpha1ApiService.DeleteComputeStreamnativeIoV1alpha1NamespacedWorkspace")
@@ -1582,16 +1590,16 @@ func (a *ComputeStreamnativeIoV1alpha1ApiService) DeleteComputeStreamnativeIoV1a
 }
 
 type ApiDeleteComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest struct {
-	ctx context.Context
-	ApiService *ComputeStreamnativeIoV1alpha1ApiService
-	name string
-	namespace string
-	pretty *string
-	dryRun *string
+	ctx                context.Context
+	ApiService         *ComputeStreamnativeIoV1alpha1ApiService
+	name               string
+	namespace          string
+	pretty             *string
+	dryRun             *string
 	gracePeriodSeconds *int32
-	orphanDependents *bool
-	propagationPolicy *string
-	body *V1DeleteOptions
+	orphanDependents   *bool
+	propagationPolicy  *string
+	body               *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -1638,28 +1646,29 @@ DeleteComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatus Method for DeleteCo
 
 delete status of a Workspace
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the Workspace
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiDeleteComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the Workspace
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiDeleteComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest
 */
 func (a *ComputeStreamnativeIoV1alpha1ApiService) DeleteComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatus(ctx context.Context, name string, namespace string) ApiDeleteComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest {
 	return ApiDeleteComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1Status
+//
+//	@return V1Status
 func (a *ComputeStreamnativeIoV1alpha1ApiService) DeleteComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusExecute(r ApiDeleteComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1Status
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputeStreamnativeIoV1alpha1ApiService.DeleteComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatus")
@@ -1747,7 +1756,7 @@ func (a *ComputeStreamnativeIoV1alpha1ApiService) DeleteComputeStreamnativeIoV1a
 }
 
 type ApiGetComputeStreamnativeIoV1alpha1APIResourcesRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *ComputeStreamnativeIoV1alpha1ApiService
 }
 
@@ -1760,24 +1769,25 @@ GetComputeStreamnativeIoV1alpha1APIResources Method for GetComputeStreamnativeIo
 
 get available resources
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiGetComputeStreamnativeIoV1alpha1APIResourcesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetComputeStreamnativeIoV1alpha1APIResourcesRequest
 */
 func (a *ComputeStreamnativeIoV1alpha1ApiService) GetComputeStreamnativeIoV1alpha1APIResources(ctx context.Context) ApiGetComputeStreamnativeIoV1alpha1APIResourcesRequest {
 	return ApiGetComputeStreamnativeIoV1alpha1APIResourcesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return V1APIResourceList
+//
+//	@return V1APIResourceList
 func (a *ComputeStreamnativeIoV1alpha1ApiService) GetComputeStreamnativeIoV1alpha1APIResourcesExecute(r ApiGetComputeStreamnativeIoV1alpha1APIResourcesRequest) (*V1APIResourceList, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1APIResourceList
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1APIResourceList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputeStreamnativeIoV1alpha1ApiService.GetComputeStreamnativeIoV1alpha1APIResources")
@@ -1846,18 +1856,18 @@ func (a *ComputeStreamnativeIoV1alpha1ApiService) GetComputeStreamnativeIoV1alph
 }
 
 type ApiListComputeStreamnativeIoV1alpha1FlinkDeploymentForAllNamespacesRequest struct {
-	ctx context.Context
-	ApiService *ComputeStreamnativeIoV1alpha1ApiService
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *ComputeStreamnativeIoV1alpha1ApiService
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -1929,24 +1939,25 @@ ListComputeStreamnativeIoV1alpha1FlinkDeploymentForAllNamespaces Method for List
 
 list or watch objects of kind FlinkDeployment
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiListComputeStreamnativeIoV1alpha1FlinkDeploymentForAllNamespacesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiListComputeStreamnativeIoV1alpha1FlinkDeploymentForAllNamespacesRequest
 */
 func (a *ComputeStreamnativeIoV1alpha1ApiService) ListComputeStreamnativeIoV1alpha1FlinkDeploymentForAllNamespaces(ctx context.Context) ApiListComputeStreamnativeIoV1alpha1FlinkDeploymentForAllNamespacesRequest {
 	return ApiListComputeStreamnativeIoV1alpha1FlinkDeploymentForAllNamespacesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeploymentList
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeploymentList
 func (a *ComputeStreamnativeIoV1alpha1ApiService) ListComputeStreamnativeIoV1alpha1FlinkDeploymentForAllNamespacesExecute(r ApiListComputeStreamnativeIoV1alpha1FlinkDeploymentForAllNamespacesRequest) (*ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeploymentList, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeploymentList
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeploymentList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputeStreamnativeIoV1alpha1ApiService.ListComputeStreamnativeIoV1alpha1FlinkDeploymentForAllNamespaces")
@@ -2045,19 +2056,19 @@ func (a *ComputeStreamnativeIoV1alpha1ApiService) ListComputeStreamnativeIoV1alp
 }
 
 type ApiListComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest struct {
-	ctx context.Context
-	ApiService *ComputeStreamnativeIoV1alpha1ApiService
-	namespace string
-	pretty *string
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *ComputeStreamnativeIoV1alpha1ApiService
+	namespace            string
+	pretty               *string
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -2129,26 +2140,27 @@ ListComputeStreamnativeIoV1alpha1NamespacedFlinkDeployment Method for ListComput
 
 list or watch objects of kind FlinkDeployment
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiListComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiListComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest
 */
 func (a *ComputeStreamnativeIoV1alpha1ApiService) ListComputeStreamnativeIoV1alpha1NamespacedFlinkDeployment(ctx context.Context, namespace string) ApiListComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest {
 	return ApiListComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest{
 		ApiService: a,
-		ctx: ctx,
-		namespace: namespace,
+		ctx:        ctx,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeploymentList
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeploymentList
 func (a *ComputeStreamnativeIoV1alpha1ApiService) ListComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentExecute(r ApiListComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest) (*ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeploymentList, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeploymentList
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeploymentList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputeStreamnativeIoV1alpha1ApiService.ListComputeStreamnativeIoV1alpha1NamespacedFlinkDeployment")
@@ -2248,19 +2260,19 @@ func (a *ComputeStreamnativeIoV1alpha1ApiService) ListComputeStreamnativeIoV1alp
 }
 
 type ApiListComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest struct {
-	ctx context.Context
-	ApiService *ComputeStreamnativeIoV1alpha1ApiService
-	namespace string
-	pretty *string
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *ComputeStreamnativeIoV1alpha1ApiService
+	namespace            string
+	pretty               *string
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -2332,26 +2344,27 @@ ListComputeStreamnativeIoV1alpha1NamespacedWorkspace Method for ListComputeStrea
 
 list or watch objects of kind Workspace
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiListComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiListComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest
 */
 func (a *ComputeStreamnativeIoV1alpha1ApiService) ListComputeStreamnativeIoV1alpha1NamespacedWorkspace(ctx context.Context, namespace string) ApiListComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest {
 	return ApiListComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest{
 		ApiService: a,
-		ctx: ctx,
-		namespace: namespace,
+		ctx:        ctx,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1WorkspaceList
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1WorkspaceList
 func (a *ComputeStreamnativeIoV1alpha1ApiService) ListComputeStreamnativeIoV1alpha1NamespacedWorkspaceExecute(r ApiListComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest) (*ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1WorkspaceList, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1WorkspaceList
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1WorkspaceList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputeStreamnativeIoV1alpha1ApiService.ListComputeStreamnativeIoV1alpha1NamespacedWorkspace")
@@ -2451,18 +2464,18 @@ func (a *ComputeStreamnativeIoV1alpha1ApiService) ListComputeStreamnativeIoV1alp
 }
 
 type ApiListComputeStreamnativeIoV1alpha1WorkspaceForAllNamespacesRequest struct {
-	ctx context.Context
-	ApiService *ComputeStreamnativeIoV1alpha1ApiService
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *ComputeStreamnativeIoV1alpha1ApiService
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -2534,24 +2547,25 @@ ListComputeStreamnativeIoV1alpha1WorkspaceForAllNamespaces Method for ListComput
 
 list or watch objects of kind Workspace
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiListComputeStreamnativeIoV1alpha1WorkspaceForAllNamespacesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiListComputeStreamnativeIoV1alpha1WorkspaceForAllNamespacesRequest
 */
 func (a *ComputeStreamnativeIoV1alpha1ApiService) ListComputeStreamnativeIoV1alpha1WorkspaceForAllNamespaces(ctx context.Context) ApiListComputeStreamnativeIoV1alpha1WorkspaceForAllNamespacesRequest {
 	return ApiListComputeStreamnativeIoV1alpha1WorkspaceForAllNamespacesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1WorkspaceList
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1WorkspaceList
 func (a *ComputeStreamnativeIoV1alpha1ApiService) ListComputeStreamnativeIoV1alpha1WorkspaceForAllNamespacesExecute(r ApiListComputeStreamnativeIoV1alpha1WorkspaceForAllNamespacesRequest) (*ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1WorkspaceList, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1WorkspaceList
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1WorkspaceList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputeStreamnativeIoV1alpha1ApiService.ListComputeStreamnativeIoV1alpha1WorkspaceForAllNamespaces")
@@ -2650,15 +2664,15 @@ func (a *ComputeStreamnativeIoV1alpha1ApiService) ListComputeStreamnativeIoV1alp
 }
 
 type ApiPatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest struct {
-	ctx context.Context
-	ApiService *ComputeStreamnativeIoV1alpha1ApiService
-	name string
-	namespace string
-	body *map[string]interface{}
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *ComputeStreamnativeIoV1alpha1ApiService
+	name         string
+	namespace    string
+	body         *map[string]interface{}
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
-	force *bool
+	force        *bool
 }
 
 func (r ApiPatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest) Body(body map[string]interface{}) ApiPatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest {
@@ -2699,28 +2713,29 @@ PatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeployment Method for PatchComp
 
 partially update the specified FlinkDeployment
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the FlinkDeployment
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiPatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the FlinkDeployment
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiPatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest
 */
 func (a *ComputeStreamnativeIoV1alpha1ApiService) PatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeployment(ctx context.Context, name string, namespace string) ApiPatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest {
 	return ApiPatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
 func (a *ComputeStreamnativeIoV1alpha1ApiService) PatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentExecute(r ApiPatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest) (*ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPatch
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputeStreamnativeIoV1alpha1ApiService.PatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeployment")
@@ -2808,15 +2823,15 @@ func (a *ComputeStreamnativeIoV1alpha1ApiService) PatchComputeStreamnativeIoV1al
 }
 
 type ApiPatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest struct {
-	ctx context.Context
-	ApiService *ComputeStreamnativeIoV1alpha1ApiService
-	name string
-	namespace string
-	body *map[string]interface{}
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *ComputeStreamnativeIoV1alpha1ApiService
+	name         string
+	namespace    string
+	body         *map[string]interface{}
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
-	force *bool
+	force        *bool
 }
 
 func (r ApiPatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest) Body(body map[string]interface{}) ApiPatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest {
@@ -2857,28 +2872,29 @@ PatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatus Method for Pat
 
 partially update status of the specified FlinkDeployment
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the FlinkDeployment
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiPatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the FlinkDeployment
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiPatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest
 */
 func (a *ComputeStreamnativeIoV1alpha1ApiService) PatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatus(ctx context.Context, name string, namespace string) ApiPatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest {
 	return ApiPatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
 func (a *ComputeStreamnativeIoV1alpha1ApiService) PatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusExecute(r ApiPatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPatch
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputeStreamnativeIoV1alpha1ApiService.PatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatus")
@@ -2966,15 +2982,15 @@ func (a *ComputeStreamnativeIoV1alpha1ApiService) PatchComputeStreamnativeIoV1al
 }
 
 type ApiPatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest struct {
-	ctx context.Context
-	ApiService *ComputeStreamnativeIoV1alpha1ApiService
-	name string
-	namespace string
-	body *map[string]interface{}
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *ComputeStreamnativeIoV1alpha1ApiService
+	name         string
+	namespace    string
+	body         *map[string]interface{}
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
-	force *bool
+	force        *bool
 }
 
 func (r ApiPatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest) Body(body map[string]interface{}) ApiPatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest {
@@ -3015,28 +3031,29 @@ PatchComputeStreamnativeIoV1alpha1NamespacedWorkspace Method for PatchComputeStr
 
 partially update the specified Workspace
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the Workspace
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiPatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the Workspace
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiPatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest
 */
 func (a *ComputeStreamnativeIoV1alpha1ApiService) PatchComputeStreamnativeIoV1alpha1NamespacedWorkspace(ctx context.Context, name string, namespace string) ApiPatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest {
 	return ApiPatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
 func (a *ComputeStreamnativeIoV1alpha1ApiService) PatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceExecute(r ApiPatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest) (*ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPatch
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputeStreamnativeIoV1alpha1ApiService.PatchComputeStreamnativeIoV1alpha1NamespacedWorkspace")
@@ -3124,15 +3141,15 @@ func (a *ComputeStreamnativeIoV1alpha1ApiService) PatchComputeStreamnativeIoV1al
 }
 
 type ApiPatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest struct {
-	ctx context.Context
-	ApiService *ComputeStreamnativeIoV1alpha1ApiService
-	name string
-	namespace string
-	body *map[string]interface{}
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *ComputeStreamnativeIoV1alpha1ApiService
+	name         string
+	namespace    string
+	body         *map[string]interface{}
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
-	force *bool
+	force        *bool
 }
 
 func (r ApiPatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest) Body(body map[string]interface{}) ApiPatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest {
@@ -3173,28 +3190,29 @@ PatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatus Method for PatchComp
 
 partially update status of the specified Workspace
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the Workspace
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiPatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the Workspace
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiPatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest
 */
 func (a *ComputeStreamnativeIoV1alpha1ApiService) PatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatus(ctx context.Context, name string, namespace string) ApiPatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest {
 	return ApiPatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
 func (a *ComputeStreamnativeIoV1alpha1ApiService) PatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusExecute(r ApiPatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPatch
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputeStreamnativeIoV1alpha1ApiService.PatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatus")
@@ -3282,11 +3300,11 @@ func (a *ComputeStreamnativeIoV1alpha1ApiService) PatchComputeStreamnativeIoV1al
 }
 
 type ApiReadComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *ComputeStreamnativeIoV1alpha1ApiService
-	name string
-	namespace string
-	pretty *string
+	name       string
+	namespace  string
+	pretty     *string
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -3304,28 +3322,29 @@ ReadComputeStreamnativeIoV1alpha1NamespacedFlinkDeployment Method for ReadComput
 
 read the specified FlinkDeployment
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the FlinkDeployment
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiReadComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the FlinkDeployment
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiReadComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest
 */
 func (a *ComputeStreamnativeIoV1alpha1ApiService) ReadComputeStreamnativeIoV1alpha1NamespacedFlinkDeployment(ctx context.Context, name string, namespace string) ApiReadComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest {
 	return ApiReadComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
 func (a *ComputeStreamnativeIoV1alpha1ApiService) ReadComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentExecute(r ApiReadComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest) (*ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputeStreamnativeIoV1alpha1ApiService.ReadComputeStreamnativeIoV1alpha1NamespacedFlinkDeployment")
@@ -3399,11 +3418,11 @@ func (a *ComputeStreamnativeIoV1alpha1ApiService) ReadComputeStreamnativeIoV1alp
 }
 
 type ApiReadComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *ComputeStreamnativeIoV1alpha1ApiService
-	name string
-	namespace string
-	pretty *string
+	name       string
+	namespace  string
+	pretty     *string
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -3421,28 +3440,29 @@ ReadComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatus Method for Read
 
 read status of the specified FlinkDeployment
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the FlinkDeployment
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiReadComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the FlinkDeployment
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiReadComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest
 */
 func (a *ComputeStreamnativeIoV1alpha1ApiService) ReadComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatus(ctx context.Context, name string, namespace string) ApiReadComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest {
 	return ApiReadComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
 func (a *ComputeStreamnativeIoV1alpha1ApiService) ReadComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusExecute(r ApiReadComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputeStreamnativeIoV1alpha1ApiService.ReadComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatus")
@@ -3516,11 +3536,11 @@ func (a *ComputeStreamnativeIoV1alpha1ApiService) ReadComputeStreamnativeIoV1alp
 }
 
 type ApiReadComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *ComputeStreamnativeIoV1alpha1ApiService
-	name string
-	namespace string
-	pretty *string
+	name       string
+	namespace  string
+	pretty     *string
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -3538,28 +3558,29 @@ ReadComputeStreamnativeIoV1alpha1NamespacedWorkspace Method for ReadComputeStrea
 
 read the specified Workspace
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the Workspace
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiReadComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the Workspace
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiReadComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest
 */
 func (a *ComputeStreamnativeIoV1alpha1ApiService) ReadComputeStreamnativeIoV1alpha1NamespacedWorkspace(ctx context.Context, name string, namespace string) ApiReadComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest {
 	return ApiReadComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
 func (a *ComputeStreamnativeIoV1alpha1ApiService) ReadComputeStreamnativeIoV1alpha1NamespacedWorkspaceExecute(r ApiReadComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest) (*ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputeStreamnativeIoV1alpha1ApiService.ReadComputeStreamnativeIoV1alpha1NamespacedWorkspace")
@@ -3633,11 +3654,11 @@ func (a *ComputeStreamnativeIoV1alpha1ApiService) ReadComputeStreamnativeIoV1alp
 }
 
 type ApiReadComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *ComputeStreamnativeIoV1alpha1ApiService
-	name string
-	namespace string
-	pretty *string
+	name       string
+	namespace  string
+	pretty     *string
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -3655,28 +3676,29 @@ ReadComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatus Method for ReadComput
 
 read status of the specified Workspace
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the Workspace
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiReadComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the Workspace
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiReadComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest
 */
 func (a *ComputeStreamnativeIoV1alpha1ApiService) ReadComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatus(ctx context.Context, name string, namespace string) ApiReadComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest {
 	return ApiReadComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
 func (a *ComputeStreamnativeIoV1alpha1ApiService) ReadComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusExecute(r ApiReadComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputeStreamnativeIoV1alpha1ApiService.ReadComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatus")
@@ -3750,13 +3772,13 @@ func (a *ComputeStreamnativeIoV1alpha1ApiService) ReadComputeStreamnativeIoV1alp
 }
 
 type ApiReplaceComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest struct {
-	ctx context.Context
-	ApiService *ComputeStreamnativeIoV1alpha1ApiService
-	name string
-	namespace string
-	body *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *ComputeStreamnativeIoV1alpha1ApiService
+	name         string
+	namespace    string
+	body         *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
 }
 
@@ -3792,28 +3814,29 @@ ReplaceComputeStreamnativeIoV1alpha1NamespacedFlinkDeployment Method for Replace
 
 replace the specified FlinkDeployment
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the FlinkDeployment
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiReplaceComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the FlinkDeployment
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiReplaceComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest
 */
 func (a *ComputeStreamnativeIoV1alpha1ApiService) ReplaceComputeStreamnativeIoV1alpha1NamespacedFlinkDeployment(ctx context.Context, name string, namespace string) ApiReplaceComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest {
 	return ApiReplaceComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
 func (a *ComputeStreamnativeIoV1alpha1ApiService) ReplaceComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentExecute(r ApiReplaceComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest) (*ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputeStreamnativeIoV1alpha1ApiService.ReplaceComputeStreamnativeIoV1alpha1NamespacedFlinkDeployment")
@@ -3898,13 +3921,13 @@ func (a *ComputeStreamnativeIoV1alpha1ApiService) ReplaceComputeStreamnativeIoV1
 }
 
 type ApiReplaceComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest struct {
-	ctx context.Context
-	ApiService *ComputeStreamnativeIoV1alpha1ApiService
-	name string
-	namespace string
-	body *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *ComputeStreamnativeIoV1alpha1ApiService
+	name         string
+	namespace    string
+	body         *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
 }
 
@@ -3940,28 +3963,29 @@ ReplaceComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatus Method for R
 
 replace status of the specified FlinkDeployment
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the FlinkDeployment
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiReplaceComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the FlinkDeployment
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiReplaceComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest
 */
 func (a *ComputeStreamnativeIoV1alpha1ApiService) ReplaceComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatus(ctx context.Context, name string, namespace string) ApiReplaceComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest {
 	return ApiReplaceComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
 func (a *ComputeStreamnativeIoV1alpha1ApiService) ReplaceComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusExecute(r ApiReplaceComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeployment
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputeStreamnativeIoV1alpha1ApiService.ReplaceComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatus")
@@ -4046,13 +4070,13 @@ func (a *ComputeStreamnativeIoV1alpha1ApiService) ReplaceComputeStreamnativeIoV1
 }
 
 type ApiReplaceComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest struct {
-	ctx context.Context
-	ApiService *ComputeStreamnativeIoV1alpha1ApiService
-	name string
-	namespace string
-	body *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *ComputeStreamnativeIoV1alpha1ApiService
+	name         string
+	namespace    string
+	body         *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
 }
 
@@ -4088,28 +4112,29 @@ ReplaceComputeStreamnativeIoV1alpha1NamespacedWorkspace Method for ReplaceComput
 
 replace the specified Workspace
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the Workspace
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiReplaceComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the Workspace
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiReplaceComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest
 */
 func (a *ComputeStreamnativeIoV1alpha1ApiService) ReplaceComputeStreamnativeIoV1alpha1NamespacedWorkspace(ctx context.Context, name string, namespace string) ApiReplaceComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest {
 	return ApiReplaceComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
 func (a *ComputeStreamnativeIoV1alpha1ApiService) ReplaceComputeStreamnativeIoV1alpha1NamespacedWorkspaceExecute(r ApiReplaceComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest) (*ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputeStreamnativeIoV1alpha1ApiService.ReplaceComputeStreamnativeIoV1alpha1NamespacedWorkspace")
@@ -4194,13 +4219,13 @@ func (a *ComputeStreamnativeIoV1alpha1ApiService) ReplaceComputeStreamnativeIoV1
 }
 
 type ApiReplaceComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest struct {
-	ctx context.Context
-	ApiService *ComputeStreamnativeIoV1alpha1ApiService
-	name string
-	namespace string
-	body *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *ComputeStreamnativeIoV1alpha1ApiService
+	name         string
+	namespace    string
+	body         *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
 }
 
@@ -4236,28 +4261,29 @@ ReplaceComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatus Method for Replace
 
 replace status of the specified Workspace
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the Workspace
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiReplaceComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the Workspace
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiReplaceComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest
 */
 func (a *ComputeStreamnativeIoV1alpha1ApiService) ReplaceComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatus(ctx context.Context, name string, namespace string) ApiReplaceComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest {
 	return ApiReplaceComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
 func (a *ComputeStreamnativeIoV1alpha1ApiService) ReplaceComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusExecute(r ApiReplaceComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Workspace
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputeStreamnativeIoV1alpha1ApiService.ReplaceComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatus")
@@ -4342,18 +4368,18 @@ func (a *ComputeStreamnativeIoV1alpha1ApiService) ReplaceComputeStreamnativeIoV1
 }
 
 type ApiWatchComputeStreamnativeIoV1alpha1FlinkDeploymentListForAllNamespacesRequest struct {
-	ctx context.Context
-	ApiService *ComputeStreamnativeIoV1alpha1ApiService
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *ComputeStreamnativeIoV1alpha1ApiService
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -4425,24 +4451,25 @@ WatchComputeStreamnativeIoV1alpha1FlinkDeploymentListForAllNamespaces Method for
 
 watch individual changes to a list of FlinkDeployment. deprecated: use the 'watch' parameter with a list operation instead.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiWatchComputeStreamnativeIoV1alpha1FlinkDeploymentListForAllNamespacesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiWatchComputeStreamnativeIoV1alpha1FlinkDeploymentListForAllNamespacesRequest
 */
 func (a *ComputeStreamnativeIoV1alpha1ApiService) WatchComputeStreamnativeIoV1alpha1FlinkDeploymentListForAllNamespaces(ctx context.Context) ApiWatchComputeStreamnativeIoV1alpha1FlinkDeploymentListForAllNamespacesRequest {
 	return ApiWatchComputeStreamnativeIoV1alpha1FlinkDeploymentListForAllNamespacesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return V1WatchEvent
+//
+//	@return V1WatchEvent
 func (a *ComputeStreamnativeIoV1alpha1ApiService) WatchComputeStreamnativeIoV1alpha1FlinkDeploymentListForAllNamespacesExecute(r ApiWatchComputeStreamnativeIoV1alpha1FlinkDeploymentListForAllNamespacesRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1WatchEvent
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputeStreamnativeIoV1alpha1ApiService.WatchComputeStreamnativeIoV1alpha1FlinkDeploymentListForAllNamespaces")
@@ -4541,20 +4568,20 @@ func (a *ComputeStreamnativeIoV1alpha1ApiService) WatchComputeStreamnativeIoV1al
 }
 
 type ApiWatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest struct {
-	ctx context.Context
-	ApiService *ComputeStreamnativeIoV1alpha1ApiService
-	name string
-	namespace string
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *ComputeStreamnativeIoV1alpha1ApiService
+	name                 string
+	namespace            string
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -4626,28 +4653,29 @@ WatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeployment Method for WatchComp
 
 watch changes to an object of kind FlinkDeployment. deprecated: use the 'watch' parameter with a list operation instead, filtered to a single item with the 'fieldSelector' parameter.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the FlinkDeployment
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiWatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the FlinkDeployment
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiWatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest
 */
 func (a *ComputeStreamnativeIoV1alpha1ApiService) WatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeployment(ctx context.Context, name string, namespace string) ApiWatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest {
 	return ApiWatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1WatchEvent
+//
+//	@return V1WatchEvent
 func (a *ComputeStreamnativeIoV1alpha1ApiService) WatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentExecute(r ApiWatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1WatchEvent
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputeStreamnativeIoV1alpha1ApiService.WatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeployment")
@@ -4748,19 +4776,19 @@ func (a *ComputeStreamnativeIoV1alpha1ApiService) WatchComputeStreamnativeIoV1al
 }
 
 type ApiWatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentListRequest struct {
-	ctx context.Context
-	ApiService *ComputeStreamnativeIoV1alpha1ApiService
-	namespace string
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *ComputeStreamnativeIoV1alpha1ApiService
+	namespace            string
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -4832,26 +4860,27 @@ WatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentList Method for Watch
 
 watch individual changes to a list of FlinkDeployment. deprecated: use the 'watch' parameter with a list operation instead.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiWatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentListRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiWatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentListRequest
 */
 func (a *ComputeStreamnativeIoV1alpha1ApiService) WatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentList(ctx context.Context, namespace string) ApiWatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentListRequest {
 	return ApiWatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentListRequest{
 		ApiService: a,
-		ctx: ctx,
-		namespace: namespace,
+		ctx:        ctx,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1WatchEvent
+//
+//	@return V1WatchEvent
 func (a *ComputeStreamnativeIoV1alpha1ApiService) WatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentListExecute(r ApiWatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentListRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1WatchEvent
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputeStreamnativeIoV1alpha1ApiService.WatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentList")
@@ -4951,20 +4980,20 @@ func (a *ComputeStreamnativeIoV1alpha1ApiService) WatchComputeStreamnativeIoV1al
 }
 
 type ApiWatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest struct {
-	ctx context.Context
-	ApiService *ComputeStreamnativeIoV1alpha1ApiService
-	name string
-	namespace string
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *ComputeStreamnativeIoV1alpha1ApiService
+	name                 string
+	namespace            string
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -5036,28 +5065,29 @@ WatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatus Method for Wat
 
 watch changes to status of an object of kind FlinkDeployment. deprecated: use the 'watch' parameter with a list operation instead, filtered to a single item with the 'fieldSelector' parameter.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the FlinkDeployment
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiWatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the FlinkDeployment
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiWatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest
 */
 func (a *ComputeStreamnativeIoV1alpha1ApiService) WatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatus(ctx context.Context, name string, namespace string) ApiWatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest {
 	return ApiWatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1WatchEvent
+//
+//	@return V1WatchEvent
 func (a *ComputeStreamnativeIoV1alpha1ApiService) WatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusExecute(r ApiWatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatusRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1WatchEvent
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputeStreamnativeIoV1alpha1ApiService.WatchComputeStreamnativeIoV1alpha1NamespacedFlinkDeploymentStatus")
@@ -5158,20 +5188,20 @@ func (a *ComputeStreamnativeIoV1alpha1ApiService) WatchComputeStreamnativeIoV1al
 }
 
 type ApiWatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest struct {
-	ctx context.Context
-	ApiService *ComputeStreamnativeIoV1alpha1ApiService
-	name string
-	namespace string
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *ComputeStreamnativeIoV1alpha1ApiService
+	name                 string
+	namespace            string
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -5243,28 +5273,29 @@ WatchComputeStreamnativeIoV1alpha1NamespacedWorkspace Method for WatchComputeStr
 
 watch changes to an object of kind Workspace. deprecated: use the 'watch' parameter with a list operation instead, filtered to a single item with the 'fieldSelector' parameter.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the Workspace
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiWatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the Workspace
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiWatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest
 */
 func (a *ComputeStreamnativeIoV1alpha1ApiService) WatchComputeStreamnativeIoV1alpha1NamespacedWorkspace(ctx context.Context, name string, namespace string) ApiWatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest {
 	return ApiWatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1WatchEvent
+//
+//	@return V1WatchEvent
 func (a *ComputeStreamnativeIoV1alpha1ApiService) WatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceExecute(r ApiWatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1WatchEvent
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputeStreamnativeIoV1alpha1ApiService.WatchComputeStreamnativeIoV1alpha1NamespacedWorkspace")
@@ -5365,19 +5396,19 @@ func (a *ComputeStreamnativeIoV1alpha1ApiService) WatchComputeStreamnativeIoV1al
 }
 
 type ApiWatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceListRequest struct {
-	ctx context.Context
-	ApiService *ComputeStreamnativeIoV1alpha1ApiService
-	namespace string
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *ComputeStreamnativeIoV1alpha1ApiService
+	namespace            string
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -5449,26 +5480,27 @@ WatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceList Method for WatchComput
 
 watch individual changes to a list of Workspace. deprecated: use the 'watch' parameter with a list operation instead.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiWatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceListRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiWatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceListRequest
 */
 func (a *ComputeStreamnativeIoV1alpha1ApiService) WatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceList(ctx context.Context, namespace string) ApiWatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceListRequest {
 	return ApiWatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceListRequest{
 		ApiService: a,
-		ctx: ctx,
-		namespace: namespace,
+		ctx:        ctx,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1WatchEvent
+//
+//	@return V1WatchEvent
 func (a *ComputeStreamnativeIoV1alpha1ApiService) WatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceListExecute(r ApiWatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceListRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1WatchEvent
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputeStreamnativeIoV1alpha1ApiService.WatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceList")
@@ -5568,20 +5600,20 @@ func (a *ComputeStreamnativeIoV1alpha1ApiService) WatchComputeStreamnativeIoV1al
 }
 
 type ApiWatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest struct {
-	ctx context.Context
-	ApiService *ComputeStreamnativeIoV1alpha1ApiService
-	name string
-	namespace string
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *ComputeStreamnativeIoV1alpha1ApiService
+	name                 string
+	namespace            string
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -5653,28 +5685,29 @@ WatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatus Method for WatchComp
 
 watch changes to status of an object of kind Workspace. deprecated: use the 'watch' parameter with a list operation instead, filtered to a single item with the 'fieldSelector' parameter.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the Workspace
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiWatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the Workspace
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiWatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest
 */
 func (a *ComputeStreamnativeIoV1alpha1ApiService) WatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatus(ctx context.Context, name string, namespace string) ApiWatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest {
 	return ApiWatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1WatchEvent
+//
+//	@return V1WatchEvent
 func (a *ComputeStreamnativeIoV1alpha1ApiService) WatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusExecute(r ApiWatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatusRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1WatchEvent
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputeStreamnativeIoV1alpha1ApiService.WatchComputeStreamnativeIoV1alpha1NamespacedWorkspaceStatus")
@@ -5775,18 +5808,18 @@ func (a *ComputeStreamnativeIoV1alpha1ApiService) WatchComputeStreamnativeIoV1al
 }
 
 type ApiWatchComputeStreamnativeIoV1alpha1WorkspaceListForAllNamespacesRequest struct {
-	ctx context.Context
-	ApiService *ComputeStreamnativeIoV1alpha1ApiService
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *ComputeStreamnativeIoV1alpha1ApiService
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -5858,24 +5891,25 @@ WatchComputeStreamnativeIoV1alpha1WorkspaceListForAllNamespaces Method for Watch
 
 watch individual changes to a list of Workspace. deprecated: use the 'watch' parameter with a list operation instead.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiWatchComputeStreamnativeIoV1alpha1WorkspaceListForAllNamespacesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiWatchComputeStreamnativeIoV1alpha1WorkspaceListForAllNamespacesRequest
 */
 func (a *ComputeStreamnativeIoV1alpha1ApiService) WatchComputeStreamnativeIoV1alpha1WorkspaceListForAllNamespaces(ctx context.Context) ApiWatchComputeStreamnativeIoV1alpha1WorkspaceListForAllNamespacesRequest {
 	return ApiWatchComputeStreamnativeIoV1alpha1WorkspaceListForAllNamespacesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return V1WatchEvent
+//
+//	@return V1WatchEvent
 func (a *ComputeStreamnativeIoV1alpha1ApiService) WatchComputeStreamnativeIoV1alpha1WorkspaceListForAllNamespacesExecute(r ApiWatchComputeStreamnativeIoV1alpha1WorkspaceListForAllNamespacesRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1WatchEvent
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputeStreamnativeIoV1alpha1ApiService.WatchComputeStreamnativeIoV1alpha1WorkspaceListForAllNamespaces")
