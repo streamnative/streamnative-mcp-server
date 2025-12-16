@@ -1,19 +1,16 @@
-// Licensed to the Apache Software Foundation (ASF) under one
-// or more contributor license agreements.  See the NOTICE file
-// distributed with this work for additional information
-// regarding copyright ownership.  The ASF licenses this file
-// to you under the Apache License, Version 2.0 (the
-// "License"); you may not use this file except in compliance
-// with the License.  You may obtain a copy of the License at
+// Copyright 2025 StreamNative
 //
-//   http://www.apache.org/licenses/LICENSE-2.0
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-// Unless required by applicable law or agreed to in writing,
-// software distributed under the License is distributed on an
-// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-// KIND, either express or implied.  See the License for the
-// specific language governing permissions and limitations
-// under the License.
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 package mcp
 
@@ -34,6 +31,8 @@ import (
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp"
 	context2 "github.com/streamnative/streamnative-mcp-server/pkg/mcp"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/session"
+	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
 func NewCmdMcpSseServer(configOpts *ServerOptions) *cobra.Command {
@@ -93,14 +92,52 @@ func runSseServer(configOpts *ServerOptions) error {
 	// SSE is not support session-based tools, so we pass an fixed sessionId
 	mcpServer.PulsarFunctionManagedMcpTools(configOpts.ReadOnly, configOpts.Features, "FIXED_SESSION_ID")
 
+	// Create Pulsar session manager for multi-session support (only for external Pulsar mode)
+	var pulsarSessionManager *session.PulsarSessionManager
+	snConfig := configOpts.Options.LoadConfigOrDie()
+	if snConfig.ExternalPulsar != nil && configOpts.MultiSessionPulsar {
+		managerConfig := &session.PulsarSessionManagerConfig{
+			MaxSessions:     configOpts.SessionCacheSize,
+			SessionTTL:      time.Duration(configOpts.SessionTTLMinutes) * time.Minute,
+			CleanupInterval: 5 * time.Minute,
+			BaseContext: pulsar.PulsarContext{
+				ServiceURL:                    snConfig.ExternalPulsar.ServiceURL,
+				WebServiceURL:                 snConfig.ExternalPulsar.WebServiceURL,
+				TLSAllowInsecureConnection:    snConfig.ExternalPulsar.TLSAllowInsecureConnection,
+				TLSEnableHostnameVerification: snConfig.ExternalPulsar.TLSEnableHostnameVerification,
+				TLSTrustCertsFilePath:         snConfig.ExternalPulsar.TLSTrustCertsFilePath,
+				TLSCertFile:                   snConfig.ExternalPulsar.TLSCertFile,
+				TLSKeyFile:                    snConfig.ExternalPulsar.TLSKeyFile,
+			},
+		}
+		pulsarSessionManager = session.NewPulsarSessionManager(managerConfig, mcpServer.PulsarSession, logger)
+		logger.Info("Multi-session Pulsar mode enabled")
+	}
+
 	sseServer := server.NewSSEServer(
 		mcpServer.MCPServer,
 		server.WithStaticBasePath(configOpts.HTTPPath),
-		server.WithSSEContextFunc(func(ctx context.Context, _ *http.Request) context.Context {
+		server.WithSSEContextFunc(func(ctx context.Context, r *http.Request) context.Context {
 			c := context.WithValue(ctx, common.OptionsKey, configOpts.Options)
 			c = context2.WithKafkaSession(c, mcpServer.KafkaSession)
-			c = context2.WithPulsarSession(c, mcpServer.PulsarSession)
 			c = context2.WithSNCloudSession(c, mcpServer.SNCloudSession)
+
+			// Handle per-user Pulsar sessions
+			if pulsarSessionManager != nil {
+				token := session.ExtractBearerToken(r)
+				if pulsarSession, err := pulsarSessionManager.GetOrCreateSession(ctx, token); err == nil {
+					c = context2.WithPulsarSession(c, pulsarSession)
+					if token != "" {
+						c = session.WithUserTokenHash(c, pulsarSessionManager.HashTokenForLog(token))
+					}
+				} else {
+					logger.WithError(err).Warn("Failed to get per-user Pulsar session, using global")
+					c = context2.WithPulsarSession(c, mcpServer.PulsarSession)
+				}
+			} else {
+				c = context2.WithPulsarSession(c, mcpServer.PulsarSession)
+			}
+
 			return c
 		}),
 	)
@@ -134,6 +171,11 @@ func runSseServer(configOpts *ServerOptions) error {
 	// 7. Graceful shutdown
 	shCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
+
+	// Stop Pulsar session manager first
+	if pulsarSessionManager != nil {
+		pulsarSessionManager.Stop()
+	}
 
 	// First try to shut down the SSE server
 	if err := sseServer.Shutdown(shCtx); err != nil {
