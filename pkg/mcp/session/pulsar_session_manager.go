@@ -96,7 +96,7 @@ func NewPulsarSessionManager(
 }
 
 // GetOrCreateSession retrieves or creates a Pulsar session for the given token
-func (m *PulsarSessionManager) GetOrCreateSession(ctx context.Context, token string) (*pulsar.Session, error) {
+func (m *PulsarSessionManager) GetOrCreateSession(_ context.Context, token string) (*pulsar.Session, error) {
 	if token == "" {
 		// Return global session when no token provided
 		return m.globalSession, nil
