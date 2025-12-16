@@ -136,7 +136,7 @@ func TestPulsarSessionManager_EmptyTokenReturnsGlobalSession(t *testing.T) {
 	defer manager.Stop()
 
 	// Empty token should return global session
-	session, err := manager.GetOrCreateSession(nil, "")
+	session, err := manager.GetOrCreateSession(context.TODO(), "")
 	if err != nil {
 		t.Errorf("GetOrCreateSession with empty token returned error: %v", err)
 	}
