@@ -37,9 +37,9 @@ type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1BookKeeper struct {
 	// Image name is the name of the image to deploy.
 	Image *string `json:"image,omitempty"`
 	// Replicas is the expected size of the bookkeeper cluster.
-	Replicas int32 `json:"replicas"`
+	Replicas     int32                                                                              `json:"replicas"`
 	ResourceSpec *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1BookKeeperNodeResourceSpec `json:"resourceSpec,omitempty"`
-	Resources *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1BookkeeperNodeResource `json:"resources,omitempty"`
+	Resources    *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1BookkeeperNodeResource     `json:"resources,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1BookKeeper instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1BookKeeper object
@@ -267,5 +267,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1BookKeep
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

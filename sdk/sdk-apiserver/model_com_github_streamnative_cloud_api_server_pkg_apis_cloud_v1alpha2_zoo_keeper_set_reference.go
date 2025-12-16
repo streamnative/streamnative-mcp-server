@@ -33,7 +33,7 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetReference ZooKeeperSetReference is a fully-qualified reference to a ZooKeeperSet with a given name.
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetReference struct {
-	Name string `json:"name"`
+	Name      string  `json:"name"`
 	Namespace *string `json:"namespace,omitempty"`
 }
 
@@ -157,5 +157,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeepe
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

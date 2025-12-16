@@ -226,5 +226,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2DefaultN
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

@@ -33,7 +33,7 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetReference BookKeeperSetReference is a fully-qualified reference to a BookKeeperSet with a given name.
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetReference struct {
-	Name string `json:"name"`
+	Name      string  `json:"name"`
 	Namespace *string `json:"namespace,omitempty"`
 }
 
@@ -157,5 +157,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeep
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

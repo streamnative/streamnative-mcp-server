@@ -35,12 +35,11 @@ import (
 	"net/url"
 )
 
-
 // BillingStreamnativeIoApiService BillingStreamnativeIoApi service
 type BillingStreamnativeIoApiService service
 
 type ApiGetBillingStreamnativeIoAPIGroupRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *BillingStreamnativeIoApiService
 }
 
@@ -53,24 +52,25 @@ GetBillingStreamnativeIoAPIGroup Method for GetBillingStreamnativeIoAPIGroup
 
 get information of a group
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiGetBillingStreamnativeIoAPIGroupRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetBillingStreamnativeIoAPIGroupRequest
 */
 func (a *BillingStreamnativeIoApiService) GetBillingStreamnativeIoAPIGroup(ctx context.Context) ApiGetBillingStreamnativeIoAPIGroupRequest {
 	return ApiGetBillingStreamnativeIoAPIGroupRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return V1APIGroup
+//
+//	@return V1APIGroup
 func (a *BillingStreamnativeIoApiService) GetBillingStreamnativeIoAPIGroupExecute(r ApiGetBillingStreamnativeIoAPIGroupRequest) (*V1APIGroup, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1APIGroup
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1APIGroup
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoApiService.GetBillingStreamnativeIoAPIGroup")

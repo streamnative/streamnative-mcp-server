@@ -19,9 +19,9 @@ var _ MappedNullable = &ServerInfo{}
 
 // ServerInfo struct for ServerInfo
 type ServerInfo struct {
-	Commit *string `json:"commit,omitempty"`
+	Commit         *string `json:"commit,omitempty"`
 	KafkaClusterId *string `json:"kafka_cluster_id,omitempty"`
-	Version *string `json:"version,omitempty"`
+	Version        *string `json:"version,omitempty"`
 }
 
 // NewServerInfo instantiates a new ServerInfo object
@@ -138,7 +138,7 @@ func (o *ServerInfo) SetVersion(v string) {
 }
 
 func (o ServerInfo) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -194,5 +194,3 @@ func (v *NullableServerInfo) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

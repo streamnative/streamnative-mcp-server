@@ -33,7 +33,7 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1ClusterRoleBindingSpec ClusterRoleBindingSpec defines the desired state of ClusterRoleBinding
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1ClusterRoleBindingSpec struct {
-	RoleRef ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RoleRef `json:"roleRef"`
+	RoleRef  ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RoleRef   `json:"roleRef"`
 	Subjects []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Subject `json:"subjects"`
 }
 
@@ -150,5 +150,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1ClusterR
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

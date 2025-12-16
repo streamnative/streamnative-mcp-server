@@ -33,9 +33,9 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RoleBindingCondition RoleBindingCondition Deprecated
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RoleBindingCondition struct {
-	Operator *int32 `json:"operator,omitempty"`
-	Srn *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Srn `json:"srn,omitempty"`
-	Type *int32 `json:"type,omitempty"`
+	Operator *int32                                                      `json:"operator,omitempty"`
+	Srn      *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Srn `json:"srn,omitempty"`
+	Type     *int32                                                      `json:"type,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RoleBindingCondition instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RoleBindingCondition object
@@ -200,5 +200,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RoleBind
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

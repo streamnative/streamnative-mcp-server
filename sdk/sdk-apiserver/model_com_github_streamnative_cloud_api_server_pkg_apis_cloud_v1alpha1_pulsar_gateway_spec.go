@@ -36,9 +36,9 @@ type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarGatewaySpec st
 	// Access is the access type of the pulsar gateway, available values are public or private. It is immutable, with the default value public.
 	Access *string `json:"access,omitempty"`
 	// Domains is the list of domain suffix that the pulsar gateway will serve. This is automatically generated based on the PulsarGateway name and PoolMember domain.
-	Domains []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Domain `json:"domains,omitempty"`
-	PoolMemberRef *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemberReference `json:"poolMemberRef,omitempty"`
-	PrivateService *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PrivateService `json:"privateService,omitempty"`
+	Domains        []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Domain             `json:"domains,omitempty"`
+	PoolMemberRef  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemberReference `json:"poolMemberRef,omitempty"`
+	PrivateService *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PrivateService      `json:"privateService,omitempty"`
 	// TopologyAware is the configuration of the topology aware feature of the pulsar gateway.
 	TopologyAware map[string]interface{} `json:"topologyAware,omitempty"`
 }
@@ -275,5 +275,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarGa
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

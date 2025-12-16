@@ -35,7 +35,7 @@ import (
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1APIKeySpec APIKeySpec defines the desired state of APIKey
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1APIKeySpec struct {
 	// Description is a user defined description of the key
-	Description *string `json:"description,omitempty"`
+	Description   *string                                                               `json:"description,omitempty"`
 	EncryptionKey *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1EncryptionKey `json:"encryptionKey,omitempty"`
 	// Expiration is a duration (as a golang duration string) that defines how long this API key is valid for. This can only be set on initial creation and not updated later
 	ExpirationTime *time.Time `json:"expirationTime,omitempty"`
@@ -314,5 +314,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1APIKeySp
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

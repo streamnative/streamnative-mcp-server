@@ -36,12 +36,12 @@ import (
 type ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentSystemMetadata struct {
 	Annotations *map[string]string `json:"annotations,omitempty"`
 	// Time is a wrapper around time.Time which supports correct marshaling to YAML and JSON.  Wrappers are provided for many of the factory methods that the time package offers.
-	CreatedAt *time.Time `json:"createdAt,omitempty"`
-	Labels *map[string]string `json:"labels,omitempty"`
+	CreatedAt *time.Time         `json:"createdAt,omitempty"`
+	Labels    *map[string]string `json:"labels,omitempty"`
 	// Time is a wrapper around time.Time which supports correct marshaling to YAML and JSON.  Wrappers are provided for many of the factory methods that the time package offers.
-	ModifiedAt *time.Time `json:"modifiedAt,omitempty"`
-	Name *string `json:"name,omitempty"`
-	ResourceVersion *int32 `json:"resourceVersion,omitempty"`
+	ModifiedAt      *time.Time `json:"modifiedAt,omitempty"`
+	Name            *string    `json:"name,omitempty"`
+	ResourceVersion *int32     `json:"resourceVersion,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentSystemMetadata instantiates a new ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentSystemMetadata object
@@ -311,5 +311,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDep
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

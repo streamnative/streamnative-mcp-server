@@ -37,9 +37,9 @@ type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Config struct {
 	// Custom accepts custom configurations.
 	Custom *map[string]string `json:"custom,omitempty"`
 	// FunctionEnabled controls whether function is enabled.
-	FunctionEnabled *bool `json:"functionEnabled,omitempty"`
+	FunctionEnabled  *bool                                                                          `json:"functionEnabled,omitempty"`
 	LakehouseStorage *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1LakehouseStorageConfig `json:"lakehouseStorage,omitempty"`
-	Protocols *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1ProtocolsConfig `json:"protocols,omitempty"`
+	Protocols        *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1ProtocolsConfig        `json:"protocols,omitempty"`
 	// TransactionEnabled controls whether transaction is enabled.
 	TransactionEnabled *bool `json:"transactionEnabled,omitempty"`
 	// WebsocketEnabled controls whether websocket is enabled.
@@ -348,5 +348,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Config) 
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

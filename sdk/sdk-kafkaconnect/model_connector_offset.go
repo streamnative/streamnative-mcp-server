@@ -19,7 +19,7 @@ var _ MappedNullable = &ConnectorOffset{}
 
 // ConnectorOffset struct for ConnectorOffset
 type ConnectorOffset struct {
-	Offset map[string]map[string]interface{} `json:"offset,omitempty"`
+	Offset    map[string]map[string]interface{} `json:"offset,omitempty"`
 	Partition map[string]map[string]interface{} `json:"partition,omitempty"`
 }
 
@@ -105,7 +105,7 @@ func (o *ConnectorOffset) SetPartition(v map[string]map[string]interface{}) {
 }
 
 func (o ConnectorOffset) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -158,5 +158,3 @@ func (v *NullableConnectorOffset) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

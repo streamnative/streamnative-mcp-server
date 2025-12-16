@@ -34,10 +34,10 @@ import (
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1IdentityPoolList struct for ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1IdentityPoolList
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1IdentityPoolList struct {
 	// APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
-	ApiVersion *string `json:"apiVersion,omitempty"`
-	Items []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1IdentityPool `json:"items"`
+	ApiVersion *string                                                               `json:"apiVersion,omitempty"`
+	Items      []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1IdentityPool `json:"items"`
 	// Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
-	Kind *string `json:"kind,omitempty"`
+	Kind     *string     `json:"kind,omitempty"`
 	Metadata *V1ListMeta `json:"metadata,omitempty"`
 }
 
@@ -231,5 +231,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Identity
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

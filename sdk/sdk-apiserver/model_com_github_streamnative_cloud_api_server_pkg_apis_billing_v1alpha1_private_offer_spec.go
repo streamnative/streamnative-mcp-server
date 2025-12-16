@@ -35,8 +35,8 @@ import (
 // ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOfferSpec PrivateOfferSpec defines the desired state of PrivateOffer
 type ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOfferSpec struct {
 	// AnchorDate is a timestamp representing the first billing cycle end date. This will be used to anchor future billing periods to that date. For example, setting the anchor date for a subscription starting on Apr 1 to be Apr 12 will send the invoice for the subscription out on Apr 12 and the 12th of every following month for a monthly subscription. It is represented in RFC3339 form and is in UTC.
-	AnchorDate *time.Time `json:"anchorDate,omitempty"`
-	Description *string `json:"description,omitempty"`
+	AnchorDate  *time.Time `json:"anchorDate,omitempty"`
+	Description *string    `json:"description,omitempty"`
 	// Duration indicates how long the subscription for this offer should last. The value must greater than 0
 	Duration *string `json:"duration,omitempty"`
 	// EndDate is a timestamp representing the planned end date of the subscription. It is represented in RFC3339 form and is in UTC.
@@ -46,8 +46,8 @@ type ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOfferSpec s
 	// Recurring items, each with an attached price.
 	Recurring []ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1OfferItem `json:"recurring,omitempty"`
 	// StartDate is a timestamp representing the planned start date of the subscription. It is represented in RFC3339 form and is in UTC.
-	StartDate *time.Time `json:"startDate,omitempty"`
-	Stripe map[string]interface{} `json:"stripe,omitempty"`
+	StartDate *time.Time             `json:"startDate,omitempty"`
+	Stripe    map[string]interface{} `json:"stripe,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOfferSpec instantiates a new ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOfferSpec object
@@ -387,5 +387,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Privat
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

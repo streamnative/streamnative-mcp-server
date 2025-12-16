@@ -36,17 +36,16 @@ import (
 	"strings"
 )
 
-
 // AuthorizationStreamnativeIoV1alpha1ApiService AuthorizationStreamnativeIoV1alpha1Api service
 type AuthorizationStreamnativeIoV1alpha1ApiService service
 
 type ApiCreateAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest struct {
-	ctx context.Context
-	ApiService *AuthorizationStreamnativeIoV1alpha1ApiService
-	namespace string
-	body *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *AuthorizationStreamnativeIoV1alpha1ApiService
+	namespace    string
+	body         *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
 }
 
@@ -82,26 +81,27 @@ CreateAuthorizationStreamnativeIoV1alpha1NamespacedIamAccount Method for CreateA
 
 create an IamAccount
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiCreateAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiCreateAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest
 */
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) CreateAuthorizationStreamnativeIoV1alpha1NamespacedIamAccount(ctx context.Context, namespace string) ApiCreateAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest {
 	return ApiCreateAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest{
 		ApiService: a,
-		ctx: ctx,
-		namespace: namespace,
+		ctx:        ctx,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) CreateAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountExecute(r ApiCreateAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest) (*ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AuthorizationStreamnativeIoV1alpha1ApiService.CreateAuthorizationStreamnativeIoV1alpha1NamespacedIamAccount")
@@ -185,13 +185,13 @@ func (a *AuthorizationStreamnativeIoV1alpha1ApiService) CreateAuthorizationStrea
 }
 
 type ApiCreateAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest struct {
-	ctx context.Context
-	ApiService *AuthorizationStreamnativeIoV1alpha1ApiService
-	name string
-	namespace string
-	body *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *AuthorizationStreamnativeIoV1alpha1ApiService
+	name         string
+	namespace    string
+	body         *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
 }
 
@@ -227,28 +227,29 @@ CreateAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatus Method for C
 
 create status of an IamAccount
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the IamAccount
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiCreateAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the IamAccount
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiCreateAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest
 */
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) CreateAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatus(ctx context.Context, name string, namespace string) ApiCreateAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest {
 	return ApiCreateAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) CreateAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusExecute(r ApiCreateAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AuthorizationStreamnativeIoV1alpha1ApiService.CreateAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatus")
@@ -333,12 +334,12 @@ func (a *AuthorizationStreamnativeIoV1alpha1ApiService) CreateAuthorizationStrea
 }
 
 type ApiCreateAuthorizationStreamnativeIoV1alpha1SelfSubjectRbacReviewRequest struct {
-	ctx context.Context
-	ApiService *AuthorizationStreamnativeIoV1alpha1ApiService
-	body *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SelfSubjectRbacReview
-	dryRun *string
+	ctx          context.Context
+	ApiService   *AuthorizationStreamnativeIoV1alpha1ApiService
+	body         *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SelfSubjectRbacReview
+	dryRun       *string
 	fieldManager *string
-	pretty *string
+	pretty       *string
 }
 
 func (r ApiCreateAuthorizationStreamnativeIoV1alpha1SelfSubjectRbacReviewRequest) Body(body ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SelfSubjectRbacReview) ApiCreateAuthorizationStreamnativeIoV1alpha1SelfSubjectRbacReviewRequest {
@@ -373,24 +374,25 @@ CreateAuthorizationStreamnativeIoV1alpha1SelfSubjectRbacReview Method for Create
 
 create a SelfSubjectRbacReview
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiCreateAuthorizationStreamnativeIoV1alpha1SelfSubjectRbacReviewRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiCreateAuthorizationStreamnativeIoV1alpha1SelfSubjectRbacReviewRequest
 */
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) CreateAuthorizationStreamnativeIoV1alpha1SelfSubjectRbacReview(ctx context.Context) ApiCreateAuthorizationStreamnativeIoV1alpha1SelfSubjectRbacReviewRequest {
 	return ApiCreateAuthorizationStreamnativeIoV1alpha1SelfSubjectRbacReviewRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SelfSubjectRbacReview
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SelfSubjectRbacReview
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) CreateAuthorizationStreamnativeIoV1alpha1SelfSubjectRbacReviewExecute(r ApiCreateAuthorizationStreamnativeIoV1alpha1SelfSubjectRbacReviewRequest) (*ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SelfSubjectRbacReview, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SelfSubjectRbacReview
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SelfSubjectRbacReview
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AuthorizationStreamnativeIoV1alpha1ApiService.CreateAuthorizationStreamnativeIoV1alpha1SelfSubjectRbacReview")
@@ -473,12 +475,12 @@ func (a *AuthorizationStreamnativeIoV1alpha1ApiService) CreateAuthorizationStrea
 }
 
 type ApiCreateAuthorizationStreamnativeIoV1alpha1SelfSubjectRulesReviewRequest struct {
-	ctx context.Context
-	ApiService *AuthorizationStreamnativeIoV1alpha1ApiService
-	body *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SelfSubjectRulesReview
-	dryRun *string
+	ctx          context.Context
+	ApiService   *AuthorizationStreamnativeIoV1alpha1ApiService
+	body         *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SelfSubjectRulesReview
+	dryRun       *string
 	fieldManager *string
-	pretty *string
+	pretty       *string
 }
 
 func (r ApiCreateAuthorizationStreamnativeIoV1alpha1SelfSubjectRulesReviewRequest) Body(body ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SelfSubjectRulesReview) ApiCreateAuthorizationStreamnativeIoV1alpha1SelfSubjectRulesReviewRequest {
@@ -513,24 +515,25 @@ CreateAuthorizationStreamnativeIoV1alpha1SelfSubjectRulesReview Method for Creat
 
 create a SelfSubjectRulesReview
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiCreateAuthorizationStreamnativeIoV1alpha1SelfSubjectRulesReviewRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiCreateAuthorizationStreamnativeIoV1alpha1SelfSubjectRulesReviewRequest
 */
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) CreateAuthorizationStreamnativeIoV1alpha1SelfSubjectRulesReview(ctx context.Context) ApiCreateAuthorizationStreamnativeIoV1alpha1SelfSubjectRulesReviewRequest {
 	return ApiCreateAuthorizationStreamnativeIoV1alpha1SelfSubjectRulesReviewRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SelfSubjectRulesReview
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SelfSubjectRulesReview
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) CreateAuthorizationStreamnativeIoV1alpha1SelfSubjectRulesReviewExecute(r ApiCreateAuthorizationStreamnativeIoV1alpha1SelfSubjectRulesReviewRequest) (*ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SelfSubjectRulesReview, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SelfSubjectRulesReview
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SelfSubjectRulesReview
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AuthorizationStreamnativeIoV1alpha1ApiService.CreateAuthorizationStreamnativeIoV1alpha1SelfSubjectRulesReview")
@@ -613,12 +616,12 @@ func (a *AuthorizationStreamnativeIoV1alpha1ApiService) CreateAuthorizationStrea
 }
 
 type ApiCreateAuthorizationStreamnativeIoV1alpha1SelfSubjectUserReviewRequest struct {
-	ctx context.Context
-	ApiService *AuthorizationStreamnativeIoV1alpha1ApiService
-	body *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SelfSubjectUserReview
-	dryRun *string
+	ctx          context.Context
+	ApiService   *AuthorizationStreamnativeIoV1alpha1ApiService
+	body         *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SelfSubjectUserReview
+	dryRun       *string
 	fieldManager *string
-	pretty *string
+	pretty       *string
 }
 
 func (r ApiCreateAuthorizationStreamnativeIoV1alpha1SelfSubjectUserReviewRequest) Body(body ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SelfSubjectUserReview) ApiCreateAuthorizationStreamnativeIoV1alpha1SelfSubjectUserReviewRequest {
@@ -653,24 +656,25 @@ CreateAuthorizationStreamnativeIoV1alpha1SelfSubjectUserReview Method for Create
 
 create a SelfSubjectUserReview
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiCreateAuthorizationStreamnativeIoV1alpha1SelfSubjectUserReviewRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiCreateAuthorizationStreamnativeIoV1alpha1SelfSubjectUserReviewRequest
 */
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) CreateAuthorizationStreamnativeIoV1alpha1SelfSubjectUserReview(ctx context.Context) ApiCreateAuthorizationStreamnativeIoV1alpha1SelfSubjectUserReviewRequest {
 	return ApiCreateAuthorizationStreamnativeIoV1alpha1SelfSubjectUserReviewRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SelfSubjectUserReview
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SelfSubjectUserReview
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) CreateAuthorizationStreamnativeIoV1alpha1SelfSubjectUserReviewExecute(r ApiCreateAuthorizationStreamnativeIoV1alpha1SelfSubjectUserReviewRequest) (*ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SelfSubjectUserReview, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SelfSubjectUserReview
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SelfSubjectUserReview
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AuthorizationStreamnativeIoV1alpha1ApiService.CreateAuthorizationStreamnativeIoV1alpha1SelfSubjectUserReview")
@@ -753,12 +757,12 @@ func (a *AuthorizationStreamnativeIoV1alpha1ApiService) CreateAuthorizationStrea
 }
 
 type ApiCreateAuthorizationStreamnativeIoV1alpha1SubjectRoleReviewRequest struct {
-	ctx context.Context
-	ApiService *AuthorizationStreamnativeIoV1alpha1ApiService
-	body *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SubjectRoleReview
-	dryRun *string
+	ctx          context.Context
+	ApiService   *AuthorizationStreamnativeIoV1alpha1ApiService
+	body         *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SubjectRoleReview
+	dryRun       *string
 	fieldManager *string
-	pretty *string
+	pretty       *string
 }
 
 func (r ApiCreateAuthorizationStreamnativeIoV1alpha1SubjectRoleReviewRequest) Body(body ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SubjectRoleReview) ApiCreateAuthorizationStreamnativeIoV1alpha1SubjectRoleReviewRequest {
@@ -793,24 +797,25 @@ CreateAuthorizationStreamnativeIoV1alpha1SubjectRoleReview Method for CreateAuth
 
 create a SubjectRoleReview
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiCreateAuthorizationStreamnativeIoV1alpha1SubjectRoleReviewRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiCreateAuthorizationStreamnativeIoV1alpha1SubjectRoleReviewRequest
 */
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) CreateAuthorizationStreamnativeIoV1alpha1SubjectRoleReview(ctx context.Context) ApiCreateAuthorizationStreamnativeIoV1alpha1SubjectRoleReviewRequest {
 	return ApiCreateAuthorizationStreamnativeIoV1alpha1SubjectRoleReviewRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SubjectRoleReview
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SubjectRoleReview
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) CreateAuthorizationStreamnativeIoV1alpha1SubjectRoleReviewExecute(r ApiCreateAuthorizationStreamnativeIoV1alpha1SubjectRoleReviewRequest) (*ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SubjectRoleReview, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SubjectRoleReview
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SubjectRoleReview
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AuthorizationStreamnativeIoV1alpha1ApiService.CreateAuthorizationStreamnativeIoV1alpha1SubjectRoleReview")
@@ -893,12 +898,12 @@ func (a *AuthorizationStreamnativeIoV1alpha1ApiService) CreateAuthorizationStrea
 }
 
 type ApiCreateAuthorizationStreamnativeIoV1alpha1SubjectRulesReviewRequest struct {
-	ctx context.Context
-	ApiService *AuthorizationStreamnativeIoV1alpha1ApiService
-	body *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SubjectRulesReview
-	dryRun *string
+	ctx          context.Context
+	ApiService   *AuthorizationStreamnativeIoV1alpha1ApiService
+	body         *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SubjectRulesReview
+	dryRun       *string
 	fieldManager *string
-	pretty *string
+	pretty       *string
 }
 
 func (r ApiCreateAuthorizationStreamnativeIoV1alpha1SubjectRulesReviewRequest) Body(body ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SubjectRulesReview) ApiCreateAuthorizationStreamnativeIoV1alpha1SubjectRulesReviewRequest {
@@ -933,24 +938,25 @@ CreateAuthorizationStreamnativeIoV1alpha1SubjectRulesReview Method for CreateAut
 
 create a SubjectRulesReview
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiCreateAuthorizationStreamnativeIoV1alpha1SubjectRulesReviewRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiCreateAuthorizationStreamnativeIoV1alpha1SubjectRulesReviewRequest
 */
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) CreateAuthorizationStreamnativeIoV1alpha1SubjectRulesReview(ctx context.Context) ApiCreateAuthorizationStreamnativeIoV1alpha1SubjectRulesReviewRequest {
 	return ApiCreateAuthorizationStreamnativeIoV1alpha1SubjectRulesReviewRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SubjectRulesReview
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SubjectRulesReview
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) CreateAuthorizationStreamnativeIoV1alpha1SubjectRulesReviewExecute(r ApiCreateAuthorizationStreamnativeIoV1alpha1SubjectRulesReviewRequest) (*ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SubjectRulesReview, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SubjectRulesReview
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1SubjectRulesReview
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AuthorizationStreamnativeIoV1alpha1ApiService.CreateAuthorizationStreamnativeIoV1alpha1SubjectRulesReview")
@@ -1033,22 +1039,22 @@ func (a *AuthorizationStreamnativeIoV1alpha1ApiService) CreateAuthorizationStrea
 }
 
 type ApiDeleteAuthorizationStreamnativeIoV1alpha1CollectionNamespacedIamAccountRequest struct {
-	ctx context.Context
-	ApiService *AuthorizationStreamnativeIoV1alpha1ApiService
-	namespace string
-	pretty *string
-	continue_ *string
-	dryRun *string
-	fieldSelector *string
-	gracePeriodSeconds *int32
-	labelSelector *string
-	limit *int32
-	orphanDependents *bool
-	propagationPolicy *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *AuthorizationStreamnativeIoV1alpha1ApiService
+	namespace            string
+	pretty               *string
+	continue_            *string
+	dryRun               *string
+	fieldSelector        *string
+	gracePeriodSeconds   *int32
+	labelSelector        *string
+	limit                *int32
+	orphanDependents     *bool
+	propagationPolicy    *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	body *V1DeleteOptions
+	timeoutSeconds       *int32
+	body                 *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -1137,26 +1143,27 @@ DeleteAuthorizationStreamnativeIoV1alpha1CollectionNamespacedIamAccount Method f
 
 delete collection of IamAccount
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiDeleteAuthorizationStreamnativeIoV1alpha1CollectionNamespacedIamAccountRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiDeleteAuthorizationStreamnativeIoV1alpha1CollectionNamespacedIamAccountRequest
 */
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) DeleteAuthorizationStreamnativeIoV1alpha1CollectionNamespacedIamAccount(ctx context.Context, namespace string) ApiDeleteAuthorizationStreamnativeIoV1alpha1CollectionNamespacedIamAccountRequest {
 	return ApiDeleteAuthorizationStreamnativeIoV1alpha1CollectionNamespacedIamAccountRequest{
 		ApiService: a,
-		ctx: ctx,
-		namespace: namespace,
+		ctx:        ctx,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1Status
+//
+//	@return V1Status
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) DeleteAuthorizationStreamnativeIoV1alpha1CollectionNamespacedIamAccountExecute(r ApiDeleteAuthorizationStreamnativeIoV1alpha1CollectionNamespacedIamAccountRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1Status
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AuthorizationStreamnativeIoV1alpha1ApiService.DeleteAuthorizationStreamnativeIoV1alpha1CollectionNamespacedIamAccount")
@@ -1264,16 +1271,16 @@ func (a *AuthorizationStreamnativeIoV1alpha1ApiService) DeleteAuthorizationStrea
 }
 
 type ApiDeleteAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest struct {
-	ctx context.Context
-	ApiService *AuthorizationStreamnativeIoV1alpha1ApiService
-	name string
-	namespace string
-	pretty *string
-	dryRun *string
+	ctx                context.Context
+	ApiService         *AuthorizationStreamnativeIoV1alpha1ApiService
+	name               string
+	namespace          string
+	pretty             *string
+	dryRun             *string
 	gracePeriodSeconds *int32
-	orphanDependents *bool
-	propagationPolicy *string
-	body *V1DeleteOptions
+	orphanDependents   *bool
+	propagationPolicy  *string
+	body               *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -1320,28 +1327,29 @@ DeleteAuthorizationStreamnativeIoV1alpha1NamespacedIamAccount Method for DeleteA
 
 delete an IamAccount
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the IamAccount
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiDeleteAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the IamAccount
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiDeleteAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest
 */
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) DeleteAuthorizationStreamnativeIoV1alpha1NamespacedIamAccount(ctx context.Context, name string, namespace string) ApiDeleteAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest {
 	return ApiDeleteAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1Status
+//
+//	@return V1Status
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) DeleteAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountExecute(r ApiDeleteAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1Status
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AuthorizationStreamnativeIoV1alpha1ApiService.DeleteAuthorizationStreamnativeIoV1alpha1NamespacedIamAccount")
@@ -1429,16 +1437,16 @@ func (a *AuthorizationStreamnativeIoV1alpha1ApiService) DeleteAuthorizationStrea
 }
 
 type ApiDeleteAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest struct {
-	ctx context.Context
-	ApiService *AuthorizationStreamnativeIoV1alpha1ApiService
-	name string
-	namespace string
-	pretty *string
-	dryRun *string
+	ctx                context.Context
+	ApiService         *AuthorizationStreamnativeIoV1alpha1ApiService
+	name               string
+	namespace          string
+	pretty             *string
+	dryRun             *string
 	gracePeriodSeconds *int32
-	orphanDependents *bool
-	propagationPolicy *string
-	body *V1DeleteOptions
+	orphanDependents   *bool
+	propagationPolicy  *string
+	body               *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -1485,28 +1493,29 @@ DeleteAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatus Method for D
 
 delete status of an IamAccount
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the IamAccount
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiDeleteAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the IamAccount
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiDeleteAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest
 */
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) DeleteAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatus(ctx context.Context, name string, namespace string) ApiDeleteAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest {
 	return ApiDeleteAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1Status
+//
+//	@return V1Status
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) DeleteAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusExecute(r ApiDeleteAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1Status
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AuthorizationStreamnativeIoV1alpha1ApiService.DeleteAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatus")
@@ -1594,7 +1603,7 @@ func (a *AuthorizationStreamnativeIoV1alpha1ApiService) DeleteAuthorizationStrea
 }
 
 type ApiGetAuthorizationStreamnativeIoV1alpha1APIResourcesRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *AuthorizationStreamnativeIoV1alpha1ApiService
 }
 
@@ -1607,24 +1616,25 @@ GetAuthorizationStreamnativeIoV1alpha1APIResources Method for GetAuthorizationSt
 
 get available resources
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiGetAuthorizationStreamnativeIoV1alpha1APIResourcesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetAuthorizationStreamnativeIoV1alpha1APIResourcesRequest
 */
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) GetAuthorizationStreamnativeIoV1alpha1APIResources(ctx context.Context) ApiGetAuthorizationStreamnativeIoV1alpha1APIResourcesRequest {
 	return ApiGetAuthorizationStreamnativeIoV1alpha1APIResourcesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return V1APIResourceList
+//
+//	@return V1APIResourceList
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) GetAuthorizationStreamnativeIoV1alpha1APIResourcesExecute(r ApiGetAuthorizationStreamnativeIoV1alpha1APIResourcesRequest) (*V1APIResourceList, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1APIResourceList
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1APIResourceList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AuthorizationStreamnativeIoV1alpha1ApiService.GetAuthorizationStreamnativeIoV1alpha1APIResources")
@@ -1693,18 +1703,18 @@ func (a *AuthorizationStreamnativeIoV1alpha1ApiService) GetAuthorizationStreamna
 }
 
 type ApiListAuthorizationStreamnativeIoV1alpha1IamAccountForAllNamespacesRequest struct {
-	ctx context.Context
-	ApiService *AuthorizationStreamnativeIoV1alpha1ApiService
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *AuthorizationStreamnativeIoV1alpha1ApiService
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -1776,24 +1786,25 @@ ListAuthorizationStreamnativeIoV1alpha1IamAccountForAllNamespaces Method for Lis
 
 list or watch objects of kind IamAccount
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiListAuthorizationStreamnativeIoV1alpha1IamAccountForAllNamespacesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiListAuthorizationStreamnativeIoV1alpha1IamAccountForAllNamespacesRequest
 */
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) ListAuthorizationStreamnativeIoV1alpha1IamAccountForAllNamespaces(ctx context.Context) ApiListAuthorizationStreamnativeIoV1alpha1IamAccountForAllNamespacesRequest {
 	return ApiListAuthorizationStreamnativeIoV1alpha1IamAccountForAllNamespacesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccountList
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccountList
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) ListAuthorizationStreamnativeIoV1alpha1IamAccountForAllNamespacesExecute(r ApiListAuthorizationStreamnativeIoV1alpha1IamAccountForAllNamespacesRequest) (*ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccountList, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccountList
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccountList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AuthorizationStreamnativeIoV1alpha1ApiService.ListAuthorizationStreamnativeIoV1alpha1IamAccountForAllNamespaces")
@@ -1892,19 +1903,19 @@ func (a *AuthorizationStreamnativeIoV1alpha1ApiService) ListAuthorizationStreamn
 }
 
 type ApiListAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest struct {
-	ctx context.Context
-	ApiService *AuthorizationStreamnativeIoV1alpha1ApiService
-	namespace string
-	pretty *string
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *AuthorizationStreamnativeIoV1alpha1ApiService
+	namespace            string
+	pretty               *string
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -1976,26 +1987,27 @@ ListAuthorizationStreamnativeIoV1alpha1NamespacedIamAccount Method for ListAutho
 
 list or watch objects of kind IamAccount
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiListAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiListAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest
 */
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) ListAuthorizationStreamnativeIoV1alpha1NamespacedIamAccount(ctx context.Context, namespace string) ApiListAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest {
 	return ApiListAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest{
 		ApiService: a,
-		ctx: ctx,
-		namespace: namespace,
+		ctx:        ctx,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccountList
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccountList
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) ListAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountExecute(r ApiListAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest) (*ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccountList, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccountList
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccountList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AuthorizationStreamnativeIoV1alpha1ApiService.ListAuthorizationStreamnativeIoV1alpha1NamespacedIamAccount")
@@ -2095,15 +2107,15 @@ func (a *AuthorizationStreamnativeIoV1alpha1ApiService) ListAuthorizationStreamn
 }
 
 type ApiPatchAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest struct {
-	ctx context.Context
-	ApiService *AuthorizationStreamnativeIoV1alpha1ApiService
-	name string
-	namespace string
-	body *map[string]interface{}
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *AuthorizationStreamnativeIoV1alpha1ApiService
+	name         string
+	namespace    string
+	body         *map[string]interface{}
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
-	force *bool
+	force        *bool
 }
 
 func (r ApiPatchAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest) Body(body map[string]interface{}) ApiPatchAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest {
@@ -2144,28 +2156,29 @@ PatchAuthorizationStreamnativeIoV1alpha1NamespacedIamAccount Method for PatchAut
 
 partially update the specified IamAccount
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the IamAccount
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiPatchAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the IamAccount
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiPatchAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest
 */
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) PatchAuthorizationStreamnativeIoV1alpha1NamespacedIamAccount(ctx context.Context, name string, namespace string) ApiPatchAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest {
 	return ApiPatchAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) PatchAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountExecute(r ApiPatchAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest) (*ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPatch
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AuthorizationStreamnativeIoV1alpha1ApiService.PatchAuthorizationStreamnativeIoV1alpha1NamespacedIamAccount")
@@ -2253,15 +2266,15 @@ func (a *AuthorizationStreamnativeIoV1alpha1ApiService) PatchAuthorizationStream
 }
 
 type ApiPatchAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest struct {
-	ctx context.Context
-	ApiService *AuthorizationStreamnativeIoV1alpha1ApiService
-	name string
-	namespace string
-	body *map[string]interface{}
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *AuthorizationStreamnativeIoV1alpha1ApiService
+	name         string
+	namespace    string
+	body         *map[string]interface{}
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
-	force *bool
+	force        *bool
 }
 
 func (r ApiPatchAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest) Body(body map[string]interface{}) ApiPatchAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest {
@@ -2302,28 +2315,29 @@ PatchAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatus Method for Pa
 
 partially update status of the specified IamAccount
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the IamAccount
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiPatchAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the IamAccount
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiPatchAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest
 */
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) PatchAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatus(ctx context.Context, name string, namespace string) ApiPatchAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest {
 	return ApiPatchAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) PatchAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusExecute(r ApiPatchAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPatch
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AuthorizationStreamnativeIoV1alpha1ApiService.PatchAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatus")
@@ -2411,11 +2425,11 @@ func (a *AuthorizationStreamnativeIoV1alpha1ApiService) PatchAuthorizationStream
 }
 
 type ApiReadAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *AuthorizationStreamnativeIoV1alpha1ApiService
-	name string
-	namespace string
-	pretty *string
+	name       string
+	namespace  string
+	pretty     *string
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -2433,28 +2447,29 @@ ReadAuthorizationStreamnativeIoV1alpha1NamespacedIamAccount Method for ReadAutho
 
 read the specified IamAccount
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the IamAccount
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiReadAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the IamAccount
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiReadAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest
 */
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) ReadAuthorizationStreamnativeIoV1alpha1NamespacedIamAccount(ctx context.Context, name string, namespace string) ApiReadAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest {
 	return ApiReadAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) ReadAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountExecute(r ApiReadAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest) (*ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AuthorizationStreamnativeIoV1alpha1ApiService.ReadAuthorizationStreamnativeIoV1alpha1NamespacedIamAccount")
@@ -2528,11 +2543,11 @@ func (a *AuthorizationStreamnativeIoV1alpha1ApiService) ReadAuthorizationStreamn
 }
 
 type ApiReadAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *AuthorizationStreamnativeIoV1alpha1ApiService
-	name string
-	namespace string
-	pretty *string
+	name       string
+	namespace  string
+	pretty     *string
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -2550,28 +2565,29 @@ ReadAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatus Method for Rea
 
 read status of the specified IamAccount
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the IamAccount
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiReadAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the IamAccount
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiReadAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest
 */
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) ReadAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatus(ctx context.Context, name string, namespace string) ApiReadAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest {
 	return ApiReadAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) ReadAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusExecute(r ApiReadAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AuthorizationStreamnativeIoV1alpha1ApiService.ReadAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatus")
@@ -2645,13 +2661,13 @@ func (a *AuthorizationStreamnativeIoV1alpha1ApiService) ReadAuthorizationStreamn
 }
 
 type ApiReplaceAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest struct {
-	ctx context.Context
-	ApiService *AuthorizationStreamnativeIoV1alpha1ApiService
-	name string
-	namespace string
-	body *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *AuthorizationStreamnativeIoV1alpha1ApiService
+	name         string
+	namespace    string
+	body         *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
 }
 
@@ -2687,28 +2703,29 @@ ReplaceAuthorizationStreamnativeIoV1alpha1NamespacedIamAccount Method for Replac
 
 replace the specified IamAccount
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the IamAccount
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiReplaceAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the IamAccount
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiReplaceAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest
 */
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) ReplaceAuthorizationStreamnativeIoV1alpha1NamespacedIamAccount(ctx context.Context, name string, namespace string) ApiReplaceAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest {
 	return ApiReplaceAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) ReplaceAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountExecute(r ApiReplaceAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountRequest) (*ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AuthorizationStreamnativeIoV1alpha1ApiService.ReplaceAuthorizationStreamnativeIoV1alpha1NamespacedIamAccount")
@@ -2793,13 +2810,13 @@ func (a *AuthorizationStreamnativeIoV1alpha1ApiService) ReplaceAuthorizationStre
 }
 
 type ApiReplaceAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest struct {
-	ctx context.Context
-	ApiService *AuthorizationStreamnativeIoV1alpha1ApiService
-	name string
-	namespace string
-	body *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
-	pretty *string
-	dryRun *string
+	ctx          context.Context
+	ApiService   *AuthorizationStreamnativeIoV1alpha1ApiService
+	name         string
+	namespace    string
+	body         *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
+	pretty       *string
+	dryRun       *string
 	fieldManager *string
 }
 
@@ -2835,28 +2852,29 @@ ReplaceAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatus Method for 
 
 replace status of the specified IamAccount
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the IamAccount
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiReplaceAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the IamAccount
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiReplaceAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest
 */
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) ReplaceAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatus(ctx context.Context, name string, namespace string) ApiReplaceAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest {
 	return ApiReplaceAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
+//
+//	@return ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) ReplaceAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusExecute(r ApiReplaceAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisAuthorizationV1alpha1IamAccount
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AuthorizationStreamnativeIoV1alpha1ApiService.ReplaceAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatus")
@@ -2941,20 +2959,20 @@ func (a *AuthorizationStreamnativeIoV1alpha1ApiService) ReplaceAuthorizationStre
 }
 
 type ApiWatchAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest struct {
-	ctx context.Context
-	ApiService *AuthorizationStreamnativeIoV1alpha1ApiService
-	name string
-	namespace string
-	allowWatchBookmarks *bool
-	continue_ *string
-	fieldSelector *string
-	labelSelector *string
-	limit *int32
-	pretty *string
-	resourceVersion *string
+	ctx                  context.Context
+	ApiService           *AuthorizationStreamnativeIoV1alpha1ApiService
+	name                 string
+	namespace            string
+	allowWatchBookmarks  *bool
+	continue_            *string
+	fieldSelector        *string
+	labelSelector        *string
+	limit                *int32
+	pretty               *string
+	resourceVersion      *string
 	resourceVersionMatch *string
-	timeoutSeconds *int32
-	watch *bool
+	timeoutSeconds       *int32
+	watch                *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -3026,28 +3044,29 @@ WatchAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatus Method for Wa
 
 watch changes to status of an object of kind IamAccount. deprecated: use the 'watch' parameter with a list operation instead, filtered to a single item with the 'fieldSelector' parameter.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param name name of the IamAccount
- @param namespace object name and auth scope, such as for teams and projects
- @return ApiWatchAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param name name of the IamAccount
+	@param namespace object name and auth scope, such as for teams and projects
+	@return ApiWatchAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest
 */
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) WatchAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatus(ctx context.Context, name string, namespace string) ApiWatchAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest {
 	return ApiWatchAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		name: name,
-		namespace: namespace,
+		ctx:        ctx,
+		name:       name,
+		namespace:  namespace,
 	}
 }
 
 // Execute executes the request
-//  @return V1WatchEvent
+//
+//	@return V1WatchEvent
 func (a *AuthorizationStreamnativeIoV1alpha1ApiService) WatchAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusExecute(r ApiWatchAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatusRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *V1WatchEvent
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AuthorizationStreamnativeIoV1alpha1ApiService.WatchAuthorizationStreamnativeIoV1alpha1NamespacedIamAccountStatus")

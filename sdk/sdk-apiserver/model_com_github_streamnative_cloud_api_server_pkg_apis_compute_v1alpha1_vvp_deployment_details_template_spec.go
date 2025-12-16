@@ -33,14 +33,14 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentDetailsTemplateSpec VvpDeploymentDetailsTemplateSpec defines the desired state of VvpDeploymentDetails
 type ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentDetailsTemplateSpec struct {
-	Artifact ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Artifact `json:"artifact"`
-	FlinkConfiguration *map[string]string `json:"flinkConfiguration,omitempty"`
-	Kubernetes *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentDetailsTemplateSpecKubernetesSpec `json:"kubernetes,omitempty"`
-	LatestCheckpointFetchInterval *int32 `json:"latestCheckpointFetchInterval,omitempty"`
-	Logging *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Logging `json:"logging,omitempty"`
-	NumberOfTaskManagers *int32 `json:"numberOfTaskManagers,omitempty"`
-	Parallelism *int32 `json:"parallelism,omitempty"`
-	Resources *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentKubernetesResources `json:"resources,omitempty"`
+	Artifact                      ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Artifact                                        `json:"artifact"`
+	FlinkConfiguration            *map[string]string                                                                                       `json:"flinkConfiguration,omitempty"`
+	Kubernetes                    *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentDetailsTemplateSpecKubernetesSpec `json:"kubernetes,omitempty"`
+	LatestCheckpointFetchInterval *int32                                                                                                   `json:"latestCheckpointFetchInterval,omitempty"`
+	Logging                       *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Logging                                        `json:"logging,omitempty"`
+	NumberOfTaskManagers          *int32                                                                                                   `json:"numberOfTaskManagers,omitempty"`
+	Parallelism                   *int32                                                                                                   `json:"parallelism,omitempty"`
+	Resources                     *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentKubernetesResources               `json:"resources,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentDetailsTemplateSpec instantiates a new ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentDetailsTemplateSpec object
@@ -373,5 +373,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDep
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

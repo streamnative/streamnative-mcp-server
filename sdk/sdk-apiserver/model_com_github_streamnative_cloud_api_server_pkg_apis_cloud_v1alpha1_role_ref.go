@@ -34,8 +34,8 @@ import (
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RoleRef struct for ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RoleRef
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RoleRef struct {
 	ApiGroup string `json:"apiGroup"`
-	Kind string `json:"kind"`
-	Name string `json:"name"`
+	Kind     string `json:"kind"`
+	Name     string `json:"name"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RoleRef instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RoleRef object
@@ -179,5 +179,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RoleRef)
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

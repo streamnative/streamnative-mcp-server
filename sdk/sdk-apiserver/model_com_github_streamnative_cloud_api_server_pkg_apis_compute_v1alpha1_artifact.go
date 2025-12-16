@@ -33,22 +33,22 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Artifact Artifact is the artifact configs to deploy.
 type ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Artifact struct {
-	AdditionalDependencies []string `json:"additionalDependencies,omitempty"`
-	AdditionalPythonArchives []string `json:"additionalPythonArchives,omitempty"`
+	AdditionalDependencies    []string `json:"additionalDependencies,omitempty"`
+	AdditionalPythonArchives  []string `json:"additionalPythonArchives,omitempty"`
 	AdditionalPythonLibraries []string `json:"additionalPythonLibraries,omitempty"`
-	ArtifactKind *string `json:"artifactKind,omitempty"`
-	EntryClass *string `json:"entryClass,omitempty"`
-	EntryModule *string `json:"entryModule,omitempty"`
-	FlinkImageRegistry *string `json:"flinkImageRegistry,omitempty"`
-	FlinkImageRepository *string `json:"flinkImageRepository,omitempty"`
-	FlinkImageTag *string `json:"flinkImageTag,omitempty"`
-	FlinkVersion *string `json:"flinkVersion,omitempty"`
-	JarUri *string `json:"jarUri,omitempty"`
-	Kind *string `json:"kind,omitempty"`
-	MainArgs *string `json:"mainArgs,omitempty"`
-	PythonArtifactUri *string `json:"pythonArtifactUri,omitempty"`
-	SqlScript *string `json:"sqlScript,omitempty"`
-	Uri *string `json:"uri,omitempty"`
+	ArtifactKind              *string  `json:"artifactKind,omitempty"`
+	EntryClass                *string  `json:"entryClass,omitempty"`
+	EntryModule               *string  `json:"entryModule,omitempty"`
+	FlinkImageRegistry        *string  `json:"flinkImageRegistry,omitempty"`
+	FlinkImageRepository      *string  `json:"flinkImageRepository,omitempty"`
+	FlinkImageTag             *string  `json:"flinkImageTag,omitempty"`
+	FlinkVersion              *string  `json:"flinkVersion,omitempty"`
+	JarUri                    *string  `json:"jarUri,omitempty"`
+	Kind                      *string  `json:"kind,omitempty"`
+	MainArgs                  *string  `json:"mainArgs,omitempty"`
+	PythonArtifactUri         *string  `json:"pythonArtifactUri,omitempty"`
+	SqlScript                 *string  `json:"sqlScript,omitempty"`
+	Uri                       *string  `json:"uri,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Artifact instantiates a new ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Artifact object
@@ -668,5 +668,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Artifa
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

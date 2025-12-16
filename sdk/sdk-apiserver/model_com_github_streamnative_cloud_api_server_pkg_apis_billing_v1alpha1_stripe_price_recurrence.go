@@ -37,8 +37,8 @@ type ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1StripePriceRecurre
 	// Interval is how often the price recurs
 	Interval *string `json:"interval,omitempty"`
 	// The number of intervals. For example, `interval=month` and `interval_count=3` bills every 3 months. Maximum of one-year interval is allowed (1 year, 12 months, or 52 weeks).
-	IntervalCount *int64 `json:"intervalCount,omitempty"`
-	UsageType *string `json:"usageType,omitempty"`
+	IntervalCount *int64  `json:"intervalCount,omitempty"`
+	UsageType     *string `json:"usageType,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1StripePriceRecurrence instantiates a new ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1StripePriceRecurrence object
@@ -238,5 +238,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Stripe
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
@@ -102,9 +103,9 @@ func TestJSONConverter_ToMCPToolInputSchemaProperties(t *testing.T) {
 				assert.NoError(t, err)
 				var expectedTool = mcp.NewTool("test", tt.expectedOptions...)
 				var actualTool = mcp.NewTool("test", opts...)
-				expectedToolSchemaJSON, _ := expectedTool.InputSchema.MarshalJSON()
-				actualToolSchemaJSON, _ := actualTool.InputSchema.MarshalJSON()
-				assert.Equal(t, expectedToolSchemaJSON, actualToolSchemaJSON, "ToolOptions mismatch")
+				expectedToolSchemaJSON, _ := json.Marshal(expectedTool.InputSchema)
+				actualToolSchemaJSON, _ := json.Marshal(actualTool.InputSchema)
+				assert.JSONEq(t, string(expectedToolSchemaJSON), string(actualToolSchemaJSON), "ToolOptions mismatch")
 			}
 		})
 	}

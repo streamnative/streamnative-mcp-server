@@ -33,9 +33,9 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1IdentityPoolSpec IdentityPoolSpec defines the desired state of IdentityPool
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1IdentityPoolSpec struct {
-	AuthType string `json:"authType"`
-	Description string `json:"description"`
-	Expression string `json:"expression"`
+	AuthType     string `json:"authType"`
+	Description  string `json:"description"`
+	Expression   string `json:"expression"`
 	ProviderName string `json:"providerName"`
 }
 
@@ -208,5 +208,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Identity
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

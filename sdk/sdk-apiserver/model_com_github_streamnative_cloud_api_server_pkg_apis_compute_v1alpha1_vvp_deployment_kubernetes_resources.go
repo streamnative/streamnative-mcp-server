@@ -33,7 +33,7 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentKubernetesResources VvpDeploymentKubernetesResources defines the Kubernetes resources for the VvpDeployment.
 type ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentKubernetesResources struct {
-	Jobmanager *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1ResourceSpec `json:"jobmanager,omitempty"`
+	Jobmanager  *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1ResourceSpec `json:"jobmanager,omitempty"`
 	Taskmanager *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1ResourceSpec `json:"taskmanager,omitempty"`
 }
 
@@ -164,5 +164,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDep
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

@@ -33,10 +33,10 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1CloudConnectionSpec CloudConnectionSpec defines the desired state of CloudConnection
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1CloudConnectionSpec struct {
-	Aws *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1AWSCloudConnection `json:"aws,omitempty"`
-	Azure *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1AzureConnection `json:"azure,omitempty"`
-	Gcp *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1GCPCloudConnection `json:"gcp,omitempty"`
-	Type string `json:"type"`
+	Aws   *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1AWSCloudConnection `json:"aws,omitempty"`
+	Azure *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1AzureConnection    `json:"azure,omitempty"`
+	Gcp   *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1GCPCloudConnection `json:"gcp,omitempty"`
+	Type  string                                                                     `json:"type"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1CloudConnectionSpec instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1CloudConnectionSpec object
@@ -229,5 +229,3 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1CloudCon
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-
