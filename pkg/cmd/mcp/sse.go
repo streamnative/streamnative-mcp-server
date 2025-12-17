@@ -184,7 +184,11 @@ func runSseServer(configOpts *ServerOptions) error {
 		mux.Handle(msgPath, authMiddleware(sseServer.MessageHandler()))
 
 		// Start custom HTTP server
-		httpServer = &http.Server{Addr: configOpts.HTTPAddr, Handler: mux}
+		httpServer = &http.Server{
+			Addr:              configOpts.HTTPAddr,
+			Handler:           mux,
+			ReadHeaderTimeout: 10 * time.Second, // Prevent Slowloris attacks
+		}
 		go func() {
 			if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 				errCh <- err
