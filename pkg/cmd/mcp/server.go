@@ -83,24 +83,29 @@ func newMcpServer(_ context.Context, configOpts *ServerOptions, logrusLogger *lo
 		}
 	case snConfig.ExternalPulsar != nil:
 		{
-			psession, err := pulsar.NewSession(pulsar.PulsarContext{
-				ServiceURL:                    snConfig.ExternalPulsar.ServiceURL,
-				WebServiceURL:                 snConfig.ExternalPulsar.WebServiceURL,
-				AuthPlugin:                    snConfig.ExternalPulsar.AuthPlugin,
-				AuthParams:                    snConfig.ExternalPulsar.AuthParams,
-				Token:                         snConfig.ExternalPulsar.Token,
-				TLSAllowInsecureConnection:    snConfig.ExternalPulsar.TLSAllowInsecureConnection,
-				TLSEnableHostnameVerification: snConfig.ExternalPulsar.TLSEnableHostnameVerification,
-				TLSTrustCertsFilePath:         snConfig.ExternalPulsar.TLSTrustCertsFilePath,
-				TLSCertFile:                   snConfig.ExternalPulsar.TLSCertFile,
-				TLSKeyFile:                    snConfig.ExternalPulsar.TLSKeyFile,
-			})
-			if err != nil {
-				return nil, errors.Wrap(err, "failed to set external Pulsar context")
-			}
 			mcpServer = mcp.NewServer("streamnative-mcp-server", "0.0.1", logrusLogger, server.WithInstructions(mcp.GetExternalPulsarServerInstructions(snConfig.ExternalPulsar.WebServiceURL)))
-			mcpServer.PulsarSession = psession
 			s = mcpServer.MCPServer
+
+			// Only create global PulsarSession if not in multi-session mode
+			// In multi-session mode, each request must provide its own token via Authorization header
+			if !configOpts.MultiSessionPulsar {
+				psession, err := pulsar.NewSession(pulsar.PulsarContext{
+					ServiceURL:                    snConfig.ExternalPulsar.ServiceURL,
+					WebServiceURL:                 snConfig.ExternalPulsar.WebServiceURL,
+					AuthPlugin:                    snConfig.ExternalPulsar.AuthPlugin,
+					AuthParams:                    snConfig.ExternalPulsar.AuthParams,
+					Token:                         snConfig.ExternalPulsar.Token,
+					TLSAllowInsecureConnection:    snConfig.ExternalPulsar.TLSAllowInsecureConnection,
+					TLSEnableHostnameVerification: snConfig.ExternalPulsar.TLSEnableHostnameVerification,
+					TLSTrustCertsFilePath:         snConfig.ExternalPulsar.TLSTrustCertsFilePath,
+					TLSCertFile:                   snConfig.ExternalPulsar.TLSCertFile,
+					TLSKeyFile:                    snConfig.ExternalPulsar.TLSKeyFile,
+				})
+				if err != nil {
+					return nil, errors.Wrap(err, "failed to set external Pulsar context")
+				}
+				mcpServer.PulsarSession = psession
+			}
 		}
 	default:
 		{

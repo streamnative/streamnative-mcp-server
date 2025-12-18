@@ -110,7 +110,8 @@ func runSseServer(configOpts *ServerOptions) error {
 				TLSKeyFile:                    snConfig.ExternalPulsar.TLSKeyFile,
 			},
 		}
-		pulsarSessionManager = session.NewPulsarSessionManager(managerConfig, mcpServer.PulsarSession, logger)
+		// Pass nil as globalSession - in multi-session mode, every request must have a valid token
+		pulsarSessionManager = session.NewPulsarSessionManager(managerConfig, nil, logger)
 		logger.Info("Multi-session Pulsar mode enabled")
 	}
 
@@ -125,14 +126,16 @@ func runSseServer(configOpts *ServerOptions) error {
 			// Handle per-user Pulsar sessions
 			if pulsarSessionManager != nil {
 				token := session.ExtractBearerToken(r)
+				// Token is already validated in auth middleware, this should always succeed
 				if pulsarSession, err := pulsarSessionManager.GetOrCreateSession(ctx, token); err == nil {
 					c = context2.WithPulsarSession(c, pulsarSession)
 					if token != "" {
 						c = session.WithUserTokenHash(c, pulsarSessionManager.HashTokenForLog(token))
 					}
 				} else {
-					logger.WithError(err).Warn("Failed to get per-user Pulsar session, using global")
-					c = context2.WithPulsarSession(c, mcpServer.PulsarSession)
+					// Should not happen since middleware validates token first
+					logger.WithError(err).Error("Unexpected auth error after middleware validation")
+					// Don't set PulsarSession - tool handlers will fail gracefully with "session not found"
 				}
 			} else {
 				c = context2.WithPulsarSession(c, mcpServer.PulsarSession)
@@ -144,16 +147,62 @@ func runSseServer(configOpts *ServerOptions) error {
 
 	// 4. Expose the full SSE URL to the user
 	ssePath := sseServer.CompleteSsePath()
+	msgPath := sseServer.CompleteMessagePath()
 	fmt.Fprintf(os.Stderr, "StreamNative Cloud MCP Server listening on http://%s%s\n",
 		configOpts.HTTPAddr, ssePath)
 
 	// 5. Run the HTTP listener in a goroutine
 	errCh := make(chan error, 1)
-	go func() {
-		if err := sseServer.Start(configOpts.HTTPAddr); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			errCh <- err // bubble up real crashes
+	var httpServer *http.Server
+
+	if pulsarSessionManager != nil {
+		// Multi-session mode: use custom handlers with auth middleware
+		mux := http.NewServeMux()
+
+		// Auth middleware wrapper that validates token before processing
+		authMiddleware := func(next http.Handler) http.Handler {
+			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				token := session.ExtractBearerToken(r)
+				if token == "" {
+					w.Header().Set("Content-Type", "application/json")
+					http.Error(w, `{"error":"missing Authorization header"}`, http.StatusUnauthorized)
+					return
+				}
+				// Pre-validate token by attempting to get/create session
+				if _, err := pulsarSessionManager.GetOrCreateSession(r.Context(), token); err != nil {
+					logger.WithError(err).Warn("Authentication failed")
+					w.Header().Set("Content-Type", "application/json")
+					http.Error(w, `{"error":"authentication failed"}`, http.StatusUnauthorized)
+					return
+				}
+				next.ServeHTTP(w, r)
+			})
 		}
-	}()
+
+		// Mount handlers with auth middleware
+		mux.Handle(ssePath, authMiddleware(sseServer.SSEHandler()))
+		mux.Handle(msgPath, authMiddleware(sseServer.MessageHandler()))
+
+		// Start custom HTTP server
+		httpServer = &http.Server{
+			Addr:              configOpts.HTTPAddr,
+			Handler:           mux,
+			ReadHeaderTimeout: 10 * time.Second, // Prevent Slowloris attacks
+		}
+		go func() {
+			if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+				errCh <- err
+			}
+		}()
+		logger.Info("SSE server started with authentication middleware")
+	} else {
+		// Non-multi-session mode: use default Start()
+		go func() {
+			if err := sseServer.Start(configOpts.HTTPAddr); err != nil && !errors.Is(err, http.ErrServerClosed) {
+				errCh <- err // bubble up real crashes
+			}
+		}()
+	}
 
 	// Give the server a moment to start
 	time.Sleep(100 * time.Millisecond)
@@ -177,10 +226,20 @@ func runSseServer(configOpts *ServerOptions) error {
 		pulsarSessionManager.Stop()
 	}
 
-	// First try to shut down the SSE server
-	if err := sseServer.Shutdown(shCtx); err != nil {
-		if !errors.Is(err, http.ErrServerClosed) {
-			logger.Errorf("Error shutting down SSE server: %v", err)
+	// Shut down the HTTP server
+	if httpServer != nil {
+		// Multi-session mode: shut down custom HTTP server
+		if err := httpServer.Shutdown(shCtx); err != nil {
+			if !errors.Is(err, http.ErrServerClosed) {
+				logger.Errorf("Error shutting down HTTP server: %v", err)
+			}
+		}
+	} else {
+		// Non-multi-session mode: shut down SSE server
+		if err := sseServer.Shutdown(shCtx); err != nil {
+			if !errors.Is(err, http.ErrServerClosed) {
+				logger.Errorf("Error shutting down SSE server: %v", err)
+			}
 		}
 	}
 

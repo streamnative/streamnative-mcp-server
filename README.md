@@ -124,6 +124,41 @@ snmcp sse --http-addr :9090 --http-path /mcp --use-external-pulsar --pulsar-web-
 docker run -i --rm -e SNMCP_ORGANIZATION=my-org -e SNMCP_KEY_FILE=/key.json -v /path/to/key-file.json:/key.json -p 9090:9090 streamnative/snmcp sse
 ```
 
+#### Multi-Session Pulsar Mode (SSE only)
+
+When running the SSE server with external Pulsar, you can enable **multi-session mode** to support per-user authentication. In this mode, each HTTP request must include an `Authorization: Bearer <token>` header, and the server will create separate Pulsar sessions for each unique token.
+
+```bash
+# Start SSE server with multi-session Pulsar mode
+snmcp sse --http-addr :9090 --http-path /mcp \
+  --use-external-pulsar \
+  --pulsar-web-service-url http://pulsar.example.com:8080 \
+  --multi-session-pulsar \
+  --session-cache-size 100 \
+  --session-ttl-minutes 30
+```
+
+**Key features:**
+- **Per-user sessions**: Each user's Pulsar token creates a separate session
+- **LRU caching**: Sessions are cached with LRU eviction when the cache is full
+- **TTL-based cleanup**: Idle sessions are automatically cleaned up after the configured TTL
+- **Strict authentication**: Requests without a valid `Authorization` header receive HTTP 401 Unauthorized
+
+**Authentication flow:**
+1. Client connects to SSE endpoint with `Authorization: Bearer <pulsar-jwt-token>` header
+2. Server validates the token by attempting to create a Pulsar session
+3. If valid, the session is cached and reused for subsequent requests
+4. If invalid or missing, server returns HTTP 401 Unauthorized
+
+**Configuration options:**
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--multi-session-pulsar` | `false` | Enable per-user Pulsar sessions |
+| `--session-cache-size` | `100` | Maximum number of cached sessions |
+| `--session-ttl-minutes` | `30` | Session idle timeout before eviction |
+
+> **Note:** Multi-session mode is only available for external Pulsar mode (`--use-external-pulsar`) and only works with the SSE server, not stdio.
+
 ### Command-line Options
 
 ```
@@ -175,6 +210,9 @@ Flags:
       --use-external-pulsar                    Use external Pulsar
       --http-addr string                       HTTP server address (default ":9090")
       --http-path string                       HTTP server path for SSE endpoint (default "/mcp")
+      --multi-session-pulsar                   Enable per-user Pulsar sessions based on Authorization header tokens (only for external Pulsar mode)
+      --session-cache-size int                 Maximum number of cached Pulsar sessions when multi-session is enabled (default 100)
+      --session-ttl-minutes int                Session TTL in minutes before eviction when multi-session is enabled (default 30)
   -v, --version                                version for snmcp
 ```
 
