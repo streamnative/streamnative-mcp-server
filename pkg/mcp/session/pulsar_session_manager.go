@@ -99,6 +99,10 @@ func NewPulsarSessionManager(
 func (m *PulsarSessionManager) GetOrCreateSession(_ context.Context, token string) (*pulsar.Session, error) {
 	if token == "" {
 		// Return global session when no token provided
+		// If no global session exists (multi-session mode), return error
+		if m.globalSession == nil {
+			return nil, fmt.Errorf("authentication required: missing Authorization header")
+		}
 		return m.globalSession, nil
 	}
 

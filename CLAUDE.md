@@ -130,8 +130,23 @@ From sessions:
 1. **StreamNative Cloud**: `--organization` + `--key-file`
 2. **External Kafka**: `--use-external-kafka` + Kafka params
 3. **External Pulsar**: `--use-external-pulsar` + Pulsar params
+4. **Multi-Session Pulsar** (SSE only): `--use-external-pulsar` + `--multi-session-pulsar`
 
 Pre-configured context: `--pulsar-instance` + `--pulsar-cluster` disables context management tools.
+
+### Multi-Session Pulsar Mode
+
+When `--multi-session-pulsar` is enabled (SSE server with external Pulsar only):
+
+- **No global PulsarSession**: Each request must provide its own token via `Authorization: Bearer <token>` header
+- **HTTP 401 on auth failure**: Requests without valid tokens are rejected with HTTP 401 Unauthorized
+- **Per-user session caching**: Sessions are cached using LRU with configurable size and TTL
+- **Session management**: See `pkg/mcp/session/pulsar_session_manager.go`
+
+Key files:
+- `pkg/cmd/mcp/sse.go` - Auth middleware wraps SSEHandler()/MessageHandler()
+- `pkg/mcp/session/pulsar_session_manager.go` - LRU session cache with TTL cleanup
+- `pkg/cmd/mcp/server.go` - Skips global PulsarSession when multi-session enabled
 
 ## Error Handling
 
