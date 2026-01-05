@@ -92,3 +92,43 @@ license-check:
 .PHONY: license-fix
 license-fix:
 	license-eye header fix
+
+# E2E Testing targets
+.PHONY: test-e2e-pulsar-start
+test-e2e-pulsar-start:
+	docker-compose -f test/docker-compose-pulsar.yml up -d
+	@echo "Waiting for Pulsar to be ready..."
+	@for i in 1 2 3 4 5 6 7 8 9 10; do \
+		if curl -s http://localhost:8080/admin/v2/clusters > /dev/null 2>&1; then \
+			echo "Pulsar is ready!"; \
+			exit 0; \
+		fi; \
+		echo "Waiting for Pulsar... ($$i/10)"; \
+		sleep 3; \
+	done
+	@echo "Error: Pulsar failed to become ready"; \
+	exit 1
+
+.PHONY: test-e2e-pulsar-stop
+test-e2e-pulsar-stop:
+	docker-compose -f test/docker-compose-pulsar.yml down
+
+.PHONY: test-e2e-pulsar-logs
+test-e2e-pulsar-logs:
+	docker-compose -f test/docker-compose-pulsar.yml logs
+
+.PHONY: test-e2e
+test-e2e:
+	go test -tags=e2e -v ./pkg/mcp/e2e/...
+
+.PHONY: test-e2e-race
+test-e2e-race:
+	go test -race -tags=e2e -v ./pkg/mcp/e2e/...
+
+.PHONY: test-e2e-run
+test-e2e-run: test-e2e-pulsar-start
+	@echo "Running E2E tests..."
+	@$(MAKE) test-e2e; \
+	result=$$?; \
+	$(MAKE) test-e2e-pulsar-stop; \
+	exit $$result
