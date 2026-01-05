@@ -35,13 +35,13 @@ jobs:
           - 8080:8080
         options: >-
           --entrypoint /bin/bash
+          -v ${{ github.workspace }}/scripts/pulsar-e2e-entrypoint.sh:/pulsar-entrypoint.sh
           --health-cmd "curl -f http://localhost:8080/admin/v2/clusters"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 30
           --health-start-period 90s
-          -v ${{ github.workspace }}/scripts/pulsar-e2e-entrypoint.sh:/pulsar-entrypoint.sh
-        cmd: ["/pulsar-entrypoint.sh"]
+          /pulsar-entrypoint.sh
 
     steps:
       - name: Check out code
