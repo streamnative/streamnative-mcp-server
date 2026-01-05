@@ -30,10 +30,10 @@ import (
 
 // PulsarTestHelper provides helper functions for Pulsar E2E testing.
 type PulsarTestHelper struct {
-	adminClient  pulsaradmin.Client
-	adminURL     string
-	serviceURL   string
-	httpClient   *http.Client
+	adminClient pulsaradmin.Client
+	adminURL    string
+	serviceURL  string
+	httpClient  *http.Client
 }
 
 // NewPulsarTestHelper creates a new PulsarTestHelper.
@@ -127,15 +127,15 @@ func (h *PulsarTestHelper) EnsureNamespace(ctx context.Context, tenant, namespac
 		// The Pulsar admin client doesn't provide typed errors, so we check the error message.
 		// This is a best-effort approach for test utilities - we check for common patterns:
 		// - "already exists" (common HTTP API message)
-		// - "AlreadyExists" (possible gRPC/protobuf message)
+		// - "alreadyexists" (possible gRPC/protobuf message)
 		// - "409" (HTTP Conflict status code)
-		// - "Conflict" (HTTP status text)
+		// - "conflict" (HTTP status text)
 		// Using case-insensitive matching for robustness
 		errMsg := strings.ToLower(err.Error())
-		if strings.Contains(errMsg, "already exists") || 
-		   strings.Contains(errMsg, "alreadyexists") || 
-		   strings.Contains(errMsg, "409") ||
-		   strings.Contains(errMsg, "conflict") {
+		if strings.Contains(errMsg, "already exists") ||
+			strings.Contains(errMsg, "alreadyexists") ||
+			strings.Contains(errMsg, "409") ||
+			strings.Contains(errMsg, "conflict") {
 			return nil // Namespace already exists, which is what we want
 		}
 		return fmt.Errorf("failed to create namespace %s: %w", fullNamespace, err)
