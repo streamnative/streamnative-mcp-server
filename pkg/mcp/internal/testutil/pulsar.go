@@ -123,12 +123,17 @@ func (h *PulsarTestHelper) EnsureNamespace(ctx context.Context, tenant, namespac
 	// Create namespace - this will fail if it already exists or if there are permission/connection issues
 	err = h.adminClient.Namespaces().CreateNamespace(fullNamespace)
 	if err != nil {
-		// Check if the error is because namespace already exists
-		// The Pulsar admin API returns a specific error message for this case
+		// Check if the error is because namespace already exists.
+		// The Pulsar admin client doesn't provide typed errors, so we check the error message.
+		// This is a best-effort approach for test utilities - we check for common patterns:
+		// - "already exists" (common HTTP API message)
+		// - "AlreadyExists" (possible gRPC/protobuf message)
+		// - "409" (HTTP Conflict status code)
 		errMsg := err.Error()
 		if strings.Contains(errMsg, "already exists") || 
 		   strings.Contains(errMsg, "AlreadyExists") || 
-		   strings.Contains(errMsg, "409") {
+		   strings.Contains(errMsg, "409") ||
+		   strings.Contains(errMsg, "Conflict") {
 			return nil // Namespace already exists, which is what we want
 		}
 		return fmt.Errorf("failed to create namespace %s: %w", fullNamespace, err)
