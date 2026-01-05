@@ -1,0 +1,40 @@
+# Copyright 2025 StreamNative
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+version: '3.8'
+
+services:
+  pulsar:
+    image: apachepulsar/pulsar:3.3.0
+    container_name: snmcp-pulsar-standalone
+    ports:
+      - "6650:6650"   # Pulsar binary protocol
+      - "8080:8080"   # Admin REST API
+      - "8443:8443"   # Pulsar binary protocol TLS
+      - "8181:8181"   # Admin REST API TLS
+    environment:
+      - PULSAR_PREFIX=pulsar-standalone
+    command: >
+      bin/pulsar standalone
+    networks:
+      - pulsar-test
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/admin/v2/clusters"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  pulsar-test:
+    driver: bridge

@@ -1,0 +1,58 @@
+# Copyright 2025 StreamNative
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: E2E Tests
+
+on:
+  push:
+    branches: [main, "release/**"]
+  pull_request:
+    branches: [main, "release/**"]
+
+permissions:
+  contents: read
+
+jobs:
+  pulsar-e2e:
+    runs-on: ubuntu-latest
+
+    services:
+      pulsar:
+        image: apachepulsar/pulsar:3.3.0
+        ports:
+          - 6650:6650
+          - 8080:8080
+        options: >-
+          --health-cmd "curl -f http://localhost:8080/admin/v2/clusters"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: "go.mod"
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Run E2E tests
+        run: go test -v -tags=e2e -race ./pkg/mcp/e2e/...
+        env:
+          PULSAR_ADMIN_URL: http://localhost:8080
+          PULSAR_SERVICE_URL: pulsar://localhost:6650
