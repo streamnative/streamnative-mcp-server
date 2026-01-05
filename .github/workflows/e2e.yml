@@ -52,14 +52,20 @@ jobs:
       - name: Wait for Pulsar to be ready
         run: |
           echo "Waiting for Pulsar to be ready..."
+          READY=0
           for i in {1..60}; do
             if curl -f http://localhost:8080/admin/v2/clusters > /dev/null 2>&1; then
+              READY=1
               echo "Pulsar is ready!"
               break
             fi
             echo "Attempt $i/60: Pulsar not ready yet..."
             sleep 2
           done
+          if [ "$READY" -ne 1 ]; then
+            echo "Pulsar failed to become ready within the expected time."
+            exit 1
+          fi
 
       - name: Run E2E tests
         run: go test -v -tags=e2e -race ./pkg/mcp/e2e/...
