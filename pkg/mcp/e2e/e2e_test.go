@@ -105,5 +105,5 @@ func cleanupTestTopic(t *testing.T, helper *testutil.PulsarTestHelper, topic str
 
 // generateTestTopicName generates a unique test topic name.
 func generateTestTopicName() string {
-	return testutil.GenerateTestTopicName(fmt.Sprintf("test-%d", time.Now().UnixNano()))
+	return testutil.GenerateTestTopicName("test")
 }
