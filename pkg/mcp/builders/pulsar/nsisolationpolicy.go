@@ -21,11 +21,10 @@ import (
 	"strings"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	mcpsdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
-	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/adapter"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
 
@@ -58,7 +57,7 @@ func NewPulsarAdminNsIsolationPolicyToolBuilder() *PulsarAdminNsIsolationPolicyT
 }
 
 // BuildTools builds the Pulsar admin namespace isolation policy tool list
-func (b *PulsarAdminNsIsolationPolicyToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]server.ServerTool, error) {
+func (b *PulsarAdminNsIsolationPolicyToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]builders.ServerTool, error) {
 	// Check features - return empty list if no required features are present
 	if !b.HasAnyRequiredFeature(config.Features) {
 		return nil, nil
@@ -73,7 +72,7 @@ func (b *PulsarAdminNsIsolationPolicyToolBuilder) BuildTools(_ context.Context, 
 	tool := b.buildNsIsolationPolicyTool()
 	handler := b.buildNsIsolationPolicyHandler(config.ReadOnly)
 
-	return []server.ServerTool{
+	return []builders.ServerTool{
 		{
 			Tool:    tool,
 			Handler: handler,
@@ -82,7 +81,7 @@ func (b *PulsarAdminNsIsolationPolicyToolBuilder) BuildTools(_ context.Context, 
 }
 
 // buildNsIsolationPolicyTool builds the Pulsar admin namespace isolation policy MCP tool definition
-func (b *PulsarAdminNsIsolationPolicyToolBuilder) buildNsIsolationPolicyTool() mcp.Tool {
+func (b *PulsarAdminNsIsolationPolicyToolBuilder) buildNsIsolationPolicyTool() *mcpsdk.Tool {
 	toolDesc := "Manage namespace isolation policies in a Pulsar cluster. " +
 		"Allows viewing, creating, updating, and deleting namespace isolation policies. " +
 		"Some operations require super-user permissions."
@@ -98,85 +97,85 @@ func (b *PulsarAdminNsIsolationPolicyToolBuilder) buildNsIsolationPolicyTool() m
 		"- set: Create or update a resource (requires super-user permissions)\n" +
 		"- delete: Delete a resource (requires super-user permissions)"
 
-	return mcp.NewTool("pulsar_admin_nsisolationpolicy",
-		mcp.WithDescription(toolDesc),
-		mcp.WithString("resource", mcp.Required(),
-			mcp.Description(resourceDesc),
+	return builders.NewTool("pulsar_admin_nsisolationpolicy",
+		builders.WithDescription(toolDesc),
+		builders.WithString("resource", builders.Required(),
+			builders.Description(resourceDesc),
 		),
-		mcp.WithString("operation", mcp.Required(),
-			mcp.Description(operationDesc),
+		builders.WithString("operation", builders.Required(),
+			builders.Description(operationDesc),
 		),
-		mcp.WithString("cluster", mcp.Required(),
-			mcp.Description("Cluster name"),
+		builders.WithString("cluster", builders.Required(),
+			builders.Description("Cluster name"),
 		),
-		mcp.WithString("name",
-			mcp.Description("Name of the policy or broker to operate on, based on resource type.\n"+
+		builders.WithString("name",
+			builders.Description("Name of the policy or broker to operate on, based on resource type.\n"+
 				"Required for: policy.get, policy.delete, policy.set, broker.get"),
 		),
-		mcp.WithArray("namespaces",
-			mcp.Description("List of namespaces to apply the isolation policy. Required for policy.set"),
-			mcp.Items(
+		builders.WithArray("namespaces",
+			builders.Description("List of namespaces to apply the isolation policy. Required for policy.set"),
+			builders.Items(
 				map[string]interface{}{
 					"type":        "string",
 					"description": "namespace",
 				},
 			),
 		),
-		mcp.WithArray("primary",
-			mcp.Description("List of primary brokers for the namespaces. Required for policy.set"),
-			mcp.Items(
+		builders.WithArray("primary",
+			builders.Description("List of primary brokers for the namespaces. Required for policy.set"),
+			builders.Items(
 				map[string]interface{}{
 					"type":        "string",
 					"description": "primary broker",
 				},
 			),
 		),
-		mcp.WithArray("secondary",
-			mcp.Description("List of secondary brokers for the namespaces. Optional for policy.set"),
-			mcp.Items(
+		builders.WithArray("secondary",
+			builders.Description("List of secondary brokers for the namespaces. Optional for policy.set"),
+			builders.Items(
 				map[string]interface{}{
 					"type":        "string",
 					"description": "secondary broker",
 				},
 			),
 		),
-		mcp.WithString("autoFailoverPolicyType",
-			mcp.Description("Auto failover policy type (e.g., min_available). Optional for policy.set"),
+		builders.WithString("autoFailoverPolicyType",
+			builders.Description("Auto failover policy type (e.g., min_available). Optional for policy.set"),
 		),
-		mcp.WithObject("autoFailoverPolicyParams",
-			mcp.Description("Auto failover policy parameters as an object (e.g., {'min_limit': '1', 'usage_threshold': '100'}). Optional for policy.set"),
+		builders.WithObject("autoFailoverPolicyParams",
+			builders.Description("Auto failover policy parameters as an object (e.g., {'min_limit': '1', 'usage_threshold': '100'}). Optional for policy.set"),
 		),
 	)
 }
 
 // buildNsIsolationPolicyHandler builds the Pulsar admin namespace isolation policy handler function
-func (b *PulsarAdminNsIsolationPolicyToolBuilder) buildNsIsolationPolicyHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminNsIsolationPolicyToolBuilder) buildNsIsolationPolicyHandler(readOnly bool) func(context.Context, *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	return func(ctx context.Context, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 		// Get Pulsar session from context
 		session := mcpCtx.GetPulsarSession(ctx)
 		if session == nil {
-			return mcp.NewToolResultError("Pulsar session not found in context"), nil
+			return adapter.NewErrorResult("Pulsar session not found in context"), nil
 		}
 
 		client, err := session.GetAdminClient()
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
+			return adapter.NewErrorResult("Failed to get admin client: %v", err), nil
 		}
 
 		// Get required parameters
-		resource, err := request.RequireString("resource")
+		resource, err := adapter.RequireString(request, "resource")
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get resource: %v", err)), nil
+			return adapter.NewErrorResult("Failed to get resource: %v", err), nil
 		}
 
-		operation, err := request.RequireString("operation")
+		operation, err := adapter.RequireString(request, "operation")
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get operation: %v", err)), nil
+			return adapter.NewErrorResult("Failed to get operation: %v", err), nil
 		}
 
-		cluster, err := request.RequireString("cluster")
+		cluster, err := adapter.RequireString(request, "cluster")
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get cluster name: %v", err)), nil
+			return adapter.NewErrorResult("Failed to get cluster name: %v", err), nil
 		}
 
 		// Normalize parameters
@@ -185,7 +184,7 @@ func (b *PulsarAdminNsIsolationPolicyToolBuilder) buildNsIsolationPolicyHandler(
 
 		// Validate write operations in read-only mode
 		if readOnly && (operation == "set" || operation == "delete") {
-			return mcp.NewToolResultError("Write operations are not allowed in read-only mode"), nil
+			return adapter.NewErrorResult("Write operations are not allowed in read-only mode"), nil
 		}
 
 		// Dispatch based on resource type
@@ -197,7 +196,7 @@ func (b *PulsarAdminNsIsolationPolicyToolBuilder) buildNsIsolationPolicyHandler(
 		case "brokers":
 			return b.handleNsIsolationBrokersResource(client, operation, cluster, request)
 		default:
-			return mcp.NewToolResultError(fmt.Sprintf("Invalid resource: %s. Available resources: policy, broker, brokers", resource)), nil
+			return adapter.NewErrorResult("Invalid resource: %s. Available resources: policy, broker, brokers", resource), nil
 		}
 	}
 }
@@ -205,80 +204,80 @@ func (b *PulsarAdminNsIsolationPolicyToolBuilder) buildNsIsolationPolicyHandler(
 // Helper functions
 
 // handlePolicyResource handles operations on the "policy" resource
-func (b *PulsarAdminNsIsolationPolicyToolBuilder) handlePolicyResource(client cmdutils.Client, operation, cluster string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminNsIsolationPolicyToolBuilder) handlePolicyResource(client cmdutils.Client, operation, cluster string, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	switch operation {
 	case "get":
-		name, err := request.RequireString("name")
+		name, err := adapter.RequireString(request, "name")
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'name' for policy.get: %v", err)), nil
+			return adapter.NewErrorResult("Missing required parameter 'name' for policy.get: %v", err), nil
 		}
 
 		// Get namespace isolation policy
 		policyInfo, err := client.NsIsolationPolicy().GetNamespaceIsolationPolicy(cluster, name)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace isolation policy: %v", err)), nil
+			return adapter.NewErrorResult("Failed to get namespace isolation policy: %v", err), nil
 		}
 
 		// Convert result to JSON string
 		policyInfoJSON, err := json.Marshal(policyInfo)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to serialize namespace isolation policy: %v", err)), nil
+			return adapter.NewErrorResult("Failed to serialize namespace isolation policy: %v", err), nil
 		}
 
-		return mcp.NewToolResultText(string(policyInfoJSON)), nil
+		return adapter.NewTextResult(string(policyInfoJSON)), nil
 
 	case "list":
 		// Get namespace isolation policies
 		policies, err := client.NsIsolationPolicy().GetNamespaceIsolationPolicies(cluster)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to list namespace isolation policies: %v", err)), nil
+			return adapter.NewErrorResult("Failed to list namespace isolation policies: %v", err), nil
 		}
 
 		// Convert result to JSON string
 		policiesJSON, err := json.Marshal(policies)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to serialize namespace isolation policies: %v", err)), nil
+			return adapter.NewErrorResult("Failed to serialize namespace isolation policies: %v", err), nil
 		}
 
-		return mcp.NewToolResultText(string(policiesJSON)), nil
+		return adapter.NewTextResult(string(policiesJSON)), nil
 
 	case "delete":
-		name, err := request.RequireString("name")
+		name, err := adapter.RequireString(request, "name")
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'name' for policy.delete: %v", err)), nil
+			return adapter.NewErrorResult("Missing required parameter 'name' for policy.delete: %v", err), nil
 		}
 
 		// Delete namespace isolation policy
 		err = client.NsIsolationPolicy().DeleteNamespaceIsolationPolicy(cluster, name)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to delete namespace isolation policy: %v", err)), nil
+			return adapter.NewErrorResult("Failed to delete namespace isolation policy: %v", err), nil
 		}
 
-		return mcp.NewToolResultText(fmt.Sprintf("Delete namespace isolation policy %s successfully", name)), nil
+		return adapter.NewTextResult(fmt.Sprintf("Delete namespace isolation policy %s successfully", name)), nil
 
 	case "set":
-		name, err := request.RequireString("name")
+		name, err := adapter.RequireString(request, "name")
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'name' for policy.set: %v", err)), nil
+			return adapter.NewErrorResult("Missing required parameter 'name' for policy.set: %v", err), nil
 		}
 
-		namespaces, err := request.RequireStringSlice("namespaces")
+		namespaces, err := adapter.RequireStringSlice(request, "namespaces")
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'namespaces' for policy.set: %v", err)), nil
+			return adapter.NewErrorResult("Missing required parameter 'namespaces' for policy.set: %v", err), nil
 		}
 
-		primary, err := request.RequireStringSlice("primary")
+		primary, err := adapter.RequireStringSlice(request, "primary")
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'primary' for policy.set: %v", err)), nil
+			return adapter.NewErrorResult("Missing required parameter 'primary' for policy.set: %v", err), nil
 		}
 
-		secondary := request.GetStringSlice("secondary", []string{})
-		autoFailoverPolicyType := request.GetString("autoFailoverPolicyType", "")
+		secondary := adapter.GetStringSlice(request, "secondary", []string{})
+		autoFailoverPolicyType := adapter.GetString(request, "autoFailoverPolicyType", "")
 
 		// Parse autoFailoverPolicyParams as a map
-		autoFailoverPolicyParamsRaw, ok := common.OptionalParamObject(request.GetArguments(), "autoFailoverPolicyParams")
-		if !ok {
-			return mcp.NewToolResultError("Failed to extract autoFailoverPolicyParams"), nil
+		autoFailoverPolicyParamsRaw := adapter.GetObject(request, "autoFailoverPolicyParams")
+		if autoFailoverPolicyParamsRaw == nil {
+			return adapter.NewErrorResult("Failed to extract autoFailoverPolicyParams"), nil
 		}
 
 		autoFailoverPolicyParams := make(map[string]string)
@@ -292,69 +291,69 @@ func (b *PulsarAdminNsIsolationPolicyToolBuilder) handlePolicyResource(client cm
 		nsIsolationData, err := utils.CreateNamespaceIsolationData(namespaces, primary, secondary,
 			autoFailoverPolicyType, autoFailoverPolicyParams)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to create namespace isolation data: %v", err)), nil
+			return adapter.NewErrorResult("Failed to create namespace isolation data: %v", err), nil
 		}
 
 		// Create/update namespace isolation policy
 		err = client.NsIsolationPolicy().CreateNamespaceIsolationPolicy(cluster, name, *nsIsolationData)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to create/update namespace isolation policy: %v", err)), nil
+			return adapter.NewErrorResult("Failed to create/update namespace isolation policy: %v", err), nil
 		}
 
-		return mcp.NewToolResultText(fmt.Sprintf("Create/Update namespace isolation policy %s successfully", name)), nil
+		return adapter.NewTextResult(fmt.Sprintf("Create/Update namespace isolation policy %s successfully", name)), nil
 
 	default:
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid operation for resource 'policy': %s. Available operations: get, list, delete, set", operation)), nil
+		return adapter.NewErrorResult("Invalid operation for resource 'policy': %s. Available operations: get, list, delete, set", operation), nil
 	}
 }
 
 // handleBrokerResource handles operations on the "broker" resource
-func (b *PulsarAdminNsIsolationPolicyToolBuilder) handleBrokerResource(client cmdutils.Client, operation, cluster string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminNsIsolationPolicyToolBuilder) handleBrokerResource(client cmdutils.Client, operation, cluster string, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	switch operation {
 	case "get":
-		name, err := request.RequireString("name")
+		name, err := adapter.RequireString(request, "name")
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'name' for broker.get: %v", err)), nil
+			return adapter.NewErrorResult("Missing required parameter 'name' for broker.get: %v", err), nil
 		}
 
 		// Get broker with policies
 		brokerInfo, err := client.NsIsolationPolicy().GetBrokerWithNamespaceIsolationPolicy(cluster, name)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get broker with namespace isolation policy: %v", err)), nil
+			return adapter.NewErrorResult("Failed to get broker with namespace isolation policy: %v", err), nil
 		}
 
 		// Convert result to JSON string
 		brokerInfoJSON, err := json.Marshal(brokerInfo)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to serialize broker information: %v", err)), nil
+			return adapter.NewErrorResult("Failed to serialize broker information: %v", err), nil
 		}
 
-		return mcp.NewToolResultText(string(brokerInfoJSON)), nil
+		return adapter.NewTextResult(string(brokerInfoJSON)), nil
 
 	default:
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid operation for resource 'broker': %s. Available operations: get", operation)), nil
+		return adapter.NewErrorResult("Invalid operation for resource 'broker': %s. Available operations: get", operation), nil
 	}
 }
 
 // handleNsIsolationBrokersResource handles operations on the "brokers" resource for namespace isolation policies
-func (b *PulsarAdminNsIsolationPolicyToolBuilder) handleNsIsolationBrokersResource(client cmdutils.Client, operation, cluster string, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminNsIsolationPolicyToolBuilder) handleNsIsolationBrokersResource(client cmdutils.Client, operation, cluster string, _ *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	switch operation {
 	case "list":
 		// Get all brokers with policies
 		brokersInfo, err := client.NsIsolationPolicy().GetBrokersWithNamespaceIsolationPolicy(cluster)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get brokers with namespace isolation policy: %v", err)), nil
+			return adapter.NewErrorResult("Failed to get brokers with namespace isolation policy: %v", err), nil
 		}
 
 		// Convert result to JSON string
 		brokersInfoJSON, err := json.Marshal(brokersInfo)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to serialize brokers information: %v", err)), nil
+			return adapter.NewErrorResult("Failed to serialize brokers information: %v", err), nil
 		}
 
-		return mcp.NewToolResultText(string(brokersInfoJSON)), nil
+		return adapter.NewTextResult(string(brokersInfoJSON)), nil
 
 	default:
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid operation for resource 'brokers': %s. Available operations: list", operation)), nil
+		return adapter.NewErrorResult("Invalid operation for resource 'brokers': %s. Available operations: list", operation), nil
 	}
 }

@@ -21,9 +21,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	mcpsdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/adapter"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 	"github.com/twmb/franz-go/pkg/sr"
 )
@@ -57,7 +57,7 @@ func NewKafkaSchemaRegistryToolBuilder() *KafkaSchemaRegistryToolBuilder {
 }
 
 // BuildTools builds the Kafka Schema Registry tool list
-func (b *KafkaSchemaRegistryToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]server.ServerTool, error) {
+func (b *KafkaSchemaRegistryToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]builders.ServerTool, error) {
 	// Check features - return empty list if no required features are present
 	if !b.HasAnyRequiredFeature(config.Features) {
 		return nil, nil
@@ -72,7 +72,7 @@ func (b *KafkaSchemaRegistryToolBuilder) BuildTools(_ context.Context, config bu
 	tool := b.buildKafkaSchemaRegistryTool()
 	handler := b.buildKafkaSchemaRegistryHandler(config.ReadOnly)
 
-	return []server.ServerTool{
+	return []builders.ServerTool{
 		{
 			Tool:    tool,
 			Handler: handler,
@@ -81,7 +81,7 @@ func (b *KafkaSchemaRegistryToolBuilder) BuildTools(_ context.Context, config bu
 }
 
 // buildKafkaSchemaRegistryTool builds the Kafka Schema Registry MCP tool definition
-func (b *KafkaSchemaRegistryToolBuilder) buildKafkaSchemaRegistryTool() mcp.Tool {
+func (b *KafkaSchemaRegistryToolBuilder) buildKafkaSchemaRegistryTool() *mcpsdk.Tool {
 	resourceDesc := "Resource to operate on. Available resources:\n" +
 		"- subjects: Collection of all schema subjects in the Schema Registry\n" +
 		"- subject: A specific schema subject (a named schema that can have multiple versions)\n" +
@@ -131,46 +131,46 @@ func (b *KafkaSchemaRegistryToolBuilder) buildKafkaSchemaRegistryTool() mcp.Tool
 		"   compatibility: \"BACKWARD\"\n\n" +
 		"This tool requires appropriate Schema Registry permissions."
 
-	return mcp.NewTool("kafka_admin_sr",
-		mcp.WithDescription(toolDesc),
-		mcp.WithString("resource", mcp.Required(),
-			mcp.Description(resourceDesc),
+	return builders.NewTool("kafka_admin_sr",
+		builders.WithDescription(toolDesc),
+		builders.WithString("resource", builders.Required(),
+			builders.Description(resourceDesc),
 		),
-		mcp.WithString("operation", mcp.Required(),
-			mcp.Description(operationDesc),
+		builders.WithString("operation", builders.Required(),
+			builders.Description(operationDesc),
 		),
-		mcp.WithString("subject",
-			mcp.Description("The name of the schema subject. "+
+		builders.WithString("subject",
+			builders.Description("The name of the schema subject. "+
 				"Required for operations on 'subject', 'versions', 'version', and subject-specific 'compatibility' resources. "+
 				"Subject names typically follow the pattern '<topic-name>-key' or '<topic-name>-value'.")),
-		mcp.WithString("version",
-			mcp.Description("The version number or 'latest' for the most recent version. "+
+		builders.WithString("version",
+			builders.Description("The version number or 'latest' for the most recent version. "+
 				"Required for 'version' resource operations.")),
-		mcp.WithString("compatibility",
-			mcp.Description("The compatibility level to set. "+
+		builders.WithString("compatibility",
+			builders.Description("The compatibility level to set. "+
 				"Valid values: BACKWARD, FORWARD, FULL, NONE. "+
 				"Required for 'set' operation on 'compatibility' resource.")),
-		mcp.WithString("schemaType",
-			mcp.Description("The schema format type. "+
+		builders.WithString("schemaType",
+			builders.Description("The schema format type. "+
 				"Valid values: AVRO, JSON, PROTOBUF. "+
 				"Required for 'create' operation on 'subject' resource.")),
-		mcp.WithObject("schema",
-			mcp.Description("The schema definition as a JSON object. "+
+		builders.WithObject("schema",
+			builders.Description("The schema definition as a JSON object. "+
 				"Required for 'create' operation on 'subject' resource. "+
 				"The structure depends on the schema type (AVRO, JSON Schema, or Protocol Buffers).")),
 	)
 }
 
 // buildKafkaSchemaRegistryHandler builds the Kafka Schema Registry handler function
-func (b *KafkaSchemaRegistryToolBuilder) buildKafkaSchemaRegistryHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *KafkaSchemaRegistryToolBuilder) buildKafkaSchemaRegistryHandler(readOnly bool) mcpsdk.ToolHandler {
+	return func(ctx context.Context, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 		// Get required parameters
-		resource, err := request.RequireString("resource")
+		resource, err := adapter.RequireString(request, "resource")
 		if err != nil {
 			return b.handleError("get resource", err), nil
 		}
 
-		operation, err := request.RequireString("operation")
+		operation, err := adapter.RequireString(request, "operation")
 		if err != nil {
 			return b.handleError("get operation", err), nil
 		}
@@ -181,7 +181,7 @@ func (b *KafkaSchemaRegistryToolBuilder) buildKafkaSchemaRegistryHandler(readOnl
 
 		// Validate write operations in read-only mode
 		if readOnly && (operation == "create" || operation == "delete" || operation == "set") {
-			return mcp.NewToolResultError("Write operations are not allowed in read-only mode"), nil
+			return adapter.NewErrorResult("Write operations are not allowed in read-only mode"), nil
 		}
 
 		// Get Schema Registry client
@@ -201,7 +201,7 @@ func (b *KafkaSchemaRegistryToolBuilder) buildKafkaSchemaRegistryHandler(readOnl
 			case "list":
 				return b.handleSchemaSubjectsList(ctx, client, request)
 			default:
-				return mcp.NewToolResultError(fmt.Sprintf("Invalid operation for resource 'subjects': %s", operation)), nil
+				return adapter.NewErrorResult("Invalid operation for resource 'subjects': %s", operation), nil
 			}
 		case "subject":
 			switch operation {
@@ -212,14 +212,14 @@ func (b *KafkaSchemaRegistryToolBuilder) buildKafkaSchemaRegistryHandler(readOnl
 			case "delete":
 				return b.handleSchemaSubjectDelete(ctx, client, request)
 			default:
-				return mcp.NewToolResultError(fmt.Sprintf("Invalid operation for resource 'subject': %s", operation)), nil
+				return adapter.NewErrorResult("Invalid operation for resource 'subject': %s", operation), nil
 			}
 		case "versions":
 			switch operation {
 			case "list":
 				return b.handleSchemaVersionsList(ctx, client, request)
 			default:
-				return mcp.NewToolResultError(fmt.Sprintf("Invalid operation for resource 'versions': %s", operation)), nil
+				return adapter.NewErrorResult("Invalid operation for resource 'versions': %s", operation), nil
 			}
 		case "version":
 			switch operation {
@@ -228,7 +228,7 @@ func (b *KafkaSchemaRegistryToolBuilder) buildKafkaSchemaRegistryHandler(readOnl
 			case "delete":
 				return b.handleSchemaVersionDelete(ctx, client, request)
 			default:
-				return mcp.NewToolResultError(fmt.Sprintf("Invalid operation for resource 'version': %s", operation)), nil
+				return adapter.NewErrorResult("Invalid operation for resource 'version': %s", operation), nil
 			}
 		case "compatibility":
 			switch operation {
@@ -237,17 +237,17 @@ func (b *KafkaSchemaRegistryToolBuilder) buildKafkaSchemaRegistryHandler(readOnl
 			case "set":
 				return b.handleSchemaCompatibilitySet(ctx, client, request)
 			default:
-				return mcp.NewToolResultError(fmt.Sprintf("Invalid operation for resource 'compatibility': %s", operation)), nil
+				return adapter.NewErrorResult("Invalid operation for resource 'compatibility': %s", operation), nil
 			}
 		case "types":
 			switch operation {
 			case "list":
 				return b.handleSchemaTypesList(ctx, client, request)
 			default:
-				return mcp.NewToolResultError(fmt.Sprintf("Invalid operation for resource 'types': %s", operation)), nil
+				return adapter.NewErrorResult("Invalid operation for resource 'types': %s", operation), nil
 			}
 		default:
-			return mcp.NewToolResultError(fmt.Sprintf("Invalid resource: %s. Available resources: subjects, subject, versions, version, compatibility, types", resource)), nil
+			return adapter.NewErrorResult("Invalid resource: %s. Available resources: subjects, subject, versions, version, compatibility, types", resource), nil
 		}
 	}
 }
@@ -255,23 +255,26 @@ func (b *KafkaSchemaRegistryToolBuilder) buildKafkaSchemaRegistryHandler(readOnl
 // Utility functions
 
 // handleError provides unified error handling
-func (b *KafkaSchemaRegistryToolBuilder) handleError(operation string, err error) *mcp.CallToolResult {
-	return mcp.NewToolResultError(fmt.Sprintf("Failed to %s: %v", operation, err))
+func (b *KafkaSchemaRegistryToolBuilder) handleError(operation string, err error) *mcpsdk.CallToolResult {
+	if err != nil {
+		return adapter.NewErrorResult("Failed to %s: %v", operation, err)
+	}
+	return adapter.NewErrorResult("Failed to %s", operation)
 }
 
 // marshalResponse provides unified JSON serialization for responses
-func (b *KafkaSchemaRegistryToolBuilder) marshalResponse(data interface{}) (*mcp.CallToolResult, error) {
+func (b *KafkaSchemaRegistryToolBuilder) marshalResponse(data interface{}) (*mcpsdk.CallToolResult, error) {
 	jsonBytes, err := json.Marshal(data)
 	if err != nil {
 		return b.handleError("marshal response", err), nil
 	}
-	return mcp.NewToolResultText(string(jsonBytes)), nil
+	return adapter.NewTextResult(string(jsonBytes)), nil
 }
 
 // Specific operation handler functions
 
 // handleSchemaSubjectsList handles listing all schema subjects
-func (b *KafkaSchemaRegistryToolBuilder) handleSchemaSubjectsList(ctx context.Context, client *sr.Client, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *KafkaSchemaRegistryToolBuilder) handleSchemaSubjectsList(ctx context.Context, client *sr.Client, _ *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	subjects, err := client.Subjects(ctx)
 	if err != nil {
 		return b.handleError("list schema subjects", err), nil
@@ -280,8 +283,8 @@ func (b *KafkaSchemaRegistryToolBuilder) handleSchemaSubjectsList(ctx context.Co
 }
 
 // handleSchemaSubjectGet handles getting the latest schema for a subject
-func (b *KafkaSchemaRegistryToolBuilder) handleSchemaSubjectGet(ctx context.Context, client *sr.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	subject, err := request.RequireString("subject")
+func (b *KafkaSchemaRegistryToolBuilder) handleSchemaSubjectGet(ctx context.Context, client *sr.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	subject, err := adapter.RequireString(request, "subject")
 	if err != nil {
 		return b.handleError("get subject name", err), nil
 	}
@@ -294,18 +297,18 @@ func (b *KafkaSchemaRegistryToolBuilder) handleSchemaSubjectGet(ctx context.Cont
 }
 
 // handleSchemaSubjectCreate handles registering a new schema for a subject
-func (b *KafkaSchemaRegistryToolBuilder) handleSchemaSubjectCreate(ctx context.Context, client *sr.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	subject, err := request.RequireString("subject")
+func (b *KafkaSchemaRegistryToolBuilder) handleSchemaSubjectCreate(ctx context.Context, client *sr.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	subject, err := adapter.RequireString(request, "subject")
 	if err != nil {
 		return b.handleError("get subject name", err), nil
 	}
 
-	schemaTypeStr, err := request.RequireString("schemaType")
+	schemaTypeStr, err := adapter.RequireString(request, "schemaType")
 	if err != nil {
 		return b.handleError("get schema type", err), nil
 	}
 
-	schema, err := request.RequireString("schema")
+	schema, err := adapter.RequireString(request, "schema")
 	if err != nil {
 		return b.handleError("get schema object", err), nil
 	}
@@ -331,8 +334,8 @@ func (b *KafkaSchemaRegistryToolBuilder) handleSchemaSubjectCreate(ctx context.C
 }
 
 // handleSchemaSubjectDelete handles deleting a schema subject
-func (b *KafkaSchemaRegistryToolBuilder) handleSchemaSubjectDelete(ctx context.Context, client *sr.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	subject, err := request.RequireString("subject")
+func (b *KafkaSchemaRegistryToolBuilder) handleSchemaSubjectDelete(ctx context.Context, client *sr.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	subject, err := adapter.RequireString(request, "subject")
 	if err != nil {
 		return b.handleError("get subject name", err), nil
 	}
@@ -346,8 +349,8 @@ func (b *KafkaSchemaRegistryToolBuilder) handleSchemaSubjectDelete(ctx context.C
 }
 
 // handleSchemaVersionsList handles listing all versions for a subject
-func (b *KafkaSchemaRegistryToolBuilder) handleSchemaVersionsList(ctx context.Context, client *sr.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	subject, err := request.RequireString("subject")
+func (b *KafkaSchemaRegistryToolBuilder) handleSchemaVersionsList(ctx context.Context, client *sr.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	subject, err := adapter.RequireString(request, "subject")
 	if err != nil {
 		return b.handleError("get subject name", err), nil
 	}
@@ -360,13 +363,13 @@ func (b *KafkaSchemaRegistryToolBuilder) handleSchemaVersionsList(ctx context.Co
 }
 
 // handleSchemaVersionGet handles getting a specific version of a schema
-func (b *KafkaSchemaRegistryToolBuilder) handleSchemaVersionGet(ctx context.Context, client *sr.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	subject, err := request.RequireString("subject")
+func (b *KafkaSchemaRegistryToolBuilder) handleSchemaVersionGet(ctx context.Context, client *sr.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	subject, err := adapter.RequireString(request, "subject")
 	if err != nil {
 		return b.handleError("get subject name", err), nil
 	}
 
-	versionStr, err := request.RequireString("version")
+	versionStr, err := adapter.RequireString(request, "version")
 	if err != nil {
 		return b.handleError("get version", err), nil
 	}
@@ -390,13 +393,13 @@ func (b *KafkaSchemaRegistryToolBuilder) handleSchemaVersionGet(ctx context.Cont
 }
 
 // handleSchemaVersionDelete handles deleting a specific version of a schema
-func (b *KafkaSchemaRegistryToolBuilder) handleSchemaVersionDelete(ctx context.Context, client *sr.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	subject, err := request.RequireString("subject")
+func (b *KafkaSchemaRegistryToolBuilder) handleSchemaVersionDelete(ctx context.Context, client *sr.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	subject, err := adapter.RequireString(request, "subject")
 	if err != nil {
 		return b.handleError("get subject name", err), nil
 	}
 
-	versionStr, err := request.RequireString("version")
+	versionStr, err := adapter.RequireString(request, "version")
 	if err != nil {
 		return b.handleError("get version", err), nil
 	}
@@ -412,12 +415,12 @@ func (b *KafkaSchemaRegistryToolBuilder) handleSchemaVersionDelete(ctx context.C
 		return b.handleError("delete schema version", err), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Schema version %d for subject %s deleted successfully", version, subject)), nil
+	return adapter.NewTextResult(fmt.Sprintf("Schema version %d for subject %s deleted successfully", version, subject)), nil
 }
 
 // handleSchemaCompatibilityGet handles getting compatibility setting
-func (b *KafkaSchemaRegistryToolBuilder) handleSchemaCompatibilityGet(ctx context.Context, client *sr.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	subject := request.GetString("subject", "") // Optional for global compatibility
+func (b *KafkaSchemaRegistryToolBuilder) handleSchemaCompatibilityGet(ctx context.Context, client *sr.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	subject := adapter.GetString(request, "subject", "") // Optional for global compatibility
 
 	var results []sr.CompatibilityResult
 	if subject != "" {
@@ -440,17 +443,17 @@ func (b *KafkaSchemaRegistryToolBuilder) handleSchemaCompatibilityGet(ctx contex
 		return b.marshalResponse(map[string]string{"compatibility": results[0].Level.String()})
 	}
 
-	return mcp.NewToolResultError("No compatibility result returned"), nil
+	return adapter.NewErrorResult("No compatibility result returned"), nil
 }
 
 // handleSchemaCompatibilitySet handles setting compatibility level
-func (b *KafkaSchemaRegistryToolBuilder) handleSchemaCompatibilitySet(ctx context.Context, client *sr.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	compatibilityStr, err := request.RequireString("compatibility")
+func (b *KafkaSchemaRegistryToolBuilder) handleSchemaCompatibilitySet(ctx context.Context, client *sr.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	compatibilityStr, err := adapter.RequireString(request, "compatibility")
 	if err != nil {
 		return b.handleError("get compatibility level", err), nil
 	}
 
-	subject := request.GetString("subject", "") // Optional for global compatibility
+	subject := adapter.GetString(request, "subject", "") // Optional for global compatibility
 
 	// Parse compatibility level
 	var compatibility sr.CompatibilityLevel
@@ -464,7 +467,7 @@ func (b *KafkaSchemaRegistryToolBuilder) handleSchemaCompatibilitySet(ctx contex
 	case "NONE":
 		compatibility = sr.CompatNone
 	default:
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid compatibility level: %s. Valid levels: BACKWARD, FORWARD, FULL, NONE", compatibilityStr)), nil
+		return adapter.NewErrorResult("Invalid compatibility level: %s. Valid levels: BACKWARD, FORWARD, FULL, NONE", compatibilityStr), nil
 	}
 
 	// Create SetCompatibility request
@@ -488,11 +491,11 @@ func (b *KafkaSchemaRegistryToolBuilder) handleSchemaCompatibilitySet(ctx contex
 		}
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Compatibility level set to %s", compatibilityStr)), nil
+	return adapter.NewTextResult(fmt.Sprintf("Compatibility level set to %s", compatibilityStr)), nil
 }
 
 // handleSchemaTypesList handles listing supported schema types
-func (b *KafkaSchemaRegistryToolBuilder) handleSchemaTypesList(_ context.Context, _ *sr.Client, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *KafkaSchemaRegistryToolBuilder) handleSchemaTypesList(_ context.Context, _ *sr.Client, _ *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	types := []string{"AVRO", "JSON", "PROTOBUF"}
 	return b.marshalResponse(types)
 }

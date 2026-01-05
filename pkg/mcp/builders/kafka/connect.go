@@ -17,14 +17,13 @@ package kafka
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"strings"
 
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	mcpsdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/adapter"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
 
@@ -59,7 +58,7 @@ func NewKafkaConnectToolBuilder() *KafkaConnectToolBuilder {
 
 // BuildTools builds the Kafka Connect tool list
 // This is the core method implementing the ToolBuilder interface
-func (b *KafkaConnectToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]server.ServerTool, error) {
+func (b *KafkaConnectToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]builders.ServerTool, error) {
 	// Check features - return empty list if no required features are present
 	if !b.HasAnyRequiredFeature(config.Features) {
 		return nil, nil
@@ -74,7 +73,7 @@ func (b *KafkaConnectToolBuilder) BuildTools(_ context.Context, config builders.
 	tool := b.buildKafkaConnectTool()
 	handler := b.buildKafkaConnectHandler(config.ReadOnly)
 
-	return []server.ServerTool{
+	return []builders.ServerTool{
 		{
 			Tool:    tool,
 			Handler: handler,
@@ -84,7 +83,7 @@ func (b *KafkaConnectToolBuilder) BuildTools(_ context.Context, config builders.
 
 // buildKafkaConnectTool builds the Kafka Connect MCP tool definition
 // Migrated from the original tool definition logic
-func (b *KafkaConnectToolBuilder) buildKafkaConnectTool() mcp.Tool {
+func (b *KafkaConnectToolBuilder) buildKafkaConnectTool() *mcpsdk.Tool {
 	resourceDesc := "Resource to operate on. Available resources:\n" +
 		"- kafka-connect-cluster: A single Kafka Connect cluster that manages connectors and tasks.\n" +
 		"- connector: A single Kafka Connect connector instance that moves data between Kafka and external systems.\n" +
@@ -169,21 +168,22 @@ func (b *KafkaConnectToolBuilder) buildKafkaConnectTool() mcp.Tool {
 		"    operation: \"get\"\n\n" +
 		"This tool requires appropriate Kafka Connect permissions."
 
-	return mcp.NewTool("kafka_admin_connect",
-		mcp.WithDescription(toolDesc),
-		mcp.WithString("resource", mcp.Required(),
-			mcp.Description(resourceDesc),
+	return builders.NewTool("kafka_admin_connect",
+		builders.WithDescription(toolDesc),
+		builders.WithString("resource", builders.Required(),
+			builders.Description(resourceDesc),
 		),
-		mcp.WithString("operation", mcp.Required(),
-			mcp.Description(operationDesc),
+		builders.WithString("operation", builders.Required(),
+			builders.Description(operationDesc),
 		),
-		mcp.WithString("name",
-			mcp.Description("The name of the Kafka Connect connector to operate on. "+
+		builders.WithString("name",
+			builders.Description("The name of the Kafka Connect connector to operate on. "+
 				"Required for 'get', 'create', 'update', 'delete', 'restart', 'pause', and 'resume' operations on the 'connector' resource. "+
 				"Must be unique within the Kafka Connect cluster. "+
-				"Should be descriptive of the connector's purpose, such as 'mysql-inventory-source' or 'elasticsearch-logs-sink'.")),
-		mcp.WithObject("config",
-			mcp.Description("The configuration settings for the connector. "+
+				"Should be descriptive of the connector's purpose, such as 'mysql-inventory-source' or 'elasticsearch-logs-sink'."),
+		),
+		builders.WithObject("config",
+			builders.Description("The configuration settings for the connector. "+
 				"Required for 'create' and 'update' operations on the 'connector' resource. "+
 				"Must include 'connector.class' which specifies the connector implementation. "+
 				"Common configurations include:\n"+
@@ -192,21 +192,22 @@ func (b *KafkaConnectToolBuilder) buildKafkaConnectTool() mcp.Tool {
 				"- topics/topic.regex/topic.prefix: Topic specification (varies by connector)\n"+
 				"- key.converter/value.converter: Data format converters\n"+
 				"- transforms: Optional transformations to apply to data\n"+
-				"Additional fields depend on the specific connector type being used.")),
+				"Additional fields depend on the specific connector type being used."),
+		),
 	)
 }
 
 // buildKafkaConnectHandler builds the Kafka Connect handler function
 // Migrated from the original handler logic
-func (b *KafkaConnectToolBuilder) buildKafkaConnectHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *KafkaConnectToolBuilder) buildKafkaConnectHandler(readOnly bool) func(context.Context, *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	return func(ctx context.Context, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 		// Get required parameters
-		resource, err := request.RequireString("resource")
+		resource, err := adapter.RequireString(request, "resource")
 		if err != nil {
 			return b.handleError("get resource", err), nil
 		}
 
-		operation, err := request.RequireString("operation")
+		operation, err := adapter.RequireString(request, "operation")
 		if err != nil {
 			return b.handleError("get operation", err), nil
 		}
@@ -217,13 +218,13 @@ func (b *KafkaConnectToolBuilder) buildKafkaConnectHandler(readOnly bool) func(c
 
 		// Validate write operations in read-only mode
 		if readOnly && (operation == "create" || operation == "update" || operation == "delete" || operation == "restart" || operation == "pause" || operation == "resume") {
-			return mcp.NewToolResultError("Write operations are not allowed in read-only mode"), nil
+			return adapter.NewErrorResult("Write operations are not allowed in read-only mode"), nil
 		}
 
 		// Get Kafka Connect client
 		session := mcpCtx.GetKafkaSession(ctx)
 		if session == nil {
-			return mcp.NewToolResultError("Kafka session not found in context"), nil
+			return adapter.NewErrorResult("Kafka session not found in context"), nil
 		}
 		admin, err := session.GetConnectClient()
 		if err != nil {
@@ -237,14 +238,14 @@ func (b *KafkaConnectToolBuilder) buildKafkaConnectHandler(readOnly bool) func(c
 			case "get":
 				return b.handleKafkaConnectClusterGet(ctx, admin, request)
 			default:
-				return mcp.NewToolResultError(fmt.Sprintf("Invalid operation for resource 'kafka-connect-cluster': %s", operation)), nil
+				return adapter.NewErrorResult("Invalid operation for resource 'kafka-connect-cluster': %s", operation), nil
 			}
 		case "connectors":
 			switch operation {
 			case "list":
 				return b.handleKafkaConnectorsList(ctx, admin, request)
 			default:
-				return mcp.NewToolResultError(fmt.Sprintf("Invalid operation for resource 'connectors': %s", operation)), nil
+				return adapter.NewErrorResult("Invalid operation for resource 'connectors': %s", operation), nil
 			}
 		case "connector":
 			switch operation {
@@ -263,17 +264,17 @@ func (b *KafkaConnectToolBuilder) buildKafkaConnectHandler(readOnly bool) func(c
 			case "resume":
 				return b.handleKafkaConnectorResume(ctx, admin, request)
 			default:
-				return mcp.NewToolResultError(fmt.Sprintf("Invalid operation for resource 'connector': %s", operation)), nil
+				return adapter.NewErrorResult("Invalid operation for resource 'connector': %s", operation), nil
 			}
 		case "connector-plugins":
 			switch operation {
 			case "list":
 				return b.handleKafkaConnectorPluginsList(ctx, admin, request)
 			default:
-				return mcp.NewToolResultError(fmt.Sprintf("Invalid operation for resource 'connector-plugins': %s", operation)), nil
+				return adapter.NewErrorResult("Invalid operation for resource 'connector-plugins': %s", operation), nil
 			}
 		default:
-			return mcp.NewToolResultError(fmt.Sprintf("Invalid resource: %s. Available resources: kafka-connect-cluster, connectors, connector, connector-plugins", resource)), nil
+			return adapter.NewErrorResult("Invalid resource: %s. Available resources: kafka-connect-cluster, connectors, connector, connector-plugins", resource), nil
 		}
 	}
 }
@@ -281,23 +282,23 @@ func (b *KafkaConnectToolBuilder) buildKafkaConnectHandler(readOnly bool) func(c
 // Unified error handling and utility functions
 
 // handleError provides unified error handling
-func (b *KafkaConnectToolBuilder) handleError(operation string, err error) *mcp.CallToolResult {
-	return mcp.NewToolResultError(fmt.Sprintf("Failed to %s: %v", operation, err))
+func (b *KafkaConnectToolBuilder) handleError(operation string, err error) *mcpsdk.CallToolResult {
+	return adapter.NewErrorResult("Failed to %s: %v", operation, err)
 }
 
 // marshalResponse provides unified JSON serialization for responses
-func (b *KafkaConnectToolBuilder) marshalResponse(data interface{}) (*mcp.CallToolResult, error) {
+func (b *KafkaConnectToolBuilder) marshalResponse(data interface{}) (*mcpsdk.CallToolResult, error) {
 	jsonBytes, err := json.Marshal(data)
 	if err != nil {
 		return b.handleError("marshal response", err), nil
 	}
-	return mcp.NewToolResultText(string(jsonBytes)), nil
+	return adapter.NewTextResult(string(jsonBytes)), nil
 }
 
 // Specific operation handler functions - migrated from original implementation
 
 // handleKafkaConnectClusterGet handles retrieving Kafka Connect cluster information
-func (b *KafkaConnectToolBuilder) handleKafkaConnectClusterGet(ctx context.Context, admin kafka.Connect, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *KafkaConnectToolBuilder) handleKafkaConnectClusterGet(ctx context.Context, admin kafka.Connect, _ *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	cluster, err := admin.GetInfo(ctx)
 	if err != nil {
 		return b.handleError("get Kafka Connect cluster", err), nil
@@ -306,7 +307,7 @@ func (b *KafkaConnectToolBuilder) handleKafkaConnectClusterGet(ctx context.Conte
 }
 
 // handleKafkaConnectorsList handles listing all connectors
-func (b *KafkaConnectToolBuilder) handleKafkaConnectorsList(ctx context.Context, admin kafka.Connect, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *KafkaConnectToolBuilder) handleKafkaConnectorsList(ctx context.Context, admin kafka.Connect, _ *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	connectors, err := admin.ListConnectors(ctx)
 	if err != nil {
 		return b.handleError("get Kafka Connect connectors", err), nil
@@ -315,8 +316,8 @@ func (b *KafkaConnectToolBuilder) handleKafkaConnectorsList(ctx context.Context,
 }
 
 // handleKafkaConnectorGet handles retrieving specific connector information
-func (b *KafkaConnectToolBuilder) handleKafkaConnectorGet(ctx context.Context, admin kafka.Connect, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	name, err := request.RequireString("name")
+func (b *KafkaConnectToolBuilder) handleKafkaConnectorGet(ctx context.Context, admin kafka.Connect, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	name, err := adapter.RequireString(request, "name")
 	if err != nil {
 		return b.handleError("get connector name", err), nil
 	}
@@ -329,13 +330,18 @@ func (b *KafkaConnectToolBuilder) handleKafkaConnectorGet(ctx context.Context, a
 }
 
 // handleKafkaConnectorCreate handles creating a new connector
-func (b *KafkaConnectToolBuilder) handleKafkaConnectorCreate(ctx context.Context, admin kafka.Connect, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	name, err := request.RequireString("name")
+func (b *KafkaConnectToolBuilder) handleKafkaConnectorCreate(ctx context.Context, admin kafka.Connect, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	name, err := adapter.RequireString(request, "name")
 	if err != nil {
 		return b.handleError("get connector name", err), nil
 	}
 
-	configMap, err := common.RequiredParamObject(request.GetArguments(), "config")
+	args, err := adapter.GetArgumentsMap(request)
+	if err != nil {
+		return b.handleError("get arguments", err), nil
+	}
+
+	configMap, err := common.RequiredParamObject(args, "config")
 	if err != nil {
 		return b.handleError("get config", err), nil
 	}
@@ -351,13 +357,18 @@ func (b *KafkaConnectToolBuilder) handleKafkaConnectorCreate(ctx context.Context
 }
 
 // handleKafkaConnectorUpdate handles updating a connector
-func (b *KafkaConnectToolBuilder) handleKafkaConnectorUpdate(ctx context.Context, admin kafka.Connect, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	name, err := request.RequireString("name")
+func (b *KafkaConnectToolBuilder) handleKafkaConnectorUpdate(ctx context.Context, admin kafka.Connect, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	name, err := adapter.RequireString(request, "name")
 	if err != nil {
 		return b.handleError("get connector name", err), nil
 	}
 
-	configMap, err := common.RequiredParamObject(request.GetArguments(), "config")
+	args, err := adapter.GetArgumentsMap(request)
+	if err != nil {
+		return b.handleError("get arguments", err), nil
+	}
+
+	configMap, err := common.RequiredParamObject(args, "config")
 	if err != nil {
 		return b.handleError("get config", err), nil
 	}
@@ -373,8 +384,8 @@ func (b *KafkaConnectToolBuilder) handleKafkaConnectorUpdate(ctx context.Context
 }
 
 // handleKafkaConnectorDelete handles deleting a connector
-func (b *KafkaConnectToolBuilder) handleKafkaConnectorDelete(ctx context.Context, admin kafka.Connect, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	name, err := request.RequireString("name")
+func (b *KafkaConnectToolBuilder) handleKafkaConnectorDelete(ctx context.Context, admin kafka.Connect, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	name, err := adapter.RequireString(request, "name")
 	if err != nil {
 		return b.handleError("get connector name", err), nil
 	}
@@ -384,12 +395,12 @@ func (b *KafkaConnectToolBuilder) handleKafkaConnectorDelete(ctx context.Context
 		return b.handleError("delete Kafka Connect connector", err), nil
 	}
 
-	return mcp.NewToolResultText("Connector deleted successfully"), nil
+	return adapter.NewTextResult("Connector deleted successfully"), nil
 }
 
 // handleKafkaConnectorRestart handles restarting a connector
-func (b *KafkaConnectToolBuilder) handleKafkaConnectorRestart(ctx context.Context, admin kafka.Connect, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	name, err := request.RequireString("name")
+func (b *KafkaConnectToolBuilder) handleKafkaConnectorRestart(ctx context.Context, admin kafka.Connect, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	name, err := adapter.RequireString(request, "name")
 	if err != nil {
 		return b.handleError("get connector name", err), nil
 	}
@@ -399,12 +410,12 @@ func (b *KafkaConnectToolBuilder) handleKafkaConnectorRestart(ctx context.Contex
 		return b.handleError("restart Kafka Connect connector", err), nil
 	}
 
-	return mcp.NewToolResultText("Connector restarted successfully"), nil
+	return adapter.NewTextResult("Connector restarted successfully"), nil
 }
 
 // handleKafkaConnectorPause handles pausing a connector
-func (b *KafkaConnectToolBuilder) handleKafkaConnectorPause(ctx context.Context, admin kafka.Connect, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	name, err := request.RequireString("name")
+func (b *KafkaConnectToolBuilder) handleKafkaConnectorPause(ctx context.Context, admin kafka.Connect, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	name, err := adapter.RequireString(request, "name")
 	if err != nil {
 		return b.handleError("get connector name", err), nil
 	}
@@ -414,12 +425,12 @@ func (b *KafkaConnectToolBuilder) handleKafkaConnectorPause(ctx context.Context,
 		return b.handleError("pause Kafka Connect connector", err), nil
 	}
 
-	return mcp.NewToolResultText("Connector paused successfully"), nil
+	return adapter.NewTextResult("Connector paused successfully"), nil
 }
 
 // handleKafkaConnectorResume handles resuming a connector
-func (b *KafkaConnectToolBuilder) handleKafkaConnectorResume(ctx context.Context, admin kafka.Connect, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	name, err := request.RequireString("name")
+func (b *KafkaConnectToolBuilder) handleKafkaConnectorResume(ctx context.Context, admin kafka.Connect, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	name, err := adapter.RequireString(request, "name")
 	if err != nil {
 		return b.handleError("get connector name", err), nil
 	}
@@ -429,11 +440,11 @@ func (b *KafkaConnectToolBuilder) handleKafkaConnectorResume(ctx context.Context
 		return b.handleError("resume Kafka Connect connector", err), nil
 	}
 
-	return mcp.NewToolResultText("Connector resumed successfully"), nil
+	return adapter.NewTextResult("Connector resumed successfully"), nil
 }
 
 // handleKafkaConnectorPluginsList handles listing connector plugins
-func (b *KafkaConnectToolBuilder) handleKafkaConnectorPluginsList(ctx context.Context, admin kafka.Connect, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *KafkaConnectToolBuilder) handleKafkaConnectorPluginsList(ctx context.Context, admin kafka.Connect, _ *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	plugins, err := admin.ListPlugins(ctx)
 	if err != nil {
 		return b.handleError("get Kafka Connect connector plugins", err), nil

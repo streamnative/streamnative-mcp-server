@@ -18,8 +18,8 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/invopop/jsonschema"
 	cliutils "github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
-	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 )
 
@@ -37,13 +37,21 @@ func NewNumberConverter() *NumberConverter {
 	}
 }
 
-func (c *NumberConverter) ToMCPToolInputSchemaProperties(schemaInfo *cliutils.SchemaInfo) ([]mcp.ToolOption, error) {
+func (c *NumberConverter) ToMCPToolInputSchemaProperties(schemaInfo *cliutils.SchemaInfo) (*jsonschema.Schema, error) {
 	if schemaInfo.Type != "INT8" && schemaInfo.Type != "INT16" && schemaInfo.Type != "INT32" && schemaInfo.Type != "INT64" && schemaInfo.Type != "FLOAT" && schemaInfo.Type != "DOUBLE" {
 		return nil, fmt.Errorf("expected INT8, INT16, INT32, INT64, FLOAT, or DOUBLE schema, got %s", schemaInfo.Type)
 	}
 
-	return []mcp.ToolOption{
-		mcp.WithNumber(c.ParamName, mcp.Description(fmt.Sprintf("The input schema is a %s schema", schemaInfo.Type)), mcp.Required()),
+	props := jsonschema.NewProperties()
+	props.Set(c.ParamName, &jsonschema.Schema{
+		Type:        "number",
+		Description: fmt.Sprintf("The input schema is a %s schema", schemaInfo.Type),
+	})
+
+	return &jsonschema.Schema{
+		Type:       "object",
+		Properties: props,
+		Required:   []string{c.ParamName},
 	}, nil
 }
 

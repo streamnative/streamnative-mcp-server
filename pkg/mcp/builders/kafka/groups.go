@@ -17,12 +17,11 @@ package kafka
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"strings"
 
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	mcpsdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/adapter"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 	"github.com/twmb/franz-go/pkg/kadm"
 )
@@ -55,7 +54,7 @@ func NewKafkaGroupsToolBuilder() *KafkaGroupsToolBuilder {
 }
 
 // BuildTools builds the Kafka Groups tool list
-func (b *KafkaGroupsToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]server.ServerTool, error) {
+func (b *KafkaGroupsToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]builders.ServerTool, error) {
 	// Check features - return empty list if no required features are present
 	if !b.HasAnyRequiredFeature(config.Features) {
 		return nil, nil
@@ -70,7 +69,7 @@ func (b *KafkaGroupsToolBuilder) BuildTools(_ context.Context, config builders.T
 	tool := b.buildKafkaGroupsTool()
 	handler := b.buildKafkaGroupsHandler(config.ReadOnly)
 
-	return []server.ServerTool{
+	return []builders.ServerTool{
 		{
 			Tool:    tool,
 			Handler: handler,
@@ -79,7 +78,7 @@ func (b *KafkaGroupsToolBuilder) BuildTools(_ context.Context, config builders.T
 }
 
 // buildKafkaGroupsTool builds the Kafka Groups MCP tool definition
-func (b *KafkaGroupsToolBuilder) buildKafkaGroupsTool() mcp.Tool {
+func (b *KafkaGroupsToolBuilder) buildKafkaGroupsTool() *mcpsdk.Tool {
 	resourceDesc := "Resource to operate on. Available resources:\n" +
 		"- group: A single Kafka Consumer Group for operations on individual groups (describe, remove-members, set-offset, delete-offset)\n" +
 		"- groups: Collection of Kafka Consumer Groups for bulk operations (list)"
@@ -130,42 +129,47 @@ func (b *KafkaGroupsToolBuilder) buildKafkaGroupsTool() mcp.Tool {
 		"   offset: 1000\n\n" +
 		"This tool requires Kafka super-user permissions."
 
-	return mcp.NewTool("kafka_admin_groups",
-		mcp.WithDescription(toolDesc),
-		mcp.WithString("resource", mcp.Required(),
-			mcp.Description(resourceDesc),
+	return builders.NewTool("kafka_admin_groups",
+		builders.WithDescription(toolDesc),
+		builders.WithString("resource", builders.Required(),
+			builders.Description(resourceDesc),
 		),
-		mcp.WithString("operation", mcp.Required(),
-			mcp.Description(operationDesc),
+		builders.WithString("operation", builders.Required(),
+			builders.Description(operationDesc),
 		),
-		mcp.WithString("group",
-			mcp.Description("The name of the Kafka Consumer Group to operate on. "+
+		builders.WithString("group",
+			builders.Description("The name of the Kafka Consumer Group to operate on. "+
 				"Required for the 'describe' and 'remove-members' operations. "+
 				"Must be an existing consumer group name in the Kafka cluster. "+
-				"Consumer Group names are case-sensitive and typically follow a naming convention like 'application-name'.")),
-		mcp.WithString("members",
-			mcp.Description("Comma-separated list of consumer instance IDs to remove from the group. "+
+				"Consumer Group names are case-sensitive and typically follow a naming convention like 'application-name'."),
+		),
+		builders.WithString("members",
+			builders.Description("Comma-separated list of consumer instance IDs to remove from the group. "+
 				"Required for the 'remove-members' operation. "+
-				"Consumer instance IDs can be found using the 'describe' operation.")),
-		mcp.WithString("topic",
-			mcp.Description("The topic name. Required for 'delete-offset' and 'set-offset' operations.")),
-		mcp.WithNumber("partition",
-			mcp.Description("The partition number. Required for 'set-offset' operation.")),
-		mcp.WithNumber("offset",
-			mcp.Description("The offset value to set. Required for 'set-offset' operation.")),
+				"Consumer instance IDs can be found using the 'describe' operation."),
+		),
+		builders.WithString("topic",
+			builders.Description("The topic name. Required for 'delete-offset' and 'set-offset' operations."),
+		),
+		builders.WithNumber("partition",
+			builders.Description("The partition number. Required for 'set-offset' operation."),
+		),
+		builders.WithNumber("offset",
+			builders.Description("The offset value to set. Required for 'set-offset' operation."),
+		),
 	)
 }
 
 // buildKafkaGroupsHandler builds the Kafka Groups handler function
-func (b *KafkaGroupsToolBuilder) buildKafkaGroupsHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *KafkaGroupsToolBuilder) buildKafkaGroupsHandler(readOnly bool) mcpsdk.ToolHandler {
+	return func(ctx context.Context, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 		// Get required parameters
-		resource, err := request.RequireString("resource")
+		resource, err := adapter.RequireString(request, "resource")
 		if err != nil {
 			return b.handleError("get resource", err), nil
 		}
 
-		operation, err := request.RequireString("operation")
+		operation, err := adapter.RequireString(request, "operation")
 		if err != nil {
 			return b.handleError("get operation", err), nil
 		}
@@ -176,7 +180,7 @@ func (b *KafkaGroupsToolBuilder) buildKafkaGroupsHandler(readOnly bool) func(con
 
 		// Validate write operations in read-only mode
 		if readOnly && (operation == "remove-members" || operation == "delete-offset" || operation == "set-offset") {
-			return mcp.NewToolResultError("Write operations are not allowed in read-only mode"), nil
+			return adapter.NewErrorResult("Write operations are not allowed in read-only mode"), nil
 		}
 
 		// Get Kafka admin client
@@ -196,7 +200,7 @@ func (b *KafkaGroupsToolBuilder) buildKafkaGroupsHandler(readOnly bool) func(con
 			case "list":
 				return b.handleKafkaGroupsList(ctx, admin, request)
 			default:
-				return mcp.NewToolResultError(fmt.Sprintf("Invalid operation for resource 'groups': %s", operation)), nil
+				return adapter.NewErrorResult("Invalid operation for resource 'groups': %s", operation), nil
 			}
 		case "group":
 			switch operation {
@@ -211,10 +215,10 @@ func (b *KafkaGroupsToolBuilder) buildKafkaGroupsHandler(readOnly bool) func(con
 			case "set-offset":
 				return b.handleKafkaGroupSetOffset(ctx, admin, request)
 			default:
-				return mcp.NewToolResultError(fmt.Sprintf("Invalid operation for resource 'group': %s", operation)), nil
+				return adapter.NewErrorResult("Invalid operation for resource 'group': %s", operation), nil
 			}
 		default:
-			return mcp.NewToolResultError(fmt.Sprintf("Invalid resource: %s. Available resources: groups, group", resource)), nil
+			return adapter.NewErrorResult("Invalid resource: %s. Available resources: groups, group", resource), nil
 		}
 	}
 }
@@ -222,23 +226,26 @@ func (b *KafkaGroupsToolBuilder) buildKafkaGroupsHandler(readOnly bool) func(con
 // Utility functions
 
 // handleError provides unified error handling
-func (b *KafkaGroupsToolBuilder) handleError(operation string, err error) *mcp.CallToolResult {
-	return mcp.NewToolResultError(fmt.Sprintf("Failed to %s: %v", operation, err))
+func (b *KafkaGroupsToolBuilder) handleError(operation string, err error) *mcpsdk.CallToolResult {
+	if err != nil {
+		return adapter.NewErrorResult("Failed to %s: %v", operation, err)
+	}
+	return adapter.NewErrorResult("Failed to %s", operation)
 }
 
 // marshalResponse provides unified JSON serialization for responses
-func (b *KafkaGroupsToolBuilder) marshalResponse(data interface{}) (*mcp.CallToolResult, error) {
+func (b *KafkaGroupsToolBuilder) marshalResponse(data interface{}) (*mcpsdk.CallToolResult, error) {
 	jsonBytes, err := json.Marshal(data)
 	if err != nil {
 		return b.handleError("marshal response", err), nil
 	}
-	return mcp.NewToolResultText(string(jsonBytes)), nil
+	return adapter.NewTextResult(string(jsonBytes)), nil
 }
 
 // Specific operation handler functions
 
 // handleKafkaGroupsList handles listing all consumer groups
-func (b *KafkaGroupsToolBuilder) handleKafkaGroupsList(ctx context.Context, admin *kadm.Client, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *KafkaGroupsToolBuilder) handleKafkaGroupsList(ctx context.Context, admin *kadm.Client, _ *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	groups, err := admin.ListGroups(ctx)
 	if err != nil {
 		return b.handleError("list Kafka consumer groups", err), nil
@@ -247,8 +254,8 @@ func (b *KafkaGroupsToolBuilder) handleKafkaGroupsList(ctx context.Context, admi
 }
 
 // handleKafkaGroupDescribe handles describing a specific consumer group
-func (b *KafkaGroupsToolBuilder) handleKafkaGroupDescribe(ctx context.Context, admin *kadm.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	groupName, err := request.RequireString("group")
+func (b *KafkaGroupsToolBuilder) handleKafkaGroupDescribe(ctx context.Context, admin *kadm.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	groupName, err := adapter.RequireString(request, "group")
 	if err != nil {
 		return b.handleError("get group name", err), nil
 	}
@@ -261,13 +268,13 @@ func (b *KafkaGroupsToolBuilder) handleKafkaGroupDescribe(ctx context.Context, a
 }
 
 // handleKafkaGroupRemoveMembers handles removing members from a consumer group
-func (b *KafkaGroupsToolBuilder) handleKafkaGroupRemoveMembers(ctx context.Context, admin *kadm.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	groupName, err := request.RequireString("group")
+func (b *KafkaGroupsToolBuilder) handleKafkaGroupRemoveMembers(ctx context.Context, admin *kadm.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	groupName, err := adapter.RequireString(request, "group")
 	if err != nil {
 		return b.handleError("get group name", err), nil
 	}
 
-	membersStr, err := request.RequireString("members")
+	membersStr, err := adapter.RequireString(request, "members")
 	if err != nil {
 		return b.handleError("get members", err), nil
 	}
@@ -287,8 +294,8 @@ func (b *KafkaGroupsToolBuilder) handleKafkaGroupRemoveMembers(ctx context.Conte
 }
 
 // handleKafkaGroupOffsets handles getting offsets for a consumer group
-func (b *KafkaGroupsToolBuilder) handleKafkaGroupOffsets(ctx context.Context, admin *kadm.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	groupName, err := request.RequireString("group")
+func (b *KafkaGroupsToolBuilder) handleKafkaGroupOffsets(ctx context.Context, admin *kadm.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	groupName, err := adapter.RequireString(request, "group")
 	if err != nil {
 		return b.handleError("get group name", err), nil
 	}
@@ -301,13 +308,13 @@ func (b *KafkaGroupsToolBuilder) handleKafkaGroupOffsets(ctx context.Context, ad
 }
 
 // handleKafkaGroupDeleteOffset handles deleting a specific offset for a consumer group
-func (b *KafkaGroupsToolBuilder) handleKafkaGroupDeleteOffset(ctx context.Context, admin *kadm.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	groupName, err := request.RequireString("group")
+func (b *KafkaGroupsToolBuilder) handleKafkaGroupDeleteOffset(ctx context.Context, admin *kadm.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	groupName, err := adapter.RequireString(request, "group")
 	if err != nil {
 		return b.handleError("get group name", err), nil
 	}
 
-	topicName, err := request.RequireString("topic")
+	topicName, err := adapter.RequireString(request, "topic")
 	if err != nil {
 		return b.handleError("get topic name", err), nil
 	}
@@ -332,24 +339,24 @@ func (b *KafkaGroupsToolBuilder) handleKafkaGroupDeleteOffset(ctx context.Contex
 }
 
 // handleKafkaGroupSetOffset handles setting a specific offset for a consumer group
-func (b *KafkaGroupsToolBuilder) handleKafkaGroupSetOffset(ctx context.Context, admin *kadm.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	groupName, err := request.RequireString("group")
+func (b *KafkaGroupsToolBuilder) handleKafkaGroupSetOffset(ctx context.Context, admin *kadm.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	groupName, err := adapter.RequireString(request, "group")
 	if err != nil {
 		return b.handleError("get group name", err), nil
 	}
 
-	topicName, err := request.RequireString("topic")
+	topicName, err := adapter.RequireString(request, "topic")
 	if err != nil {
 		return b.handleError("get topic name", err), nil
 	}
 
-	partitionNum, err := request.RequireFloat("partition")
+	partitionNum, err := adapter.RequireFloat(request, "partition")
 	if err != nil {
 		return b.handleError("get partition number", err), nil
 	}
 	partitionInt := int32(partitionNum)
 
-	offsetNum, err := request.RequireFloat("offset")
+	offsetNum, err := adapter.RequireFloat(request, "offset")
 	if err != nil {
 		return b.handleError("get offset", err), nil
 	}

@@ -18,13 +18,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	pulsarBuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/pulsar"
 )
 
 // PulsarClientProduceTools creates Pulsar Client Producer tool list using the new builder pattern
-func PulsarClientProduceTools(readOnly bool, features []string) []server.ServerTool {
+func PulsarClientProduceTools(readOnly bool, features []string) []builders.ServerTool {
 	builder := pulsarBuilders.NewPulsarClientProduceToolBuilder()
 	config := builders.ToolBuildConfig{
 		ReadOnly: readOnly,
@@ -42,7 +41,7 @@ func PulsarClientProduceTools(readOnly bool, features []string) []server.ServerT
 }
 
 // PulsarClientAddProducerTools adds Pulsar client producer tools to the MCP server
-func PulsarClientAddProducerTools(s *server.MCPServer, readOnly bool, features []string) {
+func PulsarClientAddProducerTools(s *MCPServer, readOnly bool, features []string) {
 	tools := PulsarClientProduceTools(readOnly, features)
 
 	for _, tool := range tools {

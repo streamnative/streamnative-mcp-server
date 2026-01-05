@@ -21,10 +21,10 @@ import (
 	"strings"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	mcpsdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/adapter"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
 
@@ -57,7 +57,7 @@ func NewPulsarAdminResourceQuotasToolBuilder() *PulsarAdminResourceQuotasToolBui
 }
 
 // BuildTools builds the Pulsar admin resource quotas tool list
-func (b *PulsarAdminResourceQuotasToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]server.ServerTool, error) {
+func (b *PulsarAdminResourceQuotasToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]builders.ServerTool, error) {
 	// Check features - return empty list if no required features are present
 	if !b.HasAnyRequiredFeature(config.Features) {
 		return nil, nil
@@ -72,7 +72,7 @@ func (b *PulsarAdminResourceQuotasToolBuilder) BuildTools(_ context.Context, con
 	tool := b.buildResourceQuotasTool()
 	handler := b.buildResourceQuotasHandler(config.ReadOnly)
 
-	return []server.ServerTool{
+	return []builders.ServerTool{
 		{
 			Tool:    tool,
 			Handler: handler,
@@ -81,7 +81,7 @@ func (b *PulsarAdminResourceQuotasToolBuilder) BuildTools(_ context.Context, con
 }
 
 // buildResourceQuotasTool builds the Pulsar admin resource quotas MCP tool definition
-func (b *PulsarAdminResourceQuotasToolBuilder) buildResourceQuotasTool() mcp.Tool {
+func (b *PulsarAdminResourceQuotasToolBuilder) buildResourceQuotasTool() *mcpsdk.Tool {
 	toolDesc := "Manage Apache Pulsar resource quotas for brokers, namespaces and bundles. " +
 		"Resource quotas define limits for resource usage such as message rates, bandwidth, and memory. " +
 		"These quotas help prevent resource abuse and ensure fair resource allocation across the Pulsar cluster. " +
@@ -96,62 +96,62 @@ func (b *PulsarAdminResourceQuotasToolBuilder) buildResourceQuotasTool() mcp.Too
 		"- set: Set the resource quota for a specified namespace bundle or default quota (requires super-user permissions)\n" +
 		"- reset: Reset a namespace bundle's resource quota to default value (requires super-user permissions)"
 
-	return mcp.NewTool("pulsar_admin_resourcequota",
-		mcp.WithDescription(toolDesc),
-		mcp.WithString("resource", mcp.Required(),
-			mcp.Description(resourceDesc),
+	return builders.NewTool("pulsar_admin_resourcequota",
+		builders.WithDescription(toolDesc),
+		builders.WithString("resource", builders.Required(),
+			builders.Description(resourceDesc),
 		),
-		mcp.WithString("operation", mcp.Required(),
-			mcp.Description(operationDesc),
+		builders.WithString("operation", builders.Required(),
+			builders.Description(operationDesc),
 		),
-		mcp.WithString("namespace",
-			mcp.Description("The namespace name in the format 'tenant/namespace'. "+
+		builders.WithString("namespace",
+			builders.Description("The namespace name in the format 'tenant/namespace'. "+
 				"Optional for 'get' and 'set' operations (to get/set default quota if omitted). "+
 				"Required for 'reset' operation."),
 		),
-		mcp.WithString("bundle",
-			mcp.Description("The bundle range in the format '{start-boundary}_{end-boundary}'. "+
+		builders.WithString("bundle",
+			builders.Description("The bundle range in the format '{start-boundary}_{end-boundary}'. "+
 				"Must be specified together with namespace. Bundle is a hash range of the topic names belonging to a namespace."),
 		),
-		mcp.WithNumber("msgRateIn",
-			mcp.Description("Expected incoming messages per second. Required for 'set' operation. "+
+		builders.WithNumber("msgRateIn",
+			builders.Description("Expected incoming messages per second. Required for 'set' operation. "+
 				"This defines the maximum rate of incoming messages allowed for the namespace or bundle."),
 		),
-		mcp.WithNumber("msgRateOut",
-			mcp.Description("Expected outgoing messages per second. Required for 'set' operation. "+
+		builders.WithNumber("msgRateOut",
+			builders.Description("Expected outgoing messages per second. Required for 'set' operation. "+
 				"This defines the maximum rate of outgoing messages allowed for the namespace or bundle."),
 		),
-		mcp.WithNumber("bandwidthIn",
-			mcp.Description("Expected inbound bandwidth in bytes per second. Required for 'set' operation. "+
+		builders.WithNumber("bandwidthIn",
+			builders.Description("Expected inbound bandwidth in bytes per second. Required for 'set' operation. "+
 				"This defines the maximum rate of incoming bytes allowed for the namespace or bundle."),
 		),
-		mcp.WithNumber("bandwidthOut",
-			mcp.Description("Expected outbound bandwidth in bytes per second. Required for 'set' operation. "+
+		builders.WithNumber("bandwidthOut",
+			builders.Description("Expected outbound bandwidth in bytes per second. Required for 'set' operation. "+
 				"This defines the maximum rate of outgoing bytes allowed for the namespace or bundle."),
 		),
-		mcp.WithNumber("memory",
-			mcp.Description("Expected memory usage in Mbytes. Required for 'set' operation. "+
+		builders.WithNumber("memory",
+			builders.Description("Expected memory usage in Mbytes. Required for 'set' operation. "+
 				"This defines the maximum memory allowed for storing messages for the namespace or bundle."),
 		),
-		mcp.WithBoolean("dynamic",
-			mcp.Description("Whether to allow quota to be dynamically re-calculated. Optional for 'set' operation. "+
+		builders.WithBoolean("dynamic",
+			builders.Description("Whether to allow quota to be dynamically re-calculated. Optional for 'set' operation. "+
 				"If true, the broker can dynamically adjust the quota based on the current usage patterns."),
 		),
 	)
 }
 
 // buildResourceQuotasHandler builds the Pulsar admin resource quotas handler function
-func (b *PulsarAdminResourceQuotasToolBuilder) buildResourceQuotasHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminResourceQuotasToolBuilder) buildResourceQuotasHandler(readOnly bool) func(context.Context, *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	return func(ctx context.Context, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 		// Get required parameters
-		resource, err := request.RequireString("resource")
+		resource, err := adapter.RequireString(request, "resource")
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get resource: %v", err)), nil
+			return adapter.NewErrorResult("Failed to get resource: %v", err), nil
 		}
 
-		operation, err := request.RequireString("operation")
+		operation, err := adapter.RequireString(request, "operation")
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get operation: %v", err)), nil
+			return adapter.NewErrorResult("Failed to get operation: %v", err), nil
 		}
 
 		// Normalize parameters
@@ -160,23 +160,23 @@ func (b *PulsarAdminResourceQuotasToolBuilder) buildResourceQuotasHandler(readOn
 
 		// Validate write operations in read-only mode
 		if readOnly && (operation == "set" || operation == "reset") {
-			return mcp.NewToolResultError("Write operations are not allowed in read-only mode"), nil
+			return adapter.NewErrorResult("Write operations are not allowed in read-only mode"), nil
 		}
 
 		// Verify resource type
 		if resource != "quota" {
-			return mcp.NewToolResultError(fmt.Sprintf("Invalid resource: %s. Only 'quota' is supported", resource)), nil
+			return adapter.NewErrorResult("Invalid resource: %s. Only 'quota' is supported", resource), nil
 		}
 
 		// Get Pulsar session from context
 		session := mcpCtx.GetPulsarSession(ctx)
 		if session == nil {
-			return mcp.NewToolResultError("Pulsar session not found in context"), nil
+			return adapter.NewErrorResult("Pulsar session not found in context"), nil
 		}
 
 		admin, err := session.GetAdminClient()
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
+			return adapter.NewErrorResult("Failed to get admin client: %v", err), nil
 		}
 
 		// Dispatch based on operation
@@ -188,7 +188,7 @@ func (b *PulsarAdminResourceQuotasToolBuilder) buildResourceQuotasHandler(readOn
 		case "reset":
 			return b.handleQuotaReset(admin, request)
 		default:
-			return mcp.NewToolResultError(fmt.Sprintf("Invalid operation: %s. Available operations: get, set, reset", operation)), nil
+			return adapter.NewErrorResult("Invalid operation: %s. Available operations: get, set, reset", operation), nil
 		}
 	}
 }
@@ -196,14 +196,14 @@ func (b *PulsarAdminResourceQuotasToolBuilder) buildResourceQuotasHandler(readOn
 // Helper functions
 
 // handleQuotaGet handles getting a resource quota
-func (b *PulsarAdminResourceQuotasToolBuilder) handleQuotaGet(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminResourceQuotasToolBuilder) handleQuotaGet(admin cmdutils.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	// Get optional parameters
-	namespace := request.GetString("namespace", "")
-	bundle := request.GetString("bundle", "")
+	namespace := adapter.GetString(request, "namespace", "")
+	bundle := adapter.GetString(request, "bundle", "")
 
 	// Check if both namespace and bundle are provided or neither is provided
 	if (namespace != "" && bundle == "") || (namespace == "" && bundle != "") {
-		return mcp.NewToolResultError("When specifying a namespace, you must also specify a bundle and vice versa."), nil
+		return adapter.NewErrorResult("When specifying a namespace, you must also specify a bundle and vice versa."), nil
 	}
 
 	var (
@@ -215,17 +215,17 @@ func (b *PulsarAdminResourceQuotasToolBuilder) handleQuotaGet(admin cmdutils.Cli
 		// Get default resource quota
 		resourceQuotaData, getErr = admin.ResourceQuotas().GetDefaultResourceQuota()
 		if getErr != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get default resource quota: %v", getErr)), nil
+			return adapter.NewErrorResult("Failed to get default resource quota: %v", getErr), nil
 		}
 	} else {
 		// Get namespace bundle resource quota
 		nsName, getErr := utils.GetNamespaceName(namespace)
 		if getErr != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Invalid namespace name '%s': %v", namespace, getErr)), nil
+			return adapter.NewErrorResult("Invalid namespace name '%s': %v", namespace, getErr), nil
 		}
 		resourceQuotaData, getErr = admin.ResourceQuotas().GetNamespaceBundleResourceQuota(nsName.String(), bundle)
 		if getErr != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get resource quota for namespace '%s' bundle '%s': %v",
+			return adapter.NewErrorResult(fmt.Sprintf("Failed to get resource quota for namespace '%s' bundle '%s': %v",
 				namespace, bundle, getErr)), nil
 		}
 	}
@@ -233,48 +233,48 @@ func (b *PulsarAdminResourceQuotasToolBuilder) handleQuotaGet(admin cmdutils.Cli
 	// Format the output
 	jsonBytes, err := json.Marshal(resourceQuotaData)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to marshal resource quota data: %v", err)), nil
+		return adapter.NewErrorResult("Failed to marshal resource quota data: %v", err), nil
 	}
 
-	return mcp.NewToolResultText(string(jsonBytes)), nil
+	return adapter.NewTextResult(string(jsonBytes)), nil
 }
 
 // handleQuotaSet handles setting a resource quota
-func (b *PulsarAdminResourceQuotasToolBuilder) handleQuotaSet(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminResourceQuotasToolBuilder) handleQuotaSet(admin cmdutils.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	// Get required parameters for set operation
-	msgRateIn, err := request.RequireFloat("msgRateIn")
+	msgRateIn, err := adapter.RequireFloat(request, "msgRateIn")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'msgRateIn' for quota.set: %v", err)), nil
+		return adapter.NewErrorResult("Missing required parameter 'msgRateIn' for quota.set: %v", err), nil
 	}
 
-	msgRateOut, err := request.RequireFloat("msgRateOut")
+	msgRateOut, err := adapter.RequireFloat(request, "msgRateOut")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'msgRateOut' for quota.set: %v", err)), nil
+		return adapter.NewErrorResult("Missing required parameter 'msgRateOut' for quota.set: %v", err), nil
 	}
 
-	bandwidthIn, err := request.RequireFloat("bandwidthIn")
+	bandwidthIn, err := adapter.RequireFloat(request, "bandwidthIn")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'bandwidthIn' for quota.set: %v", err)), nil
+		return adapter.NewErrorResult("Missing required parameter 'bandwidthIn' for quota.set: %v", err), nil
 	}
 
-	bandwidthOut, err := request.RequireFloat("bandwidthOut")
+	bandwidthOut, err := adapter.RequireFloat(request, "bandwidthOut")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'bandwidthOut' for quota.set: %v", err)), nil
+		return adapter.NewErrorResult("Missing required parameter 'bandwidthOut' for quota.set: %v", err), nil
 	}
 
-	memory, err := request.RequireFloat("memory")
+	memory, err := adapter.RequireFloat(request, "memory")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'memory' for quota.set: %v", err)), nil
+		return adapter.NewErrorResult("Missing required parameter 'memory' for quota.set: %v", err), nil
 	}
 
 	// Get optional parameters
-	namespace := request.GetString("namespace", "")
-	bundle := request.GetString("bundle", "")
-	dynamic := request.GetBool("dynamic", false)
+	namespace := adapter.GetString(request, "namespace", "")
+	bundle := adapter.GetString(request, "bundle", "")
+	dynamic := adapter.GetBool(request, "dynamic", false)
 
 	// Check if both namespace and bundle are provided or neither is provided
 	if (namespace != "" && bundle == "") || (namespace == "" && bundle != "") {
-		return mcp.NewToolResultError("When specifying a namespace, you must also specify a bundle and vice versa."), nil
+		return adapter.NewErrorResult("When specifying a namespace, you must also specify a bundle and vice versa."), nil
 	}
 
 	// Create resource quota object
@@ -291,48 +291,48 @@ func (b *PulsarAdminResourceQuotasToolBuilder) handleQuotaSet(admin cmdutils.Cli
 		// Set default resource quota
 		err = admin.ResourceQuotas().SetDefaultResourceQuota(*quota)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to set default resource quota: %v", err)), nil
+			return adapter.NewErrorResult("Failed to set default resource quota: %v", err), nil
 		}
 		resultMsg = "Default resource quota set successfully"
 	} else {
 		// Set namespace bundle resource quota
 		err = admin.ResourceQuotas().SetNamespaceBundleResourceQuota(namespace, bundle, *quota)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to set resource quota for namespace '%s' bundle '%s': %v",
+			return adapter.NewErrorResult(fmt.Sprintf("Failed to set resource quota for namespace '%s' bundle '%s': %v",
 				namespace, bundle, err)), nil
 		}
 		resultMsg = fmt.Sprintf("Resource quota for namespace '%s' bundle '%s' set successfully", namespace, bundle)
 	}
 
-	return mcp.NewToolResultText(resultMsg), nil
+	return adapter.NewTextResult(resultMsg), nil
 }
 
 // handleQuotaReset handles resetting a resource quota
-func (b *PulsarAdminResourceQuotasToolBuilder) handleQuotaReset(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminResourceQuotasToolBuilder) handleQuotaReset(admin cmdutils.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	// Get required parameters for reset operation
-	namespace, err := request.RequireString("namespace")
+	namespace, err := adapter.RequireString(request, "namespace")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'namespace' for quota.reset: %v", err)), nil
+		return adapter.NewErrorResult("Missing required parameter 'namespace' for quota.reset: %v", err), nil
 	}
 
-	bundle, err := request.RequireString("bundle")
+	bundle, err := adapter.RequireString(request, "bundle")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'bundle' for quota.reset: %v", err)), nil
+		return adapter.NewErrorResult("Missing required parameter 'bundle' for quota.reset: %v", err), nil
 	}
 
 	// Parse namespace name
 	nsName, err := utils.GetNamespaceName(namespace)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid namespace name '%s': %v", namespace, err)), nil
+		return adapter.NewErrorResult("Invalid namespace name '%s': %v", namespace, err), nil
 	}
 
 	// Reset namespace bundle resource quota
 	err = admin.ResourceQuotas().ResetNamespaceBundleResourceQuota(nsName.String(), bundle)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to reset resource quota for namespace '%s' bundle '%s': %v",
+		return adapter.NewErrorResult(fmt.Sprintf("Failed to reset resource quota for namespace '%s' bundle '%s': %v",
 			namespace, bundle, err)), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Resource quota for namespace '%s' bundle '%s' reset to default successfully",
+	return adapter.NewTextResult(fmt.Sprintf("Resource quota for namespace '%s' bundle '%s' reset to default successfully",
 		namespace, bundle)), nil
 }

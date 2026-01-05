@@ -23,10 +23,10 @@ import (
 	"strings"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	mcpsdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/adapter"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
 
@@ -61,7 +61,7 @@ func NewPulsarAdminSchemaToolBuilder() *PulsarAdminSchemaToolBuilder {
 
 // BuildTools builds the Pulsar Admin Schema tool list
 // This is the core method implementing the ToolBuilder interface
-func (b *PulsarAdminSchemaToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]server.ServerTool, error) {
+func (b *PulsarAdminSchemaToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]builders.ServerTool, error) {
 	// Check features - return empty list if no required features are present
 	if !b.HasAnyRequiredFeature(config.Features) {
 		return nil, nil
@@ -76,7 +76,7 @@ func (b *PulsarAdminSchemaToolBuilder) BuildTools(_ context.Context, config buil
 	tool := b.buildSchemaTool()
 	handler := b.buildSchemaHandler(config.ReadOnly)
 
-	return []server.ServerTool{
+	return []builders.ServerTool{
 		{
 			Tool:    tool,
 			Handler: handler,
@@ -86,7 +86,7 @@ func (b *PulsarAdminSchemaToolBuilder) BuildTools(_ context.Context, config buil
 
 // buildSchemaTool builds the Pulsar Admin Schema MCP tool definition
 // Migrated from the original tool definition logic
-func (b *PulsarAdminSchemaToolBuilder) buildSchemaTool() mcp.Tool {
+func (b *PulsarAdminSchemaToolBuilder) buildSchemaTool() *mcpsdk.Tool {
 	toolDesc := "Manage Apache Pulsar schemas for topics. " +
 		"Schemas in Pulsar define the structure of message data, enabling data validation, evolution, and interoperability. " +
 		"Pulsar supports multiple schema types including AVRO, JSON, PROTOBUF, etc., allowing strong typing of message content. " +
@@ -102,26 +102,26 @@ func (b *PulsarAdminSchemaToolBuilder) buildSchemaTool() mcp.Tool {
 		"- upload: Upload a new schema for a topic (requires namespace admin permissions)\n" +
 		"- delete: Delete the schema for a topic (requires namespace admin permissions)"
 
-	return mcp.NewTool("pulsar_admin_schema",
-		mcp.WithDescription(toolDesc),
-		mcp.WithString("resource", mcp.Required(),
-			mcp.Description(resourceDesc),
+	return builders.NewTool("pulsar_admin_schema",
+		builders.WithDescription(toolDesc),
+		builders.WithString("resource", builders.Required(),
+			builders.Description(resourceDesc),
 		),
-		mcp.WithString("operation", mcp.Required(),
-			mcp.Description(operationDesc),
+		builders.WithString("operation", builders.Required(),
+			builders.Description(operationDesc),
 		),
-		mcp.WithString("topic", mcp.Required(),
-			mcp.Description("The fully qualified topic name in the format 'persistent://tenant/namespace/topic'. "+
+		builders.WithString("topic", builders.Required(),
+			builders.Description("The fully qualified topic name in the format 'persistent://tenant/namespace/topic'. "+
 				"A schema is always associated with a specific topic. The schema will be enforced for all producers "+
 				"and consumers of this topic."),
 		),
-		mcp.WithNumber("version",
-			mcp.Description("The schema version (optional for 'get' operation). "+
+		builders.WithNumber("version",
+			builders.Description("The schema version (optional for 'get' operation). "+
 				"Pulsar maintains a versioned history of schemas. If not specified, the latest schema version will be returned. "+
 				"Use this parameter to retrieve a specific historical version of the schema."),
 		),
-		mcp.WithString("filename",
-			mcp.Description("The file path of the schema definition (required for 'upload' operation). "+
+		builders.WithString("filename",
+			builders.Description("The file path of the schema definition (required for 'upload' operation). "+
 				"The file should contain a JSON object with 'type', 'schema', and optionally 'properties' fields. "+
 				"Supported schema types include: AVRO, JSON, PROTOBUF, PROTOBUF_NATIVE, KEY_VALUE, BYTES, STRING, INT8, INT16, INT32, INT64, FLOAT, DOUBLE, BOOLEAN, NONE."),
 		),
@@ -130,22 +130,22 @@ func (b *PulsarAdminSchemaToolBuilder) buildSchemaTool() mcp.Tool {
 
 // buildSchemaHandler builds the Pulsar Admin Schema handler function
 // Migrated from the original handler logic
-func (b *PulsarAdminSchemaToolBuilder) buildSchemaHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminSchemaToolBuilder) buildSchemaHandler(readOnly bool) func(context.Context, *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	return func(ctx context.Context, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 		// Get required parameters
-		resource, err := request.RequireString("resource")
+		resource, err := adapter.RequireString(request, "resource")
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get resource: %v", err)), nil
+			return adapter.NewErrorResult("Failed to get resource: %v", err), nil
 		}
 
-		operation, err := request.RequireString("operation")
+		operation, err := adapter.RequireString(request, "operation")
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get operation: %v", err)), nil
+			return adapter.NewErrorResult("Failed to get operation: %v", err), nil
 		}
 
-		topic, err := request.RequireString("topic")
+		topic, err := adapter.RequireString(request, "topic")
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic'. Please provide the fully qualified topic name: %v", err)), nil
+			return adapter.NewErrorResult("Missing required parameter 'topic'. Please provide the fully qualified topic name: %v", err), nil
 		}
 
 		// Normalize parameters
@@ -154,24 +154,24 @@ func (b *PulsarAdminSchemaToolBuilder) buildSchemaHandler(readOnly bool) func(co
 
 		// Validate write operations in read-only mode
 		if readOnly && (operation == "upload" || operation == "delete") {
-			return mcp.NewToolResultError("Write operations are not allowed in read-only mode"), nil
+			return adapter.NewErrorResult("Write operations are not allowed in read-only mode"), nil
 		}
 
 		// Verify resource type
 		if resource != "schema" {
-			return mcp.NewToolResultError(fmt.Sprintf("Invalid resource: %s. Only 'schema' is supported", resource)), nil
+			return adapter.NewErrorResult("Invalid resource: %s. Only 'schema' is supported", resource), nil
 		}
 
 		// Get Pulsar session from context
 		session := mcpCtx.GetPulsarSession(ctx)
 		if session == nil {
-			return mcp.NewToolResultError("Pulsar session not found in context"), nil
+			return adapter.NewErrorResult("Pulsar session not found in context"), nil
 		}
 
 		// Create the admin client
 		admin, err := session.GetAdminClient()
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
+			return adapter.NewErrorResult("Failed to get admin client: %v", err), nil
 		}
 
 		// Dispatch based on operation
@@ -183,7 +183,7 @@ func (b *PulsarAdminSchemaToolBuilder) buildSchemaHandler(readOnly bool) func(co
 		case "delete":
 			return b.handleSchemaDelete(admin, topic)
 		default:
-			return mcp.NewToolResultError(fmt.Sprintf("Unknown operation: %s", operation)), nil
+			return adapter.NewErrorResult("Unknown operation: %s", operation), nil
 		}
 	}
 }
@@ -200,30 +200,30 @@ func (b *PulsarAdminSchemaToolBuilder) prettyPrint(data []byte) ([]byte, error) 
 // Operation handler functions - migrated from the original implementation
 
 // handleSchemaGet handles getting a schema
-func (b *PulsarAdminSchemaToolBuilder) handleSchemaGet(admin cmdutils.Client, topic string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminSchemaToolBuilder) handleSchemaGet(admin cmdutils.Client, topic string, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	// Get optional version parameter
-	version := request.GetFloat("version", 0)
+	version := adapter.GetFloat(request, "version", 0)
 
 	// Get schema info
 	if version != 0 {
 		// Get schema by version
 		info, err := admin.Schemas().GetSchemaInfoByVersion(topic, int64(version))
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get schema version %v for topic '%s': %v",
+			return adapter.NewErrorResult(fmt.Sprintf("Failed to get schema version %v for topic '%s': %v",
 				version, topic, err)), nil
 		}
 
 		jsonBytes, err := json.Marshal(info)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to process schema information: %v", err)), nil
+			return adapter.NewErrorResult("Failed to process schema information: %v", err), nil
 		}
 
-		return mcp.NewToolResultText(string(jsonBytes)), nil
+		return adapter.NewTextResult(string(jsonBytes)), nil
 	}
 	// Get latest schema
 	schemaInfoWithVersion, err := admin.Schemas().GetSchemaInfoWithVersion(topic)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get latest schema for topic '%s': %v",
+		return adapter.NewErrorResult(fmt.Sprintf("Failed to get latest schema for topic '%s': %v",
 			topic, err)), nil
 	}
 
@@ -231,66 +231,66 @@ func (b *PulsarAdminSchemaToolBuilder) handleSchemaGet(admin cmdutils.Client, to
 	var output bytes.Buffer
 	name, err := json.Marshal(schemaInfoWithVersion.SchemaInfo.Name)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to process schema name: %v", err)), nil
+		return adapter.NewErrorResult("Failed to process schema name: %v", err), nil
 	}
 
 	schemaType, err := json.Marshal(schemaInfoWithVersion.SchemaInfo.Type)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to process schema type: %v", err)), nil
+		return adapter.NewErrorResult("Failed to process schema type: %v", err), nil
 	}
 
 	properties, err := json.Marshal(schemaInfoWithVersion.SchemaInfo.Properties)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to process schema properties: %v", err)), nil
+		return adapter.NewErrorResult("Failed to process schema properties: %v", err), nil
 	}
 
 	schema, err := b.prettyPrint(schemaInfoWithVersion.SchemaInfo.Schema)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to format schema definition: %v", err)), nil
+		return adapter.NewErrorResult("Failed to format schema definition: %v", err), nil
 	}
 
 	fmt.Fprintf(&output, "{\n  name: %s \n  schema: %s\n  type: %s \n  properties: %s\n  version: %d\n}",
 		string(name), string(schema), string(schemaType), string(properties), schemaInfoWithVersion.Version)
 
-	return mcp.NewToolResultText(output.String()), nil
+	return adapter.NewTextResult(output.String()), nil
 }
 
 // handleSchemaUpload handles uploading a schema
-func (b *PulsarAdminSchemaToolBuilder) handleSchemaUpload(admin cmdutils.Client, topic string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	filename, err := request.RequireString("filename")
+func (b *PulsarAdminSchemaToolBuilder) handleSchemaUpload(admin cmdutils.Client, topic string, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	filename, err := adapter.RequireString(request, "filename")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'filename' for schema.upload. Please provide the path to the schema definition file: %v", err)), nil
+		return adapter.NewErrorResult("Missing required parameter 'filename' for schema.upload. Please provide the path to the schema definition file: %v", err), nil
 	}
 
 	// Read and parse the schema file
 	var payload utils.PostSchemaPayload
 	file, err := os.ReadFile(filename)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to read schema file '%s': %v", filename, err)), nil
+		return adapter.NewErrorResult("Failed to read schema file '%s': %v", filename, err), nil
 	}
 
 	err = json.Unmarshal(file, &payload)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to parse schema file '%s'. The file must contain valid JSON with 'type', 'schema', and optionally 'properties' fields: %v",
+		return adapter.NewErrorResult(fmt.Sprintf("Failed to parse schema file '%s'. The file must contain valid JSON with 'type', 'schema', and optionally 'properties' fields: %v",
 			filename, err)), nil
 	}
 
 	// Upload the schema
 	err = admin.Schemas().CreateSchemaByPayload(topic, payload)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to upload schema for topic '%s': %v", topic, err)), nil
+		return adapter.NewErrorResult("Failed to upload schema for topic '%s': %v", topic, err), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Schema uploaded successfully for topic '%s'", topic)), nil
+	return adapter.NewTextResult(fmt.Sprintf("Schema uploaded successfully for topic '%s'", topic)), nil
 }
 
 // handleSchemaDelete handles deleting a schema
-func (b *PulsarAdminSchemaToolBuilder) handleSchemaDelete(admin cmdutils.Client, topic string) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminSchemaToolBuilder) handleSchemaDelete(admin cmdutils.Client, topic string) (*mcpsdk.CallToolResult, error) {
 	// Delete the schema
 	err := admin.Schemas().DeleteSchema(topic)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to delete schema for topic '%s': %v", topic, err)), nil
+		return adapter.NewErrorResult("Failed to delete schema for topic '%s': %v", topic, err), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Schema deleted successfully for topic '%s'", topic)), nil
+	return adapter.NewTextResult(fmt.Sprintf("Schema deleted successfully for topic '%s'", topic)), nil
 }

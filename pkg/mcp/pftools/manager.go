@@ -27,8 +27,7 @@ import (
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/rest"
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
 	"github.com/google/go-cmp/cmp"
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	mcpsdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 	"github.com/streamnative/streamnative-mcp-server/pkg/schema"
@@ -51,7 +50,7 @@ var DefaultStringSchemaInfo = &SchemaInfo{
 
 // Server is imported directly to avoid circular dependency
 type Server struct {
-	MCPServer     *server.MCPServer
+	MCPServer     MCPServerInterface
 	KafkaSession  *kafka.Session
 	PulsarSession *pulsar.Session
 	Logger        interface{}
@@ -203,21 +202,27 @@ func (m *PulsarFunctionManager) updateFunctions() {
 
 		if changed {
 			if m.sessionID != "" {
-				err := m.mcpServer.DeleteSessionTools(m.sessionID, fnTool.Tool.Name)
+				err := m.mcpServer.DeleteSessionTools(m.sessionID, fnTool.Name)
 				if err != nil {
-					log.Printf("Failed to delete tool %s from session %s: %v", fnTool.Tool.Name, m.sessionID, err)
+					log.Printf("Failed to delete tool %s from session %s: %v", fnTool.Name, m.sessionID, err)
 				}
 			} else {
-				m.mcpServer.DeleteTools(fnTool.Tool.Name)
+				err := m.mcpServer.DeleteTools(fnTool.Name)
+				if err != nil {
+					log.Printf("Failed to delete tool %s: %v", fnTool.Name, err)
+				}
 			}
 		}
 		if m.sessionID != "" {
 			err := m.mcpServer.AddSessionTool(m.sessionID, fnTool.Tool, m.handleToolCall(fnTool))
 			if err != nil {
-				log.Printf("Failed to add tool %s to session %s: %v", fnTool.Tool.Name, m.sessionID, err)
+				log.Printf("Failed to add tool %s to session %s: %v", fnTool.Name, m.sessionID, err)
 			}
 		} else {
-			m.mcpServer.AddTool(fnTool.Tool, m.handleToolCall(fnTool))
+			err := m.mcpServer.AddTool(fnTool.Tool, m.handleToolCall(fnTool))
+			if err != nil {
+				log.Printf("Failed to add tool %s: %v", fnTool.Name, err)
+			}
 		}
 
 		// Add function to map
@@ -226,9 +231,9 @@ func (m *PulsarFunctionManager) updateFunctions() {
 		m.mutex.Unlock()
 
 		if changed {
-			log.Printf("Updated function %s as MCP tool [%s]", fullName, fnTool.Tool.Name)
+			log.Printf("Updated function %s as MCP tool [%s]", fullName, fnTool.Name)
 		} else {
-			log.Printf("Added function %s as MCP tool [%s]", fullName, fnTool.Tool.Name)
+			log.Printf("Added function %s as MCP tool [%s]", fullName, fnTool.Name)
 		}
 	}
 
@@ -237,15 +242,18 @@ func (m *PulsarFunctionManager) updateFunctions() {
 	for fullName, fnTool := range m.fnToToolMap {
 		if !seenFunctions[fullName] {
 			if m.sessionID != "" {
-				err := m.mcpServer.DeleteSessionTools(m.sessionID, fnTool.Tool.Name)
+				err := m.mcpServer.DeleteSessionTools(m.sessionID, fnTool.Name)
 				if err != nil {
-					log.Printf("Failed to delete tool %s from session %s: %v", fnTool.Tool.Name, m.sessionID, err)
+					log.Printf("Failed to delete tool %s from session %s: %v", fnTool.Name, m.sessionID, err)
 				}
 			} else {
-				m.mcpServer.DeleteTools(fnTool.Tool.Name)
+				err := m.mcpServer.DeleteTools(fnTool.Name)
+				if err != nil {
+					log.Printf("Failed to delete tool %s: %v", fnTool.Name, err)
+				}
 			}
 			delete(m.fnToToolMap, fullName)
-			log.Printf("Removed function %s from MCP tools [%s]", fullName, fnTool.Tool.Name)
+			log.Printf("Removed function %s from MCP tools [%s]", fullName, fnTool.Name)
 		}
 	}
 	m.mutex.Unlock()
@@ -414,12 +422,14 @@ func (m *PulsarFunctionManager) convertFunctionToTool(fn *utils.FunctionConfig) 
 		return nil, fmt.Errorf("failed to convert input schema to MCP tool input schema properties: %w", err)
 	}
 
-	toolInputSchemaProperties = append(toolInputSchemaProperties, mcp.WithDescription(description))
-
-	// Create the tool
-	tool := mcp.NewTool(toolName,
-		toolInputSchemaProperties...,
-	)
+	// Create a basic tool with description
+	// For now, we convert the input schema to JSON for the description
+	// In the future, we should set this as the tool's input schema
+	inputSchemaJSON, _ := json.Marshal(toolInputSchemaProperties)
+	tool := mcpsdk.Tool{
+		Name:        toolName,
+		Description: description + " Input schema: " + string(inputSchemaJSON),
+	}
 
 	// Create circuit breaker for this function
 	circuitBreaker := NewCircuitBreaker(5, 60*time.Second)
@@ -442,8 +452,8 @@ func (m *PulsarFunctionManager) convertFunctionToTool(fn *utils.FunctionConfig) 
 }
 
 // handleToolCall returns a handler function for a specific function tool
-func (m *PulsarFunctionManager) handleToolCall(fnTool *FunctionTool) func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (m *PulsarFunctionManager) handleToolCall(fnTool *FunctionTool) mcpsdk.ToolHandler {
+	return func(ctx context.Context, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 		// Get the circuit breaker
 		m.mutex.RLock()
 		cb, exists := m.circuitBreakers[fnTool.Name]
@@ -458,7 +468,14 @@ func (m *PulsarFunctionManager) handleToolCall(fnTool *FunctionTool) func(ctx co
 
 		// Check if the circuit breaker allows the request
 		if !cb.AllowRequest() {
-			return mcp.NewToolResultError(fmt.Sprintf("Circuit breaker is open for function %s. Too many failures, please try again later.", fnTool.Name)), nil
+			return &mcpsdk.CallToolResult{
+				Content: []mcpsdk.Content{
+					&mcpsdk.TextContent{
+						Text: fmt.Sprintf("Circuit breaker is open for function %s. Too many failures, please try again later.", fnTool.Name),
+					},
+				},
+				IsError: true,
+			}, nil
 		}
 
 		// Create function invoker
@@ -478,8 +495,25 @@ func (m *PulsarFunctionManager) handleToolCall(fnTool *FunctionTool) func(ctx co
 			m.mutex.Unlock()
 		}()
 
+		// Get arguments from request
+		var params map[string]interface{}
+		if request.Params.Arguments != nil && len(request.Params.Arguments) > 0 {
+			if err := json.Unmarshal(request.Params.Arguments, &params); err != nil {
+				return &mcpsdk.CallToolResult{
+					Content: []mcpsdk.Content{
+						&mcpsdk.TextContent{
+							Text: fmt.Sprintf("Failed to parse arguments: %v", err),
+						},
+					},
+					IsError: true,
+				}, nil
+			}
+		} else {
+			params = make(map[string]interface{})
+		}
+
 		// Invoke function and wait for result
-		result, err := invoker.InvokeFunctionAndWait(timeoutCtx, fnTool, request.GetArguments())
+		result, err := invoker.InvokeFunctionAndWait(timeoutCtx, fnTool, params)
 
 		// Record success or failure
 		if err != nil {

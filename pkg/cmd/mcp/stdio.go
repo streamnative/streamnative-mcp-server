@@ -17,18 +17,16 @@ package mcp
 import (
 	"context"
 	"fmt"
-	"io"
 	"os"
 	"os/signal"
 	"syscall"
 
 	stdlog "log"
 
-	"github.com/mark3labs/mcp-go/server"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	mcpsdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
-	"github.com/streamnative/streamnative-mcp-server/pkg/log"
 )
 
 func NewCmdMcpStdioServer(configOpts *ServerOptions) *cobra.Command {
@@ -61,45 +59,23 @@ func runStdioServer(configOpts *ServerOptions) error {
 
 	// Create a new MCP server
 	ctx = context.WithValue(ctx, common.OptionsKey, configOpts.Options)
-	stdLogger := stdlog.New(logger.Writer(), "snmcp-server", 0)
 	mcpServer, err := newMcpServer(ctx, configOpts, logger)
 	if err != nil {
 		return fmt.Errorf("failed to create MCP server: %w", err)
 	}
 
-	stdioServer := server.NewStdioServer(mcpServer.MCPServer)
-	stdioServer.SetErrorLogger(stdLogger)
+	// Note: command logging (LogCommands) is temporarily disabled in go-sdk migration
+	// The go-sdk StdioTransport doesn't support custom IO wrapping
+	// This will be re-implemented in Phase 2 using IOTransport
 
-	// Start listening for messages
-	errC := make(chan error, 1)
-	go func() {
-		in, out := io.Reader(os.Stdin), io.Writer(os.Stdout)
+	// Start the server using go-sdk's StdioTransport
+	fmt.Fprintf(os.Stderr, "StreamNative Cloud MCP Server running on stdio\n")
 
-		if configOpts.LogCommands {
-			// If command logging is enabled, wrap the IO with a logger
-			loggedIO := log.NewIOLogger(in, out, logger)
-			in, out = loggedIO, loggedIO
-		}
-
-		errC <- stdioServer.Listen(ctx, in, out)
-	}()
-
-	_, _ = fmt.Fprintf(os.Stderr, "StreamNative Cloud MCP Server running on stdio\n")
-
-	// Wait for shutdown signal
-	select {
-	case <-ctx.Done():
-		fmt.Fprintf(os.Stderr, "shutting down server...\n")
+	if err := mcpServer.Server.Run(ctx, &mcpsdk.StdioTransport{}); err != nil {
 		if logger != nil {
-			logger.Info("Shutting down server...")
+			logger.Errorf("Error running server: %v", err)
 		}
-	case err := <-errC:
-		if err != nil {
-			if logger != nil {
-				logger.Errorf("Error running server: %v", err)
-			}
-			return fmt.Errorf("error running server: %w", err)
-		}
+		return fmt.Errorf("error running server: %w", err)
 	}
 
 	return nil

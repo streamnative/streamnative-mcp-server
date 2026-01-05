@@ -17,14 +17,13 @@ package kafka
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"strings"
 	"time"
 
 	"github.com/hamba/avro/v2"
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	mcpsdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/adapter"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 	"github.com/twmb/franz-go/pkg/kgo"
 	"github.com/twmb/franz-go/pkg/sr"
@@ -60,7 +59,7 @@ func NewKafkaProduceToolBuilder() *KafkaProduceToolBuilder {
 
 // BuildTools builds the Kafka produce tool list
 // This is the core method implementing the ToolBuilder interface
-func (b *KafkaProduceToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]server.ServerTool, error) {
+func (b *KafkaProduceToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]builders.ServerTool, error) {
 	// Skip registration if in read-only mode
 	if config.ReadOnly {
 		return nil, nil
@@ -80,7 +79,7 @@ func (b *KafkaProduceToolBuilder) BuildTools(_ context.Context, config builders.
 	tool := b.buildKafkaProduceTool()
 	handler := b.buildKafkaProduceHandler()
 
-	return []server.ServerTool{
+	return []builders.ServerTool{
 		{
 			Tool:    tool,
 			Handler: handler,
@@ -90,7 +89,7 @@ func (b *KafkaProduceToolBuilder) BuildTools(_ context.Context, config builders.
 
 // buildKafkaProduceTool builds the Kafka produce MCP tool definition
 // Migrated from the original tool definition logic
-func (b *KafkaProduceToolBuilder) buildKafkaProduceTool() mcp.Tool {
+func (b *KafkaProduceToolBuilder) buildKafkaProduceTool() *mcpsdk.Tool {
 	toolDesc := "Produce messages to a Kafka topic.\n" +
 		"This tool allows you to send messages to Kafka topics with various options for message creation.\n\n" +
 		"Kafka Producer Concepts:\n" +
@@ -120,42 +119,42 @@ func (b *KafkaProduceToolBuilder) buildKafkaProduceTool() mcp.Tool {
 		"   partition: 2\n\n" +
 		"This tool requires Kafka producer permissions on the specified topic."
 
-	return mcp.NewTool("kafka_client_produce",
-		mcp.WithDescription(toolDesc),
-		mcp.WithString("topic", mcp.Required(),
-			mcp.Description("The name of the Kafka topic to produce messages to. "+
+	return builders.NewTool("kafka_client_produce",
+		builders.WithDescription(toolDesc),
+		builders.WithString("topic", builders.Required(),
+			builders.Description("The name of the Kafka topic to produce messages to. "+
 				"Must be an existing topic that the user has write permissions for."),
 		),
-		mcp.WithString("key",
-			mcp.Description("The key for the message. "+
+		builders.WithString("key",
+			builders.Description("The key for the message. "+
 				"Optional. Keys are used for partition assignment and maintaining order for related messages. "+
 				"Messages with the same key will be sent to the same partition."),
 		),
-		mcp.WithString("value",
-			mcp.Required(),
-			mcp.Description("The value/content of the message to send. "+
+		builders.WithString("value",
+			builders.Required(),
+			builders.Description("The value/content of the message to send. "+
 				"This is the actual payload that will be delivered to consumers. It can be a JSON string, and the system will automatically serialize it to the appropriate format based on the schema registry if it is available."),
 		),
-		mcp.WithArray("headers",
-			mcp.Description("Message headers in the format of [\"key=value\"]. "+
+		builders.WithArray("headers",
+			builders.Description("Message headers in the format of [\"key=value\"]. "+
 				"Optional. Headers allow you to attach metadata to messages without modifying the payload. "+
 				"They are passed along with the message to consumers."),
-			mcp.Items(map[string]interface{}{
+			builders.Items(map[string]interface{}{
 				"type":        "string",
 				"description": "key value pair in the format of \"key=value\"",
 			}),
 		),
-		mcp.WithNumber("partition",
-			mcp.Description("The specific partition to send the message to. "+
+		builders.WithNumber("partition",
+			builders.Description("The specific partition to send the message to. "+
 				"Optional. If not specified, Kafka will automatically assign a partition based on the message key (if provided) or round-robin assignment. "+
 				"Specifying a partition can be useful for testing or when you need guaranteed partition assignment."),
 		),
-		mcp.WithArray("messages",
-			mcp.Description("An array of messages to send in batch. "+
+		builders.WithArray("messages",
+			builders.Description("An array of messages to send in batch. "+
 				"Optional. Alternative to the single message parameters (key, value, headers, partition). "+
 				"Each message object can contain 'key', 'value', 'headers', and 'partition' properties. "+
 				"Batch sending is more efficient for multiple messages."),
-			mcp.Items(map[string]interface{}{
+			builders.Items(map[string]interface{}{
 				"type": "object",
 				"properties": map[string]interface{}{
 					"key": map[string]interface{}{
@@ -181,8 +180,8 @@ func (b *KafkaProduceToolBuilder) buildKafkaProduceTool() mcp.Tool {
 				"required": []string{"value"},
 			}),
 		),
-		mcp.WithBoolean("sync",
-			mcp.Description("Whether to wait for server acknowledgment before returning. "+
+		builders.WithBoolean("sync",
+			builders.Description("Whether to wait for server acknowledgment before returning. "+
 				"Optional. Default is true. When true, ensures the message was successfully written "+
 				"to the topic before the tool returns a success response."),
 		),
@@ -191,10 +190,10 @@ func (b *KafkaProduceToolBuilder) buildKafkaProduceTool() mcp.Tool {
 
 // buildKafkaProduceHandler builds the Kafka produce handler function
 // Migrated from the original handler logic
-func (b *KafkaProduceToolBuilder) buildKafkaProduceHandler() func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *KafkaProduceToolBuilder) buildKafkaProduceHandler() mcpsdk.ToolHandler {
+	return func(ctx context.Context, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 		// Get required topic parameter
-		topicName, err := request.RequireString("topic")
+		topicName, err := adapter.RequireString(request, "topic")
 		if err != nil {
 			return b.handleError("get topic name", err), nil
 		}
@@ -263,14 +262,14 @@ func (b *KafkaProduceToolBuilder) buildKafkaProduceHandler() func(context.Contex
 		}
 
 		// Single message mode (simplified version)
-		value, err := request.RequireString("value")
+		value, err := adapter.RequireString(request, "value")
 		if err != nil {
 			return b.handleError("get value", err), nil
 		}
 
-		key := request.GetString("key", "")
-		headers := request.GetStringSlice("headers", []string{})
-		sync := request.GetBool("sync", true)
+		key := adapter.GetString(request, "key", "")
+		headers := adapter.GetStringSlice(request, "headers", []string{})
+		sync := adapter.GetBool(request, "sync", true)
 
 		// Prepare record
 		record := &kgo.Record{
@@ -345,15 +344,18 @@ func (b *KafkaProduceToolBuilder) buildKafkaProduceHandler() func(context.Contex
 // Unified error handling and utility functions
 
 // handleError provides unified error handling
-func (b *KafkaProduceToolBuilder) handleError(operation string, err error) *mcp.CallToolResult {
-	return mcp.NewToolResultError(fmt.Sprintf("Failed to %s: %v", operation, err))
+func (b *KafkaProduceToolBuilder) handleError(operation string, err error) *mcpsdk.CallToolResult {
+	if err != nil {
+		return adapter.NewErrorResult("Failed to %s: %v", operation, err)
+	}
+	return adapter.NewErrorResult("Failed to %s", operation)
 }
 
 // marshalResponse provides unified JSON serialization for responses
-func (b *KafkaProduceToolBuilder) marshalResponse(data interface{}) (*mcp.CallToolResult, error) {
+func (b *KafkaProduceToolBuilder) marshalResponse(data interface{}) (*mcpsdk.CallToolResult, error) {
 	jsonBytes, err := json.Marshal(data)
 	if err != nil {
 		return b.handleError("marshal response", err), nil
 	}
-	return mcp.NewToolResultText(string(jsonBytes)), nil
+	return adapter.NewTextResult(string(jsonBytes)), nil
 }

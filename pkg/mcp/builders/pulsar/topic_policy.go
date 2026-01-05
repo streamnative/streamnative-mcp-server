@@ -22,10 +22,10 @@ import (
 	"strings"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	mcpsdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/adapter"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
 
@@ -58,7 +58,7 @@ func NewPulsarAdminTopicPolicyToolBuilder() *PulsarAdminTopicPolicyToolBuilder {
 }
 
 // BuildTools builds the Pulsar admin topic policy tool list
-func (b *PulsarAdminTopicPolicyToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]server.ServerTool, error) {
+func (b *PulsarAdminTopicPolicyToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]builders.ServerTool, error) {
 	// Check features - return empty list if no required features are present
 	if !b.HasAnyRequiredFeature(config.Features) {
 		return nil, nil
@@ -73,7 +73,7 @@ func (b *PulsarAdminTopicPolicyToolBuilder) BuildTools(_ context.Context, config
 	tool := b.buildTopicPolicyTool()
 	handler := b.buildTopicPolicyHandler(config.ReadOnly)
 
-	return []server.ServerTool{
+	return []builders.ServerTool{
 		{
 			Tool:    tool,
 			Handler: handler,
@@ -82,7 +82,7 @@ func (b *PulsarAdminTopicPolicyToolBuilder) BuildTools(_ context.Context, config
 }
 
 // buildTopicPolicyTool builds the Pulsar Admin Topic Policy MCP tool definition
-func (b *PulsarAdminTopicPolicyToolBuilder) buildTopicPolicyTool() mcp.Tool {
+func (b *PulsarAdminTopicPolicyToolBuilder) buildTopicPolicyTool() *mcpsdk.Tool {
 	toolDesc := "Manage Pulsar topic policies including retention, TTL, compaction, and subscription policies. " +
 		"This tool provides functionality to get, set, and remove various topic-level policies in Apache Pulsar."
 
@@ -100,29 +100,29 @@ func (b *PulsarAdminTopicPolicyToolBuilder) buildTopicPolicyTool() mcp.Tool {
 		"- set_subscription_types: Set allowed subscription types for a topic\n" +
 		"- remove_subscription_types: Remove subscription types restriction for a topic"
 
-	return mcp.NewTool("pulsar_admin_topic_policy",
-		mcp.WithDescription(toolDesc),
-		mcp.WithString("operation", mcp.Required(),
-			mcp.Description(operationDesc),
+	return builders.NewTool("pulsar_admin_topic_policy",
+		builders.WithDescription(toolDesc),
+		builders.WithString("operation", builders.Required(),
+			builders.Description(operationDesc),
 		),
-		mcp.WithString("topic", mcp.Required(),
-			mcp.Description("Topic name in format 'persistent://tenant/namespace/topic' or 'tenant/namespace/topic'"),
+		builders.WithString("topic", builders.Required(),
+			builders.Description("Topic name in format 'persistent://tenant/namespace/topic' or 'tenant/namespace/topic'"),
 		),
-		mcp.WithString("retention_size",
-			mcp.Description("Retention size policy (e.g., '100MB', '1GB') - used with retention operations"),
+		builders.WithString("retention_size",
+			builders.Description("Retention size policy (e.g., '100MB', '1GB') - used with retention operations"),
 		),
-		mcp.WithString("retention_time",
-			mcp.Description("Retention time policy (e.g., '1d', '24h', '1440m') - used with retention operations"),
+		builders.WithString("retention_time",
+			builders.Description("Retention time policy (e.g., '1d', '24h', '1440m') - used with retention operations"),
 		),
-		mcp.WithNumber("ttl_seconds",
-			mcp.Description("TTL in seconds - used with TTL operations"),
+		builders.WithNumber("ttl_seconds",
+			builders.Description("TTL in seconds - used with TTL operations"),
 		),
-		mcp.WithNumber("compaction_threshold",
-			mcp.Description("Compaction threshold in bytes - used with compaction operations"),
+		builders.WithNumber("compaction_threshold",
+			builders.Description("Compaction threshold in bytes - used with compaction operations"),
 		),
-		mcp.WithArray("subscription_types",
-			mcp.Description("List of allowed subscription types - used with subscription type operations"),
-			mcp.Items(
+		builders.WithArray("subscription_types",
+			builders.Description("List of allowed subscription types - used with subscription type operations"),
+			builders.Items(
 				map[string]interface{}{
 					"type":        "string",
 					"description": "subscription type: Exclusive, Shared, Failover, Key_Shared",
@@ -133,12 +133,12 @@ func (b *PulsarAdminTopicPolicyToolBuilder) buildTopicPolicyTool() mcp.Tool {
 }
 
 // buildTopicPolicyHandler builds the Pulsar Admin Topic Policy handler function
-func (b *PulsarAdminTopicPolicyToolBuilder) buildTopicPolicyHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicPolicyToolBuilder) buildTopicPolicyHandler(readOnly bool) func(context.Context, *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	return func(ctx context.Context, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 		// Get Pulsar session from context
 		session := mcpCtx.GetPulsarSession(ctx)
 		if session == nil {
-			return mcp.NewToolResultError("Pulsar session not found in context"), nil
+			return adapter.NewErrorResult("Pulsar session not found in context"), nil
 		}
 
 		client, err := session.GetAdminClient()
@@ -147,14 +147,14 @@ func (b *PulsarAdminTopicPolicyToolBuilder) buildTopicPolicyHandler(readOnly boo
 		}
 
 		// Get required parameters
-		operation, err := request.RequireString("operation")
+		operation, err := adapter.RequireString(request, "operation")
 		if err != nil {
-			return mcp.NewToolResultError("Missing required operation parameter"), nil
+			return adapter.NewErrorResult("Missing required operation parameter"), nil
 		}
 
-		topic, err := request.RequireString("topic")
+		topic, err := adapter.RequireString(request, "topic")
 		if err != nil {
-			return mcp.NewToolResultError("Missing required topic parameter"), nil
+			return adapter.NewErrorResult("Missing required topic parameter"), nil
 		}
 
 		// Check write operation permissions
@@ -169,7 +169,7 @@ func (b *PulsarAdminTopicPolicyToolBuilder) buildTopicPolicyHandler(readOnly boo
 		}
 
 		if isWriteOp && readOnly {
-			return mcp.NewToolResultError("Write operations not allowed in read-only mode"), nil
+			return adapter.NewErrorResult("Write operations not allowed in read-only mode"), nil
 		}
 
 		// Handle operations
@@ -199,26 +199,26 @@ func (b *PulsarAdminTopicPolicyToolBuilder) buildTopicPolicyHandler(readOnly boo
 		case "remove_subscription_types":
 			return b.handleRemoveTopicSubscriptionTypes(client, topic)
 		default:
-			return mcp.NewToolResultError(fmt.Sprintf("Unsupported operation: %s", operation)), nil
+			return adapter.NewErrorResult("Unsupported operation: %s", operation), nil
 		}
 	}
 }
 
 // Utility functions
-func (b *PulsarAdminTopicPolicyToolBuilder) handleError(operation string, err error) *mcp.CallToolResult {
-	return mcp.NewToolResultError(fmt.Sprintf("Failed to %s: %v", operation, err))
+func (b *PulsarAdminTopicPolicyToolBuilder) handleError(operation string, err error) *mcpsdk.CallToolResult {
+	return adapter.NewErrorResult("Failed to %s: %v", operation, err)
 }
 
-func (b *PulsarAdminTopicPolicyToolBuilder) marshalResponse(data interface{}) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicPolicyToolBuilder) marshalResponse(data interface{}) (*mcpsdk.CallToolResult, error) {
 	jsonBytes, err := json.Marshal(data)
 	if err != nil {
 		return b.handleError("marshal response", err), nil
 	}
-	return mcp.NewToolResultText(string(jsonBytes)), nil
+	return adapter.NewTextResult(string(jsonBytes)), nil
 }
 
 // Topic policy operation handlers
-func (b *PulsarAdminTopicPolicyToolBuilder) handleGetTopicRetention(client cmdutils.Client, topic string) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicPolicyToolBuilder) handleGetTopicRetention(client cmdutils.Client, topic string) (*mcpsdk.CallToolResult, error) {
 	// Get topic name
 	topicName, err := utils.GetTopicName(topic)
 	if err != nil {
@@ -233,7 +233,7 @@ func (b *PulsarAdminTopicPolicyToolBuilder) handleGetTopicRetention(client cmdut
 
 	// If no retention policy is defined
 	if retention == nil {
-		return mcp.NewToolResultText(fmt.Sprintf("No retention policy found for topic %s", topicName.String())), nil
+		return adapter.NewTextResult(fmt.Sprintf("No retention policy found for topic %s", topicName.String())), nil
 	}
 
 	// Format the output
@@ -251,11 +251,11 @@ func (b *PulsarAdminTopicPolicyToolBuilder) handleGetTopicRetention(client cmdut
 		retentionSize = fmt.Sprintf("%d MB", retention.RetentionSizeInMB)
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Retention policy for topic %s: %s and %s",
+	return adapter.NewTextResult(fmt.Sprintf("Retention policy for topic %s: %s and %s",
 		topicName.String(), retentionTime, retentionSize)), nil
 }
 
-func (b *PulsarAdminTopicPolicyToolBuilder) handleSetTopicRetention(client cmdutils.Client, topic string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicPolicyToolBuilder) handleSetTopicRetention(client cmdutils.Client, topic string, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	// Get topic name
 	topicName, err := utils.GetTopicName(topic)
 	if err != nil {
@@ -267,18 +267,18 @@ func (b *PulsarAdminTopicPolicyToolBuilder) handleSetTopicRetention(client cmdut
 	var retentionSizeInMB int64 = -1
 
 	// /nolint:revive
-	if retentionTime := request.GetString("retention_time", ""); retentionTime != "" {
+	if retentionTime := adapter.GetString(request, "retention_time", ""); retentionTime != "" {
 		if parsed, err := b.parseRetentionTime(retentionTime); err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Invalid retention time format: %v", err)), nil
+			return adapter.NewErrorResult("Invalid retention time format: %v", err), nil
 		} else {
 			retentionTimeInMinutes = parsed
 		}
 	}
 
 	// /nolint:revive
-	if retentionSize := request.GetString("retention_size", ""); retentionSize != "" {
+	if retentionSize := adapter.GetString(request, "retention_size", ""); retentionSize != "" {
 		if parsed, err := b.parseRetentionSize(retentionSize); err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Invalid retention size format: %v", err)), nil
+			return adapter.NewErrorResult("Invalid retention size format: %v", err), nil
 		} else {
 			retentionSizeInMB = parsed
 		}
@@ -296,10 +296,10 @@ func (b *PulsarAdminTopicPolicyToolBuilder) handleSetTopicRetention(client cmdut
 		return b.handleError("set topic retention policy", err), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Retention policy set for topic %s", topicName.String())), nil
+	return adapter.NewTextResult(fmt.Sprintf("Retention policy set for topic %s", topicName.String())), nil
 }
 
-func (b *PulsarAdminTopicPolicyToolBuilder) handleRemoveTopicRetention(client cmdutils.Client, topic string) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicPolicyToolBuilder) handleRemoveTopicRetention(client cmdutils.Client, topic string) (*mcpsdk.CallToolResult, error) {
 	// Get topic name
 	topicName, err := utils.GetTopicName(topic)
 	if err != nil {
@@ -312,10 +312,10 @@ func (b *PulsarAdminTopicPolicyToolBuilder) handleRemoveTopicRetention(client cm
 		return b.handleError("remove topic retention policy", err), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Retention policy removed for topic %s", topicName.String())), nil
+	return adapter.NewTextResult(fmt.Sprintf("Retention policy removed for topic %s", topicName.String())), nil
 }
 
-func (b *PulsarAdminTopicPolicyToolBuilder) handleGetTopicTTL(client cmdutils.Client, topic string) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicPolicyToolBuilder) handleGetTopicTTL(client cmdutils.Client, topic string) (*mcpsdk.CallToolResult, error) {
 	// Get topic name
 	topicName, err := utils.GetTopicName(topic)
 	if err != nil {
@@ -330,13 +330,13 @@ func (b *PulsarAdminTopicPolicyToolBuilder) handleGetTopicTTL(client cmdutils.Cl
 
 	// Check if TTL is set
 	if ttl == 0 {
-		return mcp.NewToolResultText(fmt.Sprintf("Message TTL is not configured for topic %s", topicName.String())), nil
+		return adapter.NewTextResult(fmt.Sprintf("Message TTL is not configured for topic %s", topicName.String())), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Message TTL for topic %s is %d seconds", topicName.String(), ttl)), nil
+	return adapter.NewTextResult(fmt.Sprintf("Message TTL for topic %s is %d seconds", topicName.String(), ttl)), nil
 }
 
-func (b *PulsarAdminTopicPolicyToolBuilder) handleSetTopicTTL(client cmdutils.Client, topic string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicPolicyToolBuilder) handleSetTopicTTL(client cmdutils.Client, topic string, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	// Get topic name
 	topicName, err := utils.GetTopicName(topic)
 	if err != nil {
@@ -344,13 +344,13 @@ func (b *PulsarAdminTopicPolicyToolBuilder) handleSetTopicTTL(client cmdutils.Cl
 	}
 
 	// Get TTL seconds parameter
-	ttlSeconds, err := request.RequireFloat("ttl_seconds")
+	ttlSeconds, err := adapter.RequireFloat(request, "ttl_seconds")
 	if err != nil {
-		return mcp.NewToolResultError("Missing required parameter 'ttl_seconds'"), nil
+		return adapter.NewErrorResult("Missing required parameter 'ttl_seconds'"), nil
 	}
 
 	if ttlSeconds < 0 {
-		return mcp.NewToolResultError("TTL seconds must be non-negative"), nil
+		return adapter.NewErrorResult("TTL seconds must be non-negative"), nil
 	}
 
 	// Set message TTL
@@ -360,13 +360,13 @@ func (b *PulsarAdminTopicPolicyToolBuilder) handleSetTopicTTL(client cmdutils.Cl
 	}
 
 	if ttlSeconds == 0 {
-		return mcp.NewToolResultText(fmt.Sprintf("Message TTL disabled for topic %s", topicName.String())), nil
+		return adapter.NewTextResult(fmt.Sprintf("Message TTL disabled for topic %s", topicName.String())), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Message TTL set to %d seconds for topic %s", int(ttlSeconds), topicName.String())), nil
+	return adapter.NewTextResult(fmt.Sprintf("Message TTL set to %d seconds for topic %s", int(ttlSeconds), topicName.String())), nil
 }
 
-func (b *PulsarAdminTopicPolicyToolBuilder) handleRemoveTopicTTL(client cmdutils.Client, topic string) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicPolicyToolBuilder) handleRemoveTopicTTL(client cmdutils.Client, topic string) (*mcpsdk.CallToolResult, error) {
 	// Get topic name
 	topicName, err := utils.GetTopicName(topic)
 	if err != nil {
@@ -379,10 +379,10 @@ func (b *PulsarAdminTopicPolicyToolBuilder) handleRemoveTopicTTL(client cmdutils
 		return b.handleError("remove topic message TTL", err), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Message TTL removed for topic %s", topicName.String())), nil
+	return adapter.NewTextResult(fmt.Sprintf("Message TTL removed for topic %s", topicName.String())), nil
 }
 
-func (b *PulsarAdminTopicPolicyToolBuilder) handleGetTopicCompaction(client cmdutils.Client, topic string) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicPolicyToolBuilder) handleGetTopicCompaction(client cmdutils.Client, topic string) (*mcpsdk.CallToolResult, error) {
 	// Get topic name
 	topicName, err := utils.GetTopicName(topic)
 	if err != nil {
@@ -397,14 +397,14 @@ func (b *PulsarAdminTopicPolicyToolBuilder) handleGetTopicCompaction(client cmdu
 
 	// Format the result
 	if threshold == 0 {
-		return mcp.NewToolResultText(fmt.Sprintf("Automatic compaction is disabled for topic %s", topicName.String())), nil
+		return adapter.NewTextResult(fmt.Sprintf("Automatic compaction is disabled for topic %s", topicName.String())), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("The compaction threshold of the topic %s is %d byte(s)",
+	return adapter.NewTextResult(fmt.Sprintf("The compaction threshold of the topic %s is %d byte(s)",
 		topicName.String(), threshold)), nil
 }
 
-func (b *PulsarAdminTopicPolicyToolBuilder) handleSetTopicCompaction(client cmdutils.Client, topic string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicPolicyToolBuilder) handleSetTopicCompaction(client cmdutils.Client, topic string, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	// Get topic name
 	topicName, err := utils.GetTopicName(topic)
 	if err != nil {
@@ -412,13 +412,13 @@ func (b *PulsarAdminTopicPolicyToolBuilder) handleSetTopicCompaction(client cmdu
 	}
 
 	// Get compaction threshold parameter
-	thresholdNum, err := request.RequireFloat("compaction_threshold")
+	thresholdNum, err := adapter.RequireFloat(request, "compaction_threshold")
 	if err != nil {
-		return mcp.NewToolResultError("Missing required parameter 'compaction_threshold'"), nil
+		return adapter.NewErrorResult("Missing required parameter 'compaction_threshold'"), nil
 	}
 
 	if thresholdNum < 0 {
-		return mcp.NewToolResultError("Compaction threshold must be non-negative"), nil
+		return adapter.NewErrorResult("Compaction threshold must be non-negative"), nil
 	}
 
 	threshold := int64(thresholdNum)
@@ -430,13 +430,13 @@ func (b *PulsarAdminTopicPolicyToolBuilder) handleSetTopicCompaction(client cmdu
 	}
 
 	if threshold == 0 {
-		return mcp.NewToolResultText(fmt.Sprintf("Automatic compaction disabled for topic %s", topicName.String())), nil
+		return adapter.NewTextResult(fmt.Sprintf("Automatic compaction disabled for topic %s", topicName.String())), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Compaction threshold set to %d bytes for topic %s", threshold, topicName.String())), nil
+	return adapter.NewTextResult(fmt.Sprintf("Compaction threshold set to %d bytes for topic %s", threshold, topicName.String())), nil
 }
 
-func (b *PulsarAdminTopicPolicyToolBuilder) handleRemoveTopicCompaction(client cmdutils.Client, topic string) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicPolicyToolBuilder) handleRemoveTopicCompaction(client cmdutils.Client, topic string) (*mcpsdk.CallToolResult, error) {
 	// Get topic name
 	topicName, err := utils.GetTopicName(topic)
 	if err != nil {
@@ -449,10 +449,10 @@ func (b *PulsarAdminTopicPolicyToolBuilder) handleRemoveTopicCompaction(client c
 		return b.handleError("remove topic compaction threshold", err), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Compaction threshold removed for topic %s", topicName.String())), nil
+	return adapter.NewTextResult(fmt.Sprintf("Compaction threshold removed for topic %s", topicName.String())), nil
 }
 
-func (b *PulsarAdminTopicPolicyToolBuilder) handleGetTopicSubscriptionTypes(client cmdutils.Client, topic string) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicPolicyToolBuilder) handleGetTopicSubscriptionTypes(client cmdutils.Client, topic string) (*mcpsdk.CallToolResult, error) {
 	// Get topic name
 	topicName, err := utils.GetTopicName(topic)
 	if err != nil {
@@ -475,7 +475,7 @@ func (b *PulsarAdminTopicPolicyToolBuilder) handleGetTopicSubscriptionTypes(clie
 		}
 
 		if len(subscriptionTypes) == 0 {
-			return mcp.NewToolResultText(fmt.Sprintf("No subscription type restrictions configured for topic %s (all types allowed)", topicName.String())), nil
+			return adapter.NewTextResult(fmt.Sprintf("No subscription type restrictions configured for topic %s (all types allowed)", topicName.String())), nil
 		}
 
 		return b.marshalResponse(map[string]interface{}{
@@ -485,11 +485,11 @@ func (b *PulsarAdminTopicPolicyToolBuilder) handleGetTopicSubscriptionTypes(clie
 	}
 
 	// Fallback: API not available in current version
-	return mcp.NewToolResultError("Subscription types policy management is not available in the current pulsarctl API version. " +
+	return adapter.NewErrorResult("Subscription types policy management is not available in the current pulsarctl API version. " +
 		"This feature may require a newer version of Pulsar or pulsarctl."), nil
 }
 
-func (b *PulsarAdminTopicPolicyToolBuilder) handleSetTopicSubscriptionTypes(client cmdutils.Client, topic string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicPolicyToolBuilder) handleSetTopicSubscriptionTypes(client cmdutils.Client, topic string, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	// Get topic name
 	topicName, err := utils.GetTopicName(topic)
 	if err != nil {
@@ -497,9 +497,9 @@ func (b *PulsarAdminTopicPolicyToolBuilder) handleSetTopicSubscriptionTypes(clie
 	}
 
 	// Get subscription types parameter
-	subscriptionTypes, err := request.RequireStringSlice("subscription_types")
+	subscriptionTypes, err := adapter.RequireStringSlice(request, "subscription_types")
 	if err != nil {
-		return mcp.NewToolResultError("Missing required parameter 'subscription_types'. " +
+		return adapter.NewErrorResult("Missing required parameter 'subscription_types'. " +
 			"Please provide an array of subscription types: Exclusive, Shared, Failover, Key_Shared"), nil
 	}
 
@@ -514,13 +514,13 @@ func (b *PulsarAdminTopicPolicyToolBuilder) handleSetTopicSubscriptionTypes(clie
 	var validatedTypes []string
 	for _, subType := range subscriptionTypes {
 		if !validTypes[subType] {
-			return mcp.NewToolResultError(fmt.Sprintf("Invalid subscription type: %s. Valid types are: Exclusive, Shared, Failover, Key_Shared", subType)), nil
+			return adapter.NewErrorResult("Invalid subscription type: %s. Valid types are: Exclusive, Shared, Failover, Key_Shared", subType), nil
 		}
 		validatedTypes = append(validatedTypes, subType)
 	}
 
 	if len(validatedTypes) == 0 {
-		return mcp.NewToolResultError("At least one valid subscription type must be specified"), nil
+		return adapter.NewErrorResult("At least one valid subscription type must be specified"), nil
 	}
 
 	// Check if the API supports subscription types management
@@ -537,16 +537,16 @@ func (b *PulsarAdminTopicPolicyToolBuilder) handleSetTopicSubscriptionTypes(clie
 			return b.handleError("set topic subscription types", err), nil
 		}
 
-		return mcp.NewToolResultText(fmt.Sprintf("Subscription types set for topic %s: %s",
+		return adapter.NewTextResult(fmt.Sprintf("Subscription types set for topic %s: %s",
 			topicName.String(), strings.Join(validatedTypes, ", "))), nil
 	}
 
 	// Fallback: API not available in current version
-	return mcp.NewToolResultError("Subscription types policy management is not available in the current pulsarctl API version. " +
+	return adapter.NewErrorResult("Subscription types policy management is not available in the current pulsarctl API version. " +
 		"This feature may require a newer version of Pulsar or pulsarctl."), nil
 }
 
-func (b *PulsarAdminTopicPolicyToolBuilder) handleRemoveTopicSubscriptionTypes(client cmdutils.Client, topic string) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicPolicyToolBuilder) handleRemoveTopicSubscriptionTypes(client cmdutils.Client, topic string) (*mcpsdk.CallToolResult, error) {
 	// Get topic name
 	topicName, err := utils.GetTopicName(topic)
 	if err != nil {
@@ -567,11 +567,11 @@ func (b *PulsarAdminTopicPolicyToolBuilder) handleRemoveTopicSubscriptionTypes(c
 			return b.handleError("remove topic subscription types policy", err), nil
 		}
 
-		return mcp.NewToolResultText(fmt.Sprintf("Subscription types policy removed for topic %s (all types now allowed)", topicName.String())), nil
+		return adapter.NewTextResult(fmt.Sprintf("Subscription types policy removed for topic %s (all types now allowed)", topicName.String())), nil
 	}
 
 	// Fallback: API not available in current version
-	return mcp.NewToolResultError("Subscription types policy management is not available in the current pulsarctl API version. " +
+	return adapter.NewErrorResult("Subscription types policy management is not available in the current pulsarctl API version. " +
 		"This feature may require a newer version of Pulsar or pulsarctl."), nil
 }
 

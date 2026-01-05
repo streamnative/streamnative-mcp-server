@@ -17,13 +17,12 @@ package mcp
 import (
 	"context"
 
-	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	pulsarbuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/pulsar"
 )
 
 // PulsarAdminAddResourceQuotasTools adds resource quotas-related tools to the MCP server
-func PulsarAdminAddResourceQuotasTools(s *server.MCPServer, readOnly bool, features []string) {
+func PulsarAdminAddResourceQuotasTools(s *MCPServer, readOnly bool, features []string) {
 	// Use the new builder pattern
 	builder := pulsarbuilders.NewPulsarAdminResourceQuotasToolBuilder()
 	config := builders.ToolBuildConfig{

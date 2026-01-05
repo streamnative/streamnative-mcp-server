@@ -20,10 +20,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	mcpsdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/adapter"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
 
@@ -56,7 +56,7 @@ func NewPulsarAdminPackagesToolBuilder() *PulsarAdminPackagesToolBuilder {
 }
 
 // BuildTools builds the Pulsar admin packages tool list
-func (b *PulsarAdminPackagesToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]server.ServerTool, error) {
+func (b *PulsarAdminPackagesToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]builders.ServerTool, error) {
 	// Check features - return empty list if no required features are present
 	if !b.HasAnyRequiredFeature(config.Features) {
 		return nil, nil
@@ -71,7 +71,7 @@ func (b *PulsarAdminPackagesToolBuilder) BuildTools(_ context.Context, config bu
 	tool := b.buildPackagesTool()
 	handler := b.buildPackagesHandler(config.ReadOnly)
 
-	return []server.ServerTool{
+	return []builders.ServerTool{
 		{
 			Tool:    tool,
 			Handler: handler,
@@ -80,7 +80,7 @@ func (b *PulsarAdminPackagesToolBuilder) BuildTools(_ context.Context, config bu
 }
 
 // buildPackagesTool builds the Pulsar admin packages MCP tool definition
-func (b *PulsarAdminPackagesToolBuilder) buildPackagesTool() mcp.Tool {
+func (b *PulsarAdminPackagesToolBuilder) buildPackagesTool() *mcpsdk.Tool {
 	toolDesc := "Manage packages in Apache Pulsar. Support package scheme: `function://`, `source://`, `sink://`" +
 		"Allows listing, viewing, updating, downloading and uploading packages. " +
 		"Some operations require super-user permissions."
@@ -97,51 +97,51 @@ func (b *PulsarAdminPackagesToolBuilder) buildPackagesTool() mcp.Tool {
 		"- download: Download a package (requires super-user permissions)\n" +
 		"- upload: Upload a package (requires super-user permissions)"
 
-	return mcp.NewTool("pulsar_admin_package",
-		mcp.WithDescription(toolDesc),
-		mcp.WithString("resource", mcp.Required(),
-			mcp.Description(resourceDesc),
+	return builders.NewTool("pulsar_admin_package",
+		builders.WithDescription(toolDesc),
+		builders.WithString("resource", builders.Required(),
+			builders.Description(resourceDesc),
 		),
-		mcp.WithString("operation", mcp.Required(),
-			mcp.Description(operationDesc),
+		builders.WithString("operation", builders.Required(),
+			builders.Description(operationDesc),
 		),
-		mcp.WithString("packageName",
-			mcp.Description("Name of the package to operate on. "+
+		builders.WithString("packageName",
+			builders.Description("Name of the package to operate on. "+
 				"Required for operations on a specific package: get, update, delete, download, upload"),
 		),
-		mcp.WithString("namespace",
-			mcp.Description("The namespace name. Required for listing packages of a specific type"),
+		builders.WithString("namespace",
+			builders.Description("The namespace name. Required for listing packages of a specific type"),
 		),
-		mcp.WithString("type",
-			mcp.Description("Package type (function, source, sink). Required for listing packages of a specific type"),
+		builders.WithString("type",
+			builders.Description("Package type (function, source, sink). Required for listing packages of a specific type"),
 		),
-		mcp.WithString("description",
-			mcp.Description("Description of the package. Required for update and upload operations"),
+		builders.WithString("description",
+			builders.Description("Description of the package. Required for update and upload operations"),
 		),
-		mcp.WithString("contact",
-			mcp.Description("Contact information for the package. Optional for update and upload operations"),
+		builders.WithString("contact",
+			builders.Description("Contact information for the package. Optional for update and upload operations"),
 		),
-		mcp.WithString("path",
-			mcp.Description("Path to download a package to or upload a package from. Required for download and upload operations"),
+		builders.WithString("path",
+			builders.Description("Path to download a package to or upload a package from. Required for download and upload operations"),
 		),
-		mcp.WithObject("properties",
-			mcp.Description("Additional properties for the package as key-value pairs. Optional for update and upload operations"),
+		builders.WithObject("properties",
+			builders.Description("Additional properties for the package as key-value pairs. Optional for update and upload operations"),
 		),
 	)
 }
 
 // buildPackagesHandler builds the Pulsar admin packages handler function
-func (b *PulsarAdminPackagesToolBuilder) buildPackagesHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminPackagesToolBuilder) buildPackagesHandler(readOnly bool) func(context.Context, *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	return func(ctx context.Context, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 		// Get required parameters
-		resource, err := request.RequireString("resource")
+		resource, err := adapter.RequireString(request, "resource")
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get resource: %v", err)), nil
+			return adapter.NewErrorResult("Failed to get resource: %v", err), nil
 		}
 
-		operation, err := request.RequireString("operation")
+		operation, err := adapter.RequireString(request, "operation")
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get operation: %v", err)), nil
+			return adapter.NewErrorResult("Failed to get operation: %v", err), nil
 		}
 
 		// Normalize parameters
@@ -150,18 +150,18 @@ func (b *PulsarAdminPackagesToolBuilder) buildPackagesHandler(readOnly bool) fun
 
 		// Validate write operations in read-only mode
 		if readOnly && (operation == "update" || operation == "delete" || operation == "download" || operation == "upload") {
-			return mcp.NewToolResultError("Write operations are not allowed in read-only mode"), nil
+			return adapter.NewErrorResult("Write operations are not allowed in read-only mode"), nil
 		}
 
 		// Get Pulsar session from context
 		session := mcpCtx.GetPulsarSession(ctx)
 		if session == nil {
-			return mcp.NewToolResultError("Pulsar session not found in context"), nil
+			return adapter.NewErrorResult("Pulsar session not found in context"), nil
 		}
 
 		client, err := session.GetAdminV3Client()
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get Pulsar client: %v", err)), nil
+			return adapter.NewErrorResult("Failed to get Pulsar client: %v", err), nil
 		}
 
 		// Dispatch based on resource type
@@ -171,7 +171,7 @@ func (b *PulsarAdminPackagesToolBuilder) buildPackagesHandler(readOnly bool) fun
 		case "packages":
 			return b.handlePackagesResource(client, operation, request)
 		default:
-			return mcp.NewToolResultError(fmt.Sprintf("Invalid resource: %s. Available resources: package, packages", resource)), nil
+			return adapter.NewErrorResult("Invalid resource: %s. Available resources: package, packages", resource), nil
 		}
 	}
 }
@@ -179,10 +179,10 @@ func (b *PulsarAdminPackagesToolBuilder) buildPackagesHandler(readOnly bool) fun
 // Helper functions
 
 // handlePackageResource handles operations on a specific package
-func (b *PulsarAdminPackagesToolBuilder) handlePackageResource(client cmdutils.Client, operation string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	packageName, err := request.RequireString("packageName")
+func (b *PulsarAdminPackagesToolBuilder) handlePackageResource(client cmdutils.Client, operation string, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	packageName, err := adapter.RequireString(request, "packageName")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'packageName' for package operations: %v", err)), nil
+		return adapter.NewErrorResult("Missing required parameter 'packageName' for package operations: %v", err), nil
 	}
 
 	switch operation {
@@ -190,133 +190,135 @@ func (b *PulsarAdminPackagesToolBuilder) handlePackageResource(client cmdutils.C
 		// Get package versions
 		packageVersions, err := client.Packages().ListVersions(packageName)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to list package versions: %v", err)), nil
+			return adapter.NewErrorResult("Failed to list package versions: %v", err), nil
 		}
 
 		// Convert result to JSON string
 		packageVersionsJSON, err := json.Marshal(packageVersions)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to serialize package versions: %v", err)), nil
+			return adapter.NewErrorResult("Failed to serialize package versions: %v", err), nil
 		}
 
-		return mcp.NewToolResultText(string(packageVersionsJSON)), nil
+		return adapter.NewTextResult(string(packageVersionsJSON)), nil
 
 	case "get":
 		// Get package metadata
 		metadata, err := client.Packages().GetMetadata(packageName)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get package metadata: %v", err)), nil
+			return adapter.NewErrorResult("Failed to get package metadata: %v", err), nil
 		}
 
 		// Convert result to JSON string
 		metadataJSON, err := json.Marshal(metadata)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to serialize package metadata: %v", err)), nil
+			return adapter.NewErrorResult("Failed to serialize package metadata: %v", err), nil
 		}
 
-		return mcp.NewToolResultText(string(metadataJSON)), nil
+		return adapter.NewTextResult(string(metadataJSON)), nil
 
 	case "update":
-		description, err := request.RequireString("description")
+		description, err := adapter.RequireString(request, "description")
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'description' for package.update: %v", err)), nil
+			return adapter.NewErrorResult("Missing required parameter 'description' for package.update: %v", err), nil
 		}
 
-		contact := request.GetString("contact", "")
-		properties := b.extractProperties(request.GetArguments())
+		contact := adapter.GetString(request, "contact", "")
+		args, _ := adapter.GetArgumentsMap(request)
+		properties := b.extractProperties(args)
 
 		// Update package metadata
 		err = client.Packages().UpdateMetadata(packageName, description, contact, properties)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to update package metadata: %v", err)), nil
+			return adapter.NewErrorResult("Failed to update package metadata: %v", err), nil
 		}
 
-		return mcp.NewToolResultText(fmt.Sprintf("The metadata of the package '%s' updated successfully", packageName)), nil
+		return adapter.NewTextResult(fmt.Sprintf("The metadata of the package '%s' updated successfully", packageName)), nil
 
 	case "delete":
 		// Delete package
 		err = client.Packages().Delete(packageName)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to delete package: %v", err)), nil
+			return adapter.NewErrorResult("Failed to delete package: %v", err), nil
 		}
 
-		return mcp.NewToolResultText(fmt.Sprintf("The package '%s' deleted successfully", packageName)), nil
+		return adapter.NewTextResult(fmt.Sprintf("The package '%s' deleted successfully", packageName)), nil
 
 	case "download":
-		path, err := request.RequireString("path")
+		path, err := adapter.RequireString(request, "path")
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'path' for package.download: %v", err)), nil
+			return adapter.NewErrorResult("Missing required parameter 'path' for package.download: %v", err), nil
 		}
 
 		// Download package
 		err = client.Packages().Download(packageName, path)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to download package: %v", err)), nil
+			return adapter.NewErrorResult("Failed to download package: %v", err), nil
 		}
 
-		return mcp.NewToolResultText(
+		return adapter.NewTextResult(
 			fmt.Sprintf("The package '%s' downloaded to path '%s' successfully", packageName, path),
 		), nil
 
 	case "upload":
-		path, err := request.RequireString("path")
+		path, err := adapter.RequireString(request, "path")
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'path' for package.upload: %v", err)), nil
+			return adapter.NewErrorResult("Missing required parameter 'path' for package.upload: %v", err), nil
 		}
 
-		description, err := request.RequireString("description")
+		description, err := adapter.RequireString(request, "description")
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'description' for package.upload: %v", err)), nil
+			return adapter.NewErrorResult("Missing required parameter 'description' for package.upload: %v", err), nil
 		}
 
-		contact := request.GetString("contact", "")
-		properties := b.extractProperties(request.GetArguments())
+		contact := adapter.GetString(request, "contact", "")
+		args, _ := adapter.GetArgumentsMap(request)
+		properties := b.extractProperties(args)
 
 		// Upload package
 		err = client.Packages().Upload(packageName, path, description, contact, properties)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to upload package: %v", err)), nil
+			return adapter.NewErrorResult("Failed to upload package: %v", err), nil
 		}
 
-		return mcp.NewToolResultText(
+		return adapter.NewTextResult(
 			fmt.Sprintf("The package '%s' uploaded from path '%s' successfully", packageName, path),
 		), nil
 
 	default:
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid operation for resource 'package': %s. Available operations: list, get, update, delete, download, upload", operation)), nil
+		return adapter.NewErrorResult("Invalid operation for resource 'package': %s. Available operations: list, get, update, delete, download, upload", operation), nil
 	}
 }
 
 // handlePackagesResource handles operations on multiple packages
-func (b *PulsarAdminPackagesToolBuilder) handlePackagesResource(client cmdutils.Client, operation string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminPackagesToolBuilder) handlePackagesResource(client cmdutils.Client, operation string, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	switch operation {
 	case "list":
-		packageType, err := request.RequireString("type")
+		packageType, err := adapter.RequireString(request, "type")
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'type' for packages.list: %v", err)), nil
+			return adapter.NewErrorResult("Missing required parameter 'type' for packages.list: %v", err), nil
 		}
 
-		namespace, err := request.RequireString("namespace")
+		namespace, err := adapter.RequireString(request, "namespace")
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'namespace' for packages.list: %v", err)), nil
+			return adapter.NewErrorResult("Missing required parameter 'namespace' for packages.list: %v", err), nil
 		}
 
 		// Get package list
 		packages, err := client.Packages().List(packageType, namespace)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to list packages: %v", err)), nil
+			return adapter.NewErrorResult("Failed to list packages: %v", err), nil
 		}
 
 		// Convert result to JSON string
 		packagesJSON, err := json.Marshal(packages)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to serialize package list: %v", err)), nil
+			return adapter.NewErrorResult("Failed to serialize package list: %v", err), nil
 		}
 
-		return mcp.NewToolResultText(string(packagesJSON)), nil
+		return adapter.NewTextResult(string(packagesJSON)), nil
 
 	default:
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid operation for resource 'packages': %s. Available operations: list", operation)), nil
+		return adapter.NewErrorResult("Invalid operation for resource 'packages': %s. Available operations: list", operation), nil
 	}
 }
 

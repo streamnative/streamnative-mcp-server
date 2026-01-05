@@ -17,14 +17,13 @@ package pulsar
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"strings"
 	"time"
 
 	"github.com/apache/pulsar-client-go/pulsar"
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	mcpsdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/adapter"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
 
@@ -58,7 +57,7 @@ func NewPulsarClientConsumeToolBuilder() *PulsarClientConsumeToolBuilder {
 
 // BuildTools builds the Pulsar Client Consumer tool list
 // This is the core method implementing the ToolBuilder interface
-func (b *PulsarClientConsumeToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]server.ServerTool, error) {
+func (b *PulsarClientConsumeToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]builders.ServerTool, error) {
 	// Check features - return empty list if no required features are present
 	if !b.HasAnyRequiredFeature(config.Features) {
 		return nil, nil
@@ -73,7 +72,7 @@ func (b *PulsarClientConsumeToolBuilder) BuildTools(_ context.Context, config bu
 	tool := b.buildConsumeTool()
 	handler := b.buildConsumeHandler(config.ReadOnly)
 
-	return []server.ServerTool{
+	return []builders.ServerTool{
 		{
 			Tool:    tool,
 			Handler: handler,
@@ -83,7 +82,7 @@ func (b *PulsarClientConsumeToolBuilder) BuildTools(_ context.Context, config bu
 
 // buildConsumeTool builds the Pulsar Client Consumer MCP tool definition
 // Migrated from the original tool definition logic
-func (b *PulsarClientConsumeToolBuilder) buildConsumeTool() mcp.Tool {
+func (b *PulsarClientConsumeToolBuilder) buildConsumeTool() *mcpsdk.Tool {
 	toolDesc := "Consume messages from a Pulsar topic. " +
 		"This tool allows you to consume messages from a specified Pulsar topic with various options " +
 		"to control the subscription behavior, message processing, and display format. " +
@@ -93,49 +92,49 @@ func (b *PulsarClientConsumeToolBuilder) buildConsumeTool() mcp.Tool {
 		"timeout settings, and message display options. " +
 		"Do not use this tool for Kafka protocol operations. Use 'kafka_client_consume' instead."
 
-	return mcp.NewTool("pulsar_client_consume",
-		mcp.WithDescription(toolDesc),
-		mcp.WithString("topic", mcp.Required(),
-			mcp.Description("The fully qualified topic name to consume from (format: [persistent|non-persistent]://tenant/namespace/topic). "+
+	return builders.NewTool("pulsar_client_consume",
+		builders.WithDescription(toolDesc),
+		builders.WithString("topic", builders.Required(),
+			builders.Description("The fully qualified topic name to consume from (format: [persistent|non-persistent]://tenant/namespace/topic). "+
 				"For partitioned topics, you can consume from all partitions by specifying the base topic name "+
 				"or from a specific partition by appending -partition-N to the topic name."),
 		),
-		mcp.WithString("subscription-name", mcp.Required(),
-			mcp.Description("The subscription name for this consumer. "+
+		builders.WithString("subscription-name", builders.Required(),
+			builders.Description("The subscription name for this consumer. "+
 				"A subscription represents a named cursor for tracking message consumption progress. "+
 				"Multiple consumers can share the same subscription name to form a consumer group."),
 		),
-		mcp.WithString("subscription-type",
-			mcp.Description("Subscription type controlling message distribution among consumers:\\n"+
+		builders.WithString("subscription-type",
+			builders.Description("Subscription type controlling message distribution among consumers:\\n"+
 				"- exclusive: Only one consumer can consume from the subscription at a time\\n"+
 				"- shared: Messages are distributed across all consumers in a round-robin fashion\\n"+
 				"- failover: Only one active consumer, others act as backups\\n"+
 				"- key_shared: Messages with the same key are delivered to the same consumer (default: exclusive)"),
 		),
-		mcp.WithString("subscription-mode",
-			mcp.Description("Subscription durability mode:\\n"+
+		builders.WithString("subscription-mode",
+			builders.Description("Subscription durability mode:\\n"+
 				"- durable: Subscription persists even when all consumers disconnect\\n"+
 				"- non-durable: Subscription is deleted when all consumers disconnect (default: durable)"),
 		),
-		mcp.WithString("initial-position",
-			mcp.Description("Initial cursor position for new subscriptions:\\n"+
+		builders.WithString("initial-position",
+			builders.Description("Initial cursor position for new subscriptions:\\n"+
 				"- latest: Start consuming from the latest (most recent) message\\n"+
 				"- earliest: Start consuming from the earliest (oldest available) message (default: latest)"),
 		),
-		mcp.WithNumber("num-messages",
-			mcp.Description("Maximum number of messages to consume in this session. "+
+		builders.WithNumber("num-messages",
+			builders.Description("Maximum number of messages to consume in this session. "+
 				"Set to 0 for unlimited consumption until timeout. (default: 10)"),
 		),
-		mcp.WithNumber("timeout",
-			mcp.Description("Maximum time to wait for messages in seconds. "+
+		builders.WithNumber("timeout",
+			builders.Description("Maximum time to wait for messages in seconds. "+
 				"The consumer will stop after this timeout even if fewer messages were received. (default: 30)"),
 		),
-		mcp.WithBoolean("show-properties",
-			mcp.Description("Include message properties in the output. "+
+		builders.WithBoolean("show-properties",
+			builders.Description("Include message properties in the output. "+
 				"Message properties are key-value pairs attached to messages for metadata purposes. (default: false)"),
 		),
-		mcp.WithBoolean("hide-payload",
-			mcp.Description("Exclude message payload from the output. "+
+		builders.WithBoolean("hide-payload",
+			builders.Description("Exclude message payload from the output. "+
 				"Useful when you only need message metadata or are dealing with large payloads. (default: false)"),
 		),
 	)
@@ -143,38 +142,38 @@ func (b *PulsarClientConsumeToolBuilder) buildConsumeTool() mcp.Tool {
 
 // buildConsumeHandler builds the Pulsar Client Consumer handler function
 // Migrated from the original handler logic
-func (b *PulsarClientConsumeToolBuilder) buildConsumeHandler(_ bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarClientConsumeToolBuilder) buildConsumeHandler(_ bool) func(context.Context, *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	return func(ctx context.Context, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 		// Extract required parameters with validation
-		topic, err := request.RequireString("topic")
+		topic, err := adapter.RequireString(request, "topic")
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get topic: %v", err)), nil
+			return adapter.NewErrorResult("Failed to get topic: %v", err), nil
 		}
 
-		subscriptionName, err := request.RequireString("subscription-name")
+		subscriptionName, err := adapter.RequireString(request, "subscription-name")
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get subscription name: %v", err)), nil
+			return adapter.NewErrorResult("Failed to get subscription name: %v", err), nil
 		}
 
 		// Set default values and extract optional parameters
-		subscriptionType := request.GetString("subscription-type", "exclusive")
-		subscriptionMode := request.GetString("subscription-mode", "durable")
-		initialPosition := request.GetString("initial-position", "latest")
-		numMessages := int(request.GetFloat("num-messages", 10))
-		timeout := int(request.GetFloat("timeout", 30))
-		showProperties := request.GetBool("show-properties", false)
-		hidePayload := request.GetBool("hide-payload", false)
+		subscriptionType := adapter.GetString(request, "subscription-type", "exclusive")
+		subscriptionMode := adapter.GetString(request, "subscription-mode", "durable")
+		initialPosition := adapter.GetString(request, "initial-position", "latest")
+		numMessages := int(adapter.GetFloat(request, "num-messages", 10))
+		timeout := int(adapter.GetFloat(request, "timeout", 30))
+		showProperties := adapter.GetBool(request, "show-properties", false)
+		hidePayload := adapter.GetBool(request, "hide-payload", false)
 
 		// Get Pulsar session from context
 		session := mcpCtx.GetPulsarSession(ctx)
 		if session == nil {
-			return mcp.NewToolResultError("Pulsar session not found in context"), nil
+			return adapter.NewErrorResult("Pulsar session not found in context"), nil
 		}
 
 		// Setup client
 		client, err := session.GetPulsarClient()
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to create Pulsar client: %v", err)), nil
+			return adapter.NewErrorResult("Failed to create Pulsar client: %v", err), nil
 		}
 		defer client.Close()
 
@@ -196,7 +195,7 @@ func (b *PulsarClientConsumeToolBuilder) buildConsumeHandler(_ bool) func(contex
 		case "key_shared":
 			consumerOpts.Type = pulsar.KeyShared
 		default:
-			return mcp.NewToolResultError(fmt.Sprintf("Invalid subscription type: %s. Valid types: exclusive, shared, failover, key_shared", subscriptionType)), nil
+			return adapter.NewErrorResult("Invalid subscription type: %s. Valid types: exclusive, shared, failover, key_shared", subscriptionType), nil
 		}
 
 		// Set subscription mode
@@ -206,7 +205,7 @@ func (b *PulsarClientConsumeToolBuilder) buildConsumeHandler(_ bool) func(contex
 		case "non-durable":
 			consumerOpts.SubscriptionMode = pulsar.NonDurable
 		default:
-			return mcp.NewToolResultError(fmt.Sprintf("Invalid subscription mode: %s. Valid modes: durable, non-durable", subscriptionMode)), nil
+			return adapter.NewErrorResult("Invalid subscription mode: %s. Valid modes: durable, non-durable", subscriptionMode), nil
 		}
 
 		// Set initial position
@@ -216,13 +215,13 @@ func (b *PulsarClientConsumeToolBuilder) buildConsumeHandler(_ bool) func(contex
 		case "earliest":
 			consumerOpts.SubscriptionInitialPosition = pulsar.SubscriptionPositionEarliest
 		default:
-			return mcp.NewToolResultError(fmt.Sprintf("Invalid initial position: %s. Valid positions: latest, earliest", initialPosition)), nil
+			return adapter.NewErrorResult("Invalid initial position: %s. Valid positions: latest, earliest", initialPosition), nil
 		}
 
 		// Create consumer
 		consumer, err := client.Subscribe(consumerOpts)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to create consumer: %v", err)), nil
+			return adapter.NewErrorResult("Failed to create consumer: %v", err), nil
 		}
 		defer consumer.Close()
 
@@ -257,7 +256,7 @@ func (b *PulsarClientConsumeToolBuilder) buildConsumeHandler(_ bool) func(contex
 				if err == context.DeadlineExceeded || err == context.Canceled {
 					break
 				}
-				return mcp.NewToolResultError(fmt.Sprintf("Error receiving message: %v", err)), nil
+				return adapter.NewErrorResult("Error receiving message: %v", err), nil
 			}
 
 			// Process the message
@@ -306,15 +305,15 @@ func (b *PulsarClientConsumeToolBuilder) buildConsumeHandler(_ bool) func(contex
 // Unified error handling and utility functions
 
 // handleError provides unified error handling
-func (b *PulsarClientConsumeToolBuilder) handleError(operation string, err error) *mcp.CallToolResult {
-	return mcp.NewToolResultError(fmt.Sprintf("Failed to %s: %v", operation, err))
+func (b *PulsarClientConsumeToolBuilder) handleError(operation string, err error) *mcpsdk.CallToolResult {
+	return adapter.NewErrorResult("Failed to %s: %v", operation, err)
 }
 
 // marshalResponse provides unified JSON serialization for responses
-func (b *PulsarClientConsumeToolBuilder) marshalResponse(data interface{}) (*mcp.CallToolResult, error) {
+func (b *PulsarClientConsumeToolBuilder) marshalResponse(data interface{}) (*mcpsdk.CallToolResult, error) {
 	jsonBytes, err := json.Marshal(data)
 	if err != nil {
 		return b.handleError("marshal response", err), nil
 	}
-	return mcp.NewToolResultText(string(jsonBytes)), nil
+	return adapter.NewTextResult(string(jsonBytes)), nil
 }

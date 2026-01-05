@@ -16,10 +16,9 @@ package schema
 
 import (
 	"fmt"
-	// "reflect" // No longer needed here
 
+	"github.com/invopop/jsonschema"
 	cliutils "github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
-	"github.com/mark3labs/mcp-go/mcp"
 )
 
 type AvroConverter struct {
@@ -30,7 +29,7 @@ func NewAvroConverter() *AvroConverter {
 	return &AvroConverter{}
 }
 
-func (c *AvroConverter) ToMCPToolInputSchemaProperties(schemaInfo *cliutils.SchemaInfo) ([]mcp.ToolOption, error) {
+func (c *AvroConverter) ToMCPToolInputSchemaProperties(schemaInfo *cliutils.SchemaInfo) (*jsonschema.Schema, error) {
 	if schemaInfo.Type != "AVRO" {
 		return nil, fmt.Errorf("expected AVRO schema, got %s", schemaInfo.Type)
 	}

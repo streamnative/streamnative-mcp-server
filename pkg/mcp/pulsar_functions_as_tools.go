@@ -116,7 +116,7 @@ func (s *Server) PulsarFunctionManagedMcpTools(readOnly bool, features []string,
 
 	// Convert Server to the internal pftools.Server type
 	pftoolsServer := &pftools2.Server{
-		MCPServer:     s.MCPServer,
+		MCPServer:     s,
 		KafkaSession:  s.KafkaSession,
 		PulsarSession: s.PulsarSession,
 		Logger:        s.logger,

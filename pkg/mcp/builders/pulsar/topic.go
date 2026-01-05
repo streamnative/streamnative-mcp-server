@@ -22,10 +22,10 @@ import (
 	"strings"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	mcpsdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/adapter"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
 
@@ -60,7 +60,7 @@ func NewPulsarAdminTopicToolBuilder() *PulsarAdminTopicToolBuilder {
 
 // BuildTools builds the Pulsar Admin Topic tool list
 // This is the core method implementing the ToolBuilder interface
-func (b *PulsarAdminTopicToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]server.ServerTool, error) {
+func (b *PulsarAdminTopicToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]builders.ServerTool, error) {
 	// Check features - return empty list if no required features are present
 	if !b.HasAnyRequiredFeature(config.Features) {
 		return nil, nil
@@ -75,7 +75,7 @@ func (b *PulsarAdminTopicToolBuilder) BuildTools(_ context.Context, config build
 	tool := b.buildTopicTool()
 	handler := b.buildTopicHandler(config.ReadOnly)
 
-	return []server.ServerTool{
+	return []builders.ServerTool{
 		{
 			Tool:    tool,
 			Handler: handler,
@@ -85,7 +85,7 @@ func (b *PulsarAdminTopicToolBuilder) BuildTools(_ context.Context, config build
 
 // buildTopicTool builds the Pulsar Admin Topic MCP tool definition
 // Migrated from the original tool definition logic
-func (b *PulsarAdminTopicToolBuilder) buildTopicTool() mcp.Tool {
+func (b *PulsarAdminTopicToolBuilder) buildTopicTool() *mcpsdk.Tool {
 	toolDesc := "Manage Apache Pulsar topics. " +
 		"Topics are the core messaging entities in Pulsar that store and transmit messages. " +
 		"Pulsar supports two types of topics: persistent (durable storage with guaranteed delivery) " +
@@ -121,57 +121,57 @@ func (b *PulsarAdminTopicToolBuilder) buildTopicTool() mcp.Tool {
 		"- offload: Offload data from a topic to long-term storage\n" +
 		"- offload-status: Check the status of data offloading for a topic"
 
-	return mcp.NewTool("pulsar_admin_topic",
-		mcp.WithDescription(toolDesc),
-		mcp.WithString("resource", mcp.Required(),
-			mcp.Description(resourceDesc),
+	return builders.NewTool("pulsar_admin_topic",
+		builders.WithDescription(toolDesc),
+		builders.WithString("resource", builders.Required(),
+			builders.Description(resourceDesc),
 		),
-		mcp.WithString("operation", mcp.Required(),
-			mcp.Description(operationDesc),
+		builders.WithString("operation", builders.Required(),
+			builders.Description(operationDesc),
 		),
-		mcp.WithString("topic",
-			mcp.Description("The fully qualified topic name (format: [persistent|non-persistent]://tenant/namespace/topic). "+
+		builders.WithString("topic",
+			builders.Description("The fully qualified topic name (format: [persistent|non-persistent]://tenant/namespace/topic). "+
 				"Required for all operations except 'list'. "+
 				"For partitioned topics, reference the base topic name without the partition suffix. "+
 				"To operate on a specific partition, append -partition-N to the topic name."),
 		),
-		mcp.WithString("namespace",
-			mcp.Description("The namespace name in the format 'tenant/namespace'. "+
+		builders.WithString("namespace",
+			builders.Description("The namespace name in the format 'tenant/namespace'. "+
 				"Required for the 'list' operation. "+
 				"A namespace is a logical grouping of topics within a tenant."),
 		),
-		mcp.WithNumber("partitions",
-			mcp.Description("The number of partitions for the topic. Required for 'create' and 'update' operations. "+
+		builders.WithNumber("partitions",
+			builders.Description("The number of partitions for the topic. Required for 'create' and 'update' operations. "+
 				"Set to 0 for a non-partitioned topic. "+
 				"Partitioned topics provide higher throughput by dividing message traffic across multiple brokers. "+
 				"Each partition is an independent unit with its own retention and cursor positions."),
 		),
-		mcp.WithBoolean("force",
-			mcp.Description("Force operation even if it disrupts producers or consumers. Optional for 'delete' operation. "+
+		builders.WithBoolean("force",
+			builders.Description("Force operation even if it disrupts producers or consumers. Optional for 'delete' operation. "+
 				"When true, all producers and consumers will be forcefully disconnected. "+
 				"Use with caution as it can interrupt active message processing."),
 		),
-		mcp.WithBoolean("non-partitioned",
-			mcp.Description("Operate on a non-partitioned topic. Optional for 'delete' operation. "+
+		builders.WithBoolean("non-partitioned",
+			builders.Description("Operate on a non-partitioned topic. Optional for 'delete' operation. "+
 				"When true and operating on a partitioned topic name, only deletes the non-partitioned topic "+
 				"with the same name, if it exists."),
 		),
-		mcp.WithBoolean("partitioned",
-			mcp.Description("Get stats for a partitioned topic. Optional for 'stats' operation. "+
+		builders.WithBoolean("partitioned",
+			builders.Description("Get stats for a partitioned topic. Optional for 'stats' operation. "+
 				"It has to be true if the topic is partitioned. Leave it empty or false for non-partitioned topic."),
 		),
-		mcp.WithBoolean("per-partition",
-			mcp.Description("Include per-partition stats. Optional for 'stats' operation. "+
+		builders.WithBoolean("per-partition",
+			builders.Description("Include per-partition stats. Optional for 'stats' operation. "+
 				"When true, returns statistics for each partition separately. "+
 				"Requires 'partitioned' parameter to be true."),
 		),
-		mcp.WithString("config",
-			mcp.Description("JSON configuration for the topic. Required for 'update' operation. "+
+		builders.WithString("config",
+			builders.Description("JSON configuration for the topic. Required for 'update' operation. "+
 				"Set various policies like retention, compaction, deduplication, etc. "+
 				"Use a JSON object format, e.g., '{\"deduplicationEnabled\": true, \"replication_clusters\": [\"us-west\", \"us-east\"]}'"),
 		),
-		mcp.WithString("messageId",
-			mcp.Description("Message ID for operations that require a position. Required for 'offload' operation. "+
+		builders.WithString("messageId",
+			builders.Description("Message ID for operations that require a position. Required for 'offload' operation. "+
 				"Format is 'ledgerId:entryId' representing a position in the topic's message log. "+
 				"For offload operations, specifies the message up to which data should be moved to long-term storage."),
 		),
@@ -180,17 +180,17 @@ func (b *PulsarAdminTopicToolBuilder) buildTopicTool() mcp.Tool {
 
 // buildTopicHandler builds the Pulsar Admin Topic handler function
 // Migrated from the original handler logic
-func (b *PulsarAdminTopicToolBuilder) buildTopicHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicToolBuilder) buildTopicHandler(readOnly bool) func(context.Context, *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	return func(ctx context.Context, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 		// Get required parameters
-		resource, err := request.RequireString("resource")
+		resource, err := adapter.RequireString(request, "resource")
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get resource: %v", err)), nil
+			return adapter.NewErrorResult("Failed to get resource: %v", err), nil
 		}
 
-		operation, err := request.RequireString("operation")
+		operation, err := adapter.RequireString(request, "operation")
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get operation: %v", err)), nil
+			return adapter.NewErrorResult("Failed to get operation: %v", err), nil
 		}
 
 		// Normalize parameters
@@ -200,19 +200,19 @@ func (b *PulsarAdminTopicToolBuilder) buildTopicHandler(readOnly bool) func(cont
 		// Validate write operations in read-only mode
 		if readOnly && (operation == "create" || operation == "delete" || operation == "unload" ||
 			operation == "terminate" || operation == "compact" || operation == "update" || operation == "offload") {
-			return mcp.NewToolResultError("Write operations are not allowed in read-only mode"), nil
+			return adapter.NewErrorResult("Write operations are not allowed in read-only mode"), nil
 		}
 
 		// Get Pulsar session from context
 		session := mcpCtx.GetPulsarSession(ctx)
 		if session == nil {
-			return mcp.NewToolResultError("Pulsar session not found in context"), nil
+			return adapter.NewErrorResult("Pulsar session not found in context"), nil
 		}
 
 		// Create the admin client
 		admin, err := session.GetAdminClient()
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
+			return adapter.NewErrorResult("Failed to get admin client: %v", err), nil
 		}
 
 		// Dispatch based on resource and operation
@@ -252,17 +252,17 @@ func (b *PulsarAdminTopicToolBuilder) buildTopicHandler(readOnly bool) func(cont
 			case "offload-status":
 				return b.handleTopicOffloadStatus(admin, request)
 			default:
-				return mcp.NewToolResultError(fmt.Sprintf("Unknown topic operation: %s", operation)), nil
+				return adapter.NewErrorResult("Unknown topic operation: %s", operation), nil
 			}
 		case "topics":
 			switch operation {
 			case "list":
 				return b.handleTopicsList(admin, request)
 			default:
-				return mcp.NewToolResultError(fmt.Sprintf("Unknown topics operation: %s", operation)), nil
+				return adapter.NewErrorResult("Unknown topics operation: %s", operation), nil
 			}
 		default:
-			return mcp.NewToolResultError(fmt.Sprintf("Unknown resource: %s", resource)), nil
+			return adapter.NewErrorResult("Unknown resource: %s", resource), nil
 		}
 	}
 }
@@ -270,38 +270,38 @@ func (b *PulsarAdminTopicToolBuilder) buildTopicHandler(readOnly bool) func(cont
 // Unified error handling and utility functions
 
 // handleError provides unified error handling
-func (b *PulsarAdminTopicToolBuilder) handleError(operation string, err error) *mcp.CallToolResult {
-	return mcp.NewToolResultError(fmt.Sprintf("Failed to %s: %v", operation, err))
+func (b *PulsarAdminTopicToolBuilder) handleError(operation string, err error) *mcpsdk.CallToolResult {
+	return adapter.NewErrorResult("Failed to %s: %v", operation, err)
 }
 
 // marshalResponse provides unified JSON serialization for responses
-func (b *PulsarAdminTopicToolBuilder) marshalResponse(data interface{}) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicToolBuilder) marshalResponse(data interface{}) (*mcpsdk.CallToolResult, error) {
 	jsonBytes, err := json.Marshal(data)
 	if err != nil {
 		return b.handleError("marshal response", err), nil
 	}
-	return mcp.NewToolResultText(string(jsonBytes)), nil
+	return adapter.NewTextResult(string(jsonBytes)), nil
 }
 
 // handleTopicsList lists all existing topics under the specified namespace
-func (b *PulsarAdminTopicToolBuilder) handleTopicsList(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicToolBuilder) handleTopicsList(admin cmdutils.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	// Get required parameters
-	namespace, err := request.RequireString("namespace")
+	namespace, err := adapter.RequireString(request, "namespace")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'namespace' for topics.list: %v", err)), nil
+		return adapter.NewErrorResult("Missing required parameter 'namespace' for topics.list: %v", err), nil
 	}
 
 	// Get namespace name
 	namespaceName, err := utils.GetNamespaceName(namespace)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid namespace name '%s': %v", namespace, err)), nil
+		return adapter.NewErrorResult("Invalid namespace name '%s': %v", namespace, err), nil
 	}
 
 	// List topics
 	partitionedTopics, nonPartitionedTopics, err := admin.Topics().List(*namespaceName)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to list topics in namespace '%s': %v",
-			namespace, err)), nil
+		return adapter.NewErrorResult("Failed to list topics in namespace '%s': %v",
+			namespace, err), nil
 	}
 
 	// Format the output
@@ -317,57 +317,57 @@ func (b *PulsarAdminTopicToolBuilder) handleTopicsList(admin cmdutils.Client, re
 }
 
 // handleTopicGet gets the metadata of an existing topic
-func (b *PulsarAdminTopicToolBuilder) handleTopicGet(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicToolBuilder) handleTopicGet(admin cmdutils.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	// Get required parameters
-	topic, err := request.RequireString("topic")
+	topic, err := adapter.RequireString(request, "topic")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.get: %v", err)), nil
+		return adapter.NewErrorResult("Missing required parameter 'topic' for topic.get: %v", err), nil
 	}
 
 	// Get topic name
 	topicName, err := utils.GetTopicName(topic)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid topic name '%s': %v", topic, err)), nil
+		return adapter.NewErrorResult("Invalid topic name '%s': %v", topic, err), nil
 	}
 
 	// Get topic metadata
 	metadata, err := admin.Topics().GetMetadata(*topicName)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get metadata for topic '%s': %v",
-			topic, err)), nil
+		return adapter.NewErrorResult("Failed to get metadata for topic '%s': %v",
+			topic, err), nil
 	}
 
 	return b.marshalResponse(metadata)
 }
 
 // handleTopicStats gets the stats for an existing topic
-func (b *PulsarAdminTopicToolBuilder) handleTopicStats(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicToolBuilder) handleTopicStats(admin cmdutils.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	// Get required parameters
-	topic, err := request.RequireString("topic")
+	topic, err := adapter.RequireString(request, "topic")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.stats: %v", err)), nil
+		return adapter.NewErrorResult("Missing required parameter 'topic' for topic.stats: %v", err), nil
 	}
 
 	// Get optional parameters
-	partitioned := request.GetBool("partitioned", false)
-	perPartition := request.GetBool("per-partition", false)
+	partitioned := adapter.GetBool(request, "partitioned", false)
+	perPartition := adapter.GetBool(request, "per-partition", false)
 
 	// Get topic name
 	topicName, err := utils.GetTopicName(topic)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid topic name '%s': %v", topic, err)), nil
+		return adapter.NewErrorResult("Invalid topic name '%s': %v", topic, err), nil
 	}
 
 	namespaceName, err := utils.GetNamespaceName(topicName.GetTenant() + "/" + topicName.GetNamespace())
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid namespace name: %v", err)), nil
+		return adapter.NewErrorResult("Invalid namespace name: %v", err), nil
 	}
 
 	// List topics to determine if this topic is partitioned
 	partitionedTopics, nonPartitionedTopics, err := admin.Topics().List(*namespaceName)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to list topics in namespace '%s': %v",
-			namespaceName, err)), nil
+		return adapter.NewErrorResult("Failed to list topics in namespace '%s': %v",
+			namespaceName, err), nil
 	}
 
 	if slices.Contains(partitionedTopics, topicName.String()) {
@@ -382,16 +382,16 @@ func (b *PulsarAdminTopicToolBuilder) handleTopicStats(admin cmdutils.Client, re
 		// Get partitioned topic stats
 		stats, err := admin.Topics().GetPartitionedStats(*topicName, perPartition)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get stats for partitioned topic '%s': %v",
-				topic, err)), nil
+			return adapter.NewErrorResult("Failed to get stats for partitioned topic '%s': %v",
+				topic, err), nil
 		}
 		data = stats
 	} else {
 		// Get topic stats
 		stats, err := admin.Topics().GetStats(*topicName)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get stats for topic '%s': %v",
-				topic, err)), nil
+			return adapter.NewErrorResult("Failed to get stats for topic '%s': %v",
+				topic, err), nil
 		}
 		data = stats
 	}
@@ -400,90 +400,90 @@ func (b *PulsarAdminTopicToolBuilder) handleTopicStats(admin cmdutils.Client, re
 }
 
 // handleTopicLookup looks up the owner broker of a topic
-func (b *PulsarAdminTopicToolBuilder) handleTopicLookup(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicToolBuilder) handleTopicLookup(admin cmdutils.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	// Get required parameters
-	topic, err := request.RequireString("topic")
+	topic, err := adapter.RequireString(request, "topic")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.lookup: %v", err)), nil
+		return adapter.NewErrorResult("Missing required parameter 'topic' for topic.lookup: %v", err), nil
 	}
 
 	// Get topic name
 	topicName, err := utils.GetTopicName(topic)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid topic name '%s': %v", topic, err)), nil
+		return adapter.NewErrorResult("Invalid topic name '%s': %v", topic, err), nil
 	}
 
 	// Lookup topic
 	lookup, err := admin.Topics().Lookup(*topicName)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to lookup topic '%s': %v",
-			topic, err)), nil
+		return adapter.NewErrorResult("Failed to lookup topic '%s': %v",
+			topic, err), nil
 	}
 
 	return b.marshalResponse(lookup)
 }
 
 // handleTopicCreate creates a topic with the specified number of partitions
-func (b *PulsarAdminTopicToolBuilder) handleTopicCreate(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicToolBuilder) handleTopicCreate(admin cmdutils.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	// Get required parameters
-	topic, err := request.RequireString("topic")
+	topic, err := adapter.RequireString(request, "topic")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.create: %v", err)), nil
+		return adapter.NewErrorResult("Missing required parameter 'topic' for topic.create: %v", err), nil
 	}
 
-	partitions, err := request.RequireFloat("partitions")
+	partitions, err := adapter.RequireFloat(request, "partitions")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'partitions' for topic.create: %v", err)), nil
+		return adapter.NewErrorResult("Missing required parameter 'partitions' for topic.create: %v", err), nil
 	}
 
 	// Validate partitions
 	if partitions < 0 {
-		return mcp.NewToolResultError("Invalid partitions number: must be non-negative. Use 0 for a non-partitioned topic."), nil
+		return adapter.NewErrorResult("Invalid partitions number: must be non-negative. Use 0 for a non-partitioned topic."), nil
 	}
 
 	// Get topic name
 	topicName, err := utils.GetTopicName(topic)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid topic name '%s': %v", topic, err)), nil
+		return adapter.NewErrorResult("Invalid topic name '%s': %v", topic, err), nil
 	}
 
 	// Create topic
 	err = admin.Topics().Create(*topicName, int(partitions))
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to create topic '%s' with %d partitions: %v",
-			topic, int(partitions), err)), nil
+		return adapter.NewErrorResult("Failed to create topic '%s' with %d partitions: %v",
+			topic, int(partitions), err), nil
 	}
 
 	if int(partitions) == 0 {
-		return mcp.NewToolResultText(fmt.Sprintf("Successfully created non-partitioned topic '%s'",
+		return adapter.NewTextResult(fmt.Sprintf("Successfully created non-partitioned topic '%s'",
 			topicName.String())), nil
 	}
-	return mcp.NewToolResultText(fmt.Sprintf("Successfully created topic '%s' with %d partitions",
+	return adapter.NewTextResult(fmt.Sprintf("Successfully created topic '%s' with %d partitions",
 		topicName.String(), int(partitions))), nil
 }
 
 // handleTopicDelete deletes a topic
-func (b *PulsarAdminTopicToolBuilder) handleTopicDelete(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicToolBuilder) handleTopicDelete(admin cmdutils.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	// Get required parameters
-	topic, err := request.RequireString("topic")
+	topic, err := adapter.RequireString(request, "topic")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.delete: %v", err)), nil
+		return adapter.NewErrorResult("Missing required parameter 'topic' for topic.delete: %v", err), nil
 	}
 
 	// Get optional parameters
-	force := request.GetBool("force", false)
-	nonPartitioned := request.GetBool("non-partitioned", false)
+	force := adapter.GetBool(request, "force", false)
+	nonPartitioned := adapter.GetBool(request, "non-partitioned", false)
 
 	// Get topic name
 	topicName, err := utils.GetTopicName(topic)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid topic name '%s': %v", topic, err)), nil
+		return adapter.NewErrorResult("Invalid topic name '%s': %v", topic, err), nil
 	}
 
 	// Delete topic
 	err = admin.Topics().Delete(*topicName, force, nonPartitioned)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to delete topic '%s': %v", topic, err)), nil
+		return adapter.NewErrorResult("Failed to delete topic '%s': %v", topic, err), nil
 	}
 
 	forceStr := ""
@@ -496,195 +496,195 @@ func (b *PulsarAdminTopicToolBuilder) handleTopicDelete(admin cmdutils.Client, r
 		nonPartitionedStr = " (non-partitioned)"
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Successfully deleted topic '%s'%s%s",
+	return adapter.NewTextResult(fmt.Sprintf("Successfully deleted topic '%s'%s%s",
 		topicName.String(), forceStr, nonPartitionedStr)), nil
 }
 
 // handleTopicUnload unloads a topic
-func (b *PulsarAdminTopicToolBuilder) handleTopicUnload(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicToolBuilder) handleTopicUnload(admin cmdutils.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	// Get required parameters
-	topic, err := request.RequireString("topic")
+	topic, err := adapter.RequireString(request, "topic")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.unload: %v", err)), nil
+		return adapter.NewErrorResult("Missing required parameter 'topic' for topic.unload: %v", err), nil
 	}
 
 	// Get topic name
 	topicName, err := utils.GetTopicName(topic)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid topic name '%s': %v", topic, err)), nil
+		return adapter.NewErrorResult("Invalid topic name '%s': %v", topic, err), nil
 	}
 
 	// Unload topic
 	err = admin.Topics().Unload(*topicName)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to unload topic '%s': %v", topic, err)), nil
+		return adapter.NewErrorResult("Failed to unload topic '%s': %v", topic, err), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Successfully unloaded topic '%s'", topicName.String())), nil
+	return adapter.NewTextResult(fmt.Sprintf("Successfully unloaded topic '%s'", topicName.String())), nil
 }
 
 // handleTopicTerminate terminates a topic
-func (b *PulsarAdminTopicToolBuilder) handleTopicTerminate(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicToolBuilder) handleTopicTerminate(admin cmdutils.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	// Get required parameters
-	topic, err := request.RequireString("topic")
+	topic, err := adapter.RequireString(request, "topic")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.terminate: %v", err)), nil
+		return adapter.NewErrorResult("Missing required parameter 'topic' for topic.terminate: %v", err), nil
 	}
 
 	// Get topic name
 	topicName, err := utils.GetTopicName(topic)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid topic name '%s': %v", topic, err)), nil
+		return adapter.NewErrorResult("Invalid topic name '%s': %v", topic, err), nil
 	}
 
 	// Terminate topic
 	messageID, err := admin.Topics().Terminate(*topicName)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to terminate topic '%s': %v", topic, err)), nil
+		return adapter.NewErrorResult("Failed to terminate topic '%s': %v", topic, err), nil
 	}
 
 	// Convert message ID to string
 	msgIDStr := fmt.Sprintf("%d:%d", messageID.LedgerID, messageID.EntryID)
 
-	return mcp.NewToolResultText(fmt.Sprintf("Successfully terminated topic '%s' at message %s. "+
+	return adapter.NewTextResult(fmt.Sprintf("Successfully terminated topic '%s' at message %s. "+
 		"No more messages can be published to this topic.",
 		topicName.String(), msgIDStr)), nil
 }
 
 // handleTopicCompact triggers compaction on a topic
-func (b *PulsarAdminTopicToolBuilder) handleTopicCompact(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicToolBuilder) handleTopicCompact(admin cmdutils.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	// Get required parameters
-	topic, err := request.RequireString("topic")
+	topic, err := adapter.RequireString(request, "topic")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.compact: %v", err)), nil
+		return adapter.NewErrorResult("Missing required parameter 'topic' for topic.compact: %v", err), nil
 	}
 
 	// Get topic name
 	topicName, err := utils.GetTopicName(topic)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid topic name '%s': %v", topic, err)), nil
+		return adapter.NewErrorResult("Invalid topic name '%s': %v", topic, err), nil
 	}
 
 	// Compact topic
 	err = admin.Topics().Compact(*topicName)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to trigger compaction for topic '%s': %v", topic, err)), nil
+		return adapter.NewErrorResult("Failed to trigger compaction for topic '%s': %v", topic, err), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Successfully triggered compaction for topic '%s'. "+
+	return adapter.NewTextResult(fmt.Sprintf("Successfully triggered compaction for topic '%s'. "+
 		"Run 'topic.status' to check compaction status.", topicName.String())), nil
 }
 
 // handleTopicInternalStats gets the internal stats for a topic
-func (b *PulsarAdminTopicToolBuilder) handleTopicInternalStats(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicToolBuilder) handleTopicInternalStats(admin cmdutils.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	// Get required parameters
-	topic, err := request.RequireString("topic")
+	topic, err := adapter.RequireString(request, "topic")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.internal-stats: %v", err)), nil
+		return adapter.NewErrorResult("Missing required parameter 'topic' for topic.internal-stats: %v", err), nil
 	}
 
 	// Get topic name
 	topicName, err := utils.GetTopicName(topic)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid topic name '%s': %v", topic, err)), nil
+		return adapter.NewErrorResult("Invalid topic name '%s': %v", topic, err), nil
 	}
 
 	// Get internal stats
 	stats, err := admin.Topics().GetInternalStats(*topicName)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get internal stats for topic '%s': %v", topic, err)), nil
+		return adapter.NewErrorResult("Failed to get internal stats for topic '%s': %v", topic, err), nil
 	}
 
 	return b.marshalResponse(stats)
 }
 
 // handleTopicInternalInfo gets the internal info for a topic
-func (b *PulsarAdminTopicToolBuilder) handleTopicInternalInfo(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicToolBuilder) handleTopicInternalInfo(admin cmdutils.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	// Get required parameters
-	topic, err := request.RequireString("topic")
+	topic, err := adapter.RequireString(request, "topic")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.internal-info: %v", err)), nil
+		return adapter.NewErrorResult("Missing required parameter 'topic' for topic.internal-info: %v", err), nil
 	}
 
 	// Get topic name
 	topicName, err := utils.GetTopicName(topic)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid topic name '%s': %v", topic, err)), nil
+		return adapter.NewErrorResult("Invalid topic name '%s': %v", topic, err), nil
 	}
 
 	// Get internal info
 	info, err := admin.Topics().GetInternalInfo(*topicName)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get internal info for topic '%s': %v", topic, err)), nil
+		return adapter.NewErrorResult("Failed to get internal info for topic '%s': %v", topic, err), nil
 	}
 
 	return b.marshalResponse(info)
 }
 
 // handleTopicBundleRange gets the bundle range of a topic
-func (b *PulsarAdminTopicToolBuilder) handleTopicBundleRange(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicToolBuilder) handleTopicBundleRange(admin cmdutils.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	// Get required parameters
-	topic, err := request.RequireString("topic")
+	topic, err := adapter.RequireString(request, "topic")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.bundle-range: %v", err)), nil
+		return adapter.NewErrorResult("Missing required parameter 'topic' for topic.bundle-range: %v", err), nil
 	}
 
 	// Get topic name
 	topicName, err := utils.GetTopicName(topic)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid topic name '%s': %v", topic, err)), nil
+		return adapter.NewErrorResult("Invalid topic name '%s': %v", topic, err), nil
 	}
 
 	// Get bundle range
 	bundle, err := admin.Topics().GetBundleRange(*topicName)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get bundle range for topic '%s': %v", topic, err)), nil
+		return adapter.NewErrorResult("Failed to get bundle range for topic '%s': %v", topic, err), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Bundle range for topic '%s': %s", topicName.String(), bundle)), nil
+	return adapter.NewTextResult(fmt.Sprintf("Bundle range for topic '%s': %s", topicName.String(), bundle)), nil
 }
 
 // handleTopicLastMessageID gets the last message ID of a topic
-func (b *PulsarAdminTopicToolBuilder) handleTopicLastMessageID(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicToolBuilder) handleTopicLastMessageID(admin cmdutils.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	// Get required parameters
-	topic, err := request.RequireString("topic")
+	topic, err := adapter.RequireString(request, "topic")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.last-message-id: %v", err)), nil
+		return adapter.NewErrorResult("Missing required parameter 'topic' for topic.last-message-id: %v", err), nil
 	}
 
 	// Get topic name
 	topicName, err := utils.GetTopicName(topic)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid topic name '%s': %v", topic, err)), nil
+		return adapter.NewErrorResult("Invalid topic name '%s': %v", topic, err), nil
 	}
 
 	// Get last message ID
 	messageID, err := admin.Topics().GetLastMessageID(*topicName)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get last message ID for topic '%s': %v", topic, err)), nil
+		return adapter.NewErrorResult("Failed to get last message ID for topic '%s': %v", topic, err), nil
 	}
 
 	return b.marshalResponse(messageID)
 }
 
 // handleTopicStatus gets the status of a topic
-func (b *PulsarAdminTopicToolBuilder) handleTopicStatus(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicToolBuilder) handleTopicStatus(admin cmdutils.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	// Get required parameters
-	topic, err := request.RequireString("topic")
+	topic, err := adapter.RequireString(request, "topic")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.status: %v", err)), nil
+		return adapter.NewErrorResult("Missing required parameter 'topic' for topic.status: %v", err), nil
 	}
 
 	// Get topic name
 	topicName, err := utils.GetTopicName(topic)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid topic name '%s': %v", topic, err)), nil
+		return adapter.NewErrorResult("Invalid topic name '%s': %v", topic, err), nil
 	}
 
 	// Get topic metadata for status check
 	metadata, err := admin.Topics().GetMetadata(*topicName)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get status for topic '%s': %v", topic, err)), nil
+		return adapter.NewErrorResult("Failed to get status for topic '%s': %v", topic, err), nil
 	}
 
 	// Create status object with available information
@@ -700,57 +700,57 @@ func (b *PulsarAdminTopicToolBuilder) handleTopicStatus(admin cmdutils.Client, r
 }
 
 // handleTopicUpdate updates a topic configuration
-func (b *PulsarAdminTopicToolBuilder) handleTopicUpdate(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicToolBuilder) handleTopicUpdate(admin cmdutils.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	// Get required parameters
-	topic, err := request.RequireString("topic")
+	topic, err := adapter.RequireString(request, "topic")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.update: %v", err)), nil
+		return adapter.NewErrorResult("Missing required parameter 'topic' for topic.update: %v", err), nil
 	}
 
-	partitions, err := request.RequireFloat("partitions")
+	partitions, err := adapter.RequireFloat(request, "partitions")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'partitions' for topic.update: %v", err)), nil
+		return adapter.NewErrorResult("Missing required parameter 'partitions' for topic.update: %v", err), nil
 	}
 
 	// Get topic name
 	topicName, err := utils.GetTopicName(topic)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid topic name '%s': %v", topic, err)), nil
+		return adapter.NewErrorResult("Invalid topic name '%s': %v", topic, err), nil
 	}
 
 	err = admin.Topics().Update(*topicName, int(partitions))
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to update topic '%s': %v", topic, err)), nil
+		return adapter.NewErrorResult("Failed to update topic '%s': %v", topic, err), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Successfully updated topic '%s' partitions to %d",
+	return adapter.NewTextResult(fmt.Sprintf("Successfully updated topic '%s' partitions to %d",
 		topicName.String(), int(partitions))), nil
 }
 
 // handleTopicOffload offloads data from a topic to long-term storage
-func (b *PulsarAdminTopicToolBuilder) handleTopicOffload(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicToolBuilder) handleTopicOffload(admin cmdutils.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	// Get required parameters
-	topic, err := request.RequireString("topic")
+	topic, err := adapter.RequireString(request, "topic")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.offload: %v", err)), nil
+		return adapter.NewErrorResult("Missing required parameter 'topic' for topic.offload: %v", err), nil
 	}
 
-	messageIDStr, err := request.RequireString("messageId")
+	messageIDStr, err := adapter.RequireString(request, "messageId")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'messageId' for topic.offload: %v", err)), nil
+		return adapter.NewErrorResult("Missing required parameter 'messageId' for topic.offload: %v", err), nil
 	}
 
 	// Get topic name
 	topicName, err := utils.GetTopicName(topic)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid topic name '%s': %v", topic, err)), nil
+		return adapter.NewErrorResult("Invalid topic name '%s': %v", topic, err), nil
 	}
 
 	// Parse message ID from format "ledgerId:entryId"
 	var ledgerID, entryID int64
 	if _, err := fmt.Sscanf(messageIDStr, "%d:%d", &ledgerID, &entryID); err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid message ID format (expected 'ledgerId:entryId'): %v. "+
-			"Valid examples: '123:456'", err)), nil
+		return adapter.NewErrorResult("Invalid message ID format (expected 'ledgerId:entryId'): %v. "+
+			"Valid examples: '123:456'", err), nil
 	}
 
 	// Create MessageID object
@@ -762,32 +762,32 @@ func (b *PulsarAdminTopicToolBuilder) handleTopicOffload(admin cmdutils.Client, 
 	// Offload topic
 	err = admin.Topics().Offload(*topicName, messageID)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to trigger offload for topic '%s': %v", topic, err)), nil
+		return adapter.NewErrorResult("Failed to trigger offload for topic '%s': %v", topic, err), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Successfully triggered offload for topic '%s' up to message %s. "+
+	return adapter.NewTextResult(fmt.Sprintf("Successfully triggered offload for topic '%s' up to message %s. "+
 		"Use 'topic.offload-status' to check the offload progress.",
 		topicName.String(), messageIDStr)), nil
 }
 
 // handleTopicOffloadStatus checks the status of data offloading for a topic
-func (b *PulsarAdminTopicToolBuilder) handleTopicOffloadStatus(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicToolBuilder) handleTopicOffloadStatus(admin cmdutils.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	// Get required parameters
-	topic, err := request.RequireString("topic")
+	topic, err := adapter.RequireString(request, "topic")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.offload-status: %v", err)), nil
+		return adapter.NewErrorResult("Missing required parameter 'topic' for topic.offload-status: %v", err), nil
 	}
 
 	// Get topic name
 	topicName, err := utils.GetTopicName(topic)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid topic name '%s': %v", topic, err)), nil
+		return adapter.NewErrorResult("Invalid topic name '%s': %v", topic, err), nil
 	}
 
 	// Get offload status
 	status, err := admin.Topics().OffloadStatus(*topicName)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get offload status for topic '%s': %v", topic, err)), nil
+		return adapter.NewErrorResult("Failed to get offload status for topic '%s': %v", topic, err), nil
 	}
 
 	return b.marshalResponse(status)

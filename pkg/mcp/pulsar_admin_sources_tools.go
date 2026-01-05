@@ -17,13 +17,12 @@ package mcp
 import (
 	"context"
 
-	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	pulsarbuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/pulsar"
 )
 
 // PulsarAdminAddSourcesTools adds a unified source-related tool to the MCP server
-func PulsarAdminAddSourcesTools(s *server.MCPServer, readOnly bool, features []string) {
+func PulsarAdminAddSourcesTools(s *MCPServer, readOnly bool, features []string) {
 	// Use the new builder pattern
 	builder := pulsarbuilders.NewPulsarAdminSourcesToolBuilder()
 	config := builders.ToolBuildConfig{

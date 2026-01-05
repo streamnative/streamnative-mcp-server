@@ -20,9 +20,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	mcpsdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/adapter"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 	"github.com/twmb/franz-go/pkg/kadm"
 )
@@ -55,7 +55,7 @@ func NewKafkaTopicsToolBuilder() *KafkaTopicsToolBuilder {
 }
 
 // BuildTools builds the Kafka Topics tool list
-func (b *KafkaTopicsToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]server.ServerTool, error) {
+func (b *KafkaTopicsToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]builders.ServerTool, error) {
 	// Check features - return empty list if no required features are present
 	if !b.HasAnyRequiredFeature(config.Features) {
 		return nil, nil
@@ -70,7 +70,7 @@ func (b *KafkaTopicsToolBuilder) BuildTools(_ context.Context, config builders.T
 	tool := b.buildKafkaTopicsTool()
 	handler := b.buildKafkaTopicsHandler(config.ReadOnly)
 
-	return []server.ServerTool{
+	return []builders.ServerTool{
 		{
 			Tool:    tool,
 			Handler: handler,
@@ -79,7 +79,7 @@ func (b *KafkaTopicsToolBuilder) BuildTools(_ context.Context, config builders.T
 }
 
 // buildKafkaTopicsTool builds the Kafka Topics MCP tool definition
-func (b *KafkaTopicsToolBuilder) buildKafkaTopicsTool() mcp.Tool {
+func (b *KafkaTopicsToolBuilder) buildKafkaTopicsTool() *mcpsdk.Tool {
 	resourceDesc := "Resource to operate on. Available resources:\n" +
 		"- topic: A single Kafka topic for operations on individual topics (create, get, delete)\n" +
 		"- topics: Collection of Kafka topics for bulk operations (list)"
@@ -137,51 +137,51 @@ func (b *KafkaTopicsToolBuilder) buildKafkaTopicsTool() mcp.Tool {
 		"   name: \"old-topic\"\n\n" +
 		"This tool requires appropriate Kafka permissions for topic management."
 
-	return mcp.NewTool("kafka_admin_topics",
-		mcp.WithDescription(toolDesc),
-		mcp.WithString("resource", mcp.Required(),
-			mcp.Description(resourceDesc),
+	return builders.NewTool("kafka_admin_topics",
+		builders.WithDescription(toolDesc),
+		builders.WithString("resource", builders.Required(),
+			builders.Description(resourceDesc),
 		),
-		mcp.WithString("operation", mcp.Required(),
-			mcp.Description(operationDesc),
+		builders.WithString("operation", builders.Required(),
+			builders.Description(operationDesc),
 		),
-		mcp.WithString("name",
-			mcp.Description("The name of the Kafka topic to operate on. "+
+		builders.WithString("name",
+			builders.Description("The name of the Kafka topic to operate on. "+
 				"Required for 'get', 'create', 'delete', and 'metadata' operations on the 'topic' resource. "+
 				"Topic names should follow Kafka naming conventions (alphanumeric, dots, underscores, and hyphens).")),
-		mcp.WithNumber("partitions",
-			mcp.Description("The number of partitions for the topic. Required for 'create' operation. "+
+		builders.WithNumber("partitions",
+			builders.Description("The number of partitions for the topic. Required for 'create' operation. "+
 				"Partitions determine the parallelism and scalability of the topic. "+
 				"More partitions allow more concurrent consumers and higher throughput.")),
-		mcp.WithNumber("replicationFactor",
-			mcp.Description("The replication factor for the topic. Required for 'create' operation. "+
+		builders.WithNumber("replicationFactor",
+			builders.Description("The replication factor for the topic. Required for 'create' operation. "+
 				"Replication factor determines fault tolerance - it should be at least 2 for production use. "+
 				"Cannot exceed the number of available brokers in the cluster.")),
-		mcp.WithObject("configs",
-			mcp.Description("Optional configuration parameters for the topic during 'create' operation. "+
+		builders.WithObject("configs",
+			builders.Description("Optional configuration parameters for the topic during 'create' operation. "+
 				"Common configurations include:\n"+
 				"- retention.ms: How long to retain messages (milliseconds)\n"+
 				"- compression.type: Compression algorithm (none, gzip, snappy, lz4, zstd)\n"+
 				"- cleanup.policy: Log cleanup policy (delete, compact, compact,delete)\n"+
 				"- segment.ms: Time before a new log segment is rolled out\n"+
 				"- max.message.bytes: Maximum size of a message batch")),
-		mcp.WithBoolean("includeInternal",
-			mcp.Description("Whether to include internal Kafka topics in the 'list' operation. "+
+		builders.WithBoolean("includeInternal",
+			builders.Description("Whether to include internal Kafka topics in the 'list' operation. "+
 				"Internal topics are used by Kafka itself (e.g., __consumer_offsets, __transaction_state). "+
 				"Default: false")),
 	)
 }
 
 // buildKafkaTopicsHandler builds the Kafka Topics handler function
-func (b *KafkaTopicsToolBuilder) buildKafkaTopicsHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *KafkaTopicsToolBuilder) buildKafkaTopicsHandler(readOnly bool) mcpsdk.ToolHandler {
+	return func(ctx context.Context, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 		// Get required parameters
-		resource, err := request.RequireString("resource")
+		resource, err := adapter.RequireString(request, "resource")
 		if err != nil {
 			return b.handleError("get resource", err), nil
 		}
 
-		operation, err := request.RequireString("operation")
+		operation, err := adapter.RequireString(request, "operation")
 		if err != nil {
 			return b.handleError("get operation", err), nil
 		}
@@ -192,7 +192,7 @@ func (b *KafkaTopicsToolBuilder) buildKafkaTopicsHandler(readOnly bool) func(con
 
 		// Validate write operations in read-only mode
 		if readOnly && (operation == "create" || operation == "delete") {
-			return mcp.NewToolResultError("Write operations are not allowed in read-only mode"), nil
+			return adapter.NewErrorResult("Write operations are not allowed in read-only mode"), nil
 		}
 
 		// Get Kafka admin client
@@ -212,7 +212,7 @@ func (b *KafkaTopicsToolBuilder) buildKafkaTopicsHandler(readOnly bool) func(con
 			case "list":
 				return b.handleKafkaTopicsList(ctx, admin, request)
 			default:
-				return mcp.NewToolResultError(fmt.Sprintf("Invalid operation for resource 'topics': %s", operation)), nil
+				return adapter.NewErrorResult("Invalid operation for resource 'topics': %s", operation), nil
 			}
 		case "topic":
 			switch operation {
@@ -225,10 +225,10 @@ func (b *KafkaTopicsToolBuilder) buildKafkaTopicsHandler(readOnly bool) func(con
 			case "metadata":
 				return b.handleKafkaTopicMetadata(ctx, admin, request)
 			default:
-				return mcp.NewToolResultError(fmt.Sprintf("Invalid operation for resource 'topic': %s", operation)), nil
+				return adapter.NewErrorResult("Invalid operation for resource 'topic': %s", operation), nil
 			}
 		default:
-			return mcp.NewToolResultError(fmt.Sprintf("Invalid resource: %s. Available resources: topics, topic", resource)), nil
+			return adapter.NewErrorResult("Invalid resource: %s. Available resources: topics, topic", resource), nil
 		}
 	}
 }
@@ -236,22 +236,25 @@ func (b *KafkaTopicsToolBuilder) buildKafkaTopicsHandler(readOnly bool) func(con
 // Utility functions
 
 // handleError provides unified error handling
-func (b *KafkaTopicsToolBuilder) handleError(operation string, err error) *mcp.CallToolResult {
-	return mcp.NewToolResultError(fmt.Sprintf("Failed to %s: %v", operation, err))
+func (b *KafkaTopicsToolBuilder) handleError(operation string, err error) *mcpsdk.CallToolResult {
+	if err != nil {
+		return adapter.NewErrorResult("Failed to %s: %v", operation, err)
+	}
+	return adapter.NewErrorResult("Failed to %s", operation)
 }
 
 // marshalResponse provides unified JSON serialization for responses
-func (b *KafkaTopicsToolBuilder) marshalResponse(data interface{}) (*mcp.CallToolResult, error) {
+func (b *KafkaTopicsToolBuilder) marshalResponse(data interface{}) (*mcpsdk.CallToolResult, error) {
 	jsonBytes, err := json.Marshal(data)
 	if err != nil {
 		return b.handleError("marshal response", err), nil
 	}
-	return mcp.NewToolResultText(string(jsonBytes)), nil
+	return adapter.NewTextResult(string(jsonBytes)), nil
 }
 
 // handleKafkaTopicsList handles listing all topics
-func (b *KafkaTopicsToolBuilder) handleKafkaTopicsList(ctx context.Context, admin *kadm.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	includeInternal := request.GetBool("includeInternal", false)
+func (b *KafkaTopicsToolBuilder) handleKafkaTopicsList(ctx context.Context, admin *kadm.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	includeInternal := adapter.GetBool(request, "includeInternal", false)
 
 	topics, err := admin.ListTopics(ctx)
 	if err != nil {
@@ -273,8 +276,8 @@ func (b *KafkaTopicsToolBuilder) handleKafkaTopicsList(ctx context.Context, admi
 }
 
 // handleKafkaTopicGet handles getting detailed information about a specific topic
-func (b *KafkaTopicsToolBuilder) handleKafkaTopicGet(ctx context.Context, admin *kadm.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	topicName, err := request.RequireString("name")
+func (b *KafkaTopicsToolBuilder) handleKafkaTopicGet(ctx context.Context, admin *kadm.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	topicName, err := adapter.RequireString(request, "name")
 	if err != nil {
 		return b.handleError("get topic name", err), nil
 	}
@@ -288,18 +291,18 @@ func (b *KafkaTopicsToolBuilder) handleKafkaTopicGet(ctx context.Context, admin 
 }
 
 // handleKafkaTopicCreate handles creating a new topic
-func (b *KafkaTopicsToolBuilder) handleKafkaTopicCreate(ctx context.Context, admin *kadm.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	topicName, err := request.RequireString("name")
+func (b *KafkaTopicsToolBuilder) handleKafkaTopicCreate(ctx context.Context, admin *kadm.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	topicName, err := adapter.RequireString(request, "name")
 	if err != nil {
 		return b.handleError("get topic name", err), nil
 	}
 
-	partitionsNum, err := request.RequireInt("partitions")
+	partitionsNum, err := adapter.RequireInt(request, "partitions")
 	if err != nil {
 		return b.handleError("get partitions", err), nil
 	}
 
-	replicationFactorNum, err := request.RequireInt("replicationFactor")
+	replicationFactorNum, err := adapter.RequireInt(request, "replicationFactor")
 	if err != nil {
 		return b.handleError("get replication factor", err), nil
 	}
@@ -311,17 +314,19 @@ func (b *KafkaTopicsToolBuilder) handleKafkaTopicCreate(ctx context.Context, adm
 
 	// Parse optional configs
 	var configs map[string]*string
-	arguments := request.GetArguments()
-	if configsParam, exists := arguments["configs"]; exists {
-		if configsMap, ok := configsParam.(map[string]interface{}); ok {
-			configs = make(map[string]*string)
-			for key, value := range configsMap {
-				if strValue, ok := value.(string); ok {
-					configs[key] = &strValue
-				} else {
-					// Convert non-string values to strings
-					strValue := fmt.Sprintf("%v", value)
-					configs[key] = &strValue
+	arguments, err := adapter.GetArgumentsMap(request)
+	if err == nil {
+		if configsParam, exists := arguments["configs"]; exists {
+			if configsMap, ok := configsParam.(map[string]interface{}); ok {
+				configs = make(map[string]*string)
+				for key, value := range configsMap {
+					if strValue, ok := value.(string); ok {
+						configs[key] = &strValue
+					} else {
+						// Convert non-string values to strings
+						strValue := fmt.Sprintf("%v", value)
+						configs[key] = &strValue
+					}
 				}
 			}
 		}
@@ -337,8 +342,8 @@ func (b *KafkaTopicsToolBuilder) handleKafkaTopicCreate(ctx context.Context, adm
 }
 
 // handleKafkaTopicDelete handles deleting a topic
-func (b *KafkaTopicsToolBuilder) handleKafkaTopicDelete(ctx context.Context, admin *kadm.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	topicName, err := request.RequireString("name")
+func (b *KafkaTopicsToolBuilder) handleKafkaTopicDelete(ctx context.Context, admin *kadm.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	topicName, err := adapter.RequireString(request, "name")
 	if err != nil {
 		return b.handleError("get topic name", err), nil
 	}
@@ -352,8 +357,8 @@ func (b *KafkaTopicsToolBuilder) handleKafkaTopicDelete(ctx context.Context, adm
 }
 
 // handleKafkaTopicMetadata handles getting metadata for a topic
-func (b *KafkaTopicsToolBuilder) handleKafkaTopicMetadata(ctx context.Context, admin *kadm.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	topicName, err := request.RequireString("name")
+func (b *KafkaTopicsToolBuilder) handleKafkaTopicMetadata(ctx context.Context, admin *kadm.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	topicName, err := adapter.RequireString(request, "name")
 	if err != nil {
 		return b.handleError("get topic name", err), nil
 	}

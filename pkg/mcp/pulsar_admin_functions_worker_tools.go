@@ -18,13 +18,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	pulsarBuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/pulsar"
 )
 
 // PulsarAdminFunctionsWorkerTools creates Pulsar Admin Functions Worker tool list using the new builder pattern
-func PulsarAdminFunctionsWorkerTools(readOnly bool, features []string) []server.ServerTool {
+func PulsarAdminFunctionsWorkerTools(readOnly bool, features []string) []builders.ServerTool {
 	builder := pulsarBuilders.NewPulsarAdminFunctionsWorkerToolBuilder()
 	config := builders.ToolBuildConfig{
 		ReadOnly: readOnly,
@@ -42,7 +41,7 @@ func PulsarAdminFunctionsWorkerTools(readOnly bool, features []string) []server.
 }
 
 // PulsarAdminAddFunctionsWorkerTools adds functions worker-related tools to the MCP server
-func PulsarAdminAddFunctionsWorkerTools(s *server.MCPServer, readOnly bool, features []string) {
+func PulsarAdminAddFunctionsWorkerTools(s *MCPServer, readOnly bool, features []string) {
 	tools := PulsarAdminFunctionsWorkerTools(readOnly, features)
 
 	for _, tool := range tools {

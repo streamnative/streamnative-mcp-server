@@ -19,8 +19,6 @@ import (
 	"fmt"
 	"sort"
 	"sync"
-
-	"github.com/mark3labs/mcp-go/server"
 )
 
 // ToolRegistry manages the registration and building of all tool builders
@@ -115,11 +113,11 @@ func (r *ToolRegistry) ListMetadata() map[string]ToolMetadata {
 
 // BuildAll builds tools for all specified configurations
 // Returns all successfully built tools and any errors encountered
-func (r *ToolRegistry) BuildAll(configs map[string]ToolBuildConfig) ([]server.ServerTool, error) {
+func (r *ToolRegistry) BuildAll(configs map[string]ToolBuildConfig) ([]ServerTool, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
-	var allTools []server.ServerTool
+	var allTools []ServerTool
 	var errors []error
 
 	for name, config := range configs {
@@ -149,7 +147,7 @@ func (r *ToolRegistry) BuildAll(configs map[string]ToolBuildConfig) ([]server.Se
 }
 
 // BuildSingle builds tools for a single tool builder
-func (r *ToolRegistry) BuildSingle(name string, config ToolBuildConfig) ([]server.ServerTool, error) {
+func (r *ToolRegistry) BuildSingle(name string, config ToolBuildConfig) ([]ServerTool, error) {
 	r.mu.RLock()
 	builder, exists := r.builders[name]
 	r.mu.RUnlock()
@@ -167,7 +165,7 @@ func (r *ToolRegistry) BuildSingle(name string, config ToolBuildConfig) ([]serve
 
 // BuildAllWithFeatures builds all relevant tools based on the feature list
 // Automatically creates configuration for each builder
-func (r *ToolRegistry) BuildAllWithFeatures(readOnly bool, features []string) ([]server.ServerTool, error) {
+func (r *ToolRegistry) BuildAllWithFeatures(readOnly bool, features []string) ([]ServerTool, error) {
 	r.mu.RLock()
 	builders := make(map[string]ToolBuilder, len(r.builders))
 	for name, builder := range r.builders {
@@ -175,7 +173,7 @@ func (r *ToolRegistry) BuildAllWithFeatures(readOnly bool, features []string) ([
 	}
 	r.mu.RUnlock()
 
-	var allTools []server.ServerTool
+	var allTools []ServerTool
 	var errors []error
 
 	for name, builder := range builders {

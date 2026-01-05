@@ -17,14 +17,13 @@ package mcp
 import (
 	"context"
 
-	"github.com/mark3labs/mcp-go/server"
 	"github.com/sirupsen/logrus"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	kafkabuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/kafka"
 )
 
 // KafkaClientAddConsumeTools adds Kafka client consume tools to the MCP server
-func KafkaClientAddConsumeTools(s *server.MCPServer, _ bool, logrusLogger *logrus.Logger, features []string) {
+func KafkaClientAddConsumeTools(s *MCPServer, _ bool, logrusLogger *logrus.Logger, features []string) {
 	// Use the new builder pattern
 	builder := kafkabuilders.NewKafkaConsumeToolBuilder()
 	config := builders.ToolBuildConfig{

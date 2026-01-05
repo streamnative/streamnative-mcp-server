@@ -18,13 +18,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	pulsarBuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/pulsar"
 )
 
 // PulsarAdminTopicTools creates Pulsar Admin Topic tool list using the new builder pattern
-func PulsarAdminTopicTools(readOnly bool, features []string) []server.ServerTool {
+func PulsarAdminTopicTools(readOnly bool, features []string) []builders.ServerTool {
 	builder := pulsarBuilders.NewPulsarAdminTopicToolBuilder()
 	config := builders.ToolBuildConfig{
 		ReadOnly: readOnly,
@@ -42,7 +41,7 @@ func PulsarAdminTopicTools(readOnly bool, features []string) []server.ServerTool
 }
 
 // PulsarAdminAddTopicTools adds topic-related tools to the MCP server
-func PulsarAdminAddTopicTools(s *server.MCPServer, readOnly bool, features []string) {
+func PulsarAdminAddTopicTools(s *MCPServer, readOnly bool, features []string) {
 	tools := PulsarAdminTopicTools(readOnly, features)
 
 	for _, tool := range tools {

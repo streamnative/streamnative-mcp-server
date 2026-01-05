@@ -20,10 +20,10 @@ import (
 	"fmt"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	mcpsdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/adapter"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
 
@@ -58,7 +58,7 @@ func NewPulsarAdminFunctionsToolBuilder() *PulsarAdminFunctionsToolBuilder {
 
 // BuildTools builds the Pulsar admin functions tool list
 // This is the core method implementing the ToolBuilder interface
-func (b *PulsarAdminFunctionsToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]server.ServerTool, error) {
+func (b *PulsarAdminFunctionsToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]builders.ServerTool, error) {
 	// Check features - return empty list if no required features are present
 	if !b.HasAnyRequiredFeature(config.Features) {
 		return nil, nil
@@ -73,7 +73,7 @@ func (b *PulsarAdminFunctionsToolBuilder) BuildTools(_ context.Context, config b
 	tool := b.buildPulsarAdminFunctionsTool()
 	handler := b.buildPulsarAdminFunctionsHandler(config.ReadOnly)
 
-	return []server.ServerTool{
+	return []builders.ServerTool{
 		{
 			Tool:    tool,
 			Handler: handler,
@@ -83,7 +83,7 @@ func (b *PulsarAdminFunctionsToolBuilder) BuildTools(_ context.Context, config b
 
 // buildPulsarAdminFunctionsTool builds the Pulsar admin functions MCP tool definition
 // Migrated from the original tool definition logic
-func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsTool() mcp.Tool {
+func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsTool() *mcpsdk.Tool {
 	toolDesc := "Manage Apache Pulsar Functions for stream processing. " +
 		"Pulsar Functions are lightweight compute processes that can consume messages from one or more Pulsar topics, " +
 		"apply user-defined processing logic, and produce results to another topic. " +
@@ -109,95 +109,95 @@ func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsTool() mcp.To
 		"- putstate: Store state in a function's state store\n" +
 		"- trigger: Manually trigger a function with a specific value"
 
-	return mcp.NewTool("pulsar_admin_functions",
-		mcp.WithDescription(toolDesc),
-		mcp.WithString("operation", mcp.Required(),
-			mcp.Description(operationDesc)),
-		mcp.WithString("tenant", mcp.Required(),
-			mcp.Description("The tenant name. Tenants are the primary organizational unit in Pulsar, "+
+	return builders.NewTool("pulsar_admin_functions",
+		builders.WithDescription(toolDesc),
+		builders.WithString("operation", builders.Required(),
+			builders.Description(operationDesc)),
+		builders.WithString("tenant", builders.Required(),
+			builders.Description("The tenant name. Tenants are the primary organizational unit in Pulsar, "+
 				"providing multi-tenancy and resource isolation. Functions deployed within a tenant "+
 				"inherit its permissions and resource quotas.")),
-		mcp.WithString("namespace", mcp.Required(),
-			mcp.Description("The namespace name. Namespaces are logical groupings of topics and functions "+
+		builders.WithString("namespace", builders.Required(),
+			builders.Description("The namespace name. Namespaces are logical groupings of topics and functions "+
 				"within a tenant. They encapsulate configuration policies and access control. "+
 				"Functions in a namespace typically process topics within the same namespace.")),
-		mcp.WithString("name",
-			mcp.Description("The function name. Required for all operations except 'list'. "+
+		builders.WithString("name",
+			builders.Description("The function name. Required for all operations except 'list'. "+
 				"Names should be descriptive of the function's purpose and must be unique within a namespace. "+
 				"Function names are used in metrics, logs, and when addressing the function via APIs.")),
 		// Additional parameters for specific operations
-		mcp.WithString("classname",
-			mcp.Description("The fully qualified class name implementing the function. Required for 'create' operation, optional for 'update'. "+
+		builders.WithString("classname",
+			builders.Description("The fully qualified class name implementing the function. Required for 'create' operation, optional for 'update'. "+
 				"For Java functions, this should be the class that implements pulsar function interfaces. "+
 				"For Python, this MUST be in format of `<Python_filename_without_extension>.<ClassName>` - for example: "+
 				"if file is '/path/to/exclamation.py' with class 'ExclamationFunction', classname must be 'exclamation.ExclamationFunction'; "+
 				"if file is '/path/to/double_number.py' with class 'DoubleNumber', classname must be 'double_number.DoubleNumber'. "+
 				"Common error: using just the class name 'DoubleNumber' (without filename prefix) will cause function creation to fail. "+
 				"Go functions should specify the 'main' function of the binary.")),
-		mcp.WithArray("inputs",
-			mcp.Description("The input topics for the function (array of strings). Optional for 'create' and 'update' operations. "+
+		builders.WithArray("inputs",
+			builders.Description("The input topics for the function (array of strings). Optional for 'create' and 'update' operations. "+
 				"Topics must be specified in the format 'persistent://tenant/namespace/topic'. "+
 				"Functions can consume from multiple topics, each with potentially different serialization types. "+
 				"All input topics should exist before the function is created."),
-			mcp.Items(
+			builders.Items(
 				map[string]interface{}{
 					"type":        "string",
 					"description": "input topic",
 				},
 			),
 		),
-		mcp.WithString("output",
-			mcp.Description("The output topic for the function results. Optional for 'create' and 'update' operations. "+
+		builders.WithString("output",
+			builders.Description("The output topic for the function results. Optional for 'create' and 'update' operations. "+
 				"Specified in the format 'persistent://tenant/namespace/topic'. "+
 				"If not set, the function will not produce any output to topics. "+
 				"The output topic will be automatically created if it doesn't exist.")),
-		mcp.WithString("jar",
-			mcp.Description("Path to the JAR file containing the function code. Optional for 'create' and 'update' operations. "+
+		builders.WithString("jar",
+			builders.Description("Path to the JAR file containing the function code. Optional for 'create' and 'update' operations. "+
 				"Support `file://`, `http://`, `https://`, `function://`, `source://`, `sink://` protocol. "+
 				"Can be a local path or supported URL protocol accessible to the Pulsar broker. "+
 				"For Java functions, this should contain all dependencies for the function. "+
 				"The jar file must be compatible with the Pulsar Functions API.")),
-		mcp.WithString("py",
-			mcp.Description("Path to the Python file containing the function code. Optional for 'create' and 'update' operations. "+
+		builders.WithString("py",
+			builders.Description("Path to the Python file containing the function code. Optional for 'create' and 'update' operations. "+
 				"Support `file://`, `http://`, `https://`, `function://`, `source://`, `sink://` protocol. "+
 				"Can be a local path or supported URL protocol accessible to the Pulsar broker. "+
 				"For Python functions, this should be the file path to the Python file, in format of `.py`, `.zip`, or `.whl`. "+
 				"The Python file must be compatible with the Pulsar Functions API.")),
-		mcp.WithString("go",
-			mcp.Description("Path to the Go file containing the function code. Optional for 'create' and 'update' operations. "+
+		builders.WithString("go",
+			builders.Description("Path to the Go file containing the function code. Optional for 'create' and 'update' operations. "+
 				"Support `file://`, `http://`, `https://`, `function://`, `source://`, `sink://` protocol. "+
 				"Can be a local path or supported URL protocol accessible to the Pulsar broker. "+
 				"For Go functions, this should be the file path to the Go file, in format of executable binary. "+
 				"The Go file must be compatible with the Pulsar Functions API.")),
-		mcp.WithNumber("parallelism",
-			mcp.Description("The parallelism factor of the function. Optional for 'create' and 'update' operations. "+
+		builders.WithNumber("parallelism",
+			builders.Description("The parallelism factor of the function. Optional for 'create' and 'update' operations. "+
 				"Determines how many instances of the function will run concurrently. "+
 				"Higher values improve throughput but require more resources. "+
 				"For stateful functions, consider how parallelism affects state consistency. "+
 				"Default is 1 (single instance).")),
-		mcp.WithObject("userConfig",
-			mcp.Description("User-defined config key/values. Optional for 'create' and 'update' operations. "+
+		builders.WithObject("userConfig",
+			builders.Description("User-defined config key/values. Optional for 'create' and 'update' operations. "+
 				"Provides configuration parameters accessible to the function at runtime. "+
 				"Specify as a JSON object with string, number, or boolean values. "+
 				"Common configs include connection parameters, batch sizes, or feature toggles. "+
 				"Example: {\"maxBatchSize\": 100, \"connectionString\": \"host:port\", \"debugMode\": true}")),
-		mcp.WithString("key",
-			mcp.Description("The state key. Required for 'querystate' and 'putstate' operations. "+
+		builders.WithString("key",
+			builders.Description("The state key. Required for 'querystate' and 'putstate' operations. "+
 				"Keys are used to identify values in the function's state store. "+
 				"They should be reasonable in length and follow a consistent pattern. "+
 				"State keys are typically limited to 128 characters.")),
-		mcp.WithString("value",
-			mcp.Description("The state value. Required for 'putstate' operation. "+
+		builders.WithString("value",
+			builders.Description("The state value. Required for 'putstate' operation. "+
 				"Values are stored in the function's state system. "+
 				"For simple values, specify as a string. For complex objects, use JSON-serialized strings. "+
 				"State values are typically limited to 1MB in size.")),
-		mcp.WithString("topic",
-			mcp.Description("The specific topic name that the function should consume from. Optional for 'trigger' operation. "+
+		builders.WithString("topic",
+			builders.Description("The specific topic name that the function should consume from. Optional for 'trigger' operation. "+
 				"Specified in the format 'persistent://tenant/namespace/topic'. "+
 				"Used when triggering a function that consumes from multiple topics. "+
 				"If not provided, the first input topic will be used.")),
-		mcp.WithString("triggerValue",
-			mcp.Description("The value with which to trigger the function. Required for 'trigger' operation. "+
+		builders.WithString("triggerValue",
+			builders.Description("The value with which to trigger the function. Required for 'trigger' operation. "+
 				"This value will be passed to the function as if it were a message from the input topic. "+
 				"String values are sent as is; for typed values, ensure proper formatting based on function expectations. "+
 				"The function processes this value just like a normal message.")),
@@ -206,21 +206,21 @@ func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsTool() mcp.To
 
 // buildPulsarAdminFunctionsHandler builds the Pulsar admin functions handler function
 // Migrated from the original handler logic
-func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsHandler(readOnly bool) func(context.Context, *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	return func(ctx context.Context, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 		// Get Pulsar session from context
 		session := mcpCtx.GetPulsarSession(ctx)
 		if session == nil {
-			return mcp.NewToolResultError("Pulsar session not found in context"), nil
+			return adapter.NewErrorResult("Pulsar session not found in context"), nil
 		}
 
 		client, err := session.GetAdminV3Client()
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get Pulsar client: %v", err)), nil
+			return adapter.NewErrorResult("Failed to get Pulsar client: %v", err), nil
 		}
 
 		// Extract and validate operation parameter
-		operation, err := request.RequireString("operation")
+		operation, err := adapter.RequireString(request, "operation")
 		if err != nil {
 			return b.handleError("get operation", err), nil
 		}
@@ -247,12 +247,12 @@ func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsHandler(readO
 		}
 
 		// Extract common parameters
-		tenant, err := request.RequireString("tenant")
+		tenant, err := adapter.RequireString(request, "tenant")
 		if err != nil {
 			return b.handleError("get tenant", fmt.Errorf("missing required parameter 'tenant': %v. A tenant is required for all Pulsar Functions operations", err)), nil
 		}
 
-		namespace, err := request.RequireString("namespace")
+		namespace, err := adapter.RequireString(request, "namespace")
 		if err != nil {
 			return b.handleError("get namespace", fmt.Errorf("missing required parameter 'namespace': %v. A namespace is required for all Pulsar Functions operations", err)), nil
 		}
@@ -260,7 +260,7 @@ func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsHandler(readO
 		// For all operations except 'list', name is required
 		var name string
 		if operation != "list" {
-			name, err = request.RequireString("name")
+			name, err = adapter.RequireString(request, "name")
 			if err != nil {
 				return b.handleError("get name", fmt.Errorf("missing required parameter 'name' for operation '%s': %v. The function name must be specified for this operation", operation, err)), nil
 			}
@@ -277,7 +277,7 @@ func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsHandler(readO
 		case "stats":
 			return b.handleFunctionStats(ctx, client, tenant, namespace, name)
 		case "querystate":
-			key, err := request.RequireString("key")
+			key, err := adapter.RequireString(request, "key")
 			if err != nil {
 				return b.handleError("get key", fmt.Errorf("missing required parameter 'key' for operation 'querystate': %v. A key is required to look up state in the function's state store", err)), nil
 			}
@@ -295,21 +295,21 @@ func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsHandler(readO
 		case "restart":
 			return b.handleFunctionRestart(ctx, client, tenant, namespace, name)
 		case "putstate":
-			key, err := request.RequireString("key")
+			key, err := adapter.RequireString(request, "key")
 			if err != nil {
 				return b.handleError("get key", fmt.Errorf("missing required parameter 'key' for operation 'putstate': %v. A key is required to store state in the function's state store", err)), nil
 			}
-			value, err := request.RequireString("value")
+			value, err := adapter.RequireString(request, "value")
 			if err != nil {
 				return b.handleError("get value", fmt.Errorf("missing required parameter 'value' for operation 'putstate': %v. A value is required to store state in the function's state store", err)), nil
 			}
 			return b.handleFunctionPutstate(ctx, client, tenant, namespace, name, key, value)
 		case "trigger":
-			triggerValue, err := request.RequireString("triggerValue")
+			triggerValue, err := adapter.RequireString(request, "triggerValue")
 			if err != nil {
 				return b.handleError("get triggerValue", fmt.Errorf("missing required parameter 'triggerValue' for operation 'trigger': %v. A trigger value is required to manually trigger the function", err)), nil
 			}
-			topic := request.GetString("topic", "")
+			topic := adapter.GetString(request, "topic", "")
 			return b.handleFunctionTrigger(ctx, client, tenant, namespace, name, triggerValue, topic)
 		default:
 			return b.handleError("handle operation", fmt.Errorf("unsupported operation: %s", operation)), nil
@@ -320,7 +320,7 @@ func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsHandler(readO
 // Helper functions - delegated operation handlers
 
 // handleFunctionList handles the list operation
-func (b *PulsarAdminFunctionsToolBuilder) handleFunctionList(_ context.Context, client cmdutils.Client, tenant, namespace string) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminFunctionsToolBuilder) handleFunctionList(_ context.Context, client cmdutils.Client, tenant, namespace string) (*mcpsdk.CallToolResult, error) {
 	admin := client.Functions()
 
 	functions, err := admin.GetFunctions(tenant, namespace)
@@ -336,7 +336,7 @@ func (b *PulsarAdminFunctionsToolBuilder) handleFunctionList(_ context.Context, 
 }
 
 // handleFunctionGet handles the get operation
-func (b *PulsarAdminFunctionsToolBuilder) handleFunctionGet(_ context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminFunctionsToolBuilder) handleFunctionGet(_ context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcpsdk.CallToolResult, error) {
 	admin := client.Functions()
 
 	functionConfig, err := admin.GetFunction(tenant, namespace, name)
@@ -348,7 +348,7 @@ func (b *PulsarAdminFunctionsToolBuilder) handleFunctionGet(_ context.Context, c
 }
 
 // handleFunctionStatus handles the status operation
-func (b *PulsarAdminFunctionsToolBuilder) handleFunctionStatus(_ context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminFunctionsToolBuilder) handleFunctionStatus(_ context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcpsdk.CallToolResult, error) {
 	admin := client.Functions()
 
 	status, err := admin.GetFunctionStatus(tenant, namespace, name)
@@ -360,12 +360,12 @@ func (b *PulsarAdminFunctionsToolBuilder) handleFunctionStatus(_ context.Context
 }
 
 // handleFunctionStats handles the stats operation
-func (b *PulsarAdminFunctionsToolBuilder) handleFunctionStats(_ context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminFunctionsToolBuilder) handleFunctionStats(_ context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcpsdk.CallToolResult, error) {
 	admin := client.Functions()
 
 	stats, err := admin.GetFunctionStats(tenant, namespace, name)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get stats for function '%s' in tenant '%s' namespace '%s': %v. Verify the function exists and is running.",
+		return adapter.NewErrorResult(fmt.Sprintf("Failed to get stats for function '%s' in tenant '%s' namespace '%s': %v. Verify the function exists and is running.",
 			name, tenant, namespace, err)), nil
 	}
 
@@ -373,12 +373,12 @@ func (b *PulsarAdminFunctionsToolBuilder) handleFunctionStats(_ context.Context,
 }
 
 // handleFunctionQuerystate handles the querystate operation
-func (b *PulsarAdminFunctionsToolBuilder) handleFunctionQuerystate(_ context.Context, client cmdutils.Client, tenant, namespace, name, key string) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminFunctionsToolBuilder) handleFunctionQuerystate(_ context.Context, client cmdutils.Client, tenant, namespace, name, key string) (*mcpsdk.CallToolResult, error) {
 	admin := client.Functions()
 
 	state, err := admin.GetFunctionState(tenant, namespace, name, key)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to query state for key '%s' in function '%s' (tenant '%s' namespace '%s'): %v. Verify the function exists and has state enabled.",
+		return adapter.NewErrorResult(fmt.Sprintf("Failed to query state for key '%s' in function '%s' (tenant '%s' namespace '%s'): %v. Verify the function exists and has state enabled.",
 			key, name, tenant, namespace, err)), nil
 	}
 
@@ -394,11 +394,11 @@ func (b *PulsarAdminFunctionsToolBuilder) handleFunctionQuerystate(_ context.Con
 }
 
 // handleFunctionCreate handles the create operation
-func (b *PulsarAdminFunctionsToolBuilder) handleFunctionCreate(_ context.Context, client cmdutils.Client, tenant, namespace, name string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminFunctionsToolBuilder) handleFunctionCreate(_ context.Context, client cmdutils.Client, tenant, namespace, name string, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	// Build function configuration from request parameters to validate
 	functionConfig, err := b.buildFunctionConfig(tenant, namespace, name, request, false)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to build function configuration for '%s' in tenant '%s' namespace '%s': %v. Please verify all required parameters are provided correctly.",
+		return adapter.NewErrorResult(fmt.Sprintf("Failed to build function configuration for '%s' in tenant '%s' namespace '%s': %v. Please verify all required parameters are provided correctly.",
 			name, tenant, namespace, err)), nil
 	}
 
@@ -415,22 +415,22 @@ func (b *PulsarAdminFunctionsToolBuilder) handleFunctionCreate(_ context.Context
 
 	err = admin.CreateFuncWithURL(functionConfig, packagePath)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to create function '%s' in tenant '%s' namespace '%s': %v. Verify the function configuration is valid.",
+		return adapter.NewErrorResult(fmt.Sprintf("Failed to create function '%s' in tenant '%s' namespace '%s': %v. Verify the function configuration is valid.",
 			name, tenant, namespace, err)), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Created function '%s' successfully in tenant '%s' namespace '%s'. The function configuration has been created.",
+	return adapter.NewTextResult(fmt.Sprintf("Created function '%s' successfully in tenant '%s' namespace '%s'. The function configuration has been created.",
 		name, tenant, namespace)), nil
 }
 
 // handleFunctionUpdate handles the update operation
-func (b *PulsarAdminFunctionsToolBuilder) handleFunctionUpdate(_ context.Context, client cmdutils.Client, tenant, namespace, name string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminFunctionsToolBuilder) handleFunctionUpdate(_ context.Context, client cmdutils.Client, tenant, namespace, name string, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	admin := client.Functions()
 
 	// Build function configuration from request parameters
 	config, err := b.buildFunctionConfig(tenant, namespace, name, request, true)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to build function configuration for '%s' in tenant '%s' namespace '%s': %v. Please verify all parameters are provided correctly.",
+		return adapter.NewErrorResult(fmt.Sprintf("Failed to build function configuration for '%s' in tenant '%s' namespace '%s': %v. Please verify all parameters are provided correctly.",
 			name, tenant, namespace, err)), nil
 	}
 
@@ -440,72 +440,72 @@ func (b *PulsarAdminFunctionsToolBuilder) handleFunctionUpdate(_ context.Context
 	}
 	err = admin.UpdateFunction(config, "", updateOptions)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to update function '%s' in tenant '%s' namespace '%s': %v. Verify the function exists and the configuration is valid.",
+		return adapter.NewErrorResult(fmt.Sprintf("Failed to update function '%s' in tenant '%s' namespace '%s': %v. Verify the function exists and the configuration is valid.",
 			name, tenant, namespace, err)), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Updated function '%s' successfully in tenant '%s' namespace '%s'. The function configuration has been modified.",
+	return adapter.NewTextResult(fmt.Sprintf("Updated function '%s' successfully in tenant '%s' namespace '%s'. The function configuration has been modified.",
 		name, tenant, namespace)), nil
 }
 
 // handleFunctionDelete handles the delete operation
-func (b *PulsarAdminFunctionsToolBuilder) handleFunctionDelete(_ context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminFunctionsToolBuilder) handleFunctionDelete(_ context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcpsdk.CallToolResult, error) {
 	admin := client.Functions()
 
 	err := admin.DeleteFunction(tenant, namespace, name)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to delete function '%s' in tenant '%s' namespace '%s': %v. Verify the function exists and you have deletion permissions.",
+		return adapter.NewErrorResult(fmt.Sprintf("Failed to delete function '%s' in tenant '%s' namespace '%s': %v. Verify the function exists and you have deletion permissions.",
 			name, tenant, namespace, err)), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Deleted function '%s' successfully from tenant '%s' namespace '%s'. All running instances have been terminated.",
+	return adapter.NewTextResult(fmt.Sprintf("Deleted function '%s' successfully from tenant '%s' namespace '%s'. All running instances have been terminated.",
 		name, tenant, namespace)), nil
 }
 
 // handleFunctionStart handles the start operation
-func (b *PulsarAdminFunctionsToolBuilder) handleFunctionStart(_ context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminFunctionsToolBuilder) handleFunctionStart(_ context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcpsdk.CallToolResult, error) {
 	admin := client.Functions()
 
 	err := admin.StartFunction(tenant, namespace, name)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to start function '%s' in tenant '%s' namespace '%s': %v. Verify the function exists and is not already running.",
+		return adapter.NewErrorResult(fmt.Sprintf("Failed to start function '%s' in tenant '%s' namespace '%s': %v. Verify the function exists and is not already running.",
 			name, tenant, namespace, err)), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Started function '%s' successfully in tenant '%s' namespace '%s'. The function instances are now processing messages.",
+	return adapter.NewTextResult(fmt.Sprintf("Started function '%s' successfully in tenant '%s' namespace '%s'. The function instances are now processing messages.",
 		name, tenant, namespace)), nil
 }
 
 // handleFunctionStop handles the stop operation
-func (b *PulsarAdminFunctionsToolBuilder) handleFunctionStop(_ context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminFunctionsToolBuilder) handleFunctionStop(_ context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcpsdk.CallToolResult, error) {
 	admin := client.Functions()
 
 	err := admin.StopFunction(tenant, namespace, name)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to stop function '%s' in tenant '%s' namespace '%s': %v. Verify the function exists and is currently running.",
+		return adapter.NewErrorResult(fmt.Sprintf("Failed to stop function '%s' in tenant '%s' namespace '%s': %v. Verify the function exists and is currently running.",
 			name, tenant, namespace, err)), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Stopped function '%s' successfully in tenant '%s' namespace '%s'. The function will no longer process messages until restarted.",
+	return adapter.NewTextResult(fmt.Sprintf("Stopped function '%s' successfully in tenant '%s' namespace '%s'. The function will no longer process messages until restarted.",
 		name, tenant, namespace)), nil
 }
 
 // handleFunctionRestart handles the restart operation
-func (b *PulsarAdminFunctionsToolBuilder) handleFunctionRestart(_ context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminFunctionsToolBuilder) handleFunctionRestart(_ context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcpsdk.CallToolResult, error) {
 	admin := client.Functions()
 
 	err := admin.RestartFunction(tenant, namespace, name)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to restart function '%s' in tenant '%s' namespace '%s': %v. Verify the function exists and is properly deployed.",
+		return adapter.NewErrorResult(fmt.Sprintf("Failed to restart function '%s' in tenant '%s' namespace '%s': %v. Verify the function exists and is properly deployed.",
 			name, tenant, namespace, err)), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Restarted function '%s' successfully in tenant '%s' namespace '%s'. All function instances have been restarted.",
+	return adapter.NewTextResult(fmt.Sprintf("Restarted function '%s' successfully in tenant '%s' namespace '%s'. All function instances have been restarted.",
 		name, tenant, namespace)), nil
 }
 
 // handleFunctionPutstate handles the putstate operation
-func (b *PulsarAdminFunctionsToolBuilder) handleFunctionPutstate(_ context.Context, client cmdutils.Client, tenant, namespace, name, key, value string) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminFunctionsToolBuilder) handleFunctionPutstate(_ context.Context, client cmdutils.Client, tenant, namespace, name, key, value string) (*mcpsdk.CallToolResult, error) {
 	admin := client.Functions()
 
 	err := admin.PutFunctionState(tenant, namespace, name, utils.FunctionState{
@@ -513,16 +513,16 @@ func (b *PulsarAdminFunctionsToolBuilder) handleFunctionPutstate(_ context.Conte
 		StringValue: value,
 	})
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to put state for key '%s' in function '%s' (tenant '%s' namespace '%s'): %v. Verify the function exists and has state enabled.",
+		return adapter.NewErrorResult(fmt.Sprintf("Failed to put state for key '%s' in function '%s' (tenant '%s' namespace '%s'): %v. Verify the function exists and has state enabled.",
 			key, name, tenant, namespace, err)), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Successfully stored state for key '%s' in function '%s' (tenant '%s' namespace '%s'). State value has been updated.",
+	return adapter.NewTextResult(fmt.Sprintf("Successfully stored state for key '%s' in function '%s' (tenant '%s' namespace '%s'). State value has been updated.",
 		key, name, tenant, namespace)), nil
 }
 
 // handleFunctionTrigger handles the trigger operation
-func (b *PulsarAdminFunctionsToolBuilder) handleFunctionTrigger(_ context.Context, client cmdutils.Client, tenant, namespace, name, triggerValue, topic string) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminFunctionsToolBuilder) handleFunctionTrigger(_ context.Context, client cmdutils.Client, tenant, namespace, name, triggerValue, topic string) (*mcpsdk.CallToolResult, error) {
 	admin := client.Functions()
 
 	var err error
@@ -536,7 +536,7 @@ func (b *PulsarAdminFunctionsToolBuilder) handleFunctionTrigger(_ context.Contex
 	}
 
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to trigger function '%s' in tenant '%s' namespace '%s': %v. Verify the function exists and is running.",
+		return adapter.NewErrorResult(fmt.Sprintf("Failed to trigger function '%s' in tenant '%s' namespace '%s': %v. Verify the function exists and is running.",
 			name, tenant, namespace, err)), nil
 	}
 
@@ -549,13 +549,13 @@ func (b *PulsarAdminFunctionsToolBuilder) handleFunctionTrigger(_ context.Contex
 			name, tenant, namespace, result)
 	}
 
-	return mcp.NewToolResultText(message), nil
+	return adapter.NewTextResult(message), nil
 }
 
 // Helper functions
 
 // buildFunctionConfig builds a Pulsar Function configuration from MCP request parameters
-func (b *PulsarAdminFunctionsToolBuilder) buildFunctionConfig(tenant, namespace, name string, request mcp.CallToolRequest, isUpdate bool) (*utils.FunctionConfig, error) {
+func (b *PulsarAdminFunctionsToolBuilder) buildFunctionConfig(tenant, namespace, name string, request *mcpsdk.CallToolRequest, isUpdate bool) (*utils.FunctionConfig, error) {
 	config := &utils.FunctionConfig{
 		Tenant:    tenant,
 		Namespace: namespace,
@@ -564,20 +564,20 @@ func (b *PulsarAdminFunctionsToolBuilder) buildFunctionConfig(tenant, namespace,
 
 	// Get required classname parameter (for create operations)
 	if !isUpdate {
-		classname, err := request.RequireString("classname")
+		classname, err := adapter.RequireString(request, "classname")
 		if err != nil {
 			return nil, fmt.Errorf("missing required parameter 'classname': %v", err)
 		}
 		config.ClassName = classname
 	} else {
 		// For update, classname is optional
-		if classname := request.GetString("classname", ""); classname != "" {
+		if classname := adapter.GetString(request, "classname", ""); classname != "" {
 			config.ClassName = classname
 		}
 	}
 
 	// Get inputs parameter (array of strings)
-	args := request.GetArguments()
+	args, _ := adapter.GetArgumentsMap(request)
 	if inputsInterface, exists := args["inputs"]; exists && inputsInterface != nil {
 		if inputsArray, ok := inputsInterface.([]interface{}); ok {
 			inputSpecs := make(map[string]utils.ConsumerConfig)
@@ -596,7 +596,7 @@ func (b *PulsarAdminFunctionsToolBuilder) buildFunctionConfig(tenant, namespace,
 	}
 
 	// Get optional output parameter
-	if output := request.GetString("output", ""); output != "" {
+	if output := adapter.GetString(request, "output", ""); output != "" {
 		config.Output = output
 	}
 
@@ -613,17 +613,17 @@ func (b *PulsarAdminFunctionsToolBuilder) buildFunctionConfig(tenant, namespace,
 	}
 
 	// Get optional jar parameter
-	if jar := request.GetString("jar", ""); jar != "" {
+	if jar := adapter.GetString(request, "jar", ""); jar != "" {
 		config.Jar = &jar
 	}
 
 	// Get optional py parameter
-	if py := request.GetString("py", ""); py != "" {
+	if py := adapter.GetString(request, "py", ""); py != "" {
 		config.Py = &py
 	}
 
 	// Get optional go parameter
-	if goFile := request.GetString("go", ""); goFile != "" {
+	if goFile := adapter.GetString(request, "go", ""); goFile != "" {
 		config.Go = &goFile
 	}
 
@@ -638,15 +638,15 @@ func (b *PulsarAdminFunctionsToolBuilder) buildFunctionConfig(tenant, namespace,
 }
 
 // handleError provides unified error handling
-func (b *PulsarAdminFunctionsToolBuilder) handleError(operation string, err error) *mcp.CallToolResult {
-	return mcp.NewToolResultError(fmt.Sprintf("Failed to %s: %v", operation, err))
+func (b *PulsarAdminFunctionsToolBuilder) handleError(operation string, err error) *mcpsdk.CallToolResult {
+	return adapter.NewErrorResult("Failed to %s: %v", operation, err)
 }
 
 // marshalResponse provides unified JSON serialization for responses
-func (b *PulsarAdminFunctionsToolBuilder) marshalResponse(data interface{}) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminFunctionsToolBuilder) marshalResponse(data interface{}) (*mcpsdk.CallToolResult, error) {
 	jsonBytes, err := json.Marshal(data)
 	if err != nil {
 		return b.handleError("marshal response", err), nil
 	}
-	return mcp.NewToolResultText(string(jsonBytes)), nil
+	return adapter.NewTextResult(string(jsonBytes)), nil
 }

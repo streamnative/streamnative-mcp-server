@@ -17,13 +17,12 @@ package mcp
 import (
 	"context"
 
-	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	pulsarBuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/pulsar"
 )
 
 // PulsarAdminClusterTools creates Pulsar Admin Cluster tool list using the new builder pattern
-func PulsarAdminClusterTools(readOnly bool, features []string) []server.ServerTool {
+func PulsarAdminClusterTools(readOnly bool, features []string) []builders.ServerTool {
 	builder := pulsarBuilders.NewPulsarAdminClusterToolBuilder()
 	config := builders.ToolBuildConfig{
 		ReadOnly: readOnly,
@@ -40,7 +39,7 @@ func PulsarAdminClusterTools(readOnly bool, features []string) []server.ServerTo
 }
 
 // PulsarAdminAddClusterTools adds cluster-related tools to the MCP server
-func PulsarAdminAddClusterTools(s *server.MCPServer, readOnly bool, features []string) {
+func PulsarAdminAddClusterTools(s *MCPServer, readOnly bool, features []string) {
 	tools := PulsarAdminClusterTools(readOnly, features)
 
 	for _, tool := range tools {

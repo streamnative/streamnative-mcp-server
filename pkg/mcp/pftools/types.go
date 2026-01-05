@@ -21,10 +21,18 @@ import (
 
 	"github.com/apache/pulsar-client-go/pulsar"
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
+	mcpsdk "github.com/modelcontextprotocol/go-sdk/mcp"
 )
+
+// MCPServerInterface defines the interface for an MCP server.
+// This is used by pftools to avoid circular dependency on the mcp package.
+type MCPServerInterface interface {
+	AddTool(tool interface{}, handler interface{}) error
+	AddSessionTool(sessionID string, tool interface{}, handler interface{}) error
+	DeleteTools(name string) error
+	DeleteSessionTools(sessionID, name string) error
+}
 
 // PulsarFunctionManager manages the lifecycle of Pulsar Functions as MCP tools
 type PulsarFunctionManager struct {
@@ -38,7 +46,7 @@ type PulsarFunctionManager struct {
 	pollInterval        time.Duration
 	stopCh              chan struct{}
 	callInProgressMap   map[string]context.CancelFunc
-	mcpServer           *server.MCPServer
+	mcpServer           MCPServerInterface
 	readOnly            bool
 	defaultTimeout      time.Duration
 	circuitBreakers     map[string]*CircuitBreaker
@@ -55,7 +63,7 @@ type FunctionTool struct {
 	OutputSchema       *SchemaInfo
 	InputTopic         string
 	OutputTopic        string
-	Tool               mcp.Tool
+	Tool               mcpsdk.Tool
 	SchemaFetchSuccess bool
 }
 
@@ -103,4 +111,11 @@ func DefaultManagerOptions() *ManagerOptions {
 		TenantNamespaces: []string{},
 		StrictExport:     false,
 	}
+}
+
+// ToolInputSchema represents the input schema for a tool.
+// This is a local type used within pftools to avoid external dependencies.
+type ToolInputSchema struct {
+	Type       string
+	Properties map[string]interface{}
 }

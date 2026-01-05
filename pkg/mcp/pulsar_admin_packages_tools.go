@@ -18,7 +18,6 @@ import (
 	"context"
 	"strings"
 
-	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	pulsarbuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/pulsar"
 )
@@ -45,7 +44,7 @@ func IsPackageURLSupported(functionPkgURL string) bool {
 }
 
 // PulsarAdminAddPackagesTools adds package-related tools to the MCP server
-func PulsarAdminAddPackagesTools(s *server.MCPServer, readOnly bool, features []string) {
+func PulsarAdminAddPackagesTools(s *MCPServer, readOnly bool, features []string) {
 	// Use the new builder pattern
 	builder := pulsarbuilders.NewPulsarAdminPackagesToolBuilder()
 	config := builders.ToolBuildConfig{

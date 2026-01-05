@@ -22,11 +22,11 @@ import (
 	"strings"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	mcpsdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	pulsarctlutils "github.com/streamnative/pulsarctl/pkg/ctl/utils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/adapter"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
 
@@ -59,7 +59,7 @@ func NewPulsarAdminNamespacePolicyToolBuilder() *PulsarAdminNamespacePolicyToolB
 }
 
 // BuildTools builds the Pulsar admin namespace policy tool list
-func (b *PulsarAdminNamespacePolicyToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]server.ServerTool, error) {
+func (b *PulsarAdminNamespacePolicyToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]builders.ServerTool, error) {
 	// Check features - return empty list if no required features are present
 	if !b.HasAnyRequiredFeature(config.Features) {
 		return nil, nil
@@ -71,12 +71,12 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) BuildTools(_ context.Context, co
 	}
 
 	// Build tools
-	tools := []server.ServerTool{}
+	tools := []builders.ServerTool{}
 
 	// Always add get policies tool
 	getTool := b.buildNamespaceGetPoliciesTool()
 	getHandler := b.buildNamespaceGetPoliciesHandler()
-	tools = append(tools, server.ServerTool{
+	tools = append(tools, builders.ServerTool{
 		Tool:    getTool,
 		Handler: getHandler,
 	})
@@ -86,7 +86,7 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) BuildTools(_ context.Context, co
 		// Add set policy tool
 		setTool := b.buildNamespaceSetPolicyTool()
 		setHandler := b.buildNamespaceSetPolicyHandler()
-		tools = append(tools, server.ServerTool{
+		tools = append(tools, builders.ServerTool{
 			Tool:    setTool,
 			Handler: setHandler,
 		})
@@ -94,7 +94,7 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) BuildTools(_ context.Context, co
 		// Add remove policy tool
 		removeTool := b.buildNamespaceRemovePolicyTool()
 		removeHandler := b.buildNamespaceRemovePolicyHandler()
-		tools = append(tools, server.ServerTool{
+		tools = append(tools, builders.ServerTool{
 			Tool:    removeTool,
 			Handler: removeHandler,
 		})
@@ -104,7 +104,7 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) BuildTools(_ context.Context, co
 }
 
 // buildNamespaceGetPoliciesTool builds the get policies tool
-func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceGetPoliciesTool() mcp.Tool {
+func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceGetPoliciesTool() *mcpsdk.Tool {
 	toolDesc := "Get the configuration policies of a namespace. " +
 		"Returns a comprehensive view of all policies applied to the namespace. " +
 		"The response includes the following fields:" +
@@ -138,16 +138,16 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceGetPoliciesTool() 
 		"\n* is_allow_auto_update_schema: Whether automatic schema updates are allowed" +
 		"\nRequires tenant admin permissions."
 
-	return mcp.NewTool("pulsar_admin_namespace_policy_get",
-		mcp.WithDescription(toolDesc),
-		mcp.WithString("namespace", mcp.Required(),
-			mcp.Description("The namespace name (tenant/namespace) to get policies for"),
+	return builders.NewTool("pulsar_admin_namespace_policy_get",
+		builders.WithDescription(toolDesc),
+		builders.WithString("namespace", builders.Required(),
+			builders.Description("The namespace name (tenant/namespace) to get policies for"),
 		),
 	)
 }
 
 // buildNamespaceSetPolicyTool builds the set policy tool
-func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceSetPolicyTool() mcp.Tool {
+func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceSetPolicyTool() *mcpsdk.Tool {
 	toolDesc := "Set a policy for a namespace. " +
 		"This is a unified tool for setting different types of policies on a namespace. " +
 		"The policy type determines which specific policy will be set, and the required parameters " +
@@ -173,13 +173,13 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceSetPolicyTool() mc
 		"subscription-auth-mode, subscription-permission, dispatch-rate, replicator-dispatch-rate, subscribe-rate, " +
 		"subscription-dispatch-rate, publish-rate"
 
-	return mcp.NewTool("pulsar_admin_namespace_policy_set",
-		mcp.WithDescription(toolDesc),
-		mcp.WithString("namespace", mcp.Required(),
-			mcp.Description("The namespace name (tenant/namespace) to set the policy for"),
+	return builders.NewTool("pulsar_admin_namespace_policy_set",
+		builders.WithDescription(toolDesc),
+		builders.WithString("namespace", builders.Required(),
+			builders.Description("The namespace name (tenant/namespace) to set the policy for"),
 		),
-		mcp.WithString("policy", mcp.Required(),
-			mcp.Description("Type of policy to set. Available options: "+
+		builders.WithString("policy", builders.Required(),
+			builders.Description("Type of policy to set. Available options: "+
 				"message-ttl, retention, permission, replication-clusters, backlog-quota, "+
 				"topic-auto-creation, schema-validation, schema-auto-update, auto-update-schema, "+
 				"offload-threshold, offload-deletion-lag, compaction-threshold, "+
@@ -189,60 +189,60 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceSetPolicyTool() mc
 				"replicator-dispatch-rate, subscribe-rate, subscription-dispatch-rate, publish-rate"),
 		),
 		// Generic policy parameters - specific ones will be used based on the policy type
-		mcp.WithString("role",
-			mcp.Description("Role name for permission policies"),
+		builders.WithString("role",
+			builders.Description("Role name for permission policies"),
 		),
-		mcp.WithArray("actions",
-			mcp.Description("Actions to grant for permission policies (e.g., produce, consume)"),
-			mcp.Items(
+		builders.WithArray("actions",
+			builders.Description("Actions to grant for permission policies (e.g., produce, consume)"),
+			builders.Items(
 				map[string]interface{}{
 					"type":        "string",
 					"description": "action",
 				},
 			),
 		),
-		mcp.WithArray("clusters",
-			mcp.Description("List of clusters for replication policies"),
-			mcp.Items(
+		builders.WithArray("clusters",
+			builders.Description("List of clusters for replication policies"),
+			builders.Items(
 				map[string]interface{}{
 					"type":        "string",
 					"description": "cluster",
 				},
 			),
 		),
-		mcp.WithArray("roles",
-			mcp.Description("List of roles for subscription permission policies"),
-			mcp.Items(
+		builders.WithArray("roles",
+			builders.Description("List of roles for subscription permission policies"),
+			builders.Items(
 				map[string]interface{}{
 					"type":        "string",
 					"description": "role",
 				},
 			),
 		),
-		mcp.WithString("ttl",
-			mcp.Description("Message TTL in seconds (or 0 to disable TTL)"),
+		builders.WithString("ttl",
+			builders.Description("Message TTL in seconds (or 0 to disable TTL)"),
 		),
-		mcp.WithString("time",
-			mcp.Description("Retention time in minutes, or special values: 0 (no retention) or -1 (infinite retention)"),
+		builders.WithString("time",
+			builders.Description("Retention time in minutes, or special values: 0 (no retention) or -1 (infinite retention)"),
 		),
-		mcp.WithString("size",
-			mcp.Description("Retention size limit (e.g., 10M, 16G, 3T), or special values: 0 (no retention) or -1 (infinite size retention)"),
+		builders.WithString("size",
+			builders.Description("Retention size limit (e.g., 10M, 16G, 3T), or special values: 0 (no retention) or -1 (infinite size retention)"),
 		),
-		mcp.WithString("limit-size",
-			mcp.Description("Size limit for backlog quota (e.g., 10M, 16G)"),
+		builders.WithString("limit-size",
+			builders.Description("Size limit for backlog quota (e.g., 10M, 16G)"),
 		),
-		mcp.WithString("limit-time",
-			mcp.Description("Time limit in seconds for backlog quota. Default is -1 (infinite)"),
+		builders.WithString("limit-time",
+			builders.Description("Time limit in seconds for backlog quota. Default is -1 (infinite)"),
 		),
-		mcp.WithString("policy",
-			mcp.Description("Retention policy for backlog quota (valid options: producer_request_hold, producer_exception, consumer_backlog_eviction)"),
+		builders.WithString("policy",
+			builders.Description("Retention policy for backlog quota (valid options: producer_request_hold, producer_exception, consumer_backlog_eviction)"),
 		),
 		// Add more parameters as needed
 	)
 }
 
 // buildNamespaceRemovePolicyTool builds the remove policy tool
-func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceRemovePolicyTool() mcp.Tool {
+func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceRemovePolicyTool() *mcpsdk.Tool {
 	toolDesc := "Remove a policy from a namespace. " +
 		"This is a unified tool for removing different types of policies from a namespace. " +
 		"The policy type determines which specific policy will be removed. " +
@@ -262,35 +262,35 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceRemovePolicyTool()
 		"6. subscription-permission: Revokes permission from a role to access a subscription\n" +
 		"   - Required: namespace, subscription, role"
 
-	return mcp.NewTool("pulsar_admin_namespace_policy_remove",
-		mcp.WithDescription(toolDesc),
-		mcp.WithString("namespace", mcp.Required(),
-			mcp.Description("The namespace name (tenant/namespace) to remove the policy from"),
+	return builders.NewTool("pulsar_admin_namespace_policy_remove",
+		builders.WithDescription(toolDesc),
+		builders.WithString("namespace", builders.Required(),
+			builders.Description("The namespace name (tenant/namespace) to remove the policy from"),
 		),
-		mcp.WithString("policy", mcp.Required(),
-			mcp.Description("Type of policy to remove. Available options: "+
+		builders.WithString("policy", builders.Required(),
+			builders.Description("Type of policy to remove. Available options: "+
 				"backlog-quota, topic-auto-creation, offload-deletion-lag, anti-affinity-group, "+
 				"permission, subscription-permission"),
 		),
-		mcp.WithString("role",
-			mcp.Description("Role name for permission policies"),
+		builders.WithString("role",
+			builders.Description("Role name for permission policies"),
 		),
-		mcp.WithString("subscription",
-			mcp.Description("Subscription name for subscription permission policies"),
+		builders.WithString("subscription",
+			builders.Description("Subscription name for subscription permission policies"),
 		),
-		mcp.WithString("type",
-			mcp.Description("Type of backlog quota to remove"),
+		builders.WithString("type",
+			builders.Description("Type of backlog quota to remove"),
 		),
 	)
 }
 
 // buildNamespaceGetPoliciesHandler builds the get policies handler
-func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceGetPoliciesHandler() func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceGetPoliciesHandler() func(context.Context, *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	return func(ctx context.Context, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 		// Get Pulsar session from context
 		session := mcpCtx.GetPulsarSession(ctx)
 		if session == nil {
-			return mcp.NewToolResultError("Pulsar session not found in context"), nil
+			return adapter.NewErrorResult("Pulsar session not found in context"), nil
 		}
 
 		client, err := session.GetAdminClient()
@@ -298,15 +298,15 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceGetPoliciesHandler
 			return b.handleError("get admin client", err), nil
 		}
 
-		namespace, err := request.RequireString("namespace")
+		namespace, err := adapter.RequireString(request, "namespace")
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
+			return adapter.NewErrorResult("Failed to get namespace name: %v", err), nil
 		}
 
 		// Get policies
 		policies, err := client.Namespaces().GetPolicies(namespace)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get policies: %v", err)), nil
+			return adapter.NewErrorResult("Failed to get policies: %v", err), nil
 		}
 
 		return b.marshalResponse(policies)
@@ -314,12 +314,12 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceGetPoliciesHandler
 }
 
 // buildNamespaceSetPolicyHandler builds the set policy handler
-func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceSetPolicyHandler() func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceSetPolicyHandler() func(context.Context, *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	return func(ctx context.Context, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 		// Get Pulsar session from context
 		session := mcpCtx.GetPulsarSession(ctx)
 		if session == nil {
-			return mcp.NewToolResultError("Pulsar session not found in context"), nil
+			return adapter.NewErrorResult("Pulsar session not found in context"), nil
 		}
 
 		client, err := session.GetAdminClient()
@@ -327,14 +327,14 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceSetPolicyHandler()
 			return b.handleError("get admin client", err), nil
 		}
 
-		namespace, err := request.RequireString("namespace")
+		namespace, err := adapter.RequireString(request, "namespace")
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
+			return adapter.NewErrorResult("Failed to get namespace name: %v", err), nil
 		}
 
-		policy, err := request.RequireString("policy")
+		policy, err := adapter.RequireString(request, "policy")
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get policy type: %v", err)), nil
+			return adapter.NewErrorResult("Failed to get policy type: %v", err), nil
 		}
 
 		// Handle different policy types
@@ -351,18 +351,18 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceSetPolicyHandler()
 			return b.handleSetBacklogQuota(ctx, client, namespace, request)
 		// Add more policy types as needed
 		default:
-			return mcp.NewToolResultError(fmt.Sprintf("Unsupported policy type: %s", policy)), nil
+			return adapter.NewErrorResult("Unsupported policy type: %s", policy), nil
 		}
 	}
 }
 
 // buildNamespaceRemovePolicyHandler builds the remove policy handler
-func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceRemovePolicyHandler() func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceRemovePolicyHandler() func(context.Context, *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	return func(ctx context.Context, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 		// Get Pulsar session from context
 		session := mcpCtx.GetPulsarSession(ctx)
 		if session == nil {
-			return mcp.NewToolResultError("Pulsar session not found in context"), nil
+			return adapter.NewErrorResult("Pulsar session not found in context"), nil
 		}
 
 		client, err := session.GetAdminClient()
@@ -370,14 +370,14 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceRemovePolicyHandle
 			return b.handleError("get admin client", err), nil
 		}
 
-		namespace, err := request.RequireString("namespace")
+		namespace, err := adapter.RequireString(request, "namespace")
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
+			return adapter.NewErrorResult("Failed to get namespace name: %v", err), nil
 		}
 
-		policy, err := request.RequireString("policy")
+		policy, err := adapter.RequireString(request, "policy")
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get policy type: %v", err)), nil
+			return adapter.NewErrorResult("Failed to get policy type: %v", err), nil
 		}
 
 		// Handle different policy types
@@ -388,54 +388,54 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceRemovePolicyHandle
 			return b.handleRemoveBacklogQuota(ctx, client, namespace, request)
 		// Add more policy types as needed
 		default:
-			return mcp.NewToolResultError(fmt.Sprintf("Unsupported policy type for removal: %s", policy)), nil
+			return adapter.NewErrorResult("Unsupported policy type for removal: %s", policy), nil
 		}
 	}
 }
 
 // Utility functions
-func (b *PulsarAdminNamespacePolicyToolBuilder) handleError(operation string, err error) *mcp.CallToolResult {
-	return mcp.NewToolResultError(fmt.Sprintf("Failed to %s: %v", operation, err))
+func (b *PulsarAdminNamespacePolicyToolBuilder) handleError(operation string, err error) *mcpsdk.CallToolResult {
+	return adapter.NewErrorResult("Failed to %s: %v", operation, err)
 }
 
-func (b *PulsarAdminNamespacePolicyToolBuilder) marshalResponse(data interface{}) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminNamespacePolicyToolBuilder) marshalResponse(data interface{}) (*mcpsdk.CallToolResult, error) {
 	jsonBytes, err := json.Marshal(data)
 	if err != nil {
 		return b.handleError("marshal response", err), nil
 	}
-	return mcp.NewToolResultText(string(jsonBytes)), nil
+	return adapter.NewTextResult(string(jsonBytes)), nil
 }
 
 // Policy-specific handler functions
 
 // handleSetMessageTTL handles setting message TTL for a namespace
-func (b *PulsarAdminNamespacePolicyToolBuilder) handleSetMessageTTL(_ context.Context, client cmdutils.Client, namespace string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	ttlStr, err := request.RequireString("ttl")
+func (b *PulsarAdminNamespacePolicyToolBuilder) handleSetMessageTTL(_ context.Context, client cmdutils.Client, namespace string, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	ttlStr, err := adapter.RequireString(request, "ttl")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get TTL: %v", err)), nil
+		return adapter.NewErrorResult("Failed to get TTL: %v", err), nil
 	}
 
 	ttl, err := strconv.ParseInt(ttlStr, 10, 64)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid TTL value, must be an integer: %v", err)), nil
+		return adapter.NewErrorResult("Invalid TTL value, must be an integer: %v", err), nil
 	}
 
 	// Set message TTL
 	err = client.Namespaces().SetNamespaceMessageTTL(namespace, int(ttl))
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to set message TTL: %v", err)), nil
+		return adapter.NewErrorResult("Failed to set message TTL: %v", err), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Set message TTL for %s to %d seconds", namespace, ttl)), nil
+	return adapter.NewTextResult(fmt.Sprintf("Set message TTL for %s to %d seconds", namespace, ttl)), nil
 }
 
 // handleSetRetention handles setting retention for a namespace
-func (b *PulsarAdminNamespacePolicyToolBuilder) handleSetRetention(_ context.Context, client cmdutils.Client, namespace string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	timeStr := request.GetString("time", "")
-	sizeStr := request.GetString("size", "")
+func (b *PulsarAdminNamespacePolicyToolBuilder) handleSetRetention(_ context.Context, client cmdutils.Client, namespace string, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	timeStr := adapter.GetString(request, "time", "")
+	sizeStr := adapter.GetString(request, "size", "")
 
 	if timeStr == "" && sizeStr == "" {
-		return mcp.NewToolResultError("At least one of 'time' or 'size' must be specified"), nil
+		return adapter.NewErrorResult("At least one of 'time' or 'size' must be specified"), nil
 	}
 
 	// Parse retention time
@@ -444,7 +444,7 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) handleSetRetention(_ context.Con
 		// Parse relative time in seconds from the input string
 		retentionTime, err := pulsarctlutils.ParseRelativeTimeInSeconds(timeStr)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Invalid retention time format: %v", err)), nil
+			return adapter.NewErrorResult("Invalid retention time format: %v", err), nil
 		}
 
 		if retentionTime != -1 {
@@ -466,14 +466,14 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) handleSetRetention(_ context.Con
 			// Parse size string (e.g., "10M", "16G", "3T")
 			sizeInBytes, err := pulsarctlutils.ValidateSizeString(sizeStr)
 			if err != nil {
-				return mcp.NewToolResultError(fmt.Sprintf("Invalid retention size format: %v", err)), nil
+				return adapter.NewErrorResult("Invalid retention size format: %v", err), nil
 			}
 
 			if sizeInBytes != -1 {
 				// Convert bytes to MB
 				retentionSizeInMB = int(sizeInBytes / (1024 * 1024))
 				if retentionSizeInMB < 1 {
-					return mcp.NewToolResultError("Retention size must be at least 1MB"), nil
+					return adapter.NewErrorResult("Retention size must be at least 1MB"), nil
 				}
 			} else {
 				retentionSizeInMB = -1 // Infinite size retention
@@ -489,122 +489,122 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) handleSetRetention(_ context.Con
 	// Set retention
 	err := client.Namespaces().SetRetention(namespace, retention)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to set retention: %v", err)), nil
+		return adapter.NewErrorResult("Failed to set retention: %v", err), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Set retention for %s successfully", namespace)), nil
+	return adapter.NewTextResult(fmt.Sprintf("Set retention for %s successfully", namespace)), nil
 }
 
 // handleGrantPermission handles granting permissions on a namespace
-func (b *PulsarAdminNamespacePolicyToolBuilder) handleGrantPermission(_ context.Context, client cmdutils.Client, namespace string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	role, err := request.RequireString("role")
+func (b *PulsarAdminNamespacePolicyToolBuilder) handleGrantPermission(_ context.Context, client cmdutils.Client, namespace string, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	role, err := adapter.RequireString(request, "role")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get role: %v", err)), nil
+		return adapter.NewErrorResult("Failed to get role: %v", err), nil
 	}
 
-	actions, err := request.RequireStringSlice("actions")
+	actions, err := adapter.RequireStringSlice(request, "actions")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get actions: %v", err)), nil
+		return adapter.NewErrorResult("Failed to get actions: %v", err), nil
 	}
 
 	ns, err := utils.GetNamespaceName(namespace)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid namespace name: %v", err)), nil
+		return adapter.NewErrorResult("Invalid namespace name: %v", err), nil
 	}
 
 	a, err := b.parseActions(actions)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to parse actions: %v", err)), nil
+		return adapter.NewErrorResult("Failed to parse actions: %v", err), nil
 	}
 
 	// Grant permissions
 	err = client.Namespaces().GrantNamespacePermission(*ns, role, a)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to grant permission: %v", err)), nil
+		return adapter.NewErrorResult("Failed to grant permission: %v", err), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Granted %v permission(s) to role %s on %s", actions, role, namespace)), nil
+	return adapter.NewTextResult(fmt.Sprintf("Granted %v permission(s) to role %s on %s", actions, role, namespace)), nil
 }
 
 // handleRevokePermission handles revoking permissions from a namespace
-func (b *PulsarAdminNamespacePolicyToolBuilder) handleRevokePermission(_ context.Context, client cmdutils.Client, namespace string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	role, err := request.RequireString("role")
+func (b *PulsarAdminNamespacePolicyToolBuilder) handleRevokePermission(_ context.Context, client cmdutils.Client, namespace string, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	role, err := adapter.RequireString(request, "role")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get role: %v", err)), nil
+		return adapter.NewErrorResult("Failed to get role: %v", err), nil
 	}
 
 	ns, err := utils.GetNamespaceName(namespace)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid namespace name: %v", err)), nil
+		return adapter.NewErrorResult("Invalid namespace name: %v", err), nil
 	}
 
 	// Revoke permissions
 	err = client.Namespaces().RevokeNamespacePermission(*ns, role)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to revoke permission: %v", err)), nil
+		return adapter.NewErrorResult("Failed to revoke permission: %v", err), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Revoked all permissions from role %s on %s", role, namespace)), nil
+	return adapter.NewTextResult(fmt.Sprintf("Revoked all permissions from role %s on %s", role, namespace)), nil
 }
 
 // handleSetReplicationClusters handles setting replication clusters for a namespace
-func (b *PulsarAdminNamespacePolicyToolBuilder) handleSetReplicationClusters(_ context.Context, client cmdutils.Client, namespace string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	clusters, err := request.RequireStringSlice("clusters")
+func (b *PulsarAdminNamespacePolicyToolBuilder) handleSetReplicationClusters(_ context.Context, client cmdutils.Client, namespace string, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	clusters, err := adapter.RequireStringSlice(request, "clusters")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get clusters: %v", err)), nil
+		return adapter.NewErrorResult("Failed to get clusters: %v", err), nil
 	}
 
 	if len(clusters) == 0 {
-		return mcp.NewToolResultError("At least one cluster must be specified"), nil
+		return adapter.NewErrorResult("At least one cluster must be specified"), nil
 	}
 
 	// Set replication clusters
 	err = client.Namespaces().SetNamespaceReplicationClusters(namespace, clusters)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to set replication clusters: %v", err)), nil
+		return adapter.NewErrorResult("Failed to set replication clusters: %v", err), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Set replication clusters for %s to %s", namespace, strings.Join(clusters, ", "))), nil
+	return adapter.NewTextResult(fmt.Sprintf("Set replication clusters for %s to %s", namespace, strings.Join(clusters, ", "))), nil
 }
 
 // handleSetBacklogQuota handles setting backlog quota for a namespace
-func (b *PulsarAdminNamespacePolicyToolBuilder) handleSetBacklogQuota(_ context.Context, client cmdutils.Client, namespace string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	limitSizeStr, err := request.RequireString("limit-size")
+func (b *PulsarAdminNamespacePolicyToolBuilder) handleSetBacklogQuota(_ context.Context, client cmdutils.Client, namespace string, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	limitSizeStr, err := adapter.RequireString(request, "limit-size")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get limit size: %v", err)), nil
+		return adapter.NewErrorResult("Failed to get limit size: %v", err), nil
 	}
 
-	policyStr, err := request.RequireString("policy")
+	policyStr, err := adapter.RequireString(request, "policy")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get policy: %v", err)), nil
+		return adapter.NewErrorResult("Failed to get policy: %v", err), nil
 	}
 
 	// Parse backlog size limit
 	limitSize, err := pulsarctlutils.ValidateSizeString(limitSizeStr)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid limit size format: %v", err)), nil
+		return adapter.NewErrorResult("Invalid limit size format: %v", err), nil
 	}
 
 	// Parse backlog quota policy using the ParseRetentionPolicy function
 	policy, err := utils.ParseRetentionPolicy(policyStr)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid backlog quota policy: %s. Valid options: producer_request_hold, producer_exception, consumer_backlog_eviction", policyStr)), nil
+		return adapter.NewErrorResult("Invalid backlog quota policy: %s. Valid options: producer_request_hold, producer_exception, consumer_backlog_eviction", policyStr), nil
 	}
 
 	// Get optional time limit
-	limitTimeStr := request.GetString("limit-time", "-1")
+	limitTimeStr := adapter.GetString(request, "limit-time", "-1")
 	limitTime, err := strconv.ParseInt(limitTimeStr, 10, 64)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid limit time: %v", err)), nil
+		return adapter.NewErrorResult("Invalid limit time: %v", err), nil
 	}
 
 	// Parse quota type (optional, default to destination_storage)
-	quotaTypeStr := request.GetString("type", "destination_storage")
+	quotaTypeStr := adapter.GetString(request, "type", "destination_storage")
 	quotaType := utils.DestinationStorage // Default
 	if quotaTypeStr != "" {
 		parsedType, err := utils.ParseBacklogQuotaType(quotaTypeStr)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Invalid backlog quota type: %v", err)), nil
+			return adapter.NewErrorResult("Invalid backlog quota type: %v", err), nil
 		}
 		quotaType = parsedType
 	}
@@ -613,21 +613,21 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) handleSetBacklogQuota(_ context.
 	backlogQuota := utils.NewBacklogQuota(limitSize, limitTime, policy)
 	err = client.Namespaces().SetBacklogQuota(namespace, backlogQuota, quotaType)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to set backlog quota: %v", err)), nil
+		return adapter.NewErrorResult("Failed to set backlog quota: %v", err), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Set backlog quota for %s successfully", namespace)), nil
+	return adapter.NewTextResult(fmt.Sprintf("Set backlog quota for %s successfully", namespace)), nil
 }
 
 // handleRemoveBacklogQuota handles removing backlog quota for a namespace
-func (b *PulsarAdminNamespacePolicyToolBuilder) handleRemoveBacklogQuota(_ context.Context, client cmdutils.Client, namespace string, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminNamespacePolicyToolBuilder) handleRemoveBacklogQuota(_ context.Context, client cmdutils.Client, namespace string, _ *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	// Remove backlog quota (API doesn't require quota type for removal)
 	err := client.Namespaces().RemoveBacklogQuota(namespace)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to remove backlog quota: %v", err)), nil
+		return adapter.NewErrorResult("Failed to remove backlog quota: %v", err), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Removed backlog quota for %s successfully", namespace)), nil
+	return adapter.NewTextResult(fmt.Sprintf("Removed backlog quota for %s successfully", namespace)), nil
 }
 
 // parseActions parses action strings into AuthAction enums

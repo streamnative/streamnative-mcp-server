@@ -18,13 +18,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	pulsarBuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/pulsar"
 )
 
 // PulsarAdminSchemaTools creates Pulsar Admin Schema tool list using the new builder pattern
-func PulsarAdminSchemaTools(readOnly bool, features []string) []server.ServerTool {
+func PulsarAdminSchemaTools(readOnly bool, features []string) []builders.ServerTool {
 	builder := pulsarBuilders.NewPulsarAdminSchemaToolBuilder()
 	config := builders.ToolBuildConfig{
 		ReadOnly: readOnly,
@@ -42,7 +41,7 @@ func PulsarAdminSchemaTools(readOnly bool, features []string) []server.ServerToo
 }
 
 // PulsarAdminAddSchemasTools adds schema-related tools to the MCP server
-func PulsarAdminAddSchemasTools(s *server.MCPServer, readOnly bool, features []string) {
+func PulsarAdminAddSchemasTools(s *MCPServer, readOnly bool, features []string) {
 	tools := PulsarAdminSchemaTools(readOnly, features)
 
 	for _, tool := range tools {

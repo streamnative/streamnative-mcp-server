@@ -23,47 +23,48 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	mcpsdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/adapter"
 	context2 "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 	sncloud "github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserver"
 )
 
 // StreamNativeAddResourceTools adds StreamNative resources tools
-func StreamNativeAddResourceTools(s *server.MCPServer, readOnly bool, features []string) {
+func StreamNativeAddResourceTools(s *MCPServer, readOnly bool, features []string) {
 	if !slices.Contains(features, string(FeatureStreamNativeCloud)) && !slices.Contains(features, string(FeatureAll)) {
 		return
 	}
 
 	if !readOnly {
 		// Add Apply tool
-		applyTool := mcp.NewTool("sncloud_resources_apply",
-			mcp.WithDescription("Apply StreamNative Cloud resources from JSON definitions. This tool allows you to apply (create or update) StreamNative Cloud resources such as PulsarInstances and PulsarClusters using JSON definitions. Please give feedback to USER if the resource is applied with error, and ask USER to check the resource definition."),
-			mcp.WithString("json_content", mcp.Required(),
-				mcp.Description("The JSON content to apply."),
+		applyTool := builders.NewTool("sncloud_resources_apply",
+			builders.WithDescription("Apply StreamNative Cloud resources from JSON definitions. This tool allows you to apply (create or update) StreamNative Cloud resources such as PulsarInstances and PulsarClusters using JSON definitions. Please give feedback to USER if the resource is applied with error, and ask USER to check the resource definition."),
+			builders.WithString("json_content", builders.Required(),
+				builders.Description("The JSON content to apply."),
 			),
-			mcp.WithBoolean("dry_run",
-				mcp.Description("If true, only validate the resource without applying it to the server."),
-				mcp.DefaultBool(false),
+			builders.WithBoolean("dry_run",
+				builders.Description("If true, only validate the resource without applying it to the server."),
+				builders.DefaultBool(false),
 			),
-			mcp.WithToolAnnotation(mcp.ToolAnnotation{
+			builders.WithToolAnnotation(builders.ToolAnnotation{
 				Title: "Apply StreamNative Cloud Resources",
 			}),
 		)
 		// Add delete tool
-		deleteTool := mcp.NewTool("sncloud_resources_delete",
-			mcp.WithDescription("Delete StreamNative Cloud resources. This tool allows you to delete StreamNative Cloud resources such as PulsarInstances and PulsarClusters."),
-			mcp.WithString("name", mcp.Required(),
-				mcp.Description("The name of the resource to delete."),
+		deleteTool := builders.NewTool("sncloud_resources_delete",
+			builders.WithDescription("Delete StreamNative Cloud resources. This tool allows you to delete StreamNative Cloud resources such as PulsarInstances and PulsarClusters."),
+			builders.WithString("name", builders.Required(),
+				builders.Description("The name of the resource to delete."),
 			),
-			mcp.WithString("type", mcp.Required(),
-				mcp.Description("The type of the resource to delete, it can be PulsarInstance or PulsarCluster."),
-				mcp.Enum("PulsarInstance", "PulsarCluster"),
+			builders.WithString("type", builders.Required(),
+				builders.Description("The type of the resource to delete, it can be PulsarInstance or PulsarCluster."),
+				builders.Enum("PulsarInstance", "PulsarCluster"),
 			),
-			mcp.WithToolAnnotation(mcp.ToolAnnotation{
+			builders.WithToolAnnotation(builders.ToolAnnotation{
 				Title:           "Delete StreamNative Cloud Resources",
-				DestructiveHint: &[]bool{true}[0],
+				DestructiveHint: func() *bool { b := true; return &b }(),
 			}),
 		)
 		s.AddTool(applyTool, handleStreamNativeResourcesApply)
@@ -86,22 +87,22 @@ type Metadata struct {
 }
 
 // handleStreamNativeResourcesApply handles the streaming_cloud_resources_apply tool
-func handleStreamNativeResourcesApply(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleStreamNativeResourcesApply(ctx context.Context, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	// Get necessary parameters
 	snConfig := common.GetOptions(ctx)
 	organization := snConfig.Organization
 	if organization == "" {
-		return mcp.NewToolResultError("No organization is set. Please set the organization using the appropriate context tool."), nil
+		return adapter.NewErrorResult("No organization is set. Please set the organization using the appropriate context tool."), nil
 	}
 
 	// Get YAML content
-	jsonContent, err := request.RequireString("json_content")
+	jsonContent, err := adapter.RequireString(request, "json_content")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get json_content: %v", err)), nil
+		return adapter.NewErrorResult("Failed to get json_content: %v", err), nil
 	}
 
 	// Get dry_run flag
-	dryRun := request.GetBool("dry_run", false)
+	dryRun := adapter.GetBool(request, "dry_run", false)
 
 	// Get API client from session
 	session := context2.GetSNCloudSession(ctx)
@@ -111,24 +112,24 @@ func handleStreamNativeResourcesApply(ctx context.Context, request mcp.CallToolR
 
 	apiClient, err := session.GetAPIClient()
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get API client: %v", err)), nil
+		return adapter.NewErrorResult("Failed to get API client: %v", err), nil
 	}
 
 	jsonContent = strings.TrimSpace(jsonContent)
 	if jsonContent == "" {
-		return mcp.NewToolResultError("No valid resources found in the provided JSON."), nil
+		return adapter.NewErrorResult("No valid resources found in the provided JSON."), nil
 	}
 
 	// Parse YAML document
 	var resource Resource
 	err = json.Unmarshal([]byte(jsonContent), &resource)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to parse JSON document: %v", err)), nil
+		return adapter.NewErrorResult("Failed to parse JSON document: %v", err), nil
 	}
 
 	// Check if resource is valid
 	if resource.APIVersion == "" || resource.Kind == "" {
-		return mcp.NewToolResultError("Invalid resource definition."), nil
+		return adapter.NewErrorResult("Invalid resource definition."), nil
 	}
 
 	// Set namespace if not specified
@@ -139,10 +140,10 @@ func handleStreamNativeResourcesApply(ctx context.Context, request mcp.CallToolR
 	// Apply resource
 	result, err := applyResource(ctx, apiClient, resource, jsonContent, organization, dryRun)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to apply resource: %v", err)), nil
+		return adapter.NewErrorResult("Failed to apply resource: %v", err), nil
 	}
 
-	return mcp.NewToolResultText(result), nil
+	return adapter.NewTextResult(result), nil
 }
 
 // applyResource applies the resource based on its type
@@ -339,18 +340,18 @@ func applyPulsarCluster(ctx context.Context, apiClient *sncloud.APIClient, jsonC
 }
 
 // handleStreamNativeResourcesDelete handles the streaming_cloud_resources_delete tool
-func handleStreamNativeResourcesDelete(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleStreamNativeResourcesDelete(ctx context.Context, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 	snConfig := common.GetOptions(ctx)
 	organization := snConfig.Organization
 
-	name, err := request.RequireString("name")
+	name, err := adapter.RequireString(request, "name")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get name: %v", err)), nil
+		return adapter.NewErrorResult("Failed to get name: %v", err), nil
 	}
 
-	resourceType, err := request.RequireString("type")
+	resourceType, err := adapter.RequireString(request, "type")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get type: %v", err)), nil
+		return adapter.NewErrorResult("Failed to get type: %v", err), nil
 	}
 
 	// Get API client from session
@@ -361,7 +362,7 @@ func handleStreamNativeResourcesDelete(ctx context.Context, request mcp.CallTool
 
 	apiClient, err := session.GetAPIClient()
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get API client: %v", err)), nil
+		return adapter.NewErrorResult("Failed to get API client: %v", err), nil
 	}
 
 	switch resourceType {
@@ -372,13 +373,13 @@ func handleStreamNativeResourcesDelete(ctx context.Context, request mcp.CallTool
 		//nolint:bodyclose
 		_, _, err = apiClient.CloudStreamnativeIoV1alpha1Api.DeleteCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(ctx, name, organization).Execute()
 	default:
-		return mcp.NewToolResultError(fmt.Sprintf("Unsupported resource type: %s", resourceType)), nil
+		return adapter.NewErrorResult("Unsupported resource type: %s", resourceType), nil
 	}
 
 	// the delete operation will return a V1Status object, which is not handled by the SDK
 	if err != nil && !strings.Contains(err.Error(), "json: cannot unmarshal") {
-		return mcp.NewToolResultError(fmt.Sprintf("failed to delete resource: %v", err)), nil
+		return adapter.NewErrorResult("failed to delete resource: %v", err), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Resource %q %s deleted", name, resourceType)), nil
+	return adapter.NewTextResult(fmt.Sprintf("Resource %q %s deleted", name, resourceType)), nil
 }

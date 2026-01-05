@@ -18,13 +18,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	pulsarBuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/pulsar"
 )
 
 // PulsarAdminNamespaceTools creates Pulsar Admin Namespace tool list using the new builder pattern
-func PulsarAdminNamespaceTools(readOnly bool, features []string) []server.ServerTool {
+func PulsarAdminNamespaceTools(readOnly bool, features []string) []builders.ServerTool {
 	builder := pulsarBuilders.NewPulsarAdminNamespaceToolBuilder()
 	config := builders.ToolBuildConfig{
 		ReadOnly: readOnly,
@@ -42,7 +41,7 @@ func PulsarAdminNamespaceTools(readOnly bool, features []string) []server.Server
 }
 
 // PulsarAdminAddNamespaceTools adds namespace-related tools to the MCP server
-func PulsarAdminAddNamespaceTools(s *server.MCPServer, readOnly bool, features []string) {
+func PulsarAdminAddNamespaceTools(s *MCPServer, readOnly bool, features []string) {
 	tools := PulsarAdminNamespaceTools(readOnly, features)
 
 	for _, tool := range tools {

@@ -21,10 +21,10 @@ import (
 	"strings"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	mcpsdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/adapter"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
 
@@ -59,7 +59,7 @@ func NewPulsarAdminTenantToolBuilder() *PulsarAdminTenantToolBuilder {
 
 // BuildTools builds the Pulsar Admin Tenant tool list
 // This is the core method implementing the ToolBuilder interface
-func (b *PulsarAdminTenantToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]server.ServerTool, error) {
+func (b *PulsarAdminTenantToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]builders.ServerTool, error) {
 	// Check features - return empty list if no required features are present
 	if !b.HasAnyRequiredFeature(config.Features) {
 		return nil, nil
@@ -74,7 +74,7 @@ func (b *PulsarAdminTenantToolBuilder) BuildTools(_ context.Context, config buil
 	tool := b.buildTenantTool()
 	handler := b.buildTenantHandler(config.ReadOnly)
 
-	return []server.ServerTool{
+	return []builders.ServerTool{
 		{
 			Tool:    tool,
 			Handler: handler,
@@ -84,7 +84,7 @@ func (b *PulsarAdminTenantToolBuilder) BuildTools(_ context.Context, config buil
 
 // buildTenantTool builds the Pulsar Admin Tenant MCP tool definition
 // Migrated from the original tool definition logic
-func (b *PulsarAdminTenantToolBuilder) buildTenantTool() mcp.Tool {
+func (b *PulsarAdminTenantToolBuilder) buildTenantTool() *mcpsdk.Tool {
 	toolDesc := "Manage Apache Pulsar tenants. " +
 		"Tenants are the highest level administrative unit in Pulsar's multi-tenancy hierarchy. " +
 		"Each tenant can contain multiple namespaces, allowing for logical isolation of applications. " +
@@ -104,39 +104,39 @@ func (b *PulsarAdminTenantToolBuilder) buildTenantTool() mcp.Tool {
 		"- update: Update configuration for an existing tenant\n" +
 		"- delete: Delete an existing tenant (must not have any active namespaces)"
 
-	return mcp.NewTool("pulsar_admin_tenant",
-		mcp.WithDescription(toolDesc),
-		mcp.WithString("resource", mcp.Required(),
-			mcp.Description(resourceDesc),
+	return builders.NewTool("pulsar_admin_tenant",
+		builders.WithDescription(toolDesc),
+		builders.WithString("resource", builders.Required(),
+			builders.Description(resourceDesc),
 		),
-		mcp.WithString("operation", mcp.Required(),
-			mcp.Description(operationDesc),
+		builders.WithString("operation", builders.Required(),
+			builders.Description(operationDesc),
 		),
-		mcp.WithString("tenant",
-			mcp.Description("The tenant name to operate on. Required for all operations except 'list'. "+
+		builders.WithString("tenant",
+			builders.Description("The tenant name to operate on. Required for all operations except 'list'. "+
 				"Tenant names are unique identifiers and form the root of the topic naming hierarchy. "+
 				"A valid tenant name must be comprised of alphanumeric characters and/or the following special characters: "+
 				"'-', '_', '.', ':'. Ensure the tenant name follows your organization's naming conventions."),
 		),
-		mcp.WithArray("adminRoles",
-			mcp.Description("List of auth principals (users or roles) allowed to administrate the tenant. "+
+		builders.WithArray("adminRoles",
+			builders.Description("List of auth principals (users or roles) allowed to administrate the tenant. "+
 				"Required for 'create' and 'update' operations. These roles can create, update, or delete any "+
 				"namespaces within the tenant, and can manage topic configurations. "+
 				"Format: array of role strings, e.g., ['admin1', 'orgAdmin']. "+
 				"Use empty array [] to remove all admin roles."),
-			mcp.Items(
+			builders.Items(
 				map[string]interface{}{
 					"type":        "string",
 					"description": "role",
 				},
 			),
 		),
-		mcp.WithArray("allowedClusters",
-			mcp.Description("List of clusters that this tenant can access. Required for 'create' and 'update' operations. "+
+		builders.WithArray("allowedClusters",
+			builders.Description("List of clusters that this tenant can access. Required for 'create' and 'update' operations. "+
 				"Restricts the tenant to only use specified clusters, enabling geographic or infrastructure isolation. "+
 				"Format: array of cluster names, e.g., ['us-west', 'us-east']. "+
 				"An empty list means no clusters are accessible to this tenant."),
-			mcp.Items(
+			builders.Items(
 				map[string]interface{}{
 					"type":        "string",
 					"description": "cluster",
@@ -148,17 +148,17 @@ func (b *PulsarAdminTenantToolBuilder) buildTenantTool() mcp.Tool {
 
 // buildTenantHandler builds the Pulsar Admin Tenant handler function
 // Migrated from the original handler logic
-func (b *PulsarAdminTenantToolBuilder) buildTenantHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTenantToolBuilder) buildTenantHandler(readOnly bool) func(context.Context, *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	return func(ctx context.Context, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 		// Get required parameters
-		resource, err := request.RequireString("resource")
+		resource, err := adapter.RequireString(request, "resource")
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get resource: %v", err)), nil
+			return adapter.NewErrorResult("Failed to get resource: %v", err), nil
 		}
 
-		operation, err := request.RequireString("operation")
+		operation, err := adapter.RequireString(request, "operation")
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get operation: %v", err)), nil
+			return adapter.NewErrorResult("Failed to get operation: %v", err), nil
 		}
 
 		// Normalize parameters
@@ -167,24 +167,24 @@ func (b *PulsarAdminTenantToolBuilder) buildTenantHandler(readOnly bool) func(co
 
 		// Validate resource
 		if resource != "tenant" {
-			return mcp.NewToolResultError(fmt.Sprintf("Invalid resource: %s. Only 'tenant' is supported.", resource)), nil
+			return adapter.NewErrorResult("Invalid resource: %s. Only 'tenant' is supported.", resource), nil
 		}
 
 		// Validate write operations in read-only mode
 		if readOnly && (operation == "create" || operation == "update" || operation == "delete") {
-			return mcp.NewToolResultError("Write operations are not allowed in read-only mode"), nil
+			return adapter.NewErrorResult("Write operations are not allowed in read-only mode"), nil
 		}
 
 		// Get Pulsar session from context
 		session := mcpCtx.GetPulsarSession(ctx)
 		if session == nil {
-			return mcp.NewToolResultError("Pulsar session not found in context"), nil
+			return adapter.NewErrorResult("Pulsar session not found in context"), nil
 		}
 
 		// Create the admin client
 		admin, err := session.GetAdminClient()
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
+			return adapter.NewErrorResult("Failed to get admin client: %v", err), nil
 		}
 
 		// Dispatch based on operation
@@ -200,7 +200,7 @@ func (b *PulsarAdminTenantToolBuilder) buildTenantHandler(readOnly bool) func(co
 		case "delete":
 			return b.handleTenantDelete(admin, request)
 		default:
-			return mcp.NewToolResultError(fmt.Sprintf("Unknown operation: %s", operation)), nil
+			return adapter.NewErrorResult("Unknown operation: %s", operation), nil
 		}
 	}
 }
@@ -208,23 +208,23 @@ func (b *PulsarAdminTenantToolBuilder) buildTenantHandler(readOnly bool) func(co
 // Unified error handling and utility functions
 
 // handleError provides unified error handling
-func (b *PulsarAdminTenantToolBuilder) handleError(operation string, err error) *mcp.CallToolResult {
-	return mcp.NewToolResultError(fmt.Sprintf("Failed to %s: %v", operation, err))
+func (b *PulsarAdminTenantToolBuilder) handleError(operation string, err error) *mcpsdk.CallToolResult {
+	return adapter.NewErrorResult("Failed to %s: %v", operation, err)
 }
 
 // marshalResponse provides unified JSON serialization for responses
-func (b *PulsarAdminTenantToolBuilder) marshalResponse(data interface{}) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTenantToolBuilder) marshalResponse(data interface{}) (*mcpsdk.CallToolResult, error) {
 	jsonBytes, err := json.Marshal(data)
 	if err != nil {
 		return b.handleError("marshal response", err), nil
 	}
-	return mcp.NewToolResultText(string(jsonBytes)), nil
+	return adapter.NewTextResult(string(jsonBytes)), nil
 }
 
 // Operation handler functions - migrated from the original implementation
 
 // handleTenantsList handles listing all tenants
-func (b *PulsarAdminTenantToolBuilder) handleTenantsList(admin cmdutils.Client) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTenantToolBuilder) handleTenantsList(admin cmdutils.Client) (*mcpsdk.CallToolResult, error) {
 	// Get tenants list
 	tenants, err := admin.Tenants().List()
 	if err != nil {
@@ -235,10 +235,10 @@ func (b *PulsarAdminTenantToolBuilder) handleTenantsList(admin cmdutils.Client) 
 }
 
 // handleTenantGet handles getting tenant configuration
-func (b *PulsarAdminTenantToolBuilder) handleTenantGet(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	tenant, err := request.RequireString("tenant")
+func (b *PulsarAdminTenantToolBuilder) handleTenantGet(admin cmdutils.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	tenant, err := adapter.RequireString(request, "tenant")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get tenant name: %v", err)), nil
+		return adapter.NewErrorResult("Failed to get tenant name: %v", err), nil
 	}
 
 	// Get tenant info
@@ -251,20 +251,20 @@ func (b *PulsarAdminTenantToolBuilder) handleTenantGet(admin cmdutils.Client, re
 }
 
 // handleTenantCreate handles creating a new tenant
-func (b *PulsarAdminTenantToolBuilder) handleTenantCreate(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	tenant, err := request.RequireString("tenant")
+func (b *PulsarAdminTenantToolBuilder) handleTenantCreate(admin cmdutils.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	tenant, err := adapter.RequireString(request, "tenant")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get tenant name: %v", err)), nil
+		return adapter.NewErrorResult("Failed to get tenant name: %v", err), nil
 	}
 
-	adminRoles, err := request.RequireStringSlice("adminRoles")
+	adminRoles, err := adapter.RequireStringSlice(request, "adminRoles")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin roles: %v", err)), nil
+		return adapter.NewErrorResult("Failed to get admin roles: %v", err), nil
 	}
 
-	allowedClusters, err := request.RequireStringSlice("allowedClusters")
+	allowedClusters, err := adapter.RequireStringSlice(request, "allowedClusters")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get allowed clusters: %v", err)), nil
+		return adapter.NewErrorResult("Failed to get allowed clusters: %v", err), nil
 	}
 
 	// Create tenant data
@@ -280,24 +280,24 @@ func (b *PulsarAdminTenantToolBuilder) handleTenantCreate(admin cmdutils.Client,
 		return b.handleError("create tenant", err), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Tenant %s created successfully", tenant)), nil
+	return adapter.NewTextResult(fmt.Sprintf("Tenant %s created successfully", tenant)), nil
 }
 
 // handleTenantUpdate handles updating tenant configuration
-func (b *PulsarAdminTenantToolBuilder) handleTenantUpdate(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	tenant, err := request.RequireString("tenant")
+func (b *PulsarAdminTenantToolBuilder) handleTenantUpdate(admin cmdutils.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	tenant, err := adapter.RequireString(request, "tenant")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get tenant name: %v", err)), nil
+		return adapter.NewErrorResult("Failed to get tenant name: %v", err), nil
 	}
 
-	adminRoles, err := request.RequireStringSlice("adminRoles")
+	adminRoles, err := adapter.RequireStringSlice(request, "adminRoles")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin roles: %v", err)), nil
+		return adapter.NewErrorResult("Failed to get admin roles: %v", err), nil
 	}
 
-	allowedClusters, err := request.RequireStringSlice("allowedClusters")
+	allowedClusters, err := adapter.RequireStringSlice(request, "allowedClusters")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get allowed clusters: %v", err)), nil
+		return adapter.NewErrorResult("Failed to get allowed clusters: %v", err), nil
 	}
 
 	// Create tenant data
@@ -313,14 +313,14 @@ func (b *PulsarAdminTenantToolBuilder) handleTenantUpdate(admin cmdutils.Client,
 		return b.handleError("update tenant", err), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Tenant %s updated successfully", tenant)), nil
+	return adapter.NewTextResult(fmt.Sprintf("Tenant %s updated successfully", tenant)), nil
 }
 
 // handleTenantDelete handles deleting a tenant
-func (b *PulsarAdminTenantToolBuilder) handleTenantDelete(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	tenant, err := request.RequireString("tenant")
+func (b *PulsarAdminTenantToolBuilder) handleTenantDelete(admin cmdutils.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	tenant, err := adapter.RequireString(request, "tenant")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get tenant name: %v", err)), nil
+		return adapter.NewErrorResult("Failed to get tenant name: %v", err), nil
 	}
 
 	// Delete tenant
@@ -329,5 +329,5 @@ func (b *PulsarAdminTenantToolBuilder) handleTenantDelete(admin cmdutils.Client,
 		return b.handleError("delete tenant", err), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Tenant %s deleted successfully", tenant)), nil
+	return adapter.NewTextResult(fmt.Sprintf("Tenant %s deleted successfully", tenant)), nil
 }

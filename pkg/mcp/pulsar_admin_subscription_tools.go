@@ -18,13 +18,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	pulsarBuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/pulsar"
 )
 
 // PulsarAdminSubscriptionTools creates Pulsar Admin Subscription tool list using the new builder pattern
-func PulsarAdminSubscriptionTools(readOnly bool, features []string) []server.ServerTool {
+func PulsarAdminSubscriptionTools(readOnly bool, features []string) []builders.ServerTool {
 	builder := pulsarBuilders.NewPulsarAdminSubscriptionToolBuilder()
 	config := builders.ToolBuildConfig{
 		ReadOnly: readOnly,
@@ -42,7 +41,7 @@ func PulsarAdminSubscriptionTools(readOnly bool, features []string) []server.Ser
 }
 
 // PulsarAdminAddSubscriptionTools adds subscription-related tools to the MCP server
-func PulsarAdminAddSubscriptionTools(s *server.MCPServer, readOnly bool, features []string) {
+func PulsarAdminAddSubscriptionTools(s *MCPServer, readOnly bool, features []string) {
 	tools := PulsarAdminSubscriptionTools(readOnly, features)
 
 	for _, tool := range tools {

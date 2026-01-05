@@ -17,13 +17,12 @@ package mcp
 import (
 	"context"
 
-	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	kafkabuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/kafka"
 )
 
 // KafkaClientAddProduceTools adds Kafka client produce tools to the MCP server
-func KafkaClientAddProduceTools(s *server.MCPServer, readOnly bool, features []string) {
+func KafkaClientAddProduceTools(s *MCPServer, readOnly bool, features []string) {
 	// Use the new builder pattern
 	builder := kafkabuilders.NewKafkaProduceToolBuilder()
 	config := builders.ToolBuildConfig{

@@ -17,8 +17,8 @@ package schema
 import (
 	"fmt"
 
+	"github.com/invopop/jsonschema"
 	cliutils "github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
-	"github.com/mark3labs/mcp-go/mcp"
 )
 
 const (
@@ -26,7 +26,7 @@ const (
 )
 
 type Converter interface {
-	ToMCPToolInputSchemaProperties(pulsarSchemaInfo *cliutils.SchemaInfo) ([]mcp.ToolOption, error)
+	ToMCPToolInputSchemaProperties(pulsarSchemaInfo *cliutils.SchemaInfo) (*jsonschema.Schema, error)
 
 	SerializeMCPRequestToPulsarPayload(arguments map[string]any, targetPulsarSchemaInfo *cliutils.SchemaInfo) ([]byte, error)
 

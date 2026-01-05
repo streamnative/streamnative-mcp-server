@@ -19,10 +19,10 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	mcpsdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/adapter"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
 
@@ -55,7 +55,7 @@ func NewPulsarAdminBrokerStatsToolBuilder() *PulsarAdminBrokerStatsToolBuilder {
 }
 
 // BuildTools builds the Pulsar Admin Broker Stats tool list
-func (b *PulsarAdminBrokerStatsToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]server.ServerTool, error) {
+func (b *PulsarAdminBrokerStatsToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]builders.ServerTool, error) {
 	// Check features - return empty list if no required features are present
 	if !b.HasAnyRequiredFeature(config.Features) {
 		return nil, nil
@@ -70,7 +70,7 @@ func (b *PulsarAdminBrokerStatsToolBuilder) BuildTools(_ context.Context, config
 	tool := b.buildBrokerStatsTool()
 	handler := b.buildBrokerStatsHandler(config.ReadOnly)
 
-	return []server.ServerTool{
+	return []builders.ServerTool{
 		{
 			Tool:    tool,
 			Handler: handler,
@@ -79,7 +79,7 @@ func (b *PulsarAdminBrokerStatsToolBuilder) BuildTools(_ context.Context, config
 }
 
 // buildBrokerStatsTool builds the Pulsar Admin Broker Stats MCP tool definition
-func (b *PulsarAdminBrokerStatsToolBuilder) buildBrokerStatsTool() mcp.Tool {
+func (b *PulsarAdminBrokerStatsToolBuilder) buildBrokerStatsTool() *mcpsdk.Tool {
 	resourceDesc := "Type of broker stats resource to access, available options:\n" +
 		"- monitoring_metrics: Metrics for the broker's monitoring system\n" +
 		"- mbeans: JVM MBeans statistics\n" +
@@ -98,24 +98,24 @@ func (b *PulsarAdminBrokerStatsToolBuilder) buildBrokerStatsTool() mcp.Tool {
 		"Example: {\"resource\": \"allocator_stats\", \"allocator_name\": \"default\"} retrieves stats for the default allocator\n" +
 		"This tool requires Pulsar super-user permissions."
 
-	return mcp.NewTool("pulsar_admin_broker_stats",
-		mcp.WithDescription(toolDesc),
-		mcp.WithString("resource", mcp.Required(),
-			mcp.Description(resourceDesc),
+	return builders.NewTool("pulsar_admin_broker_stats",
+		builders.WithDescription(toolDesc),
+		builders.WithString("resource", builders.Required(),
+			builders.Description(resourceDesc),
 		),
-		mcp.WithString("allocator_name",
-			mcp.Description("The name of the allocator to get statistics for. Required only when resource=allocator_stats"),
+		builders.WithString("allocator_name",
+			builders.Description("The name of the allocator to get statistics for. Required only when resource=allocator_stats"),
 		),
 	)
 }
 
 // buildBrokerStatsHandler builds the Pulsar Admin Broker Stats handler function
-func (b *PulsarAdminBrokerStatsToolBuilder) buildBrokerStatsHandler(_ bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminBrokerStatsToolBuilder) buildBrokerStatsHandler(_ bool) func(context.Context, *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	return func(ctx context.Context, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 		// Get Pulsar admin client
 		session := mcpCtx.GetPulsarSession(ctx)
 		if session == nil {
-			return mcp.NewToolResultError("Pulsar session not found in context"), nil
+			return adapter.NewErrorResult("Pulsar session not found in context"), nil
 		}
 		client, err := session.GetAdminClient()
 		if err != nil {
@@ -123,9 +123,9 @@ func (b *PulsarAdminBrokerStatsToolBuilder) buildBrokerStatsHandler(_ bool) func
 		}
 
 		// Get required resource parameter
-		resource, err := request.RequireString("resource")
+		resource, err := adapter.RequireString(request, "resource")
 		if err != nil {
-			return mcp.NewToolResultError("Missing required parameter 'resource'. " +
+			return adapter.NewErrorResult("Missing required parameter 'resource'. " +
 				"Please specify one of: monitoring_metrics, mbeans, topics, allocator_stats, load_report."), nil
 		}
 
@@ -138,16 +138,16 @@ func (b *PulsarAdminBrokerStatsToolBuilder) buildBrokerStatsHandler(_ bool) func
 		case "topics":
 			return b.handleTopics(client)
 		case "allocator_stats":
-			allocatorName, err := request.RequireString("allocator_name")
+			allocatorName, err := adapter.RequireString(request, "allocator_name")
 			if err != nil {
-				return mcp.NewToolResultError("Missing required parameter 'allocator_name' for allocator_stats resource. " +
+				return adapter.NewErrorResult("Missing required parameter 'allocator_name' for allocator_stats resource. " +
 					"Please provide the name of the allocator to get statistics for."), nil
 			}
 			return b.handleAllocatorStats(client, allocatorName)
 		case "load_report":
 			return b.handleLoadReport(client)
 		default:
-			return mcp.NewToolResultError(fmt.Sprintf("Unsupported resource: %s. "+
+			return adapter.NewErrorResult(fmt.Sprintf("Unsupported resource: %s. "+
 				"Please use one of: monitoring_metrics, mbeans, topics, allocator_stats, load_report.", resource)), nil
 		}
 	}
@@ -156,23 +156,23 @@ func (b *PulsarAdminBrokerStatsToolBuilder) buildBrokerStatsHandler(_ bool) func
 // Utility functions
 
 // handleError provides unified error handling
-func (b *PulsarAdminBrokerStatsToolBuilder) handleError(operation string, err error) *mcp.CallToolResult {
-	return mcp.NewToolResultError(fmt.Sprintf("Failed to %s: %v", operation, err))
+func (b *PulsarAdminBrokerStatsToolBuilder) handleError(operation string, err error) *mcpsdk.CallToolResult {
+	return adapter.NewErrorResult("Failed to %s: %v", operation, err)
 }
 
 // marshalResponse provides unified JSON serialization for responses
-func (b *PulsarAdminBrokerStatsToolBuilder) marshalResponse(data interface{}) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminBrokerStatsToolBuilder) marshalResponse(data interface{}) (*mcpsdk.CallToolResult, error) {
 	jsonBytes, err := json.Marshal(data)
 	if err != nil {
 		return b.handleError("marshal response", err), nil
 	}
-	return mcp.NewToolResultText(string(jsonBytes)), nil
+	return adapter.NewTextResult(string(jsonBytes)), nil
 }
 
 // Specific operation handler functions
 
 // handleMonitoringMetrics handles retrieving monitoring metrics
-func (b *PulsarAdminBrokerStatsToolBuilder) handleMonitoringMetrics(client cmdutils.Client) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminBrokerStatsToolBuilder) handleMonitoringMetrics(client cmdutils.Client) (*mcpsdk.CallToolResult, error) {
 	stats, err := client.BrokerStats().GetMetrics()
 	if err != nil {
 		return b.handleError("get monitoring metrics", err), nil
@@ -181,7 +181,7 @@ func (b *PulsarAdminBrokerStatsToolBuilder) handleMonitoringMetrics(client cmdut
 }
 
 // handleMBeans handles retrieving MBeans statistics
-func (b *PulsarAdminBrokerStatsToolBuilder) handleMBeans(client cmdutils.Client) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminBrokerStatsToolBuilder) handleMBeans(client cmdutils.Client) (*mcpsdk.CallToolResult, error) {
 	stats, err := client.BrokerStats().GetMBeans()
 	if err != nil {
 		return b.handleError("get MBeans", err), nil
@@ -190,7 +190,7 @@ func (b *PulsarAdminBrokerStatsToolBuilder) handleMBeans(client cmdutils.Client)
 }
 
 // handleTopics handles retrieving topics statistics
-func (b *PulsarAdminBrokerStatsToolBuilder) handleTopics(client cmdutils.Client) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminBrokerStatsToolBuilder) handleTopics(client cmdutils.Client) (*mcpsdk.CallToolResult, error) {
 	stats, err := client.BrokerStats().GetTopics()
 	if err != nil {
 		return b.handleError("get topics stats", err), nil
@@ -199,7 +199,7 @@ func (b *PulsarAdminBrokerStatsToolBuilder) handleTopics(client cmdutils.Client)
 }
 
 // handleAllocatorStats handles retrieving allocator statistics
-func (b *PulsarAdminBrokerStatsToolBuilder) handleAllocatorStats(client cmdutils.Client, allocatorName string) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminBrokerStatsToolBuilder) handleAllocatorStats(client cmdutils.Client, allocatorName string) (*mcpsdk.CallToolResult, error) {
 	stats, err := client.BrokerStats().GetAllocatorStats(allocatorName)
 	if err != nil {
 		return b.handleError("get allocator stats", err), nil
@@ -208,7 +208,7 @@ func (b *PulsarAdminBrokerStatsToolBuilder) handleAllocatorStats(client cmdutils
 }
 
 // handleLoadReport handles retrieving load report
-func (b *PulsarAdminBrokerStatsToolBuilder) handleLoadReport(client cmdutils.Client) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminBrokerStatsToolBuilder) handleLoadReport(client cmdutils.Client) (*mcpsdk.CallToolResult, error) {
 	stats, err := client.BrokerStats().GetLoadReport()
 	if err != nil {
 		return b.handleError("get load report", err), nil

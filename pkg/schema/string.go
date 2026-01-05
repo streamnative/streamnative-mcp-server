@@ -17,8 +17,8 @@ package schema
 import (
 	"fmt"
 
+	"github.com/invopop/jsonschema"
 	cliutils "github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
-	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 )
 
@@ -36,13 +36,21 @@ func NewStringConverter() *StringConverter {
 	}
 }
 
-func (c *StringConverter) ToMCPToolInputSchemaProperties(schemaInfo *cliutils.SchemaInfo) ([]mcp.ToolOption, error) {
+func (c *StringConverter) ToMCPToolInputSchemaProperties(schemaInfo *cliutils.SchemaInfo) (*jsonschema.Schema, error) {
 	if schemaInfo.Type != "STRING" && schemaInfo.Type != "BYTES" {
 		return nil, fmt.Errorf("expected STRING or BYTES schema, got %s", schemaInfo.Type)
 	}
 
-	return []mcp.ToolOption{
-		mcp.WithString(c.ParamName, mcp.Description(fmt.Sprintf("The input schema is a %s schema", schemaInfo.Type)), mcp.Required()),
+	props := jsonschema.NewProperties()
+	props.Set(c.ParamName, &jsonschema.Schema{
+		Type:        "string",
+		Description: fmt.Sprintf("The input schema is a %s schema", schemaInfo.Type),
+	})
+
+	return &jsonschema.Schema{
+		Type:       "object",
+		Properties: props,
+		Required:   []string{c.ParamName},
 	}, nil
 }
 

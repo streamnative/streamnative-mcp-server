@@ -17,13 +17,12 @@ package mcp
 import (
 	"context"
 
-	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	pulsarbuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/pulsar"
 )
 
 // PulsarAdminAddBrokerStatsTools adds broker-stats related tools to the MCP server
-func PulsarAdminAddBrokerStatsTools(s *server.MCPServer, readOnly bool, features []string) {
+func PulsarAdminAddBrokerStatsTools(s *MCPServer, readOnly bool, features []string) {
 	// Use the new builder pattern
 	builder := pulsarbuilders.NewPulsarAdminBrokerStatsToolBuilder()
 	config := builders.ToolBuildConfig{

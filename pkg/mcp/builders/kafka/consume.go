@@ -17,14 +17,13 @@ package kafka
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"github.com/hamba/avro/v2"
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	mcpsdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/sirupsen/logrus"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/adapter"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 	"github.com/twmb/franz-go/pkg/kgo"
 	"github.com/twmb/franz-go/pkg/sr"
@@ -61,7 +60,7 @@ func NewKafkaConsumeToolBuilder() *KafkaConsumeToolBuilder {
 
 // BuildTools builds the Kafka consume tool list
 // This is the core method implementing the ToolBuilder interface
-func (b *KafkaConsumeToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]server.ServerTool, error) {
+func (b *KafkaConsumeToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]builders.ServerTool, error) {
 	// Check features - return empty list if no required features are present
 	if !b.HasAnyRequiredFeature(config.Features) {
 		return nil, nil
@@ -83,7 +82,7 @@ func (b *KafkaConsumeToolBuilder) BuildTools(_ context.Context, config builders.
 	tool := b.buildKafkaConsumeTool()
 	handler := b.buildKafkaConsumeHandler()
 
-	return []server.ServerTool{
+	return []builders.ServerTool{
 		{
 			Tool:    tool,
 			Handler: handler,
@@ -93,7 +92,7 @@ func (b *KafkaConsumeToolBuilder) BuildTools(_ context.Context, config builders.
 
 // buildKafkaConsumeTool builds the Kafka consume MCP tool definition
 // Migrated from the original tool definition logic
-func (b *KafkaConsumeToolBuilder) buildKafkaConsumeTool() mcp.Tool {
+func (b *KafkaConsumeToolBuilder) buildKafkaConsumeTool() *mcpsdk.Tool {
 	toolDesc := "Consume messages from a Kafka topic.\n" +
 		"This tool allows you to read messages from Kafka topics, specifying various consumption parameters.\n\n" +
 		"Kafka Consumer Concepts:\n" +
@@ -121,35 +120,35 @@ func (b *KafkaConsumeToolBuilder) buildKafkaConsumeTool() mcp.Tool {
 		"   timeout: 30\n\n" +
 		"This tool requires Kafka consumer permissions on the specified topic."
 
-	return mcp.NewTool("kafka_client_consume",
-		mcp.WithDescription(toolDesc),
-		mcp.WithString("topic", mcp.Required(),
-			mcp.Description("The name of the Kafka topic to consume messages from. "+
+	return builders.NewTool("kafka_client_consume",
+		builders.WithDescription(toolDesc),
+		builders.WithString("topic", builders.Required(),
+			builders.Description("The name of the Kafka topic to consume messages from. "+
 				"Must be an existing topic that the user has read permissions for. "+
 				"For partitioned topics, this will consume from all partitions unless a specific partition is specified."),
 		),
-		mcp.WithString("group",
-			mcp.Description("The consumer group ID to use for consumption. "+
+		builders.WithString("group",
+			builders.Description("The consumer group ID to use for consumption. "+
 				"Optional. If provided, the consumer will join this consumer group and track offsets with Kafka. "+
 				"If not provided, a random group ID will be generated, and offsets won't be committed back to Kafka. "+
 				"Using a meaningful group ID is important when you want to resume consumption later or coordinate multiple consumers."),
 		),
-		mcp.WithString("offset",
-			mcp.Description("The offset position to start consuming from. "+
+		builders.WithString("offset",
+			builders.Description("The offset position to start consuming from. "+
 				"Optional. Must be one of these values:\n"+
 				"- 'atstart': Begin from the earliest available message in the topic/partition\n"+
 				"- 'atend': Begin from the next message that arrives after the consumer starts\n"+
 				"- 'atcommitted': Begin from the last committed offset (only works with specified 'group')\n"+
 				"Default: 'atstart'"),
 		),
-		mcp.WithNumber("max-messages",
-			mcp.Description("Maximum number of messages to consume in this request. "+
+		builders.WithNumber("max-messages",
+			builders.Description("Maximum number of messages to consume in this request. "+
 				"Optional. Limits the total number of messages returned, across all partitions if no specific partition is specified. "+
 				"Higher values retrieve more data but may increase response time and size. "+
 				"Default: 10"),
 		),
-		mcp.WithNumber("timeout",
-			mcp.Description("Maximum time in seconds to wait for messages. "+
+		builders.WithNumber("timeout",
+			builders.Description("Maximum time in seconds to wait for messages. "+
 				"Optional. The consumer will wait up to this long to collect the requested number of messages. "+
 				"If fewer than 'max-messages' are available within this time, the available messages are returned. "+
 				"Longer timeouts are useful for low-volume topics or when consuming with 'atend'. "+
@@ -160,11 +159,11 @@ func (b *KafkaConsumeToolBuilder) buildKafkaConsumeTool() mcp.Tool {
 
 // buildKafkaConsumeHandler builds the Kafka consume handler function
 // Migrated from the original handler logic
-func (b *KafkaConsumeToolBuilder) buildKafkaConsumeHandler() func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *KafkaConsumeToolBuilder) buildKafkaConsumeHandler() mcpsdk.ToolHandler {
+	return func(ctx context.Context, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 		opts := []kgo.Opt{}
 		// Get required parameters
-		topicName, err := request.RequireString("topic")
+		topicName, err := adapter.RequireString(request, "topic")
 		if err != nil {
 			return b.handleError("get topic name", err), nil
 		}
@@ -176,16 +175,16 @@ func (b *KafkaConsumeToolBuilder) buildKafkaConsumeHandler() func(context.Contex
 			w := b.logger.Writer()
 			opts = append(opts, kgo.WithLogger(kgo.BasicLogger(w, kgo.LogLevelInfo, nil)))
 		}
-		maxMessages := request.GetFloat("max-messages", 10)
+		maxMessages := adapter.GetFloat(request, "max-messages", 10)
 
-		timeoutSec := request.GetFloat("timeout", 10)
+		timeoutSec := adapter.GetFloat(request, "timeout", 10)
 
-		group := request.GetString("group", "")
+		group := adapter.GetString(request, "group", "")
 		if group != "" {
 			opts = append(opts, kgo.ConsumerGroup(group))
 		}
 
-		offsetStr := request.GetString("offset", "atstart")
+		offsetStr := adapter.GetString(request, "offset", "atstart")
 
 		var offset kgo.Offset
 		switch offsetStr {
@@ -325,15 +324,18 @@ func (b *KafkaConsumeToolBuilder) buildKafkaConsumeHandler() func(context.Contex
 // Unified error handling and utility functions
 
 // handleError provides unified error handling
-func (b *KafkaConsumeToolBuilder) handleError(operation string, err error) *mcp.CallToolResult {
-	return mcp.NewToolResultError(fmt.Sprintf("Failed to %s: %v", operation, err))
+func (b *KafkaConsumeToolBuilder) handleError(operation string, err error) *mcpsdk.CallToolResult {
+	if err != nil {
+		return adapter.NewErrorResult("Failed to %s: %v", operation, err)
+	}
+	return adapter.NewErrorResult("Failed to %s", operation)
 }
 
 // marshalResponse provides unified JSON serialization for responses
-func (b *KafkaConsumeToolBuilder) marshalResponse(data interface{}) (*mcp.CallToolResult, error) {
+func (b *KafkaConsumeToolBuilder) marshalResponse(data interface{}) (*mcpsdk.CallToolResult, error) {
 	jsonBytes, err := json.Marshal(data)
 	if err != nil {
 		return b.handleError("marshal response", err), nil
 	}
-	return mcp.NewToolResultText(string(jsonBytes)), nil
+	return adapter.NewTextResult(string(jsonBytes)), nil
 }

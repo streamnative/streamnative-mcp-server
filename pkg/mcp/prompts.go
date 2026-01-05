@@ -20,8 +20,7 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	mcpsdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	context2 "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 	sncloud "github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserver"
@@ -59,26 +58,48 @@ var (
 	AvailableProviders = []string{"azure", "aws", "gcloud"}
 )
 
-func RegisterPrompts(s *server.MCPServer) {
-	s.AddPrompt(mcp.NewPrompt("list-sncloud-clusters",
-		mcp.WithPromptDescription("List all clusters from the StreamNative Cloud"),
-	), HandleListPulsarClusters)
-	s.AddPrompt(mcp.NewPrompt("read-sncloud-cluster",
-		mcp.WithPromptDescription("Read a cluster from the StreamNative Cloud"),
-		mcp.WithArgument("name", mcp.RequiredArgument(), mcp.ArgumentDescription("The name of the cluster")),
-	), handleReadPulsarCluster)
-	s.AddPrompt(
-		mcp.NewPrompt("build-sncloud-serverless-cluster",
-			mcp.WithPromptDescription("Build a Serverless cluster in the StreamNative Cloud"),
-			mcp.WithArgument("instance-name", mcp.RequiredArgument(), mcp.ArgumentDescription("The name of the Pulsar instance, cannot reuse the name of existing instance.")),
-			mcp.WithArgument("cluster-name", mcp.RequiredArgument(), mcp.ArgumentDescription("The name of the Pulsar cluster, cannot reuse the name of existing cluster.")),
-			mcp.WithArgument("provider", mcp.ArgumentDescription("The cloud provider, could be `aws`, `gcp`, `azure`. If the selected provider do not serve serverless cluster, the prompt will return an error. If not specified, the system will use a random provider depending on the availability.")),
-		),
-		handleBuildServerlessPulsarCluster,
-	)
+func RegisterPrompts(s *MCPServer) {
+	s.AddPrompt(&mcpsdk.Prompt{
+		Name:        "list-sncloud-clusters",
+		Description: "List all clusters from the StreamNative Cloud",
+	}, HandleListPulsarClusters)
+
+	s.AddPrompt(&mcpsdk.Prompt{
+		Name:        "read-sncloud-cluster",
+		Description: "Read a cluster from the StreamNative Cloud",
+		Arguments: []*mcpsdk.PromptArgument{
+			{
+				Name:        "name",
+				Description: "The name of the cluster",
+				Required:    true,
+			},
+		},
+	}, handleReadPulsarCluster)
+
+	s.AddPrompt(&mcpsdk.Prompt{
+		Name:        "build-sncloud-serverless-cluster",
+		Description: "Build a Serverless cluster in the StreamNative Cloud",
+		Arguments: []*mcpsdk.PromptArgument{
+			{
+				Name:        "instance-name",
+				Description: "The name of the Pulsar instance, cannot reuse the name of existing instance.",
+				Required:    true,
+			},
+			{
+				Name:        "cluster-name",
+				Description: "The name of the Pulsar cluster, cannot reuse the name of existing cluster.",
+				Required:    true,
+			},
+			{
+				Name:        "provider",
+				Description: "The cloud provider, could be `aws`, `gcp`, `azure`. If the selected provider do not serve serverless cluster, the prompt will return an error. If not specified, the system will use a random provider depending on the availability.",
+				Required:    false,
+			},
+		},
+	}, handleBuildServerlessPulsarCluster)
 }
 
-func HandleListPulsarClusters(ctx context.Context, _ mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
+func HandleListPulsarClusters(ctx context.Context, _ *mcpsdk.GetPromptRequest) (*mcpsdk.GetPromptResult, error) {
 	// Get API client from session
 	session := context2.GetSNCloudSession(ctx)
 	if session == nil {
@@ -97,20 +118,19 @@ func HandleListPulsarClusters(ctx context.Context, _ mcp.GetPromptRequest) (*mcp
 	defer clustersBody.Body.Close()
 
 	var messages = make(
-		[]mcp.PromptMessage,
+		[]*mcpsdk.PromptMessage,
 		len(clusters.Items)+1,
 	)
 
-	messages[0] = mcp.PromptMessage{
-		Content: mcp.TextContent{
-			Type: "text",
+	messages[0] = &mcpsdk.PromptMessage{
+		Content: &mcpsdk.TextContent{
 			Text: fmt.Sprintf(
 				"There are %d Pulsar clusters in the StreamNative Cloud from organization %s:",
 				len(clusters.Items),
 				session.Ctx.Organization,
 			),
 		},
-		Role: mcp.RoleUser,
+		Role: "user",
 	}
 
 	for i, cluster := range clusters.Items {
@@ -127,9 +147,8 @@ func HandleListPulsarClusters(ctx context.Context, _ mcp.GetPromptRequest) (*mcp
 
 		engineType := common.GetEngineType(cluster)
 
-		messages[i+1] = mcp.PromptMessage{
-			Content: mcp.TextContent{
-				Type: "text",
+		messages[i+1] = &mcpsdk.PromptMessage{
+			Content: &mcpsdk.TextContent{
 				Text: fmt.Sprintf(
 					"Instance Name: %s\nCluster Name: %s\nCluster Display Name: %s\nCluster Status: %s\nCluster Engine Type: %s",
 					instanceName,
@@ -139,17 +158,17 @@ func HandleListPulsarClusters(ctx context.Context, _ mcp.GetPromptRequest) (*mcp
 					engineType,
 				),
 			},
-			Role: mcp.RoleUser,
+			Role: "user",
 		}
 	}
 
-	return &mcp.GetPromptResult{
+	return &mcpsdk.GetPromptResult{
 		Description: fmt.Sprintf("Pulsar clusters from StreamNative Cloud organization %s, you can use `sncloud_context_use_cluster` tool to switch to selected cluster, and use pulsar and kafka tools to interact with the cluster.", session.Ctx.Organization),
 		Messages:    messages,
 	}, nil
 }
 
-func handleReadPulsarCluster(ctx context.Context, request mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
+func handleReadPulsarCluster(ctx context.Context, request *mcpsdk.GetPromptRequest) (*mcpsdk.GetPromptResult, error) {
 	// Get API client from session
 	session := context2.GetSNCloudSession(ctx)
 	if session == nil {
@@ -161,7 +180,13 @@ func handleReadPulsarCluster(ctx context.Context, request mcp.GetPromptRequest) 
 		return nil, fmt.Errorf("failed to get API client: %v", err)
 	}
 
-	name, err := common.RequiredParam[string](common.ConvertToMapInterface(request.Params.Arguments), "name")
+	// Convert map[string]string to map[string]interface{} for common.RequiredParam
+	args := make(map[string]interface{}, len(request.Params.Arguments))
+	for k, v := range request.Params.Arguments {
+		args[k] = v
+	}
+
+	name, err := common.RequiredParam[string](args, "name")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get name: %v", err)
 	}
@@ -193,25 +218,24 @@ func handleReadPulsarCluster(ctx context.Context, request mcp.GetPromptRequest) 
 	}
 
 	var messages = make(
-		[]mcp.PromptMessage,
+		[]*mcpsdk.PromptMessage,
 		1,
 	)
 
-	messages[0] = mcp.PromptMessage{
-		Content: mcp.TextContent{
-			Type: "text",
+	messages[0] = &mcpsdk.PromptMessage{
+		Content: &mcpsdk.TextContent{
 			Text: string(context),
 		},
-		Role: mcp.RoleUser,
+		Role: "user",
 	}
 
-	return &mcp.GetPromptResult{
+	return &mcpsdk.GetPromptResult{
 		Description: fmt.Sprintf("Detailed information of Pulsar cluster %s, you can use `sncloud_context_use_cluster` tool to switch to this cluster, and use pulsar and kafka tools to interact with the cluster.", name),
 		Messages:    messages,
 	}, nil
 }
 
-func handleBuildServerlessPulsarCluster(ctx context.Context, request mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
+func handleBuildServerlessPulsarCluster(ctx context.Context, request *mcpsdk.GetPromptRequest) (*mcpsdk.GetPromptResult, error) {
 	// Get API client from session
 	session := context2.GetSNCloudSession(ctx)
 	if session == nil {
@@ -222,19 +246,24 @@ func handleBuildServerlessPulsarCluster(ctx context.Context, request mcp.GetProm
 	if err != nil {
 		return nil, fmt.Errorf("failed to get API client: %v", err)
 	}
-	arguments := common.ConvertToMapInterface(request.Params.Arguments)
 
-	instanceName, err := common.RequiredParam[string](arguments, "instance-name")
+	// Convert map[string]string to map[string]interface{} for common.RequiredParam
+	args := make(map[string]interface{}, len(request.Params.Arguments))
+	for k, v := range request.Params.Arguments {
+		args[k] = v
+	}
+
+	instanceName, err := common.RequiredParam[string](args, "instance-name")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get instance name: %v", err)
 	}
 
-	clusterName, err := common.RequiredParam[string](arguments, "cluster-name")
+	clusterName, err := common.RequiredParam[string](args, "cluster-name")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get cluster name: %v", err)
 	}
 
-	provider, hasProvider := common.OptionalParam[string](arguments, "provider")
+	provider, hasProvider := common.OptionalParam[string](args, "provider")
 	if !hasProvider {
 		provider = ""
 	}
@@ -331,31 +360,28 @@ func handleBuildServerlessPulsarCluster(ctx context.Context, request mcp.GetProm
 		return nil, fmt.Errorf("failed to marshal cluster: %v", err)
 	}
 
-	messages := []mcp.PromptMessage{
+	messages := []*mcpsdk.PromptMessage{
 		{
-			Content: mcp.TextContent{
-				Type: "text",
+			Content: &mcpsdk.TextContent{
 				Text: "The following is the Pulsar instance JSON definition and the Pulsar cluster JSON definition, you can use the `sncloud_resources_apply` tool to apply the resources to the StreamNative Cloud. Please directly use the JSON content and not modify the content. The PulsarCluster name is required to be empty. You will need to apply PulsarInstance first, then apply PulsarCluster.",
 			},
-			Role: mcp.RoleUser,
+			Role: "user",
 		},
 		{
-			Content: mcp.TextContent{
-				Type: "text",
+			Content: &mcpsdk.TextContent{
 				Text: string(instJSON),
 			},
-			Role: mcp.RoleUser,
+			Role: "user",
 		},
 		{
-			Content: mcp.TextContent{
-				Type: "text",
+			Content: &mcpsdk.TextContent{
 				Text: string(clusJSON),
 			},
-			Role: mcp.RoleUser,
+			Role: "user",
 		},
 	}
 
-	return &mcp.GetPromptResult{
+	return &mcpsdk.GetPromptResult{
 		Description: fmt.Sprintf("Create a new Serverless Pulsar cluster %s's related resources that can be applied to the StreamNative Cloud.", clusterName),
 		Messages:    messages,
 	}, nil

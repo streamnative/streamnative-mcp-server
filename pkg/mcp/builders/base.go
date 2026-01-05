@@ -19,9 +19,15 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	mcpsdk "github.com/modelcontextprotocol/go-sdk/mcp"
 )
+
+// ServerTool represents a tool with its handler.
+// This provides compatibility with the existing builder pattern.
+type ServerTool struct {
+	Tool    *mcpsdk.Tool
+	Handler mcpsdk.ToolHandler
+}
 
 // FeatureChecker defines the interface for checking feature requirements
 // It provides methods to determine if required features are available
@@ -40,7 +46,7 @@ type ToolBuilder interface {
 	GetRequiredFeatures() []string
 
 	// BuildTools builds and returns a list of server tools
-	BuildTools(ctx context.Context, config ToolBuildConfig) ([]server.ServerTool, error)
+	BuildTools(ctx context.Context, config ToolBuildConfig) ([]ServerTool, error)
 
 	// Validate validates the builder configuration
 	Validate(config ToolBuildConfig) error
@@ -131,4 +137,4 @@ func (b *BaseToolBuilder) HasAnyRequiredFeature(features []string) bool {
 
 // ToolHandlerFunc defines the tool handler function type
 // It maintains consistency with server.ToolHandlerFunc
-type ToolHandlerFunc func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error)
+type ToolHandlerFunc func(ctx context.Context, request mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error)

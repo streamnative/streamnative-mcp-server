@@ -19,7 +19,6 @@ import (
 	stdlog "log"
 	"os"
 
-	"github.com/mark3labs/mcp-go/server"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/streamnative/streamnative-mcp-server/pkg/config"
@@ -30,7 +29,6 @@ import (
 
 func newMcpServer(_ context.Context, configOpts *ServerOptions, logrusLogger *logrus.Logger) (*mcp.Server, error) {
 	snConfig := configOpts.Options.LoadConfigOrDie()
-	var s *server.MCPServer
 	var mcpServer *mcp.Server
 	switch {
 	case snConfig.KeyFile != "":
@@ -46,16 +44,17 @@ func newMcpServer(_ context.Context, configOpts *ServerOptions, logrusLogger *lo
 			if err != nil {
 				return nil, errors.Wrap(err, "failed to create StreamNative Cloud session")
 			}
-			mcpServer = mcp.NewServer("streamnative-mcp-server", "0.0.1", logrusLogger, server.WithInstructions(mcp.GetStreamNativeCloudServerInstructions(userName, snConfig)))
+			instructions := mcp.GetStreamNativeCloudServerInstructions(userName, snConfig)
+			mcpServer = mcp.NewServer("streamnative-mcp-server", "0.0.1", logrusLogger, instructions)
 			mcpServer.SNCloudSession = session
 
-			s = mcpServer.MCPServer
-			mcp.RegisterPrompts(s)
+			// Register SNCloud-specific tools
+			mcp.RegisterPrompts(mcpServer.Server)
 			// Skip context tools if pulsar instance and cluster are provided via CLI
 			skipContextTools := snConfig.Context.PulsarInstance != "" && snConfig.Context.PulsarCluster != ""
-			mcp.RegisterContextTools(s, configOpts.Features, skipContextTools)
-			mcp.StreamNativeAddLogTools(s, configOpts.ReadOnly, configOpts.Features)
-			mcp.StreamNativeAddResourceTools(s, configOpts.ReadOnly, configOpts.Features)
+			mcp.RegisterContextTools(mcpServer.Server, configOpts.Features, skipContextTools)
+			mcp.StreamNativeAddLogTools(mcpServer.Server, configOpts.ReadOnly, configOpts.Features)
+			mcp.StreamNativeAddResourceTools(mcpServer.Server, configOpts.ReadOnly, configOpts.Features)
 		}
 	case snConfig.ExternalKafka != nil:
 		{
@@ -77,14 +76,14 @@ func newMcpServer(_ context.Context, configOpts *ServerOptions, logrusLogger *lo
 			if err != nil {
 				return nil, errors.Wrap(err, "failed to set external Kafka context")
 			}
-			mcpServer = mcp.NewServer("streamnative-mcp-server", "0.0.1", logrusLogger, server.WithInstructions(mcp.GetExternalKafkaServerInstructions(snConfig.ExternalKafka.BootstrapServers)))
+			instructions := mcp.GetExternalKafkaServerInstructions(snConfig.ExternalKafka.BootstrapServers)
+			mcpServer = mcp.NewServer("streamnative-mcp-server", "0.0.1", logrusLogger, instructions)
 			mcpServer.KafkaSession = ksession
-			s = mcpServer.MCPServer
 		}
 	case snConfig.ExternalPulsar != nil:
 		{
-			mcpServer = mcp.NewServer("streamnative-mcp-server", "0.0.1", logrusLogger, server.WithInstructions(mcp.GetExternalPulsarServerInstructions(snConfig.ExternalPulsar.WebServiceURL)))
-			s = mcpServer.MCPServer
+			instructions := mcp.GetExternalPulsarServerInstructions(snConfig.ExternalPulsar.WebServiceURL)
+			mcpServer = mcp.NewServer("streamnative-mcp-server", "0.0.1", logrusLogger, instructions)
 
 			// Only create global PulsarSession if not in multi-session mode
 			// In multi-session mode, each request must provide its own token via Authorization header
@@ -114,6 +113,8 @@ func newMcpServer(_ context.Context, configOpts *ServerOptions, logrusLogger *lo
 		}
 	}
 
+	// Register all tools
+	s := mcpServer.Server
 	mcp.PulsarAdminAddBrokersTools(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.PulsarAdminAddBrokerStatsTools(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.PulsarAdminAddClusterTools(s, configOpts.ReadOnly, configOpts.Features)

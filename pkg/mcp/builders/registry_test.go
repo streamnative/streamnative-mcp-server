@@ -19,8 +19,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	mcpsdk "github.com/modelcontextprotocol/go-sdk/mcp"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/adapter"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -29,7 +29,7 @@ import (
 type MockToolBuilder struct {
 	name     string
 	features []string
-	tools    []server.ServerTool
+	tools    []ServerTool
 	err      error
 	metadata ToolMetadata
 }
@@ -44,13 +44,13 @@ func NewMockToolBuilder(name string, features []string) *MockToolBuilder {
 			Description: fmt.Sprintf("Mock tool builder for %s", name),
 			Category:    "test",
 		},
-		tools: []server.ServerTool{
+		tools: []ServerTool{
 			{
-				Tool: mcp.NewTool(name,
-					mcp.WithDescription(fmt.Sprintf("Mock tool %s", name)),
+				Tool: NewTool(name,
+					WithDescription(fmt.Sprintf("Mock tool %s", name)),
 				),
-				Handler: func(_ context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-					return mcp.NewToolResultText(fmt.Sprintf("Mock response from %s", name)), nil
+				Handler: func(_ context.Context, _ *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+					return adapter.NewTextResult(fmt.Sprintf("Mock response from %s", name)), nil
 				},
 			},
 		},
@@ -65,7 +65,7 @@ func (m *MockToolBuilder) GetRequiredFeatures() []string {
 	return m.features
 }
 
-func (m *MockToolBuilder) BuildTools(_ context.Context, _ ToolBuildConfig) ([]server.ServerTool, error) {
+func (m *MockToolBuilder) BuildTools(_ context.Context, _ ToolBuildConfig) ([]ServerTool, error) {
 	if m.err != nil {
 		return nil, m.err
 	}

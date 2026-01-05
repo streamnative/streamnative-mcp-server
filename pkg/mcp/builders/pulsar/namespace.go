@@ -21,10 +21,10 @@ import (
 	"strconv"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	mcpsdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/adapter"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
 
@@ -59,7 +59,7 @@ func NewPulsarAdminNamespaceToolBuilder() *PulsarAdminNamespaceToolBuilder {
 
 // BuildTools builds the Pulsar Admin Namespace tool list
 // This is the core method implementing the ToolBuilder interface
-func (b *PulsarAdminNamespaceToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]server.ServerTool, error) {
+func (b *PulsarAdminNamespaceToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]builders.ServerTool, error) {
 	// Check features - return empty list if no required features are present
 	if !b.HasAnyRequiredFeature(config.Features) {
 		return nil, nil
@@ -74,7 +74,7 @@ func (b *PulsarAdminNamespaceToolBuilder) BuildTools(_ context.Context, config b
 	tool := b.buildNamespaceTool()
 	handler := b.buildNamespaceHandler(config.ReadOnly)
 
-	return []server.ServerTool{
+	return []builders.ServerTool{
 		{
 			Tool:    tool,
 			Handler: handler,
@@ -84,7 +84,7 @@ func (b *PulsarAdminNamespaceToolBuilder) BuildTools(_ context.Context, config b
 
 // buildNamespaceTool builds the Pulsar Admin Namespace MCP tool definition
 // Migrated from the original tool definition logic
-func (b *PulsarAdminNamespaceToolBuilder) buildNamespaceTool() mcp.Tool {
+func (b *PulsarAdminNamespaceToolBuilder) buildNamespaceTool() *mcpsdk.Tool {
 	toolDesc := "Manage Pulsar namespaces with various operations. " +
 		"This tool provides functionality to work with namespaces in Apache Pulsar, " +
 		"including listing, creating, deleting, and performing various operations on namespaces."
@@ -99,64 +99,64 @@ func (b *PulsarAdminNamespaceToolBuilder) buildNamespaceTool() mcp.Tool {
 		"- unload: Unload a namespace from the current serving broker\n" +
 		"- split_bundle: Split a namespace bundle"
 
-	return mcp.NewTool("pulsar_admin_namespace",
-		mcp.WithDescription(toolDesc),
-		mcp.WithString("operation", mcp.Required(),
-			mcp.Description(operationDesc),
+	return builders.NewTool("pulsar_admin_namespace",
+		builders.WithDescription(toolDesc),
+		builders.WithString("operation", builders.Required(),
+			builders.Description(operationDesc),
 		),
-		mcp.WithString("tenant",
-			mcp.Description("The tenant name. Required for 'list' operation."),
+		builders.WithString("tenant",
+			builders.Description("The tenant name. Required for 'list' operation."),
 		),
-		mcp.WithString("namespace",
-			mcp.Description("The namespace name in format 'tenant/namespace'. Required for all operations except 'list'."),
+		builders.WithString("namespace",
+			builders.Description("The namespace name in format 'tenant/namespace'. Required for all operations except 'list'."),
 		),
-		mcp.WithString("bundles",
-			mcp.Description("Number of bundles to activate when creating a namespace (default: 0 for default number of bundles). Used with 'create' operation."),
+		builders.WithString("bundles",
+			builders.Description("Number of bundles to activate when creating a namespace (default: 0 for default number of bundles). Used with 'create' operation."),
 		),
-		mcp.WithArray("clusters",
-			mcp.Description("List of clusters to assign when creating a namespace. Used with 'create' operation."),
-			mcp.Items(
+		builders.WithArray("clusters",
+			builders.Description("List of clusters to assign when creating a namespace. Used with 'create' operation."),
+			builders.Items(
 				map[string]interface{}{
 					"type":        "string",
 					"description": "Cluster name",
 				},
 			),
 		),
-		mcp.WithString("subscription",
-			mcp.Description("Subscription name. Required for 'unsubscribe' operation, optional for 'clear_backlog'."),
+		builders.WithString("subscription",
+			builders.Description("Subscription name. Required for 'unsubscribe' operation, optional for 'clear_backlog'."),
 		),
-		mcp.WithString("bundle",
-			mcp.Description("Bundle name or range. Required for 'split_bundle' operation, optional for 'clear_backlog', 'unsubscribe', and 'unload'."),
+		builders.WithString("bundle",
+			builders.Description("Bundle name or range. Required for 'split_bundle' operation, optional for 'clear_backlog', 'unsubscribe', and 'unload'."),
 		),
-		mcp.WithString("force",
-			mcp.Description("Force clear backlog (true/false). Used with 'clear_backlog' operation."),
+		builders.WithString("force",
+			builders.Description("Force clear backlog (true/false). Used with 'clear_backlog' operation."),
 		),
-		mcp.WithString("unload",
-			mcp.Description("Unload newly split bundles after splitting (true/false). Used with 'split_bundle' operation."),
+		builders.WithString("unload",
+			builders.Description("Unload newly split bundles after splitting (true/false). Used with 'split_bundle' operation."),
 		),
 	)
 }
 
 // buildNamespaceHandler builds the Pulsar Admin Namespace handler function
 // Migrated from the original handler logic
-func (b *PulsarAdminNamespaceToolBuilder) buildNamespaceHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminNamespaceToolBuilder) buildNamespaceHandler(readOnly bool) func(context.Context, *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	return func(ctx context.Context, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
 		// Get operation parameter
-		operation, err := request.RequireString("operation")
+		operation, err := adapter.RequireString(request, "operation")
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get operation: %v", err)), nil
+			return adapter.NewErrorResult("Failed to get operation: %v", err), nil
 		}
 
 		// Get Pulsar session from context
 		session := mcpCtx.GetPulsarSession(ctx)
 		if session == nil {
-			return mcp.NewToolResultError("Pulsar session not found in context"), nil
+			return adapter.NewErrorResult("Pulsar session not found in context"), nil
 		}
 
 		// Create Pulsar client
 		client, err := session.GetAdminClient()
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
+			return adapter.NewErrorResult("Failed to get admin client: %v", err), nil
 		}
 
 		// Route to appropriate handler based on operation
@@ -168,7 +168,7 @@ func (b *PulsarAdminNamespaceToolBuilder) buildNamespaceHandler(readOnly bool) f
 		case "create", "delete", "clear_backlog", "unsubscribe", "unload", "split_bundle":
 			// Check if write operations are allowed
 			if readOnly {
-				return mcp.NewToolResultError(fmt.Sprintf("Operation '%s' not allowed in read-only mode", operation)), nil
+				return adapter.NewErrorResult("Operation '%s' not allowed in read-only mode", operation), nil
 			}
 
 			// Route to appropriate write operation handler
@@ -187,37 +187,37 @@ func (b *PulsarAdminNamespaceToolBuilder) buildNamespaceHandler(readOnly bool) f
 				return b.handleSplitBundle(ctx, client, request)
 			}
 		default:
-			return mcp.NewToolResultError(fmt.Sprintf("Unknown operation: %s. Supported operations: list, get_topics, create, delete, clear_backlog, unsubscribe, unload, split_bundle", operation)), nil
+			return adapter.NewErrorResult("Unknown operation: %s. Supported operations: list, get_topics, create, delete, clear_backlog, unsubscribe, unload, split_bundle", operation), nil
 		}
 
 		// Should not reach here
-		return mcp.NewToolResultError("Unexpected error: operation not handled"), nil
+		return adapter.NewErrorResult("Unexpected error: operation not handled"), nil
 	}
 }
 
 // Unified error handling and utility functions
 
 // handleError provides unified error handling
-func (b *PulsarAdminNamespaceToolBuilder) handleError(operation string, err error) *mcp.CallToolResult {
-	return mcp.NewToolResultError(fmt.Sprintf("Failed to %s: %v", operation, err))
+func (b *PulsarAdminNamespaceToolBuilder) handleError(operation string, err error) *mcpsdk.CallToolResult {
+	return adapter.NewErrorResult("Failed to %s: %v", operation, err)
 }
 
 // marshalResponse provides unified JSON serialization for responses
-func (b *PulsarAdminNamespaceToolBuilder) marshalResponse(data interface{}) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminNamespaceToolBuilder) marshalResponse(data interface{}) (*mcpsdk.CallToolResult, error) {
 	jsonBytes, err := json.Marshal(data)
 	if err != nil {
 		return b.handleError("marshal response", err), nil
 	}
-	return mcp.NewToolResultText(string(jsonBytes)), nil
+	return adapter.NewTextResult(string(jsonBytes)), nil
 }
 
 // Operation handler functions - migrated from the original implementation
 
 // handleNamespaceList handles listing namespaces for a tenant
-func (b *PulsarAdminNamespaceToolBuilder) handleNamespaceList(_ context.Context, client cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	tenant, err := request.RequireString("tenant")
+func (b *PulsarAdminNamespaceToolBuilder) handleNamespaceList(_ context.Context, client cmdutils.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	tenant, err := adapter.RequireString(request, "tenant")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get tenant name: %v", err)), nil
+		return adapter.NewErrorResult("Failed to get tenant name: %v", err), nil
 	}
 
 	// Get namespace list
@@ -230,10 +230,10 @@ func (b *PulsarAdminNamespaceToolBuilder) handleNamespaceList(_ context.Context,
 }
 
 // handleNamespaceGetTopics handles getting topics for a namespace
-func (b *PulsarAdminNamespaceToolBuilder) handleNamespaceGetTopics(_ context.Context, client cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	namespace, err := request.RequireString("namespace")
+func (b *PulsarAdminNamespaceToolBuilder) handleNamespaceGetTopics(_ context.Context, client cmdutils.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	namespace, err := adapter.RequireString(request, "namespace")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
+		return adapter.NewErrorResult("Failed to get namespace name: %v", err), nil
 	}
 
 	// Get topics list
@@ -246,24 +246,24 @@ func (b *PulsarAdminNamespaceToolBuilder) handleNamespaceGetTopics(_ context.Con
 }
 
 // handleNamespaceCreate handles creating a new namespace
-func (b *PulsarAdminNamespaceToolBuilder) handleNamespaceCreate(_ context.Context, client cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	namespace, err := request.RequireString("namespace")
+func (b *PulsarAdminNamespaceToolBuilder) handleNamespaceCreate(_ context.Context, client cmdutils.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	namespace, err := adapter.RequireString(request, "namespace")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
+		return adapter.NewErrorResult("Failed to get namespace name: %v", err), nil
 	}
 
 	// Get optional parameters
-	bundlesStr := request.GetString("bundles", "")
+	bundlesStr := adapter.GetString(request, "bundles", "")
 	bundles := 0
 	if bundlesStr != "" {
 		bundlesInt, err := strconv.Atoi(bundlesStr)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Invalid bundles value, must be an integer: %v", err)), nil
+			return adapter.NewErrorResult("Invalid bundles value, must be an integer: %v", err), nil
 		}
 		bundles = bundlesInt
 	}
 
-	clusters := request.GetStringSlice("clusters", []string{})
+	clusters := adapter.GetStringSlice(request, "clusters", []string{})
 
 	// Prepare policies
 	policies := utils.NewDefaultPolicies()
@@ -271,7 +271,7 @@ func (b *PulsarAdminNamespaceToolBuilder) handleNamespaceCreate(_ context.Contex
 	// Set bundles if provided
 	if bundles > 0 {
 		if bundles < 0 || bundles > int(^uint32(0)) { // MaxInt32
-			return mcp.NewToolResultError(
+			return adapter.NewErrorResult(
 				fmt.Sprintf("Invalid number of bundles. Number of bundles has to be in the range of (0, %d].", int(^uint32(0))),
 			), nil
 		}
@@ -286,7 +286,7 @@ func (b *PulsarAdminNamespaceToolBuilder) handleNamespaceCreate(_ context.Contex
 	// Create namespace
 	ns, err := utils.GetNamespaceName(namespace)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid namespace name: %v", err)), nil
+		return adapter.NewErrorResult("Invalid namespace name: %v", err), nil
 	}
 
 	err = client.Namespaces().CreateNsWithPolices(ns.String(), *policies)
@@ -294,14 +294,14 @@ func (b *PulsarAdminNamespaceToolBuilder) handleNamespaceCreate(_ context.Contex
 		return b.handleError("create namespace", err), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Created %s successfully", namespace)), nil
+	return adapter.NewTextResult(fmt.Sprintf("Created %s successfully", namespace)), nil
 }
 
 // handleNamespaceDelete handles deleting a namespace
-func (b *PulsarAdminNamespaceToolBuilder) handleNamespaceDelete(_ context.Context, client cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	namespace, err := request.RequireString("namespace")
+func (b *PulsarAdminNamespaceToolBuilder) handleNamespaceDelete(_ context.Context, client cmdutils.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	namespace, err := adapter.RequireString(request, "namespace")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
+		return adapter.NewErrorResult("Failed to get namespace name: %v", err), nil
 	}
 
 	// Delete namespace
@@ -310,25 +310,25 @@ func (b *PulsarAdminNamespaceToolBuilder) handleNamespaceDelete(_ context.Contex
 		return b.handleError("delete namespace", err), nil
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Deleted %s successfully", namespace)), nil
+	return adapter.NewTextResult(fmt.Sprintf("Deleted %s successfully", namespace)), nil
 }
 
 // handleClearBacklog handles clearing the backlog for all topics in a namespace
-func (b *PulsarAdminNamespaceToolBuilder) handleClearBacklog(_ context.Context, client cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	namespace, err := request.RequireString("namespace")
+func (b *PulsarAdminNamespaceToolBuilder) handleClearBacklog(_ context.Context, client cmdutils.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	namespace, err := adapter.RequireString(request, "namespace")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
+		return adapter.NewErrorResult("Failed to get namespace name: %v", err), nil
 	}
 
 	// Get optional parameters
-	subscription := request.GetString("subscription", "")
-	bundle := request.GetString("bundle", "")
-	force := request.GetString("force", "")
+	subscription := adapter.GetString(request, "subscription", "")
+	bundle := adapter.GetString(request, "bundle", "")
+	force := adapter.GetString(request, "force", "")
 	forceFlag := force == "true"
 
 	// If not forced, return an error requiring explicit force flag
 	if !forceFlag {
-		return mcp.NewToolResultError(
+		return adapter.NewErrorResult(
 			"Clear backlog operation requires explicit confirmation. Please set force=true to proceed.",
 		), nil
 	}
@@ -336,7 +336,7 @@ func (b *PulsarAdminNamespaceToolBuilder) handleClearBacklog(_ context.Context, 
 	// Get namespace name
 	ns, err := utils.GetNamespaceName(namespace)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid namespace name: %v", err)), nil
+		return adapter.NewErrorResult("Invalid namespace name: %v", err), nil
 	}
 
 	// Handle different backlog clearing scenarios
@@ -358,30 +358,30 @@ func (b *PulsarAdminNamespaceToolBuilder) handleClearBacklog(_ context.Context, 
 		return b.handleError("clear backlog", clearErr), nil
 	}
 
-	return mcp.NewToolResultText(
+	return adapter.NewTextResult(
 		fmt.Sprintf("Successfully cleared backlog for all topics in namespace %s", namespace),
 	), nil
 }
 
 // handleUnsubscribe handles unsubscribing the specified subscription for all topics of a namespace
-func (b *PulsarAdminNamespaceToolBuilder) handleUnsubscribe(_ context.Context, client cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	namespace, err := request.RequireString("namespace")
+func (b *PulsarAdminNamespaceToolBuilder) handleUnsubscribe(_ context.Context, client cmdutils.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	namespace, err := adapter.RequireString(request, "namespace")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
+		return adapter.NewErrorResult("Failed to get namespace name: %v", err), nil
 	}
 
-	subscription, err := request.RequireString("subscription")
+	subscription, err := adapter.RequireString(request, "subscription")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get subscription name: %v", err)), nil
+		return adapter.NewErrorResult("Failed to get subscription name: %v", err), nil
 	}
 
 	// Get optional bundle
-	bundle := request.GetString("bundle", "")
+	bundle := adapter.GetString(request, "bundle", "")
 
 	// Get namespace name
 	ns, err := utils.GetNamespaceName(namespace)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid namespace name: %v", err)), nil
+		return adapter.NewErrorResult("Invalid namespace name: %v", err), nil
 	}
 
 	// Unsubscribe namespace
@@ -397,27 +397,27 @@ func (b *PulsarAdminNamespaceToolBuilder) handleUnsubscribe(_ context.Context, c
 	}
 
 	if bundle == "" {
-		return mcp.NewToolResultText(
+		return adapter.NewTextResult(
 			fmt.Sprintf("Successfully unsubscribed the subscription %s for all topics of the namespace %s",
 				subscription, namespace),
 		), nil
 	}
 
-	return mcp.NewToolResultText(
+	return adapter.NewTextResult(
 		fmt.Sprintf("Successfully unsubscribed the subscription %s for all topics of the namespace %s with bundle range %s",
 			subscription, namespace, bundle),
 	), nil
 }
 
 // handleUnload handles unloading a namespace from the current serving broker
-func (b *PulsarAdminNamespaceToolBuilder) handleUnload(_ context.Context, client cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	namespace, err := request.RequireString("namespace")
+func (b *PulsarAdminNamespaceToolBuilder) handleUnload(_ context.Context, client cmdutils.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	namespace, err := adapter.RequireString(request, "namespace")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
+		return adapter.NewErrorResult("Failed to get namespace name: %v", err), nil
 	}
 
 	// Get optional bundle
-	bundle := request.GetString("bundle", "")
+	bundle := adapter.GetString(request, "bundle", "")
 
 	// Unload namespace
 	var unloadErr error
@@ -432,30 +432,30 @@ func (b *PulsarAdminNamespaceToolBuilder) handleUnload(_ context.Context, client
 	}
 
 	if bundle == "" {
-		return mcp.NewToolResultText(
+		return adapter.NewTextResult(
 			fmt.Sprintf("Unloaded namespace %s successfully", namespace),
 		), nil
 	}
 
-	return mcp.NewToolResultText(
+	return adapter.NewTextResult(
 		fmt.Sprintf("Unloaded namespace %s with bundle %s successfully", namespace, bundle),
 	), nil
 }
 
 // handleSplitBundle handles splitting a namespace bundle
-func (b *PulsarAdminNamespaceToolBuilder) handleSplitBundle(_ context.Context, client cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	namespace, err := request.RequireString("namespace")
+func (b *PulsarAdminNamespaceToolBuilder) handleSplitBundle(_ context.Context, client cmdutils.Client, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+	namespace, err := adapter.RequireString(request, "namespace")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace name: %v", err)), nil
+		return adapter.NewErrorResult("Failed to get namespace name: %v", err), nil
 	}
 
-	bundle, err := request.RequireString("bundle")
+	bundle, err := adapter.RequireString(request, "bundle")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get bundle: %v", err)), nil
+		return adapter.NewErrorResult("Failed to get bundle: %v", err), nil
 	}
 
 	// Get optional unload flag
-	unload := request.GetString("unload", "") == "true"
+	unload := adapter.GetString(request, "unload", "") == "true"
 
 	// Split namespace bundle
 	err = client.Namespaces().SplitNamespaceBundle(namespace, bundle, unload)
@@ -463,7 +463,7 @@ func (b *PulsarAdminNamespaceToolBuilder) handleSplitBundle(_ context.Context, c
 		return b.handleError("split namespace bundle", err), nil
 	}
 
-	return mcp.NewToolResultText(
+	return adapter.NewTextResult(
 		fmt.Sprintf("Split namespace bundle %s successfully", bundle),
 	), nil
 }

@@ -21,7 +21,6 @@ import (
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/mark3labs/mcp-go/mcp"
 )
 
 // newJSONSchemaInfo is a helper to create SchemaInfo for JSON type with a given AVRO schema string.

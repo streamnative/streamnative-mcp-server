@@ -155,7 +155,7 @@ func registerPulsarTopicTools(t testing.TB, server *mcp.Server, helper *PulsarTe
 
 			topics, err := helper.ListTopics(namespace)
 			if err != nil {
-				return newToolResultError(fmt.Sprintf("failed to list topics: %v", err)), nil
+				return newToolResultError(fmt.Sprintf("failed to list topics: %v", err), nil
 			}
 
 			result, _ := json.Marshal(topics)
@@ -173,7 +173,7 @@ func registerPulsarTopicTools(t testing.TB, server *mcp.Server, helper *PulsarTe
 
 			metadata, err := helper.GetTopicMetadata(topic)
 			if err != nil {
-				return newToolResultError(fmt.Sprintf("failed to get topic: %v", err)), nil
+				return newToolResultError(fmt.Sprintf("failed to get topic: %v", err), nil
 			}
 
 			result, _ := json.Marshal(metadata)
@@ -192,7 +192,7 @@ func registerPulsarTopicTools(t testing.TB, server *mcp.Server, helper *PulsarTe
 			partitions := int(partitionsVal)
 
 			if err := helper.CreateTopic(ctx, topic, partitions); err != nil {
-				return newToolResultError(fmt.Sprintf("failed to create topic: %v", err)), nil
+				return newToolResultError(fmt.Sprintf("failed to create topic: %v", err), nil
 			}
 
 			return &mcp.CallToolResult{
@@ -208,7 +208,7 @@ func registerPulsarTopicTools(t testing.TB, server *mcp.Server, helper *PulsarTe
 			}
 
 			if err := helper.DeleteTopic(ctx, topic); err != nil {
-				return newToolResultError(fmt.Sprintf("failed to delete topic: %v", err)), nil
+				return newToolResultError(fmt.Sprintf("failed to delete topic: %v", err), nil
 			}
 
 			return &mcp.CallToolResult{
@@ -218,7 +218,7 @@ func registerPulsarTopicTools(t testing.TB, server *mcp.Server, helper *PulsarTe
 			}, nil
 
 		default:
-			return newToolResultError(fmt.Sprintf("unsupported operation: %s", operation)), nil
+			return newToolResultError(fmt.Sprintf("unsupported operation: %s", operation), nil
 		}
 	}
 

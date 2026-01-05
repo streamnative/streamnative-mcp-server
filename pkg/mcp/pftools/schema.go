@@ -20,11 +20,10 @@ import (
 
 	"github.com/apache/pulsar-client-go/pulsar"
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
-	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 )
 
-var DefaultStringSchema = &mcp.ToolInputSchema{
+var DefaultStringSchema = &ToolInputSchema{
 	Type: "object",
 	Properties: map[string]interface{}{
 		"payload": map[string]interface{}{
@@ -78,7 +77,7 @@ func GetSchemaFromTopic(admin cmdutils.Client, topic string) (*SchemaInfo, error
 }
 
 // ConvertSchemaToToolInput converts a schema to MCP tool input schema
-func ConvertSchemaToToolInput(schemaInfo *SchemaInfo) (*mcp.ToolInputSchema, error) {
+func ConvertSchemaToToolInput(schemaInfo *SchemaInfo) (*ToolInputSchema, error) {
 	if schemaInfo == nil {
 		// Default to object with any fields if no schema is provided
 		return DefaultStringSchema, nil
@@ -96,7 +95,7 @@ func ConvertSchemaToToolInput(schemaInfo *SchemaInfo) (*mcp.ToolInputSchema, err
 }
 
 // convertComplexSchemaToToolInput handles conversion of complex schema types
-func convertComplexSchemaToToolInput(schemaInfo *SchemaInfo) (*mcp.ToolInputSchema, error) {
+func convertComplexSchemaToToolInput(schemaInfo *SchemaInfo) (*ToolInputSchema, error) {
 	if schemaInfo.Definition == nil {
 		return DefaultStringSchema, nil
 	}
@@ -112,7 +111,7 @@ func convertComplexSchemaToToolInput(schemaInfo *SchemaInfo) (*mcp.ToolInputSche
 	}
 
 	// For JSON schemas, use the definition directly
-	return &mcp.ToolInputSchema{
+	return &ToolInputSchema{
 		Type: "object",
 		Properties: map[string]interface{}{
 			"payload": map[string]interface{}{

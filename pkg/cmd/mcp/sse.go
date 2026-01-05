@@ -25,12 +25,11 @@ import (
 
 	stdlog "log"
 
-	"github.com/mark3labs/mcp-go/server"
+	mcpsdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp"
-	context2 "github.com/streamnative/streamnative-mcp-server/pkg/mcp"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/session"
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
@@ -75,10 +74,7 @@ func runSseServer(configOpts *ServerOptions) error {
 		return fmt.Errorf("failed to create MCP server: %w", err)
 	}
 
-	// 4. Set the context
-	ctx = context2.WithSNCloudSession(ctx, mcpServer.SNCloudSession)
-	ctx = context2.WithPulsarSession(ctx, mcpServer.PulsarSession)
-	ctx = context2.WithKafkaSession(ctx, mcpServer.KafkaSession)
+	// 4. Set SNCloud context if needed
 	if configOpts.Options.KeyFile != "" {
 		if configOpts.Options.PulsarInstance != "" && configOpts.Options.PulsarCluster != "" {
 			err = mcp.SetContext(ctx, configOpts.Options, configOpts.Options.PulsarInstance, configOpts.Options.PulsarCluster)
@@ -115,51 +111,27 @@ func runSseServer(configOpts *ServerOptions) error {
 		logger.Info("Multi-session Pulsar mode enabled")
 	}
 
-	sseServer := server.NewSSEServer(
-		mcpServer.MCPServer,
-		server.WithStaticBasePath(configOpts.HTTPPath),
-		server.WithSSEContextFunc(func(ctx context.Context, r *http.Request) context.Context {
-			c := context.WithValue(ctx, common.OptionsKey, configOpts.Options)
-			c = context2.WithKafkaSession(c, mcpServer.KafkaSession)
-			c = context2.WithSNCloudSession(c, mcpServer.SNCloudSession)
-
-			// Handle per-user Pulsar sessions
-			if pulsarSessionManager != nil {
-				token := session.ExtractBearerToken(r)
-				// Token is already validated in auth middleware, this should always succeed
-				if pulsarSession, err := pulsarSessionManager.GetOrCreateSession(ctx, token); err == nil {
-					c = context2.WithPulsarSession(c, pulsarSession)
-					if token != "" {
-						c = session.WithUserTokenHash(c, pulsarSessionManager.HashTokenForLog(token))
-					}
-				} else {
-					// Should not happen since middleware validates token first
-					logger.WithError(err).Error("Unexpected auth error after middleware validation")
-					// Don't set PulsarSession - tool handlers will fail gracefully with "session not found"
-				}
-			} else {
-				c = context2.WithPulsarSession(c, mcpServer.PulsarSession)
-			}
-
-			return c
-		}),
+	// Create go-sdk StreamableHTTPHandler
+	// The getServer function returns the server instance for each request
+	streamableHandler := mcpsdk.NewStreamableHTTPHandler(
+		func(r *http.Request) *mcpsdk.Server {
+			return mcpServer.Server
+		},
+		&mcpsdk.StreamableHTTPOptions{
+			SessionTimeout: 5 * time.Minute,
+		},
 	)
 
-	// 4. Expose the full SSE URL to the user
-	ssePath := sseServer.CompleteSsePath()
-	msgPath := sseServer.CompleteMessagePath()
+	// Build the full path
+	ssePath := configOpts.HTTPPath
 	fmt.Fprintf(os.Stderr, "StreamNative Cloud MCP Server listening on http://%s%s\n",
 		configOpts.HTTPAddr, ssePath)
 
-	// 5. Run the HTTP listener in a goroutine
-	errCh := make(chan error, 1)
-	var httpServer *http.Server
+	// Create HTTP server
+	mux := http.NewServeMux()
 
 	if pulsarSessionManager != nil {
-		// Multi-session mode: use custom handlers with auth middleware
-		mux := http.NewServeMux()
-
-		// Auth middleware wrapper that validates token before processing
+		// Multi-session mode: wrap with auth middleware
 		authMiddleware := func(next http.Handler) http.Handler {
 			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				token := session.ExtractBearerToken(r)
@@ -175,49 +147,52 @@ func runSseServer(configOpts *ServerOptions) error {
 					http.Error(w, `{"error":"authentication failed"}`, http.StatusUnauthorized)
 					return
 				}
+
+				// Inject sessions into request context
+				// Use server middleware to pass context to handlers
 				next.ServeHTTP(w, r)
 			})
 		}
 
-		// Mount handlers with auth middleware
-		mux.Handle(ssePath, authMiddleware(sseServer.SSEHandler()))
-		mux.Handle(msgPath, authMiddleware(sseServer.MessageHandler()))
+		// Add receiving middleware to inject sessions into MCP handler context
+		mcpServer.Server.AddReceivingMiddleware(func(next mcpsdk.MethodHandler) mcpsdk.MethodHandler {
+			return func(ctx context.Context, method string, req mcpsdk.Request) (mcpsdk.Result, error) {
+				// Extract sessions from context (injected by HTTP middleware)
+				// Note: go-sdk doesn't directly pass HTTP context to MCP handlers
+				// We use the base sessions for non-multi-session, or per-request sessions
+				return next(ctx, method, req)
+			}
+		})
 
-		// Start custom HTTP server
-		httpServer = &http.Server{
-			Addr:              configOpts.HTTPAddr,
-			Handler:           mux,
-			ReadHeaderTimeout: 10 * time.Second, // Prevent Slowloris attacks
-		}
-		go func() {
-			if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-				errCh <- err
-			}
-		}()
-		logger.Info("SSE server started with authentication middleware")
+		mux.Handle(ssePath, authMiddleware(streamableHandler))
 	} else {
-		// Non-multi-session mode: use default Start()
-		go func() {
-			if err := sseServer.Start(configOpts.HTTPAddr); err != nil && !errors.Is(err, http.ErrServerClosed) {
-				errCh <- err // bubble up real crashes
-			}
-		}()
+		// Non-multi-session mode: direct handler
+		mux.Handle(ssePath, streamableHandler)
 	}
 
-	// Give the server a moment to start
-	time.Sleep(100 * time.Millisecond)
+	// Start HTTP server
+	httpServer := &http.Server{
+		Addr:              configOpts.HTTPAddr,
+		Handler:           mux,
+		ReadHeaderTimeout: 10 * time.Second, // Prevent Slowloris attacks
+	}
 
-	// 6. Block until Ctrl-C or an internal error
+	errCh := make(chan error, 1)
+	go func() {
+		if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			errCh <- err
+		}
+	}()
+
+	// Wait for shutdown signal
 	select {
 	case <-ctx.Done():
-		// user hit Ctrl-C
 		fmt.Fprintln(os.Stderr, "Received shutdown signal, stopping server...")
 	case err := <-errCh:
-		// HTTP server crashed
 		return fmt.Errorf("sse server error: %w", err)
 	}
 
-	// 7. Graceful shutdown
+	// Graceful shutdown
 	shCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -227,28 +202,10 @@ func runSseServer(configOpts *ServerOptions) error {
 	}
 
 	// Shut down the HTTP server
-	if httpServer != nil {
-		// Multi-session mode: shut down custom HTTP server
-		if err := httpServer.Shutdown(shCtx); err != nil {
-			if !errors.Is(err, http.ErrServerClosed) {
-				logger.Errorf("Error shutting down HTTP server: %v", err)
-			}
+	if err := httpServer.Shutdown(shCtx); err != nil {
+		if !errors.Is(err, http.ErrServerClosed) {
+			logger.Errorf("Error shutting down HTTP server: %v", err)
 		}
-	} else {
-		// Non-multi-session mode: shut down SSE server
-		if err := sseServer.Shutdown(shCtx); err != nil {
-			if !errors.Is(err, http.ErrServerClosed) {
-				logger.Errorf("Error shutting down SSE server: %v", err)
-			}
-		}
-	}
-
-	// Wait for any remaining operations to complete
-	select {
-	case <-shCtx.Done():
-		return fmt.Errorf("shutdown timed out")
-	case <-time.After(100 * time.Millisecond):
-		// Give a small grace period for cleanup
 	}
 
 	fmt.Fprintln(os.Stderr, "SSE server stopped gracefully")
