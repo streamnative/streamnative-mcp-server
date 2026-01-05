@@ -129,11 +129,13 @@ func (h *PulsarTestHelper) EnsureNamespace(ctx context.Context, tenant, namespac
 		// - "already exists" (common HTTP API message)
 		// - "AlreadyExists" (possible gRPC/protobuf message)
 		// - "409" (HTTP Conflict status code)
-		errMsg := err.Error()
+		// - "Conflict" (HTTP status text)
+		// Using case-insensitive matching for robustness
+		errMsg := strings.ToLower(err.Error())
 		if strings.Contains(errMsg, "already exists") || 
-		   strings.Contains(errMsg, "AlreadyExists") || 
+		   strings.Contains(errMsg, "alreadyexists") || 
 		   strings.Contains(errMsg, "409") ||
-		   strings.Contains(errMsg, "Conflict") {
+		   strings.Contains(errMsg, "conflict") {
 			return nil // Namespace already exists, which is what we want
 		}
 		return fmt.Errorf("failed to create namespace %s: %w", fullNamespace, err)
