@@ -141,12 +141,12 @@ func (h *PulsarTestHelper) CreateTopic(ctx context.Context, topic string, partit
 func (h *PulsarTestHelper) TopicExists(ctx context.Context, topic string) (bool, error) {
 	topicName, err := utils.GetTopicName(topic)
 	if err != nil {
-		return false, nil
+		return false, fmt.Errorf("invalid topic name %s: %w", topic, err)
 	}
 
 	_, err = h.adminClient.Topics().GetMetadata(*topicName)
 	if err != nil {
-		return false, nil // Assume doesn't exist
+		return false, fmt.Errorf("failed to get metadata for topic %s: %w", topic, err)
 	}
 	return true, nil
 }
