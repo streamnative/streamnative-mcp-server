@@ -225,17 +225,6 @@ func registerPulsarTopicTools(t testing.TB, server *mcp.Server, helper *PulsarTe
 	server.AddTool(tool, handler)
 }
 
-// newToolResultText creates a successful text tool result.
-func newToolResultText(message string) *mcp.CallToolResult {
-	return &mcp.CallToolResult{
-		Content: []mcp.Content{
-			&mcp.TextContent{
-				Text: message,
-			},
-		},
-	}
-}
-
 // newToolResultError creates an error tool result.
 func newToolResultError(message string) *mcp.CallToolResult {
 	return &mcp.CallToolResult{
