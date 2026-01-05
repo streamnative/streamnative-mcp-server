@@ -27,22 +27,6 @@ jobs:
   pulsar-e2e:
     runs-on: ubuntu-latest
 
-    services:
-      pulsar:
-        image: apachepulsar/pulsar:3.3.0
-        ports:
-          - 6650:6650
-          - 8080:8080
-        options: >-
-          --entrypoint /bin/bash
-          -v ${{ github.workspace }}/scripts/pulsar-e2e-entrypoint.sh:/pulsar-entrypoint.sh
-          --health-cmd "curl -f http://localhost:8080/admin/v2/clusters"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 30
-          --health-start-period 90s
-          /pulsar-entrypoint.sh
-
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -55,8 +39,38 @@ jobs:
       - name: Download dependencies
         run: go mod download
 
+      - name: Start Pulsar container
+        run: |
+          docker run -d --name pulsar-standalone \
+            -p 6650:6650 \
+            -p 8080:8080 \
+            -v ${{ github.workspace }}/scripts/pulsar-e2e-entrypoint.sh:/pulsar-entrypoint.sh \
+            --entrypoint /bin/bash \
+            apachepulsar/pulsar:3.3.0 \
+            /pulsar-entrypoint.sh
+
+      - name: Wait for Pulsar to be ready
+        run: |
+          echo "Waiting for Pulsar to be ready..."
+          for i in {1..60}; do
+            if curl -f http://localhost:8080/admin/v2/clusters > /dev/null 2>&1; then
+              echo "Pulsar is ready!"
+              break
+            fi
+            echo "Attempt $i/60: Pulsar not ready yet..."
+            sleep 2
+          done
+
       - name: Run E2E tests
         run: go test -v -tags=e2e -race ./pkg/mcp/e2e/...
         env:
           PULSAR_ADMIN_URL: http://localhost:8080
           PULSAR_SERVICE_URL: pulsar://localhost:6650
+
+      - name: Show Pulsar logs on failure
+        if: failure()
+        run: docker logs pulsar-standalone
+
+      - name: Stop Pulsar container
+        if: always()
+        run: docker rm -f pulsar-standalone || true
