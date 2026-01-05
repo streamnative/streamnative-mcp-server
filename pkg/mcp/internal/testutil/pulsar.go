@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin"
@@ -106,7 +107,12 @@ func (h *PulsarTestHelper) EnsureNamespace(ctx context.Context, tenant, namespac
 
 	// Check if namespace exists
 	namespaces, err := h.adminClient.Namespaces().GetNamespaces(tenant)
-	if err == nil {
+	if err != nil {
+		// If we cannot list namespaces, we'll try to create it anyway.
+		// This could be due to permission issues or other transient errors.
+		// The CreateNamespace call will fail with a proper error if there's a real issue.
+	} else {
+		// Successfully retrieved namespaces, check if ours exists
 		for _, ns := range namespaces {
 			if ns == fullNamespace {
 				return nil // Already exists
@@ -114,9 +120,17 @@ func (h *PulsarTestHelper) EnsureNamespace(ctx context.Context, tenant, namespac
 		}
 	}
 
-	// Create namespace
+	// Create namespace - this will fail if it already exists or if there are permission/connection issues
 	err = h.adminClient.Namespaces().CreateNamespace(fullNamespace)
 	if err != nil {
+		// Check if the error is because namespace already exists
+		// The Pulsar admin API returns a specific error message for this case
+		errMsg := err.Error()
+		if strings.Contains(errMsg, "already exists") || 
+		   strings.Contains(errMsg, "AlreadyExists") || 
+		   strings.Contains(errMsg, "409") {
+			return nil // Namespace already exists, which is what we want
+		}
 		return fmt.Errorf("failed to create namespace %s: %w", fullNamespace, err)
 	}
 
