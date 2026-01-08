@@ -30,7 +30,7 @@ helm install snmcp ./charts/snmcp \
 | `server.readOnly` | `false` | Enable read-only mode |
 | `server.features` | `[]` | Features to enable (default: all-pulsar) |
 | `server.httpAddr` | `:9090` | HTTP server address |
-| `server.httpPath` | `/mcp` | SSE endpoint path |
+| `server.httpPath` | `/mcp` | Base path for SSE/message/health endpoints |
 
 ### Session Configuration
 
@@ -110,6 +110,11 @@ This chart runs MCP Server in Multi-Session Pulsar mode. Each client request mus
 ```bash
 curl -H "Authorization: Bearer <PULSAR_TOKEN>" http://localhost:9090/mcp/sse
 ```
+
+Health endpoints do not require authentication and can be used for liveness/readiness:
+
+- `GET http://localhost:9090/mcp/healthz`
+- `GET http://localhost:9090/mcp/readyz`
 
 ## License
 

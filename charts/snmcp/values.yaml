@@ -20,7 +20,7 @@ server:
   features: []
   # HTTP server address
   httpAddr: ":9090"
-  # HTTP server path for SSE endpoint
+  # HTTP server base path for SSE, message, and health endpoints
   httpPath: "/mcp"
 
 # Pulsar cluster configuration (required)
