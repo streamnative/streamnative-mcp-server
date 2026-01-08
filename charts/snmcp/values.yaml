@@ -1,0 +1,129 @@
+# StreamNative MCP Server Helm Chart Values
+# This chart deploys MCP Server in Multi-Session Pulsar mode
+
+# Image configuration
+image:
+  repository: streamnative/snmcp
+  tag: ""  # Defaults to chart appVersion
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+# Number of replicas
+replicaCount: 1
+
+# Server configuration
+server:
+  # Enable read-only mode (disables write operations)
+  readOnly: false
+  # Features to enable (e.g., "all-pulsar", "pulsar-admin", "pulsar-client")
+  # Leave empty to use default (all-pulsar)
+  features: []
+  # HTTP server address
+  httpAddr: ":9090"
+  # HTTP server path for SSE endpoint
+  httpPath: "/mcp"
+
+# Pulsar cluster configuration (required)
+pulsar:
+  # Pulsar web service URL (required)
+  webServiceURL: ""
+  # Pulsar broker service URL (optional, for client operations)
+  serviceURL: ""
+  # TLS configuration for Pulsar connection
+  tls:
+    enabled: false
+    # Name of existing secret containing TLS certs
+    secretName: ""
+    # Allow insecure TLS connection
+    allowInsecureConnection: false
+    # Enable hostname verification
+    enableHostnameVerification: true
+    # Path to trust certs file (mounted from secret)
+    trustCertsFilePath: ""
+    # Path to client cert file (mounted from secret)
+    certFile: ""
+    # Path to client key file (mounted from secret)
+    keyFile: ""
+
+# Session management configuration
+# Note: Multi-session mode is always enabled in this chart
+session:
+  # Maximum number of cached Pulsar sessions
+  cacheSize: 100
+  # Session TTL in minutes before eviction
+  ttlMinutes: 30
+
+# Kubernetes Service configuration
+service:
+  type: ClusterIP
+  port: 9090
+  annotations: {}
+
+# Ingress configuration
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: mcp.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  #  - secretName: mcp-tls
+  #    hosts:
+  #      - mcp.example.com
+
+# ServiceAccount configuration
+serviceAccount:
+  # Create a service account
+  create: true
+  # Annotations for the service account
+  annotations: {}
+  # Name of the service account (auto-generated if empty)
+  name: ""
+
+# Pod resource limits and requests
+resources: {}
+  # limits:
+  #   cpu: 500m
+  #   memory: 512Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+# Pod annotations
+podAnnotations: {}
+
+# Pod security context
+podSecurityContext:
+  fsGroup: 1000
+
+# Container security context
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  readOnlyRootFilesystem: true
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity rules
+affinity: {}
+
+# Logging configuration
+logging:
+  enabled: false
+  # Log file path (inside container)
+  logFile: "/tmp/snmcp.log"
+
+# Reserved for future Multi-Session Kafka support
+# kafka:
+#   enabled: false
+#   bootstrapServers: ""
