@@ -50,7 +50,7 @@ func SetContext(ctx context.Context, options *config.Options, instanceName, clus
 	if err != nil {
 		return fmt.Errorf("failed to list pulsar instances: %v", err)
 	}
-	defer instancesBody.Body.Close()
+	defer func() { _ = instancesBody.Body.Close() }()
 
 	var instance sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarInstance
 	foundInstance := false
@@ -61,18 +61,18 @@ func SetContext(ctx context.Context, options *config.Options, instanceName, clus
 				foundInstance = true
 				break
 			}
-			return fmt.Errorf("Pulsar instance %s is not valid", instanceName)
+			return fmt.Errorf("pulsar instance %s is not valid", instanceName)
 		}
 	}
 	if !foundInstance {
-		return fmt.Errorf("Pulsar instance %s not found in organization %s", instanceName, options.Organization)
+		return fmt.Errorf("pulsar instance %s not found in organization %s", instanceName, options.Organization)
 	}
 
 	clusters, clustersBody, err := apiClient.CloudStreamnativeIoV1alpha1Api.ListCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(ctx, options.Organization).Execute()
 	if err != nil {
 		return fmt.Errorf("failed to list pulsar clusters: %v", err)
 	}
-	defer clustersBody.Body.Close()
+	defer func() { _ = clustersBody.Body.Close() }()
 	var cluster sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarCluster
 	foundCluster := false
 	for _, c := range clusters.Items {
@@ -82,11 +82,11 @@ func SetContext(ctx context.Context, options *config.Options, instanceName, clus
 				foundCluster = true
 				break
 			}
-			return fmt.Errorf("Pulsar cluster %s is not available", clusterName)
+			return fmt.Errorf("pulsar cluster %s is not available", clusterName)
 		}
 	}
 	if !foundCluster {
-		return fmt.Errorf("Pulsar cluster %s not found", clusterName)
+		return fmt.Errorf("pulsar cluster %s not found", clusterName)
 	}
 
 	clusterUID := string(*cluster.Metadata.Uid)

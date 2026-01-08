@@ -25,10 +25,11 @@ import (
 )
 
 const (
+	// DefaultClientTimeout is the default timeout for Pulsar client operations.
 	DefaultClientTimeout = 30 * time.Second
 )
 
-//nolint:revive
+// PulsarContext holds configuration for connecting to a Pulsar cluster.
 type PulsarContext struct {
 	ServiceURL                    string
 	WebServiceURL                 string

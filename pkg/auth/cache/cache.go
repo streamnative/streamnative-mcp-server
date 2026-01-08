@@ -51,6 +51,7 @@ type tokenCache struct {
 	token     *oauth2.Token
 }
 
+// NewDefaultTokenCache creates a default token cache with the given store and refresher.
 func NewDefaultTokenCache(store store.Store, audience string,
 	refresher auth.AuthorizationGrantRefresher) (CachingTokenSource, error) {
 	cache := &tokenCache{

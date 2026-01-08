@@ -110,7 +110,7 @@ func initLogger(filePath string) (*logrus.Logger, error) {
 		return logrus.New(), nil
 	}
 
-	fd, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	fd, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open log file: %w", err)
 	}

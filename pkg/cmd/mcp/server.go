@@ -29,7 +29,7 @@ import (
 )
 
 func newMcpServer(_ context.Context, configOpts *ServerOptions, logrusLogger *logrus.Logger) (*mcp.Server, error) {
-	snConfig := configOpts.Options.LoadConfigOrDie()
+	snConfig := configOpts.LoadConfigOrDie()
 	var s *server.MCPServer
 	var mcpServer *mcp.Server
 	switch {

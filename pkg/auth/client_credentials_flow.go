@@ -41,6 +41,7 @@ type ClientCredentialsExchanger interface {
 	ExchangeClientCredentials(req ClientCredentialsExchangeRequest) (*TokenResult, error)
 }
 
+// NewClientCredentialsFlow creates a new client credentials flow with the given components.
 func NewClientCredentialsFlow(
 	issuerData Issuer,
 	provider ClientCredentialsProvider,
@@ -127,6 +128,7 @@ type ClientCredentialsGrantRefresher struct {
 	clock      clock.Clock
 }
 
+// NewDefaultClientCredentialsGrantRefresher creates a default client credentials grant refresher.
 func NewDefaultClientCredentialsGrantRefresher(issuerData Issuer,
 	clock clock.Clock) (*ClientCredentialsGrantRefresher, error) {
 	wellKnownEndpoints, err := GetOIDCWellKnownEndpointsFromIssuerURL(issuerData.IssuerEndpoint)

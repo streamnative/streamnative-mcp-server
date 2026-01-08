@@ -61,7 +61,7 @@ type Server struct {
 func NewPulsarFunctionManager(snServer *Server, readOnly bool, options *ManagerOptions, sessionID string) (*PulsarFunctionManager, error) {
 	// Get Pulsar client and admin client
 	if snServer.PulsarSession == nil {
-		return nil, fmt.Errorf("Pulsar session not found in context")
+		return nil, fmt.Errorf("pulsar session not found in context")
 	}
 
 	// Get Pulsar client from session using type-safe interface

@@ -80,12 +80,14 @@ func NewSession(ctx KafkaContext) (*Session, error) {
 	return session, nil
 }
 
+// SASLConfig holds SASL authentication configuration.
 type SASLConfig struct {
 	Mechanism string
 	Username  string
 	Password  string
 }
 
+// TLSConfig holds TLS configuration for Kafka connections.
 type TLSConfig struct {
 	Enabled        bool
 	ClientKeyFile  string
@@ -116,7 +118,7 @@ func tlsOpt(config *TLSConfig, opts []kgo.Opt) ([]kgo.Opt, error) {
 func saslOpt(config *SASLConfig, opts []kgo.Opt) ([]kgo.Opt, error) {
 	if config.Mechanism != "" || config.Username != "" || config.Password != "" {
 		if config.Mechanism == "" || config.Username == "" || config.Password == "" {
-			return nil, fmt.Errorf("All of Mechanism, Username, and Password must be specified if any are")
+			return nil, fmt.Errorf("all of Mechanism, Username, and Password must be specified if any are")
 		}
 		method := strings.ToLower(config.Mechanism)
 		method = strings.ReplaceAll(method, "-", "")
