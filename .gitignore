@@ -11,3 +11,4 @@ vendor
 .cursor/
 agents/
 .serena/
+.envrc
