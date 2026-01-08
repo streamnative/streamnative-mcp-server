@@ -1,5 +1,5 @@
 pulsar:
-  image: snstage/pulsar-all:4.1.0.10
+  image: apachepulsar/pulsar-all:4.1.0
   ports:
     broker: 6650
     web: 8080

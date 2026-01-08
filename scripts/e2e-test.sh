@@ -5,8 +5,9 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 E2E_DIR="${ROOT_DIR}/charts/snmcp/e2e"
 
 PULSAR_CONTAINER="${PULSAR_CONTAINER:-pulsar-standalone}"
-PULSAR_IMAGE="${PULSAR_IMAGE:-snstage/pulsar-all:4.1.0.10}"
+PULSAR_IMAGE="${PULSAR_IMAGE:-apachepulsar/pulsar-all:4.1.0}"
 KIND_NETWORK="${KIND_NETWORK:-kind}"
+KIND_CLUSTER_NAME="${KIND_CLUSTER_NAME:-kind}"
 PULSAR_WEB_PORT="${PULSAR_WEB_PORT:-8080}"
 PULSAR_BROKER_PORT="${PULSAR_BROKER_PORT:-6650}"
 PULSAR_STARTUP_TIMEOUT="${PULSAR_STARTUP_TIMEOUT:-180}"
@@ -15,10 +16,16 @@ PULSAR_STARTUP_INTERVAL="${PULSAR_STARTUP_INTERVAL:-3}"
 SNMCP_RELEASE="${SNMCP_RELEASE:-snmcp}"
 SNMCP_NAMESPACE="${SNMCP_NAMESPACE:-default}"
 SNMCP_CHART_DIR="${SNMCP_CHART_DIR:-${ROOT_DIR}/charts/snmcp}"
-SNMCP_FEATURES="${SNMCP_FEATURES:-pulsar-admin,pulsar-client}"
+SNMCP_FEATURES=""
 SNMCP_IMAGE_REPO="${SNMCP_IMAGE_REPO:-}"
 SNMCP_IMAGE_TAG="${SNMCP_IMAGE_TAG:-}"
 SNMCP_WAIT_TIMEOUT="${SNMCP_WAIT_TIMEOUT:-180s}"
+SNMCP_HTTP_PATH="${SNMCP_HTTP_PATH:-/mcp}"
+SNMCP_SERVICE_PORT="${SNMCP_SERVICE_PORT:-9090}"
+SNMCP_LOCAL_PORT="${SNMCP_LOCAL_PORT:-19090}"
+SNMCP_PORT_FORWARD_TIMEOUT="${SNMCP_PORT_FORWARD_TIMEOUT:-60}"
+SNMCP_E2E_BIN="${SNMCP_E2E_BIN:-${ROOT_DIR}/bin/snmcp-e2e}"
+SNMCP_PORT_FORWARD_PID=""
 
 TOKEN_ENV_FILE="${TOKEN_ENV_FILE:-${E2E_DIR}/test-tokens.env}"
 TOKEN_SECRET_FILE="${TOKEN_SECRET_FILE:-${E2E_DIR}/test-secret.key}"
@@ -53,6 +60,19 @@ pulsar_ip() {
   docker inspect -f "{{.NetworkSettings.Networks.${KIND_NETWORK}.IPAddress}}" "$PULSAR_CONTAINER"
 }
 
+wait_for_http() {
+  local url="$1"
+  local timeout="$2"
+  local deadline=$((SECONDS + timeout))
+  while ((SECONDS < deadline)); do
+    if curl -fsS "$url" >/dev/null; then
+      return 0
+    fi
+    sleep 2
+  done
+  return 1
+}
+
 setup_pulsar() {
   require_cmd docker
   require_cmd curl
@@ -78,7 +98,7 @@ setup_pulsar() {
     -e PULSAR_PREFIX_brokerClientAuthenticationParameters="token:${ADMIN_TOKEN}" \
     -v "$TOKEN_SECRET_FILE:/pulsarctl/test/auth/token/secret.key:ro" \
     "$PULSAR_IMAGE" \
-    bash -lc 'set -- $(hostname -i); export PULSAR_PREFIX_advertisedAddress=$1; exec bin/pulsar standalone' \
+    bash -lc 'set -- $(hostname -i); export PULSAR_PREFIX_advertisedAddress=$1; bin/apply-config-from-env.py /pulsar/conf/standalone.conf; exec bin/pulsar standalone' \
     >/dev/null
 
   log "waiting for pulsar to be ready"
@@ -98,6 +118,21 @@ setup_pulsar() {
   die "pulsar not ready after ${PULSAR_STARTUP_TIMEOUT}s"
 }
 
+build_image() {
+  require_cmd docker
+  require_cmd kind
+
+  SNMCP_IMAGE_REPO="${SNMCP_IMAGE_REPO:-snmcp-e2e}"
+  SNMCP_IMAGE_TAG="${SNMCP_IMAGE_TAG:-local}"
+
+  local image_ref="${SNMCP_IMAGE_REPO}:${SNMCP_IMAGE_TAG}"
+  log "building image ${image_ref}"
+  docker build -t "$image_ref" -f "${ROOT_DIR}/Dockerfile" "$ROOT_DIR" >/dev/null
+
+  log "loading image into kind"
+  kind load docker-image "$image_ref" --name "$KIND_CLUSTER_NAME" >/dev/null
+}
+
 deploy_mcp() {
   require_cmd helm
   require_cmd kubectl
@@ -113,7 +148,6 @@ deploy_mcp() {
     --create-namespace
     --set "pulsar.webServiceURL=http://${ip}:${PULSAR_WEB_PORT}"
     --set "pulsar.serviceURL=pulsar://${ip}:${PULSAR_BROKER_PORT}"
-    --set "server.features={${SNMCP_FEATURES}}"
     --wait
     --timeout "$SNMCP_WAIT_TIMEOUT"
   )
@@ -137,6 +171,32 @@ deploy_mcp() {
   log "snmcp deployed and ready"
 }
 
+run_tests() {
+  require_cmd kubectl
+  require_cmd go
+  require_cmd curl
+  load_tokens
+
+  log "building snmcp-e2e binary"
+  go build -o "$SNMCP_E2E_BIN" "${ROOT_DIR}/cmd/snmcp-e2e" >/dev/null
+
+  log "starting port-forward for snmcp service"
+  kubectl port-forward "svc/${SNMCP_RELEASE}" "${SNMCP_LOCAL_PORT}:${SNMCP_SERVICE_PORT}" \
+    --namespace "$SNMCP_NAMESPACE" >/dev/null 2>&1 &
+  SNMCP_PORT_FORWARD_PID=$!
+
+  trap 'if [[ -n "${SNMCP_PORT_FORWARD_PID:-}" ]]; then kill "$SNMCP_PORT_FORWARD_PID" >/dev/null 2>&1 || true; fi' RETURN
+
+  local health_url="http://127.0.0.1:${SNMCP_LOCAL_PORT}${SNMCP_HTTP_PATH}/healthz"
+  if ! wait_for_http "$health_url" "$SNMCP_PORT_FORWARD_TIMEOUT"; then
+    die "port-forward did not become ready within ${SNMCP_PORT_FORWARD_TIMEOUT}s"
+  fi
+
+  local http_base="http://127.0.0.1:${SNMCP_LOCAL_PORT}${SNMCP_HTTP_PATH}"
+  log "running snmcp-e2e against ${http_base}"
+  E2E_HTTP_BASE="$http_base" "$SNMCP_E2E_BIN"
+}
+
 cleanup() {
   require_cmd docker
 
@@ -155,9 +215,11 @@ Usage: $0 <command>
 
 Commands:
   setup-pulsar   Start Pulsar standalone with JWT auth on the kind network
+  build-image    Build snmcp image and load into kind
   deploy-mcp     Deploy snmcp Helm chart and wait for readiness
+  run-tests      Port-forward snmcp service and run E2E client
   cleanup        Remove Pulsar container and uninstall snmcp release
-  all            Run setup-pulsar then deploy-mcp
+  all            Run setup-pulsar, build-image, deploy-mcp, and run-tests
 USAGE
 }
 
@@ -167,15 +229,23 @@ main() {
     setup-pulsar)
       setup_pulsar
       ;;
+    build-image)
+      build_image
+      ;;
     deploy-mcp)
       deploy_mcp
+      ;;
+    run-tests)
+      run_tests
       ;;
     cleanup)
       cleanup
       ;;
     all)
       setup_pulsar
+      build_image
       deploy_mcp
+      run_tests
       ;;
     *)
       usage

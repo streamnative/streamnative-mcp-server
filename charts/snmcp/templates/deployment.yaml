@@ -106,8 +106,12 @@ spec:
             failureThreshold: 3
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          {{- if or .Values.pulsar.tls.enabled .Values.logging.enabled }}
+          {{- if or .Values.pulsar.tls.enabled .Values.logging.enabled .Values.server.configDir }}
           volumeMounts:
+            {{- if .Values.server.configDir }}
+            - name: config-dir
+              mountPath: {{ .Values.server.configDir | quote }}
+            {{- end }}
             {{- if and .Values.pulsar.tls.enabled .Values.pulsar.tls.secretName }}
             - name: pulsar-tls
               mountPath: /etc/snmcp/tls
@@ -118,8 +122,12 @@ spec:
               mountPath: /tmp
             {{- end }}
           {{- end }}
-      {{- if or .Values.pulsar.tls.enabled .Values.logging.enabled }}
+      {{- if or .Values.pulsar.tls.enabled .Values.logging.enabled .Values.server.configDir }}
       volumes:
+        {{- if .Values.server.configDir }}
+        - name: config-dir
+          emptyDir: {}
+        {{- end }}
         {{- if and .Values.pulsar.tls.enabled .Values.pulsar.tls.secretName }}
         - name: pulsar-tls
           secret:
