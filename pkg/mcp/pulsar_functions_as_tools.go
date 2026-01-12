@@ -31,6 +31,7 @@ var (
 	functionManagersLock sync.RWMutex
 )
 
+// StopAllPulsarFunctionManagers stops and removes all function managers.
 func StopAllPulsarFunctionManagers() {
 	functionManagersLock.Lock()
 	defer functionManagersLock.Unlock()
@@ -48,6 +49,7 @@ func StopAllPulsarFunctionManagers() {
 	log.Println("All Pulsar Function managers stopped")
 }
 
+// PulsarFunctionManagedMcpTools registers Pulsar Functions-as-tools handlers.
 func (s *Server) PulsarFunctionManagedMcpTools(readOnly bool, features []string, sessionID string) {
 	if !slices.Contains(features, string(FeatureAll)) &&
 		!slices.Contains(features, string(FeatureFunctionsAsTools)) &&

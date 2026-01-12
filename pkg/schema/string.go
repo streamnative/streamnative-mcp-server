@@ -36,6 +36,7 @@ func NewStringConverter() *StringConverter {
 	}
 }
 
+// ToMCPToolInputSchemaProperties converts string schema info into MCP tool options.
 func (c *StringConverter) ToMCPToolInputSchemaProperties(schemaInfo *cliutils.SchemaInfo) ([]mcp.ToolOption, error) {
 	if schemaInfo.Type != "STRING" && schemaInfo.Type != "BYTES" {
 		return nil, fmt.Errorf("expected STRING or BYTES schema, got %s", schemaInfo.Type)
@@ -46,6 +47,7 @@ func (c *StringConverter) ToMCPToolInputSchemaProperties(schemaInfo *cliutils.Sc
 	}, nil
 }
 
+// SerializeMCPRequestToPulsarPayload serializes MCP arguments into a string payload.
 func (c *StringConverter) SerializeMCPRequestToPulsarPayload(arguments map[string]any, targetPulsarSchemaInfo *cliutils.SchemaInfo) ([]byte, error) {
 	if err := c.ValidateArguments(arguments, targetPulsarSchemaInfo); err != nil {
 		return nil, fmt.Errorf("arguments validation failed: %w", err)
@@ -59,6 +61,7 @@ func (c *StringConverter) SerializeMCPRequestToPulsarPayload(arguments map[strin
 	return []byte(payload), nil
 }
 
+// ValidateArguments validates arguments against the string schema.
 func (c *StringConverter) ValidateArguments(arguments map[string]any, targetPulsarSchemaInfo *cliutils.SchemaInfo) error {
 	if targetPulsarSchemaInfo.Type != "STRING" && targetPulsarSchemaInfo.Type != "BYTES" {
 		return fmt.Errorf("expected STRING or BYTES schema, got %s", targetPulsarSchemaInfo.Type)

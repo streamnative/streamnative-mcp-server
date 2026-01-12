@@ -24,10 +24,13 @@ import (
 )
 
 const (
-	ServiceName  = "StreamNativeMCP"
+	// ServiceName is the name used for keyring service.
+	ServiceName = "StreamNativeMCP"
+	// KeychainName is the name of the macOS keychain.
 	KeychainName = "snmcp"
 )
 
+// AuthOptions provides configuration options for authentication.
 type AuthOptions struct {
 	BackendOverride string
 	storage         Storage
@@ -37,15 +40,18 @@ type AuthOptions struct {
 	store.Store
 }
 
+// NewDefaultAuthOptions creates a new AuthOptions with default values.
 func NewDefaultAuthOptions() AuthOptions {
 	return AuthOptions{}
 }
 
+// AddFlags registers authentication flags on the command.
 func (o *AuthOptions) AddFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().StringVar(&o.BackendOverride, "keyring-backend", "",
 		"If present, the backend to use")
 }
 
+// Complete initializes the auth backend using the provided storage.
 func (o *AuthOptions) Complete(storage Storage) error {
 	o.storage = storage
 	kr, err := o.makeKeyring()

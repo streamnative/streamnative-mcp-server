@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
@@ -264,7 +265,7 @@ func (b *PulsarAdminSchemaToolBuilder) handleSchemaUpload(admin cmdutils.Client,
 
 	// Read and parse the schema file
 	var payload utils.PostSchemaPayload
-	file, err := os.ReadFile(filename)
+	file, err := os.ReadFile(filepath.Clean(filename))
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to read schema file '%s': %v", filename, err)), nil
 	}

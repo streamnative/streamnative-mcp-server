@@ -29,12 +29,12 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
-	"github.com/streamnative/streamnative-mcp-server/pkg/mcp"
-	context2 "github.com/streamnative/streamnative-mcp-server/pkg/mcp"
+	mcpctx "github.com/streamnative/streamnative-mcp-server/pkg/mcp"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/session"
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
+// NewCmdMcpSseServer builds the SSE server command.
 func NewCmdMcpSseServer(configOpts *ServerOptions) *cobra.Command {
 	sseCmd := &cobra.Command{
 		Use:   "sse",
@@ -76,12 +76,12 @@ func runSseServer(configOpts *ServerOptions) error {
 	}
 
 	// 4. Set the context
-	ctx = context2.WithSNCloudSession(ctx, mcpServer.SNCloudSession)
-	ctx = context2.WithPulsarSession(ctx, mcpServer.PulsarSession)
-	ctx = context2.WithKafkaSession(ctx, mcpServer.KafkaSession)
-	if configOpts.Options.KeyFile != "" {
-		if configOpts.Options.PulsarInstance != "" && configOpts.Options.PulsarCluster != "" {
-			err = mcp.SetContext(ctx, configOpts.Options, configOpts.Options.PulsarInstance, configOpts.Options.PulsarCluster)
+	ctx = mcpctx.WithSNCloudSession(ctx, mcpServer.SNCloudSession)
+	ctx = mcpctx.WithPulsarSession(ctx, mcpServer.PulsarSession)
+	ctx = mcpctx.WithKafkaSession(ctx, mcpServer.KafkaSession)
+	if configOpts.KeyFile != "" {
+		if configOpts.PulsarInstance != "" && configOpts.PulsarCluster != "" {
+			err = mcpctx.SetContext(ctx, configOpts.Options, configOpts.PulsarInstance, configOpts.PulsarCluster)
 			if err != nil {
 				return errors.Wrap(err, "failed to set StreamNative Cloud context")
 			}
@@ -94,7 +94,7 @@ func runSseServer(configOpts *ServerOptions) error {
 
 	// Create Pulsar session manager for multi-session support (only for external Pulsar mode)
 	var pulsarSessionManager *session.PulsarSessionManager
-	snConfig := configOpts.Options.LoadConfigOrDie()
+	snConfig := configOpts.LoadConfigOrDie()
 	if snConfig.ExternalPulsar != nil && configOpts.MultiSessionPulsar {
 		managerConfig := &session.PulsarSessionManagerConfig{
 			MaxSessions:     configOpts.SessionCacheSize,
@@ -120,15 +120,15 @@ func runSseServer(configOpts *ServerOptions) error {
 		server.WithStaticBasePath(configOpts.HTTPPath),
 		server.WithSSEContextFunc(func(ctx context.Context, r *http.Request) context.Context {
 			c := context.WithValue(ctx, common.OptionsKey, configOpts.Options)
-			c = context2.WithKafkaSession(c, mcpServer.KafkaSession)
-			c = context2.WithSNCloudSession(c, mcpServer.SNCloudSession)
+			c = mcpctx.WithKafkaSession(c, mcpServer.KafkaSession)
+			c = mcpctx.WithSNCloudSession(c, mcpServer.SNCloudSession)
 
 			// Handle per-user Pulsar sessions
 			if pulsarSessionManager != nil {
 				token := session.ExtractBearerToken(r)
 				// Token is already validated in auth middleware, this should always succeed
 				if pulsarSession, err := pulsarSessionManager.GetOrCreateSession(ctx, token); err == nil {
-					c = context2.WithPulsarSession(c, pulsarSession)
+					c = mcpctx.WithPulsarSession(c, pulsarSession)
 					if token != "" {
 						c = session.WithUserTokenHash(c, pulsarSessionManager.HashTokenForLog(token))
 					}
@@ -138,7 +138,7 @@ func runSseServer(configOpts *ServerOptions) error {
 					// Don't set PulsarSession - tool handlers will fail gracefully with "session not found"
 				}
 			} else {
-				c = context2.WithPulsarSession(c, mcpServer.PulsarSession)
+				c = mcpctx.WithPulsarSession(c, mcpServer.PulsarSession)
 			}
 
 			return c

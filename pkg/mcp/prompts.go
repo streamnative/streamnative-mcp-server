@@ -28,6 +28,7 @@ import (
 	"k8s.io/utils/ptr"
 )
 
+// ServerlessPoolMember describes a serverless pool option.
 type ServerlessPoolMember struct {
 	Provider  string
 	Namespace string
@@ -36,6 +37,7 @@ type ServerlessPoolMember struct {
 }
 
 var (
+	// ServerlessPoolMemberList defines the supported serverless pools.
 	ServerlessPoolMemberList = []ServerlessPoolMember{
 		{
 			Provider:  "azure",
@@ -56,9 +58,11 @@ var (
 		// 	Location:  "us-central1",
 		// },
 	}
+	// AvailableProviders lists supported cloud providers.
 	AvailableProviders = []string{"azure", "aws", "gcloud"}
 )
 
+// RegisterPrompts registers prompt handlers on the server.
 func RegisterPrompts(s *server.MCPServer) {
 	s.AddPrompt(mcp.NewPrompt("list-sncloud-clusters",
 		mcp.WithPromptDescription("List all clusters from the StreamNative Cloud"),
@@ -78,6 +82,7 @@ func RegisterPrompts(s *server.MCPServer) {
 	)
 }
 
+// HandleListPulsarClusters handles listing StreamNative Cloud clusters.
 func HandleListPulsarClusters(ctx context.Context, _ mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
 	// Get API client from session
 	session := context2.GetSNCloudSession(ctx)
@@ -94,7 +99,7 @@ func HandleListPulsarClusters(ctx context.Context, _ mcp.GetPromptRequest) (*mcp
 	if err != nil {
 		return nil, fmt.Errorf("failed to list pulsar clusters: %v", err)
 	}
-	defer clustersBody.Body.Close()
+	defer func() { _ = clustersBody.Body.Close() }()
 
 	var messages = make(
 		[]mcp.PromptMessage,
@@ -170,7 +175,7 @@ func handleReadPulsarCluster(ctx context.Context, request mcp.GetPromptRequest) 
 	if err != nil {
 		return nil, fmt.Errorf("failed to list pulsar clusters: %v", err)
 	}
-	defer clustersBody.Body.Close()
+	defer func() { _ = clustersBody.Body.Close() }()
 	var cluster sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarCluster
 	for _, c := range clusters.Items {
 		if *c.Metadata.Name == name {
@@ -248,7 +253,7 @@ func handleBuildServerlessPulsarCluster(ctx context.Context, request mcp.GetProm
 	if err != nil {
 		return nil, fmt.Errorf("failed to list pool options: %v", err)
 	}
-	defer poolOptionsBody.Body.Close()
+	defer func() { _ = poolOptionsBody.Body.Close() }()
 	if poolOptions == nil {
 		return nil, fmt.Errorf("no pool options found")
 	}

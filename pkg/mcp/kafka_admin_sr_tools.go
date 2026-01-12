@@ -22,6 +22,7 @@ import (
 	kafkabuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/kafka"
 )
 
+// KafkaAdminAddSchemaRegistryTools registers Kafka Schema Registry tools.
 func KafkaAdminAddSchemaRegistryTools(s *server.MCPServer, readOnly bool, features []string) {
 	// Use the new builder pattern
 	builder := kafkabuilders.NewKafkaSchemaRegistryToolBuilder()

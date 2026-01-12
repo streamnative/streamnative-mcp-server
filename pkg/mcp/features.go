@@ -14,8 +14,10 @@
 
 package mcp
 
+// Feature represents a named capability flag for MCP tools.
 type Feature string
 
+// Feature flags used to register MCP tools.
 const (
 	FeatureAll                          Feature = "all"
 	FeatureAllKafka                     Feature = "all-kafka"

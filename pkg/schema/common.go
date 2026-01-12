@@ -20,7 +20,7 @@ import (
 	"github.com/apache/pulsar-client-go/pulsar"
 )
 
-// GetSchemaType 返回Schema类型的字符串表示
+// GetSchemaType returns the string representation of a schema type.
 func GetSchemaType(schemaType pulsar.SchemaType) string {
 	switch schemaType {
 	case pulsar.AVRO:

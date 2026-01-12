@@ -245,12 +245,7 @@ func (b *PulsarClientConsumeToolBuilder) buildConsumeHandler(_ bool) func(contex
 		messageCount := 0
 
 		// Consume messages
-		for {
-			// Check if we've consumed the requested number of messages
-			if numMessages > 0 && messageCount >= numMessages {
-				break
-			}
-
+		for numMessages <= 0 || messageCount < numMessages {
 			// Receive message with timeout
 			msg, err := consumer.Receive(consumeCtx)
 			if err != nil {

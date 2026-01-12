@@ -22,9 +22,11 @@ import (
 )
 
 const (
+	// ParamName is the default parameter name for payload arguments.
 	ParamName = "payload"
 )
 
+// Converter defines schema conversion behaviors for MCP tools.
 type Converter interface {
 	ToMCPToolInputSchemaProperties(pulsarSchemaInfo *cliutils.SchemaInfo) ([]mcp.ToolOption, error)
 
@@ -33,6 +35,7 @@ type Converter interface {
 	ValidateArguments(arguments map[string]any, targetPulsarSchemaInfo *cliutils.SchemaInfo) error
 }
 
+// ConverterFactory returns a converter for the given schema type.
 func ConverterFactory(schemaType string) (Converter, error) {
 	switch schemaType {
 	case "AVRO":
@@ -50,6 +53,7 @@ func ConverterFactory(schemaType string) (Converter, error) {
 	}
 }
 
+// BaseConverter provides shared fields for schema converters.
 type BaseConverter struct {
 	ParamName string
 }

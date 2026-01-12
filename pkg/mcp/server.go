@@ -22,6 +22,7 @@ import (
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
+// Server wraps MCP server state and StreamNative sessions.
 type Server struct {
 	MCPServer      *server.MCPServer
 	KafkaSession   *kafka.Session
@@ -30,6 +31,7 @@ type Server struct {
 	logger         *logrus.Logger
 }
 
+// NewServer creates a new MCP server with StreamNative integrations.
 func NewServer(name, version string, logger *logrus.Logger, opts ...server.ServerOption) *Server {
 	// Create a new MCP server
 	opts = AddOpts(opts...)
@@ -38,6 +40,7 @@ func NewServer(name, version string, logger *logrus.Logger, opts ...server.Serve
 	return mcpserver
 }
 
+// AddOpts merges default server options with custom options.
 func AddOpts(opts ...server.ServerOption) []server.ServerOption {
 	defaultOpts := []server.ServerOption{
 		server.WithResourceCapabilities(true, true),
@@ -48,6 +51,7 @@ func AddOpts(opts ...server.ServerOption) []server.ServerOption {
 	return opts
 }
 
+// CreateSNCloudMCPServer constructs a Server wrapper for StreamNative Cloud.
 func CreateSNCloudMCPServer(s *server.MCPServer, logger *logrus.Logger) *Server {
 	mcpserver := &Server{
 		MCPServer:      s,

@@ -24,6 +24,7 @@ import (
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 )
 
+// DefaultStringSchema defines the default MCP input schema for string payloads.
 var DefaultStringSchema = &mcp.ToolInputSchema{
 	Type: "object",
 	Properties: map[string]interface{}{
@@ -123,6 +124,7 @@ func convertComplexSchemaToToolInput(schemaInfo *SchemaInfo) (*mcp.ToolInputSche
 	}, nil
 }
 
+// GetPulsarTypeSchema converts SchemaInfo into a Pulsar schema.
 func GetPulsarTypeSchema(schemaInfo *SchemaInfo) (pulsar.Schema, error) {
 	if schemaInfo == nil || schemaInfo.Definition == nil {
 		return pulsar.NewStringSchema(nil), nil

@@ -26,6 +26,7 @@ import (
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 )
 
+// RegisterContextTools registers context-related tools on the server.
 func RegisterContextTools(s *server.MCPServer, features []string, skipContextTools bool) {
 	if !slices.Contains(features, string(FeatureStreamNativeCloud)) && !slices.Contains(features, string(FeatureAll)) {
 		return

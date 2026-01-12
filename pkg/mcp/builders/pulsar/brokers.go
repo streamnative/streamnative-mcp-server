@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package pulsar provides MCP tool builders for Pulsar admin operations.
 package pulsar
 
 import (

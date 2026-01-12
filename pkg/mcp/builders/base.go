@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package builders provides common interfaces and helpers for MCP tool builders.
 package builders
 
 import (
