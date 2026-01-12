@@ -31,6 +31,7 @@ helm install snmcp ./charts/snmcp \
 | `server.features` | `[]` | Features to enable (default: all-pulsar) |
 | `server.httpAddr` | `:9090` | HTTP server address |
 | `server.httpPath` | `/mcp` | Base path for SSE/message/health endpoints |
+| `server.configDir` | `/var/lib/snmcp` | Config directory for snmcp state (must be writable) |
 
 ### Session Configuration
 

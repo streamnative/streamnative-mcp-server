@@ -111,6 +111,7 @@ spec:
             {{- if .Values.server.configDir }}
             - name: config-dir
               mountPath: {{ .Values.server.configDir | quote }}
+              readOnly: false
             {{- end }}
             {{- if and .Values.pulsar.tls.enabled .Values.pulsar.tls.secretName }}
             - name: pulsar-tls

@@ -22,7 +22,7 @@ server:
   httpAddr: ":9090"
   # HTTP server base path for SSE, message, and health endpoints
   httpPath: "/mcp"
-  # Config directory for snmcp state
+  # Config directory for snmcp state (must be writable)
   configDir: "/var/lib/snmcp"
 
 # Pulsar cluster configuration (required)
