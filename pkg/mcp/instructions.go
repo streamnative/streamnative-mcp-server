@@ -20,6 +20,7 @@ import (
 	"github.com/streamnative/streamnative-mcp-server/pkg/config"
 )
 
+// GetStreamNativeCloudServerInstructions renders instructions for StreamNative Cloud.
 func GetStreamNativeCloudServerInstructions(userName string, snConfig *config.SnConfig) string {
 	contextInformation := ""
 	if snConfig.Context.PulsarCluster != "" && snConfig.Context.PulsarInstance != "" {
@@ -85,12 +86,14 @@ func GetStreamNativeCloudServerInstructions(userName string, snConfig *config.Sn
 	Logged in as %s. %s`, userName, contextInformation)
 }
 
+// GetExternalKafkaServerInstructions renders instructions for external Kafka.
 func GetExternalKafkaServerInstructions(bootstrapServers string) string {
 	return fmt.Sprintf(`StreamNative Cloud MCP Server provides resources and tools for AI agents to interact with Kafka resources and services.
 
 	Bootstrap servers: %s`, bootstrapServers)
 }
 
+// GetExternalPulsarServerInstructions renders instructions for external Pulsar.
 func GetExternalPulsarServerInstructions(webServiceURL string) string {
 	return fmt.Sprintf(`StreamNative Cloud MCP Server provides resources and tools for AI agents to interact with Pulsar resources and services.
 

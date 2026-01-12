@@ -63,7 +63,7 @@ func avroFieldToMcpOption(field *avro.Field) (mcp.ToolOption, error) {
 	}
 
 	isRequired := true
-	var underlyingTypeForDefault avro.Schema = fieldType // Used to check default value against non-union type
+	underlyingTypeForDefault := fieldType // Used to check default value against non-union type
 
 	if unionSchema, ok := fieldType.(*avro.UnionSchema); ok {
 		isNullAble := false

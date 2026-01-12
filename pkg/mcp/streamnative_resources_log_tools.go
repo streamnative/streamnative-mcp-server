@@ -31,6 +31,7 @@ import (
 	context2 "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
 
+// FunctionConnectorList lists supported log components.
 var FunctionConnectorList = []string{"sink", "source", "function", "kafka-connect"}
 
 // StreamNativeAddLogTools adds log tools
@@ -79,6 +80,7 @@ func StreamNativeAddLogTools(s *server.MCPServer, _ bool, features []string) {
 	s.AddTool(logTool, handleStreamNativeResourcesLog)
 }
 
+// LogOptions captures parameters for StreamNative log queries.
 type LogOptions struct {
 	ServiceURL                   string
 	Organization                 string
@@ -97,11 +99,13 @@ type LogOptions struct {
 	InsecureSkipTLSVerifyBackend bool
 }
 
+// LogResult represents a log query response.
 type LogResult struct {
 	Total int          `json:"total"`
 	Data  []LogContent `json:"data"`
 }
 
+// LogContent represents a single log entry.
 type LogContent struct {
 	Message  string `json:"message"`
 	Position int64  `json:"position"`
@@ -241,7 +245,7 @@ func (o *LogOptions) getLogs(client *http.Client, position int64,
 	if err != nil {
 		return results, fmt.Errorf("failed to request logs (%s): %v", url, err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	var logResult LogResult
 	var body []byte

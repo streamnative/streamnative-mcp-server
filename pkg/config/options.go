@@ -27,15 +27,22 @@ import (
 )
 
 const (
-	EnvConfigDir               = "SNMCP_CONFIG_DIR"
-	GlobalDefaultIssuer        = "https://auth.streamnative.cloud/"
-	GlobalDefaultClientID      = "AJYEdHWi9EFekEaUXkPWA2MqQ3lq1NrI"
-	GlobalDefaultAudience      = "https://api.streamnative.cloud"
-	GlobalDefaultAPIServer     = "https://api.streamnative.cloud"
+	// EnvConfigDir overrides the default config directory.
+	EnvConfigDir = "SNMCP_CONFIG_DIR"
+	// GlobalDefaultIssuer is the default OAuth2 issuer.
+	GlobalDefaultIssuer = "https://auth.streamnative.cloud/"
+	// GlobalDefaultClientID is the default OAuth2 client ID.
+	GlobalDefaultClientID = "AJYEdHWi9EFekEaUXkPWA2MqQ3lq1NrI"
+	// GlobalDefaultAudience is the default OAuth2 audience.
+	GlobalDefaultAudience = "https://api.streamnative.cloud"
+	// GlobalDefaultAPIServer is the default API server URL.
+	GlobalDefaultAPIServer = "https://api.streamnative.cloud"
+	// GlobalDefaultProxyLocation is the default proxy URL.
 	GlobalDefaultProxyLocation = "https://proxy.streamnative.cloud"
-	GlobalDefaultLogLocation   = "https://log.streamnative.cloud"
+	// GlobalDefaultLogLocation is the default log API URL.
+	GlobalDefaultLogLocation = "https://log.streamnative.cloud"
 
-	// Environment variable prefix
+	// EnvPrefix is the environment variable prefix.
 	EnvPrefix = "SNMCP"
 )
 
@@ -162,42 +169,42 @@ func (o *Options) AddFlags(cmd *cobra.Command) {
 	o.AuthOptions.AddFlags(cmd)
 
 	// Bind command line flags to viper
-	viper.BindPFlag("config-dir", cmd.PersistentFlags().Lookup("config-dir"))
-	viper.BindPFlag("key-file", cmd.PersistentFlags().Lookup("key-file"))
-	viper.BindPFlag("server", cmd.PersistentFlags().Lookup("server"))
-	viper.BindPFlag("issuer", cmd.PersistentFlags().Lookup("issuer"))
-	viper.BindPFlag("audience", cmd.PersistentFlags().Lookup("audience"))
-	viper.BindPFlag("client-id", cmd.PersistentFlags().Lookup("client-id"))
-	viper.BindPFlag("organization", cmd.PersistentFlags().Lookup("organization"))
-	viper.BindPFlag("proxy-location", cmd.PersistentFlags().Lookup("proxy-location"))
-	viper.BindPFlag("log-location", cmd.PersistentFlags().Lookup("log-location"))
-	viper.BindPFlag("pulsar-instance", cmd.PersistentFlags().Lookup("pulsar-instance"))
-	viper.BindPFlag("pulsar-cluster", cmd.PersistentFlags().Lookup("pulsar-cluster"))
-	viper.BindPFlag("use-external-kafka", cmd.PersistentFlags().Lookup("use-external-kafka"))
-	viper.BindPFlag("use-external-pulsar", cmd.PersistentFlags().Lookup("use-external-pulsar"))
-	viper.BindPFlag("kafka-bootstrap-servers", cmd.PersistentFlags().Lookup("kafka-bootstrap-servers"))
-	viper.BindPFlag("kafka-schema-registry-url", cmd.PersistentFlags().Lookup("kafka-schema-registry-url"))
-	viper.BindPFlag("kafka-auth-type", cmd.PersistentFlags().Lookup("kafka-auth-type"))
-	viper.BindPFlag("kafka-auth-mechanism", cmd.PersistentFlags().Lookup("kafka-auth-mechanism"))
-	viper.BindPFlag("kafka-auth-user", cmd.PersistentFlags().Lookup("kafka-auth-user"))
-	viper.BindPFlag("kafka-auth-pass", cmd.PersistentFlags().Lookup("kafka-auth-pass"))
-	viper.BindPFlag("kafka-use-tls", cmd.PersistentFlags().Lookup("kafka-use-tls"))
-	viper.BindPFlag("kafka-client-key-file", cmd.PersistentFlags().Lookup("kafka-client-key-file"))
-	viper.BindPFlag("kafka-client-cert-file", cmd.PersistentFlags().Lookup("kafka-client-cert-file"))
-	viper.BindPFlag("kafka-ca-file", cmd.PersistentFlags().Lookup("kafka-ca-file"))
-	viper.BindPFlag("kafka-schema-registry-auth-user", cmd.PersistentFlags().Lookup("kafka-schema-registry-auth-user"))
-	viper.BindPFlag("kafka-schema-registry-auth-pass", cmd.PersistentFlags().Lookup("kafka-schema-registry-auth-pass"))
-	viper.BindPFlag("kafka-schema-registry-bearer-token", cmd.PersistentFlags().Lookup("kafka-schema-registry-bearer-token"))
-	viper.BindPFlag("pulsar-web-service-url", cmd.PersistentFlags().Lookup("pulsar-web-service-url"))
-	viper.BindPFlag("pulsar-service-url", cmd.PersistentFlags().Lookup("pulsar-service-url"))
-	viper.BindPFlag("pulsar-auth-plugin", cmd.PersistentFlags().Lookup("pulsar-auth-plugin"))
-	viper.BindPFlag("pulsar-auth-params", cmd.PersistentFlags().Lookup("pulsar-auth-params"))
-	viper.BindPFlag("pulsar-tls-allow-insecure-connection", cmd.PersistentFlags().Lookup("pulsar-tls-allow-insecure-connection"))
-	viper.BindPFlag("pulsar-tls-enable-hostname-verification", cmd.PersistentFlags().Lookup("pulsar-tls-enable-hostname-verification"))
-	viper.BindPFlag("pulsar-tls-trust-certs-file-path", cmd.PersistentFlags().Lookup("pulsar-tls-trust-certs-file-path"))
-	viper.BindPFlag("pulsar-tls-cert-file", cmd.PersistentFlags().Lookup("pulsar-tls-cert-file"))
-	viper.BindPFlag("pulsar-tls-key-file", cmd.PersistentFlags().Lookup("pulsar-tls-key-file"))
-	viper.BindPFlag("pulsar-token", cmd.PersistentFlags().Lookup("pulsar-token"))
+	_ = viper.BindPFlag("config-dir", cmd.PersistentFlags().Lookup("config-dir"))
+	_ = viper.BindPFlag("key-file", cmd.PersistentFlags().Lookup("key-file"))
+	_ = viper.BindPFlag("server", cmd.PersistentFlags().Lookup("server"))
+	_ = viper.BindPFlag("issuer", cmd.PersistentFlags().Lookup("issuer"))
+	_ = viper.BindPFlag("audience", cmd.PersistentFlags().Lookup("audience"))
+	_ = viper.BindPFlag("client-id", cmd.PersistentFlags().Lookup("client-id"))
+	_ = viper.BindPFlag("organization", cmd.PersistentFlags().Lookup("organization"))
+	_ = viper.BindPFlag("proxy-location", cmd.PersistentFlags().Lookup("proxy-location"))
+	_ = viper.BindPFlag("log-location", cmd.PersistentFlags().Lookup("log-location"))
+	_ = viper.BindPFlag("pulsar-instance", cmd.PersistentFlags().Lookup("pulsar-instance"))
+	_ = viper.BindPFlag("pulsar-cluster", cmd.PersistentFlags().Lookup("pulsar-cluster"))
+	_ = viper.BindPFlag("use-external-kafka", cmd.PersistentFlags().Lookup("use-external-kafka"))
+	_ = viper.BindPFlag("use-external-pulsar", cmd.PersistentFlags().Lookup("use-external-pulsar"))
+	_ = viper.BindPFlag("kafka-bootstrap-servers", cmd.PersistentFlags().Lookup("kafka-bootstrap-servers"))
+	_ = viper.BindPFlag("kafka-schema-registry-url", cmd.PersistentFlags().Lookup("kafka-schema-registry-url"))
+	_ = viper.BindPFlag("kafka-auth-type", cmd.PersistentFlags().Lookup("kafka-auth-type"))
+	_ = viper.BindPFlag("kafka-auth-mechanism", cmd.PersistentFlags().Lookup("kafka-auth-mechanism"))
+	_ = viper.BindPFlag("kafka-auth-user", cmd.PersistentFlags().Lookup("kafka-auth-user"))
+	_ = viper.BindPFlag("kafka-auth-pass", cmd.PersistentFlags().Lookup("kafka-auth-pass"))
+	_ = viper.BindPFlag("kafka-use-tls", cmd.PersistentFlags().Lookup("kafka-use-tls"))
+	_ = viper.BindPFlag("kafka-client-key-file", cmd.PersistentFlags().Lookup("kafka-client-key-file"))
+	_ = viper.BindPFlag("kafka-client-cert-file", cmd.PersistentFlags().Lookup("kafka-client-cert-file"))
+	_ = viper.BindPFlag("kafka-ca-file", cmd.PersistentFlags().Lookup("kafka-ca-file"))
+	_ = viper.BindPFlag("kafka-schema-registry-auth-user", cmd.PersistentFlags().Lookup("kafka-schema-registry-auth-user"))
+	_ = viper.BindPFlag("kafka-schema-registry-auth-pass", cmd.PersistentFlags().Lookup("kafka-schema-registry-auth-pass"))
+	_ = viper.BindPFlag("kafka-schema-registry-bearer-token", cmd.PersistentFlags().Lookup("kafka-schema-registry-bearer-token"))
+	_ = viper.BindPFlag("pulsar-web-service-url", cmd.PersistentFlags().Lookup("pulsar-web-service-url"))
+	_ = viper.BindPFlag("pulsar-service-url", cmd.PersistentFlags().Lookup("pulsar-service-url"))
+	_ = viper.BindPFlag("pulsar-auth-plugin", cmd.PersistentFlags().Lookup("pulsar-auth-plugin"))
+	_ = viper.BindPFlag("pulsar-auth-params", cmd.PersistentFlags().Lookup("pulsar-auth-params"))
+	_ = viper.BindPFlag("pulsar-tls-allow-insecure-connection", cmd.PersistentFlags().Lookup("pulsar-tls-allow-insecure-connection"))
+	_ = viper.BindPFlag("pulsar-tls-enable-hostname-verification", cmd.PersistentFlags().Lookup("pulsar-tls-enable-hostname-verification"))
+	_ = viper.BindPFlag("pulsar-tls-trust-certs-file-path", cmd.PersistentFlags().Lookup("pulsar-tls-trust-certs-file-path"))
+	_ = viper.BindPFlag("pulsar-tls-cert-file", cmd.PersistentFlags().Lookup("pulsar-tls-cert-file"))
+	_ = viper.BindPFlag("pulsar-tls-key-file", cmd.PersistentFlags().Lookup("pulsar-tls-key-file"))
+	_ = viper.BindPFlag("pulsar-token", cmd.PersistentFlags().Lookup("pulsar-token"))
 }
 
 // Complete completes options from the provided values
@@ -212,7 +219,7 @@ func (o *Options) Complete() error {
 		o.ConfigDir = filepath.Join(home, ".snmcp")
 	}
 	if _, err := os.Stat(o.ConfigDir); os.IsNotExist(err) {
-		err := os.MkdirAll(o.ConfigDir, 0755)
+		err := os.MkdirAll(o.ConfigDir, 0750)
 		if err != nil {
 			return fmt.Errorf("failed to create config directory: %w", err)
 		}
@@ -405,10 +412,12 @@ func (o *Options) Complete() error {
 	return nil
 }
 
+// GetConfigDirectory returns the directory used for configuration data.
 func (o *Options) GetConfigDirectory() string {
 	return o.ConfigDir
 }
 
+// LoadConfig loads configuration from the current in-memory options.
 func (o *Options) LoadConfig() (*SnConfig, error) {
 	config := &SnConfig{
 		Server: o.Server,
@@ -435,11 +444,13 @@ func (o *Options) LoadConfig() (*SnConfig, error) {
 	return config, nil
 }
 
+// LoadConfigOrDie loads configuration and ignores errors.
 func (o *Options) LoadConfigOrDie() *SnConfig {
 	cfg, _ := o.LoadConfig()
 	return cfg
 }
 
+// SaveConfig persists configuration to disk.
 func (o *Options) SaveConfig(config *SnConfig) error {
 	data, err := yaml.Marshal(config)
 	if err != nil {

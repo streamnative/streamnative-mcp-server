@@ -36,6 +36,7 @@ func NewBooleanConverter() *BooleanConverter {
 	}
 }
 
+// ToMCPToolInputSchemaProperties converts BOOLEAN schema info into MCP tool options.
 func (c *BooleanConverter) ToMCPToolInputSchemaProperties(schemaInfo *cliutils.SchemaInfo) ([]mcp.ToolOption, error) {
 	if schemaInfo.Type != "BOOLEAN" {
 		return nil, fmt.Errorf("expected BOOLEAN schema, got %s", schemaInfo.Type)
@@ -46,6 +47,7 @@ func (c *BooleanConverter) ToMCPToolInputSchemaProperties(schemaInfo *cliutils.S
 	}, nil
 }
 
+// SerializeMCPRequestToPulsarPayload serializes MCP arguments into a BOOLEAN payload.
 func (c *BooleanConverter) SerializeMCPRequestToPulsarPayload(arguments map[string]any, targetPulsarSchemaInfo *cliutils.SchemaInfo) ([]byte, error) {
 	if err := c.ValidateArguments(arguments, targetPulsarSchemaInfo); err != nil {
 		return nil, fmt.Errorf("arguments validation failed: %w", err)
@@ -59,6 +61,7 @@ func (c *BooleanConverter) SerializeMCPRequestToPulsarPayload(arguments map[stri
 	return []byte(fmt.Sprintf("%t", payload)), nil
 }
 
+// ValidateArguments validates arguments against the BOOLEAN schema.
 func (c *BooleanConverter) ValidateArguments(arguments map[string]any, targetPulsarSchemaInfo *cliutils.SchemaInfo) error {
 	if targetPulsarSchemaInfo.Type != "BOOLEAN" {
 		return fmt.Errorf("expected BOOLEAN schema, got %s", targetPulsarSchemaInfo.Type)

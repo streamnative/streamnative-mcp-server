@@ -71,7 +71,7 @@ func StreamNativeAddResourceTools(s *server.MCPServer, readOnly bool, features [
 	}
 }
 
-// Define simple resource structure for parsing YAML documents
+// Resource represents a StreamNative resource manifest.
 type Resource struct {
 	APIVersion string                 `json:"apiVersion" yaml:"apiVersion"`
 	Kind       string                 `json:"kind" yaml:"kind"`
@@ -79,6 +79,7 @@ type Resource struct {
 	Spec       map[string]interface{} `json:"spec" yaml:"spec"`
 }
 
+// Metadata holds standard resource metadata.
 type Metadata struct {
 	Name      string            `json:"name" yaml:"name"`
 	Namespace string            `json:"namespace" yaml:"namespace"`
@@ -190,7 +191,7 @@ func applyPulsarInstance(ctx context.Context, apiClient *sncloud.APIClient, json
 	if name != "" {
 		// Try to get existing resource
 		existingInstance, bdy, err := apiClient.CloudStreamnativeIoV1alpha1Api.ReadCloudStreamnativeIoV1alpha1NamespacedPulsarInstance(ctx, name, organization).Execute()
-		defer bdy.Body.Close()
+		defer func() { _ = bdy.Body.Close() }()
 		if err == nil {
 			exists = true
 			if existingInstance.Metadata != nil && existingInstance.Metadata.ResourceVersion != nil {
@@ -223,7 +224,7 @@ func applyPulsarInstance(ctx context.Context, apiClient *sncloud.APIClient, json
 			request = request.DryRun(dryRunStr)
 		}
 		_, bdy, err = request.Execute()
-		defer bdy.Body.Close()
+		defer func() { _ = bdy.Body.Close() }()
 	} else {
 		verb = "created"
 		// Create new resource
@@ -233,7 +234,7 @@ func applyPulsarInstance(ctx context.Context, apiClient *sncloud.APIClient, json
 			request = request.DryRun(dryRunStr)
 		}
 		_, bdy, err = request.Execute()
-		defer bdy.Body.Close()
+		defer func() { _ = bdy.Body.Close() }()
 	}
 
 	if err != nil {
@@ -277,7 +278,7 @@ func applyPulsarCluster(ctx context.Context, apiClient *sncloud.APIClient, jsonC
 	if name != "" {
 		// Try to get existing resource
 		existingCluster, bdy, err := apiClient.CloudStreamnativeIoV1alpha1Api.ReadCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(ctx, name, organization).Execute()
-		defer bdy.Body.Close()
+		defer func() { _ = bdy.Body.Close() }()
 		if err == nil {
 			exists = true
 			if existingCluster.Metadata != nil && existingCluster.Metadata.ResourceVersion != nil {
@@ -311,7 +312,7 @@ func applyPulsarCluster(ctx context.Context, apiClient *sncloud.APIClient, jsonC
 		}
 
 		_, bdy, err = request.Execute()
-		defer bdy.Body.Close()
+		defer func() { _ = bdy.Body.Close() }()
 	} else {
 		verb = "created"
 		// Create new resource
@@ -321,7 +322,7 @@ func applyPulsarCluster(ctx context.Context, apiClient *sncloud.APIClient, jsonC
 			request = request.DryRun(dryRunStr)
 		}
 		_, bdy, err = request.Execute()
-		defer bdy.Body.Close()
+		defer func() { _ = bdy.Body.Close() }()
 	}
 
 	if err != nil {

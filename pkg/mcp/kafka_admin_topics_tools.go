@@ -22,6 +22,7 @@ import (
 	kafkabuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/kafka"
 )
 
+// KafkaAdminAddTopicTools registers Kafka admin topic tools.
 func KafkaAdminAddTopicTools(s *server.MCPServer, readOnly bool, features []string) {
 	// Use the new builder pattern
 	builder := kafkabuilders.NewKafkaTopicsToolBuilder()
