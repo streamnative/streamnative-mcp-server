@@ -24,13 +24,10 @@ import (
 )
 
 const (
-	// ServiceName is the name used for keyring service.
-	ServiceName = "StreamNativeMCP"
-	// KeychainName is the name of the macOS keychain.
+	ServiceName  = "StreamNativeMCP"
 	KeychainName = "snmcp"
 )
 
-// AuthOptions provides configuration options for authentication.
 type AuthOptions struct {
 	BackendOverride string
 	storage         Storage
@@ -40,7 +37,6 @@ type AuthOptions struct {
 	store.Store
 }
 
-// NewDefaultAuthOptions creates a new AuthOptions with default values.
 func NewDefaultAuthOptions() AuthOptions {
 	return AuthOptions{}
 }

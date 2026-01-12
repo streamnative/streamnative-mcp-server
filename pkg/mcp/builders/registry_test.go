@@ -148,7 +148,8 @@ func TestToolRegistry(t *testing.T) {
 		registry := NewToolRegistry()
 		builder := NewMockToolBuilder("panic_tool", []string{"feature"})
 
-		_ = registry.Register(builder) // First registration
+		///nolint:errcheck
+		registry.Register(builder) // First registration
 		assert.Panics(t, func() {
 			registry.MustRegister(builder) // Duplicate registration should panic
 		})
@@ -157,7 +158,8 @@ func TestToolRegistry(t *testing.T) {
 	t.Run("GetBuilder_Success", func(t *testing.T) {
 		registry := NewToolRegistry()
 		builder := NewMockToolBuilder("get_test_tool", []string{"feature"})
-		_ = registry.Register(builder)
+		///nolint:errcheck
+		registry.Register(builder)
 
 		retrieved, exists := registry.GetBuilder("get_test_tool")
 		assert.True(t, exists)
@@ -176,8 +178,10 @@ func TestToolRegistry(t *testing.T) {
 		builder1 := NewMockToolBuilder("tool1", []string{"feature1"})
 		builder2 := NewMockToolBuilder("tool2", []string{"feature2"})
 
-		_ = registry.Register(builder1)
-		_ = registry.Register(builder2)
+		///nolint:errcheck
+		registry.Register(builder1)
+		///nolint:errcheck
+		registry.Register(builder2)
 
 		names := registry.ListBuilders()
 		assert.Len(t, names, 2)
@@ -190,7 +194,8 @@ func TestToolRegistry(t *testing.T) {
 	t.Run("GetMetadata", func(t *testing.T) {
 		registry := NewToolRegistry()
 		builder := NewMockToolBuilder("metadata_tool", []string{"feature"})
-		_ = registry.Register(builder)
+		///nolint:errcheck
+		registry.Register(builder)
 
 		metadata, exists := registry.GetMetadata("metadata_tool")
 		assert.True(t, exists)
@@ -203,8 +208,10 @@ func TestToolRegistry(t *testing.T) {
 		builder1 := NewMockToolBuilder("tool1", []string{"feature1"})
 		builder2 := NewMockToolBuilder("tool2", []string{"feature2"})
 
-		_ = registry.Register(builder1)
-		_ = registry.Register(builder2)
+		///nolint:errcheck
+		registry.Register(builder1)
+		///nolint:errcheck
+		registry.Register(builder2)
 
 		metadata := registry.ListMetadata()
 		assert.Len(t, metadata, 2)
@@ -215,7 +222,8 @@ func TestToolRegistry(t *testing.T) {
 	t.Run("BuildSingle_Success", func(t *testing.T) {
 		registry := NewToolRegistry()
 		builder := NewMockToolBuilder("single_tool", []string{"test_feature"})
-		_ = registry.Register(builder)
+		///nolint:errcheck
+		registry.Register(builder)
 
 		config := ToolBuildConfig{
 			Features: []string{"test_feature"},
@@ -242,7 +250,8 @@ func TestToolRegistry(t *testing.T) {
 	t.Run("BuildSingle_ValidationFailed", func(t *testing.T) {
 		registry := NewToolRegistry()
 		builder := NewMockToolBuilder("validation_tool", []string{"required_feature"})
-		_ = registry.Register(builder)
+		///nolint:errcheck
+		registry.Register(builder)
 
 		config := ToolBuildConfig{
 			Features: []string{"wrong_feature"},
@@ -258,8 +267,10 @@ func TestToolRegistry(t *testing.T) {
 		builder1 := NewMockToolBuilder("tool1", []string{"feature1"})
 		builder2 := NewMockToolBuilder("tool2", []string{"feature2"})
 
-		_ = registry.Register(builder1)
-		_ = registry.Register(builder2)
+		///nolint:errcheck
+		registry.Register(builder1)
+		///nolint:errcheck
+		registry.Register(builder2)
 
 		configs := map[string]ToolBuildConfig{
 			"tool1": {Features: []string{"feature1"}},
@@ -278,8 +289,10 @@ func TestToolRegistry(t *testing.T) {
 
 		builder2.SetError(fmt.Errorf("build error"))
 
-		_ = registry.Register(builder1)
-		_ = registry.Register(builder2)
+		///nolint:errcheck
+		registry.Register(builder1)
+		///nolint:errcheck
+		registry.Register(builder2)
 
 		configs := map[string]ToolBuildConfig{
 			"tool1": {Features: []string{"feature1"}},
@@ -297,9 +310,12 @@ func TestToolRegistry(t *testing.T) {
 		builder2 := NewMockToolBuilder("tool2", []string{"feature2"})
 		builder3 := NewMockToolBuilder("tool3", []string{"feature3"})
 
-		_ = registry.Register(builder1)
-		_ = registry.Register(builder2)
-		_ = registry.Register(builder3)
+		///nolint:errcheck
+		registry.Register(builder1)
+		///nolint:errcheck
+		registry.Register(builder2)
+		///nolint:errcheck
+		registry.Register(builder3)
 
 		// Only provide feature1 and feature2
 		tools, err := registry.BuildAllWithFeatures(false, []string{"feature1", "feature2"})
@@ -310,7 +326,8 @@ func TestToolRegistry(t *testing.T) {
 	t.Run("Clear", func(t *testing.T) {
 		registry := NewToolRegistry()
 		builder := NewMockToolBuilder("clear_tool", []string{"feature"})
-		_ = registry.Register(builder)
+		///nolint:errcheck
+		registry.Register(builder)
 
 		assert.Equal(t, 1, registry.Count())
 
@@ -321,7 +338,8 @@ func TestToolRegistry(t *testing.T) {
 	t.Run("Unregister", func(t *testing.T) {
 		registry := NewToolRegistry()
 		builder := NewMockToolBuilder("unregister_tool", []string{"feature"})
-		_ = registry.Register(builder)
+		///nolint:errcheck
+		registry.Register(builder)
 
 		assert.Equal(t, 1, registry.Count())
 

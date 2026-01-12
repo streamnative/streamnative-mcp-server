@@ -241,7 +241,7 @@ func (o *LogOptions) getLogs(client *http.Client, position int64,
 	if err != nil {
 		return results, fmt.Errorf("failed to request logs (%s): %v", url, err)
 	}
-	defer func() { _ = resp.Body.Close() }()
+	defer resp.Body.Close()
 
 	var logResult LogResult
 	var body []byte

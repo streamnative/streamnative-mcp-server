@@ -43,7 +43,7 @@ func GetOIDCWellKnownEndpointsFromIssuerURL(issuerURL string) (*OIDCWellKnownEnd
 	if err != nil {
 		return nil, errors.Wrapf(err, "could not get well known endpoints from url %s", u.String())
 	}
-	defer func() { _ = r.Body.Close() }()
+	defer r.Body.Close()
 
 	var wkEndpoints OIDCWellKnownEndpoints
 	err = json.NewDecoder(r.Body).Decode(&wkEndpoints)

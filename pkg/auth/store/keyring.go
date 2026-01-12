@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package store provides token storage implementations for authentication credentials.
-// It includes a KeyringStore implementation that uses the system keyring for secure storage.
 package store
 
 import (
@@ -27,7 +25,6 @@ import (
 	"k8s.io/utils/clock"
 )
 
-// KeyringStore provides secure token storage using the system keyring.
 type KeyringStore struct {
 	kr    keyring.Keyring
 	clock clock.Clock
@@ -51,7 +48,6 @@ func NewKeyringStore(kr keyring.Keyring) (*KeyringStore, error) {
 
 var _ Store = &KeyringStore{}
 
-// SaveGrant saves an authorization grant to the keyring.
 func (f *KeyringStore) SaveGrant(audience string, grant auth.AuthorizationGrant) error {
 	f.lock.Lock()
 	defer f.lock.Unlock()
@@ -79,7 +75,6 @@ func (f *KeyringStore) SaveGrant(audience string, grant auth.AuthorizationGrant)
 	return nil
 }
 
-// LoadGrant loads an authorization grant from the keyring.
 func (f *KeyringStore) LoadGrant(audience string) (*auth.AuthorizationGrant, error) {
 	f.lock.Lock()
 	defer f.lock.Unlock()
@@ -102,7 +97,6 @@ func (f *KeyringStore) LoadGrant(audience string) (*auth.AuthorizationGrant, err
 	return &item.Grant, nil
 }
 
-// WhoAmI returns the username associated with the grant for the given audience.
 func (f *KeyringStore) WhoAmI(audience string) (string, error) {
 	f.lock.Lock()
 	defer f.lock.Unlock()
@@ -138,7 +132,6 @@ func (f *KeyringStore) WhoAmI(audience string) (string, error) {
 	return label, err
 }
 
-// Logout removes all stored grants from the keyring.
 func (f *KeyringStore) Logout() error {
 	f.lock.Lock()
 	defer f.lock.Unlock()

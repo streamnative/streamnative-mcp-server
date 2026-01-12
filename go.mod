@@ -5,7 +5,7 @@ go 1.24.4
 require (
 	github.com/99designs/keyring v1.2.2
 	github.com/apache/pulsar-client-go v0.13.1
-	github.com/golang-jwt/jwt v3.2.1+incompatible
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/google/go-cmp v0.7.0
 	github.com/hamba/avro/v2 v2.28.0
 	github.com/mark3labs/mcp-go v0.43.2

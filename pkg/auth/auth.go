@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package auth provides authentication and authorization functionality for StreamNative MCP Server.
-// It implements OAuth 2.0 flows including client credentials and device authorization grants.
 package auth
 
 import (
@@ -22,13 +20,12 @@ import (
 	"io"
 	"time"
 
-	"github.com/golang-jwt/jwt"
+	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/oauth2"
 	"k8s.io/utils/clock"
 )
 
 const (
-	// ClaimNameUserName is the JWT claim name for the username.
 	ClaimNameUserName = "https://streamnative.io/username"
 )
 
@@ -142,18 +139,17 @@ func ExtractUserName(token oauth2.Token) (string, error) {
 	return "", fmt.Errorf("access token doesn't contain a recognizable user claim")
 }
 
-// DumpToken outputs token information to the provided writer for debugging.
 func DumpToken(out io.Writer, token oauth2.Token) {
 	p := jwt.Parser{}
 	claims := jwt.MapClaims{}
 	if _, _, err := p.ParseUnverified(token.AccessToken, claims); err != nil {
-		_, _ = fmt.Fprintf(out, "Unable to parse token.  Err: %v\n", err)
+		fmt.Fprintf(out, "Unable to parse token.  Err: %v\n", err)
 		return
 	}
 
 	text, err := json.MarshalIndent(claims, "", "  ")
 	if err != nil {
-		_, _ = fmt.Fprintf(out, "Unable to print token.  Err: %v\n", err)
+		fmt.Fprintf(out, "Unable to print token.  Err: %v\n", err)
 	}
 	_, _ = out.Write(text)
 	_, _ = fmt.Fprintln(out, "")

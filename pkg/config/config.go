@@ -21,7 +21,6 @@ import (
 	"github.com/streamnative/streamnative-mcp-server/pkg/auth"
 )
 
-// SnConfig holds the StreamNative MCP Server configuration.
 type SnConfig struct {
 	// the API server endpoint
 	Server string `yaml:"server"`
@@ -41,7 +40,6 @@ type SnConfig struct {
 	ExternalPulsar *ExternalPulsar `yaml:"external-pulsar"`
 }
 
-// Auth holds authentication configuration for the StreamNative API.
 type Auth struct {
 	// the OAuth 2.0 issuer endpoint
 	IssuerEndpoint string `yaml:"issuer"`
@@ -52,10 +50,10 @@ type Auth struct {
 }
 
 func (a *Auth) Validate() error {
-	if isValidIssuer(a.IssuerEndpoint) && isValidClientID(a.ClientID) && isValidAudience(a.Audience) {
-		return nil
+	if !(isValidIssuer(a.IssuerEndpoint) && isValidClientID(a.ClientID) && isValidAudience(a.Audience)) {
+		return errors.New("configuration error: auth section is incomplete or invalid")
 	}
-	return errors.New("configuration error: auth section is incomplete or invalid")
+	return nil
 }
 
 func isValidIssuer(iss string) bool {
@@ -79,14 +77,12 @@ func (a *Auth) Issuer() auth.Issuer {
 	}
 }
 
-// Context holds the default context for cluster connections.
 type Context struct {
 	Organization   string `yaml:"organization,omitempty"`
 	PulsarInstance string `yaml:"pulsar-instance,omitempty"`
 	PulsarCluster  string `yaml:"pulsar-cluster,omitempty"`
 }
 
-// Storage defines the interface for persisting configuration and credentials.
 type Storage interface {
 	// Gets the config directory for configuration files, credentials and caches
 	GetConfigDirectory() string

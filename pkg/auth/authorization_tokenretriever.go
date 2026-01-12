@@ -82,7 +82,6 @@ type TokenErrorResponse struct {
 	ErrorDescription string `json:"error_description"`
 }
 
-// TokenError represents an error response from the token endpoint.
 type TokenError struct {
 	ErrorCode        string
 	ErrorDescription string
@@ -223,7 +222,6 @@ func (ce *TokenRetriever) ExchangeCode(req AuthorizationCodeExchangeRequest) (*T
 	if err != nil {
 		return nil, err
 	}
-	defer func() { _ = response.Body.Close() }()
 
 	return ce.handleAuthTokensResponse(response)
 }
@@ -232,7 +230,7 @@ func (ce *TokenRetriever) ExchangeCode(req AuthorizationCodeExchangeRequest) (*T
 // auth tokens for errors and parsing the raw body to a TokenResult struct
 func (ce *TokenRetriever) handleAuthTokensResponse(resp *http.Response) (*TokenResult, error) {
 	if resp.Body != nil {
-		defer func() { _ = resp.Body.Close() }()
+		defer resp.Body.Close()
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
@@ -274,7 +272,6 @@ func (ce *TokenRetriever) ExchangeDeviceCode(ctx context.Context, req DeviceCode
 		if err != nil {
 			return nil, err
 		}
-		defer func() { _ = response.Body.Close() }()
 		token, err := ce.handleAuthTokensResponse(response)
 		if err == nil {
 			return token, nil
@@ -317,7 +314,6 @@ func (ce *TokenRetriever) ExchangeRefreshToken(req RefreshTokenExchangeRequest) 
 	if err != nil {
 		return nil, err
 	}
-	defer func() { _ = response.Body.Close() }()
 
 	return ce.handleAuthTokensResponse(response)
 }
@@ -334,7 +330,6 @@ func (ce *TokenRetriever) ExchangeClientCredentials(req ClientCredentialsExchang
 	if err != nil {
 		return nil, err
 	}
-	defer func() { _ = response.Body.Close() }()
 
 	return ce.handleAuthTokensResponse(response)
 }

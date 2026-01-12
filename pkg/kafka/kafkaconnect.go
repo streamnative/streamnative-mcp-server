@@ -192,7 +192,7 @@ func (c *connectImpl) ListConnectors(_ context.Context) ([]string, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to list connectors: %w", err)
 	}
-	defer func() { _ = resp.Body.Close() }()
+	defer resp.Body.Close()
 
 	// Parse response body
 	body, err := io.ReadAll(resp.Body)
@@ -247,7 +247,7 @@ func (c *connectImpl) CreateConnector(_ context.Context, name string, config map
 	if err != nil {
 		return nil, fmt.Errorf("failed to create connector: %w", err)
 	}
-	defer func() { _ = resp.Body.Close() }()
+	defer resp.Body.Close()
 
 	// Parse response body
 	body, err := io.ReadAll(resp.Body)
@@ -298,7 +298,7 @@ func (c *connectImpl) UpdateConnector(_ context.Context, name string, config map
 	if err != nil {
 		return nil, fmt.Errorf("failed to update connector: %w", err)
 	}
-	defer func() { _ = resp.Body.Close() }()
+	defer resp.Body.Close()
 
 	// Parse response body
 	body, err := io.ReadAll(resp.Body)
@@ -393,7 +393,7 @@ func (c *connectImpl) GetConnectorStatus(_ context.Context, name string) (*Conne
 	if err != nil {
 		return nil, fmt.Errorf("failed to get connector status: %w", err)
 	}
-	defer func() { _ = resp.Body.Close() }()
+	defer resp.Body.Close()
 
 	// Parse response body
 	body, err := io.ReadAll(resp.Body)
@@ -448,7 +448,7 @@ func (c *connectImpl) GetConnectorTasks(_ context.Context, name string) ([]TaskI
 	if err != nil {
 		return nil, fmt.Errorf("failed to get connector tasks: %w", err)
 	}
-	defer func() { _ = resp.Body.Close() }()
+	defer resp.Body.Close()
 
 	// Parse response body
 	body, err := io.ReadAll(resp.Body)
@@ -489,7 +489,7 @@ func (c *connectImpl) ListPlugins(_ context.Context) ([]PluginInfo, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to list connector plugins: %w", err)
 	}
-	defer func() { _ = resp.Body.Close() }()
+	defer resp.Body.Close()
 
 	// Parse response body
 	body, err := io.ReadAll(resp.Body)
@@ -536,7 +536,7 @@ func (c *connectImpl) ValidateConfig(_ context.Context, pluginClass string, conf
 	if err != nil {
 		return nil, fmt.Errorf("failed to validate connector config: %w", err)
 	}
-	defer func() { _ = resp.Body.Close() }()
+	defer resp.Body.Close()
 
 	// Parse response body
 	body, err := io.ReadAll(resp.Body)

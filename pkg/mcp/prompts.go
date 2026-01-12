@@ -94,7 +94,7 @@ func HandleListPulsarClusters(ctx context.Context, _ mcp.GetPromptRequest) (*mcp
 	if err != nil {
 		return nil, fmt.Errorf("failed to list pulsar clusters: %v", err)
 	}
-	defer func() { _ = clustersBody.Body.Close() }()
+	defer clustersBody.Body.Close()
 
 	var messages = make(
 		[]mcp.PromptMessage,
@@ -170,7 +170,7 @@ func handleReadPulsarCluster(ctx context.Context, request mcp.GetPromptRequest) 
 	if err != nil {
 		return nil, fmt.Errorf("failed to list pulsar clusters: %v", err)
 	}
-	defer func() { _ = clustersBody.Body.Close() }()
+	defer clustersBody.Body.Close()
 	var cluster sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarCluster
 	for _, c := range clusters.Items {
 		if *c.Metadata.Name == name {
@@ -248,7 +248,7 @@ func handleBuildServerlessPulsarCluster(ctx context.Context, request mcp.GetProm
 	if err != nil {
 		return nil, fmt.Errorf("failed to list pool options: %v", err)
 	}
-	defer func() { _ = poolOptionsBody.Body.Close() }()
+	defer poolOptionsBody.Body.Close()
 	if poolOptions == nil {
 		return nil, fmt.Errorf("no pool options found")
 	}
