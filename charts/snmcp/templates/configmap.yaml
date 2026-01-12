@@ -9,7 +9,7 @@ metadata:
   labels:
     {{- include "snmcp.labels" . | nindent 4 }}
 data:
-  SNMCP_PULSAR_WEB_SERVICE_URL: {{ .Values.pulsar.webServiceURL | quote }}
+  SNMCP_PULSAR_WEB_SERVICE_URL: {{ required "pulsar.webServiceURL is required" .Values.pulsar.webServiceURL | quote }}
   {{- if .Values.pulsar.serviceURL }}
   SNMCP_PULSAR_SERVICE_URL: {{ .Values.pulsar.serviceURL | quote }}
   {{- end }}
