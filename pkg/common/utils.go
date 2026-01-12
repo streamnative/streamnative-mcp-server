@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package common
+// Package common provides shared helpers for StreamNative MCP Server.
+package common //nolint:revive
 
 import (
 	"context"
@@ -25,8 +26,10 @@ import (
 	sncloud "github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserver"
 )
 
+// ContextKey defines typed keys for context values.
 type ContextKey string
 
+// Common constants used for context keys and token handling.
 const (
 	OptionsKey                        ContextKey = "snmcp-options"
 	AnnotationStreamNativeCloudEngine            = "cloud.streamnative.io/engine"
@@ -73,7 +76,7 @@ func RequiredParam[T comparable](arguments map[string]interface{}, p string) (T,
 	return arguments[p].(T), nil
 }
 
-// Helper function to get an optional parameter from the request
+// OptionalParam returns an optional parameter from the request.
 func OptionalParam[T any](arguments map[string]interface{}, paramName string) (T, bool) {
 	var empty T
 	param, ok := arguments[paramName]
@@ -89,7 +92,7 @@ func OptionalParam[T any](arguments map[string]interface{}, paramName string) (T
 	return value, true
 }
 
-// Helper function to get a required array parameter from the request
+// RequiredParamArray returns a required array parameter from the request.
 func RequiredParamArray[T any](arguments map[string]interface{}, paramName string) ([]T, error) {
 	var empty []T
 	param, ok := arguments[paramName]
@@ -114,6 +117,7 @@ func RequiredParamArray[T any](arguments map[string]interface{}, paramName strin
 	return result, nil
 }
 
+// OptionalParamArray returns an optional array parameter from the request.
 func OptionalParamArray[T any](arguments map[string]interface{}, paramName string) ([]T, bool) {
 	var empty []T
 	param, ok := arguments[paramName]
@@ -161,7 +165,7 @@ func OptionalParamConfigs(arguments map[string]interface{}, paramName string) ([
 	return result, true
 }
 
-// RequiredParamObject gets a required object parameter from the request
+// RequiredParamObject returns a required object parameter from the request.
 func RequiredParamObject(arguments map[string]interface{}, name string) (map[string]interface{}, error) {
 	// Get the parameter value
 	paramValue, found := arguments[name]
@@ -177,6 +181,7 @@ func RequiredParamObject(arguments map[string]interface{}, name string) (map[str
 	return nil, fmt.Errorf("%s parameter must be an object", name)
 }
 
+// OptionalParamObject returns an optional object parameter from the request.
 func OptionalParamObject(arguments map[string]interface{}, name string) (map[string]interface{}, bool) {
 	paramValue, found := arguments[name]
 	if !found || paramValue == nil {
@@ -190,6 +195,7 @@ func OptionalParamObject(arguments map[string]interface{}, name string) (map[str
 	return nil, false
 }
 
+// GetOptions extracts the config options from the context.
 func GetOptions(ctx context.Context) *config.Options {
 	return ctx.Value(OptionsKey).(*config.Options)
 }
@@ -220,6 +226,7 @@ func GetEngineType(cluster sncloud.ComGithubStreamnativeCloudApiServerPkgApisClo
 	return "classic"
 }
 
+// ConvertToMapInterface converts a map of strings to a map of interface values.
 func ConvertToMapInterface(m map[string]string) map[string]interface{} {
 	result := make(map[string]interface{})
 	for k, v := range m {
@@ -228,6 +235,7 @@ func ConvertToMapInterface(m map[string]string) map[string]interface{} {
 	return result
 }
 
+// ConvertToMapString converts a map of interface values to a map of strings.
 func ConvertToMapString(m map[string]interface{}) map[string]string {
 	result := make(map[string]string)
 	for k, v := range m {
@@ -244,6 +252,7 @@ func IsInstanceValid(instance sncloud.ComGithubStreamnativeCloudApiServerPkgApis
 		instance.Status.Auth.Oauth2.Audience != ""
 }
 
+// HasCachedValidToken returns whether the cached grant has a valid token.
 func HasCachedValidToken(cachedGrant *auth.AuthorizationGrant) (bool, error) {
 	if cachedGrant == nil || cachedGrant.Token == nil {
 		return false, nil
@@ -253,6 +262,7 @@ func HasCachedValidToken(cachedGrant *auth.AuthorizationGrant) (bool, error) {
 	return cachedGrant.Token.Valid(), nil
 }
 
+// IsTokenAboutToExpire reports whether the token expires within the window.
 func IsTokenAboutToExpire(cachedGrant *auth.AuthorizationGrant, window time.Duration) (bool, error) {
 	if cachedGrant == nil || cachedGrant.Token == nil {
 		return true, nil

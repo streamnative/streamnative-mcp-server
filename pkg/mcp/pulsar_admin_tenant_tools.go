@@ -22,6 +22,7 @@ import (
 	pulsarbuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/pulsar"
 )
 
+// PulsarAdminAddTenantTools registers Pulsar admin tenant tools.
 func PulsarAdminAddTenantTools(s *server.MCPServer, readOnly bool, features []string) {
 	// Use the new builder pattern
 	builder := pulsarbuilders.NewPulsarAdminTenantToolBuilder()

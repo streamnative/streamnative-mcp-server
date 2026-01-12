@@ -37,6 +37,7 @@ func NewNumberConverter() *NumberConverter {
 	}
 }
 
+// ToMCPToolInputSchemaProperties converts numeric schema info into MCP tool options.
 func (c *NumberConverter) ToMCPToolInputSchemaProperties(schemaInfo *cliutils.SchemaInfo) ([]mcp.ToolOption, error) {
 	if schemaInfo.Type != "INT8" && schemaInfo.Type != "INT16" && schemaInfo.Type != "INT32" && schemaInfo.Type != "INT64" && schemaInfo.Type != "FLOAT" && schemaInfo.Type != "DOUBLE" {
 		return nil, fmt.Errorf("expected INT8, INT16, INT32, INT64, FLOAT, or DOUBLE schema, got %s", schemaInfo.Type)
@@ -47,6 +48,7 @@ func (c *NumberConverter) ToMCPToolInputSchemaProperties(schemaInfo *cliutils.Sc
 	}, nil
 }
 
+// SerializeMCPRequestToPulsarPayload serializes MCP arguments into a numeric payload.
 func (c *NumberConverter) SerializeMCPRequestToPulsarPayload(arguments map[string]any, targetPulsarSchemaInfo *cliutils.SchemaInfo) ([]byte, error) {
 	if err := c.ValidateArguments(arguments, targetPulsarSchemaInfo); err != nil {
 		return nil, fmt.Errorf("arguments validation failed: %w", err)
@@ -75,6 +77,7 @@ func (c *NumberConverter) SerializeMCPRequestToPulsarPayload(arguments map[strin
 	}
 }
 
+// ValidateArguments validates arguments against the numeric schema.
 func (c *NumberConverter) ValidateArguments(arguments map[string]any, targetPulsarSchemaInfo *cliutils.SchemaInfo) error {
 	if targetPulsarSchemaInfo.Type != "INT8" && targetPulsarSchemaInfo.Type != "INT16" && targetPulsarSchemaInfo.Type != "INT32" && targetPulsarSchemaInfo.Type != "INT64" && targetPulsarSchemaInfo.Type != "FLOAT" && targetPulsarSchemaInfo.Type != "DOUBLE" {
 		return fmt.Errorf("expected INT8, INT16, INT32, INT64, FLOAT, or DOUBLE schema, got %s", targetPulsarSchemaInfo.Type)

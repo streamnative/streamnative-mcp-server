@@ -35,10 +35,13 @@ import (
 )
 
 const (
-	CustomRuntimeOptionsEnvMcpToolNameKey        = "MCP_TOOL_NAME"
+	// CustomRuntimeOptionsEnvMcpToolNameKey is the env var name for tool names.
+	CustomRuntimeOptionsEnvMcpToolNameKey = "MCP_TOOL_NAME"
+	// CustomRuntimeOptionsEnvMcpToolDescriptionKey is the env var name for tool descriptions.
 	CustomRuntimeOptionsEnvMcpToolDescriptionKey = "MCP_TOOL_DESCRIPTION"
 )
 
+// DefaultStringSchemaInfo defines the default schema info for string payloads.
 var DefaultStringSchemaInfo = &SchemaInfo{
 	Type: "STRING",
 	Definition: map[string]interface{}{
@@ -61,7 +64,7 @@ type Server struct {
 func NewPulsarFunctionManager(snServer *Server, readOnly bool, options *ManagerOptions, sessionID string) (*PulsarFunctionManager, error) {
 	// Get Pulsar client and admin client
 	if snServer.PulsarSession == nil {
-		return nil, fmt.Errorf("Pulsar session not found in context")
+		return nil, fmt.Errorf("pulsar session not found in context")
 	}
 
 	// Get Pulsar client from session using type-safe interface

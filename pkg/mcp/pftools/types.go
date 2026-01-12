@@ -48,6 +48,7 @@ type PulsarFunctionManager struct {
 	clusterErrorHandler ClusterErrorHandler
 }
 
+// FunctionTool represents a Pulsar function exposed as an MCP tool.
 type FunctionTool struct {
 	Name               string
 	Function           *utils.FunctionConfig
@@ -59,12 +60,14 @@ type FunctionTool struct {
 	SchemaFetchSuccess bool
 }
 
+// SchemaInfo represents schema metadata for Pulsar functions.
 type SchemaInfo struct {
 	Type             string
 	Definition       map[string]interface{}
 	PulsarSchemaInfo *utils.SchemaInfo
 }
 
+// CircuitBreaker guards function invocations to prevent repeated failures.
 type CircuitBreaker struct {
 	failureCount     int
 	failureThreshold int
@@ -74,16 +77,20 @@ type CircuitBreaker struct {
 	mutex            sync.RWMutex
 }
 
+// CircuitState represents the circuit breaker state.
 type CircuitState int
 
+// Circuit breaker states.
 const (
 	StateOpen CircuitState = iota
 	StateHalfOpen
 	StateClosed
 )
 
+// ClusterErrorHandler handles cluster errors for Pulsar function managers.
 type ClusterErrorHandler func(*PulsarFunctionManager, error)
 
+// ManagerOptions configures PulsarFunctionManager behavior.
 type ManagerOptions struct {
 	PollInterval        time.Duration
 	DefaultTimeout      time.Duration
@@ -94,6 +101,7 @@ type ManagerOptions struct {
 	ClusterErrorHandler ClusterErrorHandler
 }
 
+// DefaultManagerOptions returns default manager options.
 func DefaultManagerOptions() *ManagerOptions {
 	return &ManagerOptions{
 		PollInterval:     30 * time.Second,

@@ -18,19 +18,25 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
 const (
+	// KeyFileTypeServiceAccount identifies service account key files.
 	KeyFileTypeServiceAccount = "sn_service_account"
-	FILE                      = "file://"
-	DATA                      = "data://"
+	// FILE indicates a file:// key file reference.
+	FILE = "file://"
+	// DATA indicates a data:// inline key file reference.
+	DATA = "data://"
 )
 
+// KeyFileProvider provides client credentials from a key file path.
 type KeyFileProvider struct {
 	KeyFile string
 }
 
+// KeyFile holds service account credentials from a JSON key file.
 type KeyFile struct {
 	Type         string `json:"type"`
 	ClientID     string `json:"client_id"`
@@ -38,6 +44,7 @@ type KeyFile struct {
 	ClientEmail  string `json:"client_email"`
 }
 
+// NewClientCredentialsProviderFromKeyFile creates a provider from a key file path.
 func NewClientCredentialsProviderFromKeyFile(keyFile string) *KeyFileProvider {
 	return &KeyFileProvider{
 		KeyFile: keyFile,
@@ -46,13 +53,14 @@ func NewClientCredentialsProviderFromKeyFile(keyFile string) *KeyFileProvider {
 
 var _ ClientCredentialsProvider = &KeyFileProvider{}
 
+// GetClientCredentials loads client credentials from the configured key file source.
 func (k *KeyFileProvider) GetClientCredentials() (*KeyFile, error) {
 	var keyFile []byte
 	var err error
 	switch {
 	case strings.HasPrefix(k.KeyFile, FILE):
 		filename := strings.TrimPrefix(k.KeyFile, FILE)
-		keyFile, err = os.ReadFile(filename)
+		keyFile, err = os.ReadFile(filepath.Clean(filename))
 	case strings.HasPrefix(k.KeyFile, DATA):
 		keyFile = []byte(strings.TrimPrefix(k.KeyFile, DATA))
 	case strings.HasPrefix(k.KeyFile, "data:"):
@@ -80,10 +88,12 @@ func (k *KeyFileProvider) GetClientCredentials() (*KeyFile, error) {
 	return &v, nil
 }
 
+// KeyFileStructProvider provides client credentials from an in-memory KeyFile struct.
 type KeyFileStructProvider struct {
 	KeyFile *KeyFile
 }
 
+// GetClientCredentials returns the client credentials from the in-memory KeyFile.
 func (k *KeyFileStructProvider) GetClientCredentials() (*KeyFile, error) {
 	if k.KeyFile == nil {
 		return nil, fmt.Errorf("key file is nil")
@@ -91,6 +101,7 @@ func (k *KeyFileStructProvider) GetClientCredentials() (*KeyFile, error) {
 	return k.KeyFile, nil
 }
 
+// NewClientCredentialsProviderFromKeyFileStruct creates a provider from an in-memory KeyFile.
 func NewClientCredentialsProviderFromKeyFileStruct(keyFile *KeyFile) *KeyFileStructProvider {
 	return &KeyFileStructProvider{
 		KeyFile: keyFile,

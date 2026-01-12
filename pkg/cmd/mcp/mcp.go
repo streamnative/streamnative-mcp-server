@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package mcp provides CLI commands for the MCP server.
 package mcp
 
 import (
@@ -38,18 +39,20 @@ type ServerOptions struct {
 	*config.Options
 }
 
+// NewMcpServerOptions creates ServerOptions with the provided config.
 func NewMcpServerOptions(configOpts *config.Options) *ServerOptions {
 	return &ServerOptions{
 		Options: configOpts,
 	}
 }
 
+// Complete finalizes server options after loading configuration.
 func (o *ServerOptions) Complete() error {
 	if err := o.Options.Complete(); err != nil {
 		return err
 	}
 
-	snConfig := o.Options.LoadConfigOrDie()
+	snConfig := o.LoadConfigOrDie()
 
 	// If the key file is provided, use it to authenticate to StreamNative Cloud
 	switch {
@@ -68,7 +71,7 @@ func (o *ServerOptions) Complete() error {
 			}
 
 			// persist the authorization data
-			if err = o.Options.SaveGrant(issuer.Audience, *grant); err != nil {
+			if err = o.SaveGrant(issuer.Audience, *grant); err != nil {
 				return errors.Wrap(err, "Unable to store the authorization data")
 			}
 
@@ -107,6 +110,7 @@ func (o *ServerOptions) Complete() error {
 	return nil
 }
 
+// AddFlags registers command flags for the server options.
 func (o *ServerOptions) AddFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().BoolVarP(&o.ReadOnly, "read-only", "r", false, "Read-only mode")
 	cmd.PersistentFlags().StringVar(&o.LogFile, "log-file", "", "Path to log file")

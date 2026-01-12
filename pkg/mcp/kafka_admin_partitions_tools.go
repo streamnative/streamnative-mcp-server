@@ -22,6 +22,7 @@ import (
 	kafkabuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/kafka"
 )
 
+// KafkaAdminAddPartitionsTools registers Kafka admin partition tools.
 func KafkaAdminAddPartitionsTools(s *server.MCPServer, readOnly bool, features []string) {
 	// Use the new builder pattern
 	builder := kafkabuilders.NewKafkaPartitionsToolBuilder()

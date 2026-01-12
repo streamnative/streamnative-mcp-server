@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package pulsar provides Pulsar connection helpers.
 package pulsar
 
 import (
@@ -25,11 +26,12 @@ import (
 )
 
 const (
+	// DefaultClientTimeout is the default timeout for Pulsar client operations.
 	DefaultClientTimeout = 30 * time.Second
 )
 
-//nolint:revive
-type PulsarContext struct {
+// PulsarContext holds configuration for connecting to a Pulsar cluster.
+type PulsarContext struct { //nolint:revive
 	ServiceURL                    string
 	WebServiceURL                 string
 	Token                         string
@@ -67,6 +69,7 @@ func NewSession(ctx PulsarContext) (*Session, error) {
 	return session, nil
 }
 
+// SetPulsarContext initializes Pulsar clients using the provided context.
 func (s *Session) SetPulsarContext(ctx PulsarContext) error {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
@@ -161,6 +164,7 @@ func (s *Session) SetPulsarContext(ctx PulsarContext) error {
 	return nil
 }
 
+// GetAdminClient returns the Pulsar admin v2 client.
 func (s *Session) GetAdminClient() (cmdutils.Client, error) {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
@@ -171,6 +175,7 @@ func (s *Session) GetAdminClient() (cmdutils.Client, error) {
 	return s.AdminClient, nil
 }
 
+// GetAdminV3Client returns the Pulsar admin v3 client.
 func (s *Session) GetAdminV3Client() (cmdutils.Client, error) {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
@@ -181,6 +186,7 @@ func (s *Session) GetAdminV3Client() (cmdutils.Client, error) {
 	return s.AdminV3Client, nil
 }
 
+// GetPulsarClient returns the Pulsar data client.
 func (s *Session) GetPulsarClient() (pulsar.Client, error) {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
