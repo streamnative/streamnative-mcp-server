@@ -22,6 +22,7 @@ import (
 	kafkabuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/kafka"
 )
 
+// KafkaAdminAddKafkaConnectTools registers Kafka Connect admin tools.
 func KafkaAdminAddKafkaConnectTools(s *server.MCPServer, readOnly bool, features []string) {
 	// Use the new builder pattern
 	builder := kafkabuilders.NewKafkaConnectToolBuilder()

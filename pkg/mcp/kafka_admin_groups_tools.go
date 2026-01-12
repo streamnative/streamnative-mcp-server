@@ -22,6 +22,7 @@ import (
 	kafkabuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/kafka"
 )
 
+// KafkaAdminAddGroupsTools registers Kafka admin group tools.
 func KafkaAdminAddGroupsTools(s *server.MCPServer, readOnly bool, features []string) {
 	// Use the new builder pattern
 	builder := kafkabuilders.NewKafkaGroupsToolBuilder()

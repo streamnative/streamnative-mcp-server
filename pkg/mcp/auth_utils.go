@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package mcp contains core MCP server integrations and tools.
 package mcp
 
 import (
@@ -22,6 +23,7 @@ import (
 )
 
 const (
+	// DefaultPulsarPort is the default Pulsar protocol port.
 	DefaultPulsarPort = 6651
 )
 

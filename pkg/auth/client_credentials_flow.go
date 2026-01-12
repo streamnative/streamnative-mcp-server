@@ -41,6 +41,7 @@ type ClientCredentialsExchanger interface {
 	ExchangeClientCredentials(req ClientCredentialsExchangeRequest) (*TokenResult, error)
 }
 
+// NewClientCredentialsFlow creates a new client credentials flow with the given components.
 func NewClientCredentialsFlow(
 	issuerData Issuer,
 	provider ClientCredentialsProvider,
@@ -98,6 +99,7 @@ func NewDefaultClientCredentialsFlowWithKeyFileStruct(issuerData Issuer, keyFile
 
 var _ Flow = &ClientCredentialsFlow{}
 
+// Authorize requests an authorization grant using the client credentials flow.
 func (c *ClientCredentialsFlow) Authorize() (*AuthorizationGrant, error) {
 	keyFile, err := c.provider.GetClientCredentials()
 	if err != nil {
@@ -121,12 +123,14 @@ func (c *ClientCredentialsFlow) Authorize() (*AuthorizationGrant, error) {
 	return grant, nil
 }
 
+// ClientCredentialsGrantRefresher refreshes client-credentials grants using the token endpoint.
 type ClientCredentialsGrantRefresher struct {
 	issuerData Issuer
 	exchanger  ClientCredentialsExchanger
 	clock      clock.Clock
 }
 
+// NewDefaultClientCredentialsGrantRefresher creates a default client credentials grant refresher.
 func NewDefaultClientCredentialsGrantRefresher(issuerData Issuer,
 	clock clock.Clock) (*ClientCredentialsGrantRefresher, error) {
 	wellKnownEndpoints, err := GetOIDCWellKnownEndpointsFromIssuerURL(issuerData.IssuerEndpoint)
@@ -147,6 +151,7 @@ func NewDefaultClientCredentialsGrantRefresher(issuerData Issuer,
 
 var _ AuthorizationGrantRefresher = &ClientCredentialsGrantRefresher{}
 
+// Refresh exchanges the client credentials for a fresh authorization grant.
 func (g *ClientCredentialsGrantRefresher) Refresh(grant *AuthorizationGrant) (*AuthorizationGrant, error) {
 	if grant.Type != GrantTypeClientCredentials {
 		return nil, errors.New("unsupported grant type")

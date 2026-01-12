@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package config provides configuration loading and client setup helpers.
 package config
 
 import (

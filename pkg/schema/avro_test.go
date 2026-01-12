@@ -349,10 +349,11 @@ func TestAvroConverter_SerializeMCPRequestToPulsarPayload(t *testing.T) {
 			var schemaToUse string
 			var argsToMarshal map[string]interface{}
 
-			if tt.schemaInfo.Name == "SimpleAvroSerialize" {
+			switch tt.schemaInfo.Name {
+			case "SimpleAvroSerialize":
 				schemaToUse = simpleRecordSchema
 				argsToMarshal = tt.args
-			} else if tt.schemaInfo.Name == "ComplexAvroSerialize" {
+			case "ComplexAvroSerialize":
 				schemaToUse = complexRecordSchemaString
 				complexArgsCopy := make(map[string]interface{})
 				for k, v := range tt.args {

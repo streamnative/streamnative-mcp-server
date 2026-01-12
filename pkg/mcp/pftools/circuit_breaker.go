@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package pftools provides Pulsar Functions tooling for MCP.
 package pftools
 
 import (

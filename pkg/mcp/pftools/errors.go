@@ -22,8 +22,10 @@ import (
 )
 
 var (
+	// ErrFunctionNotFound indicates the function was not found.
 	ErrFunctionNotFound = errors.New("function not found")
-	ErrNotOurMessage    = errors.New("not our message")
+	// ErrNotOurMessage indicates a message that should be ignored.
+	ErrNotOurMessage = errors.New("not our message")
 )
 
 // IsClusterUnhealthy checks if an error indicates cluster health issues
@@ -34,6 +36,7 @@ func IsClusterUnhealthy(err error) bool {
 	return false
 }
 
+// IsAuthError reports whether the error is an authorization error.
 func IsAuthError(err error) bool {
 	if restErr, ok := err.(rest.Error); ok {
 		return restErr.Code == 403

@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package context
+// Package context provides internal context helpers for MCP sessions.
+package context //nolint:revive
 
 import (
 	"context"
@@ -24,6 +25,7 @@ import (
 
 type contextKey string
 
+// Context keys for StreamNative sessions and identifiers.
 const (
 	SNCloudOrganizationContextKey contextKey = "sncloud_organization"
 	SNCloudInstanceContextKey     contextKey = "sncloud_instance"

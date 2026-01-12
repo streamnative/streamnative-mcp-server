@@ -14,6 +14,7 @@
 
 package config
 
+// ExternalPulsar holds connection settings for an external Pulsar cluster.
 type ExternalPulsar struct {
 	ServiceURL                    string
 	WebServiceURL                 string

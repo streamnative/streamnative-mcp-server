@@ -29,14 +29,14 @@ import (
 )
 
 func newMcpServer(_ context.Context, configOpts *ServerOptions, logrusLogger *logrus.Logger) (*mcp.Server, error) {
-	snConfig := configOpts.Options.LoadConfigOrDie()
+	snConfig := configOpts.LoadConfigOrDie()
 	var s *server.MCPServer
 	var mcpServer *mcp.Server
 	switch {
 	case snConfig.KeyFile != "":
 		{
 			issuer := snConfig.Auth.Issuer()
-			userName, err := configOpts.Options.WhoAmI(issuer.Audience)
+			userName, err := configOpts.WhoAmI(issuer.Audience)
 			if err != nil {
 				stdlog.Fatalf("failed to get user name: %v", err)
 				os.Exit(1)

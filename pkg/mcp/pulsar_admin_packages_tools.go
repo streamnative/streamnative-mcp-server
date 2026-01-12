@@ -24,18 +24,27 @@ import (
 )
 
 const (
-	HTTP    = "http"
-	FILE    = "file"
+	// HTTP represents the HTTP package URL scheme.
+	HTTP = "http"
+	// FILE represents the file package URL scheme.
+	FILE = "file"
+	// BUILTIN represents the builtin package scheme.
 	BUILTIN = "builtin"
 
+	// FUNCTION represents a function package type.
 	FUNCTION = "function"
-	SINK     = "sink"
-	SOURCE   = "source"
+	// SINK represents a sink package type.
+	SINK = "sink"
+	// SOURCE represents a source package type.
+	SOURCE = "source"
 
-	PublicTenant     = "public"
+	// PublicTenant is the default public tenant name.
+	PublicTenant = "public"
+	// DefaultNamespace is the default namespace name.
 	DefaultNamespace = "default"
 )
 
+// IsPackageURLSupported reports whether the package URL scheme is supported.
 func IsPackageURLSupported(functionPkgURL string) bool {
 	return functionPkgURL != "" && (strings.HasPrefix(functionPkgURL, HTTP) ||
 		strings.HasPrefix(functionPkgURL, FILE) ||

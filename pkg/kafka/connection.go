@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package kafka provides Kafka connection and client helpers.
 package kafka
 
 import (
@@ -80,12 +81,14 @@ func NewSession(ctx KafkaContext) (*Session, error) {
 	return session, nil
 }
 
+// SASLConfig holds SASL authentication configuration.
 type SASLConfig struct {
 	Mechanism string
 	Username  string
 	Password  string
 }
 
+// TLSConfig holds TLS configuration for Kafka connections.
 type TLSConfig struct {
 	Enabled        bool
 	ClientKeyFile  string
@@ -116,7 +119,7 @@ func tlsOpt(config *TLSConfig, opts []kgo.Opt) ([]kgo.Opt, error) {
 func saslOpt(config *SASLConfig, opts []kgo.Opt) ([]kgo.Opt, error) {
 	if config.Mechanism != "" || config.Username != "" || config.Password != "" {
 		if config.Mechanism == "" || config.Username == "" || config.Password == "" {
-			return nil, fmt.Errorf("All of Mechanism, Username, and Password must be specified if any are")
+			return nil, fmt.Errorf("all of Mechanism, Username, and Password must be specified if any are")
 		}
 		method := strings.ToLower(config.Mechanism)
 		method = strings.ReplaceAll(method, "-", "")
@@ -144,6 +147,7 @@ func saslOpt(config *SASLConfig, opts []kgo.Opt) ([]kgo.Opt, error) {
 	return opts, nil
 }
 
+// SetKafkaContext initializes Kafka clients using the provided context.
 func (s *Session) SetKafkaContext(ctx KafkaContext) error {
 	s.Ctx = ctx
 	kc := &s.Ctx
@@ -205,6 +209,7 @@ func (s *Session) SetKafkaContext(ctx KafkaContext) error {
 	return nil
 }
 
+// GetClient returns a Kafka client with optional overrides.
 func (s *Session) GetClient(opts ...kgo.Opt) (*kgo.Client, error) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
@@ -230,6 +235,7 @@ func (s *Session) GetClient(opts ...kgo.Opt) (*kgo.Client, error) {
 	return s.Client, nil
 }
 
+// GetAdminClient returns the Kafka admin client.
 func (s *Session) GetAdminClient() (*kadm.Client, error) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
@@ -248,6 +254,7 @@ func (s *Session) GetAdminClient() (*kadm.Client, error) {
 	return s.AdminClient, nil
 }
 
+// GetSchemaRegistryClient returns the schema registry client.
 func (s *Session) GetSchemaRegistryClient() (*sr.Client, error) {
 	if s.Ctx.SchemaRegistryURL == "" {
 		return nil, fmt.Errorf("schema registry not enabled on the current context")
@@ -276,6 +283,7 @@ func (s *Session) GetSchemaRegistryClient() (*sr.Client, error) {
 	return s.SchemaRegistryClient, nil
 }
 
+// GetConnectClient returns the Kafka Connect client.
 func (s *Session) GetConnectClient() (Connect, error) {
 	if s.Ctx.ConnectURL == "" {
 		return nil, fmt.Errorf("kafka connect not enabled on the current context")

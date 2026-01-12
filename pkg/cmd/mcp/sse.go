@@ -35,6 +35,7 @@ import (
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
+// NewCmdMcpSseServer builds the SSE server command.
 func NewCmdMcpSseServer(configOpts *ServerOptions) *cobra.Command {
 	sseCmd := &cobra.Command{
 		Use:   "sse",
@@ -79,9 +80,9 @@ func runSseServer(configOpts *ServerOptions) error {
 	ctx = mcpctx.WithSNCloudSession(ctx, mcpServer.SNCloudSession)
 	ctx = mcpctx.WithPulsarSession(ctx, mcpServer.PulsarSession)
 	ctx = mcpctx.WithKafkaSession(ctx, mcpServer.KafkaSession)
-	if configOpts.Options.KeyFile != "" {
-		if configOpts.Options.PulsarInstance != "" && configOpts.Options.PulsarCluster != "" {
-			err = mcpctx.SetContext(ctx, configOpts.Options, configOpts.Options.PulsarInstance, configOpts.Options.PulsarCluster)
+	if configOpts.KeyFile != "" {
+		if configOpts.PulsarInstance != "" && configOpts.PulsarCluster != "" {
+			err = mcpctx.SetContext(ctx, configOpts.Options, configOpts.PulsarInstance, configOpts.PulsarCluster)
 			if err != nil {
 				return errors.Wrap(err, "failed to set StreamNative Cloud context")
 			}
@@ -94,7 +95,7 @@ func runSseServer(configOpts *ServerOptions) error {
 
 	// Create Pulsar session manager for multi-session support (only for external Pulsar mode)
 	var pulsarSessionManager *session.PulsarSessionManager
-	snConfig := configOpts.Options.LoadConfigOrDie()
+	snConfig := configOpts.LoadConfigOrDie()
 	if snConfig.ExternalPulsar != nil && configOpts.MultiSessionPulsar {
 		managerConfig := &session.PulsarSessionManagerConfig{
 			MaxSessions:     configOpts.SessionCacheSize,

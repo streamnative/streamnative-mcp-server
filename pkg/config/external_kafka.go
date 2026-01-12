@@ -14,6 +14,7 @@
 
 package config
 
+// ExternalKafka holds connection settings for an external Kafka cluster.
 type ExternalKafka struct {
 	BootstrapServers  string
 	AuthType          string

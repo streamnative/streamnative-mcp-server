@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package schema provides schema converters for MCP tool payloads.
 package schema
 
 import (
@@ -22,14 +23,17 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 )
 
+// AvroConverter converts AVRO schemas to MCP tool definitions and payloads.
 type AvroConverter struct {
 	BaseConverter
 }
 
+// NewAvroConverter creates a new AvroConverter.
 func NewAvroConverter() *AvroConverter {
 	return &AvroConverter{}
 }
 
+// ToMCPToolInputSchemaProperties converts AVRO schema info into MCP tool options.
 func (c *AvroConverter) ToMCPToolInputSchemaProperties(schemaInfo *cliutils.SchemaInfo) ([]mcp.ToolOption, error) {
 	if schemaInfo.Type != "AVRO" {
 		return nil, fmt.Errorf("expected AVRO schema, got %s", schemaInfo.Type)
@@ -37,6 +41,7 @@ func (c *AvroConverter) ToMCPToolInputSchemaProperties(schemaInfo *cliutils.Sche
 	return processAvroSchemaStringToMCPToolInput(string(schemaInfo.Schema))
 }
 
+// SerializeMCPRequestToPulsarPayload serializes MCP arguments into an AVRO payload.
 func (c *AvroConverter) SerializeMCPRequestToPulsarPayload(arguments map[string]any, targetPulsarSchemaInfo *cliutils.SchemaInfo) ([]byte, error) {
 	if err := c.ValidateArguments(arguments, targetPulsarSchemaInfo); err != nil {
 		return nil, fmt.Errorf("arguments validation failed: %w", err)
@@ -44,6 +49,7 @@ func (c *AvroConverter) SerializeMCPRequestToPulsarPayload(arguments map[string]
 	return serializeArgumentsToAvroBinary(arguments, string(targetPulsarSchemaInfo.Schema))
 }
 
+// ValidateArguments validates arguments against the AVRO schema.
 func (c *AvroConverter) ValidateArguments(arguments map[string]any, targetPulsarSchemaInfo *cliutils.SchemaInfo) error {
 	if targetPulsarSchemaInfo.Type != "AVRO" {
 		return fmt.Errorf("expected AVRO schema for validation, got %s", targetPulsarSchemaInfo.Type)
