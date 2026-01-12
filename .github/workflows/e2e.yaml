@@ -41,17 +41,8 @@ jobs:
       - name: Download dependencies
         run: go mod download
 
-      - name: Start Pulsar
-        run: ./scripts/e2e-test.sh setup-pulsar
-
-      - name: Build and load snmcp image
-        run: ./scripts/e2e-test.sh build-image
-
-      - name: Deploy snmcp
-        run: ./scripts/e2e-test.sh deploy-mcp
-
       - name: Run E2E tests
-        run: ./scripts/e2e-test.sh run-tests
+        run: ./scripts/e2e-test.sh all
 
       - name: Cleanup
         if: always()
