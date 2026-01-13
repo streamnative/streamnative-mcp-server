@@ -50,8 +50,6 @@ spec:
             - "$(SNMCP_SESSION_CACHE_SIZE)"
             - --session-ttl-minutes
             - "$(SNMCP_SESSION_TTL_MINUTES)"
-            - --http-addr
-            - "$(SNMCP_HTTP_ADDR)"
             - --http-path
             - "$(SNMCP_HTTP_PATH)"
             {{- if .Values.server.readOnly }}

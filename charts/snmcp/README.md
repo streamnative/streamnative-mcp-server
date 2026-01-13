@@ -29,9 +29,10 @@ helm install snmcp ./charts/snmcp \
 |-----------|---------|-------------|
 | `server.readOnly` | `false` | Enable read-only mode |
 | `server.features` | `[]` | Features to enable (default: all-pulsar) |
-| `server.httpAddr` | `:9090` | HTTP server address |
 | `server.httpPath` | `/mcp` | Base path for SSE/message/health endpoints |
 | `server.configDir` | `/var/lib/snmcp` | Config directory for snmcp state (must be writable) |
+
+The container listens on port 9090. Use `service.port` or Ingress to expose a different port.
 
 ### Session Configuration
 

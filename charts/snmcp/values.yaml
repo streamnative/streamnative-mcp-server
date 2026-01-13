@@ -18,8 +18,6 @@ server:
   # Features to enable (e.g., "all-pulsar", "pulsar-admin", "pulsar-client")
   # Leave empty to use default (all-pulsar)
   features: []
-  # HTTP server address
-  httpAddr: ":9090"
   # HTTP server base path for SSE, message, and health endpoints
   httpPath: "/mcp"
   # Config directory for snmcp state (must be writable)
@@ -58,6 +56,7 @@ session:
 # Kubernetes Service configuration
 service:
   type: ClusterIP
+  # Port exposed by the Service (container listens on 9090)
   port: 9090
   annotations: {}
 

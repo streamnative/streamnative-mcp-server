@@ -15,7 +15,6 @@ data:
   {{- end }}
   SNMCP_SESSION_CACHE_SIZE: {{ .Values.session.cacheSize | quote }}
   SNMCP_SESSION_TTL_MINUTES: {{ .Values.session.ttlMinutes | quote }}
-  SNMCP_HTTP_ADDR: {{ .Values.server.httpAddr | quote }}
   SNMCP_HTTP_PATH: {{ .Values.server.httpPath | quote }}
   SNMCP_CONFIG_DIR: {{ .Values.server.configDir | quote }}
   SNMCP_READ_ONLY: {{ .Values.server.readOnly | quote }}
