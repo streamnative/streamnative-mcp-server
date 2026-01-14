@@ -1,0 +1,18 @@
+apiVersion: v2
+name: snmcp
+description: A Helm chart for StreamNative MCP Server with Multi-Session Pulsar support
+type: application
+version: 0.1.0
+appVersion: "0.0.1"
+home: https://github.com/streamnative/streamnative-mcp-server
+sources:
+  - https://github.com/streamnative/streamnative-mcp-server
+maintainers:
+  - name: StreamNative
+    url: https://streamnative.io
+keywords:
+  - mcp
+  - streamnative
+  - pulsar
+  - ai
+  - llm

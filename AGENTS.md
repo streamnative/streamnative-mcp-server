@@ -135,3 +135,5 @@ This file follows the AGENTS.md spec described in the Codex system message (scop
 ---
 
 Happy hacking! 🚀
+
+@CLAUDE.md as reference.
