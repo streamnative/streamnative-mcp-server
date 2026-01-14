@@ -1,0 +1,12 @@
+pulsar:
+  image: apachepulsar/pulsar-all:4.1.0
+  ports:
+    broker: 6650
+    web: 8080
+  auth:
+    enabled: true
+    tokenSecretKeyFile: /pulsarctl/test/auth/token/secret.key
+    superUserRoles:
+      - admin
+  resources:
+    javaToolOptions: "-Xms256m -Xmx512m"

@@ -1,0 +1,49 @@
+name: E2E Tests
+
+on:
+  push:
+    paths:
+      - "charts/**"
+      - "cmd/snmcp-e2e/**"
+      - "scripts/e2e-test.sh"
+      - ".github/workflows/e2e.yaml"
+  pull_request:
+    paths:
+      - "charts/**"
+      - "cmd/snmcp-e2e/**"
+      - "scripts/e2e-test.sh"
+      - ".github/workflows/e2e.yaml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: "go.mod"
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+
+      - name: Set up Kind
+        uses: helm/kind-action@v1
+        with:
+          cluster_name: kind
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Run E2E tests
+        run: ./scripts/e2e-test.sh all
+
+      - name: Cleanup
+        if: always()
+        run: ./scripts/e2e-test.sh cleanup

@@ -1,0 +1,151 @@
+{{/*
+Copyright 2025 StreamNative
+SPDX-License-Identifier: Apache-2.0
+*/}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "snmcp.fullname" . }}
+  labels:
+    {{- include "snmcp.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "snmcp.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "snmcp.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "snmcp.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ include "snmcp.imageTag" . }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - sse
+            - --use-external-pulsar
+            - --multi-session-pulsar
+            - --pulsar-web-service-url
+            - "$(SNMCP_PULSAR_WEB_SERVICE_URL)"
+            {{- if .Values.pulsar.serviceURL }}
+            - --pulsar-service-url
+            - "$(SNMCP_PULSAR_SERVICE_URL)"
+            {{- end }}
+            - --session-cache-size
+            - "$(SNMCP_SESSION_CACHE_SIZE)"
+            - --session-ttl-minutes
+            - "$(SNMCP_SESSION_TTL_MINUTES)"
+            - --http-path
+            - "$(SNMCP_HTTP_PATH)"
+            {{- if .Values.server.readOnly }}
+            - --read-only
+            {{- end }}
+            {{- if .Values.server.features }}
+            - --features
+            - "$(SNMCP_FEATURES)"
+            {{- end }}
+            {{- if .Values.pulsar.tls.enabled }}
+            - --pulsar-tls-allow-insecure-connection={{ .Values.pulsar.tls.allowInsecureConnection }}
+            - --pulsar-tls-enable-hostname-verification={{ .Values.pulsar.tls.enableHostnameVerification }}
+            {{- if .Values.pulsar.tls.trustCertsFilePath }}
+            - --pulsar-tls-trust-certs-file-path
+            - "$(SNMCP_PULSAR_TLS_TRUST_CERTS_PATH)"
+            {{- end }}
+            {{- if .Values.pulsar.tls.certFile }}
+            - --pulsar-tls-cert-file
+            - "$(SNMCP_PULSAR_TLS_CERT_FILE)"
+            {{- end }}
+            {{- if .Values.pulsar.tls.keyFile }}
+            - --pulsar-tls-key-file
+            - "$(SNMCP_PULSAR_TLS_KEY_FILE)"
+            {{- end }}
+            {{- end }}
+            {{- if .Values.logging.enabled }}
+            - --log-file
+            - {{ .Values.logging.logFile | quote }}
+            {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "snmcp.fullname" . }}
+          ports:
+            - name: http
+              containerPort: 9090
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: {{ trimSuffix "/" .Values.server.httpPath }}/healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: {{ trimSuffix "/" .Values.server.httpPath }}/readyz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          {{- if or .Values.pulsar.tls.enabled .Values.logging.enabled .Values.server.configDir }}
+          volumeMounts:
+            {{- if .Values.server.configDir }}
+            - name: config-dir
+              mountPath: {{ .Values.server.configDir | quote }}
+              readOnly: false
+            {{- end }}
+            {{- if and .Values.pulsar.tls.enabled .Values.pulsar.tls.secretName }}
+            - name: pulsar-tls
+              mountPath: /etc/snmcp/tls
+              readOnly: true
+            {{- end }}
+            {{- if .Values.logging.enabled }}
+            - name: logs
+              mountPath: /tmp
+            {{- end }}
+          {{- end }}
+      {{- if or .Values.pulsar.tls.enabled .Values.logging.enabled .Values.server.configDir }}
+      volumes:
+        {{- if .Values.server.configDir }}
+        - name: config-dir
+          emptyDir: {}
+        {{- end }}
+        {{- if and .Values.pulsar.tls.enabled .Values.pulsar.tls.secretName }}
+        - name: pulsar-tls
+          secret:
+            secretName: {{ .Values.pulsar.tls.secretName }}
+        {{- end }}
+        {{- if .Values.logging.enabled }}
+        - name: logs
+          emptyDir: {}
+        {{- end }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
