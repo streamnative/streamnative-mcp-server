@@ -28,8 +28,8 @@ OUTPUT_BIN=${OUTPUT}/bin
 KUBECTL_VERSION=1.28.0
 KUBECTL_BIN=$OUTPUT_BIN/kubectl
 HELM_BIN=$OUTPUT_BIN/helm
-HELM_VERSION=3.0.1
-KIND_VERSION=0.10.0
+HELM_VERSION=3.14.4
+KIND_VERSION=0.20.0
 KIND_BIN=$OUTPUT_BIN/kind
 CR_BIN=$OUTPUT_BIN/cr
 CR_VERSION=1.4.0
@@ -84,7 +84,7 @@ function hack::ensure_helm() {
         return 0
     fi
     local HELM_URL=https://get.helm.sh/helm-v${HELM_VERSION}-${OS}-${ARCH}.tar.gz
-    curl --retry 10 -L -s "$HELM_URL" | tar --strip-components 1 -C $OUTPUT_BIN -zxf - ${OS}-${ARCH}/helm
+    curl --retry 10 -f -L -s "$HELM_URL" | tar --strip-components 1 -C $OUTPUT_BIN -zxf - ${OS}-${ARCH}/helm
 }
 
 function hack::verify_kind() {
@@ -102,7 +102,7 @@ function hack::ensure_kind() {
     echo "Installing kind v$KIND_VERSION..."
     tmpfile=$(mktemp)
     trap "test -f $tmpfile && rm $tmpfile" RETURN
-    curl --retry 10 -L -o $tmpfile https://github.com/kubernetes-sigs/kind/releases/download/v${KIND_VERSION}/kind-$(uname)-amd64
+    curl --retry 10 -f -L -o $tmpfile https://github.com/kubernetes-sigs/kind/releases/download/v${KIND_VERSION}/kind-$(uname)-amd64
     mv $tmpfile $KIND_BIN
     chmod +x $KIND_BIN
 }
