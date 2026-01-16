@@ -56,7 +56,6 @@ function publish_charts() {
     cp --force ${CHARTS_INDEX}/index.yaml index.yaml
     git add index.yaml
     git commit --message="Publish new charts ${REPO}-v${RELEASE_BRANCH:7}" --signoff --gpg-sign=${KEY_ID}
-    git remote -v
     git remote add sn https://${SNBOT_USER}:${GITHUB_TOKEN}@github.com/${OWNER}/${CHART_REPO}
     git push sn gh-pages
 }
