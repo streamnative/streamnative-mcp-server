@@ -27,7 +27,7 @@ REPO_PATH=`cd ${BINDIR}/..;pwd`
 # CHARTS_REPO_PATH is the path of charts
 CHARTS_REPO_PATH=`cd ${REPO_PATH}/../charts;pwd`
 OWNER=${OWNER:-streamnative}
-REPO=${REPO:-snmcp}
+REPO=${REPO:-streamnative-mcp-server}
 CHART_REPO=${CHART_REPO:-charts}
 GITHUB_TOKEN=${GITHUB_TOKEN:-"UNSET"}
 GITUSER=${GITUSER:-"UNSET"}
