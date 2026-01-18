@@ -22,8 +22,8 @@ import (
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
-// Server wraps MCP server state and StreamNative sessions.
-type Server struct {
+// LegacyServer wraps MCP server state and StreamNative sessions for mark3labs/mcp-go.
+type LegacyServer struct {
 	MCPServer      *server.MCPServer
 	KafkaSession   *kafka.Session
 	PulsarSession  *pulsar.Session
@@ -31,17 +31,17 @@ type Server struct {
 	logger         *logrus.Logger
 }
 
-// NewServer creates a new MCP server with StreamNative integrations.
-func NewServer(name, version string, logger *logrus.Logger, opts ...server.ServerOption) *Server {
+// NewLegacyServer creates a new MCP server with StreamNative integrations.
+func NewLegacyServer(name, version string, logger *logrus.Logger, opts ...server.ServerOption) *LegacyServer {
 	// Create a new MCP server
-	opts = AddOpts(opts...)
+	opts = addLegacyOpts(opts...)
 	s := server.NewMCPServer(name, version, opts...)
-	mcpserver := CreateSNCloudMCPServer(s, logger)
+	mcpserver := createSNCloudLegacyServer(s, logger)
 	return mcpserver
 }
 
-// AddOpts merges default server options with custom options.
-func AddOpts(opts ...server.ServerOption) []server.ServerOption {
+// addLegacyOpts merges default server options with custom options.
+func addLegacyOpts(opts ...server.ServerOption) []server.ServerOption {
 	defaultOpts := []server.ServerOption{
 		server.WithResourceCapabilities(true, true),
 		server.WithRecovery(),
@@ -51,9 +51,9 @@ func AddOpts(opts ...server.ServerOption) []server.ServerOption {
 	return opts
 }
 
-// CreateSNCloudMCPServer constructs a Server wrapper for StreamNative Cloud.
-func CreateSNCloudMCPServer(s *server.MCPServer, logger *logrus.Logger) *Server {
-	mcpserver := &Server{
+// createSNCloudLegacyServer constructs a LegacyServer wrapper for StreamNative Cloud.
+func createSNCloudLegacyServer(s *server.MCPServer, logger *logrus.Logger) *LegacyServer {
+	mcpserver := &LegacyServer{
 		MCPServer:      s,
 		logger:         logger,
 		SNCloudSession: &config.Session{},
