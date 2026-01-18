@@ -2,7 +2,7 @@
 bin/
 dist/
 
-.DS_Store 
+.DS_Store
 tmp/
 *.log
 
@@ -12,3 +12,4 @@ vendor
 agents/
 .serena/
 .envrc
+.agents
