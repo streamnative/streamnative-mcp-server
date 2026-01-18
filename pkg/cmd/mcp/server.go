@@ -28,10 +28,10 @@ import (
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
-func newMcpServer(_ context.Context, configOpts *ServerOptions, logrusLogger *logrus.Logger) (*mcp.Server, error) {
+func newMcpServer(_ context.Context, configOpts *ServerOptions, logrusLogger *logrus.Logger) (*mcp.LegacyServer, error) {
 	snConfig := configOpts.LoadConfigOrDie()
 	var s *server.MCPServer
-	var mcpServer *mcp.Server
+	var mcpServer *mcp.LegacyServer
 	switch {
 	case snConfig.KeyFile != "":
 		{
@@ -46,7 +46,7 @@ func newMcpServer(_ context.Context, configOpts *ServerOptions, logrusLogger *lo
 			if err != nil {
 				return nil, errors.Wrap(err, "failed to create StreamNative Cloud session")
 			}
-			mcpServer = mcp.NewServer("streamnative-mcp-server", "0.0.1", logrusLogger, server.WithInstructions(mcp.GetStreamNativeCloudServerInstructions(userName, snConfig)))
+			mcpServer = mcp.NewLegacyServer("streamnative-mcp-server", "0.0.1", logrusLogger, server.WithInstructions(mcp.GetStreamNativeCloudServerInstructions(userName, snConfig)))
 			mcpServer.SNCloudSession = session
 
 			s = mcpServer.MCPServer
@@ -77,13 +77,13 @@ func newMcpServer(_ context.Context, configOpts *ServerOptions, logrusLogger *lo
 			if err != nil {
 				return nil, errors.Wrap(err, "failed to set external Kafka context")
 			}
-			mcpServer = mcp.NewServer("streamnative-mcp-server", "0.0.1", logrusLogger, server.WithInstructions(mcp.GetExternalKafkaServerInstructions(snConfig.ExternalKafka.BootstrapServers)))
+			mcpServer = mcp.NewLegacyServer("streamnative-mcp-server", "0.0.1", logrusLogger, server.WithInstructions(mcp.GetExternalKafkaServerInstructions(snConfig.ExternalKafka.BootstrapServers)))
 			mcpServer.KafkaSession = ksession
 			s = mcpServer.MCPServer
 		}
 	case snConfig.ExternalPulsar != nil:
 		{
-			mcpServer = mcp.NewServer("streamnative-mcp-server", "0.0.1", logrusLogger, server.WithInstructions(mcp.GetExternalPulsarServerInstructions(snConfig.ExternalPulsar.WebServiceURL)))
+			mcpServer = mcp.NewLegacyServer("streamnative-mcp-server", "0.0.1", logrusLogger, server.WithInstructions(mcp.GetExternalPulsarServerInstructions(snConfig.ExternalPulsar.WebServiceURL)))
 			s = mcpServer.MCPServer
 
 			// Only create global PulsarSession if not in multi-session mode

@@ -50,7 +50,7 @@ func StopAllPulsarFunctionManagers() {
 }
 
 // PulsarFunctionManagedMcpTools registers Pulsar Functions-as-tools handlers.
-func (s *Server) PulsarFunctionManagedMcpTools(readOnly bool, features []string, sessionID string) {
+func (s *LegacyServer) PulsarFunctionManagedMcpTools(readOnly bool, features []string, sessionID string) {
 	if !slices.Contains(features, string(FeatureAll)) &&
 		!slices.Contains(features, string(FeatureFunctionsAsTools)) &&
 		!slices.Contains(features, string(FeatureStreamNativeCloud)) {
