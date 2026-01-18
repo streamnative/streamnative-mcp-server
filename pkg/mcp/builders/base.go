@@ -20,8 +20,7 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 // FeatureChecker defines the interface for checking feature requirements
@@ -41,13 +40,38 @@ type ToolBuilder interface {
 	GetRequiredFeatures() []string
 
 	// BuildTools builds and returns a list of server tools
-	BuildTools(ctx context.Context, config ToolBuildConfig) ([]server.ServerTool, error)
+	BuildTools(ctx context.Context, config ToolBuildConfig) ([]ToolDefinition, error)
 
 	// Validate validates the builder configuration
 	Validate(config ToolBuildConfig) error
 
 	// Embed FeatureChecker interface
 	FeatureChecker
+}
+
+// ToolDefinition describes a tool and its handler registration.
+type ToolDefinition interface {
+	Definition() *mcp.Tool
+	Register(server *mcp.Server)
+}
+
+// ServerTool combines a tool with a typed handler.
+type ServerTool[In, Out any] struct {
+	Tool    *mcp.Tool
+	Handler ToolHandlerFunc[In, Out]
+}
+
+// Definition returns the tool definition.
+func (t ServerTool[In, Out]) Definition() *mcp.Tool {
+	return t.Tool
+}
+
+// Register installs the tool on the provided server.
+func (t ServerTool[In, Out]) Register(server *mcp.Server) {
+	if server == nil || t.Tool == nil {
+		return
+	}
+	mcp.AddTool(server, t.Tool, t.Handler)
 }
 
 // ToolBuildConfig contains all configuration information needed to build tools
@@ -130,6 +154,6 @@ func (b *BaseToolBuilder) HasAnyRequiredFeature(features []string) bool {
 	return false
 }
 
-// ToolHandlerFunc defines the tool handler function type
-// It maintains consistency with server.ToolHandlerFunc
-type ToolHandlerFunc func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error)
+// ToolHandlerFunc defines the tool handler function type.
+// It aliases mcp.ToolHandlerFor to preserve SDK behavior.
+type ToolHandlerFunc[In, Out any] = mcp.ToolHandlerFor[In, Out]
