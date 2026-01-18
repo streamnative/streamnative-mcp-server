@@ -17,7 +17,6 @@ package mcp
 import (
 	"context"
 	"fmt"
-	"io"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -25,11 +24,10 @@ import (
 
 	stdlog "log"
 
-	"github.com/mark3labs/mcp-go/server"
+	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
-	"github.com/streamnative/streamnative-mcp-server/pkg/log"
 )
 
 // NewCmdMcpStdioServer builds the stdio server command.
@@ -69,21 +67,18 @@ func runStdioServer(configOpts *ServerOptions) error {
 		return fmt.Errorf("failed to create MCP server: %w", err)
 	}
 
-	stdioServer := server.NewStdioServer(mcpServer.MCPServer)
-	stdioServer.SetErrorLogger(stdLogger)
+	var transport sdk.Transport = &sdk.StdioTransport{}
+	if configOpts.LogCommands {
+		transport = &sdk.LoggingTransport{
+			Transport: transport,
+			Writer:    logger.Writer(),
+		}
+	}
 
 	// Start listening for messages
 	errC := make(chan error, 1)
 	go func() {
-		in, out := io.Reader(os.Stdin), io.Writer(os.Stdout)
-
-		if configOpts.LogCommands {
-			// If command logging is enabled, wrap the IO with a logger
-			loggedIO := log.NewIOLogger(in, out, logger)
-			in, out = loggedIO, loggedIO
-		}
-
-		errC <- stdioServer.Listen(ctx, in, out)
+		errC <- mcpServer.Run(ctx, transport, stdLogger)
 	}()
 
 	_, _ = fmt.Fprintf(os.Stderr, "StreamNative Cloud MCP Server running on stdio\n")
