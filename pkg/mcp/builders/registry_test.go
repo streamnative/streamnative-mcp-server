@@ -19,8 +19,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -29,7 +28,7 @@ import (
 type MockToolBuilder struct {
 	name     string
 	features []string
-	tools    []server.ServerTool
+	tools    []ToolDefinition
 	err      error
 	metadata ToolMetadata
 }
@@ -44,13 +43,18 @@ func NewMockToolBuilder(name string, features []string) *MockToolBuilder {
 			Description: fmt.Sprintf("Mock tool builder for %s", name),
 			Category:    "test",
 		},
-		tools: []server.ServerTool{
-			{
-				Tool: mcp.NewTool(name,
-					mcp.WithDescription(fmt.Sprintf("Mock tool %s", name)),
-				),
-				Handler: func(_ context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-					return mcp.NewToolResultText(fmt.Sprintf("Mock response from %s", name)), nil
+		tools: []ToolDefinition{
+			ServerTool[map[string]any, any]{
+				Tool: &mcp.Tool{
+					Name:        name,
+					Description: fmt.Sprintf("Mock tool %s", name),
+				},
+				Handler: func(_ context.Context, _ *mcp.CallToolRequest, _ map[string]any) (*mcp.CallToolResult, any, error) {
+					return &mcp.CallToolResult{
+						Content: []mcp.Content{
+							&mcp.TextContent{Text: fmt.Sprintf("Mock response from %s", name)},
+						},
+					}, nil, nil
 				},
 			},
 		},
@@ -65,7 +69,7 @@ func (m *MockToolBuilder) GetRequiredFeatures() []string {
 	return m.features
 }
 
-func (m *MockToolBuilder) BuildTools(_ context.Context, _ ToolBuildConfig) ([]server.ServerTool, error) {
+func (m *MockToolBuilder) BuildTools(_ context.Context, _ ToolBuildConfig) ([]ToolDefinition, error) {
 	if m.err != nil {
 		return nil, m.err
 	}
@@ -224,7 +228,7 @@ func TestToolRegistry(t *testing.T) {
 		tools, err := registry.BuildSingle("single_tool", config)
 		require.NoError(t, err)
 		assert.Len(t, tools, 1)
-		assert.Equal(t, "single_tool", tools[0].Tool.Name)
+		assert.Equal(t, "single_tool", tools[0].Definition().Name)
 	})
 
 	t.Run("BuildSingle_NotFound", func(t *testing.T) {
