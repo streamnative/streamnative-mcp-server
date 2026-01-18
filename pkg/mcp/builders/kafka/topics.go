@@ -18,18 +18,59 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"strings"
 
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	"github.com/google/jsonschema-go/jsonschema"
+	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 	"github.com/twmb/franz-go/pkg/kadm"
 )
 
-// KafkaTopicsToolBuilder implements the ToolBuilder interface for Kafka Topics
-// /nolint:revive
-type KafkaTopicsToolBuilder struct {
+type kafkaTopicsInput struct {
+	Resource          string         `json:"resource"`
+	Operation         string         `json:"operation"`
+	Name              *string        `json:"name,omitempty"`
+	Partitions        *int           `json:"partitions,omitempty"`
+	ReplicationFactor *int           `json:"replicationFactor,omitempty"`
+	Configs           map[string]any `json:"configs,omitempty"`
+	IncludeInternal   bool           `json:"includeInternal,omitempty"`
+}
+
+const (
+	kafkaTopicsResourceDesc = "Resource to operate on. Available resources:\n" +
+		"- topic: A single Kafka topic for operations on individual topics (create, get, delete)\n" +
+		"- topics: Collection of Kafka topics for bulk operations (list)"
+	kafkaTopicsOperationDesc = "Operation to perform. Available operations:\n" +
+		"- list: List all topics in the Kafka cluster, optionally including internal topics\n" +
+		"- get: Get detailed configuration for a specific topic\n" +
+		"- create: Create a new topic with specified partitions, replication factor, and optional configs\n" +
+		"- delete: Delete an existing topic\n" +
+		"- metadata: Get metadata for a specific topic"
+	kafkaTopicsNameDesc = "The name of the Kafka topic to operate on. " +
+		"Required for 'get', 'create', 'delete', and 'metadata' operations on the 'topic' resource. " +
+		"Topic names should follow Kafka naming conventions (alphanumeric, dots, underscores, and hyphens)."
+	kafkaTopicsPartitionsDesc = "The number of partitions for the topic. Required for 'create' operation. " +
+		"Partitions determine the parallelism and scalability of the topic. " +
+		"More partitions allow more concurrent consumers and higher throughput."
+	kafkaTopicsReplicationFactorDesc = "The replication factor for the topic. Required for 'create' operation. " +
+		"Replication factor determines fault tolerance - it should be at least 2 for production use. " +
+		"Cannot exceed the number of available brokers in the cluster."
+	kafkaTopicsConfigsDesc = "Optional configuration parameters for the topic during 'create' operation. " +
+		"Common configurations include:\n" +
+		"- retention.ms: How long to retain messages (milliseconds)\n" +
+		"- compression.type: Compression algorithm (none, gzip, snappy, lz4, zstd)\n" +
+		"- cleanup.policy: Log cleanup policy (delete, compact, compact,delete)\n" +
+		"- segment.ms: Time before a new log segment is rolled out\n" +
+		"- max.message.bytes: Maximum size of a message batch"
+	kafkaTopicsIncludeInternalDesc = "Whether to include internal Kafka topics in the 'list' operation. " +
+		"Internal topics are used by Kafka itself (e.g., __consumer_offsets, __transaction_state). " +
+		"Default: false"
+)
+
+// KafkaTopicsToolBuilder implements the ToolBuilder interface for Kafka topics.
+type KafkaTopicsToolBuilder struct { //nolint:revive
 	*builders.BaseToolBuilder
 }
 
@@ -55,7 +96,7 @@ func NewKafkaTopicsToolBuilder() *KafkaTopicsToolBuilder {
 }
 
 // BuildTools builds the Kafka Topics tool list
-func (b *KafkaTopicsToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]server.ServerTool, error) {
+func (b *KafkaTopicsToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]builders.ToolDefinition, error) {
 	// Check features - return empty list if no required features are present
 	if !b.HasAnyRequiredFeature(config.Features) {
 		return nil, nil
@@ -67,11 +108,14 @@ func (b *KafkaTopicsToolBuilder) BuildTools(_ context.Context, config builders.T
 	}
 
 	// Build tools
-	tool := b.buildKafkaTopicsTool()
+	tool, err := b.buildKafkaTopicsTool()
+	if err != nil {
+		return nil, err
+	}
 	handler := b.buildKafkaTopicsHandler(config.ReadOnly)
 
-	return []server.ServerTool{
-		{
+	return []builders.ToolDefinition{
+		builders.ServerTool[kafkaTopicsInput, any]{
 			Tool:    tool,
 			Handler: handler,
 		},
@@ -79,17 +123,11 @@ func (b *KafkaTopicsToolBuilder) BuildTools(_ context.Context, config builders.T
 }
 
 // buildKafkaTopicsTool builds the Kafka Topics MCP tool definition
-func (b *KafkaTopicsToolBuilder) buildKafkaTopicsTool() mcp.Tool {
-	resourceDesc := "Resource to operate on. Available resources:\n" +
-		"- topic: A single Kafka topic for operations on individual topics (create, get, delete)\n" +
-		"- topics: Collection of Kafka topics for bulk operations (list)"
-
-	operationDesc := "Operation to perform. Available operations:\n" +
-		"- list: List all topics in the Kafka cluster, optionally including internal topics\n" +
-		"- get: Get detailed configuration for a specific topic\n" +
-		"- create: Create a new topic with specified partitions, replication factor, and optional configs\n" +
-		"- delete: Delete an existing topic\n" +
-		"- metadata: Get metadata for a specific topic\n"
+func (b *KafkaTopicsToolBuilder) buildKafkaTopicsTool() (*sdk.Tool, error) {
+	inputSchema, err := buildKafkaTopicsInputSchema()
+	if err != nil {
+		return nil, err
+	}
 
 	toolDesc := "Unified tool for managing Apache Kafka topics.\n" +
 		"This tool provides access to various Kafka topic operations, including creation, deletion, listing, and configuration retrieval.\n" +
@@ -137,72 +175,33 @@ func (b *KafkaTopicsToolBuilder) buildKafkaTopicsTool() mcp.Tool {
 		"   name: \"old-topic\"\n\n" +
 		"This tool requires appropriate Kafka permissions for topic management."
 
-	return mcp.NewTool("kafka_admin_topics",
-		mcp.WithDescription(toolDesc),
-		mcp.WithString("resource", mcp.Required(),
-			mcp.Description(resourceDesc),
-		),
-		mcp.WithString("operation", mcp.Required(),
-			mcp.Description(operationDesc),
-		),
-		mcp.WithString("name",
-			mcp.Description("The name of the Kafka topic to operate on. "+
-				"Required for 'get', 'create', 'delete', and 'metadata' operations on the 'topic' resource. "+
-				"Topic names should follow Kafka naming conventions (alphanumeric, dots, underscores, and hyphens).")),
-		mcp.WithNumber("partitions",
-			mcp.Description("The number of partitions for the topic. Required for 'create' operation. "+
-				"Partitions determine the parallelism and scalability of the topic. "+
-				"More partitions allow more concurrent consumers and higher throughput.")),
-		mcp.WithNumber("replicationFactor",
-			mcp.Description("The replication factor for the topic. Required for 'create' operation. "+
-				"Replication factor determines fault tolerance - it should be at least 2 for production use. "+
-				"Cannot exceed the number of available brokers in the cluster.")),
-		mcp.WithObject("configs",
-			mcp.Description("Optional configuration parameters for the topic during 'create' operation. "+
-				"Common configurations include:\n"+
-				"- retention.ms: How long to retain messages (milliseconds)\n"+
-				"- compression.type: Compression algorithm (none, gzip, snappy, lz4, zstd)\n"+
-				"- cleanup.policy: Log cleanup policy (delete, compact, compact,delete)\n"+
-				"- segment.ms: Time before a new log segment is rolled out\n"+
-				"- max.message.bytes: Maximum size of a message batch")),
-		mcp.WithBoolean("includeInternal",
-			mcp.Description("Whether to include internal Kafka topics in the 'list' operation. "+
-				"Internal topics are used by Kafka itself (e.g., __consumer_offsets, __transaction_state). "+
-				"Default: false")),
-	)
+	return &sdk.Tool{
+		Name:        "kafka_admin_topics",
+		Description: toolDesc,
+		InputSchema: inputSchema,
+	}, nil
 }
 
 // buildKafkaTopicsHandler builds the Kafka Topics handler function
-func (b *KafkaTopicsToolBuilder) buildKafkaTopicsHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		// Get required parameters
-		resource, err := request.RequireString("resource")
-		if err != nil {
-			return b.handleError("get resource", err), nil
-		}
-
-		operation, err := request.RequireString("operation")
-		if err != nil {
-			return b.handleError("get operation", err), nil
-		}
-
+func (b *KafkaTopicsToolBuilder) buildKafkaTopicsHandler(readOnly bool) builders.ToolHandlerFunc[kafkaTopicsInput, any] {
+	return func(ctx context.Context, _ *sdk.CallToolRequest, input kafkaTopicsInput) (*sdk.CallToolResult, any, error) {
 		// Normalize parameters
-		resource = strings.ToLower(resource)
-		operation = strings.ToLower(operation)
+		resource := strings.ToLower(input.Resource)
+		operation := strings.ToLower(input.Operation)
 
 		// Validate write operations in read-only mode
 		if readOnly && (operation == "create" || operation == "delete") {
-			return mcp.NewToolResultError("Write operations are not allowed in read-only mode"), nil
+			return nil, nil, fmt.Errorf("write operations are not allowed in read-only mode")
 		}
 
 		// Get Kafka admin client
 		session := mcpCtx.GetKafkaSession(ctx)
 		if session == nil {
-			return b.handleError("get Kafka session not found in context", nil), nil
+			return nil, nil, b.handleError("get Kafka session not found in context", nil)
 		}
 		admin, err := session.GetAdminClient()
 		if err != nil {
-			return b.handleError("get admin client", err), nil
+			return nil, nil, b.handleError("get admin client", err)
 		}
 
 		// Dispatch based on resource and operation
@@ -210,25 +209,30 @@ func (b *KafkaTopicsToolBuilder) buildKafkaTopicsHandler(readOnly bool) func(con
 		case "topics":
 			switch operation {
 			case "list":
-				return b.handleKafkaTopicsList(ctx, admin, request)
+				result, err := b.handleKafkaTopicsList(ctx, admin, input)
+				return result, nil, err
 			default:
-				return mcp.NewToolResultError(fmt.Sprintf("Invalid operation for resource 'topics': %s", operation)), nil
+				return nil, nil, fmt.Errorf("invalid operation for resource 'topics': %s", operation)
 			}
 		case "topic":
 			switch operation {
 			case "get":
-				return b.handleKafkaTopicGet(ctx, admin, request)
+				result, err := b.handleKafkaTopicGet(ctx, admin, input)
+				return result, nil, err
 			case "create":
-				return b.handleKafkaTopicCreate(ctx, admin, request)
+				result, err := b.handleKafkaTopicCreate(ctx, admin, input)
+				return result, nil, err
 			case "delete":
-				return b.handleKafkaTopicDelete(ctx, admin, request)
+				result, err := b.handleKafkaTopicDelete(ctx, admin, input)
+				return result, nil, err
 			case "metadata":
-				return b.handleKafkaTopicMetadata(ctx, admin, request)
+				result, err := b.handleKafkaTopicMetadata(ctx, admin, input)
+				return result, nil, err
 			default:
-				return mcp.NewToolResultError(fmt.Sprintf("Invalid operation for resource 'topic': %s", operation)), nil
+				return nil, nil, fmt.Errorf("invalid operation for resource 'topic': %s", operation)
 			}
 		default:
-			return mcp.NewToolResultError(fmt.Sprintf("Invalid resource: %s. Available resources: topics, topic", resource)), nil
+			return nil, nil, fmt.Errorf("invalid resource: %s. available resources: topics, topic", resource)
 		}
 	}
 }
@@ -236,26 +240,42 @@ func (b *KafkaTopicsToolBuilder) buildKafkaTopicsHandler(readOnly bool) func(con
 // Utility functions
 
 // handleError provides unified error handling
-func (b *KafkaTopicsToolBuilder) handleError(operation string, err error) *mcp.CallToolResult {
-	return mcp.NewToolResultError(fmt.Sprintf("Failed to %s: %v", operation, err))
+func (b *KafkaTopicsToolBuilder) handleError(operation string, err error) error {
+	return fmt.Errorf("failed to %s: %v", operation, err)
 }
 
 // marshalResponse provides unified JSON serialization for responses
-func (b *KafkaTopicsToolBuilder) marshalResponse(data interface{}) (*mcp.CallToolResult, error) {
+func (b *KafkaTopicsToolBuilder) marshalResponse(data interface{}) (*sdk.CallToolResult, error) {
 	jsonBytes, err := json.Marshal(data)
 	if err != nil {
-		return b.handleError("marshal response", err), nil
+		return nil, b.handleError("marshal response", err)
 	}
-	return mcp.NewToolResultText(string(jsonBytes)), nil
+	return &sdk.CallToolResult{
+		Content: []sdk.Content{&sdk.TextContent{Text: string(jsonBytes)}},
+	}, nil
+}
+
+func requireString(value *string, key string) (string, error) {
+	if value == nil {
+		return "", fmt.Errorf("required argument %q not found", key)
+	}
+	return *value, nil
+}
+
+func requireInt(value *int, key string) (int, error) {
+	if value == nil {
+		return 0, fmt.Errorf("required argument %q not found", key)
+	}
+	return *value, nil
 }
 
 // handleKafkaTopicsList handles listing all topics
-func (b *KafkaTopicsToolBuilder) handleKafkaTopicsList(ctx context.Context, admin *kadm.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	includeInternal := request.GetBool("includeInternal", false)
+func (b *KafkaTopicsToolBuilder) handleKafkaTopicsList(ctx context.Context, admin *kadm.Client, input kafkaTopicsInput) (*sdk.CallToolResult, error) {
+	includeInternal := input.IncludeInternal
 
 	topics, err := admin.ListTopics(ctx)
 	if err != nil {
-		return b.handleError("list Kafka topics", err), nil
+		return nil, b.handleError("list Kafka topics", err)
 	}
 
 	// Filter out internal topics if not requested
@@ -273,95 +293,220 @@ func (b *KafkaTopicsToolBuilder) handleKafkaTopicsList(ctx context.Context, admi
 }
 
 // handleKafkaTopicGet handles getting detailed information about a specific topic
-func (b *KafkaTopicsToolBuilder) handleKafkaTopicGet(ctx context.Context, admin *kadm.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	topicName, err := request.RequireString("name")
+func (b *KafkaTopicsToolBuilder) handleKafkaTopicGet(ctx context.Context, admin *kadm.Client, input kafkaTopicsInput) (*sdk.CallToolResult, error) {
+	topicName, err := requireString(input.Name, "name")
 	if err != nil {
-		return b.handleError("get topic name", err), nil
+		return nil, b.handleError("get topic name", err)
 	}
 
 	topics, err := admin.ListTopics(ctx, topicName)
 	if err != nil {
-		return b.handleError("get Kafka topic", err), nil
+		return nil, b.handleError("get Kafka topic", err)
 	}
 
 	return b.marshalResponse(topics)
 }
 
 // handleKafkaTopicCreate handles creating a new topic
-func (b *KafkaTopicsToolBuilder) handleKafkaTopicCreate(ctx context.Context, admin *kadm.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	topicName, err := request.RequireString("name")
+func (b *KafkaTopicsToolBuilder) handleKafkaTopicCreate(ctx context.Context, admin *kadm.Client, input kafkaTopicsInput) (*sdk.CallToolResult, error) {
+	topicName, err := requireString(input.Name, "name")
 	if err != nil {
-		return b.handleError("get topic name", err), nil
+		return nil, b.handleError("get topic name", err)
 	}
 
-	partitionsNum, err := request.RequireInt("partitions")
+	partitionsNum, err := requireInt(input.Partitions, "partitions")
 	if err != nil {
-		return b.handleError("get partitions", err), nil
+		return nil, b.handleError("get partitions", err)
 	}
 
-	replicationFactorNum, err := request.RequireInt("replicationFactor")
+	replicationFactorNum, err := requireInt(input.ReplicationFactor, "replicationFactor")
 	if err != nil {
-		return b.handleError("get replication factor", err), nil
+		return nil, b.handleError("get replication factor", err)
 	}
 
-	///nolint:gosec
+	//nolint:gosec
 	partitions := int32(partitionsNum)
-	///nolint:gosec
+	//nolint:gosec
 	replicationFactor := int16(replicationFactorNum)
 
-	// Parse optional configs
-	var configs map[string]*string
-	arguments := request.GetArguments()
-	if configsParam, exists := arguments["configs"]; exists {
-		if configsMap, ok := configsParam.(map[string]interface{}); ok {
-			configs = make(map[string]*string)
-			for key, value := range configsMap {
-				if strValue, ok := value.(string); ok {
-					configs[key] = &strValue
-				} else {
-					// Convert non-string values to strings
-					strValue := fmt.Sprintf("%v", value)
-					configs[key] = &strValue
-				}
-			}
-		}
-	}
+	configs := b.buildConfigs(input)
 
 	// Create topic using the correct CreateTopics API
 	results, err := admin.CreateTopics(ctx, partitions, replicationFactor, configs, topicName)
 	if err != nil {
-		return b.handleError("create Kafka topic", err), nil
+		return nil, b.handleError("create Kafka topic", err)
 	}
 
 	return b.marshalResponse(results)
 }
 
 // handleKafkaTopicDelete handles deleting a topic
-func (b *KafkaTopicsToolBuilder) handleKafkaTopicDelete(ctx context.Context, admin *kadm.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	topicName, err := request.RequireString("name")
+func (b *KafkaTopicsToolBuilder) handleKafkaTopicDelete(ctx context.Context, admin *kadm.Client, input kafkaTopicsInput) (*sdk.CallToolResult, error) {
+	topicName, err := requireString(input.Name, "name")
 	if err != nil {
-		return b.handleError("get topic name", err), nil
+		return nil, b.handleError("get topic name", err)
 	}
 
 	results, err := admin.DeleteTopics(ctx, topicName)
 	if err != nil {
-		return b.handleError("delete Kafka topic", err), nil
+		return nil, b.handleError("delete Kafka topic", err)
 	}
 
 	return b.marshalResponse(results)
 }
 
 // handleKafkaTopicMetadata handles getting metadata for a topic
-func (b *KafkaTopicsToolBuilder) handleKafkaTopicMetadata(ctx context.Context, admin *kadm.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	topicName, err := request.RequireString("name")
+func (b *KafkaTopicsToolBuilder) handleKafkaTopicMetadata(ctx context.Context, admin *kadm.Client, input kafkaTopicsInput) (*sdk.CallToolResult, error) {
+	topicName, err := requireString(input.Name, "name")
 	if err != nil {
-		return b.handleError("get topic name", err), nil
+		return nil, b.handleError("get topic name", err)
 	}
 
 	metadata, err := admin.Metadata(ctx, topicName)
 	if err != nil {
-		return b.handleError("get Kafka topic metadata", err), nil
+		return nil, b.handleError("get Kafka topic metadata", err)
 	}
 
 	return b.marshalResponse(metadata)
+}
+
+func (b *KafkaTopicsToolBuilder) buildConfigs(input kafkaTopicsInput) map[string]*string {
+	if len(input.Configs) == 0 {
+		return nil
+	}
+
+	configs := make(map[string]*string, len(input.Configs))
+	for key, value := range input.Configs {
+		strValue, ok := value.(string)
+		if !ok {
+			strValue = fmt.Sprintf("%v", value)
+		}
+		configs[key] = &strValue
+	}
+
+	return configs
+}
+
+func buildKafkaTopicsInputSchema() (*jsonschema.Schema, error) {
+	schema, err := jsonschema.For[kafkaTopicsInput](nil)
+	if err != nil {
+		return nil, fmt.Errorf("input schema: %w", err)
+	}
+	if schema.Type != "object" {
+		return nil, fmt.Errorf("input schema must have type \"object\"")
+	}
+
+	if schema.Properties == nil {
+		schema.Properties = map[string]*jsonschema.Schema{}
+	}
+	setSchemaDescription(schema, "resource", kafkaTopicsResourceDesc)
+	setSchemaDescription(schema, "operation", kafkaTopicsOperationDesc)
+	setSchemaDescription(schema, "name", kafkaTopicsNameDesc)
+	setSchemaDescription(schema, "partitions", kafkaTopicsPartitionsDesc)
+	setSchemaDescription(schema, "replicationFactor", kafkaTopicsReplicationFactorDesc)
+	setSchemaDescription(schema, "configs", kafkaTopicsConfigsDesc)
+	setSchemaDescription(schema, "includeInternal", kafkaTopicsIncludeInternalDesc)
+
+	normalizeAdditionalProperties(schema)
+	return schema, nil
+}
+
+func setSchemaDescription(schema *jsonschema.Schema, name, desc string) {
+	if schema == nil {
+		return
+	}
+	prop, ok := schema.Properties[name]
+	if !ok || prop == nil {
+		return
+	}
+	prop.Description = desc
+}
+
+func normalizeAdditionalProperties(schema *jsonschema.Schema) {
+	visited := map[*jsonschema.Schema]bool{}
+	var walk func(*jsonschema.Schema)
+	walk = func(s *jsonschema.Schema) {
+		if s == nil || visited[s] {
+			return
+		}
+		visited[s] = true
+
+		if s.Type == "object" && s.Properties != nil && isFalseSchema(s.AdditionalProperties) {
+			s.AdditionalProperties = nil
+		}
+
+		for _, prop := range s.Properties {
+			walk(prop)
+		}
+		for _, prop := range s.PatternProperties {
+			walk(prop)
+		}
+		for _, def := range s.Defs {
+			walk(def)
+		}
+		for _, def := range s.Definitions {
+			walk(def)
+		}
+		if s.AdditionalProperties != nil && !isFalseSchema(s.AdditionalProperties) {
+			walk(s.AdditionalProperties)
+		}
+		if s.Items != nil {
+			walk(s.Items)
+		}
+		for _, item := range s.PrefixItems {
+			walk(item)
+		}
+		if s.AdditionalItems != nil {
+			walk(s.AdditionalItems)
+		}
+		if s.UnevaluatedItems != nil {
+			walk(s.UnevaluatedItems)
+		}
+		if s.UnevaluatedProperties != nil {
+			walk(s.UnevaluatedProperties)
+		}
+		if s.PropertyNames != nil {
+			walk(s.PropertyNames)
+		}
+		if s.Contains != nil {
+			walk(s.Contains)
+		}
+		for _, subschema := range s.AllOf {
+			walk(subschema)
+		}
+		for _, subschema := range s.AnyOf {
+			walk(subschema)
+		}
+		for _, subschema := range s.OneOf {
+			walk(subschema)
+		}
+		if s.Not != nil {
+			walk(s.Not)
+		}
+		if s.If != nil {
+			walk(s.If)
+		}
+		if s.Then != nil {
+			walk(s.Then)
+		}
+		if s.Else != nil {
+			walk(s.Else)
+		}
+		for _, subschema := range s.DependentSchemas {
+			walk(subschema)
+		}
+	}
+	walk(schema)
+}
+
+func isFalseSchema(schema *jsonschema.Schema) bool {
+	if schema == nil || schema.Not == nil {
+		return false
+	}
+	if !reflect.ValueOf(*schema.Not).IsZero() {
+		return false
+	}
+	clone := *schema
+	clone.Not = nil
+	return reflect.ValueOf(clone).IsZero()
 }
