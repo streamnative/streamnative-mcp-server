@@ -17,15 +17,15 @@ package mcp
 import (
 	"context"
 
-	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
+	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	kafkabuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/kafka"
 )
 
-// KafkaAdminAddGroupsTools registers Kafka admin group tools.
-func KafkaAdminAddGroupsTools(s *sdk.Server, readOnly bool, features []string) {
+// KafkaAdminAddGroupsToolsLegacy registers Kafka admin group tools on legacy servers.
+func KafkaAdminAddGroupsToolsLegacy(s *server.MCPServer, readOnly bool, features []string) {
 	// Use the new builder pattern
-	builder := kafkabuilders.NewKafkaGroupsToolBuilder()
+	builder := kafkabuilders.NewKafkaGroupsLegacyToolBuilder()
 	config := builders.ToolBuildConfig{
 		ReadOnly: readOnly,
 		Features: features,
@@ -39,6 +39,6 @@ func KafkaAdminAddGroupsTools(s *sdk.Server, readOnly bool, features []string) {
 
 	// Add all built tools to the server
 	for _, tool := range tools {
-		tool.Register(s)
+		s.AddTool(tool.Tool, tool.Handler)
 	}
 }
