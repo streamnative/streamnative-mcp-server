@@ -17,15 +17,14 @@ package mcp
 import (
 	"context"
 
-	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
+	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	pulsarbuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/pulsar"
 )
 
-// PulsarAdminAddResourceQuotasTools adds resource quotas-related tools to the MCP server
-func PulsarAdminAddResourceQuotasTools(s *sdk.Server, readOnly bool, features []string) {
-	// Use the new builder pattern
-	builder := pulsarbuilders.NewPulsarAdminResourceQuotasToolBuilder()
+// PulsarAdminAddResourceQuotasToolsLegacy registers Pulsar admin resource quotas tools for the legacy server.
+func PulsarAdminAddResourceQuotasToolsLegacy(s *server.MCPServer, readOnly bool, features []string) {
+	builder := pulsarbuilders.NewPulsarAdminResourceQuotasLegacyToolBuilder()
 	config := builders.ToolBuildConfig{
 		ReadOnly: readOnly,
 		Features: features,
@@ -33,12 +32,10 @@ func PulsarAdminAddResourceQuotasTools(s *sdk.Server, readOnly bool, features []
 
 	tools, err := builder.BuildTools(context.Background(), config)
 	if err != nil {
-		// Log error but don't fail - this maintains backward compatibility
 		return
 	}
 
-	// Add all built tools to the server
 	for _, tool := range tools {
-		tool.Register(s)
+		s.AddTool(tool.Tool, tool.Handler)
 	}
 }
