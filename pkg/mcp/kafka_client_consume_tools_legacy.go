@@ -17,28 +17,29 @@ package mcp
 import (
 	"context"
 
-	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
+	"github.com/mark3labs/mcp-go/server"
+	"github.com/sirupsen/logrus"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	kafkabuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/kafka"
 )
 
-// KafkaClientAddConsumeTools adds Kafka client consume tools to the MCP server
-func KafkaClientAddConsumeTools(s *sdk.Server, readOnly bool, features []string) {
-	// Use the new builder pattern
-	builder := kafkabuilders.NewKafkaConsumeToolBuilder()
+// KafkaClientAddConsumeToolsLegacy adds Kafka client consume tools to the legacy MCP server.
+func KafkaClientAddConsumeToolsLegacy(s *server.MCPServer, readOnly bool, logrusLogger *logrus.Logger, features []string) {
+	builder := kafkabuilders.NewKafkaConsumeLegacyToolBuilder()
 	config := builders.ToolBuildConfig{
 		ReadOnly: readOnly,
 		Features: features,
+		Options: map[string]interface{}{
+			"logger": logrusLogger,
+		},
 	}
 
 	tools, err := builder.BuildTools(context.Background(), config)
 	if err != nil {
-		// Log error but don't fail - this maintains backward compatibility
 		return
 	}
 
-	// Add all built tools to the server
 	for _, tool := range tools {
-		tool.Register(s)
+		s.AddTool(tool.Tool, tool.Handler)
 	}
 }
