@@ -20,17 +20,17 @@ import (
 
 	"github.com/apache/pulsar-client-go/pulsar"
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
-	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/google/jsonschema-go/jsonschema"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 )
 
 // DefaultStringSchema defines the default MCP input schema for string payloads.
-var DefaultStringSchema = &mcp.ToolInputSchema{
+var DefaultStringSchema = &jsonschema.Schema{
 	Type: "object",
-	Properties: map[string]interface{}{
-		"payload": map[string]interface{}{
-			"type":        "string",
-			"description": "The payload of the message, in plain text format",
+	Properties: map[string]*jsonschema.Schema{
+		"payload": {
+			Type:        "string",
+			Description: "The payload of the message, in plain text format",
 		},
 	},
 }
@@ -79,7 +79,7 @@ func GetSchemaFromTopic(admin cmdutils.Client, topic string) (*SchemaInfo, error
 }
 
 // ConvertSchemaToToolInput converts a schema to MCP tool input schema
-func ConvertSchemaToToolInput(schemaInfo *SchemaInfo) (*mcp.ToolInputSchema, error) {
+func ConvertSchemaToToolInput(schemaInfo *SchemaInfo) (*jsonschema.Schema, error) {
 	if schemaInfo == nil {
 		// Default to object with any fields if no schema is provided
 		return DefaultStringSchema, nil
@@ -97,7 +97,7 @@ func ConvertSchemaToToolInput(schemaInfo *SchemaInfo) (*mcp.ToolInputSchema, err
 }
 
 // convertComplexSchemaToToolInput handles conversion of complex schema types
-func convertComplexSchemaToToolInput(schemaInfo *SchemaInfo) (*mcp.ToolInputSchema, error) {
+func convertComplexSchemaToToolInput(schemaInfo *SchemaInfo) (*jsonschema.Schema, error) {
 	if schemaInfo.Definition == nil {
 		return DefaultStringSchema, nil
 	}
@@ -113,12 +113,12 @@ func convertComplexSchemaToToolInput(schemaInfo *SchemaInfo) (*mcp.ToolInputSche
 	}
 
 	// For JSON schemas, use the definition directly
-	return &mcp.ToolInputSchema{
+	return &jsonschema.Schema{
 		Type: "object",
-		Properties: map[string]interface{}{
-			"payload": map[string]interface{}{
-				"type":        "string",
-				"description": "The payload of the message, in JSON String format, the schema of the payload in AVRO format is: " + string(definitionString),
+		Properties: map[string]*jsonschema.Schema{
+			"payload": {
+				Type:        "string",
+				Description: "The payload of the message, in JSON String format, the schema of the payload in AVRO format is: " + string(definitionString),
 			},
 		},
 	}, nil
