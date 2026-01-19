@@ -17,13 +17,13 @@ package mcp
 import (
 	"context"
 
-	"github.com/mark3labs/mcp-go/server"
+	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	kafkabuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/kafka"
 )
 
 // KafkaAdminAddSchemaRegistryTools registers Kafka Schema Registry tools.
-func KafkaAdminAddSchemaRegistryTools(s *server.MCPServer, readOnly bool, features []string) {
+func KafkaAdminAddSchemaRegistryTools(s *sdk.Server, readOnly bool, features []string) {
 	// Use the new builder pattern
 	builder := kafkabuilders.NewKafkaSchemaRegistryToolBuilder()
 	config := builders.ToolBuildConfig{
@@ -39,6 +39,6 @@ func KafkaAdminAddSchemaRegistryTools(s *server.MCPServer, readOnly bool, featur
 
 	// Add all built tools to the server
 	for _, tool := range tools {
-		s.AddTool(tool.Tool, tool.Handler)
+		tool.Register(s)
 	}
 }
