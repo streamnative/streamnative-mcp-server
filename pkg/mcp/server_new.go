@@ -117,14 +117,17 @@ func slogLevelFromLogrus(level logrus.Level) slog.Level {
 }
 
 func addDefaultMiddleware(server *sdk.Server, logger *logrus.Logger) {
-	if logger == nil {
+	if server == nil {
 		return
 	}
 
-	server.AddReceivingMiddleware(
-		loggingMiddleware(logger),
+	middlewares := []sdk.Middleware{
 		recoveryMiddleware(logger),
-	)
+	}
+	if logger != nil {
+		middlewares = append([]sdk.Middleware{loggingMiddleware(logger)}, middlewares...)
+	}
+	server.AddReceivingMiddleware(middlewares...)
 }
 
 func loggingMiddleware(logger *logrus.Logger) sdk.Middleware {
@@ -143,7 +146,7 @@ func loggingMiddleware(logger *logrus.Logger) sdk.Middleware {
 				"session_id": sessionID,
 			})
 
-			if callReq, ok := req.(*sdk.CallToolRequest); ok {
+			if callReq, ok := req.(*sdk.CallToolRequest); ok && callReq != nil && callReq.Params != nil {
 				entry = entry.WithField("tool", callReq.Params.Name)
 				entry.Debug("MCP tool call started")
 			} else {
@@ -173,19 +176,35 @@ func recoveryMiddleware(logger *logrus.Logger) sdk.Middleware {
 		return func(ctx context.Context, method string, req sdk.Request) (result sdk.Result, err error) {
 			defer func() {
 				if recovered := recover(); recovered != nil {
-					sessionID := ""
-					if req != nil {
-						if session := req.GetSession(); session != nil {
-							sessionID = session.ID()
-						}
+					toolName := ""
+					if callReq, ok := req.(*sdk.CallToolRequest); ok && callReq != nil && callReq.Params != nil {
+						toolName = callReq.Params.Name
 					}
-					logger.WithFields(logrus.Fields{
-						"method":     method,
-						"session_id": sessionID,
-						"panic":      recovered,
-					}).Error("MCP request panic recovered")
-					logger.WithField("stack", string(debug.Stack())).Debug("MCP panic stack")
-					err = fmt.Errorf("panic recovered in %s request: %v", method, recovered)
+
+					if logger != nil {
+						sessionID := ""
+						if req != nil {
+							if session := req.GetSession(); session != nil {
+								sessionID = session.ID()
+							}
+						}
+						fields := logrus.Fields{
+							"method":     method,
+							"session_id": sessionID,
+							"panic":      recovered,
+						}
+						if toolName != "" {
+							fields["tool"] = toolName
+						}
+						logger.WithFields(fields).Error("MCP request panic recovered")
+						logger.WithField("stack", string(debug.Stack())).Debug("MCP panic stack")
+					}
+
+					if toolName != "" {
+						err = fmt.Errorf("panic recovered in %s tool handler: %v", toolName, recovered)
+					} else {
+						err = fmt.Errorf("panic recovered in %s request: %v", method, recovered)
+					}
 					result = nil
 				}
 			}()
