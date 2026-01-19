@@ -17,15 +17,14 @@ package mcp
 import (
 	"context"
 
-	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
+	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	pulsarbuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/pulsar"
 )
 
-// PulsarAdminAddBrokerStatsTools adds broker-stats related tools to the MCP server
-func PulsarAdminAddBrokerStatsTools(s *sdk.Server, readOnly bool, features []string) {
-	// Use the new builder pattern
-	builder := pulsarbuilders.NewPulsarAdminBrokerStatsToolBuilder()
+// PulsarAdminAddBrokerStatsToolsLegacy registers Pulsar admin broker stats tools for the legacy server.
+func PulsarAdminAddBrokerStatsToolsLegacy(s *server.MCPServer, readOnly bool, features []string) {
+	builder := pulsarbuilders.NewPulsarAdminBrokerStatsLegacyToolBuilder()
 	config := builders.ToolBuildConfig{
 		ReadOnly: readOnly,
 		Features: features,
@@ -33,12 +32,10 @@ func PulsarAdminAddBrokerStatsTools(s *sdk.Server, readOnly bool, features []str
 
 	tools, err := builder.BuildTools(context.Background(), config)
 	if err != nil {
-		// Log error but don't fail - this maintains backward compatibility
 		return
 	}
 
-	// Add all built tools to the server
 	for _, tool := range tools {
-		tool.Register(s)
+		s.AddTool(tool.Tool, tool.Handler)
 	}
 }
