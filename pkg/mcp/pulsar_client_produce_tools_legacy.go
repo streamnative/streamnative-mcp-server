@@ -17,14 +17,14 @@ package mcp
 import (
 	"context"
 
-	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
+	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	pulsarBuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/pulsar"
 )
 
-// PulsarClientAddProducerTools adds Pulsar client producer tools to the MCP server.
-func PulsarClientAddProducerTools(s *sdk.Server, readOnly bool, features []string) {
-	builder := pulsarBuilders.NewPulsarClientProduceToolBuilder()
+// PulsarClientAddProducerToolsLegacy adds Pulsar client producer tools to the legacy MCP server.
+func PulsarClientAddProducerToolsLegacy(s *server.MCPServer, readOnly bool, features []string) {
+	builder := pulsarBuilders.NewPulsarClientProduceLegacyToolBuilder()
 	config := builders.ToolBuildConfig{
 		ReadOnly: readOnly,
 		Features: features,
@@ -36,6 +36,6 @@ func PulsarClientAddProducerTools(s *sdk.Server, readOnly bool, features []strin
 	}
 
 	for _, tool := range tools {
-		tool.Register(s)
+		s.AddTool(tool.Tool, tool.Handler)
 	}
 }
