@@ -15,6 +15,7 @@
 package mcp
 
 import (
+	"context"
 	"log"
 	"os"
 	"slices"
@@ -66,7 +67,7 @@ func (s *LegacyServer) PulsarFunctionManagedMcpTools(readOnly bool, features []s
 	options := pftools2.DefaultManagerOptions()
 
 	// Configure cluster error handler for graceful cleanup
-	options.ClusterErrorHandler = func(_ *pftools2.PulsarFunctionManager, err error) {
+	options.ClusterErrorHandler = func(_ context.Context, _ *pftools2.PulsarFunctionManager, err error) {
 		log.Printf("Cluster health error detected: %v", err)
 		log.Printf("Consider implementing cleanup logic here (e.g., stopping manager, notifying monitoring systems)")
 		// The calling service can implement specific cleanup logic here
@@ -118,7 +119,7 @@ func (s *LegacyServer) PulsarFunctionManagedMcpTools(readOnly bool, features []s
 
 	// Convert Server to the internal pftools.Server type
 	pftoolsServer := &pftools2.Server{
-		MCPServer:     s.MCPServer,
+		LegacyServer:  s.MCPServer,
 		KafkaSession:  s.KafkaSession,
 		PulsarSession: s.PulsarSession,
 		Logger:        s.logger,
