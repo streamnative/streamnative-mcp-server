@@ -123,7 +123,7 @@ func newMcpServer(_ context.Context, configOpts *ServerOptions, logrusLogger *lo
 	mcp.PulsarAdminAddNsIsolationPolicyTools(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.PulsarAdminAddPackagesTools(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.PulsarAdminAddResourceQuotasTools(s, configOpts.ReadOnly, configOpts.Features)
-	mcp.PulsarAdminAddSchemasTools(s, configOpts.ReadOnly, configOpts.Features)
+	mcp.PulsarAdminAddSchemasToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.PulsarAdminAddSubscriptionTools(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.PulsarAdminAddTenantToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.PulsarAdminAddTopicToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
