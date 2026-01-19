@@ -148,6 +148,17 @@ func run(ctx context.Context, cfg config) error {
 		return err
 	}
 
+	result, err = callTool(ctx, testClient, "pulsar_admin_tenant", map[string]any{
+		"resource":        "tenant",
+		"operation":       "create",
+		"tenant":          tenant + "-unauthorized",
+		"adminRoles":      []string{"test-user"},
+		"allowedClusters": []string{cluster},
+	})
+	if err := requireToolError(result, err, "pulsar_admin_tenant unauthorized create"); err != nil {
+		return err
+	}
+
 	result, err = callTool(ctx, adminClient, "pulsar_admin_namespace", map[string]any{
 		"operation": "create",
 		"namespace": namespace,
