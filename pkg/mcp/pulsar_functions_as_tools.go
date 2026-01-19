@@ -24,6 +24,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/streamnative/streamnative-mcp-server/pkg/config"
 	pftools2 "github.com/streamnative/streamnative-mcp-server/pkg/mcp/pftools"
 )
 
@@ -52,6 +53,27 @@ func StopAllPulsarFunctionManagers() {
 
 // PulsarFunctionManagedMcpTools registers Pulsar Functions-as-tools handlers.
 func (s *LegacyServer) PulsarFunctionManagedMcpTools(readOnly bool, features []string, sessionID string) {
+	pftoolsServer := &pftools2.Server{
+		LegacyServer:  s.MCPServer,
+		KafkaSession:  s.KafkaSession,
+		PulsarSession: s.PulsarSession,
+		Logger:        s.logger,
+	}
+	registerPulsarFunctionManagedMcpTools(readOnly, features, sessionID, s.SNCloudSession, pftoolsServer)
+}
+
+// PulsarFunctionManagedMcpTools registers Pulsar Functions-as-tools handlers.
+func (s *Server) PulsarFunctionManagedMcpTools(readOnly bool, features []string, sessionID string) {
+	pftoolsServer := &pftools2.Server{
+		MCPServer:     s.MCPServer,
+		KafkaSession:  s.KafkaSession,
+		PulsarSession: s.PulsarSession,
+		Logger:        s.logger,
+	}
+	registerPulsarFunctionManagedMcpTools(readOnly, features, sessionID, s.SNCloudSession, pftoolsServer)
+}
+
+func registerPulsarFunctionManagedMcpTools(readOnly bool, features []string, sessionID string, snCloudSession *config.Session, pftoolsServer *pftools2.Server) {
 	if !slices.Contains(features, string(FeatureAll)) &&
 		!slices.Contains(features, string(FeatureFunctionsAsTools)) &&
 		!slices.Contains(features, string(FeatureStreamNativeCloud)) {
@@ -74,7 +96,10 @@ func (s *LegacyServer) PulsarFunctionManagedMcpTools(readOnly bool, features []s
 		// For example: stop the manager, send alerts, implement backoff strategies
 	}
 
-	if s.SNCloudSession.Ctx.Organization == "" || s.SNCloudSession.Ctx.PulsarInstance == "" || s.SNCloudSession.Ctx.PulsarCluster == "" {
+	if snCloudSession == nil ||
+		snCloudSession.Ctx.Organization == "" ||
+		snCloudSession.Ctx.PulsarInstance == "" ||
+		snCloudSession.Ctx.PulsarCluster == "" {
 		log.Printf("Skipping Pulsar Functions as MCP Tools because both organization, pulsar instance and pulsar cluster are not set")
 		return
 	}
@@ -115,14 +140,6 @@ func (s *LegacyServer) PulsarFunctionManagedMcpTools(readOnly bool, features []s
 	if strictExportStr := os.Getenv("FUNCTIONS_AS_TOOLS_STRICT_EXPORT"); strictExportStr != "" {
 		options.StrictExport = strictExportStr == "true"
 		log.Printf("Setting Pulsar Functions strict export to %v", options.StrictExport)
-	}
-
-	// Convert Server to the internal pftools.Server type
-	pftoolsServer := &pftools2.Server{
-		LegacyServer:  s.MCPServer,
-		KafkaSession:  s.KafkaSession,
-		PulsarSession: s.PulsarSession,
-		Logger:        s.logger,
 	}
 
 	manager, err := pftools2.NewPulsarFunctionManager(pftoolsServer, readOnly, options, sessionID)
