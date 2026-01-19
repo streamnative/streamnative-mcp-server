@@ -114,9 +114,9 @@ func newMcpServer(_ context.Context, configOpts *ServerOptions, logrusLogger *lo
 		}
 	}
 
-	mcp.PulsarAdminAddBrokersTools(s, configOpts.ReadOnly, configOpts.Features)
+	mcp.PulsarAdminAddBrokersToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.PulsarAdminAddBrokerStatsTools(s, configOpts.ReadOnly, configOpts.Features)
-	mcp.PulsarAdminAddClusterTools(s, configOpts.ReadOnly, configOpts.Features)
+	mcp.PulsarAdminAddClusterToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.PulsarAdminAddFunctionsWorkerTools(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.PulsarAdminAddNamespaceToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.PulsarAdminAddNamespacePolicyTools(s, configOpts.ReadOnly, configOpts.Features)
@@ -124,12 +124,12 @@ func newMcpServer(_ context.Context, configOpts *ServerOptions, logrusLogger *lo
 	mcp.PulsarAdminAddPackagesTools(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.PulsarAdminAddResourceQuotasTools(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.PulsarAdminAddSchemasToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
-	mcp.PulsarAdminAddSubscriptionTools(s, configOpts.ReadOnly, configOpts.Features)
+	mcp.PulsarAdminAddSubscriptionToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.PulsarAdminAddTenantToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.PulsarAdminAddTopicToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
-	mcp.PulsarAdminAddSinksTools(s, configOpts.ReadOnly, configOpts.Features)
+	mcp.PulsarAdminAddSinksToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.PulsarAdminAddFunctionsToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
-	mcp.PulsarAdminAddSourcesTools(s, configOpts.ReadOnly, configOpts.Features)
+	mcp.PulsarAdminAddSourcesToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.PulsarAdminAddTopicPolicyTools(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.PulsarClientAddConsumerTools(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.PulsarClientAddProducerTools(s, configOpts.ReadOnly, configOpts.Features)

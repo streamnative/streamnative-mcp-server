@@ -17,14 +17,14 @@ package mcp
 import (
 	"context"
 
-	"github.com/mark3labs/mcp-go/server"
+	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
-	pulsarBuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/pulsar"
+	pulsarbuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/pulsar"
 )
 
-// PulsarAdminClusterTools creates Pulsar Admin Cluster tool list using the new builder pattern
-func PulsarAdminClusterTools(readOnly bool, features []string) []server.ServerTool {
-	builder := pulsarBuilders.NewPulsarAdminClusterToolBuilder()
+// PulsarAdminAddClusterTools adds cluster-related tools to the MCP server
+func PulsarAdminAddClusterTools(s *sdk.Server, readOnly bool, features []string) {
+	builder := pulsarbuilders.NewPulsarAdminClusterToolBuilder()
 	config := builders.ToolBuildConfig{
 		ReadOnly: readOnly,
 		Features: features,
@@ -32,18 +32,10 @@ func PulsarAdminClusterTools(readOnly bool, features []string) []server.ServerTo
 
 	tools, err := builder.BuildTools(context.Background(), config)
 	if err != nil {
-		// In production environment, this should use proper logging
-		return nil
+		return
 	}
 
-	return tools
-}
-
-// PulsarAdminAddClusterTools adds cluster-related tools to the MCP server
-func PulsarAdminAddClusterTools(s *server.MCPServer, readOnly bool, features []string) {
-	tools := PulsarAdminClusterTools(readOnly, features)
-
 	for _, tool := range tools {
-		s.AddTool(tool.Tool, tool.Handler)
+		tool.Register(s)
 	}
 }
