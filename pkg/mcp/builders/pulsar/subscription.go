@@ -21,11 +21,52 @@ import (
 	"strings"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	"github.com/google/jsonschema-go/jsonschema"
+	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
+)
+
+type pulsarAdminSubscriptionInput struct {
+	Resource            string   `json:"resource"`
+	Operation           string   `json:"operation"`
+	Topic               string   `json:"topic"`
+	Subscription        *string  `json:"subscription,omitempty"`
+	MessageID           *string  `json:"messageId,omitempty"`
+	Count               *float64 `json:"count,omitempty"`
+	ExpireTimeInSeconds *float64 `json:"expireTimeInSeconds,omitempty"`
+	Force               *bool    `json:"force,omitempty"`
+}
+
+const (
+	pulsarAdminSubscriptionResourceDesc = "Resource to operate on. Available resources:\n" +
+		"- subscription: A subscription on a topic representing a consumer group"
+	pulsarAdminSubscriptionOperationDesc = "Operation to perform. Available operations:\n" +
+		"- list: List all subscriptions for a topic\n" +
+		"- create: Create a new subscription on a topic\n" +
+		"- delete: Delete a subscription from a topic\n" +
+		"- skip: Skip a specified number of messages for a subscription\n" +
+		"- expire: Expire messages older than specified time for a subscription\n" +
+		"- reset-cursor: Reset the cursor position for a subscription to a specific message ID"
+	pulsarAdminSubscriptionTopicDesc = "The fully qualified topic name in the format 'persistent://tenant/namespace/topic'. " +
+		"For partitioned topics, you can either specify the base topic name (to apply the operation across all partitions) " +
+		"or a specific partition in the format 'topicName-partition-N'."
+	pulsarAdminSubscriptionNameDesc = "The subscription name. Required for all operations except 'list'. " +
+		"A subscription name is a logical identifier for a durable position in a topic. " +
+		"Multiple consumers can attach to the same subscription to implement different messaging patterns."
+	pulsarAdminSubscriptionMessageIDDesc = "Message ID for positioning the subscription cursor. Used in 'create' and 'reset-cursor' operations. " +
+		"Values can be:\n" +
+		"- 'latest': Position at the latest (most recent) message\n" +
+		"- 'earliest': Position at the earliest (oldest available) message\n" +
+		"- specific position in 'ledgerId:entryId' format for precise positioning"
+	pulsarAdminSubscriptionCountDesc = "The number of messages to skip (required for 'skip' operation). " +
+		"This moves the subscription cursor forward by the specified number of messages without processing them."
+	pulsarAdminSubscriptionExpireDesc = "Expire messages older than the specified seconds (required for 'expire' operation). " +
+		"This moves the subscription cursor to skip all messages published before the specified time."
+	pulsarAdminSubscriptionForceDesc = "Force deletion of subscription (optional for 'delete' operation). " +
+		"When true, all consumers will be forcefully disconnected and the subscription will be deleted. " +
+		"Use with caution as it can interrupt active message processing."
 )
 
 // PulsarAdminSubscriptionToolBuilder implements the ToolBuilder interface for Pulsar Admin Subscription tools
@@ -59,7 +100,7 @@ func NewPulsarAdminSubscriptionToolBuilder() *PulsarAdminSubscriptionToolBuilder
 
 // BuildTools builds the Pulsar Admin Subscription tool list
 // This is the core method implementing the ToolBuilder interface
-func (b *PulsarAdminSubscriptionToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]server.ServerTool, error) {
+func (b *PulsarAdminSubscriptionToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]builders.ToolDefinition, error) {
 	// Check features - return empty list if no required features are present
 	if !b.HasAnyRequiredFeature(config.Features) {
 		return nil, nil
@@ -71,11 +112,14 @@ func (b *PulsarAdminSubscriptionToolBuilder) BuildTools(_ context.Context, confi
 	}
 
 	// Build tools
-	tool := b.buildSubscriptionTool()
+	tool, err := b.buildSubscriptionTool()
+	if err != nil {
+		return nil, err
+	}
 	handler := b.buildSubscriptionHandler(config.ReadOnly)
 
-	return []server.ServerTool{
-		{
+	return []builders.ToolDefinition{
+		builders.ServerTool[pulsarAdminSubscriptionInput, any]{
 			Tool:    tool,
 			Handler: handler,
 		},
@@ -84,7 +128,12 @@ func (b *PulsarAdminSubscriptionToolBuilder) BuildTools(_ context.Context, confi
 
 // buildSubscriptionTool builds the Pulsar Admin Subscription MCP tool definition
 // Migrated from the original tool definition logic
-func (b *PulsarAdminSubscriptionToolBuilder) buildSubscriptionTool() mcp.Tool {
+func (b *PulsarAdminSubscriptionToolBuilder) buildSubscriptionTool() (*sdk.Tool, error) {
+	inputSchema, err := buildPulsarAdminSubscriptionInputSchema()
+	if err != nil {
+		return nil, err
+	}
+
 	toolDesc := "Manage Apache Pulsar subscriptions on topics. " +
 		"Subscriptions are named entities representing consumer groups that maintain their position in a topic. " +
 		"Pulsar supports multiple subscription modes (Exclusive, Shared, Failover, Key_Shared) to accommodate different messaging patterns. " +
@@ -93,76 +142,30 @@ func (b *PulsarAdminSubscriptionToolBuilder) buildSubscriptionTool() mcp.Tool {
 		"Operations include listing, creating, deleting, and manipulating message cursors within subscriptions. " +
 		"Most operations require namespace admin permissions plus produce/consume permissions on the topic."
 
-	resourceDesc := "Resource to operate on. Available resources:\n" +
-		"- subscription: A subscription on a topic representing a consumer group"
-
-	operationDesc := "Operation to perform. Available operations:\n" +
-		"- list: List all subscriptions for a topic\n" +
-		"- create: Create a new subscription on a topic\n" +
-		"- delete: Delete a subscription from a topic\n" +
-		"- skip: Skip a specified number of messages for a subscription\n" +
-		"- expire: Expire messages older than specified time for a subscription\n" +
-		"- reset-cursor: Reset the cursor position for a subscription to a specific message ID"
-
-	return mcp.NewTool("pulsar_admin_subscription",
-		mcp.WithDescription(toolDesc),
-		mcp.WithString("resource", mcp.Required(),
-			mcp.Description(resourceDesc),
-		),
-		mcp.WithString("operation", mcp.Required(),
-			mcp.Description(operationDesc),
-		),
-		mcp.WithString("topic", mcp.Required(),
-			mcp.Description("The fully qualified topic name in the format 'persistent://tenant/namespace/topic'. "+
-				"For partitioned topics, you can either specify the base topic name (to apply the operation across all partitions) "+
-				"or a specific partition in the format 'topicName-partition-N'."),
-		),
-		mcp.WithString("subscription",
-			mcp.Description("The subscription name. Required for all operations except 'list'. "+
-				"A subscription name is a logical identifier for a durable position in a topic. "+
-				"Multiple consumers can attach to the same subscription to implement different messaging patterns."),
-		),
-		mcp.WithString("messageId",
-			mcp.Description("Message ID for positioning the subscription cursor. Used in 'create' and 'reset-cursor' operations. "+
-				"Values can be:\n"+
-				"- 'latest': Position at the latest (most recent) message\n"+
-				"- 'earliest': Position at the earliest (oldest available) message\n"+
-				"- specific position in 'ledgerId:entryId' format for precise positioning"),
-		),
-		mcp.WithNumber("count",
-			mcp.Description("The number of messages to skip (required for 'skip' operation). "+
-				"This moves the subscription cursor forward by the specified number of messages without processing them."),
-		),
-		mcp.WithNumber("expireTimeInSeconds",
-			mcp.Description("Expire messages older than the specified seconds (required for 'expire' operation). "+
-				"This moves the subscription cursor to skip all messages published before the specified time."),
-		),
-		mcp.WithBoolean("force",
-			mcp.Description("Force deletion of subscription (optional for 'delete' operation). "+
-				"When true, all consumers will be forcefully disconnected and the subscription will be deleted. "+
-				"Use with caution as it can interrupt active message processing."),
-		),
-	)
+	return &sdk.Tool{
+		Name:        "pulsar_admin_subscription",
+		Description: toolDesc,
+		InputSchema: inputSchema,
+	}, nil
 }
 
 // buildSubscriptionHandler builds the Pulsar Admin Subscription handler function
 // Migrated from the original handler logic
-func (b *PulsarAdminSubscriptionToolBuilder) buildSubscriptionHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		// Get required parameters
-		resource, err := request.RequireString("resource")
-		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get resource: %v", err)), nil
+func (b *PulsarAdminSubscriptionToolBuilder) buildSubscriptionHandler(readOnly bool) builders.ToolHandlerFunc[pulsarAdminSubscriptionInput, any] {
+	return func(ctx context.Context, _ *sdk.CallToolRequest, input pulsarAdminSubscriptionInput) (*sdk.CallToolResult, any, error) {
+		resource := input.Resource
+		if resource == "" {
+			return nil, nil, fmt.Errorf("missing required parameter 'resource'")
 		}
 
-		operation, err := request.RequireString("operation")
-		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get operation: %v", err)), nil
+		operation := input.Operation
+		if operation == "" {
+			return nil, nil, fmt.Errorf("missing required parameter 'operation'")
 		}
 
-		topic, err := request.RequireString("topic")
-		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic'. Please provide the fully qualified topic name: %v", err)), nil
+		topic := input.Topic
+		if topic == "" {
+			return nil, nil, fmt.Errorf("missing required parameter 'topic'. please provide the fully qualified topic name")
 		}
 
 		// Normalize parameters
@@ -171,48 +174,54 @@ func (b *PulsarAdminSubscriptionToolBuilder) buildSubscriptionHandler(readOnly b
 
 		// Validate write operations in read-only mode
 		if readOnly && (operation != "list") {
-			return mcp.NewToolResultError("Write operations are not allowed in read-only mode"), nil
+			return nil, nil, fmt.Errorf("write operations are not allowed in read-only mode")
 		}
 
 		// Verify resource type
 		if resource != "subscription" {
-			return mcp.NewToolResultError(fmt.Sprintf("Invalid resource: %s. Only 'subscription' is supported", resource)), nil
+			return nil, nil, fmt.Errorf("invalid resource: %s. only 'subscription' is supported", resource)
 		}
 
 		// Parse topic name
 		topicName, err := utils.GetTopicName(topic)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Invalid topic name '%s': %v", topic, err)), nil
+			return nil, nil, fmt.Errorf("invalid topic name '%s': %v", topic, err)
 		}
 
 		// Get Pulsar session from context
 		session := mcpCtx.GetPulsarSession(ctx)
 		if session == nil {
-			return mcp.NewToolResultError("Pulsar session not found in context"), nil
+			return nil, nil, fmt.Errorf("pulsar session not found in context")
 		}
 
 		// Create the admin client
 		admin, err := session.GetAdminClient()
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
+			return nil, nil, fmt.Errorf("failed to get admin client: %v", err)
 		}
 
 		// Dispatch based on operation
 		switch operation {
 		case "list":
-			return b.handleSubsList(admin, topicName)
+			result, err := b.handleSubsList(admin, topicName)
+			return result, nil, err
 		case "create":
-			return b.handleSubsCreate(admin, topicName, request)
+			result, err := b.handleSubsCreate(admin, topicName, input)
+			return result, nil, err
 		case "delete":
-			return b.handleSubsDelete(admin, topicName, request)
+			result, err := b.handleSubsDelete(admin, topicName, input)
+			return result, nil, err
 		case "skip":
-			return b.handleSubsSkip(admin, topicName, request)
+			result, err := b.handleSubsSkip(admin, topicName, input)
+			return result, nil, err
 		case "expire":
-			return b.handleSubsExpire(admin, topicName, request)
+			result, err := b.handleSubsExpire(admin, topicName, input)
+			return result, nil, err
 		case "reset-cursor":
-			return b.handleSubsResetCursor(admin, topicName, request)
+			result, err := b.handleSubsResetCursor(admin, topicName, input)
+			return result, nil, err
 		default:
-			return mcp.NewToolResultError(fmt.Sprintf("Unknown operation: %s", operation)), nil
+			return nil, nil, fmt.Errorf("unknown operation: %s", operation)
 		}
 	}
 }
@@ -220,43 +229,47 @@ func (b *PulsarAdminSubscriptionToolBuilder) buildSubscriptionHandler(readOnly b
 // Unified error handling and utility functions
 
 // handleError provides unified error handling
-func (b *PulsarAdminSubscriptionToolBuilder) handleError(operation string, err error) *mcp.CallToolResult {
-	return mcp.NewToolResultError(fmt.Sprintf("Failed to %s: %v", operation, err))
+func (b *PulsarAdminSubscriptionToolBuilder) handleError(operation string, err error) error {
+	return fmt.Errorf("failed to %s: %v", operation, err)
 }
 
 // marshalResponse provides unified JSON serialization for responses
-func (b *PulsarAdminSubscriptionToolBuilder) marshalResponse(data interface{}) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminSubscriptionToolBuilder) marshalResponse(data interface{}) (*sdk.CallToolResult, error) {
 	jsonBytes, err := json.Marshal(data)
 	if err != nil {
-		return b.handleError("marshal response", err), nil
+		return nil, b.handleError("marshal response", err)
 	}
-	return mcp.NewToolResultText(string(jsonBytes)), nil
+	return &sdk.CallToolResult{
+		Content: []sdk.Content{&sdk.TextContent{Text: string(jsonBytes)}},
+	}, nil
 }
 
 // Operation handler functions - migrated from the original implementation
 
 // handleSubsList handles listing all subscriptions for a topic
-func (b *PulsarAdminSubscriptionToolBuilder) handleSubsList(admin cmdutils.Client, topicName *utils.TopicName) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminSubscriptionToolBuilder) handleSubsList(admin cmdutils.Client, topicName *utils.TopicName) (*sdk.CallToolResult, error) {
 	// List subscriptions
 	subscriptions, err := admin.Subscriptions().List(*topicName)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to list subscriptions for topic '%s': %v",
-			topicName.String(), err)), nil
+		return nil, fmt.Errorf("failed to list subscriptions for topic '%s': %v", topicName.String(), err)
 	}
 
 	return b.marshalResponse(subscriptions)
 }
 
 // handleSubsCreate handles creating a new subscription
-func (b *PulsarAdminSubscriptionToolBuilder) handleSubsCreate(admin cmdutils.Client, topicName *utils.TopicName, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminSubscriptionToolBuilder) handleSubsCreate(admin cmdutils.Client, topicName *utils.TopicName, input pulsarAdminSubscriptionInput) (*sdk.CallToolResult, error) {
 	// Get required parameter
-	subscription, err := request.RequireString("subscription")
+	subscription, err := requireString(input.Subscription, "subscription")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'subscription' for subscription.create: %v", err)), nil
+		return nil, fmt.Errorf("missing required parameter 'subscription' for subscription.create: %v", err)
 	}
 
 	// Get optional messageID parameter (default is "latest")
-	messageID := request.GetString("messageId", "latest")
+	messageID := stringValue(input.MessageID)
+	if messageID == "" {
+		messageID = "latest"
+	}
 
 	// Parse messageId
 	var messageIDObj utils.MessageID
@@ -268,12 +281,11 @@ func (b *PulsarAdminSubscriptionToolBuilder) handleSubsCreate(admin cmdutils.Cli
 	default:
 		s := strings.Split(messageID, ":")
 		if len(s) != 2 {
-			return mcp.NewToolResultError(fmt.Sprintf(
-				"Invalid messageId format: %s. Use 'latest', 'earliest', or 'ledgerId:entryId' format", messageID)), nil
+			return nil, fmt.Errorf("invalid messageId format: %s. use 'latest', 'earliest', or 'ledgerId:entryId' format", messageID)
 		}
 		msgID, err := utils.ParseMessageID(messageID)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to parse messageId '%s': %v", messageID, err)), nil
+			return nil, fmt.Errorf("failed to parse messageId '%s': %v", messageID, err)
 		}
 		messageIDObj = *msgID
 	}
@@ -281,37 +293,33 @@ func (b *PulsarAdminSubscriptionToolBuilder) handleSubsCreate(admin cmdutils.Cli
 	// Create subscription
 	err = admin.Subscriptions().Create(*topicName, subscription, messageIDObj)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to create subscription '%s' on topic '%s': %v",
-			subscription, topicName.String(), err)), nil
+		return nil, fmt.Errorf("failed to create subscription '%s' on topic '%s': %v", subscription, topicName.String(), err)
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Created subscription '%s' on topic '%s' from position '%s' successfully",
-		subscription, topicName.String(), messageID)), nil
+	return textResult(fmt.Sprintf("Created subscription '%s' on topic '%s' from position '%s' successfully", subscription, topicName.String(), messageID)), nil
 }
 
 // handleSubsDelete handles deleting a subscription
-func (b *PulsarAdminSubscriptionToolBuilder) handleSubsDelete(admin cmdutils.Client, topicName *utils.TopicName, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminSubscriptionToolBuilder) handleSubsDelete(admin cmdutils.Client, topicName *utils.TopicName, input pulsarAdminSubscriptionInput) (*sdk.CallToolResult, error) {
 	// Get required parameter
-	subscription, err := request.RequireString("subscription")
+	subscription, err := requireString(input.Subscription, "subscription")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'subscription' for subscription.delete: %v", err)), nil
+		return nil, fmt.Errorf("missing required parameter 'subscription' for subscription.delete: %v", err)
 	}
 
 	// Get optional force parameter (default is false)
-	force := request.GetBool("force", false)
+	force := input.Force != nil && *input.Force
 
 	// Delete subscription
 	if force {
 		err = admin.Subscriptions().ForceDelete(*topicName, subscription)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to forcefully delete subscription '%s' from topic '%s': %v",
-				subscription, topicName.String(), err)), nil
+			return nil, fmt.Errorf("failed to forcefully delete subscription '%s' from topic '%s': %v", subscription, topicName.String(), err)
 		}
 	} else {
 		err = admin.Subscriptions().Delete(*topicName, subscription)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to delete subscription '%s' from topic '%s': %v",
-				subscription, topicName.String(), err)), nil
+			return nil, fmt.Errorf("failed to delete subscription '%s' from topic '%s': %v", subscription, topicName.String(), err)
 		}
 	}
 
@@ -319,71 +327,68 @@ func (b *PulsarAdminSubscriptionToolBuilder) handleSubsDelete(admin cmdutils.Cli
 	if force {
 		forceStr = " forcefully"
 	}
-	return mcp.NewToolResultText(fmt.Sprintf("Deleted subscription '%s' from topic '%s'%s successfully",
-		subscription, topicName.String(), forceStr)), nil
+	return textResult(fmt.Sprintf("Deleted subscription '%s' from topic '%s'%s successfully", subscription, topicName.String(), forceStr)), nil
 }
 
 // handleSubsSkip handles skipping messages for a subscription
-func (b *PulsarAdminSubscriptionToolBuilder) handleSubsSkip(admin cmdutils.Client, topicName *utils.TopicName, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminSubscriptionToolBuilder) handleSubsSkip(admin cmdutils.Client, topicName *utils.TopicName, input pulsarAdminSubscriptionInput) (*sdk.CallToolResult, error) {
 	// Get required parameters
-	subscription, err := request.RequireString("subscription")
+	subscription, err := requireString(input.Subscription, "subscription")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'subscription' for subscription.skip: %v", err)), nil
+		return nil, fmt.Errorf("missing required parameter 'subscription' for subscription.skip: %v", err)
 	}
 
-	count, err := request.RequireFloat("count")
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'count' for subscription.skip: %v", err)), nil
+	if input.Count == nil {
+		return nil, fmt.Errorf("missing required parameter 'count' for subscription.skip")
 	}
+
+	count := *input.Count
 
 	// Skip messages
 	err = admin.Subscriptions().SkipMessages(*topicName, subscription, int64(count))
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to skip messages for subscription '%s' on topic '%s': %v",
-			subscription, topicName.String(), err)), nil
+		return nil, fmt.Errorf("failed to skip messages for subscription '%s' on topic '%s': %v", subscription, topicName.String(), err)
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Skipped %d messages for subscription '%s' on topic '%s' successfully",
-		int(count), subscription, topicName.String())), nil
+	return textResult(fmt.Sprintf("Skipped %d messages for subscription '%s' on topic '%s' successfully", int(count), subscription, topicName.String())), nil
 }
 
 // handleSubsExpire handles expiring messages for a subscription
-func (b *PulsarAdminSubscriptionToolBuilder) handleSubsExpire(admin cmdutils.Client, topicName *utils.TopicName, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminSubscriptionToolBuilder) handleSubsExpire(admin cmdutils.Client, topicName *utils.TopicName, input pulsarAdminSubscriptionInput) (*sdk.CallToolResult, error) {
 	// Get required parameters
-	subscription, err := request.RequireString("subscription")
+	subscription, err := requireString(input.Subscription, "subscription")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'subscription' for subscription.expire: %v", err)), nil
+		return nil, fmt.Errorf("missing required parameter 'subscription' for subscription.expire: %v", err)
 	}
 
-	expireTime, err := request.RequireFloat("expireTimeInSeconds")
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'expireTimeInSeconds' for subscription.expire: %v", err)), nil
+	if input.ExpireTimeInSeconds == nil {
+		return nil, fmt.Errorf("missing required parameter 'expireTimeInSeconds' for subscription.expire")
 	}
+
+	expireTime := *input.ExpireTimeInSeconds
 
 	// Expire messages
 	err = admin.Subscriptions().ExpireMessages(*topicName, subscription, int64(expireTime))
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to expire messages for subscription '%s' on topic '%s': %v",
-			subscription, topicName.String(), err)), nil
+		return nil, fmt.Errorf("failed to expire messages for subscription '%s' on topic '%s': %v", subscription, topicName.String(), err)
 	}
 
-	return mcp.NewToolResultText(
-		fmt.Sprintf("Expired messages older than %d seconds for subscription '%s' on topic '%s' successfully",
-			int(expireTime), subscription, topicName.String()),
+	return textResult(
+		fmt.Sprintf("Expired messages older than %d seconds for subscription '%s' on topic '%s' successfully", int(expireTime), subscription, topicName.String()),
 	), nil
 }
 
 // handleSubsResetCursor handles resetting a subscription cursor
-func (b *PulsarAdminSubscriptionToolBuilder) handleSubsResetCursor(admin cmdutils.Client, topicName *utils.TopicName, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminSubscriptionToolBuilder) handleSubsResetCursor(admin cmdutils.Client, topicName *utils.TopicName, input pulsarAdminSubscriptionInput) (*sdk.CallToolResult, error) {
 	// Get required parameters
-	subscription, err := request.RequireString("subscription")
+	subscription, err := requireString(input.Subscription, "subscription")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'subscription' for subscription.reset-cursor: %v", err)), nil
+		return nil, fmt.Errorf("missing required parameter 'subscription' for subscription.reset-cursor: %v", err)
 	}
 
-	messageID, err := request.RequireString("messageId")
+	messageID, err := requireString(input.MessageID, "messageId")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'messageId' for subscription.reset-cursor: %v", err)), nil
+		return nil, fmt.Errorf("missing required parameter 'messageId' for subscription.reset-cursor: %v", err)
 	}
 
 	// Parse messageId
@@ -396,12 +401,11 @@ func (b *PulsarAdminSubscriptionToolBuilder) handleSubsResetCursor(admin cmdutil
 	default:
 		s := strings.Split(messageID, ":")
 		if len(s) != 2 {
-			return mcp.NewToolResultError(fmt.Sprintf(
-				"Invalid messageId format: %s. Use 'latest', 'earliest', or 'ledgerId:entryId' format", messageID)), nil
+			return nil, fmt.Errorf("invalid messageId format: %s. use 'latest', 'earliest', or 'ledgerId:entryId' format", messageID)
 		}
 		msgID, err := utils.ParseMessageID(messageID)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to parse messageId '%s': %v", messageID, err)), nil
+			return nil, fmt.Errorf("failed to parse messageId '%s': %v", messageID, err)
 		}
 		messageIDObj = *msgID
 	}
@@ -409,12 +413,34 @@ func (b *PulsarAdminSubscriptionToolBuilder) handleSubsResetCursor(admin cmdutil
 	// Reset cursor
 	err = admin.Subscriptions().ResetCursorToMessageID(*topicName, subscription, messageIDObj)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to reset cursor for subscription '%s' on topic '%s': %v",
-			subscription, topicName.String(), err)), nil
+		return nil, fmt.Errorf("failed to reset cursor for subscription '%s' on topic '%s': %v", subscription, topicName.String(), err)
 	}
 
-	return mcp.NewToolResultText(
-		fmt.Sprintf("Reset cursor for subscription '%s' on topic '%s' to position '%s' successfully",
-			subscription, topicName.String(), messageID),
-	), nil
+	return textResult(fmt.Sprintf("Reset cursor for subscription '%s' on topic '%s' to position '%s' successfully", subscription, topicName.String(), messageID)), nil
+}
+
+func buildPulsarAdminSubscriptionInputSchema() (*jsonschema.Schema, error) {
+	schema, err := jsonschema.For[pulsarAdminSubscriptionInput](nil)
+	if err != nil {
+		return nil, fmt.Errorf("input schema: %w", err)
+	}
+	if schema.Type != "object" {
+		return nil, fmt.Errorf("input schema must have type \"object\"")
+	}
+
+	if schema.Properties == nil {
+		schema.Properties = map[string]*jsonschema.Schema{}
+	}
+
+	setSchemaDescription(schema, "resource", pulsarAdminSubscriptionResourceDesc)
+	setSchemaDescription(schema, "operation", pulsarAdminSubscriptionOperationDesc)
+	setSchemaDescription(schema, "topic", pulsarAdminSubscriptionTopicDesc)
+	setSchemaDescription(schema, "subscription", pulsarAdminSubscriptionNameDesc)
+	setSchemaDescription(schema, "messageId", pulsarAdminSubscriptionMessageIDDesc)
+	setSchemaDescription(schema, "count", pulsarAdminSubscriptionCountDesc)
+	setSchemaDescription(schema, "expireTimeInSeconds", pulsarAdminSubscriptionExpireDesc)
+	setSchemaDescription(schema, "force", pulsarAdminSubscriptionForceDesc)
+
+	normalizeAdditionalProperties(schema)
+	return schema, nil
 }

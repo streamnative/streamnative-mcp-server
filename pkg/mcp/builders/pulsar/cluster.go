@@ -20,11 +20,47 @@ import (
 	"fmt"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	"github.com/google/jsonschema-go/jsonschema"
+	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
+)
+
+type pulsarAdminClusterInput struct {
+	Resource            string   `json:"resource"`
+	Operation           string   `json:"operation"`
+	ClusterName         *string  `json:"cluster_name,omitempty"`
+	DomainName          *string  `json:"domain_name,omitempty"`
+	ServiceURL          *string  `json:"service_url,omitempty"`
+	ServiceURLTLS       *string  `json:"service_url_tls,omitempty"`
+	BrokerServiceURL    *string  `json:"broker_service_url,omitempty"`
+	BrokerServiceURLTLS *string  `json:"broker_service_url_tls,omitempty"`
+	PeerClusterNames    []string `json:"peer_cluster_names,omitempty"`
+	Brokers             []string `json:"brokers,omitempty"`
+}
+
+const (
+	pulsarAdminClusterResourceDesc = "Type of cluster resource to access, available options:\n" +
+		"- cluster: Pulsar cluster configuration\n" +
+		"- peer_clusters: Peer clusters for geo-replication\n" +
+		"- failure_domain: Failure domains for fault tolerance"
+	pulsarAdminClusterOperationDesc = "Operation to perform, available options (depend on resource):\n" +
+		"- list: List resources (used with cluster, failure_domain)\n" +
+		"- get: Retrieve resource information (used with cluster, peer_clusters, failure_domain)\n" +
+		"- create: Create a new resource (used with cluster, failure_domain)\n" +
+		"- update: Update an existing resource (used with cluster, peer_clusters, failure_domain)\n" +
+		"- delete: Delete a resource (used with cluster, failure_domain)"
+	pulsarAdminClusterNameDesc                = "Name of the Pulsar cluster, required for all operations except 'list' with resource=cluster"
+	pulsarAdminClusterDomainNameDesc          = "Name of the failure domain, required when resource=failure_domain and operation is get, create, update, or delete"
+	pulsarAdminClusterServiceURLDesc          = "Pulsar cluster web service URL (e.g., http://example.pulsar.io:8080), used when resource=cluster and operation is create or update"
+	pulsarAdminClusterServiceURLTLSDesc       = "Pulsar cluster TLS secured web service URL (e.g., https://example.pulsar.io:8443), used when resource=cluster and operation is create or update"
+	pulsarAdminClusterBrokerServiceURLDesc    = "Pulsar cluster broker service URL (e.g., pulsar://example.pulsar.io:6650), used when resource=cluster and operation is create or update"
+	pulsarAdminClusterBrokerServiceURLTLSDesc = "Pulsar cluster TLS secured broker service URL (e.g., pulsar+ssl://example.pulsar.io:6651), used when resource=cluster and operation is create or update"
+	pulsarAdminClusterPeerClusterNamesDesc    = "List of clusters to be registered as peer-clusters, used when:\n" +
+		"- resource=cluster and operation is create or update\n" +
+		"- resource=peer_clusters and operation is update"
+	pulsarAdminClusterBrokersDesc = "List of broker names to include in a failure domain, required when resource=failure_domain and operation is create or update"
 )
 
 // PulsarAdminClusterToolBuilder implements the ToolBuilder interface for Pulsar Admin Cluster tools
@@ -58,7 +94,7 @@ func NewPulsarAdminClusterToolBuilder() *PulsarAdminClusterToolBuilder {
 
 // BuildTools builds the Pulsar Admin Cluster tool list
 // This is the core method implementing the ToolBuilder interface
-func (b *PulsarAdminClusterToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]server.ServerTool, error) {
+func (b *PulsarAdminClusterToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]builders.ToolDefinition, error) {
 	// Check features - return empty list if no required features are present
 	if !b.HasAnyRequiredFeature(config.Features) {
 		return nil, nil
@@ -70,11 +106,14 @@ func (b *PulsarAdminClusterToolBuilder) BuildTools(_ context.Context, config bui
 	}
 
 	// Build tools
-	tool := b.buildClusterTool()
+	tool, err := b.buildClusterTool()
+	if err != nil {
+		return nil, err
+	}
 	handler := b.buildClusterHandler(config.ReadOnly)
 
-	return []server.ServerTool{
-		{
+	return []builders.ToolDefinition{
+		builders.ServerTool[pulsarAdminClusterInput, any]{
 			Tool:    tool,
 			Handler: handler,
 		},
@@ -83,7 +122,12 @@ func (b *PulsarAdminClusterToolBuilder) BuildTools(_ context.Context, config bui
 
 // buildClusterTool builds the Pulsar Admin Cluster MCP tool definition
 // Migrated from the original tool definition logic
-func (b *PulsarAdminClusterToolBuilder) buildClusterTool() mcp.Tool {
+func (b *PulsarAdminClusterToolBuilder) buildClusterTool() (*sdk.Tool, error) {
+	inputSchema, err := buildPulsarAdminClusterInputSchema()
+	if err != nil {
+		return nil, err
+	}
+
 	toolDesc := "Unified tool for managing Apache Pulsar clusters.\n" +
 		"This tool provides access to various cluster resources and operations, including:\n" +
 		"1. Manage clusters (resource=cluster): List, get, create, update, delete clusters\n" +
@@ -96,118 +140,62 @@ func (b *PulsarAdminClusterToolBuilder) buildClusterTool() mcp.Tool {
 		"- {\"resource\": \"failure_domain\", \"operation\": \"list\", \"cluster_name\": \"my-cluster\"} lists failure domains\n" +
 		"This tool requires Pulsar super-user permissions."
 
-	resourceDesc := "Type of cluster resource to access, available options:\n" +
-		"- cluster: Pulsar cluster configuration\n" +
-		"- peer_clusters: Peer clusters for geo-replication\n" +
-		"- failure_domain: Failure domains for fault tolerance"
-
-	operationDesc := "Operation to perform, available options (depend on resource):\n" +
-		"- list: List resources (used with cluster, failure_domain)\n" +
-		"- get: Retrieve resource information (used with cluster, peer_clusters, failure_domain)\n" +
-		"- create: Create a new resource (used with cluster, failure_domain)\n" +
-		"- update: Update an existing resource (used with cluster, peer_clusters, failure_domain)\n" +
-		"- delete: Delete a resource (used with cluster, failure_domain)"
-
-	return mcp.NewTool("pulsar_admin_cluster",
-		mcp.WithDescription(toolDesc),
-		mcp.WithString("resource", mcp.Required(),
-			mcp.Description(resourceDesc),
-		),
-		mcp.WithString("operation", mcp.Required(),
-			mcp.Description(operationDesc),
-		),
-		mcp.WithString("cluster_name",
-			mcp.Description("Name of the Pulsar cluster, required for all operations except 'list' with resource=cluster"),
-		),
-		mcp.WithString("domain_name",
-			mcp.Description("Name of the failure domain, required when resource=failure_domain and operation is get, create, update, or delete"),
-		),
-		mcp.WithString("service_url",
-			mcp.Description("Pulsar cluster web service URL (e.g., http://example.pulsar.io:8080), used when resource=cluster and operation is create or update"),
-		),
-		mcp.WithString("service_url_tls",
-			mcp.Description("Pulsar cluster TLS secured web service URL (e.g., https://example.pulsar.io:8443), used when resource=cluster and operation is create or update"),
-		),
-		mcp.WithString("broker_service_url",
-			mcp.Description("Pulsar cluster broker service URL (e.g., pulsar://example.pulsar.io:6650), used when resource=cluster and operation is create or update"),
-		),
-		mcp.WithString("broker_service_url_tls",
-			mcp.Description("Pulsar cluster TLS secured broker service URL (e.g., pulsar+ssl://example.pulsar.io:6651), used when resource=cluster and operation is create or update"),
-		),
-		mcp.WithArray("peer_cluster_names",
-			mcp.Description("List of clusters to be registered as peer-clusters, used when:\n"+
-				"- resource=cluster and operation is create or update\n"+
-				"- resource=peer_clusters and operation is update"),
-			mcp.Items(
-				map[string]interface{}{
-					"type":        "string",
-					"description": "peer cluster name",
-				},
-			),
-		),
-		mcp.WithArray("brokers",
-			mcp.Description("List of broker names to include in a failure domain, required when resource=failure_domain and operation is create or update"),
-			mcp.Items(
-				map[string]interface{}{
-					"type":        "string",
-					"description": "broker",
-				},
-			),
-		),
-	)
+	return &sdk.Tool{
+		Name:        "pulsar_admin_cluster",
+		Description: toolDesc,
+		InputSchema: inputSchema,
+	}, nil
 }
 
 // buildClusterHandler builds the Pulsar Admin Cluster handler function
 // Migrated from the original handler logic
-func (b *PulsarAdminClusterToolBuilder) buildClusterHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminClusterToolBuilder) buildClusterHandler(readOnly bool) builders.ToolHandlerFunc[pulsarAdminClusterInput, any] {
+	return func(ctx context.Context, _ *sdk.CallToolRequest, input pulsarAdminClusterInput) (*sdk.CallToolResult, any, error) {
 		// Get Pulsar session from context
 		session := mcpCtx.GetPulsarSession(ctx)
 		if session == nil {
-			return mcp.NewToolResultError("Pulsar session not found in context"), nil
+			return nil, nil, fmt.Errorf("pulsar session not found in context")
 		}
 
 		client, err := session.GetAdminClient()
 		if err != nil {
-			return b.handleError("get admin client", err), nil
+			return nil, nil, b.handleError("get admin client", err)
 		}
 
-		// Get required parameters
-		resource, err := request.RequireString("resource")
-		if err != nil {
-			return mcp.NewToolResultError("Missing required resource parameter. " +
-				"Please specify one of: cluster, peer_clusters, failure_domain."), nil
+		resource := input.Resource
+		if resource == "" {
+			return nil, nil, fmt.Errorf("missing required resource parameter. please specify one of: cluster, peer_clusters, failure_domain")
 		}
 
-		operation, err := request.RequireString("operation")
-		if err != nil {
-			return mcp.NewToolResultError("Missing required operation parameter. " +
-				"Please specify one of: list, get, create, update, delete based on the resource type."), nil
+		operation := input.Operation
+		if operation == "" {
+			return nil, nil, fmt.Errorf("missing required operation parameter. please specify one of: list, get, create, update, delete based on the resource type")
 		}
 
 		// Validate if the parameter combination is valid
 		validCombination, errMsg := b.validateClusterResourceOperation(resource, operation)
 		if !validCombination {
-			return mcp.NewToolResultError(errMsg), nil
+			return nil, nil, fmt.Errorf("%s", errMsg)
 		}
 
 		// Check write operation permissions
 		if (operation == "create" || operation == "update" || operation == "delete") && readOnly {
-			return mcp.NewToolResultError("Create/update/delete operations not allowed in read-only mode. " +
-				"Please contact your administrator if you need to modify cluster resources."), nil
+			return nil, nil, fmt.Errorf("create/update/delete operations not allowed in read-only mode. please contact your administrator if you need to modify cluster resources")
 		}
 
 		// Process request based on resource type
 		switch resource {
 		case "cluster":
-			return b.handleClusterResource(client, operation, request)
+			result, err := b.handleClusterResource(client, operation, input)
+			return result, nil, err
 		case "peer_clusters":
-			return b.handlePeerClustersResource(client, operation, request)
+			result, err := b.handlePeerClustersResource(client, operation, input)
+			return result, nil, err
 		case "failure_domain":
-			return b.handleFailureDomainResource(client, operation, request)
+			result, err := b.handleFailureDomainResource(client, operation, input)
+			return result, nil, err
 		default:
-			return mcp.NewToolResultError(fmt.Sprintf("Unsupported resource: %s. "+
-				"Please use one of: cluster, peer_clusters, failure_domain.", resource)), nil
+			return nil, nil, fmt.Errorf("unsupported resource: %s. please use one of: cluster, peer_clusters, failure_domain", resource)
 		}
 	}
 }
@@ -215,17 +203,19 @@ func (b *PulsarAdminClusterToolBuilder) buildClusterHandler(readOnly bool) func(
 // Unified error handling and utility functions
 
 // handleError provides unified error handling
-func (b *PulsarAdminClusterToolBuilder) handleError(operation string, err error) *mcp.CallToolResult {
-	return mcp.NewToolResultError(fmt.Sprintf("Failed to %s: %v", operation, err))
+func (b *PulsarAdminClusterToolBuilder) handleError(operation string, err error) error {
+	return fmt.Errorf("failed to %s: %v", operation, err)
 }
 
 // marshalResponse provides unified JSON serialization for responses
-func (b *PulsarAdminClusterToolBuilder) marshalResponse(data interface{}) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminClusterToolBuilder) marshalResponse(data interface{}) (*sdk.CallToolResult, error) {
 	jsonBytes, err := json.Marshal(data)
 	if err != nil {
-		return b.handleError("marshal response", err), nil
+		return nil, b.handleError("marshal response", err)
 	}
-	return mcp.NewToolResultText(string(jsonBytes)), nil
+	return &sdk.CallToolResult{
+		Content: []sdk.Content{&sdk.TextContent{Text: string(jsonBytes)}},
+	}, nil
 }
 
 // Validate if the resource and operation combination is valid
@@ -250,110 +240,103 @@ func (b *PulsarAdminClusterToolBuilder) validateClusterResourceOperation(resourc
 }
 
 // Handle cluster resource operations
-func (b *PulsarAdminClusterToolBuilder) handleClusterResource(client cmdutils.Client, operation string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminClusterToolBuilder) handleClusterResource(client cmdutils.Client, operation string, input pulsarAdminClusterInput) (*sdk.CallToolResult, error) {
 	switch operation {
 	case "list":
 		return b.handleClusterList(client)
 	case "get":
-		clusterName, err := request.RequireString("cluster_name")
+		clusterName, err := requireString(input.ClusterName, "cluster_name")
 		if err != nil {
-			return mcp.NewToolResultError("Missing required parameter 'cluster_name'. " +
-				"Please provide the name of the cluster to get information for."), nil
+			return nil, fmt.Errorf("missing required parameter 'cluster_name'. please provide the name of the cluster to get information for")
 		}
 		return b.getClusterData(client, clusterName)
 	case "create":
-		return b.createCluster(client, request)
+		return b.createCluster(client, input)
 	case "update":
-		return b.updateCluster(client, request)
+		return b.updateCluster(client, input)
 	case "delete":
-		clusterName, err := request.RequireString("cluster_name")
+		clusterName, err := requireString(input.ClusterName, "cluster_name")
 		if err != nil {
-			return mcp.NewToolResultError("Missing required parameter 'cluster_name'. " +
-				"Please provide the name of the cluster to delete."), nil
+			return nil, fmt.Errorf("missing required parameter 'cluster_name'. please provide the name of the cluster to delete")
 		}
 		return b.deleteCluster(client, clusterName)
 	default:
-		return mcp.NewToolResultError(fmt.Sprintf("Unsupported cluster operation: %s", operation)), nil
+		return nil, fmt.Errorf("unsupported cluster operation: %s", operation)
 	}
 }
 
 // Handle peer clusters resource operations
-func (b *PulsarAdminClusterToolBuilder) handlePeerClustersResource(client cmdutils.Client, operation string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	clusterName, err := request.RequireString("cluster_name")
+func (b *PulsarAdminClusterToolBuilder) handlePeerClustersResource(client cmdutils.Client, operation string, input pulsarAdminClusterInput) (*sdk.CallToolResult, error) {
+	clusterName, err := requireString(input.ClusterName, "cluster_name")
 	if err != nil {
-		return mcp.NewToolResultError("Missing required parameter 'cluster_name'. " +
-			"Please provide the name of the cluster for peer clusters operation."), nil
+		return nil, fmt.Errorf("missing required parameter 'cluster_name'. please provide the name of the cluster for peer clusters operation")
 	}
 
 	switch operation {
 	case "get":
 		return b.getPeerClusters(client, clusterName)
 	case "update":
-		return b.updatePeerClusters(client, clusterName, request)
+		return b.updatePeerClusters(client, clusterName, input)
 	default:
-		return mcp.NewToolResultError(fmt.Sprintf("Unsupported peer_clusters operation: %s", operation)), nil
+		return nil, fmt.Errorf("unsupported peer_clusters operation: %s", operation)
 	}
 }
 
 // Handle failure domain resource operations
-func (b *PulsarAdminClusterToolBuilder) handleFailureDomainResource(client cmdutils.Client, operation string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	clusterName, err := request.RequireString("cluster_name")
+func (b *PulsarAdminClusterToolBuilder) handleFailureDomainResource(client cmdutils.Client, operation string, input pulsarAdminClusterInput) (*sdk.CallToolResult, error) {
+	clusterName, err := requireString(input.ClusterName, "cluster_name")
 	if err != nil {
-		return mcp.NewToolResultError("Missing required parameter 'cluster_name'. " +
-			"Please provide the name of the cluster for failure domain operation."), nil
+		return nil, fmt.Errorf("missing required parameter 'cluster_name'. please provide the name of the cluster for failure domain operation")
 	}
 
 	switch operation {
 	case "list":
 		return b.listFailureDomains(client, clusterName)
 	case "get":
-		domainName, err := request.RequireString("domain_name")
+		domainName, err := requireString(input.DomainName, "domain_name")
 		if err != nil {
-			return mcp.NewToolResultError("Missing required parameter 'domain_name'. " +
-				"Please provide the name of the failure domain."), nil
+			return nil, fmt.Errorf("missing required parameter 'domain_name'. please provide the name of the failure domain")
 		}
 		return b.getFailureDomain(client, clusterName, domainName)
 	case "create":
-		return b.createFailureDomain(client, clusterName, request)
+		return b.createFailureDomain(client, clusterName, input)
 	case "update":
-		return b.updateFailureDomain(client, clusterName, request)
+		return b.updateFailureDomain(client, clusterName, input)
 	case "delete":
-		domainName, err := request.RequireString("domain_name")
+		domainName, err := requireString(input.DomainName, "domain_name")
 		if err != nil {
-			return mcp.NewToolResultError("Missing required parameter 'domain_name'. " +
-				"Please provide the name of the failure domain to delete."), nil
+			return nil, fmt.Errorf("missing required parameter 'domain_name'. please provide the name of the failure domain to delete")
 		}
 		return b.deleteFailureDomain(client, clusterName, domainName)
 	default:
-		return mcp.NewToolResultError(fmt.Sprintf("Unsupported failure_domain operation: %s", operation)), nil
+		return nil, fmt.Errorf("unsupported failure_domain operation: %s", operation)
 	}
 }
 
-func (b *PulsarAdminClusterToolBuilder) handleClusterList(client cmdutils.Client) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminClusterToolBuilder) handleClusterList(client cmdutils.Client) (*sdk.CallToolResult, error) {
 	// Get cluster list
 	clusters, err := client.Clusters().List()
 	if err != nil {
-		return b.handleError("get cluster list", err), nil
+		return nil, b.handleError("get cluster list", err)
 	}
 
 	return b.marshalResponse(clusters)
 }
 
-func (b *PulsarAdminClusterToolBuilder) getClusterData(client cmdutils.Client, clusterName string) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminClusterToolBuilder) getClusterData(client cmdutils.Client, clusterName string) (*sdk.CallToolResult, error) {
 	// Get cluster data
 	clusterData, err := client.Clusters().Get(clusterName)
 	if err != nil {
-		return b.handleError("get cluster data", err), nil
+		return nil, b.handleError("get cluster data", err)
 	}
 
 	return b.marshalResponse(clusterData)
 }
 
-func (b *PulsarAdminClusterToolBuilder) createCluster(client cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	clusterName, err := request.RequireString("cluster_name")
+func (b *PulsarAdminClusterToolBuilder) createCluster(client cmdutils.Client, input pulsarAdminClusterInput) (*sdk.CallToolResult, error) {
+	clusterName, err := requireString(input.ClusterName, "cluster_name")
 	if err != nil {
-		return mcp.NewToolResultError("Missing required parameter 'cluster_name'. " +
-			"Please provide the name of the cluster to create."), nil
+		return nil, fmt.Errorf("missing required parameter 'cluster_name'. please provide the name of the cluster to create")
 	}
 
 	// Initialize cluster data
@@ -362,36 +345,35 @@ func (b *PulsarAdminClusterToolBuilder) createCluster(client cmdutils.Client, re
 	}
 
 	// Set optional parameters if provided
-	if serviceURL := request.GetString("service_url", ""); serviceURL != "" {
+	if serviceURL := stringValue(input.ServiceURL); serviceURL != "" {
 		clusterData.ServiceURL = serviceURL
 	}
-	if serviceURLTls := request.GetString("service_url_tls", ""); serviceURLTls != "" {
-		clusterData.ServiceURLTls = serviceURLTls
+	if serviceURLTLS := stringValue(input.ServiceURLTLS); serviceURLTLS != "" {
+		clusterData.ServiceURLTls = serviceURLTLS
 	}
-	if brokerServiceURL := request.GetString("broker_service_url", ""); brokerServiceURL != "" {
+	if brokerServiceURL := stringValue(input.BrokerServiceURL); brokerServiceURL != "" {
 		clusterData.BrokerServiceURL = brokerServiceURL
 	}
-	if brokerServiceURLTls := request.GetString("broker_service_url_tls", ""); brokerServiceURLTls != "" {
-		clusterData.BrokerServiceURLTls = brokerServiceURLTls
+	if brokerServiceURLTLS := stringValue(input.BrokerServiceURLTLS); brokerServiceURLTLS != "" {
+		clusterData.BrokerServiceURLTls = brokerServiceURLTLS
 	}
-	if peerClusters := request.GetStringSlice("peer_cluster_names", []string{}); len(peerClusters) > 0 {
-		clusterData.PeerClusterNames = peerClusters
+	if len(input.PeerClusterNames) > 0 {
+		clusterData.PeerClusterNames = input.PeerClusterNames
 	}
 
 	// Create cluster
 	err = client.Clusters().Create(clusterData)
 	if err != nil {
-		return b.handleError("create cluster", err), nil
+		return nil, b.handleError("create cluster", err)
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Cluster %s created successfully", clusterName)), nil
+	return textResult(fmt.Sprintf("Cluster %s created successfully", clusterName)), nil
 }
 
-func (b *PulsarAdminClusterToolBuilder) updateCluster(client cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	clusterName, err := request.RequireString("cluster_name")
+func (b *PulsarAdminClusterToolBuilder) updateCluster(client cmdutils.Client, input pulsarAdminClusterInput) (*sdk.CallToolResult, error) {
+	clusterName, err := requireString(input.ClusterName, "cluster_name")
 	if err != nil {
-		return mcp.NewToolResultError("Missing required parameter 'cluster_name'. " +
-			"Please provide the name of the cluster to update."), nil
+		return nil, fmt.Errorf("missing required parameter 'cluster_name'. please provide the name of the cluster to update")
 	}
 
 	// Initialize cluster data
@@ -400,98 +382,95 @@ func (b *PulsarAdminClusterToolBuilder) updateCluster(client cmdutils.Client, re
 	}
 
 	// Set optional parameters if provided
-	if serviceURL := request.GetString("service_url", ""); serviceURL != "" {
+	if serviceURL := stringValue(input.ServiceURL); serviceURL != "" {
 		clusterData.ServiceURL = serviceURL
 	}
-	if serviceURLTls := request.GetString("service_url_tls", ""); serviceURLTls != "" {
-		clusterData.ServiceURLTls = serviceURLTls
+	if serviceURLTLS := stringValue(input.ServiceURLTLS); serviceURLTLS != "" {
+		clusterData.ServiceURLTls = serviceURLTLS
 	}
-	if brokerServiceURL := request.GetString("broker_service_url", ""); brokerServiceURL != "" {
+	if brokerServiceURL := stringValue(input.BrokerServiceURL); brokerServiceURL != "" {
 		clusterData.BrokerServiceURL = brokerServiceURL
 	}
-	if brokerServiceURLTls := request.GetString("broker_service_url_tls", ""); brokerServiceURLTls != "" {
-		clusterData.BrokerServiceURLTls = brokerServiceURLTls
+	if brokerServiceURLTLS := stringValue(input.BrokerServiceURLTLS); brokerServiceURLTLS != "" {
+		clusterData.BrokerServiceURLTls = brokerServiceURLTLS
 	}
-	if peerClusters := request.GetStringSlice("peer_cluster_names", []string{}); len(peerClusters) > 0 {
-		clusterData.PeerClusterNames = peerClusters
+	if len(input.PeerClusterNames) > 0 {
+		clusterData.PeerClusterNames = input.PeerClusterNames
 	}
 
 	// Update cluster
 	err = client.Clusters().Update(clusterData)
 	if err != nil {
-		return b.handleError("update cluster", err), nil
+		return nil, b.handleError("update cluster", err)
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Cluster %s updated successfully", clusterName)), nil
+	return textResult(fmt.Sprintf("Cluster %s updated successfully", clusterName)), nil
 }
 
-func (b *PulsarAdminClusterToolBuilder) deleteCluster(client cmdutils.Client, clusterName string) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminClusterToolBuilder) deleteCluster(client cmdutils.Client, clusterName string) (*sdk.CallToolResult, error) {
 	// Delete cluster
 	err := client.Clusters().Delete(clusterName)
 	if err != nil {
-		return b.handleError("delete cluster", err), nil
+		return nil, b.handleError("delete cluster", err)
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Cluster %s deleted successfully", clusterName)), nil
+	return textResult(fmt.Sprintf("Cluster %s deleted successfully", clusterName)), nil
 }
 
-func (b *PulsarAdminClusterToolBuilder) getPeerClusters(client cmdutils.Client, clusterName string) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminClusterToolBuilder) getPeerClusters(client cmdutils.Client, clusterName string) (*sdk.CallToolResult, error) {
 	// Get peer clusters
 	peerClusters, err := client.Clusters().GetPeerClusters(clusterName)
 	if err != nil {
-		return b.handleError("get peer clusters", err), nil
+		return nil, b.handleError("get peer clusters", err)
 	}
 
 	return b.marshalResponse(peerClusters)
 }
 
-func (b *PulsarAdminClusterToolBuilder) updatePeerClusters(client cmdutils.Client, clusterName string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	peerClusters, err := request.RequireStringSlice("peer_cluster_names")
+func (b *PulsarAdminClusterToolBuilder) updatePeerClusters(client cmdutils.Client, clusterName string, input pulsarAdminClusterInput) (*sdk.CallToolResult, error) {
+	peerClusters, err := requireStringSlice(input.PeerClusterNames, "peer_cluster_names")
 	if err != nil {
-		return mcp.NewToolResultError("Missing required parameter 'peer_cluster_names'. " +
-			"Please provide an array of peer cluster names to set."), nil
+		return nil, fmt.Errorf("missing required parameter 'peer_cluster_names'. please provide an array of peer cluster names to set")
 	}
 
 	// Update peer clusters
 	err = client.Clusters().UpdatePeerClusters(clusterName, peerClusters)
 	if err != nil {
-		return b.handleError("update peer clusters", err), nil
+		return nil, b.handleError("update peer clusters", err)
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Peer clusters for %s updated successfully", clusterName)), nil
+	return textResult(fmt.Sprintf("Peer clusters for %s updated successfully", clusterName)), nil
 }
 
-func (b *PulsarAdminClusterToolBuilder) listFailureDomains(client cmdutils.Client, clusterName string) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminClusterToolBuilder) listFailureDomains(client cmdutils.Client, clusterName string) (*sdk.CallToolResult, error) {
 	// Get failure domains list
 	failureDomains, err := client.Clusters().ListFailureDomains(clusterName)
 	if err != nil {
-		return b.handleError("list failure domains", err), nil
+		return nil, b.handleError("list failure domains", err)
 	}
 
 	return b.marshalResponse(failureDomains)
 }
 
-func (b *PulsarAdminClusterToolBuilder) getFailureDomain(client cmdutils.Client, clusterName, domainName string) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminClusterToolBuilder) getFailureDomain(client cmdutils.Client, clusterName, domainName string) (*sdk.CallToolResult, error) {
 	// Get failure domain
 	failureDomain, err := client.Clusters().GetFailureDomain(clusterName, domainName)
 	if err != nil {
-		return b.handleError("get failure domain", err), nil
+		return nil, b.handleError("get failure domain", err)
 	}
 
 	return b.marshalResponse(failureDomain)
 }
 
-func (b *PulsarAdminClusterToolBuilder) createFailureDomain(client cmdutils.Client, clusterName string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	domainName, err := request.RequireString("domain_name")
+func (b *PulsarAdminClusterToolBuilder) createFailureDomain(client cmdutils.Client, clusterName string, input pulsarAdminClusterInput) (*sdk.CallToolResult, error) {
+	domainName, err := requireString(input.DomainName, "domain_name")
 	if err != nil {
-		return mcp.NewToolResultError("Missing required parameter 'domain_name'. " +
-			"Please provide the name of the failure domain to create."), nil
+		return nil, fmt.Errorf("missing required parameter 'domain_name'. please provide the name of the failure domain to create")
 	}
 
-	brokers, err := request.RequireStringSlice("brokers")
+	brokers, err := requireStringSlice(input.Brokers, "brokers")
 	if err != nil {
-		return mcp.NewToolResultError("Missing required parameter 'brokers'. " +
-			"Please provide an array of broker names to include in this failure domain."), nil
+		return nil, fmt.Errorf("missing required parameter 'brokers'. please provide an array of broker names to include in this failure domain")
 	}
 
 	// Create failure domain data
@@ -504,23 +483,21 @@ func (b *PulsarAdminClusterToolBuilder) createFailureDomain(client cmdutils.Clie
 	// Create failure domain
 	err = client.Clusters().CreateFailureDomain(failureDomainData)
 	if err != nil {
-		return b.handleError("create failure domain", err), nil
+		return nil, b.handleError("create failure domain", err)
 	}
 
-	return mcp.NewToolResultText(fmt.Sprintf("Failure domain %s created successfully in cluster %s", domainName, clusterName)), nil
+	return textResult(fmt.Sprintf("Failure domain %s created successfully in cluster %s", domainName, clusterName)), nil
 }
 
-func (b *PulsarAdminClusterToolBuilder) updateFailureDomain(client cmdutils.Client, clusterName string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	domainName, err := request.RequireString("domain_name")
+func (b *PulsarAdminClusterToolBuilder) updateFailureDomain(client cmdutils.Client, clusterName string, input pulsarAdminClusterInput) (*sdk.CallToolResult, error) {
+	domainName, err := requireString(input.DomainName, "domain_name")
 	if err != nil {
-		return mcp.NewToolResultError("Missing required parameter 'domain_name'. " +
-			"Please provide the name of the failure domain to update."), nil
+		return nil, fmt.Errorf("missing required parameter 'domain_name'. please provide the name of the failure domain to update")
 	}
 
-	brokers, err := request.RequireStringSlice("brokers")
+	brokers, err := requireStringSlice(input.Brokers, "brokers")
 	if err != nil {
-		return mcp.NewToolResultError("Missing required parameter 'brokers'. " +
-			"Please provide an array of broker names to include in this failure domain."), nil
+		return nil, fmt.Errorf("missing required parameter 'brokers'. please provide an array of broker names to include in this failure domain")
 	}
 
 	// Create failure domain data
@@ -533,14 +510,13 @@ func (b *PulsarAdminClusterToolBuilder) updateFailureDomain(client cmdutils.Clie
 	// Update failure domain
 	err = client.Clusters().UpdateFailureDomain(failureDomainData)
 	if err != nil {
-		return b.handleError("update failure domain", err), nil
+		return nil, b.handleError("update failure domain", err)
 	}
 
-	return mcp.NewToolResultText(
-		fmt.Sprintf("Failure domain %s updated successfully in cluster %s", domainName, clusterName)), nil
+	return textResult(fmt.Sprintf("Failure domain %s updated successfully in cluster %s", domainName, clusterName)), nil
 }
 
-func (b *PulsarAdminClusterToolBuilder) deleteFailureDomain(client cmdutils.Client, clusterName, domainName string) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminClusterToolBuilder) deleteFailureDomain(client cmdutils.Client, clusterName, domainName string) (*sdk.CallToolResult, error) {
 	// Create failure domain data for deletion
 	failureDomainData := utils.FailureDomainData{
 		ClusterName: clusterName,
@@ -550,9 +526,43 @@ func (b *PulsarAdminClusterToolBuilder) deleteFailureDomain(client cmdutils.Clie
 	// Delete failure domain
 	err := client.Clusters().DeleteFailureDomain(failureDomainData)
 	if err != nil {
-		return b.handleError("delete failure domain", err), nil
+		return nil, b.handleError("delete failure domain", err)
 	}
 
-	return mcp.NewToolResultText(
-		fmt.Sprintf("Failure domain %s deleted successfully from cluster %s", domainName, clusterName)), nil
+	return textResult(fmt.Sprintf("Failure domain %s deleted successfully from cluster %s", domainName, clusterName)), nil
+}
+
+func buildPulsarAdminClusterInputSchema() (*jsonschema.Schema, error) {
+	schema, err := jsonschema.For[pulsarAdminClusterInput](nil)
+	if err != nil {
+		return nil, fmt.Errorf("input schema: %w", err)
+	}
+	if schema.Type != "object" {
+		return nil, fmt.Errorf("input schema must have type \"object\"")
+	}
+
+	if schema.Properties == nil {
+		schema.Properties = map[string]*jsonschema.Schema{}
+	}
+
+	setSchemaDescription(schema, "resource", pulsarAdminClusterResourceDesc)
+	setSchemaDescription(schema, "operation", pulsarAdminClusterOperationDesc)
+	setSchemaDescription(schema, "cluster_name", pulsarAdminClusterNameDesc)
+	setSchemaDescription(schema, "domain_name", pulsarAdminClusterDomainNameDesc)
+	setSchemaDescription(schema, "service_url", pulsarAdminClusterServiceURLDesc)
+	setSchemaDescription(schema, "service_url_tls", pulsarAdminClusterServiceURLTLSDesc)
+	setSchemaDescription(schema, "broker_service_url", pulsarAdminClusterBrokerServiceURLDesc)
+	setSchemaDescription(schema, "broker_service_url_tls", pulsarAdminClusterBrokerServiceURLTLSDesc)
+	setSchemaDescription(schema, "peer_cluster_names", pulsarAdminClusterPeerClusterNamesDesc)
+	setSchemaDescription(schema, "brokers", pulsarAdminClusterBrokersDesc)
+
+	if peersSchema := schema.Properties["peer_cluster_names"]; peersSchema != nil && peersSchema.Items != nil {
+		peersSchema.Items.Description = "peer cluster name"
+	}
+	if brokersSchema := schema.Properties["brokers"]; brokersSchema != nil && brokersSchema.Items != nil {
+		brokersSchema.Items.Description = "broker"
+	}
+
+	normalizeAdditionalProperties(schema)
+	return schema, nil
 }

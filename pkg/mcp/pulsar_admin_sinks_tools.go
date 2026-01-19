@@ -17,14 +17,13 @@ package mcp
 import (
 	"context"
 
-	"github.com/mark3labs/mcp-go/server"
+	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	pulsarbuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/pulsar"
 )
 
-// PulsarAdminAddSinksTools adds a unified sink-related tool to the MCP server
-func PulsarAdminAddSinksTools(s *server.MCPServer, readOnly bool, features []string) {
-	// Use the new builder pattern
+// PulsarAdminAddSinksTools adds sink-related tools to the MCP server
+func PulsarAdminAddSinksTools(s *sdk.Server, readOnly bool, features []string) {
 	builder := pulsarbuilders.NewPulsarAdminSinksToolBuilder()
 	config := builders.ToolBuildConfig{
 		ReadOnly: readOnly,
@@ -33,12 +32,10 @@ func PulsarAdminAddSinksTools(s *server.MCPServer, readOnly bool, features []str
 
 	tools, err := builder.BuildTools(context.Background(), config)
 	if err != nil {
-		// Log error but don't fail - this maintains backward compatibility
 		return
 	}
 
-	// Add all built tools to the server
 	for _, tool := range tools {
-		s.AddTool(tool.Tool, tool.Handler)
+		tool.Register(s)
 	}
 }
