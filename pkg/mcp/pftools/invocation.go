@@ -25,7 +25,7 @@ import (
 
 	"github.com/apache/pulsar-client-go/pulsar"
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
-	"github.com/mark3labs/mcp-go/mcp"
+	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/streamnative-mcp-server/pkg/schema"
 )
 
@@ -53,16 +53,33 @@ func NewFunctionInvoker(manager *PulsarFunctionManager) *FunctionInvoker {
 	}
 }
 
+func newToolResultText(text string) *sdk.CallToolResult {
+	return &sdk.CallToolResult{
+		Content: []sdk.Content{
+			&sdk.TextContent{Text: text},
+		},
+	}
+}
+
+func newToolResultError(text string) *sdk.CallToolResult {
+	return &sdk.CallToolResult{
+		Content: []sdk.Content{
+			&sdk.TextContent{Text: text},
+		},
+		IsError: true,
+	}
+}
+
 // InvokeFunctionAndWait sends a message to the function and waits for the result
-func (fi *FunctionInvoker) InvokeFunctionAndWait(ctx context.Context, fnTool *FunctionTool, params map[string]interface{}) (*mcp.CallToolResult, error) {
+func (fi *FunctionInvoker) InvokeFunctionAndWait(ctx context.Context, fnTool *FunctionTool, params map[string]interface{}) (*sdk.CallToolResult, error) {
 	schemaConverter, err := schema.ConverterFactory(fnTool.OutputSchema.Type)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get schema converter: %v", err)), nil
+		return newToolResultError(fmt.Sprintf("Failed to get schema converter: %v", err)), nil
 	}
 
 	payload, err := schemaConverter.SerializeMCPRequestToPulsarPayload(params, fnTool.OutputSchema.PulsarSchemaInfo)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to serialize payload: %v", err)), nil
+		return newToolResultError(fmt.Sprintf("Failed to serialize payload: %v", err)), nil
 	}
 
 	// Create a result channel for this request
@@ -71,7 +88,7 @@ func (fi *FunctionInvoker) InvokeFunctionAndWait(ctx context.Context, fnTool *Fu
 	// Send message to input topic
 	msgID, err := fi.sendMessage(ctx, fnTool.InputTopic, payload)
 	if err != nil || msgID == "" {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to send message: %v", err)), nil
+		return newToolResultError(fmt.Sprintf("Failed to send message: %v", err)), nil
 	}
 
 	fi.registerResultChannel(msgID, resultChan)
@@ -80,19 +97,19 @@ func (fi *FunctionInvoker) InvokeFunctionAndWait(ctx context.Context, fnTool *Fu
 	// Set up consumer for output topic
 	err = fi.setupConsumer(ctx, fnTool.InputTopic, fnTool.OutputTopic, msgID, fnTool.OutputSchema)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to set up consumer: %v", err)), nil
+		return newToolResultError(fmt.Sprintf("Failed to set up consumer: %v", err)), nil
 	}
 
 	// Wait for result or timeout
 	select {
 	case result := <-resultChan:
 		if result.Error != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Function execution failed: %v", result.Error)), nil
+			return newToolResultError(fmt.Sprintf("Function execution failed: %v", result.Error)), nil
 		}
 
-		return mcp.NewToolResultText(result.Data), nil
+		return newToolResultText(result.Data), nil
 	case <-ctx.Done():
-		return mcp.NewToolResultError(fmt.Sprintf("Function invocation timed out after %v", ctx.Value("timeout"))), nil
+		return newToolResultError(fmt.Sprintf("Function invocation timed out after %v", ctx.Value("timeout"))), nil
 	}
 }
 
