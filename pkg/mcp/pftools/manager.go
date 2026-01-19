@@ -477,17 +477,18 @@ func (m *PulsarFunctionManager) handleToolCall(fnTool *FunctionTool) sdk.ToolHan
 		}
 
 		result, err := m.invokeToolCall(ctx, fnTool, args)
-		return legacyResultToSDK(result), nil, err
+		return result, nil, err
 	}
 }
 
 func (m *PulsarFunctionManager) handleLegacyToolCall(fnTool *FunctionTool) func(ctx context.Context, request legacy.CallToolRequest) (*legacy.CallToolResult, error) {
 	return func(ctx context.Context, request legacy.CallToolRequest) (*legacy.CallToolResult, error) {
-		return m.invokeToolCall(ctx, fnTool, request.GetArguments())
+		result, err := m.invokeToolCall(ctx, fnTool, request.GetArguments())
+		return sdkResultToLegacy(result), err
 	}
 }
 
-func (m *PulsarFunctionManager) invokeToolCall(ctx context.Context, fnTool *FunctionTool, args map[string]interface{}) (*legacy.CallToolResult, error) {
+func (m *PulsarFunctionManager) invokeToolCall(ctx context.Context, fnTool *FunctionTool, args map[string]interface{}) (*sdk.CallToolResult, error) {
 	// Get the circuit breaker
 	m.mutex.RLock()
 	cb, exists := m.circuitBreakers[fnTool.Name]
@@ -502,7 +503,7 @@ func (m *PulsarFunctionManager) invokeToolCall(ctx context.Context, fnTool *Func
 
 	// Check if the circuit breaker allows the request
 	if !cb.AllowRequest() {
-		return legacy.NewToolResultError(fmt.Sprintf("Circuit breaker is open for function %s. Too many failures, please try again later.", fnTool.Name)), nil
+		return newToolResultError(fmt.Sprintf("Circuit breaker is open for function %s. Too many failures, please try again later.", fnTool.Name)), nil
 	}
 
 	// Create function invoker
@@ -759,6 +760,39 @@ func legacyResultToSDK(result *legacy.CallToolResult) *sdk.CallToolResult {
 			converted.Content = append(converted.Content, &sdk.TextContent{Text: value.Text})
 		default:
 			converted.Content = append(converted.Content, &sdk.TextContent{Text: fmt.Sprintf("%v", value)})
+		}
+	}
+
+	return converted
+}
+
+func sdkResultToLegacy(result *sdk.CallToolResult) *legacy.CallToolResult {
+	if result == nil {
+		return nil
+	}
+
+	converted := &legacy.CallToolResult{
+		StructuredContent: result.StructuredContent,
+		IsError:           result.IsError,
+	}
+
+	if len(result.Content) == 0 {
+		return converted
+	}
+
+	converted.Content = make([]legacy.Content, 0, len(result.Content))
+	for _, content := range result.Content {
+		switch value := content.(type) {
+		case *sdk.TextContent:
+			converted.Content = append(converted.Content, legacy.TextContent{
+				Type: legacy.ContentTypeText,
+				Text: value.Text,
+			})
+		default:
+			converted.Content = append(converted.Content, legacy.TextContent{
+				Type: legacy.ContentTypeText,
+				Text: fmt.Sprintf("%v", value),
+			})
 		}
 	}
 
