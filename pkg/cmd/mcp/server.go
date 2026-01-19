@@ -132,7 +132,7 @@ func newMcpServer(_ context.Context, configOpts *ServerOptions, logrusLogger *lo
 	mcp.PulsarAdminAddSourcesToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.PulsarAdminAddTopicPolicyToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.PulsarClientAddConsumerTools(s, configOpts.ReadOnly, configOpts.Features)
-	mcp.PulsarClientAddProducerTools(s, configOpts.ReadOnly, configOpts.Features)
+	mcp.PulsarClientAddProducerToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
 
 	mcp.KafkaAdminAddTopicToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.KafkaAdminAddPartitionsToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
