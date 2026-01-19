@@ -252,6 +252,69 @@ func TestPulsarAdminSinksToolBuilder_ReadOnlyRejectsCreate(t *testing.T) {
 	assert.Contains(t, err.Error(), "read-only")
 }
 
+func TestPulsarAdminPackagesToolBuilder(t *testing.T) {
+	builder := NewPulsarAdminPackagesToolBuilder()
+
+	config := builders.ToolBuildConfig{
+		ReadOnly: false,
+		Features: []string{"pulsar-admin-packages"},
+	}
+
+	tools, err := builder.BuildTools(context.Background(), config)
+	require.NoError(t, err)
+	assert.Len(t, tools, 1)
+	assert.Equal(t, "pulsar_admin_package", tools[0].Definition().Name)
+
+	config.Features = []string{"unrelated-feature"}
+	tools, err = builder.BuildTools(context.Background(), config)
+	require.NoError(t, err)
+	assert.Empty(t, tools)
+}
+
+func TestPulsarAdminPackagesToolSchema(t *testing.T) {
+	builder := NewPulsarAdminPackagesToolBuilder()
+	tool, err := builder.buildPackagesTool()
+	require.NoError(t, err)
+	assert.Equal(t, "pulsar_admin_package", tool.Name)
+
+	schema, ok := tool.InputSchema.(*jsonschema.Schema)
+	require.True(t, ok)
+	require.NotNil(t, schema.Properties)
+
+	expectedRequired := []string{"resource", "operation"}
+	assert.ElementsMatch(t, expectedRequired, schema.Required)
+
+	expectedProps := []string{
+		"resource",
+		"operation",
+		"packageName",
+		"namespace",
+		"type",
+		"description",
+		"contact",
+		"path",
+		"properties",
+	}
+	assert.ElementsMatch(t, expectedProps, mapStringKeys(schema.Properties))
+
+	resourceSchema := schema.Properties["resource"]
+	require.NotNil(t, resourceSchema)
+	assert.Equal(t, pulsarAdminPackagesResourceDesc, resourceSchema.Description)
+}
+
+func TestPulsarAdminPackagesToolBuilder_ReadOnlyRejectsUpload(t *testing.T) {
+	builder := NewPulsarAdminPackagesToolBuilder()
+	handler := builder.buildPackagesHandler(true)
+
+	_, _, err := handler(context.Background(), nil, pulsarAdminPackagesInput{
+		Resource:  "package",
+		Operation: "upload",
+	})
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "read-only")
+}
+
 func TestPulsarAdminSubscriptionToolBuilder(t *testing.T) {
 	builder := NewPulsarAdminSubscriptionToolBuilder()
 
