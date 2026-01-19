@@ -17,14 +17,13 @@ package mcp
 import (
 	"context"
 
-	"github.com/mark3labs/mcp-go/server"
+	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	pulsarbuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/pulsar"
 )
 
-// PulsarAdminAddSourcesTools adds a unified source-related tool to the MCP server
-func PulsarAdminAddSourcesTools(s *server.MCPServer, readOnly bool, features []string) {
-	// Use the new builder pattern
+// PulsarAdminAddSourcesTools adds source-related tools to the MCP server
+func PulsarAdminAddSourcesTools(s *sdk.Server, readOnly bool, features []string) {
 	builder := pulsarbuilders.NewPulsarAdminSourcesToolBuilder()
 	config := builders.ToolBuildConfig{
 		ReadOnly: readOnly,
@@ -33,12 +32,10 @@ func PulsarAdminAddSourcesTools(s *server.MCPServer, readOnly bool, features []s
 
 	tools, err := builder.BuildTools(context.Background(), config)
 	if err != nil {
-		// Log error but don't fail - this maintains backward compatibility
 		return
 	}
 
-	// Add all built tools to the server
 	for _, tool := range tools {
-		s.AddTool(tool.Tool, tool.Handler)
+		tool.Register(s)
 	}
 }

@@ -12,30 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package mcp
+package pulsar
 
 import (
-	"context"
-
+	legacy "github.com/mark3labs/mcp-go/mcp"
 	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
-	pulsarbuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/pulsar"
 )
 
-// PulsarAdminAddBrokersTools adds broker-related tools to the MCP server
-func PulsarAdminAddBrokersTools(s *sdk.Server, readOnly bool, features []string) {
-	builder := pulsarbuilders.NewPulsarAdminBrokersToolBuilder()
-	config := builders.ToolBuildConfig{
-		ReadOnly: readOnly,
-		Features: features,
+func legacyToolResultFromSDK(result *sdk.CallToolResult) *legacy.CallToolResult {
+	if result == nil {
+		return legacy.NewToolResultText("")
 	}
 
-	tools, err := builder.BuildTools(context.Background(), config)
-	if err != nil {
-		return
+	text := ""
+	for _, content := range result.Content {
+		if textContent, ok := content.(*sdk.TextContent); ok {
+			text = textContent.Text
+			break
+		}
 	}
 
-	for _, tool := range tools {
-		tool.Register(s)
+	if result.IsError {
+		if text == "" {
+			text = "tool call failed"
+		}
+		return legacy.NewToolResultError(text)
 	}
+
+	return legacy.NewToolResultText(text)
 }

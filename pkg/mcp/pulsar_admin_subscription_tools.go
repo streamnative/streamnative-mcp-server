@@ -16,16 +16,15 @@ package mcp
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/mark3labs/mcp-go/server"
+	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
-	pulsarBuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/pulsar"
+	pulsarbuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/pulsar"
 )
 
-// PulsarAdminSubscriptionTools creates Pulsar Admin Subscription tool list using the new builder pattern
-func PulsarAdminSubscriptionTools(readOnly bool, features []string) []server.ServerTool {
-	builder := pulsarBuilders.NewPulsarAdminSubscriptionToolBuilder()
+// PulsarAdminAddSubscriptionTools adds subscription-related tools to the MCP server
+func PulsarAdminAddSubscriptionTools(s *sdk.Server, readOnly bool, features []string) {
+	builder := pulsarbuilders.NewPulsarAdminSubscriptionToolBuilder()
 	config := builders.ToolBuildConfig{
 		ReadOnly: readOnly,
 		Features: features,
@@ -33,19 +32,10 @@ func PulsarAdminSubscriptionTools(readOnly bool, features []string) []server.Ser
 
 	tools, err := builder.BuildTools(context.Background(), config)
 	if err != nil {
-		// In production environment, this should use proper logging
-		fmt.Printf("Failed to build Pulsar Admin Subscription tools: %v\n", err)
-		return nil
+		return
 	}
 
-	return tools
-}
-
-// PulsarAdminAddSubscriptionTools adds subscription-related tools to the MCP server
-func PulsarAdminAddSubscriptionTools(s *server.MCPServer, readOnly bool, features []string) {
-	tools := PulsarAdminSubscriptionTools(readOnly, features)
-
 	for _, tool := range tools {
-		s.AddTool(tool.Tool, tool.Handler)
+		tool.Register(s)
 	}
 }

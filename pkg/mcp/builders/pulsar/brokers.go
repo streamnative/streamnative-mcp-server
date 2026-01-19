@@ -20,11 +20,49 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	"github.com/google/jsonschema-go/jsonschema"
+	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
+)
+
+type pulsarAdminBrokersInput struct {
+	Resource    string  `json:"resource"`
+	Operation   string  `json:"operation"`
+	ClusterName *string `json:"clusterName,omitempty"`
+	BrokerURL   *string `json:"brokerUrl,omitempty"`
+	ConfigType  *string `json:"configType,omitempty"`
+	ConfigName  *string `json:"configName,omitempty"`
+	ConfigValue *string `json:"configValue,omitempty"`
+}
+
+const (
+	pulsarAdminBrokersResourceDesc = "Type of resource to access, available options:\n" +
+		"- brokers: Manage broker listings\n" +
+		"- health: Check broker health status\n" +
+		"- config: Manage broker configurations\n" +
+		"- namespaces: Manage namespaces owned by a broker"
+	pulsarAdminBrokersOperationDesc = "Operation to perform, available options:\n" +
+		"- list: List resources (used with brokers)\n" +
+		"- get: Retrieve resource information (used with health, config, namespaces)\n" +
+		"- update: Update a resource (used with config)\n" +
+		"- delete: Delete a resource (used with config)"
+	pulsarAdminBrokersClusterNameDesc = "Pulsar cluster name, required for these operations:\n" +
+		"- When resource=brokers, operation=list\n" +
+		"- When resource=namespaces, operation=get"
+	pulsarAdminBrokersBrokerURLDesc = "Broker URL, such as '127.0.0.1:8080', required for these operations:\n" +
+		"- When resource=namespaces, operation=get"
+	pulsarAdminBrokersConfigTypeDesc = "Configuration type, required when resource=config, operation=get, available options:\n" +
+		"- dynamic: Get list of dynamically modifiable configuration names\n" +
+		"- runtime: Get all runtime configurations (including static and dynamic configs)\n" +
+		"- internal: Get internal configuration information\n" +
+		"- all_dynamic: Get all dynamic configurations and their current values"
+	pulsarAdminBrokersConfigNameDesc = "Configuration parameter name, required for these operations:\n" +
+		"- When resource=config, operation=update\n" +
+		"- When resource=config, operation=delete"
+	pulsarAdminBrokersConfigValueDesc = "Configuration parameter value, required for these operations:\n" +
+		"- When resource=config, operation=update"
 )
 
 // PulsarAdminBrokersToolBuilder implements the ToolBuilder interface for Pulsar admin brokers
@@ -56,7 +94,7 @@ func NewPulsarAdminBrokersToolBuilder() *PulsarAdminBrokersToolBuilder {
 }
 
 // BuildTools builds the Pulsar admin brokers tool list
-func (b *PulsarAdminBrokersToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]server.ServerTool, error) {
+func (b *PulsarAdminBrokersToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]builders.ToolDefinition, error) {
 	// Check features - return empty list if no required features are present
 	if !b.HasAnyRequiredFeature(config.Features) {
 		return nil, nil
@@ -68,11 +106,14 @@ func (b *PulsarAdminBrokersToolBuilder) BuildTools(_ context.Context, config bui
 	}
 
 	// Build tools
-	tool := b.buildPulsarAdminBrokersTool()
+	tool, err := b.buildPulsarAdminBrokersTool()
+	if err != nil {
+		return nil, err
+	}
 	handler := b.buildPulsarAdminBrokersHandler(config.ReadOnly)
 
-	return []server.ServerTool{
-		{
+	return []builders.ToolDefinition{
+		builders.ServerTool[pulsarAdminBrokersInput, any]{
 			Tool:    tool,
 			Handler: handler,
 		},
@@ -80,110 +121,80 @@ func (b *PulsarAdminBrokersToolBuilder) BuildTools(_ context.Context, config bui
 }
 
 // buildPulsarAdminBrokersTool builds the Pulsar admin brokers MCP tool definition
-func (b *PulsarAdminBrokersToolBuilder) buildPulsarAdminBrokersTool() mcp.Tool {
-	return mcp.NewTool("pulsar_admin_brokers",
-		mcp.WithDescription("Unified tool for managing Apache Pulsar broker resources. This tool integrates multiple broker management functions, including:\n"+
-			"1. List active brokers in a cluster (resource=brokers, operation=list)\n"+
-			"2. Check broker health status (resource=health, operation=get)\n"+
-			"3. Manage broker configurations (resource=config, operation=get/update/delete)\n"+
-			"4. View namespaces owned by a broker (resource=namespaces, operation=get)\n\n"+
-			"Different functions are accessed by combining resource and operation parameters, with other parameters used selectively based on operation type.\n"+
-			"Example: {\"resource\": \"config\", \"operation\": \"get\", \"configType\": \"dynamic\"} retrieves all dynamic configuration names.\n"+
-			"This tool requires Pulsar super-user permissions."),
-		mcp.WithString("resource", mcp.Required(),
-			mcp.Description("Type of resource to access, available options:\n"+
-				"- brokers: Manage broker listings\n"+
-				"- health: Check broker health status\n"+
-				"- config: Manage broker configurations\n"+
-				"- namespaces: Manage namespaces owned by a broker"),
-		),
-		mcp.WithString("operation", mcp.Required(),
-			mcp.Description("Operation to perform, available options:\n"+
-				"- list: List resources (used with brokers)\n"+
-				"- get: Retrieve resource information (used with health, config, namespaces)\n"+
-				"- update: Update a resource (used with config)\n"+
-				"- delete: Delete a resource (used with config)"),
-		),
-		mcp.WithString("clusterName",
-			mcp.Description("Pulsar cluster name, required for these operations:\n"+
-				"- When resource=brokers, operation=list\n"+
-				"- When resource=namespaces, operation=get"),
-		),
-		mcp.WithString("brokerUrl",
-			mcp.Description("Broker URL, such as '127.0.0.1:8080', required for these operations:\n"+
-				"- When resource=namespaces, operation=get"),
-		),
-		mcp.WithString("configType",
-			mcp.Description("Configuration type, required when resource=config, operation=get, available options:\n"+
-				"- dynamic: Get list of dynamically modifiable configuration names\n"+
-				"- runtime: Get all runtime configurations (including static and dynamic configs)\n"+
-				"- internal: Get internal configuration information\n"+
-				"- all_dynamic: Get all dynamic configurations and their current values"),
-		),
-		mcp.WithString("configName",
-			mcp.Description("Configuration parameter name, required for these operations:\n"+
-				"- When resource=config, operation=update\n"+
-				"- When resource=config, operation=delete"),
-		),
-		mcp.WithString("configValue",
-			mcp.Description("Configuration parameter value, required for these operations:\n"+
-				"- When resource=config, operation=update"),
-		),
-	)
+func (b *PulsarAdminBrokersToolBuilder) buildPulsarAdminBrokersTool() (*sdk.Tool, error) {
+	inputSchema, err := buildPulsarAdminBrokersInputSchema()
+	if err != nil {
+		return nil, err
+	}
+
+	toolDesc := "Unified tool for managing Apache Pulsar broker resources. This tool integrates multiple broker management functions, including:\n" +
+		"1. List active brokers in a cluster (resource=brokers, operation=list)\n" +
+		"2. Check broker health status (resource=health, operation=get)\n" +
+		"3. Manage broker configurations (resource=config, operation=get/update/delete)\n" +
+		"4. View namespaces owned by a broker (resource=namespaces, operation=get)\n\n" +
+		"Different functions are accessed by combining resource and operation parameters, with other parameters used selectively based on operation type.\n" +
+		"Example: {\"resource\": \"config\", \"operation\": \"get\", \"configType\": \"dynamic\"} retrieves all dynamic configuration names.\n" +
+		"This tool requires Pulsar super-user permissions."
+
+	return &sdk.Tool{
+		Name:        "pulsar_admin_brokers",
+		Description: toolDesc,
+		InputSchema: inputSchema,
+	}, nil
 }
 
 // buildPulsarAdminBrokersHandler builds the Pulsar admin brokers handler function
-func (b *PulsarAdminBrokersToolBuilder) buildPulsarAdminBrokersHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminBrokersToolBuilder) buildPulsarAdminBrokersHandler(readOnly bool) builders.ToolHandlerFunc[pulsarAdminBrokersInput, any] {
+	return func(ctx context.Context, _ *sdk.CallToolRequest, input pulsarAdminBrokersInput) (*sdk.CallToolResult, any, error) {
 		// Get Pulsar session from context
 		session := mcpCtx.GetPulsarSession(ctx)
 		if session == nil {
-			return mcp.NewToolResultError("Pulsar session not found in context"), nil
+			return nil, nil, fmt.Errorf("pulsar session not found in context")
 		}
 
 		// Get admin client
 		client, err := session.GetAdminClient()
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
+			return nil, nil, fmt.Errorf("failed to get admin client: %v", err)
 		}
 
 		// Get required parameters
-		resource, err := request.RequireString("resource")
-		if err != nil {
-			return mcp.NewToolResultError("Missing required resource parameter. " +
-				"Please specify one of: brokers, health, config, namespaces."), nil
+		resource := input.Resource
+		if resource == "" {
+			return nil, nil, fmt.Errorf("missing required resource parameter. please specify one of: brokers, health, config, namespaces")
 		}
 
-		operation, err := request.RequireString("operation")
-		if err != nil {
-			return mcp.NewToolResultError("Missing required operation parameter. " +
-				"Please specify one of: list, get, update, delete based on the resource type."), nil
+		operation := input.Operation
+		if operation == "" {
+			return nil, nil, fmt.Errorf("missing required operation parameter. please specify one of: list, get, update, delete based on the resource type")
 		}
 
 		// Validate if the parameter combination is valid
 		validCombination, errMsg := b.validateResourceOperation(resource, operation)
 		if !validCombination {
-			return mcp.NewToolResultError(errMsg), nil
+			return nil, nil, fmt.Errorf("%s", errMsg)
 		}
 
 		// Process request based on resource type
 		switch resource {
 		case "brokers":
-			return b.handleBrokersResource(client, operation, request)
+			result, err := b.handleBrokersResource(client, operation, input)
+			return result, nil, err
 		case "health":
-			return b.handleHealthResource(client, operation, request)
+			result, err := b.handleHealthResource(client, operation)
+			return result, nil, err
 		case "config":
 			// Check write operation permissions
 			if (operation == "update" || operation == "delete") && readOnly {
-				return mcp.NewToolResultError("Configuration update/delete operations not allowed in read-only mode. " +
-					"Please contact your administrator if you need to modify broker configurations."), nil
+				return nil, nil, fmt.Errorf("configuration update/delete operations not allowed in read-only mode. please contact your administrator if you need to modify broker configurations")
 			}
-			return b.handleConfigResource(client, operation, request)
+			result, err := b.handleConfigResource(client, operation, input)
+			return result, nil, err
 		case "namespaces":
-			return b.handleNamespacesResource(client, operation, request)
+			result, err := b.handleNamespacesResource(client, operation, input)
+			return result, nil, err
 		default:
-			return mcp.NewToolResultError(fmt.Sprintf("Unsupported resource: %s. "+
-				"Please use one of: brokers, health, config, namespaces.", resource)), nil
+			return nil, nil, fmt.Errorf("unsupported resource: %s. please use one of: brokers, health, config, namespaces", resource)
 		}
 	}
 }
@@ -213,58 +224,47 @@ func (b *PulsarAdminBrokersToolBuilder) validateResourceOperation(resource, oper
 }
 
 // handleBrokersResource handles brokers resource
-func (b *PulsarAdminBrokersToolBuilder) handleBrokersResource(client cmdutils.Client, operation string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminBrokersToolBuilder) handleBrokersResource(client cmdutils.Client, operation string, input pulsarAdminBrokersInput) (*sdk.CallToolResult, error) {
 	switch operation {
 	case "list":
-		clusterName, err := request.RequireString("clusterName")
+		clusterName, err := requireString(input.ClusterName, "clusterName")
 		if err != nil {
-			return mcp.NewToolResultError("Missing required parameter 'clusterName'. " +
-				"Please provide the name of the Pulsar cluster to list brokers for."), nil
+			return nil, fmt.Errorf("missing required parameter 'clusterName'. please provide the name of the Pulsar cluster to list brokers for")
 		}
 
 		brokers, err := client.Brokers().GetActiveBrokers(clusterName)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get active brokers: %v. "+
-				"Please verify the cluster name and ensure the Pulsar service is running.", err)), nil
+			return nil, fmt.Errorf("failed to get active brokers: %v. please verify the cluster name and ensure the Pulsar service is running", err)
 		}
 
-		brokersJSON, err := json.Marshal(brokers)
-		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to serialize brokers list: %v", err)), nil
-		}
-
-		return mcp.NewToolResultText(string(brokersJSON)), nil
+		return b.marshalResponse(brokers)
 	default:
-		return mcp.NewToolResultError(fmt.Sprintf("Unsupported operation '%s' for brokers resource. "+
-			"The only supported operation is 'list'.", operation)), nil
+		return nil, fmt.Errorf("unsupported operation '%s' for brokers resource. the only supported operation is 'list'", operation)
 	}
 }
 
 // handleHealthResource handles health resource
-func (b *PulsarAdminBrokersToolBuilder) handleHealthResource(client cmdutils.Client, operation string, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminBrokersToolBuilder) handleHealthResource(client cmdutils.Client, operation string) (*sdk.CallToolResult, error) {
 	switch operation {
 	case "get":
 		//nolint:staticcheck
 		err := client.Brokers().HealthCheck()
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Broker health check failed: %v. "+
-				"The broker might be down or experiencing issues.", err)), nil
+			return nil, fmt.Errorf("broker health check failed: %v. the broker might be down or experiencing issues", err)
 		}
-		return mcp.NewToolResultText("ok"), nil
+		return textResult("ok"), nil
 	default:
-		return mcp.NewToolResultError(fmt.Sprintf("Unsupported operation '%s' for health resource. "+
-			"The only supported operation is 'get'.", operation)), nil
+		return nil, fmt.Errorf("unsupported operation '%s' for health resource. the only supported operation is 'get'", operation)
 	}
 }
 
 // handleConfigResource handles config resource
-func (b *PulsarAdminBrokersToolBuilder) handleConfigResource(client cmdutils.Client, operation string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminBrokersToolBuilder) handleConfigResource(client cmdutils.Client, operation string, input pulsarAdminBrokersInput) (*sdk.CallToolResult, error) {
 	switch operation {
 	case "get":
-		configType, err := request.RequireString("configType")
+		configType, err := requireString(input.ConfigType, "configType")
 		if err != nil {
-			return mcp.NewToolResultError("Missing required parameter 'configType'. " +
-				"Please specify one of: dynamic, runtime, internal, all_dynamic."), nil
+			return nil, fmt.Errorf("missing required parameter 'configType'. please specify one of: dynamic, runtime, internal, all_dynamic")
 		}
 
 		var result interface{}
@@ -280,95 +280,108 @@ func (b *PulsarAdminBrokersToolBuilder) handleConfigResource(client cmdutils.Cli
 		case "all_dynamic":
 			result, fetchErr = client.Brokers().GetAllDynamicConfigurations()
 		default:
-			return mcp.NewToolResultError(fmt.Sprintf("Invalid config type: '%s'. "+
-				"Valid types are: dynamic, runtime, internal, all_dynamic.", configType)), nil
+			return nil, fmt.Errorf("invalid config type: '%s'. valid types are: dynamic, runtime, internal, all_dynamic", configType)
 		}
 
 		if fetchErr != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get %s configuration: %v", configType, fetchErr)), nil
+			return nil, fmt.Errorf("failed to get %s configuration: %v", configType, fetchErr)
 		}
 
-		resultJSON, err := json.Marshal(result)
-		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to serialize configuration: %v", err)), nil
-		}
-
-		return mcp.NewToolResultText(string(resultJSON)), nil
+		return b.marshalResponse(result)
 
 	case "update":
-		configName, err := request.RequireString("configName")
+		configName, err := requireString(input.ConfigName, "configName")
 		if err != nil {
-			return mcp.NewToolResultError("Missing required parameter 'configName'. " +
-				"Please provide the name of the configuration parameter to update."), nil
+			return nil, fmt.Errorf("missing required parameter 'configName'. please provide the name of the configuration parameter to update")
 		}
 
-		configValue, err := request.RequireString("configValue")
+		configValue, err := requireString(input.ConfigValue, "configValue")
 		if err != nil {
-			return mcp.NewToolResultError("Missing required parameter 'configValue'. " +
-				"Please provide the new value for the configuration parameter."), nil
+			return nil, fmt.Errorf("missing required parameter 'configValue'. please provide the new value for the configuration parameter")
 		}
 
 		err = client.Brokers().UpdateDynamicConfiguration(configName, configValue)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to update configuration: %v. "+
-				"Please verify the configuration name is valid and the value is of the correct type.", err)), nil
+			return nil, fmt.Errorf("failed to update configuration: %v. please verify the configuration name is valid and the value is of the correct type", err)
 		}
 
-		return mcp.NewToolResultText(fmt.Sprintf("Dynamic configuration '%s' updated successfully to '%s'",
-			configName, configValue)), nil
+		return textResult(fmt.Sprintf("Dynamic configuration '%s' updated successfully to '%s'", configName, configValue)), nil
 
 	case "delete":
-		configName, err := request.RequireString("configName")
+		configName, err := requireString(input.ConfigName, "configName")
 		if err != nil {
-			return mcp.NewToolResultError("Missing required parameter 'configName'. " +
-				"Please provide the name of the configuration parameter to delete."), nil
+			return nil, fmt.Errorf("missing required parameter 'configName'. please provide the name of the configuration parameter to delete")
 		}
 
 		err = client.Brokers().DeleteDynamicConfiguration(configName)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to delete configuration: %v. "+
-				"Please verify the configuration name is valid and exists.", err)), nil
+			return nil, fmt.Errorf("failed to delete configuration: %v. please verify the configuration name is valid and exists", err)
 		}
 
-		return mcp.NewToolResultText(fmt.Sprintf("Dynamic configuration '%s' deleted successfully", configName)), nil
+		return textResult(fmt.Sprintf("Dynamic configuration '%s' deleted successfully", configName)), nil
 
 	default:
-		return mcp.NewToolResultError(fmt.Sprintf("Unsupported operation '%s' for config resource. "+
-			"Supported operations are: get, update, delete.", operation)), nil
+		return nil, fmt.Errorf("unsupported operation '%s' for config resource. supported operations are: get, update, delete", operation)
 	}
 }
 
 // handleNamespacesResource handles namespaces resource
-func (b *PulsarAdminBrokersToolBuilder) handleNamespacesResource(client cmdutils.Client, operation string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminBrokersToolBuilder) handleNamespacesResource(client cmdutils.Client, operation string, input pulsarAdminBrokersInput) (*sdk.CallToolResult, error) {
 	switch operation {
 	case "get":
-		clusterName, err := request.RequireString("clusterName")
+		clusterName, err := requireString(input.ClusterName, "clusterName")
 		if err != nil {
-			return mcp.NewToolResultError("Missing required parameter 'clusterName'. " +
-				"Please provide the name of the Pulsar cluster."), nil
+			return nil, fmt.Errorf("missing required parameter 'clusterName'. please provide the name of the Pulsar cluster")
 		}
 
-		brokerURL, err := request.RequireString("brokerUrl")
+		brokerURL, err := requireString(input.BrokerURL, "brokerUrl")
 		if err != nil {
-			return mcp.NewToolResultError("Missing required parameter 'brokerUrl'. " +
-				"Please provide the URL of the broker (e.g., '127.0.0.1:8080')."), nil
+			return nil, fmt.Errorf("missing required parameter 'brokerUrl'. please provide the URL of the broker (e.g., '127.0.0.1:8080')")
 		}
 
 		namespaces, err := client.Brokers().GetOwnedNamespaces(clusterName, brokerURL)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get owned namespaces: %v. "+
-				"Please verify the cluster name and broker URL are correct.", err)), nil
+			return nil, fmt.Errorf("failed to get owned namespaces: %v. please verify the cluster name and broker URL are correct", err)
 		}
 
-		namespacesJSON, err := json.Marshal(namespaces)
-		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to serialize namespaces: %v", err)), nil
-		}
-
-		return mcp.NewToolResultText(string(namespacesJSON)), nil
+		return b.marshalResponse(namespaces)
 
 	default:
-		return mcp.NewToolResultError(fmt.Sprintf("Unsupported operation '%s' for namespaces resource. "+
-			"The only supported operation is 'get'.", operation)), nil
+		return nil, fmt.Errorf("unsupported operation '%s' for namespaces resource. the only supported operation is 'get'", operation)
 	}
+}
+
+func (b *PulsarAdminBrokersToolBuilder) marshalResponse(data interface{}) (*sdk.CallToolResult, error) {
+	jsonBytes, err := json.Marshal(data)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal response: %v", err)
+	}
+	return &sdk.CallToolResult{
+		Content: []sdk.Content{&sdk.TextContent{Text: string(jsonBytes)}},
+	}, nil
+}
+
+func buildPulsarAdminBrokersInputSchema() (*jsonschema.Schema, error) {
+	schema, err := jsonschema.For[pulsarAdminBrokersInput](nil)
+	if err != nil {
+		return nil, fmt.Errorf("input schema: %w", err)
+	}
+	if schema.Type != "object" {
+		return nil, fmt.Errorf("input schema must have type \"object\"")
+	}
+
+	if schema.Properties == nil {
+		schema.Properties = map[string]*jsonschema.Schema{}
+	}
+
+	setSchemaDescription(schema, "resource", pulsarAdminBrokersResourceDesc)
+	setSchemaDescription(schema, "operation", pulsarAdminBrokersOperationDesc)
+	setSchemaDescription(schema, "clusterName", pulsarAdminBrokersClusterNameDesc)
+	setSchemaDescription(schema, "brokerUrl", pulsarAdminBrokersBrokerURLDesc)
+	setSchemaDescription(schema, "configType", pulsarAdminBrokersConfigTypeDesc)
+	setSchemaDescription(schema, "configName", pulsarAdminBrokersConfigNameDesc)
+	setSchemaDescription(schema, "configValue", pulsarAdminBrokersConfigValueDesc)
+
+	normalizeAdditionalProperties(schema)
+	return schema, nil
 }
