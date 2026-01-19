@@ -27,8 +27,9 @@ import (
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/rest"
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
 	"github.com/google/go-cmp/cmp"
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	legacy "github.com/mark3labs/mcp-go/mcp"
+	legacyserver "github.com/mark3labs/mcp-go/server"
+	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 	"github.com/streamnative/streamnative-mcp-server/pkg/schema"
@@ -54,7 +55,8 @@ var DefaultStringSchemaInfo = &SchemaInfo{
 
 // Server is imported directly to avoid circular dependency
 type Server struct {
-	MCPServer     *server.MCPServer
+	MCPServer     *sdk.Server
+	LegacyServer  *legacyserver.MCPServer
 	KafkaSession  *kafka.Session
 	PulsarSession *pulsar.Session
 	Logger        interface{}
@@ -100,6 +102,7 @@ func NewPulsarFunctionManager(snServer *Server, readOnly bool, options *ManagerO
 		stopCh:              make(chan struct{}),
 		callInProgressMap:   make(map[string]context.CancelFunc),
 		mcpServer:           snServer.MCPServer,
+		legacyServer:        snServer.LegacyServer,
 		readOnly:            readOnly,
 		defaultTimeout:      options.DefaultTimeout,
 		circuitBreakers:     make(map[string]*CircuitBreaker),
@@ -158,7 +161,7 @@ func (m *PulsarFunctionManager) updateFunctions() {
 
 		// Check if this is a cluster health error and invoke callback if configured
 		if (IsClusterUnhealthy(err) || IsAuthError(err)) && m.clusterErrorHandler != nil {
-			go m.clusterErrorHandler(m, err)
+			go m.clusterErrorHandler(context.Background(), m, err)
 		}
 		return
 	}
@@ -205,23 +208,9 @@ func (m *PulsarFunctionManager) updateFunctions() {
 		}
 
 		if changed {
-			if m.sessionID != "" {
-				err := m.mcpServer.DeleteSessionTools(m.sessionID, fnTool.Tool.Name)
-				if err != nil {
-					log.Printf("Failed to delete tool %s from session %s: %v", fnTool.Tool.Name, m.sessionID, err)
-				}
-			} else {
-				m.mcpServer.DeleteTools(fnTool.Tool.Name)
-			}
+			m.removeTool(fnTool)
 		}
-		if m.sessionID != "" {
-			err := m.mcpServer.AddSessionTool(m.sessionID, fnTool.Tool, m.handleToolCall(fnTool))
-			if err != nil {
-				log.Printf("Failed to add tool %s to session %s: %v", fnTool.Tool.Name, m.sessionID, err)
-			}
-		} else {
-			m.mcpServer.AddTool(fnTool.Tool, m.handleToolCall(fnTool))
-		}
+		m.addTool(fnTool)
 
 		// Add function to map
 		m.mutex.Lock()
@@ -239,19 +228,61 @@ func (m *PulsarFunctionManager) updateFunctions() {
 	m.mutex.Lock()
 	for fullName, fnTool := range m.fnToToolMap {
 		if !seenFunctions[fullName] {
-			if m.sessionID != "" {
-				err := m.mcpServer.DeleteSessionTools(m.sessionID, fnTool.Tool.Name)
-				if err != nil {
-					log.Printf("Failed to delete tool %s from session %s: %v", fnTool.Tool.Name, m.sessionID, err)
-				}
-			} else {
-				m.mcpServer.DeleteTools(fnTool.Tool.Name)
-			}
+			m.removeTool(fnTool)
 			delete(m.fnToToolMap, fullName)
 			log.Printf("Removed function %s from MCP tools [%s]", fullName, fnTool.Tool.Name)
 		}
 	}
 	m.mutex.Unlock()
+}
+
+func (m *PulsarFunctionManager) addTool(fnTool *FunctionTool) {
+	if fnTool == nil || fnTool.Tool == nil {
+		return
+	}
+
+	if m.mcpServer != nil {
+		m.mcpServer.AddTool(fnTool.Tool, m.handleToolCall(fnTool))
+		return
+	}
+
+	if m.legacyServer == nil {
+		return
+	}
+
+	legacyTool := sdkToolToLegacy(fnTool.Tool)
+	if m.sessionID != "" {
+		if err := m.legacyServer.AddSessionTool(m.sessionID, legacyTool, m.handleLegacyToolCall(fnTool)); err != nil {
+			log.Printf("Failed to add tool %s to session %s: %v", legacyTool.Name, m.sessionID, err)
+		}
+		return
+	}
+
+	m.legacyServer.AddTool(legacyTool, m.handleLegacyToolCall(fnTool))
+}
+
+func (m *PulsarFunctionManager) removeTool(fnTool *FunctionTool) {
+	if fnTool == nil || fnTool.Tool == nil {
+		return
+	}
+
+	if m.mcpServer != nil {
+		m.mcpServer.RemoveTools(fnTool.Tool.Name)
+		return
+	}
+
+	if m.legacyServer == nil {
+		return
+	}
+
+	if m.sessionID != "" {
+		if err := m.legacyServer.DeleteSessionTools(m.sessionID, fnTool.Tool.Name); err != nil {
+			log.Printf("Failed to delete tool %s from session %s: %v", fnTool.Tool.Name, m.sessionID, err)
+		}
+		return
+	}
+
+	m.legacyServer.DeleteTools(fnTool.Tool.Name)
 }
 
 // getFunctionsList retrieves all functions from the specified tenants/namespaces
@@ -417,12 +448,13 @@ func (m *PulsarFunctionManager) convertFunctionToTool(fn *utils.FunctionConfig) 
 		return nil, fmt.Errorf("failed to convert input schema to MCP tool input schema properties: %w", err)
 	}
 
-	toolInputSchemaProperties = append(toolInputSchemaProperties, mcp.WithDescription(description))
+	toolInputSchemaProperties = append(toolInputSchemaProperties, legacy.WithDescription(description))
 
 	// Create the tool
-	tool := mcp.NewTool(toolName,
+	legacyTool := legacy.NewTool(toolName,
 		toolInputSchemaProperties...,
 	)
+	tool := legacyToolToSDK(legacyTool)
 
 	// Create circuit breaker for this function
 	circuitBreaker := NewCircuitBreaker(5, 60*time.Second)
@@ -445,54 +477,72 @@ func (m *PulsarFunctionManager) convertFunctionToTool(fn *utils.FunctionConfig) 
 }
 
 // handleToolCall returns a handler function for a specific function tool
-func (m *PulsarFunctionManager) handleToolCall(fnTool *FunctionTool) func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		// Get the circuit breaker
-		m.mutex.RLock()
-		cb, exists := m.circuitBreakers[fnTool.Name]
-		m.mutex.RUnlock()
-
-		if !exists {
-			cb = NewCircuitBreaker(5, 60*time.Second)
-			m.mutex.Lock()
-			m.circuitBreakers[fnTool.Name] = cb
-			m.mutex.Unlock()
+func (m *PulsarFunctionManager) handleToolCall(fnTool *FunctionTool) func(ctx context.Context, request *sdk.CallToolRequest) (*sdk.CallToolResult, error) {
+	return func(ctx context.Context, request *sdk.CallToolRequest) (*sdk.CallToolResult, error) {
+		args := map[string]interface{}{}
+		if request != nil && len(request.Params.Arguments) > 0 {
+			if err := json.Unmarshal(request.Params.Arguments, &args); err != nil {
+				return legacyResultToSDK(legacy.NewToolResultError(fmt.Sprintf("Failed to parse arguments: %v", err))), nil
+			}
 		}
 
-		// Check if the circuit breaker allows the request
-		if !cb.AllowRequest() {
-			return mcp.NewToolResultError(fmt.Sprintf("Circuit breaker is open for function %s. Too many failures, please try again later.", fnTool.Name)), nil
-		}
-
-		// Create function invoker
-		invoker := NewFunctionInvoker(m)
-
-		// Create context with timeout
-		timeoutCtx, cancel := context.WithTimeout(ctx, m.defaultTimeout)
-		defer cancel()
-
-		// Register call
-		m.mutex.Lock()
-		m.callInProgressMap[fnTool.Name] = cancel
-		m.mutex.Unlock()
-		defer func() {
-			m.mutex.Lock()
-			delete(m.callInProgressMap, fnTool.Name)
-			m.mutex.Unlock()
-		}()
-
-		// Invoke function and wait for result
-		result, err := invoker.InvokeFunctionAndWait(timeoutCtx, fnTool, request.GetArguments())
-
-		// Record success or failure
-		if err != nil {
-			cb.RecordFailure()
-		} else {
-			cb.RecordSuccess()
-		}
-
-		return result, err
+		result, err := m.invokeToolCall(ctx, fnTool, args)
+		return legacyResultToSDK(result), err
 	}
+}
+
+func (m *PulsarFunctionManager) handleLegacyToolCall(fnTool *FunctionTool) func(ctx context.Context, request legacy.CallToolRequest) (*legacy.CallToolResult, error) {
+	return func(ctx context.Context, request legacy.CallToolRequest) (*legacy.CallToolResult, error) {
+		return m.invokeToolCall(ctx, fnTool, request.GetArguments())
+	}
+}
+
+func (m *PulsarFunctionManager) invokeToolCall(ctx context.Context, fnTool *FunctionTool, args map[string]interface{}) (*legacy.CallToolResult, error) {
+	// Get the circuit breaker
+	m.mutex.RLock()
+	cb, exists := m.circuitBreakers[fnTool.Name]
+	m.mutex.RUnlock()
+
+	if !exists {
+		cb = NewCircuitBreaker(5, 60*time.Second)
+		m.mutex.Lock()
+		m.circuitBreakers[fnTool.Name] = cb
+		m.mutex.Unlock()
+	}
+
+	// Check if the circuit breaker allows the request
+	if !cb.AllowRequest() {
+		return legacy.NewToolResultError(fmt.Sprintf("Circuit breaker is open for function %s. Too many failures, please try again later.", fnTool.Name)), nil
+	}
+
+	// Create function invoker
+	invoker := NewFunctionInvoker(m)
+
+	// Create context with timeout
+	timeoutCtx, cancel := context.WithTimeout(ctx, m.defaultTimeout)
+	defer cancel()
+
+	// Register call
+	m.mutex.Lock()
+	m.callInProgressMap[fnTool.Name] = cancel
+	m.mutex.Unlock()
+	defer func() {
+		m.mutex.Lock()
+		delete(m.callInProgressMap, fnTool.Name)
+		m.mutex.Unlock()
+	}()
+
+	// Invoke function and wait for result
+	result, err := invoker.InvokeFunctionAndWait(timeoutCtx, fnTool, args)
+
+	// Record success or failure
+	if err != nil {
+		cb.RecordFailure()
+	} else {
+		cb.RecordSuccess()
+	}
+
+	return result, err
 }
 
 // getFunctionFullName returns the full name of a function
@@ -572,4 +622,159 @@ func (m *PulsarFunctionManager) GetProducer(topic string) (pulsarclient.Producer
 	m.producerCache[topic] = newProducer
 	log.Printf("Created and cached producer for topic: %s", topic)
 	return newProducer, nil
+}
+
+func legacyToolToSDK(tool legacy.Tool) *sdk.Tool {
+	inputSchema := any(tool.InputSchema)
+	if tool.RawInputSchema != nil {
+		inputSchema = tool.RawInputSchema
+	}
+
+	var outputSchema any
+	if tool.RawOutputSchema != nil {
+		outputSchema = tool.RawOutputSchema
+	} else if tool.OutputSchema.Type != "" {
+		outputSchema = tool.OutputSchema
+	}
+
+	return &sdk.Tool{
+		Name:         tool.Name,
+		Description:  tool.Description,
+		InputSchema:  inputSchema,
+		OutputSchema: outputSchema,
+		Annotations:  legacyAnnotationsToSDK(tool.Annotations),
+	}
+}
+
+func legacyAnnotationsToSDK(annotations legacy.ToolAnnotation) *sdk.ToolAnnotations {
+	if annotations.Title == "" &&
+		annotations.ReadOnlyHint == nil &&
+		annotations.DestructiveHint == nil &&
+		annotations.IdempotentHint == nil &&
+		annotations.OpenWorldHint == nil {
+		return nil
+	}
+
+	converted := &sdk.ToolAnnotations{
+		Title: annotations.Title,
+	}
+	if annotations.ReadOnlyHint != nil {
+		converted.ReadOnlyHint = *annotations.ReadOnlyHint
+	}
+	if annotations.DestructiveHint != nil {
+		converted.DestructiveHint = annotations.DestructiveHint
+	}
+	if annotations.IdempotentHint != nil {
+		converted.IdempotentHint = *annotations.IdempotentHint
+	}
+	if annotations.OpenWorldHint != nil {
+		converted.OpenWorldHint = annotations.OpenWorldHint
+	}
+	return converted
+}
+
+func sdkToolToLegacy(tool *sdk.Tool) legacy.Tool {
+	if tool == nil {
+		return legacy.Tool{}
+	}
+
+	legacyTool := legacy.NewTool(tool.Name)
+	legacyTool.Description = tool.Description
+	applyLegacyInputSchema(&legacyTool, tool.InputSchema)
+	applyLegacyOutputSchema(&legacyTool, tool.OutputSchema)
+
+	if tool.Annotations != nil {
+		legacyTool.Annotations = legacy.ToolAnnotation{
+			Title:           tool.Annotations.Title,
+			ReadOnlyHint:    boolPtr(tool.Annotations.ReadOnlyHint),
+			DestructiveHint: tool.Annotations.DestructiveHint,
+			IdempotentHint:  boolPtr(tool.Annotations.IdempotentHint),
+			OpenWorldHint:   tool.Annotations.OpenWorldHint,
+		}
+	}
+
+	return legacyTool
+}
+
+func applyLegacyInputSchema(tool *legacy.Tool, schema any) {
+	if tool == nil || schema == nil {
+		return
+	}
+
+	switch value := schema.(type) {
+	case legacy.ToolInputSchema:
+		tool.InputSchema = value
+	case *legacy.ToolInputSchema:
+		tool.InputSchema = *value
+	case json.RawMessage:
+		tool.RawInputSchema = value
+		tool.InputSchema = legacy.ToolInputSchema{}
+	case []byte:
+		tool.RawInputSchema = json.RawMessage(value)
+		tool.InputSchema = legacy.ToolInputSchema{}
+	default:
+		raw, err := json.Marshal(schema)
+		if err == nil {
+			tool.RawInputSchema = raw
+			tool.InputSchema = legacy.ToolInputSchema{}
+		}
+	}
+}
+
+func applyLegacyOutputSchema(tool *legacy.Tool, schema any) {
+	if tool == nil || schema == nil {
+		return
+	}
+
+	switch value := schema.(type) {
+	case legacy.ToolOutputSchema:
+		tool.OutputSchema = value
+	case *legacy.ToolOutputSchema:
+		tool.OutputSchema = *value
+	case json.RawMessage:
+		tool.RawOutputSchema = value
+		tool.OutputSchema = legacy.ToolOutputSchema{}
+	case []byte:
+		tool.RawOutputSchema = json.RawMessage(value)
+		tool.OutputSchema = legacy.ToolOutputSchema{}
+	default:
+		raw, err := json.Marshal(schema)
+		if err == nil {
+			tool.RawOutputSchema = raw
+			tool.OutputSchema = legacy.ToolOutputSchema{}
+		}
+	}
+}
+
+func legacyResultToSDK(result *legacy.CallToolResult) *sdk.CallToolResult {
+	if result == nil {
+		return nil
+	}
+
+	converted := &sdk.CallToolResult{
+		StructuredContent: result.StructuredContent,
+		IsError:           result.IsError,
+	}
+
+	if len(result.Content) == 0 {
+		return converted
+	}
+
+	converted.Content = make([]sdk.Content, 0, len(result.Content))
+	for _, content := range result.Content {
+		switch value := content.(type) {
+		case legacy.TextContent:
+			converted.Content = append(converted.Content, &sdk.TextContent{Text: value.Text})
+		case *legacy.TextContent:
+			converted.Content = append(converted.Content, &sdk.TextContent{Text: value.Text})
+		default:
+			converted.Content = append(converted.Content, &sdk.TextContent{Text: fmt.Sprintf("%v", value)})
+		}
+	}
+
+	return converted
+}
+
+func boolPtr(value bool) *bool {
+	return &value
 }

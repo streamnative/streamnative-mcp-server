@@ -21,8 +21,8 @@ import (
 
 	"github.com/apache/pulsar-client-go/pulsar"
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	legacyserver "github.com/mark3labs/mcp-go/server"
+	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 )
 
@@ -38,7 +38,8 @@ type PulsarFunctionManager struct {
 	pollInterval        time.Duration
 	stopCh              chan struct{}
 	callInProgressMap   map[string]context.CancelFunc
-	mcpServer           *server.MCPServer
+	mcpServer           *sdk.Server
+	legacyServer        *legacyserver.MCPServer
 	readOnly            bool
 	defaultTimeout      time.Duration
 	circuitBreakers     map[string]*CircuitBreaker
@@ -56,7 +57,7 @@ type FunctionTool struct {
 	OutputSchema       *SchemaInfo
 	InputTopic         string
 	OutputTopic        string
-	Tool               mcp.Tool
+	Tool               *sdk.Tool
 	SchemaFetchSuccess bool
 }
 
@@ -88,7 +89,7 @@ const (
 )
 
 // ClusterErrorHandler handles cluster errors for Pulsar function managers.
-type ClusterErrorHandler func(*PulsarFunctionManager, error)
+type ClusterErrorHandler func(context.Context, *PulsarFunctionManager, error)
 
 // ManagerOptions configures PulsarFunctionManager behavior.
 type ManagerOptions struct {
