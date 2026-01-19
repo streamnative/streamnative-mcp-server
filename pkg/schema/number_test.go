@@ -15,14 +15,12 @@
 package schema
 
 import (
-	"encoding/json"
 	"fmt"
 	"math"
 	"testing"
 
 	"github.com/apache/pulsar-client-go/pulsar"
 	cliutils "github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
-	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -40,56 +38,55 @@ func TestNewNumberConverter(t *testing.T) {
 	assert.Equal(t, "payload", converter.ParamName)
 }
 
-func TestNumberConverter_ToMCPToolInputSchemaProperties(t *testing.T) {
+func TestNumberConverter_ToToolInputSchema(t *testing.T) {
 	converter := NewNumberConverter()
 	tests := []struct {
 		name             string
 		schemaInfo       *cliutils.SchemaInfo // This is schema.SchemaInfo which has Type as string
-		expectedProps    []mcp.ToolOption
+		expectedSchema   string
 		expectError      bool
 		expectedErrorMsg string
 	}{
 		{
 			name: "INT8 type",
 			// newNumberSchemaInfo now correctly sets schemaInfo.Type as string (e.g., "INT8")
-			schemaInfo:    newNumberSchemaInfo(pulsar.INT8),
-			expectedProps: []mcp.ToolOption{mcp.WithNumber("payload", mcp.Description("The input schema is a INT8 schema"), mcp.Required())},
-			expectError:   false,
+			schemaInfo:     newNumberSchemaInfo(pulsar.INT8),
+			expectedSchema: mustSchemaJSON(newPayloadSchema("payload", "The input schema is a INT8 schema", "number")),
+			expectError:    false,
 		},
 		{
-			name:          "INT16 type",
-			schemaInfo:    newNumberSchemaInfo(pulsar.INT16),
-			expectedProps: []mcp.ToolOption{mcp.WithNumber("payload", mcp.Description("The input schema is a INT16 schema"), mcp.Required())},
-			expectError:   false,
+			name:           "INT16 type",
+			schemaInfo:     newNumberSchemaInfo(pulsar.INT16),
+			expectedSchema: mustSchemaJSON(newPayloadSchema("payload", "The input schema is a INT16 schema", "number")),
+			expectError:    false,
 		},
 		{
-			name:          "INT32 type",
-			schemaInfo:    newNumberSchemaInfo(pulsar.INT32),
-			expectedProps: []mcp.ToolOption{mcp.WithNumber("payload", mcp.Description("The input schema is a INT32 schema"), mcp.Required())},
-			expectError:   false,
+			name:           "INT32 type",
+			schemaInfo:     newNumberSchemaInfo(pulsar.INT32),
+			expectedSchema: mustSchemaJSON(newPayloadSchema("payload", "The input schema is a INT32 schema", "number")),
+			expectError:    false,
 		},
 		{
-			name:          "INT64 type",
-			schemaInfo:    newNumberSchemaInfo(pulsar.INT64),
-			expectedProps: []mcp.ToolOption{mcp.WithNumber("payload", mcp.Description("The input schema is a INT64 schema"), mcp.Required())},
-			expectError:   false,
+			name:           "INT64 type",
+			schemaInfo:     newNumberSchemaInfo(pulsar.INT64),
+			expectedSchema: mustSchemaJSON(newPayloadSchema("payload", "The input schema is a INT64 schema", "number")),
+			expectError:    false,
 		},
 		{
-			name:          "FLOAT type",
-			schemaInfo:    newNumberSchemaInfo(pulsar.FLOAT),
-			expectedProps: []mcp.ToolOption{mcp.WithNumber("payload", mcp.Description("The input schema is a FLOAT schema"), mcp.Required())},
-			expectError:   false,
+			name:           "FLOAT type",
+			schemaInfo:     newNumberSchemaInfo(pulsar.FLOAT),
+			expectedSchema: mustSchemaJSON(newPayloadSchema("payload", "The input schema is a FLOAT schema", "number")),
+			expectError:    false,
 		},
 		{
-			name:          "DOUBLE type",
-			schemaInfo:    newNumberSchemaInfo(pulsar.DOUBLE),
-			expectedProps: []mcp.ToolOption{mcp.WithNumber("payload", mcp.Description("The input schema is a DOUBLE schema"), mcp.Required())},
-			expectError:   false,
+			name:           "DOUBLE type",
+			schemaInfo:     newNumberSchemaInfo(pulsar.DOUBLE),
+			expectedSchema: mustSchemaJSON(newPayloadSchema("payload", "The input schema is a DOUBLE schema", "number")),
+			expectError:    false,
 		},
 		{
 			name:             "Unsupported type STRING",
 			schemaInfo:       newNumberSchemaInfo(pulsar.STRING),
-			expectedProps:    nil,
 			expectError:      true,
 			expectedErrorMsg: "expected INT8, INT16, INT32, INT64, FLOAT, or DOUBLE schema, got STRING",
 		},
@@ -97,20 +94,16 @@ func TestNumberConverter_ToMCPToolInputSchemaProperties(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			props, err := converter.ToMCPToolInputSchemaProperties(tt.schemaInfo)
+			schema, err := converter.ToToolInputSchema(tt.schemaInfo)
 			if tt.expectError {
 				assert.Error(t, err)
 				if tt.expectedErrorMsg != "" {
 					assert.Contains(t, err.Error(), tt.expectedErrorMsg)
 				}
-				assert.Nil(t, props)
+				assert.Nil(t, schema)
 			} else {
 				assert.NoError(t, err)
-				var expectedTool = mcp.NewTool("test", tt.expectedProps...)
-				var actualTool = mcp.NewTool("test", props...)
-				expectedToolSchemaJSON, _ := json.Marshal(expectedTool.InputSchema)
-				actualToolSchemaJSON, _ := json.Marshal(actualTool.InputSchema)
-				assert.JSONEq(t, string(expectedToolSchemaJSON), string(actualToolSchemaJSON), "ToolOptions mismatch")
+				assert.JSONEq(t, tt.expectedSchema, mustSchemaJSON(schema))
 			}
 		})
 	}

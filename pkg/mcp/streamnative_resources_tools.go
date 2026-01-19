@@ -18,56 +18,61 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"slices"
 	"strings"
 
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	context2 "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 	sncloud "github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserver"
 )
 
+type streamnativeResourcesApplyInput struct {
+	JSONContent string `json:"json_content" jsonschema:"The JSON content to apply."`
+	DryRun      bool   `json:"dry_run,omitempty" jsonschema:"If true, only validate the resource without applying it to the server."`
+}
+
+type streamnativeResourcesDeleteInput struct {
+	Name string `json:"name" jsonschema:"The name of the resource to delete."`
+	Type string `json:"type" jsonschema:"The type of the resource to delete, it can be PulsarInstance or PulsarCluster."`
+}
+
 // StreamNativeAddResourceTools adds StreamNative resources tools
-func StreamNativeAddResourceTools(s *server.MCPServer, readOnly bool, features []string) {
+func StreamNativeAddResourceTools(s *sdk.Server, readOnly bool, features []string) {
 	if !slices.Contains(features, string(FeatureStreamNativeCloud)) && !slices.Contains(features, string(FeatureAll)) {
 		return
 	}
 
 	if !readOnly {
-		// Add Apply tool
-		applyTool := mcp.NewTool("sncloud_resources_apply",
-			mcp.WithDescription("Apply StreamNative Cloud resources from JSON definitions. This tool allows you to apply (create or update) StreamNative Cloud resources such as PulsarInstances and PulsarClusters using JSON definitions. Please give feedback to USER if the resource is applied with error, and ask USER to check the resource definition."),
-			mcp.WithString("json_content", mcp.Required(),
-				mcp.Description("The JSON content to apply."),
-			),
-			mcp.WithBoolean("dry_run",
-				mcp.Description("If true, only validate the resource without applying it to the server."),
-				mcp.DefaultBool(false),
-			),
-			mcp.WithToolAnnotation(mcp.ToolAnnotation{
-				Title: "Apply StreamNative Cloud Resources",
-			}),
-		)
-		// Add delete tool
-		deleteTool := mcp.NewTool("sncloud_resources_delete",
-			mcp.WithDescription("Delete StreamNative Cloud resources. This tool allows you to delete StreamNative Cloud resources such as PulsarInstances and PulsarClusters."),
-			mcp.WithString("name", mcp.Required(),
-				mcp.Description("The name of the resource to delete."),
-			),
-			mcp.WithString("type", mcp.Required(),
-				mcp.Description("The type of the resource to delete, it can be PulsarInstance or PulsarCluster."),
-				mcp.Enum("PulsarInstance", "PulsarCluster"),
-			),
-			mcp.WithToolAnnotation(mcp.ToolAnnotation{
+		applySchema, err := InputSchema[streamnativeResourcesApplyInput]()
+		if err != nil {
+			return
+		}
+		setSchemaPropertyDefault(applySchema, "dry_run", false)
+		applyTool := &sdk.Tool{
+			Name:        "sncloud_resources_apply",
+			Description: "Apply StreamNative Cloud resources from JSON definitions. This tool allows you to apply (create or update) StreamNative Cloud resources such as PulsarInstances and PulsarClusters using JSON definitions. Please give feedback to USER if the resource is applied with error, and ask USER to check the resource definition.",
+			InputSchema: applySchema,
+			Annotations: &sdk.ToolAnnotations{Title: "Apply StreamNative Cloud Resources"},
+		}
+
+		deleteSchema, err := InputSchema[streamnativeResourcesDeleteInput]()
+		if err != nil {
+			return
+		}
+		setSchemaPropertyEnum(deleteSchema, "type", []string{"PulsarInstance", "PulsarCluster"})
+		deleteTool := &sdk.Tool{
+			Name:        "sncloud_resources_delete",
+			Description: "Delete StreamNative Cloud resources. This tool allows you to delete StreamNative Cloud resources such as PulsarInstances and PulsarClusters.",
+			InputSchema: deleteSchema,
+			Annotations: &sdk.ToolAnnotations{
 				Title:           "Delete StreamNative Cloud Resources",
-				DestructiveHint: &[]bool{true}[0],
-			}),
-		)
-		s.AddTool(applyTool, handleStreamNativeResourcesApply)
-		s.AddTool(deleteTool, handleStreamNativeResourcesDelete)
+				DestructiveHint: boolPtr(true),
+			},
+		}
+
+		sdk.AddTool(s, applyTool, handleStreamNativeResourcesApply)
+		sdk.AddTool(s, deleteTool, handleStreamNativeResourcesDelete)
 	}
 }
 
@@ -87,49 +92,44 @@ type Metadata struct {
 }
 
 // handleStreamNativeResourcesApply handles the streaming_cloud_resources_apply tool
-func handleStreamNativeResourcesApply(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleStreamNativeResourcesApply(ctx context.Context, _ *sdk.CallToolRequest, input streamnativeResourcesApplyInput) (*sdk.CallToolResult, any, error) {
 	// Get necessary parameters
 	snConfig := common.GetOptions(ctx)
 	organization := snConfig.Organization
 	if organization == "" {
-		return mcp.NewToolResultError("No organization is set. Please set the organization using the appropriate context tool."), nil
+		return nil, nil, fmt.Errorf("no organization is set. please set the organization using the appropriate context tool")
 	}
 
-	// Get YAML content
-	jsonContent, err := request.RequireString("json_content")
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get json_content: %v", err)), nil
+	// Get JSON content
+	jsonContent := strings.TrimSpace(input.JSONContent)
+	if jsonContent == "" {
+		return nil, nil, fmt.Errorf("no valid resources found in the provided JSON")
 	}
 
 	// Get dry_run flag
-	dryRun := request.GetBool("dry_run", false)
+	dryRun := input.DryRun
 
 	// Get API client from session
 	session := context2.GetSNCloudSession(ctx)
 	if session == nil {
-		return nil, fmt.Errorf("failed to get StreamNative Cloud session")
+		return nil, nil, fmt.Errorf("failed to get StreamNative Cloud session")
 	}
 
 	apiClient, err := session.GetAPIClient()
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get API client: %v", err)), nil
+		return nil, nil, fmt.Errorf("failed to get API client: %v", err)
 	}
 
-	jsonContent = strings.TrimSpace(jsonContent)
-	if jsonContent == "" {
-		return mcp.NewToolResultError("No valid resources found in the provided JSON."), nil
-	}
-
-	// Parse YAML document
+	// Parse JSON document
 	var resource Resource
 	err = json.Unmarshal([]byte(jsonContent), &resource)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to parse JSON document: %v", err)), nil
+		return nil, nil, fmt.Errorf("failed to parse JSON document: %v", err)
 	}
 
 	// Check if resource is valid
 	if resource.APIVersion == "" || resource.Kind == "" {
-		return mcp.NewToolResultError("Invalid resource definition."), nil
+		return nil, nil, fmt.Errorf("invalid resource definition")
 	}
 
 	// Set namespace if not specified
@@ -140,10 +140,10 @@ func handleStreamNativeResourcesApply(ctx context.Context, request mcp.CallToolR
 	// Apply resource
 	result, err := applyResource(ctx, apiClient, resource, jsonContent, organization, dryRun)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to apply resource: %v", err)), nil
+		return nil, nil, fmt.Errorf("failed to apply resource: %v", err)
 	}
 
-	return mcp.NewToolResultText(result), nil
+	return newToolResultText(result), nil, nil
 }
 
 // applyResource applies the resource based on its type
@@ -200,55 +200,36 @@ func applyPulsarInstance(ctx context.Context, apiClient *sncloud.APIClient, json
 		}
 	}
 
-	var verb string
-
-	// Convert dryRun bool to string parameter required by API
-	dryRunStr := "All"
-
-	// Create or update based on whether resource exists
-	var bdy *http.Response
-	var err error
-	if exists {
-		verb = "updated"
-		// Make sure resourceVersion is set to support updates
-		if existingResourceVersion != nil {
-			if instance.Metadata.ResourceVersion == nil {
-				instance.Metadata.ResourceVersion = existingResourceVersion
-			}
-		}
-
-		// Use Replace method to update resource
-		request := apiClient.CloudStreamnativeIoV1alpha1Api.ReplaceCloudStreamnativeIoV1alpha1NamespacedPulsarInstance(
-			ctx, name, organization).Body(instance)
-		if dryRun {
-			request = request.DryRun(dryRunStr)
-		}
-		_, bdy, err = request.Execute()
-		defer func() { _ = bdy.Body.Close() }()
-	} else {
-		verb = "created"
-		// Create new resource
-		request := apiClient.CloudStreamnativeIoV1alpha1Api.CreateCloudStreamnativeIoV1alpha1NamespacedPulsarInstance(
-			ctx, organization).Body(instance)
-		if dryRun {
-			request = request.DryRun(dryRunStr)
-		}
-		_, bdy, err = request.Execute()
-		defer func() { _ = bdy.Body.Close() }()
-	}
-
-	if err != nil {
-		body, innerErr := io.ReadAll(bdy.Body)
-		if innerErr != nil {
-			return "", fmt.Errorf("failed to read body: %v", innerErr)
-		}
-		return "", fmt.Errorf("failed to %s PulsarInstance: %v (%s)", verb, err, string(body))
-	}
-
 	if dryRun {
-		return fmt.Sprintf("PulsarInstance %q would be %s (dry run)", name, verb), nil
+		return "Resource validation successful (dry run)", nil
 	}
-	return fmt.Sprintf("PulsarInstance %q %s", name, verb), nil
+
+	// Set resource version for update
+	if exists {
+		if instance.Metadata != nil {
+			instance.Metadata.ResourceVersion = existingResourceVersion
+		}
+
+		// Update existing instance
+		_, resp, err := apiClient.CloudStreamnativeIoV1alpha1Api.ReplaceCloudStreamnativeIoV1alpha1NamespacedPulsarInstance(ctx, name, organization).Body(instance).Execute()
+		if resp != nil {
+			defer func() { _ = resp.Body.Close() }()
+		}
+		if err != nil {
+			return "", fmt.Errorf("failed to update instance: %v", err)
+		}
+		return fmt.Sprintf("Updated PulsarInstance %s successfully", name), nil
+	}
+
+	// Create new instance
+	_, resp, err := apiClient.CloudStreamnativeIoV1alpha1Api.CreateCloudStreamnativeIoV1alpha1NamespacedPulsarInstance(ctx, organization).Body(instance).Execute()
+	if resp != nil {
+		defer func() { _ = resp.Body.Close() }()
+	}
+	if err != nil {
+		return "", fmt.Errorf("failed to create instance: %v", err)
+	}
+	return fmt.Sprintf("Created PulsarInstance %s successfully", name), nil
 }
 
 // applyPulsarCluster applies PulsarCluster resource
@@ -271,6 +252,7 @@ func applyPulsarCluster(ctx context.Context, apiClient *sncloud.APIClient, jsonC
 	if cluster.Metadata.Name != nil {
 		name = *cluster.Metadata.Name
 	}
+
 	// Check if resource already exists
 	exists := false
 	var existingResourceVersion *string
@@ -287,99 +269,95 @@ func applyPulsarCluster(ctx context.Context, apiClient *sncloud.APIClient, jsonC
 		}
 	}
 
-	var verb string
-
-	// Convert dryRun bool to string parameter required by API
-	dryRunStr := "All"
-
-	// Create or update based on whether resource exists
-	var bdy *http.Response
-	var err error
-	if exists {
-		verb = "updated"
-		// Make sure resourceVersion is set to support updates
-		if existingResourceVersion != nil {
-			if cluster.Metadata.ResourceVersion == nil {
-				cluster.Metadata.ResourceVersion = existingResourceVersion
-			}
-		}
-
-		// Use Replace method to update resource
-		request := apiClient.CloudStreamnativeIoV1alpha1Api.ReplaceCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(
-			ctx, name, organization).Body(cluster)
-		if dryRun {
-			request = request.DryRun(dryRunStr)
-		}
-
-		_, bdy, err = request.Execute()
-		defer func() { _ = bdy.Body.Close() }()
-	} else {
-		verb = "created"
-		// Create new resource
-		request := apiClient.CloudStreamnativeIoV1alpha1Api.CreateCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(
-			ctx, organization).Body(cluster)
-		if dryRun {
-			request = request.DryRun(dryRunStr)
-		}
-		_, bdy, err = request.Execute()
-		defer func() { _ = bdy.Body.Close() }()
-	}
-
-	if err != nil {
-		body, innerErr := io.ReadAll(bdy.Body)
-		if innerErr != nil {
-			return "", fmt.Errorf("failed to read body: %v", innerErr)
-		}
-		return "", fmt.Errorf("failed to %s PulsarCluster: %v (%s)", verb, err, string(body))
-	}
-
 	if dryRun {
-		return fmt.Sprintf("PulsarCluster %q would be %s (dry run)", name, verb), nil
+		return "Resource validation successful (dry run)", nil
 	}
-	return fmt.Sprintf("PulsarCluster %q %s", name, verb), nil
+
+	// Set resource version for update
+	if exists {
+		if cluster.Metadata != nil {
+			cluster.Metadata.ResourceVersion = existingResourceVersion
+		}
+
+		// Update existing cluster
+		_, resp, err := apiClient.CloudStreamnativeIoV1alpha1Api.ReplaceCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(ctx, name, organization).Body(cluster).Execute()
+		if resp != nil {
+			defer func() { _ = resp.Body.Close() }()
+		}
+		if err != nil {
+			return "", fmt.Errorf("failed to update cluster: %v", err)
+		}
+		return fmt.Sprintf("Updated PulsarCluster %s successfully", name), nil
+	}
+
+	// Create new cluster
+	_, resp, err := apiClient.CloudStreamnativeIoV1alpha1Api.CreateCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(ctx, organization).Body(cluster).Execute()
+	if resp != nil {
+		defer func() { _ = resp.Body.Close() }()
+	}
+	if err != nil {
+		return "", fmt.Errorf("failed to create cluster: %v", err)
+	}
+	return fmt.Sprintf("Created PulsarCluster %s successfully", name), nil
 }
 
 // handleStreamNativeResourcesDelete handles the streaming_cloud_resources_delete tool
-func handleStreamNativeResourcesDelete(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleStreamNativeResourcesDelete(ctx context.Context, _ *sdk.CallToolRequest, input streamnativeResourcesDeleteInput) (*sdk.CallToolResult, any, error) {
+	// Get necessary parameters
 	snConfig := common.GetOptions(ctx)
 	organization := snConfig.Organization
-
-	name, err := request.RequireString("name")
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get name: %v", err)), nil
+	if organization == "" {
+		return nil, nil, fmt.Errorf("no organization is set. please set the organization using the appropriate context tool")
 	}
 
-	resourceType, err := request.RequireString("type")
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get type: %v", err)), nil
+	name := input.Name
+	if name == "" {
+		return nil, nil, fmt.Errorf("missing required parameter 'name'")
+	}
+
+	resourceType := input.Type
+	if resourceType == "" {
+		return nil, nil, fmt.Errorf("missing required parameter 'type'")
 	}
 
 	// Get API client from session
 	session := context2.GetSNCloudSession(ctx)
 	if session == nil {
-		return nil, fmt.Errorf("failed to get StreamNative Cloud session")
+		return nil, nil, fmt.Errorf("failed to get StreamNative Cloud session")
 	}
 
 	apiClient, err := session.GetAPIClient()
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get API client: %v", err)), nil
+		return nil, nil, fmt.Errorf("failed to get API client: %v", err)
 	}
 
+	// Delete resource based on type
 	switch resourceType {
 	case "PulsarInstance":
-		//nolint:bodyclose
-		_, _, err = apiClient.CloudStreamnativeIoV1alpha1Api.DeleteCloudStreamnativeIoV1alpha1NamespacedPulsarInstance(ctx, name, organization).Execute()
+		_, resp, err := apiClient.CloudStreamnativeIoV1alpha1Api.DeleteCloudStreamnativeIoV1alpha1NamespacedPulsarInstance(ctx, name, organization).Execute()
+		if resp != nil {
+			defer func() { _ = resp.Body.Close() }()
+		}
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to delete PulsarInstance: %v", err)
+		}
 	case "PulsarCluster":
-		//nolint:bodyclose
-		_, _, err = apiClient.CloudStreamnativeIoV1alpha1Api.DeleteCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(ctx, name, organization).Execute()
+		_, resp, err := apiClient.CloudStreamnativeIoV1alpha1Api.DeleteCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(ctx, name, organization).Execute()
+		if resp != nil {
+			defer func() { _ = resp.Body.Close() }()
+		}
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to delete PulsarCluster: %v", err)
+		}
 	default:
-		return mcp.NewToolResultError(fmt.Sprintf("Unsupported resource type: %s", resourceType)), nil
+		return nil, nil, fmt.Errorf("unsupported resource type: %s", resourceType)
 	}
 
-	// the delete operation will return a V1Status object, which is not handled by the SDK
-	if err != nil && !strings.Contains(err.Error(), "json: cannot unmarshal") {
-		return mcp.NewToolResultError(fmt.Sprintf("failed to delete resource: %v", err)), nil
-	}
-
-	return mcp.NewToolResultText(fmt.Sprintf("Resource %q %s deleted", name, resourceType)), nil
+	return newToolResultText(fmt.Sprintf("Resource %q %s deleted", name, resourceType)), nil, nil
 }
+
+func boolPtr(value bool) *bool {
+	return &value
+}
+
+// applyResourceRequest sends a JSON request with the provided body

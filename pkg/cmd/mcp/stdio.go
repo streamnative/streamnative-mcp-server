@@ -22,12 +22,11 @@ import (
 	"path/filepath"
 	"syscall"
 
-	stdlog "log"
-
 	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
+	mcpctx "github.com/streamnative/streamnative-mcp-server/pkg/mcp"
 )
 
 // NewCmdMcpStdioServer builds the stdio server command.
@@ -56,16 +55,18 @@ func runStdioServer(configOpts *ServerOptions) error {
 	// Initialize logger if log file specified
 	logger, err := initLogger(configOpts.LogFile)
 	if err != nil {
-		stdlog.Fatal("Failed to initialize logger:", err)
+		return fmt.Errorf("failed to initialize logger: %w", err)
 	}
 
 	// Create a new MCP server
 	ctx = context.WithValue(ctx, common.OptionsKey, configOpts.Options)
-	stdLogger := stdlog.New(logger.Writer(), "snmcp-server", 0)
 	mcpServer, err := newMcpServer(ctx, configOpts, logger)
 	if err != nil {
 		return fmt.Errorf("failed to create MCP server: %w", err)
 	}
+	ctx = mcpctx.WithSNCloudSession(ctx, mcpServer.SNCloudSession)
+	ctx = mcpctx.WithPulsarSession(ctx, mcpServer.PulsarSession)
+	ctx = mcpctx.WithKafkaSession(ctx, mcpServer.KafkaSession)
 
 	var transport sdk.Transport = &sdk.StdioTransport{}
 	if configOpts.LogCommands {
@@ -78,7 +79,7 @@ func runStdioServer(configOpts *ServerOptions) error {
 	// Start listening for messages
 	errC := make(chan error, 1)
 	go func() {
-		errC <- mcpServer.Run(ctx, transport, stdLogger)
+		errC <- mcpServer.MCPServer.Run(ctx, transport)
 	}()
 
 	_, _ = fmt.Fprintf(os.Stderr, "StreamNative Cloud MCP Server running on stdio\n")

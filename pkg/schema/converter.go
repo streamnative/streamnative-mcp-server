@@ -18,7 +18,7 @@ import (
 	"fmt"
 
 	cliutils "github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
-	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/google/jsonschema-go/jsonschema"
 )
 
 const (
@@ -28,7 +28,7 @@ const (
 
 // Converter defines schema conversion behaviors for MCP tools.
 type Converter interface {
-	ToMCPToolInputSchemaProperties(pulsarSchemaInfo *cliutils.SchemaInfo) ([]mcp.ToolOption, error)
+	ToToolInputSchema(pulsarSchemaInfo *cliutils.SchemaInfo) (*jsonschema.Schema, error)
 
 	SerializeMCPRequestToPulsarPayload(arguments map[string]any, targetPulsarSchemaInfo *cliutils.SchemaInfo) ([]byte, error)
 
@@ -56,4 +56,17 @@ func ConverterFactory(schemaType string) (Converter, error) {
 // BaseConverter provides shared fields for schema converters.
 type BaseConverter struct {
 	ParamName string
+}
+
+func newPayloadSchema(paramName, description, schemaType string) *jsonschema.Schema {
+	return &jsonschema.Schema{
+		Type: "object",
+		Properties: map[string]*jsonschema.Schema{
+			paramName: {
+				Type:        schemaType,
+				Description: description,
+			},
+		},
+		Required: []string{paramName},
+	}
 }

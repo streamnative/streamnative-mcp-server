@@ -27,8 +27,6 @@ import (
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/rest"
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
 	"github.com/google/go-cmp/cmp"
-	legacy "github.com/mark3labs/mcp-go/mcp"
-	legacyserver "github.com/mark3labs/mcp-go/server"
 	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
@@ -55,14 +53,13 @@ var DefaultStringSchemaInfo = &SchemaInfo{
 // Server is imported directly to avoid circular dependency
 type Server struct {
 	MCPServer     *sdk.Server
-	LegacyServer  *legacyserver.MCPServer
 	KafkaSession  *kafka.Session
 	PulsarSession *pulsar.Session
 	Logger        interface{}
 }
 
 // NewPulsarFunctionManager creates a new PulsarFunctionManager
-func NewPulsarFunctionManager(snServer *Server, readOnly bool, options *ManagerOptions, sessionID string) (*PulsarFunctionManager, error) {
+func NewPulsarFunctionManager(snServer *Server, readOnly bool, options *ManagerOptions) (*PulsarFunctionManager, error) {
 	// Get Pulsar client and admin client
 	if snServer.PulsarSession == nil {
 		return nil, fmt.Errorf("pulsar session not found in context")
@@ -101,13 +98,11 @@ func NewPulsarFunctionManager(snServer *Server, readOnly bool, options *ManagerO
 		stopCh:              make(chan struct{}),
 		callInProgressMap:   make(map[string]context.CancelFunc),
 		mcpServer:           snServer.MCPServer,
-		legacyServer:        snServer.LegacyServer,
 		readOnly:            readOnly,
 		defaultTimeout:      options.DefaultTimeout,
 		circuitBreakers:     make(map[string]*CircuitBreaker),
 		tenantNamespaces:    options.TenantNamespaces,
 		strictExport:        options.StrictExport,
-		sessionID:           sessionID,
 		clusterErrorHandler: options.ClusterErrorHandler,
 	}
 
@@ -244,20 +239,6 @@ func (m *PulsarFunctionManager) addTool(fnTool *FunctionTool) {
 		sdk.AddTool(m.mcpServer, fnTool.Tool, m.handleToolCall(fnTool))
 		return
 	}
-
-	if m.legacyServer == nil {
-		return
-	}
-
-	legacyTool := sdkToolToLegacy(fnTool.Tool)
-	if m.sessionID != "" {
-		if err := m.legacyServer.AddSessionTool(m.sessionID, legacyTool, m.handleLegacyToolCall(fnTool)); err != nil {
-			log.Printf("Failed to add tool %s to session %s: %v", legacyTool.Name, m.sessionID, err)
-		}
-		return
-	}
-
-	m.legacyServer.AddTool(legacyTool, m.handleLegacyToolCall(fnTool))
 }
 
 func (m *PulsarFunctionManager) removeTool(fnTool *FunctionTool) {
@@ -269,19 +250,6 @@ func (m *PulsarFunctionManager) removeTool(fnTool *FunctionTool) {
 		m.mcpServer.RemoveTools(fnTool.Tool.Name)
 		return
 	}
-
-	if m.legacyServer == nil {
-		return
-	}
-
-	if m.sessionID != "" {
-		if err := m.legacyServer.DeleteSessionTools(m.sessionID, fnTool.Tool.Name); err != nil {
-			log.Printf("Failed to delete tool %s from session %s: %v", fnTool.Tool.Name, m.sessionID, err)
-		}
-		return
-	}
-
-	m.legacyServer.DeleteTools(fnTool.Tool.Name)
 }
 
 // getFunctionsList retrieves all functions from the specified tenants/namespaces
@@ -481,13 +449,6 @@ func (m *PulsarFunctionManager) handleToolCall(fnTool *FunctionTool) sdk.ToolHan
 	}
 }
 
-func (m *PulsarFunctionManager) handleLegacyToolCall(fnTool *FunctionTool) func(ctx context.Context, request legacy.CallToolRequest) (*legacy.CallToolResult, error) {
-	return func(ctx context.Context, request legacy.CallToolRequest) (*legacy.CallToolResult, error) {
-		result, err := m.invokeToolCall(ctx, fnTool, request.GetArguments())
-		return sdkResultToLegacy(result), err
-	}
-}
-
 func (m *PulsarFunctionManager) invokeToolCall(ctx context.Context, fnTool *FunctionTool, args map[string]interface{}) (*sdk.CallToolResult, error) {
 	// Get the circuit breaker
 	m.mutex.RLock()
@@ -613,192 +574,4 @@ func (m *PulsarFunctionManager) GetProducer(topic string) (pulsarclient.Producer
 	m.producerCache[topic] = newProducer
 	log.Printf("Created and cached producer for topic: %s", topic)
 	return newProducer, nil
-}
-
-func legacyToolToSDK(tool legacy.Tool) *sdk.Tool {
-	inputSchema := any(tool.InputSchema)
-	if tool.RawInputSchema != nil {
-		inputSchema = tool.RawInputSchema
-	}
-
-	var outputSchema any
-	if tool.RawOutputSchema != nil {
-		outputSchema = tool.RawOutputSchema
-	} else if tool.OutputSchema.Type != "" {
-		outputSchema = tool.OutputSchema
-	}
-
-	return &sdk.Tool{
-		Name:         tool.Name,
-		Description:  tool.Description,
-		InputSchema:  inputSchema,
-		OutputSchema: outputSchema,
-		Annotations:  legacyAnnotationsToSDK(tool.Annotations),
-	}
-}
-
-func legacyAnnotationsToSDK(annotations legacy.ToolAnnotation) *sdk.ToolAnnotations {
-	if annotations.Title == "" &&
-		annotations.ReadOnlyHint == nil &&
-		annotations.DestructiveHint == nil &&
-		annotations.IdempotentHint == nil &&
-		annotations.OpenWorldHint == nil {
-		return nil
-	}
-
-	converted := &sdk.ToolAnnotations{
-		Title: annotations.Title,
-	}
-	if annotations.ReadOnlyHint != nil {
-		converted.ReadOnlyHint = *annotations.ReadOnlyHint
-	}
-	if annotations.DestructiveHint != nil {
-		converted.DestructiveHint = annotations.DestructiveHint
-	}
-	if annotations.IdempotentHint != nil {
-		converted.IdempotentHint = *annotations.IdempotentHint
-	}
-	if annotations.OpenWorldHint != nil {
-		converted.OpenWorldHint = annotations.OpenWorldHint
-	}
-	return converted
-}
-
-func sdkToolToLegacy(tool *sdk.Tool) legacy.Tool {
-	if tool == nil {
-		return legacy.Tool{}
-	}
-
-	legacyTool := legacy.NewTool(tool.Name)
-	legacyTool.Description = tool.Description
-	applyLegacyInputSchema(&legacyTool, tool.InputSchema)
-	applyLegacyOutputSchema(&legacyTool, tool.OutputSchema)
-
-	if tool.Annotations != nil {
-		legacyTool.Annotations = legacy.ToolAnnotation{
-			Title:           tool.Annotations.Title,
-			ReadOnlyHint:    boolPtr(tool.Annotations.ReadOnlyHint),
-			DestructiveHint: tool.Annotations.DestructiveHint,
-			IdempotentHint:  boolPtr(tool.Annotations.IdempotentHint),
-			OpenWorldHint:   tool.Annotations.OpenWorldHint,
-		}
-	}
-
-	return legacyTool
-}
-
-func applyLegacyInputSchema(tool *legacy.Tool, schema any) {
-	if tool == nil || schema == nil {
-		return
-	}
-
-	switch value := schema.(type) {
-	case legacy.ToolInputSchema:
-		tool.InputSchema = value
-	case *legacy.ToolInputSchema:
-		tool.InputSchema = *value
-	case json.RawMessage:
-		tool.RawInputSchema = value
-		tool.InputSchema = legacy.ToolInputSchema{}
-	case []byte:
-		tool.RawInputSchema = json.RawMessage(value)
-		tool.InputSchema = legacy.ToolInputSchema{}
-	default:
-		raw, err := json.Marshal(schema)
-		if err == nil {
-			tool.RawInputSchema = raw
-			tool.InputSchema = legacy.ToolInputSchema{}
-		}
-	}
-}
-
-func applyLegacyOutputSchema(tool *legacy.Tool, schema any) {
-	if tool == nil || schema == nil {
-		return
-	}
-
-	switch value := schema.(type) {
-	case legacy.ToolOutputSchema:
-		tool.OutputSchema = value
-	case *legacy.ToolOutputSchema:
-		tool.OutputSchema = *value
-	case json.RawMessage:
-		tool.RawOutputSchema = value
-		tool.OutputSchema = legacy.ToolOutputSchema{}
-	case []byte:
-		tool.RawOutputSchema = json.RawMessage(value)
-		tool.OutputSchema = legacy.ToolOutputSchema{}
-	default:
-		raw, err := json.Marshal(schema)
-		if err == nil {
-			tool.RawOutputSchema = raw
-			tool.OutputSchema = legacy.ToolOutputSchema{}
-		}
-	}
-}
-
-func legacyResultToSDK(result *legacy.CallToolResult) *sdk.CallToolResult {
-	if result == nil {
-		return nil
-	}
-
-	converted := &sdk.CallToolResult{
-		StructuredContent: result.StructuredContent,
-		IsError:           result.IsError,
-	}
-
-	if len(result.Content) == 0 {
-		return converted
-	}
-
-	converted.Content = make([]sdk.Content, 0, len(result.Content))
-	for _, content := range result.Content {
-		switch value := content.(type) {
-		case legacy.TextContent:
-			converted.Content = append(converted.Content, &sdk.TextContent{Text: value.Text})
-		case *legacy.TextContent:
-			converted.Content = append(converted.Content, &sdk.TextContent{Text: value.Text})
-		default:
-			converted.Content = append(converted.Content, &sdk.TextContent{Text: fmt.Sprintf("%v", value)})
-		}
-	}
-
-	return converted
-}
-
-func sdkResultToLegacy(result *sdk.CallToolResult) *legacy.CallToolResult {
-	if result == nil {
-		return nil
-	}
-
-	converted := &legacy.CallToolResult{
-		StructuredContent: result.StructuredContent,
-		IsError:           result.IsError,
-	}
-
-	if len(result.Content) == 0 {
-		return converted
-	}
-
-	converted.Content = make([]legacy.Content, 0, len(result.Content))
-	for _, content := range result.Content {
-		switch value := content.(type) {
-		case *sdk.TextContent:
-			converted.Content = append(converted.Content, legacy.TextContent{
-				Type: legacy.ContentTypeText,
-				Text: value.Text,
-			})
-		default:
-			converted.Content = append(converted.Content, legacy.TextContent{
-				Type: legacy.ContentTypeText,
-				Text: fmt.Sprintf("%v", value),
-			})
-		}
-	}
-
-	return converted
-}
-
-func boolPtr(value bool) *bool {
-	return &value
 }

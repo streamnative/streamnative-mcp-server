@@ -16,17 +16,18 @@ package schema
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"strings"
 
+	"github.com/google/jsonschema-go/jsonschema"
 	"github.com/hamba/avro/v2"
-	"github.com/mark3labs/mcp-go/mcp"
 )
 
-// processAvroSchemaStringToMCPToolInput takes an AVRO schema string, parses it,
-// and converts it to MCP tool input schema properties.
-func processAvroSchemaStringToMCPToolInput(avroSchemaString string) ([]mcp.ToolOption, error) {
+// processAvroSchemaStringToToolInputSchema takes an AVRO schema string, parses it,
+// and converts it to a JSON schema for tool inputs.
+func processAvroSchemaStringToToolInputSchema(avroSchemaString string) (*jsonschema.Schema, error) {
 	schema, err := avro.Parse(avroSchemaString)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse AVRO schema: %w", err)
@@ -34,215 +35,90 @@ func processAvroSchemaStringToMCPToolInput(avroSchemaString string) ([]mcp.ToolO
 
 	recordSchema, ok := schema.(*avro.RecordSchema)
 	if !ok {
-		// If it's not a record, perhaps it's a simpler type that can't be directly mapped to tool options,
-		// or we need a different handling strategy. For now, strict record check.
 		return nil, fmt.Errorf("expected AVRO record schema at the top level, got %s", reflect.TypeOf(schema).String())
 	}
 
-	var opts []mcp.ToolOption
+	properties := make(map[string]*jsonschema.Schema)
+	required := make([]string, 0, len(recordSchema.Fields()))
+
 	for _, field := range recordSchema.Fields() {
-		fieldOption, err := avroFieldToMcpOption(field)
+		fieldSchema, isRequired, err := avroFieldToSchema(field)
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert field '%s': %w", field.Name(), err)
 		}
-		opts = append(opts, fieldOption)
+		properties[field.Name()] = fieldSchema
+		if isRequired {
+			required = append(required, field.Name())
+		}
 	}
-	return opts, nil
+
+	return &jsonschema.Schema{
+		Type:       "object",
+		Properties: properties,
+		Required:   required,
+	}, nil
 }
 
-// avroFieldToMcpOption converts a single AVRO field to an mcp.ToolOption.
-func avroFieldToMcpOption(field *avro.Field) (mcp.ToolOption, error) {
+func avroFieldToSchema(field *avro.Field) (*jsonschema.Schema, bool, error) {
 	fieldType := field.Type()
-	fieldName := field.Name()
-
-	var description string
-	if field.Doc() != "" {
-		description = field.Doc()
-	} else {
-		description = fmt.Sprintf("%s (type: %s)", fieldName, strings.ReplaceAll(fieldType.String(), "\"", "")) // Default description
+	description := field.Doc()
+	if description == "" {
+		description = fmt.Sprintf("%s (type: %s)", field.Name(), strings.ReplaceAll(fieldType.String(), "\"", ""))
 	}
 
-	isRequired := true
-	underlyingTypeForDefault := fieldType // Used to check default value against non-union type
+	props, err := avroSchemaDefinitionToMcpProperties(field.Name(), fieldType, description)
+	if err != nil {
+		return nil, false, err
+	}
+	schema, err := schemaFromMap(props)
+	if err != nil {
+		return nil, false, err
+	}
+	if field.HasDefault() {
+		applyAvroDefault(schema, field.Default())
+	}
+	return schema, isFieldRequired(fieldType), nil
+}
 
+func schemaFromMap(props map[string]any) (*jsonschema.Schema, error) {
+	raw, err := json.Marshal(props)
+	if err != nil {
+		return nil, err
+	}
+	var schema jsonschema.Schema
+	if err := json.Unmarshal(raw, &schema); err != nil {
+		return nil, err
+	}
+	return &schema, nil
+}
+
+func isFieldRequired(fieldType avro.Schema) bool {
 	if unionSchema, ok := fieldType.(*avro.UnionSchema); ok {
-		isNullAble := false
-		var nonNullTypes []avro.Schema
 		for _, t := range unionSchema.Types() {
 			if t.Type() == avro.Null {
-				isNullAble = true
-			} else {
-				nonNullTypes = append(nonNullTypes, t)
+				return false
 			}
 		}
-		isRequired = !isNullAble
-
-		// If it's a nullable union with one other type (e.g., ["null", "string"]),
-		// treat it as that other type for default value and MCP type mapping.
-		//nolint:gocritic // This is a valid use of len(nonNullTypes) == 1
-		if isNullAble && len(nonNullTypes) == 1 {
-			underlyingTypeForDefault = nonNullTypes[0]
-		} else if len(nonNullTypes) == 1 {
-			// Not nullable, but still a union with one type (should ideally not happen, but handle)
-			underlyingTypeForDefault = nonNullTypes[0]
-		} else if len(nonNullTypes) > 1 {
-			// Complex union (e.g., ["string", "int"]), for MCP, describe as string and mention union nature.
-			// Default values for complex unions are tricky with current MCP options.
-			// MCP schema might need to be a string with a description of the union.
-			props := []mcp.PropertyOption{mcp.Description(description + " (union type: " + strings.ReplaceAll(fieldType.String(), "\"", "") + ")")}
-			if isRequired {
-				props = append(props, mcp.Required())
-			}
-			// Default value for complex union is not straightforward to map to a single MCP type's default.
-			// We will skip setting mcp.Default... for complex unions for now.
-			return mcp.WithString(fieldName, props...), nil
-		}
-		// If only "null" type was in union, or empty nonNullTypes (invalid schema), this will be caught by later type switch.
 	}
+	return true
+}
 
-	var prop []mcp.PropertyOption
-	if isRequired {
-		prop = append(prop, mcp.Required())
+func applyAvroDefault(schema *jsonschema.Schema, value any) {
+	if schema == nil {
+		return
 	}
-	prop = append(prop, mcp.Description(description))
-
-	var opt mcp.ToolOption
-
-	// Use underlyingTypeForDefault for determining MCP type and handling default values
-	// This handles cases like ["null", "string"] by treating it as "string" for MCP mapping.
-	effectiveType := underlyingTypeForDefault.Type()
-
-	switch effectiveType {
-	case avro.String:
-		if field.HasDefault() {
-			if defaultVal, ok := field.Default().(string); ok {
-				prop = append(prop, mcp.DefaultString(defaultVal))
-			}
-		}
-		opt = mcp.WithString(fieldName, prop...)
-	case avro.Int, avro.Long: // MCP 'number' can represent both
-		if field.HasDefault() {
-			// Avro library parses numeric defaults as float64 for int/long/float/double from JSON representation
-			if defaultVal, ok := field.Default().(float64); ok {
-				prop = append(prop, mcp.DefaultNumber(defaultVal))
-			} else if defaultIntVal, ok := field.Default().(int); ok { // direct int
-				prop = append(prop, mcp.DefaultNumber(float64(defaultIntVal)))
-			} else if defaultInt32Val, ok := field.Default().(int32); ok {
-				prop = append(prop, mcp.DefaultNumber(float64(defaultInt32Val)))
-			} else if defaultInt64Val, ok := field.Default().(int64); ok {
-				prop = append(prop, mcp.DefaultNumber(float64(defaultInt64Val)))
-			}
-		}
-		opt = mcp.WithNumber(fieldName, prop...)
-	case avro.Float, avro.Double: // MCP 'number' can represent both
-		if field.HasDefault() {
-			if defaultVal, ok := field.Default().(float64); ok {
-				prop = append(prop, mcp.DefaultNumber(defaultVal))
-			}
-		}
-		opt = mcp.WithNumber(fieldName, prop...)
-	case avro.Boolean:
-		if field.HasDefault() {
-			if defaultVal, ok := field.Default().(bool); ok {
-				prop = append(prop, mcp.DefaultBool(defaultVal))
-			}
-		}
-		opt = mcp.WithBoolean(fieldName, prop...)
-	case avro.Bytes, avro.Fixed:
-		if field.HasDefault() {
-			if defaultVal, ok := field.Default().(string); ok {
-				prop = append(prop, mcp.DefaultString(defaultVal))
-			} else if defaultBytes, ok := field.Default().([]byte); ok {
-				prop = append(prop, mcp.DefaultString(string(defaultBytes))) // Or base64
-			}
-		}
-		// For Fixed type, add size information to description
-		if fixedSchema, ok := underlyingTypeForDefault.(*avro.FixedSchema); ok {
-			description += fmt.Sprintf(" (fixed size: %d bytes)", fixedSchema.Size())
-			prop[0] = mcp.Description(description) // Update description in prop
-		}
-		opt = mcp.WithString(fieldName, prop...) // Always use WithString for Bytes/Fixed in MCP options
-	case avro.Array:
-		arraySchema, _ := underlyingTypeForDefault.(*avro.ArraySchema) // Safe due to switch
-		itemsDef, err := avroSchemaDefinitionToMcpProperties("item", arraySchema.Items(), "Array items")
-		if err != nil {
-			return nil, fmt.Errorf("failed to convert array items for field '%s': %w", fieldName, err)
-		}
-		prop = append(prop, mcp.Items(itemsDef))
-		// Default for array is not directly supported by mcp.DefaultArray like mcp.DefaultString etc.
-		// It would require converting []any to a string representation or specific handling.
-		opt = mcp.WithArray(fieldName, prop...)
-	case avro.Map:
-		mapSchema, _ := underlyingTypeForDefault.(*avro.MapSchema) // Safe due to switch
-		// For MCP, map values are usually represented as an object where keys are arbitrary strings
-		// and all values conform to a single schema.
-		// mcp.Properties expects a map[string]any defining named properties.
-		// This is a slight mismatch. MCP's WithObject with mcp.Properties(map[string]any{"*": valuesDef})
-		// is one way, or a more flexible mcp.WithMap that takes a value schema.
-		// For now, let's assume map values translate to a generic object property definition.
-		valuesDef, err := avroSchemaDefinitionToMcpProperties("value", mapSchema.Values(), "Map values")
-		if err != nil {
-			return nil, fmt.Errorf("failed to convert map values for field '%s': %w", fieldName, err)
-		}
-		// This isn't a perfect fit for mcp.Properties which expects fixed keys.
-		// A better MCP representation for a map might be WithObject where AdditionalProperties is set.
-		// For now, we describe it as an object and the value schema applies to all its properties.
-		// A more accurate MCP representation might be needed if maps are used extensively.
-		// Let's use a single property "*" to denote the schema for all values.
-		prop = append(prop, mcp.Properties(map[string]any{"*": valuesDef}))
-		opt = mcp.WithObject(fieldName, prop...) // Representing map as a generic object.
-	case avro.Record:
-		recordSchema, _ := underlyingTypeForDefault.(*avro.RecordSchema) // Safe due to switch
-		subProps := make(map[string]any)
-		for _, subField := range recordSchema.Fields() {
-			// Recursively call avroFieldToMcpOption to get the ToolOption, then extract its schema part?
-			// No, avroSchemaDefinitionToMcpProperties is for defining schema of items/values, not named fields.
-			// We need to build the properties map for mcp.WithObject.
-			// Each subField needs its schema definition.
-			var subFieldDescription string
-			if subField.Doc() != "" {
-				subFieldDescription = subField.Doc()
-			} else {
-				subFieldDescription = fmt.Sprintf("%s (type: %s)", subField.Name(), strings.ReplaceAll(subField.Type().String(), "\"", "")) // Default description
-			}
-			subFieldDef, err := avroSchemaDefinitionToMcpProperties(subField.Name(), subField.Type(), subFieldDescription)
-			if err != nil {
-				return nil, fmt.Errorf("failed to convert sub-field '%s' of record '%s': %w", subField.Name(), fieldName, err)
-			}
-			subProps[subField.Name()] = subFieldDef
-		}
-		prop = append(prop, mcp.Properties(subProps))
-		opt = mcp.WithObject(fieldName, prop...)
-	case avro.Enum:
-		enumSchema, _ := underlyingTypeForDefault.(*avro.EnumSchema) // Safe due to switch
-		prop = append(prop, mcp.Enum(enumSchema.Symbols()...))
-		if field.HasDefault() {
-			if defaultVal, ok := field.Default().(string); ok { // Enum default is string
-				prop = append(prop, mcp.DefaultString(defaultVal))
-			}
-		}
-		opt = mcp.WithString(fieldName, prop...) // Enum is represented as string in MCP
-	case avro.Null:
-		// This case should ideally be handled by the union logic making the field not required.
-		// If a field is solely "null", it's an odd schema. For MCP, maybe a string with note.
-		// If isRequired is true here (meaning it wasn't a union with null), it's a non-optional null field.
-		// This is unusual. Let's represent as a non-required string.
-		if isRequired { // Should not happen if only type is null and handled by union logic
-			prop = []mcp.PropertyOption{mcp.Description(description + " (null type)")} // remove mcp.Required
-		} else {
-			prop = append(prop, mcp.Description(description+" (null type)"))
-		}
-		opt = mcp.WithString(fieldName, prop...) // Or handle as a special ignorable field?
-	default:
-		// For unknown or unsupported AVRO types, represent as a string in MCP with a description.
-		var defaultCaseProps []mcp.PropertyOption
-		defaultCaseProps = append(defaultCaseProps, mcp.Description(description+" (unsupported AVRO type: "+string(effectiveType)+")"))
-		if isRequired {
-			defaultCaseProps = append(defaultCaseProps, mcp.Required())
-		}
-		opt = mcp.WithString(fieldName, defaultCaseProps...)
+	if value == nil {
+		schema.Default = json.RawMessage("null")
+		return
 	}
-	return opt, nil
+	if bytesValue, ok := value.([]byte); ok {
+		value = string(bytesValue)
+	}
+	raw, err := json.Marshal(value)
+	if err != nil {
+		return
+	}
+	schema.Default = raw
 }
 
 // avroSchemaDefinitionToMcpProperties converts an AVRO schema definition (like for array items or map values)

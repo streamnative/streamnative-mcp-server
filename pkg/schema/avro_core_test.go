@@ -15,14 +15,11 @@
 package schema
 
 import (
-	"encoding/json"
 	"testing"
 
 	"github.com/hamba/avro/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/mark3labs/mcp-go/mcp"
 )
 
 // AVRO Schema Definitions for Testing
@@ -173,245 +170,325 @@ func getExpectedAvroBinary(t *testing.T, schemaStr string, data map[string]any) 
 	return bin
 }
 
-func TestProcessAvroSchemaStringToMCPToolInput(t *testing.T) {
+func TestProcessAvroSchemaStringToToolInputSchema(t *testing.T) {
 	tests := []struct {
 		name             string
 		schemaStr        string
-		expectedOptions  []mcp.ToolOption
+		expectedSchema   string
 		expectError      bool
 		expectedErrorMsg string
 	}{
 		{
 			name:      "Simple Record",
 			schemaStr: simpleRecordSchema,
-			expectedOptions: []mcp.ToolOption{
-				mcp.WithNumber("id", mcp.Description("id (type: long)"), mcp.Required()),
-				mcp.WithString("name", mcp.Description("name (type: string)"), mcp.Required()),
-			},
+			expectedSchema: mustSchemaJSON(map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"id": map[string]any{
+						"type":        "number",
+						"description": "id (type: long)",
+					},
+					"name": map[string]any{
+						"type":        "string",
+						"description": "name (type: string)",
+					},
+				},
+				"required": []string{"id", "name"},
+			}),
 			expectError: false,
 		},
 		{
 			name:      "Schema With All Primitives",
 			schemaStr: schemaWithAllPrimitives,
-			expectedOptions: []mcp.ToolOption{
-				mcp.WithBoolean("boolField", mcp.Description("boolField (type: boolean)"), mcp.Required()),
-				mcp.WithNumber("intField", mcp.Description("intField (type: int)"), mcp.Required()),
-				mcp.WithNumber("longField", mcp.Description("longField (type: long)"), mcp.Required()),
-				mcp.WithNumber("floatField", mcp.Description("floatField (type: float)"), mcp.Required()),
-				mcp.WithNumber("doubleField", mcp.Description("doubleField (type: double)"), mcp.Required()),
-				mcp.WithString("bytesField", mcp.Description("bytesField (type: bytes)"), mcp.Required()),
-				mcp.WithString("stringField", mcp.Description("stringField (type: string)"), mcp.Required()),
-			},
+			expectedSchema: mustSchemaJSON(map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"boolField": map[string]any{
+						"type":        "boolean",
+						"description": "boolField (type: boolean)",
+					},
+					"intField": map[string]any{
+						"type":        "number",
+						"description": "intField (type: int)",
+					},
+					"longField": map[string]any{
+						"type":        "number",
+						"description": "longField (type: long)",
+					},
+					"floatField": map[string]any{
+						"type":        "number",
+						"description": "floatField (type: float)",
+					},
+					"doubleField": map[string]any{
+						"type":        "number",
+						"description": "doubleField (type: double)",
+					},
+					"bytesField": map[string]any{
+						"type":        "string",
+						"description": "bytesField (type: bytes)",
+					},
+					"stringField": map[string]any{
+						"type":        "string",
+						"description": "stringField (type: string)",
+					},
+				},
+				"required": []string{"boolField", "intField", "longField", "floatField", "doubleField", "bytesField", "stringField"},
+			}),
 			expectError: false,
 		},
 		{
 			name:             "Invalid AVRO schema string",
 			schemaStr:        `{"type": "invalid"`,
-			expectedOptions:  nil,
 			expectError:      true,
 			expectedErrorMsg: "failed to parse AVRO schema",
 		},
 		{
 			name:             "Top-level non-record (string)",
 			schemaStr:        `"string"`,
-			expectedOptions:  nil,
 			expectError:      true,
 			expectedErrorMsg: "expected AVRO record schema at the top level, got *avro.PrimitiveSchema",
 		},
 		{
 			name:      "Schema With Optional Field (string)",
 			schemaStr: schemaWithOptionalField,
-			expectedOptions: []mcp.ToolOption{
-				mcp.WithString("requiredField", mcp.Description("requiredField (type: string)"), mcp.Required()),
-				mcp.WithString("optionalField", mcp.Description("optionalField (type: [null,string])")),
-			},
+			expectedSchema: mustSchemaJSON(map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"requiredField": map[string]any{
+						"type":        "string",
+						"description": "requiredField (type: string)",
+					},
+					"optionalField": map[string]any{
+						"type":        "string",
+						"description": "optionalField (type: [null,string]) (nullable)",
+						"default":     nil,
+					},
+				},
+				"required": []string{"requiredField"},
+			}),
 			expectError: false,
 		},
 		{
 			name:      "Schema With Default Value (string and int)",
 			schemaStr: schemaWithDefaultValue,
-			expectedOptions: []mcp.ToolOption{
-				mcp.WithString("name", mcp.Description("name (type: string)"), mcp.Required(), mcp.DefaultString("DefaultName")),
-				mcp.WithNumber("age", mcp.Description("age (type: int)"), mcp.Required(), mcp.DefaultNumber(30)),
-			},
+			expectedSchema: mustSchemaJSON(map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"name": map[string]any{
+						"type":        "string",
+						"description": "name (type: string)",
+						"default":     "DefaultName",
+					},
+					"age": map[string]any{
+						"type":        "number",
+						"description": "age (type: int)",
+						"default":     30,
+					},
+				},
+				"required": []string{"name", "age"},
+			}),
 			expectError: false,
 		},
 		{
 			name:      "Nested Record",
 			schemaStr: nestedRecordSchema,
-			expectedOptions: []mcp.ToolOption{
-				mcp.WithString("id", mcp.Description("id (type: string)"), mcp.Required()),
-				mcp.WithObject("inner",
-					mcp.Description("inner (type: {name:InnerRecord,type:record,fields:[{name:value,type:int},{name:description,type:[null,string]}]})"),
-					mcp.Required(),
-					mcp.Properties(map[string]any{
-						"value": map[string]any{
-							"type":        "number",
-							"description": "value (type: int)",
+			expectedSchema: mustSchemaJSON(map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"id": map[string]any{
+						"type":        "string",
+						"description": "id (type: string)",
+					},
+					"inner": map[string]any{
+						"type":        "object",
+						"description": "inner (type: {name:InnerRecord,type:record,fields:[{name:value,type:int},{name:description,type:[null,string]}]})",
+						"properties": map[string]any{
+							"value": map[string]any{
+								"type":        "number",
+								"description": "value (type: int)",
+							},
+							"description": map[string]any{
+								"type":        "string",
+								"description": "description (type: [null,string]) (nullable)",
+							},
 						},
-						"description": map[string]any{
-							"type":        "string",
-							"description": "description (type: [null,string]) (nullable)",
-						},
-					}),
-				),
-			},
+					},
+				},
+				"required": []string{"id", "inner"},
+			}),
 			expectError: false,
 		},
 		{
 			name:      "Array of Primitives (stringArray, optionalIntArray)",
 			schemaStr: arraySchemaPrimitive,
-			expectedOptions: []mcp.ToolOption{
-				mcp.WithArray("stringArray",
-					mcp.Description("stringArray (type: {type:array,items:string})"),
-					mcp.Required(),
-					mcp.Items(map[string]any{
-						"type":        "string",
-						"description": "Array items",
-					}),
-				),
-				mcp.WithArray("optionalIntArray",
-					mcp.Description("optionalIntArray (type: [null,{type:array,items:int}])"),
-					mcp.Items(map[string]any{
-						"type":        "number",
-						"description": "Array items",
-					}),
-				),
-			},
+			expectedSchema: mustSchemaJSON(map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"stringArray": map[string]any{
+						"type":        "array",
+						"description": "stringArray (type: {type:array,items:string})",
+						"items": map[string]any{
+							"type":        "string",
+							"description": "Array items",
+						},
+					},
+					"optionalIntArray": map[string]any{
+						"type":        "array",
+						"description": "optionalIntArray (type: [null,{type:array,items:int}]) (nullable)",
+						"items": map[string]any{
+							"type":        "number",
+							"description": "Array items",
+						},
+						"default": nil,
+					},
+				},
+				"required": []string{"stringArray"},
+			}),
 			expectError: false,
 		},
 		{
 			name:      "Array of Records",
 			schemaStr: arraySchemaRecord,
-			expectedOptions: []mcp.ToolOption{
-				mcp.WithArray("records",
-					mcp.Description("records (type: {type:array,items:{name:ContainedRecord,type:record,fields:[{name:key,type:string},{name:val,type:long}]}})"),
-					mcp.Required(),
-					mcp.Items(map[string]any{
-						"type":        "object",
-						"description": "Array items",
-						"properties": map[string]any{
-							"key": map[string]any{
-								"type":        "string",
-								"description": "key (type: string)",
-							},
-							"val": map[string]any{
-								"type":        "number",
-								"description": "val (type: long)",
+			expectedSchema: mustSchemaJSON(map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"records": map[string]any{
+						"type":        "array",
+						"description": "records (type: {type:array,items:{name:ContainedRecord,type:record,fields:[{name:key,type:string},{name:val,type:long}]}})",
+						"items": map[string]any{
+							"type":        "object",
+							"description": "Array items",
+							"properties": map[string]any{
+								"key": map[string]any{
+									"type":        "string",
+									"description": "key (type: string)",
+								},
+								"val": map[string]any{
+									"type":        "number",
+									"description": "val (type: long)",
+								},
 							},
 						},
-					}),
-				),
-			},
+					},
+				},
+				"required": []string{"records"},
+			}),
 			expectError: false,
 		},
 		{
 			name:      "Map of Primitives (stringMap, optionalIntMap)",
 			schemaStr: mapSchemaPrimitive,
-			expectedOptions: []mcp.ToolOption{
-				mcp.WithObject("stringMap", // Avro map becomes MCP object
-					mcp.Description("stringMap (type: {type:map,values:string})"),
-					mcp.Required(),
-					mcp.Properties(map[string]any{ // Based on avroFieldToMcpOption logic for map
-						"*": map[string]any{
-							"type":        "string",
-							"description": "Map values",
+			expectedSchema: mustSchemaJSON(map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"stringMap": map[string]any{
+						"type":        "object",
+						"description": "stringMap (type: {type:map,values:string})",
+						"properties": map[string]any{
+							"*": map[string]any{
+								"type":        "string",
+								"description": "Map values schema",
+							},
 						},
-					}),
-				),
-				mcp.WithObject("optionalIntMap",
-					mcp.Description("optionalIntMap (type: [null,{type:map,values:int}])"),
-					// Not required due to ["null", map] union
-					mcp.Properties(map[string]any{
-						"*": map[string]any{
-							"type":        "number",
-							"description": "Map values",
+					},
+					"optionalIntMap": map[string]any{
+						"type":        "object",
+						"description": "optionalIntMap (type: [null,{type:map,values:int}]) (nullable)",
+						"properties": map[string]any{
+							"*": map[string]any{
+								"type":        "number",
+								"description": "Map values schema",
+							},
 						},
-					}),
-					// Avro default: null for the union handled by not being required.
-				),
-			},
+						"default": nil,
+					},
+				},
+				"required": []string{"stringMap"},
+			}),
 			expectError: false,
 		},
 		{
 			name:      "Map of Records",
 			schemaStr: mapSchemaRecord,
-			expectedOptions: []mcp.ToolOption{
-				mcp.WithObject("recordsMap",
-					mcp.Description("recordsMap (type: {type:map,values:{name:MappedRecord,type:record,fields:[{name:id,type:int},{name:status,type:string}]}})"),
-					mcp.Required(),
-					mcp.Properties(map[string]any{
-						"*": map[string]any{
-							"type":        "object",
-							"description": "Map values",
-							"properties": map[string]any{
-								"id": map[string]any{
-									"type":        "number",
-									"description": "id (type: int)",
-								},
-								"status": map[string]any{
-									"type":        "string",
-									"description": "status (type: string)",
+			expectedSchema: mustSchemaJSON(map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"recordsMap": map[string]any{
+						"type":        "object",
+						"description": "recordsMap (type: {type:map,values:{name:MappedRecord,type:record,fields:[{name:id,type:int},{name:status,type:string}]}})",
+						"properties": map[string]any{
+							"*": map[string]any{
+								"type":        "object",
+								"description": "Map values schema",
+								"properties": map[string]any{
+									"id": map[string]any{
+										"type":        "number",
+										"description": "id (type: int)",
+									},
+									"status": map[string]any{
+										"type":        "string",
+										"description": "status (type: string)",
+									},
 								},
 							},
 						},
-					}),
-				),
-			},
+					},
+				},
+				"required": []string{"recordsMap"},
+			}),
 			expectError: false,
 		},
 		{
 			name:      "Enum Field",
 			schemaStr: enumSchema,
-			expectedOptions: []mcp.ToolOption{
-				mcp.WithString("suit",
-					mcp.Description("suit (type: {name:Suit,type:enum,symbols:[SPADES,HEARTS,DIAMONDS,CLUBS]})"),
-					mcp.Required(),
-					mcp.Enum("SPADES", "HEARTS", "DIAMONDS", "CLUBS"),
-				),
-			},
+			expectedSchema: mustSchemaJSON(map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"suit": map[string]any{
+						"type":        "string",
+						"description": "suit (type: {name:Suit,type:enum,symbols:[SPADES,HEARTS,DIAMONDS,CLUBS]})",
+						"enum":        []string{"SPADES", "HEARTS", "DIAMONDS", "CLUBS"},
+					},
+				},
+				"required": []string{"suit"},
+			}),
 			expectError: false,
 		},
 		{
 			name:      "Simple Union Field (stringOrInt)",
 			schemaStr: unionSchemaSimple,
-			expectedOptions: []mcp.ToolOption{
-				// Based on avroFieldToMcpOption, a complex union ["string", "int"] becomes mcp.WithString
-				// with a description indicating it's a union. It's marked as required by default.
-				mcp.WithString("stringOrInt",
-					mcp.Description("stringOrInt (type: [string,int]) (union type: [string,int])"),
-					mcp.Required(),
-				),
-				// For ["null", "string", "int"], it's also a complex union but not required.
-				mcp.WithString("nullableStringOrInt",
-					mcp.Description("nullableStringOrInt (type: [null,string,int]) (union type: [null,string,int])"),
-					// Not mcp.Required() due to presence of "null" in union.
-					// Default is Avro null, so no mcp.DefaultString is added.
-				),
-			},
+			expectedSchema: mustSchemaJSON(map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"stringOrInt": map[string]any{
+						"type":        "string",
+						"description": "stringOrInt (type: [string,int]) (union type: [string,int])",
+					},
+					"nullableStringOrInt": map[string]any{
+						"type":        "string",
+						"description": "nullableStringOrInt (type: [null,string,int]) (union type: [null,string,int])",
+						"default":     nil,
+					},
+				},
+				"required": []string{"stringOrInt"},
+			}),
 			expectError: false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			opts, err := processAvroSchemaStringToMCPToolInput(tt.schemaStr)
+			schema, err := processAvroSchemaStringToToolInputSchema(tt.schemaStr)
 
 			if tt.expectError {
 				assert.Error(t, err)
 				if tt.expectedErrorMsg != "" {
 					assert.Contains(t, err.Error(), tt.expectedErrorMsg)
 				}
-				assert.Nil(t, opts)
+				assert.Nil(t, schema)
 			} else {
 				assert.NoError(t, err)
-				require.Equal(t, len(tt.expectedOptions), len(opts), "Number of options should match")
-				var actualTool, expectedTool mcp.Tool
-				actualTool = mcp.NewTool("test", opts...)
-				expectedTool = mcp.NewTool("test", tt.expectedOptions...)
-				actualToolInputSchemaJSON, _ := json.Marshal(actualTool.InputSchema)
-				expectedToolInputSchemaJSON, _ := json.Marshal(expectedTool.InputSchema)
-				assert.JSONEq(t, string(expectedToolInputSchemaJSON), string(actualToolInputSchemaJSON), "ToolOption did not produce the same property configuration. Expected: %+v, Got: %+v", expectedTool, actualTool)
+				assert.JSONEq(t, tt.expectedSchema, mustSchemaJSON(schema))
 			}
 		})
 	}

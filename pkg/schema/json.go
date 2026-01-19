@@ -19,7 +19,7 @@ import (
 	"fmt"
 
 	cliutils "github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
-	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/google/jsonschema-go/jsonschema"
 )
 
 // JSONConverter handles the conversion for Pulsar JSON schemas.
@@ -34,16 +34,16 @@ func NewJSONConverter() *JSONConverter {
 	return &JSONConverter{}
 }
 
-// ToMCPToolInputSchemaProperties converts the Pulsar JSON SchemaInfo (which is AVRO based)
-// to MCP tool input schema properties.
-func (c *JSONConverter) ToMCPToolInputSchemaProperties(schemaInfo *cliutils.SchemaInfo) ([]mcp.ToolOption, error) {
+// ToToolInputSchema converts the Pulsar JSON SchemaInfo (which is AVRO based)
+// to a JSON schema for tool inputs.
+func (c *JSONConverter) ToToolInputSchema(schemaInfo *cliutils.SchemaInfo) (*jsonschema.Schema, error) {
 	if schemaInfo.Type != "JSON" {
 		// Assuming GetSchemaType will be available from somewhere in the package (e.g. converter.go)
 		return nil, fmt.Errorf("expected JSON schema, got %s", schemaInfo.Type)
 	}
 	// The schemaInfo.Schema for JSON type is the AVRO schema string definition.
 	// Delegate to the core AVRO processing function from avro_core.go.
-	return processAvroSchemaStringToMCPToolInput(string(schemaInfo.Schema))
+	return processAvroSchemaStringToToolInputSchema(string(schemaInfo.Schema))
 }
 
 // SerializeMCPRequestToPulsarPayload validates arguments against the underlying AVRO schema definition

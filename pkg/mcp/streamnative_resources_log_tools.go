@@ -26,58 +26,48 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	context2 "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
 
 // FunctionConnectorList lists supported log components.
 var FunctionConnectorList = []string{"sink", "source", "function", "kafka-connect"}
 
+type streamnativeLogsInput struct {
+	Component         string `json:"component" jsonschema:"The component to get logs from, including sink, source, function, kafka-connect"`
+	Name              string `json:"name" jsonschema:"The name of the resource to get logs from."`
+	Tenant            string `json:"tenant,omitempty" jsonschema:"The pulsar tenant of the resource to get logs from. This is required for pulsar functions, pulsar source connectors, pulsar sink connectors. For kafka connect connectors, this is optional, and the default value is 'public'."`
+	Namespace         string `json:"namespace,omitempty" jsonschema:"The pulsar namespace of the resource to get logs from. This is required for pulsar functions, pulsar source connectors, pulsar sink connectors. For kafka connect connectors, this is optional, and the default value is 'default'."`
+	Size              string `json:"size,omitempty" jsonschema:"String format of the number of lines to get from the logs, e.g. 10, 100, etc. (default: 20)"`
+	ReplicaID         int    `json:"replica_id,omitempty" jsonschema:"The replica index of the resource to get logs from, this is used for multiple replicas of running pulsar functions, pulsar source connectors, pulsar sink connectors, and kafka connect connectors. The value should be a positive integer (like 0, 1, 2, etc.), and the default value is -1, which means all replicas."`
+	Timestamp         string `json:"timestamp,omitempty" jsonschema:"Start timestamp of logs, for example: 1662430984225"`
+	Since             string `json:"since,omitempty" jsonschema:"Since time of logs, numbers end with s|m|h, for example one hour ago: 1h"`
+	PreviousContainer bool   `json:"previous_container,omitempty" jsonschema:"Return previous terminated container logs, defaults to false."`
+}
+
 // StreamNativeAddLogTools adds log tools
-func StreamNativeAddLogTools(s *server.MCPServer, _ bool, features []string) {
+func StreamNativeAddLogTools(s *sdk.Server, _ bool, features []string) {
 	if !slices.Contains(features, string(FeatureStreamNativeCloud)) && !slices.Contains(features, string(FeatureAll)) {
 		return
 	}
 
-	logTool := mcp.NewTool("sncloud_logs",
-		mcp.WithDescription("Display the logs of resources in StreamNative Cloud, including pulsar functions, pulsar source connectors, pulsar sink connectors, and kafka connect connectors logs running along with PulsarInstance and PulsarCluster."+
-			"This tool is used to help you debug the issues of resources in StreamNative Cloud. You can use `sncloud_context_use_cluster` to change the context to a specific cluster first, then use this tool to get the logs of resources in the cluster. This tool is suggested to be used with 'pulsar_admin_functions', 'pulsar_admin_sinks', 'pulsar_admin_sources', and 'kafka_admin_connect'"),
-		mcp.WithString("component", mcp.Required(),
-			mcp.Description("The component to get logs from, including "+strings.Join(FunctionConnectorList, ", ")),
-			mcp.Enum(FunctionConnectorList...),
-		),
-		mcp.WithString("name", mcp.Required(),
-			mcp.Description("The name of the resource to get logs from."),
-		),
-		mcp.WithString("tenant", mcp.Required(),
-			mcp.Description("The pulsar tenant of the resource to get logs from. This is required for pulsar functions, pulsar source connectors, pulsar sink connectors. For kafka connect connectors, this is optional, and the default value is 'public'."),
-			mcp.DefaultString("public"),
-		),
-		mcp.WithString("namespace", mcp.Required(),
-			mcp.Description("The pulsar namespace of the resource to get logs from. This is required for pulsar functions, pulsar source connectors, pulsar sink connectors. For kafka connect connectors, this is optional, and the default value is 'default'."),
-			mcp.DefaultString("default"),
-		),
-		mcp.WithString("size",
-			mcp.Description("String format of the number of lines to get from the logs, e.g. 10, 100, etc. (default: 20)"),
-			mcp.DefaultString("20"),
-		),
-		mcp.WithNumber("replica_id",
-			mcp.Description("The replica index of the resource to get logs from, this is used for multiple replicas of running pulsar functions, pulsar source connectors, pulsar sink connectors, and kafka connect connectors. The value should be a positive integer (like 0, 1, 2, etc.), and the default value is -1, which means all replicas."),
-			mcp.DefaultNumber(-1),
-		),
-		mcp.WithString("timestamp",
-			mcp.Description("Start timestamp of logs, for example: 1662430984225"),
-		),
-		mcp.WithString("since",
-			mcp.Description("Since time of logs, numbers end with s|m|h, for example one hour ago: 1h"),
-		),
-		mcp.WithBoolean("previous_container",
-			mcp.Description("Return previous terminated container logs, defaults to false."),
-			mcp.DefaultBool(false),
-		),
-	)
-	s.AddTool(logTool, handleStreamNativeResourcesLog)
+	inputSchema, err := InputSchema[streamnativeLogsInput]()
+	if err != nil {
+		return
+	}
+	setSchemaPropertyEnum(inputSchema, "component", FunctionConnectorList)
+	setSchemaPropertyDefault(inputSchema, "tenant", "public")
+	setSchemaPropertyDefault(inputSchema, "namespace", "default")
+	setSchemaPropertyDefault(inputSchema, "size", "20")
+	setSchemaPropertyDefault(inputSchema, "replica_id", -1)
+	setSchemaPropertyDefault(inputSchema, "previous_container", false)
+
+	logTool := &sdk.Tool{
+		Name:        "sncloud_logs",
+		Description: "Display the logs of resources in StreamNative Cloud, including pulsar functions, pulsar source connectors, pulsar sink connectors, and kafka connect connectors logs running along with PulsarInstance and PulsarCluster. This tool is used to help you debug the issues of resources in StreamNative Cloud. You can use `sncloud_context_use_cluster` to change the context to a specific cluster first, then use this tool to get the logs of resources in the cluster. This tool is suggested to be used with 'pulsar_admin_functions', 'pulsar_admin_sinks', 'pulsar_admin_sources', and 'kafka_admin_connect'",
+		InputSchema: inputSchema,
+	}
+	sdk.AddTool(s, logTool, handleStreamNativeResourcesLog)
 }
 
 // LogOptions captures parameters for StreamNative log queries.
@@ -112,43 +102,52 @@ type LogContent struct {
 	Record   int64  `json:"record"`
 }
 
-func handleStreamNativeResourcesLog(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func handleStreamNativeResourcesLog(ctx context.Context, _ *sdk.CallToolRequest, input streamnativeLogsInput) (*sdk.CallToolResult, any, error) {
 	// Get log client from session
 	session := context2.GetSNCloudSession(ctx)
 	if session == nil {
-		return nil, fmt.Errorf("failed to get StreamNative Cloud session")
+		return nil, nil, fmt.Errorf("failed to get StreamNative Cloud session")
 	}
 	instance, cluster, organization := session.Ctx.PulsarInstance, session.Ctx.PulsarCluster, session.Ctx.Organization
 	if instance == "" || cluster == "" || organization == "" {
-		return mcp.NewToolResultError("No context is set, please use `sncloud_context_use_cluster` to set the context first."), nil
+		return nil, nil, fmt.Errorf("no context is set, please use `sncloud_context_use_cluster` to set the context first")
 	}
 
 	// Extract required parameters with validation
-	component, err := request.RequireString("component")
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get component: %v", err)), nil
+	component := input.Component
+	if component == "" {
+		return nil, nil, fmt.Errorf("missing required parameter 'component'")
 	}
 
-	name, err := request.RequireString("name")
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get name: %v", err)), nil
+	name := input.Name
+	if name == "" {
+		return nil, nil, fmt.Errorf("missing required parameter 'name'")
 	}
 
-	tenant := request.GetString("tenant", "public")
+	tenant := input.Tenant
+	if tenant == "" {
+		tenant = "public"
+	}
 
-	namespace := request.GetString("namespace", "default")
+	namespace := input.Namespace
+	if namespace == "" {
+		namespace = "default"
+	}
 
-	size := request.GetString("size", "20")
+	size := input.Size
+	if size == "" {
+		size = "20"
+	}
 
-	replicaID := request.GetInt("replica_id", -1)
+	replicaID := input.ReplicaID
 	if replicaID == 0 {
 		replicaID = -1
 	}
 
-	timestampStr := request.GetString("timestamp", "")
-	sinceStr := request.GetString("since", "")
+	timestampStr := input.Timestamp
+	sinceStr := input.Since
 
-	previousContainer := request.GetBool("previous_container", false)
+	previousContainer := input.PreviousContainer
 
 	if sinceStr != "" {
 		sinceStr = "-" + sinceStr
@@ -183,93 +182,93 @@ func handleStreamNativeResourcesLog(ctx context.Context, request mcp.CallToolReq
 
 	client, err := session.GetLogClient()
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get logging client: %v", err)), nil
+		return nil, nil, fmt.Errorf("failed to get logging client: %v", err)
 	}
 
 	results := []string{}
 	results, err = logOptions.getLogs(client, 0, 0, results)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get logs: %v", err)), nil
+		return nil, nil, fmt.Errorf("failed to get logs: %v", err)
 	}
 
 	if len(results) == 0 {
-		return mcp.NewToolResultText("No logs found"), nil
+		return newToolResultText("No logs found"), nil, nil
 	}
 
-	return mcp.NewToolResultText(strings.Join(results, "\n")), nil
+	return newToolResultText(strings.Join(results, "\n")), nil, nil
 }
 
-func (o *LogOptions) getLogs(client *http.Client, position int64,
-	record int64, results []string) ([]string, error) {
-	var err error
-	logBrowseMode := "next"
-	if o.Previous {
-		logBrowseMode = "previous"
-	}
-	url := fmt.Sprintf("%s/v1alpha1/logs?"+
-		"organization=%s"+
-		"&instance=%s"+
-		"&cluster=%s"+
-		"&component=%s"+
-		"&name=%s"+
-		"&pulsar_tenant=%s"+
-		"&pulsar_namespace=%s"+
-		"&size=%s"+
-		"&log_browse_mode=%s"+
-		"&timestamp=%s"+
-		"&next_position=%d"+
-		"&next_record=%d"+
-		"&replica_id=%d",
-		o.ServiceURL,
-		o.Organization,
-		o.Instance,
-		o.Cluster,
-		o.Component,
-		o.Name,
-		o.PulsarTenant,
-		o.PulsarNamespace,
-		o.Size,
-		logBrowseMode,
-		o.Timestamp,
-		position,
-		record,
-		o.replicaID,
-	)
-
-	req, err := http.NewRequest("GET", url, nil)
+// Helper function to send HTTP GET request to fetch logs
+func (opts *LogOptions) sendLogRequest(client *http.Client, offset int, _ int) (*http.Response, error) {
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, opts.ServiceURL, nil)
 	if err != nil {
-		return results, fmt.Errorf("failed to create request: %v", err)
+		return nil, err
 	}
 
-	resp, err := client.Do(req)
-	if err != nil {
-		return results, fmt.Errorf("failed to request logs (%s): %v", url, err)
+	// Set query parameters
+	query := req.URL.Query()
+	query.Add("organization", opts.Organization)
+	query.Add("instance", opts.Instance)
+	query.Add("cluster", opts.Cluster)
+	query.Add("component", opts.Component)
+	query.Add("name", opts.Name)
+	query.Add("namespace", opts.PulsarNamespace)
+	query.Add("tenant", opts.PulsarTenant)
+	query.Add("size", opts.Size)
+	query.Add("offset", strconv.Itoa(offset))
+	query.Add("follow", "false")
+	if opts.replicaID != -1 {
+		query.Add("replica_id", strconv.Itoa(opts.replicaID))
 	}
-	defer func() { _ = resp.Body.Close() }()
+	if opts.Since != "" {
+		query.Add("since", opts.Since)
+	}
+	if opts.Timestamp != "" {
+		query.Add("timestamp", opts.Timestamp)
+	}
+	if opts.Previous {
+		query.Add("previous_container", "true")
+	}
+	req.URL.RawQuery = query.Encode()
+
+	// Send request
+	return client.Do(req)
+}
+
+// getLogs fetches logs from StreamNative log API.
+func (opts *LogOptions) getLogs(client *http.Client, offset int, lastRecord int, results []string) ([]string, error) {
+	response, err := opts.sendLogRequest(client, offset, lastRecord)
+	if err != nil {
+		return nil, fmt.Errorf("failed to send request: %w", err)
+	}
+	defer func() {
+		_ = response.Body.Close()
+	}()
+
+	if response.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("received non-200 response: %d", response.StatusCode)
+	}
+
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
+	}
 
 	var logResult LogResult
-	var body []byte
-	body, err = io.ReadAll(resp.Body)
-	if err != nil {
-		return results, fmt.Errorf("failed to read response body: %v", err)
-	}
-	err = json.Unmarshal(body, &logResult)
-	if err != nil {
-		return results, fmt.Errorf("failed to decode logs (%s): %v", url, err)
+	if err := json.Unmarshal(body, &logResult); err != nil {
+		return nil, fmt.Errorf("failed to parse response body: %w", err)
 	}
 
-	nextPosition := position
-	nextRecord := record
+	// Process logs
 	for _, log := range logResult.Data {
 		results = append(results, log.Message)
-		nextPosition = log.Position
-		nextRecord = log.Record
-	}
-	if o.Timestamp == "" {
-		o.Timestamp = strconv.FormatInt(nextPosition, 10)
-		return o.getLogs(
-			client, nextPosition, nextRecord, results)
+		offset++
+		lastRecord = int(log.Record)
 	}
 
-	return results, err
+	if offset < logResult.Total {
+		return opts.getLogs(client, offset, lastRecord, results)
+	}
+
+	return results, nil
 }

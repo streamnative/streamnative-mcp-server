@@ -20,7 +20,7 @@ import (
 	// "reflect" // No longer needed here
 
 	cliutils "github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
-	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/google/jsonschema-go/jsonschema"
 )
 
 // AvroConverter converts AVRO schemas to MCP tool definitions and payloads.
@@ -33,12 +33,12 @@ func NewAvroConverter() *AvroConverter {
 	return &AvroConverter{}
 }
 
-// ToMCPToolInputSchemaProperties converts AVRO schema info into MCP tool options.
-func (c *AvroConverter) ToMCPToolInputSchemaProperties(schemaInfo *cliutils.SchemaInfo) ([]mcp.ToolOption, error) {
+// ToToolInputSchema converts AVRO schema info into a JSON schema.
+func (c *AvroConverter) ToToolInputSchema(schemaInfo *cliutils.SchemaInfo) (*jsonschema.Schema, error) {
 	if schemaInfo.Type != "AVRO" {
 		return nil, fmt.Errorf("expected AVRO schema, got %s", schemaInfo.Type)
 	}
-	return processAvroSchemaStringToMCPToolInput(string(schemaInfo.Schema))
+	return processAvroSchemaStringToToolInputSchema(string(schemaInfo.Schema))
 }
 
 // SerializeMCPRequestToPulsarPayload serializes MCP arguments into an AVRO payload.

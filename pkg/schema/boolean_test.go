@@ -20,7 +20,6 @@ import (
 	"testing"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
-	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -38,47 +37,41 @@ func TestNewBooleanConverter(t *testing.T) {
 	assert.Equal(t, ParamName, converter.ParamName, "ParamName should be initialized to the package constant")
 }
 
-func TestBooleanConverter_ToMCPToolInputSchemaProperties(t *testing.T) {
+func TestBooleanConverter_ToToolInputSchema(t *testing.T) {
 	converter := NewBooleanConverter()
 
 	tests := []struct {
 		name       string
 		schemaInfo *utils.SchemaInfo
-		wantOpts   []mcp.ToolOption
+		wantSchema string
 		wantErr    bool
 	}{
 		{
 			name:       "Valid BOOLEAN schema",
 			schemaInfo: newBoolSchemaInfo("BOOLEAN"),
-			wantOpts: []mcp.ToolOption{
-				mcp.WithBoolean(ParamName, mcp.Description(fmt.Sprintf("The input schema is a %s schema", "BOOLEAN")), mcp.Required()),
-			},
-			wantErr: false,
+			wantSchema: mustSchemaJSON(newPayloadSchema(ParamName, fmt.Sprintf("The input schema is a %s schema", "BOOLEAN"), "boolean")),
+			wantErr:    false,
 		},
 		{
 			name:       "Invalid schema type (STRING)",
 			schemaInfo: newBoolSchemaInfo("STRING"),
-			wantOpts:   nil,
 			wantErr:    true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotOpts, err := converter.ToMCPToolInputSchemaProperties(tt.schemaInfo)
+			gotSchema, err := converter.ToToolInputSchema(tt.schemaInfo)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ToMCPToolInputSchemaProperties() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("ToToolInputSchema() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			var expectedTool, actualTool mcp.Tool
-			expectedTool = mcp.NewTool("test", tt.wantOpts...)
-			actualTool = mcp.NewTool("test", gotOpts...)
-			expectedToolSchemaJSON, _ := json.Marshal(expectedTool.InputSchema)
-			actualToolSchemaJSON, _ := json.Marshal(actualTool.InputSchema)
-			assert.JSONEq(t, string(expectedToolSchemaJSON), string(actualToolSchemaJSON))
-			if tt.wantErr && err != nil {
-				assert.Contains(t, err.Error(), "expected BOOLEAN schema, got")
+			if tt.wantErr {
+				assert.Nil(t, gotSchema)
+				return
 			}
+			assert.NotNil(t, gotSchema)
+			assert.JSONEq(t, tt.wantSchema, mustSchemaJSON(gotSchema))
 		})
 	}
 }
@@ -167,15 +160,15 @@ func TestBooleanConverter_SerializeMCPRequestToPulsarPayload(t *testing.T) {
 			args:       map[string]any{},
 			want:       nil,
 			wantErr:    true,
-			errContain: "arguments validation failed", // Outer error message from SerializeMCPRequestToPulsarPayload
+			errContain: "arguments validation failed",
 		},
 		{
 			name:       "Validation error (e.g., wrong schema type during ValidateArguments)",
-			schemaInfo: newBoolSchemaInfo("STRING"), // Invalid schema type for this converter
+			schemaInfo: newBoolSchemaInfo("STRING"),
 			args:       map[string]any{ParamName: true},
 			want:       nil,
 			wantErr:    true,
-			errContain: "arguments validation failed", // Outer error message from SerializeMCPRequestToPulsarPayload
+			errContain: "arguments validation failed",
 		},
 	}
 
@@ -194,4 +187,10 @@ func TestBooleanConverter_SerializeMCPRequestToPulsarPayload(t *testing.T) {
 	}
 }
 
-// Future test functions will be added here.
+func mustSchemaJSON(schema any) string {
+	data, err := json.Marshal(schema)
+	if err != nil {
+		return ""
+	}
+	return string(data)
+}

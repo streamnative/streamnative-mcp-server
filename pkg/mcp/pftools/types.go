@@ -21,7 +21,6 @@ import (
 
 	"github.com/apache/pulsar-client-go/pulsar"
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
-	legacyserver "github.com/mark3labs/mcp-go/server"
 	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 )
@@ -39,13 +38,11 @@ type PulsarFunctionManager struct {
 	stopCh              chan struct{}
 	callInProgressMap   map[string]context.CancelFunc
 	mcpServer           *sdk.Server
-	legacyServer        *legacyserver.MCPServer
 	readOnly            bool
 	defaultTimeout      time.Duration
 	circuitBreakers     map[string]*CircuitBreaker
 	tenantNamespaces    []string
 	strictExport        bool
-	sessionID           string
 	clusterErrorHandler ClusterErrorHandler
 }
 

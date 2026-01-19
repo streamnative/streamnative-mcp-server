@@ -16,23 +16,30 @@ package mcp
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
 	"path"
+	"sync"
 	"syscall"
 	"time"
 
-	stdlog "log"
-
-	"github.com/mark3labs/mcp-go/server"
+	"github.com/google/uuid"
+	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	mcpctx "github.com/streamnative/streamnative-mcp-server/pkg/mcp"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/session"
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
+)
+
+const (
+	jsonrpcVersion        = "2.0"
+	jsonrpcInvalidRequest = -32600
+	jsonrpcInvalidParams  = -32602
 )
 
 // NewCmdMcpSseServer builds the SSE server command.
@@ -66,7 +73,7 @@ func runSseServer(configOpts *ServerOptions) error {
 	// 2. Initialize logger if log file specified
 	logger, err := initLogger(configOpts.LogFile)
 	if err != nil {
-		stdlog.Fatal("Failed to initialize logger:", err)
+		return fmt.Errorf("failed to initialize logger: %w", err)
 	}
 
 	// 3. Create a new MCP server
@@ -90,8 +97,7 @@ func runSseServer(configOpts *ServerOptions) error {
 	}
 
 	// add Pulsar Functions as MCP tools
-	// SSE is not support session-based tools, so we pass an fixed sessionId
-	mcpServer.PulsarFunctionManagedMcpTools(configOpts.ReadOnly, configOpts.Features, "FIXED_SESSION_ID")
+	mcpServer.PulsarFunctionManagedMcpTools(configOpts.ReadOnly, configOpts.Features)
 
 	// Create Pulsar session manager for multi-session support (only for external Pulsar mode)
 	var pulsarSessionManager *session.PulsarSessionManager
@@ -122,8 +128,9 @@ func runSseServer(configOpts *ServerOptions) error {
 		Handler:           mux,
 		ReadHeaderTimeout: 10 * time.Second, // Prevent Slowloris attacks
 	}
-	sseContextFunc := func(ctx context.Context, r *http.Request) context.Context {
-		c := context.WithValue(ctx, common.OptionsKey, configOpts.Options)
+
+	sessionContext := func(r *http.Request) context.Context {
+		c := context.WithValue(r.Context(), common.OptionsKey, configOpts.Options)
 		c = mcpctx.WithKafkaSession(c, mcpServer.KafkaSession)
 		c = mcpctx.WithSNCloudSession(c, mcpServer.SNCloudSession)
 
@@ -131,15 +138,18 @@ func runSseServer(configOpts *ServerOptions) error {
 		if pulsarSessionManager != nil {
 			token := session.ExtractBearerToken(r)
 			// Token is already validated in auth middleware, this should always succeed
-			if pulsarSession, err := pulsarSessionManager.GetOrCreateSession(ctx, token); err == nil {
+			pulsarSession, err := pulsarSessionManager.GetOrCreateSession(c, token)
+			if err != nil {
+				// Should not happen since middleware validates token first
+				if logger != nil {
+					logger.WithError(err).Error("Unexpected auth error after middleware validation")
+				}
+				// Don't set PulsarSession - tool handlers will fail gracefully with "session not found"
+			} else {
 				c = mcpctx.WithPulsarSession(c, pulsarSession)
 				if token != "" {
 					c = session.WithUserTokenHash(c, pulsarSessionManager.HashTokenForLog(token))
 				}
-			} else {
-				// Should not happen since middleware validates token first
-				logger.WithError(err).Error("Unexpected auth error after middleware validation")
-				// Don't set PulsarSession - tool handlers will fail gracefully with "session not found"
 			}
 		} else {
 			c = mcpctx.WithPulsarSession(c, mcpServer.PulsarSession)
@@ -147,16 +157,12 @@ func runSseServer(configOpts *ServerOptions) error {
 
 		return c
 	}
-	sseServer := server.NewSSEServer(
-		mcpServer.MCPServer,
-		server.WithHTTPServer(httpServer),
-		server.WithStaticBasePath(configOpts.HTTPPath),
-		server.WithSSEContextFunc(sseContextFunc),
-	)
+
+	sessions := newSSESessionStore()
 
 	// 4. Expose the full SSE URL to the user
-	ssePath := sseServer.CompleteSsePath()
-	msgPath := sseServer.CompleteMessagePath()
+	ssePath := joinHTTPPath(configOpts.HTTPPath, "sse")
+	msgPath := joinHTTPPath(configOpts.HTTPPath, "message")
 	fmt.Fprintf(os.Stderr, "StreamNative Cloud MCP Server listening on http://%s%s\n",
 		configOpts.HTTPAddr, ssePath)
 
@@ -178,7 +184,9 @@ func runSseServer(configOpts *ServerOptions) error {
 				}
 				// Pre-validate token by attempting to get/create session
 				if _, err := pulsarSessionManager.GetOrCreateSession(r.Context(), token); err != nil {
-					logger.WithError(err).Warn("Authentication failed")
+					if logger != nil {
+						logger.WithError(err).Warn("Authentication failed")
+					}
 					w.Header().Set("Content-Type", "application/json")
 					http.Error(w, `{"error":"authentication failed"}`, http.StatusUnauthorized)
 					return
@@ -186,18 +194,93 @@ func runSseServer(configOpts *ServerOptions) error {
 				next.ServeHTTP(w, r)
 			})
 		}
-		logger.Info("SSE server started with authentication middleware")
+		if logger != nil {
+			logger.Info("SSE server started with authentication middleware")
+		}
 	}
 
-	mux.Handle(ssePath, authMiddleware(sseServer.SSEHandler()))
-	mux.Handle(msgPath, authMiddleware(sseServer.MessageHandler()))
+	sseHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
+		w.Header().Set("Content-Type", "text/event-stream")
+		w.Header().Set("Cache-Control", "no-cache")
+		w.Header().Set("Connection", "keep-alive")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+
+		if _, ok := w.(http.Flusher); !ok {
+			http.Error(w, "Streaming unsupported", http.StatusInternalServerError)
+			return
+		}
+
+		sessionID := uuid.NewString()
+		endpoint := fmt.Sprintf("%s?sessionid=%s", msgPath, sessionID)
+		transport := &sdk.SSEServerTransport{
+			Endpoint: endpoint,
+			Response: w,
+		}
+
+		sessionTransport := &sseSessionTransport{transport: transport, sessionID: sessionID}
+		serverSession, err := mcpServer.MCPServer.Connect(sessionContext(r), sessionTransport, nil)
+		if err != nil {
+			http.Error(w, "Failed to start SSE transport", http.StatusInternalServerError)
+			return
+		}
+
+		state := &sseSessionState{sessionID: sessionID, transport: transport, session: serverSession}
+		sessions.Store(sessionID, state)
+		defer sessions.Delete(sessionID)
+		defer func() {
+			_ = serverSession.Close()
+		}()
+
+		waitCh := make(chan struct{})
+		go func() {
+			_ = serverSession.Wait()
+			close(waitCh)
+		}()
+
+		select {
+		case <-r.Context().Done():
+		case <-waitCh:
+		}
+	})
+
+	messageHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			writeJSONRPCError(w, jsonrpcInvalidRequest, "Method not allowed")
+			return
+		}
+
+		sessionID := r.URL.Query().Get("sessionId")
+		if sessionID == "" {
+			sessionID = r.URL.Query().Get("sessionid")
+		}
+		if sessionID == "" {
+			writeJSONRPCError(w, jsonrpcInvalidParams, "Missing sessionId")
+			return
+		}
+
+		state, ok := sessions.Load(sessionID)
+		if !ok || state.transport == nil {
+			writeJSONRPCError(w, jsonrpcInvalidParams, "Invalid session ID")
+			return
+		}
+
+		state.transport.ServeHTTP(w, r)
+	})
+
+	mux.Handle(ssePath, authMiddleware(sseHandler))
+	mux.Handle(msgPath, authMiddleware(messageHandler))
 	mux.HandleFunc(healthPath, healthHandler("ok"))
 	mux.HandleFunc(readyPath, healthHandler("ready"))
 
 	// 5. Run the HTTP listener in a goroutine
 	errCh := make(chan error, 1)
 	go func() {
-		if err := sseServer.Start(configOpts.HTTPAddr); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			errCh <- err // bubble up real crashes
 		}
 	}()
@@ -224,8 +307,10 @@ func runSseServer(configOpts *ServerOptions) error {
 		pulsarSessionManager.Stop()
 	}
 
-	// Shut down the SSE server (also closes the underlying HTTP server)
-	if err := sseServer.Shutdown(shCtx); err != nil {
+	sessions.CloseAll()
+
+	// Shut down the HTTP server (also closes the SSE connections)
+	if err := httpServer.Shutdown(shCtx); err != nil {
 		if !errors.Is(err, http.ErrServerClosed) {
 			logger.Errorf("Error shutting down SSE server: %v", err)
 		}
@@ -243,27 +328,112 @@ func runSseServer(configOpts *ServerOptions) error {
 	return nil
 }
 
+type sseSessionState struct {
+	sessionID string
+	transport *sdk.SSEServerTransport
+	session   *sdk.ServerSession
+}
+
+type sseSessionStore struct {
+	sessions sync.Map
+}
+
+func newSSESessionStore() *sseSessionStore {
+	return &sseSessionStore{}
+}
+
+func (s *sseSessionStore) Store(id string, state *sseSessionState) {
+	s.sessions.Store(id, state)
+}
+
+func (s *sseSessionStore) Load(id string) (*sseSessionState, bool) {
+	value, ok := s.sessions.Load(id)
+	if !ok {
+		return nil, false
+	}
+	state, ok := value.(*sseSessionState)
+	return state, ok
+}
+
+func (s *sseSessionStore) Delete(id string) {
+	s.sessions.Delete(id)
+}
+
+func (s *sseSessionStore) CloseAll() {
+	s.sessions.Range(func(key, value any) bool {
+		if state, ok := value.(*sseSessionState); ok {
+			if state.session != nil {
+				_ = state.session.Close()
+			}
+		}
+		s.sessions.Delete(key)
+		return true
+	})
+}
+
+type sseSessionTransport struct {
+	transport *sdk.SSEServerTransport
+	sessionID string
+}
+
+func (t *sseSessionTransport) Connect(ctx context.Context) (sdk.Connection, error) {
+	conn, err := t.transport.Connect(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return &sseSessionConn{Connection: conn, sessionID: t.sessionID}, nil
+}
+
+type sseSessionConn struct {
+	sdk.Connection
+	sessionID string
+}
+
+func (c *sseSessionConn) SessionID() string {
+	return c.sessionID
+}
+
+type jsonrpcErrorResponse struct {
+	JSONRPC string             `json:"jsonrpc"`
+	ID      any                `json:"id"`
+	Error   jsonrpcErrorDetail `json:"error"`
+}
+
+type jsonrpcErrorDetail struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
+func writeJSONRPCError(w http.ResponseWriter, code int, message string) {
+	response := jsonrpcErrorResponse{
+		JSONRPC: jsonrpcVersion,
+		ID:      nil,
+		Error: jsonrpcErrorDetail{
+			Code:    code,
+			Message: message,
+		},
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusBadRequest)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, fmt.Sprintf("Failed to encode response: %v", err), http.StatusInternalServerError)
+	}
+}
+
 func joinHTTPPath(basePath string, suffix string) string {
-	joined := path.Join(basePath, suffix)
-	if joined == "" {
+	cleanedBase := path.Clean(basePath)
+	if cleanedBase == "." || cleanedBase == "/" {
+		cleanedBase = ""
+	}
+	if cleanedBase == "" {
 		return "/" + suffix
 	}
-	if joined[0] != '/' {
-		return "/" + joined
-	}
-	return joined
+	return cleanedBase + "/" + suffix
 }
 
 func healthHandler(status string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet && r.Method != http.MethodHead {
-			w.WriteHeader(http.StatusMethodNotAllowed)
-			return
-		}
-		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	return func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		if r.Method == http.MethodGet {
-			_, _ = w.Write([]byte(status))
-		}
+		_, _ = w.Write([]byte(status))
 	}
 }

@@ -19,7 +19,6 @@ import (
 	stdlog "log"
 	"os"
 
-	"github.com/mark3labs/mcp-go/server"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/streamnative/streamnative-mcp-server/pkg/config"
@@ -28,10 +27,9 @@ import (
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
-func newMcpServer(_ context.Context, configOpts *ServerOptions, logrusLogger *logrus.Logger) (*mcp.LegacyServer, error) {
+func newMcpServer(_ context.Context, configOpts *ServerOptions, logrusLogger *logrus.Logger) (*mcp.Server, error) {
 	snConfig := configOpts.LoadConfigOrDie()
-	var s *server.MCPServer
-	var mcpServer *mcp.LegacyServer
+	var mcpServer *mcp.Server
 	switch {
 	case snConfig.KeyFile != "":
 		{
@@ -46,16 +44,16 @@ func newMcpServer(_ context.Context, configOpts *ServerOptions, logrusLogger *lo
 			if err != nil {
 				return nil, errors.Wrap(err, "failed to create StreamNative Cloud session")
 			}
-			mcpServer = mcp.NewLegacyServer("streamnative-mcp-server", "0.0.1", logrusLogger, server.WithInstructions(mcp.GetStreamNativeCloudServerInstructions(userName, snConfig)))
+			mcpServer = mcp.NewServer("streamnative-mcp-server", "0.0.1", logrusLogger, mcp.WithInstructions(mcp.GetStreamNativeCloudServerInstructions(userName, snConfig)))
 			mcpServer.SNCloudSession = session
 
-			s = mcpServer.MCPServer
-			mcp.RegisterPrompts(s)
+			serverInstance := mcpServer.MCPServer
+			mcp.RegisterPrompts(serverInstance)
 			// Skip context tools if pulsar instance and cluster are provided via CLI
 			skipContextTools := snConfig.Context.PulsarInstance != "" && snConfig.Context.PulsarCluster != ""
-			mcp.RegisterContextTools(s, configOpts.Features, skipContextTools)
-			mcp.StreamNativeAddLogTools(s, configOpts.ReadOnly, configOpts.Features)
-			mcp.StreamNativeAddResourceTools(s, configOpts.ReadOnly, configOpts.Features)
+			mcp.RegisterContextTools(serverInstance, configOpts.Features, skipContextTools)
+			mcp.StreamNativeAddLogTools(serverInstance, configOpts.ReadOnly, configOpts.Features)
+			mcp.StreamNativeAddResourceTools(serverInstance, configOpts.ReadOnly, configOpts.Features)
 		}
 	case snConfig.ExternalKafka != nil:
 		{
@@ -77,14 +75,12 @@ func newMcpServer(_ context.Context, configOpts *ServerOptions, logrusLogger *lo
 			if err != nil {
 				return nil, errors.Wrap(err, "failed to set external Kafka context")
 			}
-			mcpServer = mcp.NewLegacyServer("streamnative-mcp-server", "0.0.1", logrusLogger, server.WithInstructions(mcp.GetExternalKafkaServerInstructions(snConfig.ExternalKafka.BootstrapServers)))
+			mcpServer = mcp.NewServer("streamnative-mcp-server", "0.0.1", logrusLogger, mcp.WithInstructions(mcp.GetExternalKafkaServerInstructions(snConfig.ExternalKafka.BootstrapServers)))
 			mcpServer.KafkaSession = ksession
-			s = mcpServer.MCPServer
 		}
 	case snConfig.ExternalPulsar != nil:
 		{
-			mcpServer = mcp.NewLegacyServer("streamnative-mcp-server", "0.0.1", logrusLogger, server.WithInstructions(mcp.GetExternalPulsarServerInstructions(snConfig.ExternalPulsar.WebServiceURL)))
-			s = mcpServer.MCPServer
+			mcpServer = mcp.NewServer("streamnative-mcp-server", "0.0.1", logrusLogger, mcp.WithInstructions(mcp.GetExternalPulsarServerInstructions(snConfig.ExternalPulsar.WebServiceURL)))
 
 			// Only create global PulsarSession if not in multi-session mode
 			// In multi-session mode, each request must provide its own token via Authorization header
@@ -114,32 +110,33 @@ func newMcpServer(_ context.Context, configOpts *ServerOptions, logrusLogger *lo
 		}
 	}
 
-	mcp.PulsarAdminAddBrokersToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
-	mcp.PulsarAdminAddBrokerStatsToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
-	mcp.PulsarAdminAddClusterToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
-	mcp.PulsarAdminAddFunctionsWorkerToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
-	mcp.PulsarAdminAddNamespaceToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
-	mcp.PulsarAdminAddNamespacePolicyToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
-	mcp.PulsarAdminAddNsIsolationPolicyToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
-	mcp.PulsarAdminAddPackagesToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
-	mcp.PulsarAdminAddResourceQuotasToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
-	mcp.PulsarAdminAddSchemasToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
-	mcp.PulsarAdminAddSubscriptionToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
-	mcp.PulsarAdminAddTenantToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
-	mcp.PulsarAdminAddTopicToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
-	mcp.PulsarAdminAddSinksToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
-	mcp.PulsarAdminAddFunctionsToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
-	mcp.PulsarAdminAddSourcesToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
-	mcp.PulsarAdminAddTopicPolicyToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
-	mcp.PulsarClientAddConsumerToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
-	mcp.PulsarClientAddProducerToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
+	serverInstance := mcpServer.MCPServer
+	mcp.PulsarAdminAddBrokersTools(serverInstance, configOpts.ReadOnly, configOpts.Features)
+	mcp.PulsarAdminAddBrokerStatsTools(serverInstance, configOpts.ReadOnly, configOpts.Features)
+	mcp.PulsarAdminAddClusterTools(serverInstance, configOpts.ReadOnly, configOpts.Features)
+	mcp.PulsarAdminAddFunctionsWorkerTools(serverInstance, configOpts.ReadOnly, configOpts.Features)
+	mcp.PulsarAdminAddNamespaceTools(serverInstance, configOpts.ReadOnly, configOpts.Features)
+	mcp.PulsarAdminAddNamespacePolicyTools(serverInstance, configOpts.ReadOnly, configOpts.Features)
+	mcp.PulsarAdminAddNsIsolationPolicyTools(serverInstance, configOpts.ReadOnly, configOpts.Features)
+	mcp.PulsarAdminAddPackagesTools(serverInstance, configOpts.ReadOnly, configOpts.Features)
+	mcp.PulsarAdminAddResourceQuotasTools(serverInstance, configOpts.ReadOnly, configOpts.Features)
+	mcp.PulsarAdminAddSchemasTools(serverInstance, configOpts.ReadOnly, configOpts.Features)
+	mcp.PulsarAdminAddSubscriptionTools(serverInstance, configOpts.ReadOnly, configOpts.Features)
+	mcp.PulsarAdminAddTenantTools(serverInstance, configOpts.ReadOnly, configOpts.Features)
+	mcp.PulsarAdminAddTopicTools(serverInstance, configOpts.ReadOnly, configOpts.Features)
+	mcp.PulsarAdminAddSinksTools(serverInstance, configOpts.ReadOnly, configOpts.Features)
+	mcp.PulsarAdminAddFunctionsTools(serverInstance, configOpts.ReadOnly, configOpts.Features)
+	mcp.PulsarAdminAddSourcesTools(serverInstance, configOpts.ReadOnly, configOpts.Features)
+	mcp.PulsarAdminAddTopicPolicyTools(serverInstance, configOpts.ReadOnly, configOpts.Features)
+	mcp.PulsarClientAddConsumerTools(serverInstance, configOpts.ReadOnly, configOpts.Features)
+	mcp.PulsarClientAddProducerTools(serverInstance, configOpts.ReadOnly, configOpts.Features)
 
-	mcp.KafkaAdminAddTopicToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
-	mcp.KafkaAdminAddPartitionsToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
-	mcp.KafkaAdminAddGroupsToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
-	mcp.KafkaAdminAddSchemaRegistryToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
-	mcp.KafkaAdminAddKafkaConnectToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
-	mcp.KafkaClientAddConsumeToolsLegacy(s, configOpts.ReadOnly, logrusLogger, configOpts.Features)
-	mcp.KafkaClientAddProduceToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
+	mcp.KafkaAdminAddTopicTools(serverInstance, configOpts.ReadOnly, configOpts.Features)
+	mcp.KafkaAdminAddPartitionsTools(serverInstance, configOpts.ReadOnly, configOpts.Features)
+	mcp.KafkaAdminAddGroupsTools(serverInstance, configOpts.ReadOnly, configOpts.Features)
+	mcp.KafkaAdminAddSchemaRegistryTools(serverInstance, configOpts.ReadOnly, configOpts.Features)
+	mcp.KafkaAdminAddKafkaConnectTools(serverInstance, configOpts.ReadOnly, configOpts.Features)
+	mcp.KafkaClientAddConsumeTools(serverInstance, configOpts.ReadOnly, configOpts.Features)
+	mcp.KafkaClientAddProduceTools(serverInstance, configOpts.ReadOnly, configOpts.Features)
 	return mcpServer, nil
 }

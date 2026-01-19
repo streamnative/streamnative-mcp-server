@@ -18,6 +18,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/google/jsonschema-go/jsonschema"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -59,9 +60,9 @@ func TestKafkaConnectToolBuilder_BuildTools_Success(t *testing.T) {
 	require.Len(t, tools, 1)
 
 	tool := tools[0]
-	assert.NotNil(t, tool.Tool)
-	assert.NotNil(t, tool.Handler)
-	assert.Equal(t, "kafka_admin_connect", tool.Tool.Name)
+	assert.NotNil(t, tool)
+	assert.NotNil(t, tool.Definition())
+	assert.Equal(t, "kafka_admin_connect", tool.Definition().Name)
 }
 
 func TestKafkaConnectToolBuilder_BuildTools_WithAllFeature(t *testing.T) {
@@ -78,7 +79,7 @@ func TestKafkaConnectToolBuilder_BuildTools_WithAllFeature(t *testing.T) {
 	require.Len(t, tools, 1)
 
 	tool := tools[0]
-	assert.Equal(t, "kafka_admin_connect", tool.Tool.Name)
+	assert.Equal(t, "kafka_admin_connect", tool.Definition().Name)
 }
 
 func TestKafkaConnectToolBuilder_BuildTools_WithAllKafkaFeature(t *testing.T) {
@@ -165,18 +166,39 @@ func TestKafkaConnectToolBuilder_Validate_NoRequiredFeatures(t *testing.T) {
 func TestKafkaConnectToolBuilder_ToolDefinition(t *testing.T) {
 	builder := NewKafkaConnectToolBuilder()
 
-	tool := builder.buildKafkaConnectTool()
-
+	tool, err := builder.buildKafkaConnectTool()
+	require.NoError(t, err)
 	assert.Equal(t, "kafka_admin_connect", tool.Name)
 	assert.NotEmpty(t, tool.Description)
 
-	// Verify required parameters
-	assert.Contains(t, tool.InputSchema.Properties, "resource")
-	assert.Contains(t, tool.InputSchema.Properties, "operation")
-	assert.Contains(t, tool.InputSchema.Properties, "name")
-	assert.Contains(t, tool.InputSchema.Properties, "config")
+	schema, ok := tool.InputSchema.(*jsonschema.Schema)
+	require.True(t, ok)
+	require.NotNil(t, schema.Properties)
 
-	// Verify required fields
-	assert.Contains(t, tool.InputSchema.Required, "resource")
-	assert.Contains(t, tool.InputSchema.Required, "operation")
+	expectedRequired := []string{"resource", "operation"}
+	assert.ElementsMatch(t, expectedRequired, schema.Required)
+
+	expectedProps := []string{"resource", "operation", "name", "config"}
+	assert.ElementsMatch(t, expectedProps, mapStringKeys(schema.Properties))
+
+	resourceSchema := schema.Properties["resource"]
+	require.NotNil(t, resourceSchema)
+	assert.Equal(t, kafkaConnectResourceDesc, resourceSchema.Description)
+
+	operationSchema := schema.Properties["operation"]
+	require.NotNil(t, operationSchema)
+	assert.Equal(t, kafkaConnectOperationDesc, operationSchema.Description)
+}
+
+func TestKafkaConnectToolBuilder_ReadOnlyRejectsWrite(t *testing.T) {
+	builder := NewKafkaConnectToolBuilder()
+	handler := builder.buildKafkaConnectHandler(true)
+
+	_, _, err := handler(context.Background(), nil, kafkaConnectInput{
+		Resource:  "connector",
+		Operation: "create",
+	})
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "read-only")
 }

@@ -15,12 +15,10 @@
 package schema
 
 import (
-	"encoding/json"
 	"fmt"
 	"testing"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
-	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -38,36 +36,31 @@ func TestNewStringConverter(t *testing.T) {
 	assert.Equal(t, ParamName, converter.ParamName, "ParamName should be initialized to the package constant")
 }
 
-func TestStringConverter_ToMCPToolInputSchemaProperties(t *testing.T) {
+func TestStringConverter_ToToolInputSchema(t *testing.T) {
 	converter := NewStringConverter()
 
 	tests := []struct {
 		name       string
 		schemaInfo *utils.SchemaInfo
-		wantOpts   []mcp.ToolOption
+		wantSchema string
 		wantErr    bool
 		errContain string
 	}{
 		{
 			name:       "Valid STRING schema",
 			schemaInfo: newStringSchemaInfo("STRING"),
-			wantOpts: []mcp.ToolOption{
-				mcp.WithString(ParamName, mcp.Description(fmt.Sprintf("The input schema is a %s schema", "STRING")), mcp.Required()),
-			},
-			wantErr: false,
+			wantSchema: mustSchemaJSON(newPayloadSchema(ParamName, fmt.Sprintf("The input schema is a %s schema", "STRING"), "string")),
+			wantErr:    false,
 		},
 		{
 			name:       "Valid BYTES schema",
 			schemaInfo: newStringSchemaInfo("BYTES"),
-			wantOpts: []mcp.ToolOption{
-				mcp.WithString(ParamName, mcp.Description(fmt.Sprintf("The input schema is a %s schema", "BYTES")), mcp.Required()),
-			},
-			wantErr: false,
+			wantSchema: mustSchemaJSON(newPayloadSchema(ParamName, fmt.Sprintf("The input schema is a %s schema", "BYTES"), "string")),
+			wantErr:    false,
 		},
 		{
 			name:       "Invalid schema type (JSON)",
 			schemaInfo: newStringSchemaInfo("JSON"),
-			wantOpts:   nil,
 			wantErr:    true,
 			errContain: "expected STRING or BYTES schema, got JSON",
 		},
@@ -75,19 +68,19 @@ func TestStringConverter_ToMCPToolInputSchemaProperties(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotOpts, err := converter.ToMCPToolInputSchemaProperties(tt.schemaInfo)
+			gotSchema, err := converter.ToToolInputSchema(tt.schemaInfo)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ToMCPToolInputSchemaProperties() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("ToToolInputSchema() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			var expectedTool = mcp.NewTool("test", gotOpts...)
-			var actualTool = mcp.NewTool("test", tt.wantOpts...)
-			expectedToolInputSchemaJSON, _ := json.Marshal(expectedTool.InputSchema)
-			actualToolInputSchemaJSON, _ := json.Marshal(actualTool.InputSchema)
-			assert.JSONEq(t, string(expectedToolInputSchemaJSON), string(actualToolInputSchemaJSON))
-			if tt.wantErr && err != nil {
-				assert.Contains(t, err.Error(), tt.errContain)
+			if tt.wantErr {
+				assert.Nil(t, gotSchema)
+				if err != nil {
+					assert.Contains(t, err.Error(), tt.errContain)
+				}
+				return
 			}
+			assert.JSONEq(t, tt.wantSchema, mustSchemaJSON(gotSchema))
 		})
 	}
 }

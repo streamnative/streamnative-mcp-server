@@ -15,13 +15,10 @@
 package schema
 
 import (
-	"encoding/json"
 	"testing"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
 	"github.com/stretchr/testify/assert"
-
-	"github.com/mark3labs/mcp-go/mcp"
 )
 
 // complexRecordSchemaString is used by TestAvroConverter_ValidateArguments
@@ -66,8 +63,8 @@ func TestNewAvroConverter(t *testing.T) {
 	// AvroConverter also relies on Avro structure primarily, similar to JSONConverter.
 }
 
-// TestAvroConverter_ToMCPToolInputSchemaProperties tests ToMCPToolInputSchemaProperties for AvroConverter.
-func TestAvroConverter_ToMCPToolInputSchemaProperties(t *testing.T) {
+// TestAvroConverter_ToToolInputSchema tests ToToolInputSchema for AvroConverter.
+func TestAvroConverter_ToToolInputSchema(t *testing.T) {
 	converter := NewAvroConverter()
 
 	const localSimpleRecordSchemaForAvro = `{
@@ -82,69 +79,70 @@ func TestAvroConverter_ToMCPToolInputSchemaProperties(t *testing.T) {
 	const invalidAvroSchemaForAvro = `{"type": "invalidAvro}`
 
 	tests := []struct {
-		name            string
-		schemaInfo      *utils.SchemaInfo
-		expectedOptions []mcp.ToolOption
-		expectError     bool
-		errorContains   string
+		name           string
+		schemaInfo     *utils.SchemaInfo
+		expectedSchema string
+		expectError    bool
+		errorContains  string
 	}{
 		{
 			name:       "Valid AVRO schema",
 			schemaInfo: newAvroSchemaInfo(localSimpleRecordSchemaForAvro),
-			expectedOptions: []mcp.ToolOption{
-				mcp.WithNumber("id", mcp.Description("id (type: long)"), mcp.Required()),
-				mcp.WithString("data", mcp.Description("data (type: string)"), mcp.Required()),
-			},
+			expectedSchema: mustSchemaJSON(map[string]any{
+				"type": "object",
+				"properties": map[string]any{
+					"id": map[string]any{
+						"type":        "number",
+						"description": "id (type: long)",
+					},
+					"data": map[string]any{
+						"type":        "string",
+						"description": "data (type: string)",
+					},
+				},
+				"required": []string{"id", "data"},
+			}),
 			expectError: false,
 		},
 		{
-			name:            "SchemaInfo type is not AVRO (e.g., JSON)",
-			schemaInfo:      &utils.SchemaInfo{Type: "JSON", Schema: []byte(localSimpleRecordSchemaForAvro)},
-			expectedOptions: nil,
-			expectError:     true,
-			errorContains:   "expected AVRO schema, got JSON",
+			name:          "SchemaInfo type is not AVRO (e.g., JSON)",
+			schemaInfo:    &utils.SchemaInfo{Type: "JSON", Schema: []byte(localSimpleRecordSchemaForAvro)},
+			expectError:   true,
+			errorContains: "expected AVRO schema, got JSON",
 		},
 		{
-			name:            "Invalid underlying Avro schema string",
-			schemaInfo:      newAvroSchemaInfo(invalidAvroSchemaForAvro),
-			expectedOptions: nil,
-			expectError:     true,
-			errorContains:   "unknown type: {\"type\": \"invalidAvro}",
+			name:          "Invalid underlying Avro schema string",
+			schemaInfo:    newAvroSchemaInfo(invalidAvroSchemaForAvro),
+			expectError:   true,
+			errorContains: "failed to parse AVRO schema",
 		},
 		{
-			name:            "Underlying Avro schema is nil",
-			schemaInfo:      &utils.SchemaInfo{Type: "AVRO", Schema: nil},
-			expectedOptions: nil,
-			expectError:     true,
-			errorContains:   "unknown type: ",
+			name:          "Underlying Avro schema is nil",
+			schemaInfo:    &utils.SchemaInfo{Type: "AVRO", Schema: nil},
+			expectError:   true,
+			errorContains: "failed to parse AVRO schema",
 		},
 		{
-			name:            "Underlying Avro schema is empty string",
-			schemaInfo:      newAvroSchemaInfo(""),
-			expectedOptions: nil,
-			expectError:     true,
-			errorContains:   "unknown type: ",
+			name:          "Underlying Avro schema is empty string",
+			schemaInfo:    newAvroSchemaInfo(""),
+			expectError:   true,
+			errorContains: "failed to parse AVRO schema",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			opts, err := converter.ToMCPToolInputSchemaProperties(tt.schemaInfo)
+			schema, err := converter.ToToolInputSchema(tt.schemaInfo)
 
 			if tt.expectError {
 				assert.Error(t, err)
 				if tt.errorContains != "" {
 					assert.Contains(t, err.Error(), tt.errorContains)
 				}
-				assert.Nil(t, opts)
+				assert.Nil(t, schema)
 			} else {
 				assert.NoError(t, err)
-				var expectedTool, actualTool mcp.Tool
-				expectedTool = mcp.NewTool("test", tt.expectedOptions...)
-				actualTool = mcp.NewTool("test", opts...)
-				expectedToolSchemaJSON, _ := json.Marshal(expectedTool.InputSchema)
-				actualToolSchemaJSON, _ := json.Marshal(actualTool.InputSchema)
-				assert.JSONEq(t, string(expectedToolSchemaJSON), string(actualToolSchemaJSON), "Tool mismatch")
+				assert.JSONEq(t, tt.expectedSchema, mustSchemaJSON(schema))
 			}
 		})
 	}

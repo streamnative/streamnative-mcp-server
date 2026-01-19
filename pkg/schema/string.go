@@ -18,7 +18,7 @@ import (
 	"fmt"
 
 	cliutils "github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
-	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/google/jsonschema-go/jsonschema"
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 )
 
@@ -36,15 +36,14 @@ func NewStringConverter() *StringConverter {
 	}
 }
 
-// ToMCPToolInputSchemaProperties converts string schema info into MCP tool options.
-func (c *StringConverter) ToMCPToolInputSchemaProperties(schemaInfo *cliutils.SchemaInfo) ([]mcp.ToolOption, error) {
+// ToToolInputSchema converts string schema info into a JSON schema.
+func (c *StringConverter) ToToolInputSchema(schemaInfo *cliutils.SchemaInfo) (*jsonschema.Schema, error) {
 	if schemaInfo.Type != "STRING" && schemaInfo.Type != "BYTES" {
 		return nil, fmt.Errorf("expected STRING or BYTES schema, got %s", schemaInfo.Type)
 	}
 
-	return []mcp.ToolOption{
-		mcp.WithString(c.ParamName, mcp.Description(fmt.Sprintf("The input schema is a %s schema", schemaInfo.Type)), mcp.Required()),
-	}, nil
+	description := fmt.Sprintf("The input schema is a %s schema", schemaInfo.Type)
+	return newPayloadSchema(c.ParamName, description, "string"), nil
 }
 
 // SerializeMCPRequestToPulsarPayload serializes MCP arguments into a string payload.

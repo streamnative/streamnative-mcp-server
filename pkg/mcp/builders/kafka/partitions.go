@@ -20,11 +20,35 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	"github.com/google/jsonschema-go/jsonschema"
+	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 	"github.com/twmb/franz-go/pkg/kadm"
+)
+
+type kafkaPartitionsInput struct {
+	Resource  string  `json:"resource"`
+	Operation string  `json:"operation"`
+	Topic     *string `json:"topic,omitempty"`
+	NewTotal  *int    `json:"new-total,omitempty"`
+}
+
+const (
+	kafkaPartitionsResourceDesc = "Resource to operate on. Available resources:\n" +
+		"- partition: A single Kafka Partition of a Kafka topic. Partitions are the basic unit of parallelism and data distribution in Kafka."
+	kafkaPartitionsOperationDesc = "Operation to perform. Available operations:\n" +
+		"- update: Update the number of partitions for an existing Kafka topic. This operation can only increase the number of partitions, not decrease them."
+	kafkaPartitionsTopicDesc = "The name of the Kafka topic to operate on. " +
+		"Required for the 'update' operation. " +
+		"Must be an existing topic name in the Kafka cluster. " +
+		"The topic must be in a healthy state for partition updates to succeed."
+	kafkaPartitionsNewTotalDesc = "The new total number of partitions for the Kafka topic. " +
+		"Required for the 'update' operation. " +
+		"Must be greater than the current number of partitions (cannot decrease partitions). " +
+		"A larger number of partitions can help increase parallelism and throughput, but may also " +
+		"increase resource utilization on the brokers. " +
+		"Consider Kafka cluster capacity when setting this value."
 )
 
 // KafkaPartitionsToolBuilder implements the ToolBuilder interface for Kafka Partitions
@@ -55,7 +79,7 @@ func NewKafkaPartitionsToolBuilder() *KafkaPartitionsToolBuilder {
 }
 
 // BuildTools builds the Kafka Partitions tool list
-func (b *KafkaPartitionsToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]server.ServerTool, error) {
+func (b *KafkaPartitionsToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]builders.ToolDefinition, error) {
 	// Check features - return empty list if no required features are present
 	if !b.HasAnyRequiredFeature(config.Features) {
 		return nil, nil
@@ -67,11 +91,14 @@ func (b *KafkaPartitionsToolBuilder) BuildTools(_ context.Context, config builde
 	}
 
 	// Build tools
-	tool := b.buildKafkaPartitionsTool()
+	tool, err := b.buildKafkaPartitionsTool()
+	if err != nil {
+		return nil, err
+	}
 	handler := b.buildKafkaPartitionsHandler(config.ReadOnly)
 
-	return []server.ServerTool{
-		{
+	return []builders.ToolDefinition{
+		builders.ServerTool[kafkaPartitionsInput, any]{
 			Tool:    tool,
 			Handler: handler,
 		},
@@ -79,12 +106,11 @@ func (b *KafkaPartitionsToolBuilder) BuildTools(_ context.Context, config builde
 }
 
 // buildKafkaPartitionsTool builds the Kafka Partitions MCP tool definition
-func (b *KafkaPartitionsToolBuilder) buildKafkaPartitionsTool() mcp.Tool {
-	resourceDesc := "Resource to operate on. Available resources:\n" +
-		"- partition: A single Kafka Partition of a Kafka topic. Partitions are the basic unit of parallelism and data distribution in Kafka."
-
-	operationDesc := "Operation to perform. Available operations:\n" +
-		"- update: Update the number of partitions for an existing Kafka topic. This operation can only increase the number of partitions, not decrease them."
+func (b *KafkaPartitionsToolBuilder) buildKafkaPartitionsTool() (*sdk.Tool, error) {
+	inputSchema, err := buildKafkaPartitionsInputSchema()
+	if err != nil {
+		return nil, err
+	}
 
 	toolDesc := "Unified tool for managing Apache Kafka partitions.\n" +
 		"This tool provides access to Kafka partition operations, particularly adding partitions to existing topics.\n" +
@@ -109,60 +135,33 @@ func (b *KafkaPartitionsToolBuilder) buildKafkaPartitionsTool() mcp.Tool {
 		"   partitions: 12\n\n" +
 		"This tool requires appropriate Kafka permissions for partition management."
 
-	return mcp.NewTool("kafka_admin_partitions",
-		mcp.WithDescription(toolDesc),
-		mcp.WithString("resource", mcp.Required(),
-			mcp.Description(resourceDesc),
-		),
-		mcp.WithString("operation", mcp.Required(),
-			mcp.Description(operationDesc),
-		),
-		mcp.WithString("topic",
-			mcp.Description("The name of the Kafka topic to operate on. "+
-				"Required for the 'update' operation. "+
-				"Must be an existing topic name in the Kafka cluster. "+
-				"The topic must be in a healthy state for partition updates to succeed.")),
-		mcp.WithNumber("new-total",
-			mcp.Description("The new total number of partitions for the Kafka topic. "+
-				"Required for the 'update' operation. "+
-				"Must be greater than the current number of partitions (cannot decrease partitions). "+
-				"A larger number of partitions can help increase parallelism and throughput, but may also "+
-				"increase resource utilization on the brokers. "+
-				"Consider Kafka cluster capacity when setting this value.")),
-	)
+	return &sdk.Tool{
+		Name:        "kafka_admin_partitions",
+		Description: toolDesc,
+		InputSchema: inputSchema,
+	}, nil
 }
 
 // buildKafkaPartitionsHandler builds the Kafka Partitions handler function
-func (b *KafkaPartitionsToolBuilder) buildKafkaPartitionsHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		// Get required parameters
-		resource, err := request.RequireString("resource")
-		if err != nil {
-			return b.handleError("get resource", err), nil
-		}
-
-		operation, err := request.RequireString("operation")
-		if err != nil {
-			return b.handleError("get operation", err), nil
-		}
-
+func (b *KafkaPartitionsToolBuilder) buildKafkaPartitionsHandler(readOnly bool) builders.ToolHandlerFunc[kafkaPartitionsInput, any] {
+	return func(ctx context.Context, _ *sdk.CallToolRequest, input kafkaPartitionsInput) (*sdk.CallToolResult, any, error) {
 		// Normalize parameters
-		resource = strings.ToLower(resource)
-		operation = strings.ToLower(operation)
+		resource := strings.ToLower(input.Resource)
+		operation := strings.ToLower(input.Operation)
 
 		// Validate write operations in read-only mode
 		if readOnly && operation == "update" {
-			return mcp.NewToolResultError("Write operations are not allowed in read-only mode"), nil
+			return nil, nil, fmt.Errorf("write operations are not allowed in read-only mode")
 		}
 
 		// Get Kafka admin client
 		session := mcpCtx.GetKafkaSession(ctx)
 		if session == nil {
-			return b.handleError("get Kafka session not found in context", nil), nil
+			return nil, nil, b.handleError("get Kafka session not found in context", nil)
 		}
 		admin, err := session.GetAdminClient()
 		if err != nil {
-			return b.handleError("get admin client", err), nil
+			return nil, nil, b.handleError("get admin client", err)
 		}
 
 		// Dispatch based on resource and operation
@@ -170,12 +169,13 @@ func (b *KafkaPartitionsToolBuilder) buildKafkaPartitionsHandler(readOnly bool) 
 		case "partition":
 			switch operation {
 			case "update":
-				return b.handleKafkaPartitionUpdate(ctx, admin, request)
+				result, err := b.handleKafkaPartitionUpdate(ctx, admin, input)
+				return result, nil, err
 			default:
-				return mcp.NewToolResultError(fmt.Sprintf("Invalid operation for resource 'partition': %s", operation)), nil
+				return nil, nil, fmt.Errorf("invalid operation for resource 'partition': %s", operation)
 			}
 		default:
-			return mcp.NewToolResultError(fmt.Sprintf("Invalid resource: %s. Available resources: partition", resource)), nil
+			return nil, nil, fmt.Errorf("invalid resource: %s. available resources: partition", resource)
 		}
 	}
 }
@@ -183,35 +183,58 @@ func (b *KafkaPartitionsToolBuilder) buildKafkaPartitionsHandler(readOnly bool) 
 // Utility functions
 
 // handleError provides unified error handling
-func (b *KafkaPartitionsToolBuilder) handleError(operation string, err error) *mcp.CallToolResult {
-	return mcp.NewToolResultError(fmt.Sprintf("Failed to %s: %v", operation, err))
+func (b *KafkaPartitionsToolBuilder) handleError(operation string, err error) error {
+	return fmt.Errorf("failed to %s: %v", operation, err)
 }
 
 // marshalResponse provides unified JSON serialization for responses
-func (b *KafkaPartitionsToolBuilder) marshalResponse(data interface{}) (*mcp.CallToolResult, error) {
+func (b *KafkaPartitionsToolBuilder) marshalResponse(data interface{}) (*sdk.CallToolResult, error) {
 	jsonBytes, err := json.Marshal(data)
 	if err != nil {
-		return b.handleError("marshal response", err), nil
+		return nil, b.handleError("marshal response", err)
 	}
-	return mcp.NewToolResultText(string(jsonBytes)), nil
+	return &sdk.CallToolResult{
+		Content: []sdk.Content{&sdk.TextContent{Text: string(jsonBytes)}},
+	}, nil
 }
 
 // handleKafkaPartitionUpdate handles updating the number of partitions for a topic
-func (b *KafkaPartitionsToolBuilder) handleKafkaPartitionUpdate(ctx context.Context, admin *kadm.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	topicName, err := request.RequireString("topic")
+func (b *KafkaPartitionsToolBuilder) handleKafkaPartitionUpdate(ctx context.Context, admin *kadm.Client, input kafkaPartitionsInput) (*sdk.CallToolResult, error) {
+	topicName, err := requireString(input.Topic, "topic")
 	if err != nil {
-		return b.handleError("get topic name", err), nil
+		return nil, b.handleError("get topic name", err)
 	}
 
-	newTotal, err := request.RequireInt("new-total")
+	newTotal, err := requireInt(input.NewTotal, "new-total")
 	if err != nil {
-		return b.handleError("get new total", err), nil
+		return nil, b.handleError("get new total", err)
 	}
 
 	response, err := admin.UpdatePartitions(ctx, newTotal, topicName)
 	if err != nil {
-		return b.handleError("update Kafka topic partitions", err), nil
+		return nil, b.handleError("update Kafka topic partitions", err)
 	}
 
 	return b.marshalResponse(response)
+}
+
+func buildKafkaPartitionsInputSchema() (*jsonschema.Schema, error) {
+	schema, err := jsonschema.For[kafkaPartitionsInput](nil)
+	if err != nil {
+		return nil, fmt.Errorf("input schema: %w", err)
+	}
+	if schema.Type != "object" {
+		return nil, fmt.Errorf("input schema must have type \"object\"")
+	}
+
+	if schema.Properties == nil {
+		schema.Properties = map[string]*jsonschema.Schema{}
+	}
+	setSchemaDescription(schema, "resource", kafkaPartitionsResourceDesc)
+	setSchemaDescription(schema, "operation", kafkaPartitionsOperationDesc)
+	setSchemaDescription(schema, "topic", kafkaPartitionsTopicDesc)
+	setSchemaDescription(schema, "new-total", kafkaPartitionsNewTotalDesc)
+
+	normalizeAdditionalProperties(schema)
+	return schema, nil
 }

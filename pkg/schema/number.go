@@ -19,7 +19,7 @@ import (
 	"math"
 
 	cliutils "github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
-	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/google/jsonschema-go/jsonschema"
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 )
 
@@ -37,15 +37,14 @@ func NewNumberConverter() *NumberConverter {
 	}
 }
 
-// ToMCPToolInputSchemaProperties converts numeric schema info into MCP tool options.
-func (c *NumberConverter) ToMCPToolInputSchemaProperties(schemaInfo *cliutils.SchemaInfo) ([]mcp.ToolOption, error) {
+// ToToolInputSchema converts numeric schema info into a JSON schema.
+func (c *NumberConverter) ToToolInputSchema(schemaInfo *cliutils.SchemaInfo) (*jsonschema.Schema, error) {
 	if schemaInfo.Type != "INT8" && schemaInfo.Type != "INT16" && schemaInfo.Type != "INT32" && schemaInfo.Type != "INT64" && schemaInfo.Type != "FLOAT" && schemaInfo.Type != "DOUBLE" {
 		return nil, fmt.Errorf("expected INT8, INT16, INT32, INT64, FLOAT, or DOUBLE schema, got %s", schemaInfo.Type)
 	}
 
-	return []mcp.ToolOption{
-		mcp.WithNumber(c.ParamName, mcp.Description(fmt.Sprintf("The input schema is a %s schema", schemaInfo.Type)), mcp.Required()),
-	}, nil
+	description := fmt.Sprintf("The input schema is a %s schema", schemaInfo.Type)
+	return newPayloadSchema(c.ParamName, description, "number"), nil
 }
 
 // SerializeMCPRequestToPulsarPayload serializes MCP arguments into a numeric payload.

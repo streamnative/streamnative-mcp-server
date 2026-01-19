@@ -18,7 +18,7 @@ import (
 	"fmt"
 
 	cliutils "github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
-	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/google/jsonschema-go/jsonschema"
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 )
 
@@ -36,15 +36,14 @@ func NewBooleanConverter() *BooleanConverter {
 	}
 }
 
-// ToMCPToolInputSchemaProperties converts BOOLEAN schema info into MCP tool options.
-func (c *BooleanConverter) ToMCPToolInputSchemaProperties(schemaInfo *cliutils.SchemaInfo) ([]mcp.ToolOption, error) {
+// ToToolInputSchema converts BOOLEAN schema info into a JSON schema.
+func (c *BooleanConverter) ToToolInputSchema(schemaInfo *cliutils.SchemaInfo) (*jsonschema.Schema, error) {
 	if schemaInfo.Type != "BOOLEAN" {
 		return nil, fmt.Errorf("expected BOOLEAN schema, got %s", schemaInfo.Type)
 	}
 
-	return []mcp.ToolOption{
-		mcp.WithBoolean(c.ParamName, mcp.Description(fmt.Sprintf("The input schema is a %s schema", schemaInfo.Type)), mcp.Required()),
-	}, nil
+	description := fmt.Sprintf("The input schema is a %s schema", schemaInfo.Type)
+	return newPayloadSchema(c.ParamName, description, "boolean"), nil
 }
 
 // SerializeMCPRequestToPulsarPayload serializes MCP arguments into a BOOLEAN payload.

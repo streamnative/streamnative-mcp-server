@@ -52,37 +52,20 @@ func StopAllPulsarFunctionManagers() {
 }
 
 // PulsarFunctionManagedMcpTools registers Pulsar Functions-as-tools handlers.
-func (s *LegacyServer) PulsarFunctionManagedMcpTools(readOnly bool, features []string, sessionID string) {
-	pftoolsServer := &pftools2.Server{
-		LegacyServer:  s.MCPServer,
-		KafkaSession:  s.KafkaSession,
-		PulsarSession: s.PulsarSession,
-		Logger:        s.logger,
-	}
-	registerPulsarFunctionManagedMcpTools(readOnly, features, sessionID, s.SNCloudSession, pftoolsServer)
-}
-
-// PulsarFunctionManagedMcpTools registers Pulsar Functions-as-tools handlers.
-func (s *Server) PulsarFunctionManagedMcpTools(readOnly bool, features []string, sessionID string) {
+func (s *Server) PulsarFunctionManagedMcpTools(readOnly bool, features []string) {
 	pftoolsServer := &pftools2.Server{
 		MCPServer:     s.MCPServer,
 		KafkaSession:  s.KafkaSession,
 		PulsarSession: s.PulsarSession,
 		Logger:        s.logger,
 	}
-	registerPulsarFunctionManagedMcpTools(readOnly, features, sessionID, s.SNCloudSession, pftoolsServer)
+	registerPulsarFunctionManagedMcpTools(readOnly, features, s.SNCloudSession, pftoolsServer)
 }
 
-func registerPulsarFunctionManagedMcpTools(readOnly bool, features []string, sessionID string, snCloudSession *config.Session, pftoolsServer *pftools2.Server) {
+func registerPulsarFunctionManagedMcpTools(readOnly bool, features []string, snCloudSession *config.Session, pftoolsServer *pftools2.Server) {
 	if !slices.Contains(features, string(FeatureAll)) &&
 		!slices.Contains(features, string(FeatureFunctionsAsTools)) &&
 		!slices.Contains(features, string(FeatureStreamNativeCloud)) {
-		return
-	}
-
-	// Validate sessionID
-	if sessionID == "" {
-		log.Printf("Skipping Pulsar Functions as MCP Tools because sessionID is empty")
 		return
 	}
 
@@ -142,7 +125,7 @@ func registerPulsarFunctionManagedMcpTools(readOnly bool, features []string, ses
 		log.Printf("Setting Pulsar Functions strict export to %v", options.StrictExport)
 	}
 
-	manager, err := pftools2.NewPulsarFunctionManager(pftoolsServer, readOnly, options, sessionID)
+	manager, err := pftools2.NewPulsarFunctionManager(pftoolsServer, readOnly, options)
 	if err != nil {
 		log.Printf("Failed to create Pulsar Function manager: %v", err)
 		return
