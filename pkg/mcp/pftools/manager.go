@@ -32,7 +32,6 @@ import (
 	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
-	"github.com/streamnative/streamnative-mcp-server/pkg/schema"
 )
 
 const (
@@ -242,7 +241,7 @@ func (m *PulsarFunctionManager) addTool(fnTool *FunctionTool) {
 	}
 
 	if m.mcpServer != nil {
-		m.mcpServer.AddTool(fnTool.Tool, m.handleToolCall(fnTool))
+		sdk.AddTool(m.mcpServer, fnTool.Tool, m.handleToolCall(fnTool))
 		return
 	}
 
@@ -438,23 +437,16 @@ func (m *PulsarFunctionManager) convertFunctionToTool(fn *utils.FunctionConfig) 
 	// Create description
 	description := retrieveToolDescription(fn)
 
-	schemaConverter, err := schema.ConverterFactory(inputSchema.Type)
+	toolInputSchema, err := ConvertSchemaToToolInput(inputSchema)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create schema converter: %w", err)
+		return nil, fmt.Errorf("failed to convert input schema to MCP tool input schema: %w", err)
 	}
 
-	toolInputSchemaProperties, err := schemaConverter.ToMCPToolInputSchemaProperties(inputSchema.PulsarSchemaInfo)
-	if err != nil {
-		return nil, fmt.Errorf("failed to convert input schema to MCP tool input schema properties: %w", err)
+	tool := &sdk.Tool{
+		Name:        toolName,
+		Description: description,
+		InputSchema: toolInputSchema,
 	}
-
-	toolInputSchemaProperties = append(toolInputSchemaProperties, legacy.WithDescription(description))
-
-	// Create the tool
-	legacyTool := legacy.NewTool(toolName,
-		toolInputSchemaProperties...,
-	)
-	tool := legacyToolToSDK(legacyTool)
 
 	// Create circuit breaker for this function
 	circuitBreaker := NewCircuitBreaker(5, 60*time.Second)
@@ -477,17 +469,15 @@ func (m *PulsarFunctionManager) convertFunctionToTool(fn *utils.FunctionConfig) 
 }
 
 // handleToolCall returns a handler function for a specific function tool
-func (m *PulsarFunctionManager) handleToolCall(fnTool *FunctionTool) func(ctx context.Context, request *sdk.CallToolRequest) (*sdk.CallToolResult, error) {
-	return func(ctx context.Context, request *sdk.CallToolRequest) (*sdk.CallToolResult, error) {
-		args := map[string]interface{}{}
-		if request != nil && len(request.Params.Arguments) > 0 {
-			if err := json.Unmarshal(request.Params.Arguments, &args); err != nil {
-				return legacyResultToSDK(legacy.NewToolResultError(fmt.Sprintf("Failed to parse arguments: %v", err))), nil
-			}
+func (m *PulsarFunctionManager) handleToolCall(fnTool *FunctionTool) sdk.ToolHandlerFor[map[string]any, any] {
+	return func(ctx context.Context, _ *sdk.CallToolRequest, input map[string]any) (*sdk.CallToolResult, any, error) {
+		args := input
+		if args == nil {
+			args = map[string]any{}
 		}
 
 		result, err := m.invokeToolCall(ctx, fnTool, args)
-		return legacyResultToSDK(result), err
+		return legacyResultToSDK(result), nil, err
 	}
 }
 
