@@ -17,6 +17,7 @@ package mcp
 import (
 	"context"
 
+	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/streamnative-mcp-server/pkg/config"
 	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
 	internalContext "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
@@ -51,6 +52,31 @@ func WithPulsarSession(ctx context.Context, session *pulsar.Session) context.Con
 // WithKafkaSession sets the Kafka session in the context
 func WithKafkaSession(ctx context.Context, session *kafka.Session) context.Context {
 	return internalContext.WithKafkaSession(ctx, session)
+}
+
+// WithMCPRequest sets the MCP request in the context
+func WithMCPRequest(ctx context.Context, request sdk.Request) context.Context {
+	return internalContext.WithMCPRequest(ctx, request)
+}
+
+// GetMCPRequest gets the MCP request from the context
+func GetMCPRequest(ctx context.Context) sdk.Request {
+	return internalContext.GetMCPRequest(ctx)
+}
+
+// GetMCPSession gets the MCP session from the context
+func GetMCPSession(ctx context.Context) sdk.Session {
+	return internalContext.GetMCPSession(ctx)
+}
+
+// GetMCPSessionID gets the MCP session ID from the context
+func GetMCPSessionID(ctx context.Context) string {
+	return internalContext.GetMCPSessionID(ctx)
+}
+
+// GetMCPRequestExtra gets the MCP request extra from the context
+func GetMCPRequestExtra(ctx context.Context) *sdk.RequestExtra {
+	return internalContext.GetMCPRequestExtra(ctx)
 }
 
 // GetSNCloudOrganization gets the SNCloud organization from the context

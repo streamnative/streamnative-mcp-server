@@ -17,7 +17,9 @@ package context //nolint:revive
 
 import (
 	"context"
+	"reflect"
 
+	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/streamnative-mcp-server/pkg/config"
 	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
@@ -33,6 +35,7 @@ const (
 	SNCloudSessionContextKey      contextKey = "sncloud_session"
 	PulsarSessionContextKey       contextKey = "pulsar_session"
 	KafkaSessionContextKey        contextKey = "kafka_session"
+	MCPRequestContextKey          contextKey = "mcp_request"
 )
 
 // WithSNCloudOrganization sets the SNCloud organization in the context
@@ -63,6 +66,56 @@ func WithPulsarSession(ctx context.Context, session *pulsar.Session) context.Con
 // WithKafkaSession sets the Kafka session in the context
 func WithKafkaSession(ctx context.Context, session *kafka.Session) context.Context {
 	return context.WithValue(ctx, KafkaSessionContextKey, session)
+}
+
+// WithMCPRequest sets the MCP request in the context.
+func WithMCPRequest(ctx context.Context, request sdk.Request) context.Context {
+	return context.WithValue(ctx, MCPRequestContextKey, request)
+}
+
+// GetMCPRequest gets the MCP request from the context.
+func GetMCPRequest(ctx context.Context) sdk.Request {
+	if val := ctx.Value(MCPRequestContextKey); val != nil {
+		if request, ok := val.(sdk.Request); ok {
+			return request
+		}
+	}
+	return nil
+}
+
+// GetMCPSession gets the MCP session from the context.
+func GetMCPSession(ctx context.Context) sdk.Session {
+	request := GetMCPRequest(ctx)
+	if request == nil {
+		return nil
+	}
+	session := request.GetSession()
+	if session == nil {
+		return nil
+	}
+	value := reflect.ValueOf(session)
+	if value.Kind() == reflect.Ptr && value.IsNil() {
+		return nil
+	}
+	return session
+}
+
+// GetMCPSessionID gets the MCP session ID from the context.
+func GetMCPSessionID(ctx context.Context) string {
+	session := GetMCPSession(ctx)
+	if session == nil {
+		return ""
+	}
+	return session.ID()
+}
+
+// GetMCPRequestExtra gets the MCP request extra from the context.
+func GetMCPRequestExtra(ctx context.Context) *sdk.RequestExtra {
+	request := GetMCPRequest(ctx)
+	if request == nil {
+		return nil
+	}
+	return request.GetExtra()
 }
 
 // GetSNCloudOrganization gets the SNCloud organization from the context
