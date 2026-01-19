@@ -128,7 +128,7 @@ func newMcpServer(_ context.Context, configOpts *ServerOptions, logrusLogger *lo
 	mcp.PulsarAdminAddTenantToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.PulsarAdminAddTopicToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.PulsarAdminAddSinksTools(s, configOpts.ReadOnly, configOpts.Features)
-	mcp.PulsarAdminAddFunctionsTools(s, configOpts.ReadOnly, configOpts.Features)
+	mcp.PulsarAdminAddFunctionsToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.PulsarAdminAddSourcesTools(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.PulsarAdminAddTopicPolicyTools(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.PulsarClientAddConsumerTools(s, configOpts.ReadOnly, configOpts.Features)
