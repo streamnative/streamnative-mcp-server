@@ -17,14 +17,14 @@ package mcp
 import (
 	"context"
 
-	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
+	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	pulsarbuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/pulsar"
 )
 
-// PulsarAdminAddNamespaceTools registers Pulsar admin namespace tools.
-func PulsarAdminAddNamespaceTools(s *sdk.Server, readOnly bool, features []string) {
-	builder := pulsarbuilders.NewPulsarAdminNamespaceToolBuilder()
+// PulsarAdminAddNamespaceToolsLegacy registers Pulsar admin namespace tools for the legacy server.
+func PulsarAdminAddNamespaceToolsLegacy(s *server.MCPServer, readOnly bool, features []string) {
+	builder := pulsarbuilders.NewPulsarAdminNamespaceLegacyToolBuilder()
 	config := builders.ToolBuildConfig{
 		ReadOnly: readOnly,
 		Features: features,
@@ -36,6 +36,6 @@ func PulsarAdminAddNamespaceTools(s *sdk.Server, readOnly bool, features []strin
 	}
 
 	for _, tool := range tools {
-		tool.Register(s)
+		s.AddTool(tool.Tool, tool.Handler)
 	}
 }
