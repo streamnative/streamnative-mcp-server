@@ -118,7 +118,7 @@ func newMcpServer(_ context.Context, configOpts *ServerOptions, logrusLogger *lo
 	mcp.PulsarAdminAddBrokerStatsTools(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.PulsarAdminAddClusterTools(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.PulsarAdminAddFunctionsWorkerTools(s, configOpts.ReadOnly, configOpts.Features)
-	mcp.PulsarAdminAddNamespaceTools(s, configOpts.ReadOnly, configOpts.Features)
+	mcp.PulsarAdminAddNamespaceToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.PulsarAdminAddNamespacePolicyTools(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.PulsarAdminAddNsIsolationPolicyTools(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.PulsarAdminAddPackagesTools(s, configOpts.ReadOnly, configOpts.Features)
