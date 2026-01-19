@@ -19,11 +19,32 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	"github.com/google/jsonschema-go/jsonschema"
+	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
+)
+
+type pulsarAdminFunctionsWorkerInput struct {
+	Resource string `json:"resource"`
+}
+
+const (
+	pulsarAdminFunctionsWorkerToolDesc = "Unified tool for managing Apache Pulsar Functions Worker resources. " +
+		"Pulsar Functions is a serverless compute framework that allows you to process messages in a streaming fashion. " +
+		"The Functions Worker is the runtime environment that executes and manages Pulsar Functions. " +
+		"This tool provides comprehensive access to functions worker resources including function statistics, " +
+		"monitoring metrics, cluster information, leader election status, and function assignments across the cluster. " +
+		"Functions workers can be deployed in multiple modes (standalone, cluster) and this tool helps monitor " +
+		"and manage the worker cluster state, performance metrics, and function distribution. " +
+		"Most operations require Pulsar super-user permissions for security reasons."
+	pulsarAdminFunctionsWorkerResourceDesc = "Type of functions worker resource to access. Available resources:\n" +
+		"- function_stats: Statistics for all functions running on the functions worker, including processing rates, error counts, and resource usage\n" +
+		"- monitoring_metrics: Comprehensive metrics for monitoring function workers, including JVM metrics, resource utilization, and performance indicators\n" +
+		"- cluster: Information about all workers in the functions worker cluster, including their status, capabilities, and workload distribution\n" +
+		"- cluster_leader: Information about the leader of the functions worker cluster, essential for understanding cluster coordination\n" +
+		"- function_assignments: Current assignments of functions across the functions worker cluster, showing which functions are running on which workers"
 )
 
 // PulsarAdminFunctionsWorkerToolBuilder implements the ToolBuilder interface for Pulsar Admin Functions Worker tools
@@ -57,7 +78,7 @@ func NewPulsarAdminFunctionsWorkerToolBuilder() *PulsarAdminFunctionsWorkerToolB
 
 // BuildTools builds the Pulsar Admin Functions Worker tool list
 // This is the core method implementing the ToolBuilder interface
-func (b *PulsarAdminFunctionsWorkerToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]server.ServerTool, error) {
+func (b *PulsarAdminFunctionsWorkerToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]builders.ToolDefinition, error) {
 	// Check features - return empty list if no required features are present
 	if !b.HasAnyRequiredFeature(config.Features) {
 		return nil, nil
@@ -69,11 +90,14 @@ func (b *PulsarAdminFunctionsWorkerToolBuilder) BuildTools(_ context.Context, co
 	}
 
 	// Build tools
-	tool := b.buildFunctionsWorkerTool()
+	tool, err := b.buildFunctionsWorkerTool()
+	if err != nil {
+		return nil, err
+	}
 	handler := b.buildFunctionsWorkerHandler(config.ReadOnly)
 
-	return []server.ServerTool{
-		{
+	return []builders.ToolDefinition{
+		builders.ServerTool[pulsarAdminFunctionsWorkerInput, any]{
 			Tool:    tool,
 			Handler: handler,
 		},
@@ -82,69 +106,60 @@ func (b *PulsarAdminFunctionsWorkerToolBuilder) BuildTools(_ context.Context, co
 
 // buildFunctionsWorkerTool builds the Pulsar Admin Functions Worker MCP tool definition
 // Migrated from the original tool definition logic
-func (b *PulsarAdminFunctionsWorkerToolBuilder) buildFunctionsWorkerTool() mcp.Tool {
-	toolDesc := "Unified tool for managing Apache Pulsar Functions Worker resources. " +
-		"Pulsar Functions is a serverless compute framework that allows you to process messages in a streaming fashion. " +
-		"The Functions Worker is the runtime environment that executes and manages Pulsar Functions. " +
-		"This tool provides comprehensive access to functions worker resources including function statistics, " +
-		"monitoring metrics, cluster information, leader election status, and function assignments across the cluster. " +
-		"Functions workers can be deployed in multiple modes (standalone, cluster) and this tool helps monitor " +
-		"and manage the worker cluster state, performance metrics, and function distribution. " +
-		"Most operations require Pulsar super-user permissions for security reasons."
+func (b *PulsarAdminFunctionsWorkerToolBuilder) buildFunctionsWorkerTool() (*sdk.Tool, error) {
+	inputSchema, err := buildPulsarAdminFunctionsWorkerInputSchema()
+	if err != nil {
+		return nil, err
+	}
 
-	resourceDesc := "Type of functions worker resource to access. Available resources:\\n" +
-		"- function_stats: Statistics for all functions running on the functions worker, including processing rates, error counts, and resource usage\\n" +
-		"- monitoring_metrics: Comprehensive metrics for monitoring function workers, including JVM metrics, resource utilization, and performance indicators\\n" +
-		"- cluster: Information about all workers in the functions worker cluster, including their status, capabilities, and workload distribution\\n" +
-		"- cluster_leader: Information about the leader of the functions worker cluster, essential for understanding cluster coordination\\n" +
-		"- function_assignments: Current assignments of functions across the functions worker cluster, showing which functions are running on which workers"
-
-	return mcp.NewTool("pulsar_admin_functions_worker",
-		mcp.WithDescription(toolDesc),
-		mcp.WithString("resource", mcp.Required(),
-			mcp.Description(resourceDesc),
-		),
-	)
+	return &sdk.Tool{
+		Name:        "pulsar_admin_functions_worker",
+		Description: pulsarAdminFunctionsWorkerToolDesc,
+		InputSchema: inputSchema,
+	}, nil
 }
 
 // buildFunctionsWorkerHandler builds the Pulsar Admin Functions Worker handler function
 // Migrated from the original handler logic
-func (b *PulsarAdminFunctionsWorkerToolBuilder) buildFunctionsWorkerHandler(_ bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminFunctionsWorkerToolBuilder) buildFunctionsWorkerHandler(_ bool) builders.ToolHandlerFunc[pulsarAdminFunctionsWorkerInput, any] {
+	return func(ctx context.Context, _ *sdk.CallToolRequest, input pulsarAdminFunctionsWorkerInput) (*sdk.CallToolResult, any, error) {
 		// Get Pulsar session from context
 		session := mcpCtx.GetPulsarSession(ctx)
 		if session == nil {
-			return mcp.NewToolResultError("Pulsar session not found in context"), nil
+			return nil, nil, fmt.Errorf("pulsar session not found in context")
 		}
 
 		// Create the admin client
 		admin, err := session.GetAdminClient()
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
+			return nil, nil, b.handleError("get admin client", err)
 		}
 
 		// Get required resource parameter
-		resource, err := request.RequireString("resource")
-		if err != nil {
-			return mcp.NewToolResultError("Missing required parameter 'resource'. " +
-				"Please specify one of: function_stats, monitoring_metrics, cluster, cluster_leader, function_assignments"), nil
+		resource := input.Resource
+		if resource == "" {
+			return nil, nil, fmt.Errorf("missing required parameter 'resource'; please specify one of: function_stats, monitoring_metrics, cluster, cluster_leader, function_assignments")
 		}
 
 		// Process request based on resource type
 		switch resource {
 		case "function_stats":
-			return b.handleFunctionsWorkerFunctionStats(admin)
+			result, handlerErr := b.handleFunctionsWorkerFunctionStats(admin)
+			return result, nil, handlerErr
 		case "monitoring_metrics":
-			return b.handleFunctionsWorkerMonitoringMetrics(admin)
+			result, handlerErr := b.handleFunctionsWorkerMonitoringMetrics(admin)
+			return result, nil, handlerErr
 		case "cluster":
-			return b.handleFunctionsWorkerGetCluster(admin)
+			result, handlerErr := b.handleFunctionsWorkerGetCluster(admin)
+			return result, nil, handlerErr
 		case "cluster_leader":
-			return b.handleFunctionsWorkerGetClusterLeader(admin)
+			result, handlerErr := b.handleFunctionsWorkerGetClusterLeader(admin)
+			return result, nil, handlerErr
 		case "function_assignments":
-			return b.handleFunctionsWorkerGetFunctionAssignments(admin)
+			result, handlerErr := b.handleFunctionsWorkerGetFunctionAssignments(admin)
+			return result, nil, handlerErr
 		default:
-			return mcp.NewToolResultError(fmt.Sprintf("Unsupported resource: %s. "+
-				"Please use one of: function_stats, monitoring_metrics, cluster, cluster_leader, function_assignments", resource)), nil
+			return nil, nil, fmt.Errorf("unsupported resource: %s. please use one of: function_stats, monitoring_metrics, cluster, cluster_leader, function_assignments", resource)
 		}
 	}
 }
@@ -152,72 +167,92 @@ func (b *PulsarAdminFunctionsWorkerToolBuilder) buildFunctionsWorkerHandler(_ bo
 // Unified error handling and utility functions
 
 // handleError provides unified error handling
-func (b *PulsarAdminFunctionsWorkerToolBuilder) handleError(operation string, err error) *mcp.CallToolResult {
-	return mcp.NewToolResultError(fmt.Sprintf("Failed to %s: %v", operation, err))
+func (b *PulsarAdminFunctionsWorkerToolBuilder) handleError(operation string, err error) error {
+	return fmt.Errorf("failed to %s: %v", operation, err)
 }
 
 // marshalResponse provides unified JSON serialization for responses
-func (b *PulsarAdminFunctionsWorkerToolBuilder) marshalResponse(data interface{}) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminFunctionsWorkerToolBuilder) marshalResponse(data interface{}) (*sdk.CallToolResult, error) {
 	jsonBytes, err := json.Marshal(data)
 	if err != nil {
-		return b.handleError("marshal response", err), nil
+		return nil, b.handleError("marshal response", err)
 	}
-	return mcp.NewToolResultText(string(jsonBytes)), nil
+	return &sdk.CallToolResult{
+		Content: []sdk.Content{&sdk.TextContent{Text: string(jsonBytes)}},
+	}, nil
 }
 
 // Operation handler functions - migrated from the original implementation
 
 // handleFunctionsWorkerFunctionStats handles retrieving function statistics
-func (b *PulsarAdminFunctionsWorkerToolBuilder) handleFunctionsWorkerFunctionStats(admin cmdutils.Client) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminFunctionsWorkerToolBuilder) handleFunctionsWorkerFunctionStats(admin cmdutils.Client) (*sdk.CallToolResult, error) {
 	// Get function stats
 	stats, err := admin.FunctionsWorker().GetFunctionsStats()
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get functions stats: %v", err)), nil
+		return nil, b.handleError("get functions stats", err)
 	}
 
 	return b.marshalResponse(stats)
 }
 
 // handleFunctionsWorkerMonitoringMetrics handles retrieving monitoring metrics
-func (b *PulsarAdminFunctionsWorkerToolBuilder) handleFunctionsWorkerMonitoringMetrics(admin cmdutils.Client) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminFunctionsWorkerToolBuilder) handleFunctionsWorkerMonitoringMetrics(admin cmdutils.Client) (*sdk.CallToolResult, error) {
 	// Get monitoring metrics
 	metrics, err := admin.FunctionsWorker().GetMetrics()
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get monitoring metrics: %v", err)), nil
+		return nil, b.handleError("get monitoring metrics", err)
 	}
 
 	return b.marshalResponse(metrics)
 }
 
 // handleFunctionsWorkerGetCluster handles retrieving cluster information
-func (b *PulsarAdminFunctionsWorkerToolBuilder) handleFunctionsWorkerGetCluster(admin cmdutils.Client) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminFunctionsWorkerToolBuilder) handleFunctionsWorkerGetCluster(admin cmdutils.Client) (*sdk.CallToolResult, error) {
 	// Get cluster info
 	cluster, err := admin.FunctionsWorker().GetCluster()
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get worker cluster: %v", err)), nil
+		return nil, b.handleError("get worker cluster", err)
 	}
 
 	return b.marshalResponse(cluster)
 }
 
 // handleFunctionsWorkerGetClusterLeader handles retrieving cluster leader information
-func (b *PulsarAdminFunctionsWorkerToolBuilder) handleFunctionsWorkerGetClusterLeader(admin cmdutils.Client) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminFunctionsWorkerToolBuilder) handleFunctionsWorkerGetClusterLeader(admin cmdutils.Client) (*sdk.CallToolResult, error) {
 	// Get cluster leader
 	leader, err := admin.FunctionsWorker().GetClusterLeader()
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get worker cluster leader: %v", err)), nil
+		return nil, b.handleError("get worker cluster leader", err)
 	}
 
 	return b.marshalResponse(leader)
 }
 
 // handleFunctionsWorkerGetFunctionAssignments handles retrieving function assignments
-func (b *PulsarAdminFunctionsWorkerToolBuilder) handleFunctionsWorkerGetFunctionAssignments(admin cmdutils.Client) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminFunctionsWorkerToolBuilder) handleFunctionsWorkerGetFunctionAssignments(admin cmdutils.Client) (*sdk.CallToolResult, error) {
 	// Get function assignments
 	assignments, err := admin.FunctionsWorker().GetAssignments()
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get function assignments: %v", err)), nil
+		return nil, b.handleError("get function assignments", err)
 	}
 
 	return b.marshalResponse(assignments)
+}
+
+func buildPulsarAdminFunctionsWorkerInputSchema() (*jsonschema.Schema, error) {
+	schema, err := jsonschema.For[pulsarAdminFunctionsWorkerInput](nil)
+	if err != nil {
+		return nil, fmt.Errorf("input schema: %w", err)
+	}
+	if schema.Type != "object" {
+		return nil, fmt.Errorf("input schema must have type \"object\"")
+	}
+
+	if schema.Properties == nil {
+		schema.Properties = map[string]*jsonschema.Schema{}
+	}
+
+	setSchemaDescription(schema, "resource", pulsarAdminFunctionsWorkerResourceDesc)
+	normalizeAdditionalProperties(schema)
+	return schema, nil
 }
