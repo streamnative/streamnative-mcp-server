@@ -18,6 +18,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/google/jsonschema-go/jsonschema"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -45,8 +46,20 @@ func TestPulsarAdminFunctionsToolBuilder(t *testing.T) {
 		tools, err := builder.BuildTools(context.Background(), config)
 		require.NoError(t, err)
 		assert.Len(t, tools, 1)
-		assert.Equal(t, "pulsar_admin_functions", tools[0].Tool.Name)
-		assert.NotNil(t, tools[0].Handler)
+		assert.Equal(t, "pulsar_admin_functions", tools[0].Definition().Name)
+		assert.NotNil(t, tools[0])
+	})
+
+	t.Run("BuildTools_ReadOnly", func(t *testing.T) {
+		config := builders.ToolBuildConfig{
+			ReadOnly: true,
+			Features: []string{"pulsar-admin-functions"},
+		}
+
+		tools, err := builder.BuildTools(context.Background(), config)
+		require.NoError(t, err)
+		assert.Len(t, tools, 1)
+		assert.Equal(t, "pulsar_admin_functions", tools[0].Definition().Name)
 	})
 
 	t.Run("BuildTools_NoFeatures", func(t *testing.T) {
@@ -77,4 +90,56 @@ func TestPulsarAdminFunctionsToolBuilder(t *testing.T) {
 		err := builder.Validate(config)
 		assert.Error(t, err)
 	})
+}
+
+func TestPulsarAdminFunctionsToolSchema(t *testing.T) {
+	builder := NewPulsarAdminFunctionsToolBuilder()
+	tool, err := builder.buildPulsarAdminFunctionsTool()
+	require.NoError(t, err)
+	assert.Equal(t, "pulsar_admin_functions", tool.Name)
+
+	schema, ok := tool.InputSchema.(*jsonschema.Schema)
+	require.True(t, ok)
+	require.NotNil(t, schema.Properties)
+
+	expectedRequired := []string{"operation", "tenant", "namespace"}
+	assert.ElementsMatch(t, expectedRequired, schema.Required)
+
+	expectedProps := []string{
+		"operation",
+		"tenant",
+		"namespace",
+		"name",
+		"classname",
+		"inputs",
+		"output",
+		"jar",
+		"py",
+		"go",
+		"parallelism",
+		"userConfig",
+		"key",
+		"value",
+		"topic",
+		"triggerValue",
+	}
+	assert.ElementsMatch(t, expectedProps, mapStringKeys(schema.Properties))
+
+	operationSchema := schema.Properties["operation"]
+	require.NotNil(t, operationSchema)
+	assert.Equal(t, pulsarAdminFunctionsOperationDesc, operationSchema.Description)
+}
+
+func TestPulsarAdminFunctionsToolBuilder_ReadOnlyRejectsWrite(t *testing.T) {
+	builder := NewPulsarAdminFunctionsToolBuilder()
+	handler := builder.buildPulsarAdminFunctionsHandler(true)
+
+	_, _, err := handler(context.Background(), nil, pulsarAdminFunctionsInput{
+		Operation: "create",
+		Tenant:    "tenant",
+		Namespace: "namespace",
+	})
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "read-only")
 }
