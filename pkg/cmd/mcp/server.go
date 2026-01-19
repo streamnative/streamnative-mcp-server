@@ -140,6 +140,6 @@ func newMcpServer(_ context.Context, configOpts *ServerOptions, logrusLogger *lo
 	mcp.KafkaAdminAddSchemaRegistryTools(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.KafkaAdminAddKafkaConnectTools(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.KafkaClientAddConsumeTools(s, configOpts.ReadOnly, logrusLogger, configOpts.Features)
-	mcp.KafkaClientAddProduceTools(s, configOpts.ReadOnly, configOpts.Features)
+	mcp.KafkaClientAddProduceToolsLegacy(s, configOpts.ReadOnly, configOpts.Features)
 	return mcpServer, nil
 }

@@ -18,6 +18,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/google/jsonschema-go/jsonschema"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -45,8 +46,8 @@ func TestKafkaProduceToolBuilder(t *testing.T) {
 		tools, err := builder.BuildTools(context.Background(), config)
 		require.NoError(t, err)
 		assert.Len(t, tools, 1)
-		assert.Equal(t, "kafka_client_produce", tools[0].Tool.Name)
-		assert.NotNil(t, tools[0].Handler)
+		assert.Equal(t, "kafka_client_produce", tools[0].Definition().Name)
+		assert.NotNil(t, tools[0])
 	})
 
 	t.Run("BuildTools_ReadOnlyMode", func(t *testing.T) {
@@ -88,4 +89,33 @@ func TestKafkaProduceToolBuilder(t *testing.T) {
 		err := builder.Validate(config)
 		assert.Error(t, err)
 	})
+}
+
+func TestKafkaProduceToolSchema(t *testing.T) {
+	builder := NewKafkaProduceToolBuilder()
+	tool, err := builder.buildKafkaProduceTool()
+	require.NoError(t, err)
+	assert.Equal(t, "kafka_client_produce", tool.Name)
+
+	schema, ok := tool.InputSchema.(*jsonschema.Schema)
+	require.True(t, ok)
+	require.NotNil(t, schema.Properties)
+
+	expectedRequired := []string{"topic", "value"}
+	assert.ElementsMatch(t, expectedRequired, schema.Required)
+
+	expectedProps := []string{
+		"topic",
+		"key",
+		"value",
+		"headers",
+		"partition",
+		"messages",
+		"sync",
+	}
+	assert.ElementsMatch(t, expectedProps, mapStringKeys(schema.Properties))
+
+	topicSchema := schema.Properties["topic"]
+	require.NotNil(t, topicSchema)
+	assert.Equal(t, kafkaProduceTopicDesc, topicSchema.Description)
 }
