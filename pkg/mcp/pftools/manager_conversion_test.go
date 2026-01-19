@@ -62,3 +62,24 @@ func TestLegacyResultToSDKTextContent(t *testing.T) {
 	require.True(t, ok)
 	require.Equal(t, "ok", textContent.Text)
 }
+
+func TestSDKResultToLegacyTextContent(t *testing.T) {
+	sdkResult := &sdk.CallToolResult{
+		Content: []sdk.Content{
+			&sdk.TextContent{Text: "ok"},
+		},
+		IsError:           true,
+		StructuredContent: map[string]any{"status": "ok"},
+	}
+
+	legacyResult := sdkResultToLegacy(sdkResult)
+	require.NotNil(t, legacyResult)
+	require.True(t, legacyResult.IsError)
+	require.Equal(t, sdkResult.StructuredContent, legacyResult.StructuredContent)
+	require.Len(t, legacyResult.Content, 1)
+
+	textContent, ok := legacyResult.Content[0].(legacy.TextContent)
+	require.True(t, ok)
+	require.Equal(t, "ok", textContent.Text)
+	require.Equal(t, legacy.ContentTypeText, textContent.Type)
+}
