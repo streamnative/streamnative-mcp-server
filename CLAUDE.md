@@ -19,16 +19,16 @@ go test -v -run TestName ./pkg/...    # Run a single test
 
 ## Architecture Overview
 
-The StreamNative MCP Server implements the Model Context Protocol using the `mark3labs/mcp-go` library to enable AI agents to interact with Apache Kafka, Apache Pulsar, and StreamNative Cloud resources.
+The StreamNative MCP Server implements the Model Context Protocol using the `modelcontextprotocol/go-sdk` library to enable AI agents to interact with Apache Kafka, Apache Pulsar, and StreamNative Cloud resources.
 
 ### Request Flow
 
 ```
-Client Request → MCP Server (pkg/mcp/server.go)
+Client Request → Transport (stdio/SSE in pkg/cmd/mcp/)
                     ↓
-              SSE/stdio transport layer (pkg/cmd/mcp/)
+              MCP Server (go-sdk, pkg/mcp/server_new.go)
                     ↓
-              Tool Handler (from builders)
+              Tool Handler (typed input/output)
                     ↓
               Context Functions (pkg/mcp/ctx.go)
                     ↓
@@ -37,13 +37,16 @@ Client Request → MCP Server (pkg/mcp/server.go)
 
 ### Core Components
 
-1. **Server & Sessions** (`pkg/mcp/server.go`)
-   - `Server` struct holds `MCPServer`, `KafkaSession`, `PulsarSession`, and `SNCloudSession`
-   - Sessions provide lazy-initialized clients for each service
+1. **Server & Sessions** (`pkg/mcp/server_new.go`)
+   - `Server` wraps go-sdk `*mcp.Server` as `MCPServer` and holds `KafkaSession`, `PulsarSession`, and `SNCloudSession`
+   - `NewServer` configures server capabilities plus logging/recovery middleware
    - Context functions (`pkg/mcp/ctx.go`) inject/retrieve sessions from request context
 
 2. **Tool Builders Framework** (`pkg/mcp/builders/`)
-   - `ToolBuilder` interface: `GetName()`, `GetRequiredFeatures()`, `BuildTools()`, `Validate()`
+   - `ToolBuilder` interface: `GetName()`, `GetRequiredFeatures()`, `BuildTools(ctx, config)`, `Validate(config)`
+   - `ToolDefinition` provides `Definition()` and `Register(*mcp.Server)` for typed tool installs
+   - `ServerTool[In, Out]` pairs a `*mcp.Tool` with `mcp.ToolHandlerFor[In, Out]`
+   - Tool schemas are generated via `jsonschema-go` helpers in `pkg/mcp/schema.go`
    - `BaseToolBuilder` provides common feature validation logic
    - `ToolRegistry` manages all tool builders with concurrent-safe registration
    - `ToolBuildConfig` specifies build parameters (ReadOnly, Features, Options)
@@ -57,6 +60,7 @@ Client Request → MCP Server (pkg/mcp/server.go)
 4. **Tool Registration** (`pkg/mcp/*_tools.go`)
    - Each `*_tools.go` file creates a builder, builds tools, and adds them to the server
    - Tools are conditionally registered based on `--features` flag
+   - Registration uses `tool.Register(server)` to install typed handlers on the go-sdk server
    - Feature constants defined in `pkg/mcp/features.go`
 
 5. **PFTools - Functions as Tools** (`pkg/mcp/pftools/`)
@@ -69,8 +73,9 @@ Client Request → MCP Server (pkg/mcp/server.go)
    - `pulsar_session_manager.go` - LRU session cache with TTL cleanup for multi-session mode
 
 7. **Transport Layer** (`pkg/cmd/mcp/`)
-   - `sse.go` - SSE transport with health endpoints (`/healthz`, `/readyz`) and auth middleware
-   - `server.go` - Stdio transport and common server initialization
+   - `stdio.go` - Stdio transport via `mcp.StdioTransport` (optional `mcp.LoggingTransport`)
+   - `sse.go` - SSE transport via `mcp.SSEServerTransport` with message endpoint, health endpoints, and auth middleware
+   - `server.go` - Common server initialization and tool registration
 
 ### Key Design Patterns
 
@@ -101,11 +106,35 @@ Client Request → MCP Server (pkg/mcp/server.go)
        }
    }
 
-   func (b *MyToolBuilder) BuildTools(ctx context.Context, config builders.ToolBuildConfig) ([]server.ServerTool, error) {
+   func (b *MyToolBuilder) BuildTools(ctx context.Context, config builders.ToolBuildConfig) ([]builders.ToolDefinition, error) {
        if !b.HasAnyRequiredFeature(config.Features) {
            return nil, nil
        }
-       // Build and return tools
+       if err := b.Validate(config); err != nil {
+           return nil, err
+       }
+
+       inputSchema, err := mcp.InputSchema[MyInput]()
+       if err != nil {
+           return nil, err
+       }
+
+       tool := &sdk.Tool{
+           Name:        "my_tool",
+           Description: "Tool description",
+           InputSchema: inputSchema,
+       }
+
+       handler := func(ctx context.Context, _ *sdk.CallToolRequest, input MyInput) (*sdk.CallToolResult, MyOutput, error) {
+           // Handler logic here
+           return &sdk.CallToolResult{
+               Content: []sdk.Content{&sdk.TextContent{Text: "ok"}},
+           }, MyOutput{}, nil
+       }
+
+       return []builders.ToolDefinition{
+           builders.ServerTool[MyInput, MyOutput]{Tool: tool, Handler: handler},
+       }, nil
    }
    ```
 
@@ -113,12 +142,12 @@ Client Request → MCP Server (pkg/mcp/server.go)
 
 3. **Create Registration File** `pkg/mcp/my_tools.go`:
    ```go
-   func AddMyTools(s *server.MCPServer, readOnly bool, features []string) {
+   func AddMyTools(s *sdk.Server, readOnly bool, features []string) {
        builder := kafkabuilders.NewMyToolBuilder()
        config := builders.ToolBuildConfig{ReadOnly: readOnly, Features: features}
        tools, _ := builder.BuildTools(context.Background(), config)
        for _, tool := range tools {
-           s.AddTool(tool.Tool, tool.Handler)
+           tool.Register(s)
        }
    }
    ```
@@ -127,7 +156,10 @@ Client Request → MCP Server (pkg/mcp/server.go)
    ```go
    session := mcp.GetKafkaSession(ctx)  // or GetPulsarSession
    if session == nil {
-       return mcp.NewToolResultError("session not found"), nil
+       return &sdk.CallToolResult{
+           IsError: true,
+           Content: []sdk.Content{&sdk.TextContent{Text: "session not found"}},
+       }, nil, nil
    }
    admin, err := session.GetAdminClient()
    ```
@@ -242,6 +274,6 @@ The project includes generated SDK packages:
 ## Error Handling
 
 - Wrap errors: `fmt.Errorf("failed to X: %w", err)`
-- Return tool errors: `mcp.NewToolResultError("message")`
+- Return tool errors by setting `IsError: true` on `sdk.CallToolResult`
 - Check session nil before operations
 - For PFTools, use circuit breaker to handle repeated failures
