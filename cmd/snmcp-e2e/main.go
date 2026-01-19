@@ -28,8 +28,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mark3labs/mcp-go/client"
-	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 type config struct {
@@ -272,34 +271,19 @@ func expectUnauthorized(ctx context.Context, sseURL, token string, verbose bool)
 		return fmt.Errorf("expected unauthorized status for %s, got %d", sseURL, status)
 	}
 
-	headers := map[string]string{
-		"Authorization": "Bearer " + token,
-	}
-	c, err := client.NewSSEMCPClient(sseURL, client.WithHeaders(headers))
+	session, err := newAuthedClient(ctx, sseURL, token, "snmcp-e2e-unauthorized")
 	if err != nil {
-		return err
-	}
-	defer func() {
-		_ = c.Close()
-	}()
-
-	if err := c.Start(ctx); err != nil {
-		logf(verbose, "sse start error: %v", err)
+		logf(verbose, "sse connect error: %v", err)
 		if isAuthError(err) {
 			return nil
 		}
 		return fmt.Errorf("expected auth error for %s, got %v", sseURL, err)
 	}
+	defer func() {
+		_ = session.Close()
+	}()
 
-	if err := initializeClient(ctx, c, "snmcp-e2e-unauthorized"); err != nil {
-		logf(verbose, "initialize error: %v", err)
-		if isAuthError(err) {
-			return nil
-		}
-		return fmt.Errorf("expected auth error during initialize for %s, got %v", sseURL, err)
-	}
-
-	result, err := callTool(ctx, c, "pulsar_admin_cluster", map[string]any{
+	result, err := callTool(ctx, session, "pulsar_admin_cluster", map[string]any{
 		"resource":  "cluster",
 		"operation": "list",
 	})
@@ -321,39 +305,49 @@ func expectUnauthorized(ctx context.Context, sseURL, token string, verbose bool)
 	return nil
 }
 
-func newAuthedClient(ctx context.Context, sseURL, token, clientName string) (*client.Client, error) {
-	headers := map[string]string{
-		"Authorization": "Bearer " + token,
+func newAuthedClient(ctx context.Context, sseURL, token, clientName string) (*mcp.ClientSession, error) {
+	transport := &mcp.SSEClientTransport{
+		Endpoint:   sseURL,
+		HTTPClient: newAuthHTTPClient(token),
 	}
-	c, err := client.NewSSEMCPClient(sseURL, client.WithHeaders(headers))
-	if err != nil {
-		return nil, err
-	}
-	if err := c.Start(ctx); err != nil {
-		return nil, err
-	}
-	if err := initializeClient(ctx, c, clientName); err != nil {
-		return nil, err
-	}
-	return c, nil
-}
-
-func initializeClient(ctx context.Context, c *client.Client, name string) error {
-	req := mcp.InitializeRequest{}
-	req.Params.ProtocolVersion = mcp.LATEST_PROTOCOL_VERSION
-	req.Params.ClientInfo = mcp.Implementation{
-		Name:    name,
+	c := mcp.NewClient(&mcp.Implementation{
+		Name:    clientName,
 		Version: "1.0.0",
-	}
-	_, err := c.Initialize(ctx, req)
-	return err
+	}, nil)
+	return c.Connect(ctx, transport, nil)
 }
 
-func callTool(ctx context.Context, c *client.Client, name string, args map[string]any) (*mcp.CallToolResult, error) {
-	request := mcp.CallToolRequest{}
-	request.Params.Name = name
-	request.Params.Arguments = args
-	return c.CallTool(ctx, request)
+type authRoundTripper struct {
+	base  http.RoundTripper
+	token string
+}
+
+func (rt *authRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	base := rt.base
+	if base == nil {
+		base = http.DefaultTransport
+	}
+	cloned := req.Clone(req.Context())
+	if rt.token != "" {
+		cloned.Header.Set("Authorization", "Bearer "+rt.token)
+	}
+	return base.RoundTrip(cloned)
+}
+
+func newAuthHTTPClient(token string) *http.Client {
+	return &http.Client{
+		Transport: &authRoundTripper{
+			base:  http.DefaultTransport,
+			token: token,
+		},
+	}
+}
+
+func callTool(ctx context.Context, session *mcp.ClientSession, name string, args map[string]any) (*mcp.CallToolResult, error) {
+	return session.CallTool(ctx, &mcp.CallToolParams{
+		Name:      name,
+		Arguments: args,
+	})
 }
 
 func requireToolOK(result *mcp.CallToolResult, err error, label string) error {
@@ -380,7 +374,7 @@ func firstText(result *mcp.CallToolResult) string {
 	if result == nil || len(result.Content) == 0 {
 		return ""
 	}
-	if text, ok := result.Content[0].(mcp.TextContent); ok {
+	if text, ok := result.Content[0].(*mcp.TextContent); ok {
 		return text.Text
 	}
 	return ""
@@ -443,7 +437,7 @@ func isAuthText(text string) bool {
 	return false
 }
 
-func listClusters(ctx context.Context, c *client.Client) ([]string, error) {
+func listClusters(ctx context.Context, c *mcp.ClientSession) ([]string, error) {
 	result, err := callTool(ctx, c, "pulsar_admin_cluster", map[string]any{
 		"resource":  "cluster",
 		"operation": "list",
@@ -462,7 +456,7 @@ func listClusters(ctx context.Context, c *client.Client) ([]string, error) {
 	return clusters, nil
 }
 
-func runConcurrent(ctx context.Context, adminClient, testClient *client.Client, topic, subscription string) error {
+func runConcurrent(ctx context.Context, adminClient, testClient *mcp.ClientSession, topic, subscription string) error {
 	var wg sync.WaitGroup
 	errCh := make(chan error, 2)
 
