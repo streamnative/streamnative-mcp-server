@@ -17,15 +17,14 @@ package mcp
 import (
 	"context"
 
-	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
+	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	kafkabuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/kafka"
 )
 
-// KafkaClientAddProduceTools adds Kafka client produce tools to the MCP server
-func KafkaClientAddProduceTools(s *sdk.Server, readOnly bool, features []string) {
-	// Use the new builder pattern
-	builder := kafkabuilders.NewKafkaProduceToolBuilder()
+// KafkaClientAddProduceToolsLegacy adds Kafka client produce tools to the legacy MCP server.
+func KafkaClientAddProduceToolsLegacy(s *server.MCPServer, readOnly bool, features []string) {
+	builder := kafkabuilders.NewKafkaProduceLegacyToolBuilder()
 	config := builders.ToolBuildConfig{
 		ReadOnly: readOnly,
 		Features: features,
@@ -33,12 +32,10 @@ func KafkaClientAddProduceTools(s *sdk.Server, readOnly bool, features []string)
 
 	tools, err := builder.BuildTools(context.Background(), config)
 	if err != nil {
-		// Log error but don't fail - this maintains backward compatibility
 		return
 	}
 
-	// Add all built tools to the server
 	for _, tool := range tools {
-		tool.Register(s)
+		s.AddTool(tool.Tool, tool.Handler)
 	}
 }

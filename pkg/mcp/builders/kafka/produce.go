@@ -21,13 +21,57 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/jsonschema-go/jsonschema"
 	"github.com/hamba/avro/v2"
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcp-go/server"
+	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 	"github.com/twmb/franz-go/pkg/kgo"
 	"github.com/twmb/franz-go/pkg/sr"
+)
+
+type kafkaProduceMessageInput struct {
+	Key       *string  `json:"key,omitempty"`
+	Value     string   `json:"value"`
+	Headers   []string `json:"headers,omitempty"`
+	Partition *int     `json:"partition,omitempty"`
+}
+
+type kafkaProduceInput struct {
+	Topic     string                     `json:"topic"`
+	Key       *string                    `json:"key,omitempty"`
+	Value     string                     `json:"value"`
+	Headers   []string                   `json:"headers,omitempty"`
+	Partition *int                       `json:"partition,omitempty"`
+	Messages  []kafkaProduceMessageInput `json:"messages,omitempty"`
+	Sync      *bool                      `json:"sync,omitempty"`
+}
+
+const (
+	kafkaProduceTopicDesc = "The name of the Kafka topic to produce messages to. " +
+		"Must be an existing topic that the user has write permissions for."
+	kafkaProduceKeyDesc = "The key for the message. " +
+		"Optional. Keys are used for partition assignment and maintaining order for related messages. " +
+		"Messages with the same key will be sent to the same partition."
+	kafkaProduceValueDesc = "The value/content of the message to send. " +
+		"This is the actual payload that will be delivered to consumers. It can be a JSON string, and the system will automatically serialize it to the appropriate format based on the schema registry if it is available."
+	kafkaProduceHeadersDesc = "Message headers in the format of [\"key=value\"]. " +
+		"Optional. Headers allow you to attach metadata to messages without modifying the payload. " +
+		"They are passed along with the message to consumers."
+	kafkaProducePartitionDesc = "The specific partition to send the message to. " +
+		"Optional. If not specified, Kafka will automatically assign a partition based on the message key (if provided) or round-robin assignment. " +
+		"Specifying a partition can be useful for testing or when you need guaranteed partition assignment."
+	kafkaProduceMessagesDesc = "An array of messages to send in batch. " +
+		"Optional. Alternative to the single message parameters (key, value, headers, partition). " +
+		"Each message object can contain 'key', 'value', 'headers', and 'partition' properties. " +
+		"Batch sending is more efficient for multiple messages."
+	kafkaProduceSyncDesc = "Whether to wait for server acknowledgment before returning. " +
+		"Optional. Default is true. When true, ensures the message was successfully written to the topic before the tool returns a success response."
+
+	kafkaProduceMessageKeyDesc       = "Message key"
+	kafkaProduceMessageValueDesc     = "Message value (required)"
+	kafkaProduceMessageHeadersDesc   = "Message headers as array of \"key=value\" strings"
+	kafkaProduceMessagePartitionDesc = "Target partition number"
 )
 
 // KafkaProduceToolBuilder implements the ToolBuilder interface for Kafka client produce operations
@@ -60,7 +104,7 @@ func NewKafkaProduceToolBuilder() *KafkaProduceToolBuilder {
 
 // BuildTools builds the Kafka produce tool list
 // This is the core method implementing the ToolBuilder interface
-func (b *KafkaProduceToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]server.ServerTool, error) {
+func (b *KafkaProduceToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]builders.ToolDefinition, error) {
 	// Skip registration if in read-only mode
 	if config.ReadOnly {
 		return nil, nil
@@ -77,11 +121,14 @@ func (b *KafkaProduceToolBuilder) BuildTools(_ context.Context, config builders.
 	}
 
 	// Build tools
-	tool := b.buildKafkaProduceTool()
+	tool, err := b.buildKafkaProduceTool()
+	if err != nil {
+		return nil, err
+	}
 	handler := b.buildKafkaProduceHandler()
 
-	return []server.ServerTool{
-		{
+	return []builders.ToolDefinition{
+		builders.ServerTool[kafkaProduceInput, any]{
 			Tool:    tool,
 			Handler: handler,
 		},
@@ -90,7 +137,12 @@ func (b *KafkaProduceToolBuilder) BuildTools(_ context.Context, config builders.
 
 // buildKafkaProduceTool builds the Kafka produce MCP tool definition
 // Migrated from the original tool definition logic
-func (b *KafkaProduceToolBuilder) buildKafkaProduceTool() mcp.Tool {
+func (b *KafkaProduceToolBuilder) buildKafkaProduceTool() (*sdk.Tool, error) {
+	inputSchema, err := buildKafkaProduceInputSchema()
+	if err != nil {
+		return nil, err
+	}
+
 	toolDesc := "Produce messages to a Kafka topic.\n" +
 		"This tool allows you to send messages to Kafka topics with various options for message creation.\n\n" +
 		"Kafka Producer Concepts:\n" +
@@ -120,95 +172,29 @@ func (b *KafkaProduceToolBuilder) buildKafkaProduceTool() mcp.Tool {
 		"   partition: 2\n\n" +
 		"This tool requires Kafka producer permissions on the specified topic."
 
-	return mcp.NewTool("kafka_client_produce",
-		mcp.WithDescription(toolDesc),
-		mcp.WithString("topic", mcp.Required(),
-			mcp.Description("The name of the Kafka topic to produce messages to. "+
-				"Must be an existing topic that the user has write permissions for."),
-		),
-		mcp.WithString("key",
-			mcp.Description("The key for the message. "+
-				"Optional. Keys are used for partition assignment and maintaining order for related messages. "+
-				"Messages with the same key will be sent to the same partition."),
-		),
-		mcp.WithString("value",
-			mcp.Required(),
-			mcp.Description("The value/content of the message to send. "+
-				"This is the actual payload that will be delivered to consumers. It can be a JSON string, and the system will automatically serialize it to the appropriate format based on the schema registry if it is available."),
-		),
-		mcp.WithArray("headers",
-			mcp.Description("Message headers in the format of [\"key=value\"]. "+
-				"Optional. Headers allow you to attach metadata to messages without modifying the payload. "+
-				"They are passed along with the message to consumers."),
-			mcp.Items(map[string]interface{}{
-				"type":        "string",
-				"description": "key value pair in the format of \"key=value\"",
-			}),
-		),
-		mcp.WithNumber("partition",
-			mcp.Description("The specific partition to send the message to. "+
-				"Optional. If not specified, Kafka will automatically assign a partition based on the message key (if provided) or round-robin assignment. "+
-				"Specifying a partition can be useful for testing or when you need guaranteed partition assignment."),
-		),
-		mcp.WithArray("messages",
-			mcp.Description("An array of messages to send in batch. "+
-				"Optional. Alternative to the single message parameters (key, value, headers, partition). "+
-				"Each message object can contain 'key', 'value', 'headers', and 'partition' properties. "+
-				"Batch sending is more efficient for multiple messages."),
-			mcp.Items(map[string]interface{}{
-				"type": "object",
-				"properties": map[string]interface{}{
-					"key": map[string]interface{}{
-						"type":        "string",
-						"description": "Message key",
-					},
-					"value": map[string]interface{}{
-						"type":        "string",
-						"description": "Message value (required)",
-					},
-					"headers": map[string]interface{}{
-						"type":        "array",
-						"description": "Message headers as array of \"key=value\" strings",
-						"items": map[string]interface{}{
-							"type": "string",
-						},
-					},
-					"partition": map[string]interface{}{
-						"type":        "number",
-						"description": "Target partition number",
-					},
-				},
-				"required": []string{"value"},
-			}),
-		),
-		mcp.WithBoolean("sync",
-			mcp.Description("Whether to wait for server acknowledgment before returning. "+
-				"Optional. Default is true. When true, ensures the message was successfully written "+
-				"to the topic before the tool returns a success response."),
-		),
-	)
+	return &sdk.Tool{
+		Name:        "kafka_client_produce",
+		Description: toolDesc,
+		InputSchema: inputSchema,
+	}, nil
 }
 
 // buildKafkaProduceHandler builds the Kafka produce handler function
 // Migrated from the original handler logic
-func (b *KafkaProduceToolBuilder) buildKafkaProduceHandler() func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-		// Get required topic parameter
-		topicName, err := request.RequireString("topic")
-		if err != nil {
-			return b.handleError("get topic name", err), nil
-		}
+func (b *KafkaProduceToolBuilder) buildKafkaProduceHandler() builders.ToolHandlerFunc[kafkaProduceInput, any] {
+	return func(ctx context.Context, _ *sdk.CallToolRequest, input kafkaProduceInput) (*sdk.CallToolResult, any, error) {
+		topicName := input.Topic
 
 		// Get Kafka session from context
 		session := mcpCtx.GetKafkaSession(ctx)
 		if session == nil {
-			return b.handleError("get Kafka session not found in context", nil), nil
+			return nil, nil, b.handleError("get Kafka session not found in context", nil)
 		}
 
 		// Create Kafka client using the session
 		kafkaClient, err := session.GetClient()
 		if err != nil {
-			return b.handleError("create Kafka client", err), nil
+			return nil, nil, b.handleError("create Kafka client", err)
 		}
 		defer kafkaClient.Close()
 
@@ -224,19 +210,19 @@ func (b *KafkaProduceToolBuilder) buildKafkaProduceHandler() func(context.Contex
 		defer cancel()
 
 		if err = kafkaClient.Ping(timeoutCtx); err != nil { // check connectivity to cluster
-			return b.handleError("ping Kafka cluster", err), nil
+			return nil, nil, b.handleError("ping Kafka cluster", err)
 		}
 
 		if schemaReady {
 			subjSchema, err := srClient.SchemaByVersion(timeoutCtx, topicName+"-value", -1)
 			if err != nil {
-				return b.handleError("get schema", err), nil
+				return nil, nil, b.handleError("get schema", err)
 			}
 			switch subjSchema.Type {
 			case sr.TypeAvro:
 				avroSchema, err := avro.Parse(subjSchema.Schema.Schema)
 				if err != nil {
-					return b.handleError("parse avro schema", err), nil
+					return nil, nil, b.handleError("parse avro schema", err)
 				}
 				serde.Register(
 					subjSchema.ID,
@@ -263,14 +249,16 @@ func (b *KafkaProduceToolBuilder) buildKafkaProduceHandler() func(context.Contex
 		}
 
 		// Single message mode (simplified version)
-		value, err := request.RequireString("value")
-		if err != nil {
-			return b.handleError("get value", err), nil
+		value := input.Value
+		key := ""
+		if input.Key != nil {
+			key = *input.Key
 		}
-
-		key := request.GetString("key", "")
-		headers := request.GetStringSlice("headers", []string{})
-		sync := request.GetBool("sync", true)
+		headers := input.Headers
+		sync := true
+		if input.Sync != nil {
+			sync = *input.Sync
+		}
 
 		// Prepare record
 		record := &kgo.Record{
@@ -302,7 +290,7 @@ func (b *KafkaProduceToolBuilder) buildKafkaProduceHandler() func(context.Contex
 			if err := json.Unmarshal([]byte(value), &jsonValue); err == nil {
 				encodedValue, err := serde.Encode(jsonValue)
 				if err != nil {
-					return b.handleError("encode value with schema", err), nil
+					return nil, nil, b.handleError("encode value with schema", err)
 				}
 				record.Value = encodedValue
 			}
@@ -312,7 +300,7 @@ func (b *KafkaProduceToolBuilder) buildKafkaProduceHandler() func(context.Contex
 		if sync {
 			results := kafkaClient.ProduceSync(timeoutCtx, record)
 			if len(results) > 0 && results[0].Err != nil {
-				return b.handleError("produce message", results[0].Err), nil
+				return nil, nil, b.handleError("produce message", results[0].Err)
 			}
 		} else {
 			kafkaClient.Produce(timeoutCtx, record, func(_ *kgo.Record, _ error) {
@@ -336,8 +324,41 @@ func (b *KafkaProduceToolBuilder) buildKafkaProduceHandler() func(context.Contex
 			response["partition"] = record.Partition
 		}
 
-		return b.marshalResponse(response)
+		result, err := b.marshalResponse(response)
+		return result, nil, err
 	}
+}
+
+func buildKafkaProduceInputSchema() (*jsonschema.Schema, error) {
+	schema, err := jsonschema.For[kafkaProduceInput](nil)
+	if err != nil {
+		return nil, fmt.Errorf("input schema: %w", err)
+	}
+	if schema.Type != "object" {
+		return nil, fmt.Errorf("input schema must have type \"object\"")
+	}
+
+	if schema.Properties == nil {
+		schema.Properties = map[string]*jsonschema.Schema{}
+	}
+	setSchemaDescription(schema, "topic", kafkaProduceTopicDesc)
+	setSchemaDescription(schema, "key", kafkaProduceKeyDesc)
+	setSchemaDescription(schema, "value", kafkaProduceValueDesc)
+	setSchemaDescription(schema, "headers", kafkaProduceHeadersDesc)
+	setSchemaDescription(schema, "partition", kafkaProducePartitionDesc)
+	setSchemaDescription(schema, "messages", kafkaProduceMessagesDesc)
+	setSchemaDescription(schema, "sync", kafkaProduceSyncDesc)
+
+	messagesSchema := schema.Properties["messages"]
+	if messagesSchema != nil && messagesSchema.Items != nil {
+		setSchemaDescription(messagesSchema.Items, "key", kafkaProduceMessageKeyDesc)
+		setSchemaDescription(messagesSchema.Items, "value", kafkaProduceMessageValueDesc)
+		setSchemaDescription(messagesSchema.Items, "headers", kafkaProduceMessageHeadersDesc)
+		setSchemaDescription(messagesSchema.Items, "partition", kafkaProduceMessagePartitionDesc)
+	}
+
+	normalizeAdditionalProperties(schema)
+	return schema, nil
 }
 
 // Helper functions
@@ -345,15 +366,17 @@ func (b *KafkaProduceToolBuilder) buildKafkaProduceHandler() func(context.Contex
 // Unified error handling and utility functions
 
 // handleError provides unified error handling
-func (b *KafkaProduceToolBuilder) handleError(operation string, err error) *mcp.CallToolResult {
-	return mcp.NewToolResultError(fmt.Sprintf("Failed to %s: %v", operation, err))
+func (b *KafkaProduceToolBuilder) handleError(operation string, err error) error {
+	return fmt.Errorf("failed to %s: %v", operation, err)
 }
 
 // marshalResponse provides unified JSON serialization for responses
-func (b *KafkaProduceToolBuilder) marshalResponse(data interface{}) (*mcp.CallToolResult, error) {
+func (b *KafkaProduceToolBuilder) marshalResponse(data interface{}) (*sdk.CallToolResult, error) {
 	jsonBytes, err := json.Marshal(data)
 	if err != nil {
-		return b.handleError("marshal response", err), nil
+		return nil, b.handleError("marshal response", err)
 	}
-	return mcp.NewToolResultText(string(jsonBytes)), nil
+	return &sdk.CallToolResult{
+		Content: []sdk.Content{&sdk.TextContent{Text: string(jsonBytes)}},
+	}, nil
 }
