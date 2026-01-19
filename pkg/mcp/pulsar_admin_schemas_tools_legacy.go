@@ -17,14 +17,14 @@ package mcp
 import (
 	"context"
 
-	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
+	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	pulsarBuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/pulsar"
 )
 
-// PulsarAdminAddSchemasTools adds schema-related tools to the MCP server.
-func PulsarAdminAddSchemasTools(s *sdk.Server, readOnly bool, features []string) {
-	builder := pulsarBuilders.NewPulsarAdminSchemaToolBuilder()
+// PulsarAdminAddSchemasToolsLegacy adds schema-related tools to the legacy MCP server.
+func PulsarAdminAddSchemasToolsLegacy(s *server.MCPServer, readOnly bool, features []string) {
+	builder := pulsarBuilders.NewPulsarAdminSchemaLegacyToolBuilder()
 	config := builders.ToolBuildConfig{
 		ReadOnly: readOnly,
 		Features: features,
@@ -36,6 +36,6 @@ func PulsarAdminAddSchemasTools(s *sdk.Server, readOnly bool, features []string)
 	}
 
 	for _, tool := range tools {
-		tool.Register(s)
+		s.AddTool(tool.Tool, tool.Handler)
 	}
 }
