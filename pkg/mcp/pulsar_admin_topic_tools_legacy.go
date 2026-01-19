@@ -17,14 +17,14 @@ package mcp
 import (
 	"context"
 
-	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
+	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	pulsarBuilders "github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders/pulsar"
 )
 
-// PulsarAdminAddTopicTools registers Pulsar admin topic tools.
-func PulsarAdminAddTopicTools(s *sdk.Server, readOnly bool, features []string) {
-	builder := pulsarBuilders.NewPulsarAdminTopicToolBuilder()
+// PulsarAdminAddTopicToolsLegacy registers Pulsar admin topic tools for the legacy server.
+func PulsarAdminAddTopicToolsLegacy(s *server.MCPServer, readOnly bool, features []string) {
+	builder := pulsarBuilders.NewPulsarAdminTopicLegacyToolBuilder()
 	config := builders.ToolBuildConfig{
 		ReadOnly: readOnly,
 		Features: features,
@@ -36,6 +36,6 @@ func PulsarAdminAddTopicTools(s *sdk.Server, readOnly bool, features []string) {
 	}
 
 	for _, tool := range tools {
-		tool.Register(s)
+		s.AddTool(tool.Tool, tool.Handler)
 	}
 }
