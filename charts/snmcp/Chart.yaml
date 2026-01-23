@@ -2,8 +2,8 @@ apiVersion: v2
 name: snmcp
 description: A Helm chart for StreamNative MCP Server with Multi-Session Pulsar support
 type: application
-version: 0.1.0
-appVersion: "0.0.1"
+version: v0.1.15-rc.2
+appVersion: "v0.1.15-rc.2"
 home: https://github.com/streamnative/streamnative-mcp-server
 sources:
   - https://github.com/streamnative/streamnative-mcp-server
