@@ -16,6 +16,8 @@ package pftools
 
 import (
 	"errors"
+	"net"
+	"net/url"
 	"strings"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/rest"
@@ -30,16 +32,99 @@ var (
 
 // IsClusterUnhealthy checks if an error indicates cluster health issues
 func IsClusterUnhealthy(err error) bool {
-	if restErr, ok := err.(rest.Error); ok {
-		return restErr.Code == 503 && strings.Contains(restErr.Reason, "no healthy upstream")
+	if err == nil {
+		return false
 	}
-	return false
+
+	if restErr, ok := err.(rest.Error); ok {
+		if restErr.Code == 503 && strings.Contains(strings.ToLower(restErr.Reason), "no healthy upstream") {
+			return true
+		}
+	}
+
+	return IsNetworkError(err)
 }
 
 // IsAuthError reports whether the error is an authorization error.
 func IsAuthError(err error) bool {
+	if err == nil {
+		return false
+	}
 	if restErr, ok := err.(rest.Error); ok {
-		return restErr.Code == 403
+		return restErr.Code == 401 || restErr.Code == 403
+	}
+	return isAuthErrorText(err.Error())
+}
+
+// IsNotFoundError reports whether the error is a not found error.
+func IsNotFoundError(err error) bool {
+	if err == nil {
+		return false
+	}
+	if restErr, ok := err.(rest.Error); ok {
+		return restErr.Code == 404
+	}
+	return isNotFoundText(err.Error())
+}
+
+// IsNetworkError reports whether the error indicates a network failure.
+func IsNetworkError(err error) bool {
+	if err == nil {
+		return false
+	}
+	var netErr net.Error
+	if errors.As(err, &netErr) {
+		return true
+	}
+	var urlErr *url.Error
+	if errors.As(err, &urlErr) {
+		return true
+	}
+
+	errStr := strings.ToLower(err.Error())
+	networkErrorPatterns := []string{
+		"connection reset",
+		"connection refused",
+		"broken pipe",
+		"tls handshake timeout",
+		"i/o timeout",
+		"context deadline exceeded",
+		"timeout",
+		"eof",
+		"network is unreachable",
+		"no route to host",
+	}
+	for _, pattern := range networkErrorPatterns {
+		if strings.Contains(errStr, pattern) {
+			return true
+		}
+	}
+	return false
+}
+
+func isAuthErrorText(text string) bool {
+	lowered := strings.ToLower(text)
+	authErrorPatterns := []string{
+		"unauthorized",
+		"forbidden",
+		"token expired",
+		"expired token",
+		"invalid token",
+		"401",
+		"403",
+	}
+	for _, pattern := range authErrorPatterns {
+		if strings.Contains(lowered, pattern) {
+			return true
+		}
+	}
+	return false
+}
+
+func isNotFoundText(text string) bool {
+	lowered := strings.ToLower(text)
+	if strings.Contains(lowered, "404") && strings.Contains(lowered, "not found") {
+		return true
 	}
 	return false
 }
