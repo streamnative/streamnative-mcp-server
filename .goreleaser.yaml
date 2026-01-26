@@ -56,24 +56,36 @@ dockers:
     dockerfile: Dockerfile.goreleaser
     goos: linux
     goarch: amd64
+    use: buildx
+    build_flag_templates:
+      - "--platform=linux/amd64"
   - image_templates:
       - "streamnative/snmcp:{{ .Tag }}-arm64"
       - "streamnative/snmcp:latest-arm64"
     dockerfile: Dockerfile.goreleaser
     goos: linux
     goarch: arm64
+    use: buildx
+    build_flag_templates:
+      - "--platform=linux/arm64"
   - image_templates:
       - "streamnative/mcp-server:{{ .Tag }}-amd64"
       - "streamnative/mcp-server:latest-amd64"
     dockerfile: Dockerfile.goreleaser
     goos: linux
     goarch: amd64
+    use: buildx
+    build_flag_templates:
+      - "--platform=linux/amd64"
   - image_templates:
       - "streamnative/mcp-server:{{ .Tag }}-arm64"
       - "streamnative/mcp-server:latest-arm64"
     dockerfile: Dockerfile.goreleaser
     goos: linux
     goarch: arm64
+    use: buildx
+    build_flag_templates:
+      - "--platform=linux/arm64"
 
 docker_manifests:
   - name_template: "streamnative/snmcp:{{ .Tag }}"
