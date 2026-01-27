@@ -1,12 +1,13 @@
-# AGENTS.md  
-Guide for autonomous coding agents (e.g., OpenAI Codex) working in **streamnative-mcp-server**
+# AGENTS.md
+Guide for autonomous coding agents (e.g., OpenAI Codex) working in streamnative-mcp-server
 
 ---
 
 ## 1 | Project snapshot
-* **What it is** – A fast, developer-friendly **Model Context Protocol (MCP) server** that lets LLM agents talk to **Apache Kafka, Apache Pulsar, and StreamNative Cloud** through a single, consistent interface.  
-* **Key outputs** – A single Go binary named **`snmcp`** (and a Docker image) that can run as a *stdio* or *SSE* server.  
-* **Primary language / tooling** – Go 1.22+, `make`, `golangci-lint`, `goreleaser`.
+* What it is - A fast, developer-friendly Model Context Protocol (MCP) server that lets LLM agents talk to Apache Kafka, Apache Pulsar, and StreamNative Cloud through a single interface.
+* Key outputs - Go binary `snmcp`; Docker images `streamnative/mcp-server` (preferred) and `streamnative/snmcp` (legacy); Helm chart `charts/snmcp`.
+* Transports - stdio and SSE (HTTP).
+* Primary language / tooling - Go 1.24.4, make, golangci-lint, goreleaser, license-eye.
 
 ---
 
@@ -14,52 +15,54 @@ Guide for autonomous coding agents (e.g., OpenAI Codex) working in **streamnativ
 
 | Path | What lives here | Touch with care? |
 |------|-----------------|------------------|
-| `cmd/streamnative-mcp-server/` | `main.go` entry‑point for the CLI/server | **yes** |
-| `pkg/` | Core library packages (Kafka tools, Pulsar tools, cloud integration, feature gating) | yes |
-| `sdk/` | Thin Go client helpers (generated) | can be re‑generated |
-| `docs/tools/` | One Markdown file per MCP tool – these are surfaced to the LLM at runtime | **yes** |
-| `.github/workflows/` | CI (lint, unit test, release) | only if changing CI |
-| `Makefile` | Local build helpers (`make build`, `make fix-license`, …) | safe |
+| `cmd/streamnative-mcp-server/` | `main.go` entry point for the CLI/server | yes |
+| `pkg/cmd/mcp/` | stdio/SSE transport, auth middleware, health endpoints | yes |
+| `pkg/mcp/` | MCP server, sessions, feature flags, tool registration | yes |
+| `pkg/mcp/builders/` | Tool builder framework and concrete tool builders | yes |
+| `pkg/mcp/session/` | Multi-session Pulsar cache and cleanup | yes |
+| `docs/tools/` | One Markdown file per MCP tool surfaced to LLMs at runtime | yes |
+| `charts/snmcp/` | Helm chart for Kubernetes deployment | yes |
+| `sdk/` | Generated Go SDKs for external APIs | can be re-generated |
+| `.github/workflows/` | CI (lint, tests, release) | only if changing CI |
+| `Makefile` | Local build helpers | safe |
 
 ---
 
 ## 3 | Required dev workflow
 
-> **Agents MUST follow every step below before committing code or opening a PR.**
+> Agents MUST follow every step below before committing code or opening a PR.
 
-1. **Install deps**  
+1. Install deps
    ```bash
-   brew install golangci-lint            # or use the install script
-   go install github.com/elastic/go-licenser@latest
+   brew install golangci-lint            # or use the official install script
+   go install github.com/apache/skywalking-eyes/cmd/license-eye@latest
    ```
 
-2. **Build & unit tests**  
+2. Build and unit tests
    ```bash
-   make build            # invokes `go build …` with version metadata
-   go test ./...         # _there are few tests today – add more!_
+   make build            # invokes `go build` with version metadata
+   go test ./...
    ```
 
-3. **Static analysis & formatting**  
-   Run `golangci-lint run` and ensure **zero** issues. Linters enabled include `govet`, `staticcheck`, `revive`, `gosec`, etc.  
-   Follow `go fmt` / `goimports` import grouping.
+3. Static analysis and formatting
+   Run `golangci-lint run` and ensure zero issues. Use `gofmt`/`go fmt` and keep import grouping consistent (use goimports if configured).
 
-4. **License headers**  
+4. License headers
    ```bash
-   make fix-license      # injects Apache 2.0 headers via go-licenser
+   make license-fix
+   make license-check
    ```
 
-5. **Generate artifacts** (only if you edited code‑gen files)  
-   ```bash
-   go generate ./...
-   go mod tidy
-   ```
+5. Generate artifacts (only if you edited generated SDKs or OpenAPI specs)
+   - Follow the README/HOW_TO_BUILD files under `sdk/`.
+   - Run `go mod tidy` after regeneration.
 
-6. **Commit & conventional message**  
-   Use **Conventional Commits** (`feat:`, `fix:`, `docs:` …). Keep title ≤ 72 chars and add a body explaining _why_.
+6. Commit and conventional message
+   Use Conventional Commits (`feat:`, `fix:`, `docs:`). Keep title <= 72 chars and add a body explaining why.
 
-7. **Run the full release checks locally (optional but recommended)**  
+7. Run the full release checks locally (optional but recommended)
    ```bash
-   goreleaser release --snapshot --clean  # mirrors CI pipeline
+   goreleaser release --snapshot --clean
    ```
 
 ---
@@ -69,71 +72,103 @@ Guide for autonomous coding agents (e.g., OpenAI Codex) working in **streamnativ
 ```bash
 # StreamNative Cloud (stdio)
 bin/snmcp stdio --organization $ORG --key-file my_sa.json
+
 # External Kafka
 bin/snmcp stdio --use-external-kafka --kafka-bootstrap-servers localhost:9092
+
 # External Pulsar
 bin/snmcp stdio --use-external-pulsar --pulsar-web-service-url http://localhost:8080
 ```
 
-For HTTP/SSE mode add `sse --http-addr :9090 --http-path /mcp`.
+```bash
+# SSE server
+bin/snmcp sse --http-addr :9090 --http-path /mcp --organization $ORG --key-file my_sa.json
+```
+
+SSE notes:
+- Health endpoints: `/mcp/healthz` and `/mcp/readyz`.
+- Multi-session Pulsar (SSE + external Pulsar only): `--multi-session-pulsar`, `--session-cache-size`, `--session-ttl-minutes`.
 
 ---
 
-## 5 | Coding conventions
+## 5 | Architecture overview
 
-* **Package layout** – one feature per package; avoid cyclic imports.  
-* **Error handling** – wrap with `fmt.Errorf("context: %w", err)`; export sentinel errors where appropriate.  
-* **Logging** – rely on `zap` (already imported) with structured fields.  
-* **Tests** – use Go’s `testing` plus `testify/require`. When adding a tool, write at least:
-  * happy‑path invocation
+Request flow:
+```
+Client Request -> MCP Server (pkg/mcp/server.go)
+                 -> Transport (pkg/cmd/mcp)
+                 -> Tool Handler (builders)
+                 -> Context functions (pkg/mcp/ctx.go)
+                 -> Service client (Kafka/Pulsar/SNCloud)
+```
+
+Core components:
+1. Server and sessions - `pkg/mcp/server.go` manages Kafka/Pulsar/SNCloud sessions and MCP server wiring.
+2. Tool builders - `pkg/mcp/builders/` implements the builder pattern and feature validation.
+3. Tool registration - `pkg/mcp/*_tools.go` adds tools based on feature flags.
+4. Functions-as-tools (PFTools) - dynamic Pulsar Functions mapping with a circuit breaker.
+5. Session management - `pkg/mcp/session/` implements LRU + TTL cleanup for multi-session Pulsar mode.
+
+Key patterns:
+- Builder + registry for tool assembly.
+- Context injection for sessions.
+- Feature flags defined in `pkg/mcp/features.go`.
+- Multi-session mode disables the global Pulsar session and requires per-request tokens.
+
+---
+
+## 6 | Coding conventions
+
+* Package layout - one feature per package; avoid cyclic imports.
+* Error handling - wrap with `fmt.Errorf("context: %w", err)`; export sentinel errors when needed.
+* Logging - use `logrus` with structured fields.
+* Tests - use Go `testing` plus `testify/require`. When adding a tool, add:
+  * happy-path invocation
   * typical error path
   * integration stub (may be skipped with `-short`)
 
 ---
 
-## 6 | Common tasks for agents
+## 7 | Common tasks for agents
 
 | Task | Checklist |
 |------|-----------|
-| **Add a new MCP tool** | 1) create package in `pkg/tools/...` 2) update `docs/tools/<tool>.md` 3) add to feature flag map 4) go‑vet + tests |
-| **Bug fix** | reproduce with unit test first → fix → ensure lint/test pass |
-| **Docs** | update both README **and** the per‑tool doc; regenerate table of contents |
-| **Release prep** | bump version tag, update changelog, run `goreleaser release --snapshot` |
+| Add a new MCP tool | 1) create package in `pkg/mcp/builders/...` 2) update `docs/tools/<tool>.md` 3) add to feature flag map 4) tests + go vet |
+| Bug fix | reproduce with unit test first -> fix -> ensure lint/test pass |
+| Docs | update README and the per-tool doc; regenerate any table of contents |
+| Release prep | bump version tag, update changelog, run `goreleaser release --snapshot --clean` |
 
 ---
 
-## 7 | Programmatic checks the agent MUST run
+## 8 | Programmatic checks the agent MUST run
 
 ```bash
 go vet ./...
 golangci-lint run
 go test ./...
-make build                    # binary must compile for darwin/amd64 & linux/amd64
+make build
+make license-check
 ```
 
-Codex **must not** finish a task until all checks pass locally. If CI fails, iterate until green.
+Codex MUST not finish a task until all checks pass locally. If CI fails, iterate until green.
 
 ---
 
-## 8 | Pull‑request etiquette
+## 9 | Pull-request etiquette
 
-* Open PR against `main`, no new branches needed.  
-* Include a **Summary**, **Testing plan**, and **Docs updated** checklist.  
-* Mention which `--features` flags were affected, so reviewers know what to smoke‑test.  
+* Open PR against `main`, no new branches needed.
+* Include a Summary, Testing plan, and Docs updated checklist.
+* Mention which `--features` flags were affected, so reviewers know what to smoke-test.
 * If the change affects the public CLI, update `README.md` usage examples.
 
 ---
 
-## 9 | AGENTS.md spec compliance
+## 10 | AGENTS.md spec compliance
 
-This file follows the AGENTS.md spec described in the Codex system message (scope, precedence, required programmatic checks, etc.).  
+This file follows the AGENTS.md spec described in the Codex system message (scope, precedence, required programmatic checks, etc.).
 
-* Its scope is the **entire repository**.  
-* Deeper‑level AGENTS.md (not currently present) may override these instructions for their subtree.  
+* Its scope is the entire repository.
+* Deeper-level AGENTS.md (not currently present) may override these instructions for their subtree.
 * Direct human instructions in a prompt override anything here.
 
----
-
-Happy hacking! 🚀
-
-@CLAUDE.md as reference.
+See `CLAUDE.md` for deeper architecture and workflow details.
