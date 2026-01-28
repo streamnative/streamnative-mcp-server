@@ -17,6 +17,7 @@ Guide for autonomous coding agents (e.g., OpenAI Codex) working in **streamnativ
 | `cmd/streamnative-mcp-server/` | `main.go` entry‑point for the CLI/server | **yes** |
 | `pkg/` | Core library packages (Kafka tools, Pulsar tools, cloud integration, feature gating) | yes |
 | `sdk/` | Thin Go client helpers (generated) | can be re‑generated |
+| `charts/` | Helm charts (snmcp chart + values + README) | **yes** |
 | `docs/tools/` | One Markdown file per MCP tool – these are surfaced to the LLM at runtime | **yes** |
 | `.github/workflows/` | CI (lint, unit test, release) | only if changing CI |
 | `Makefile` | Local build helpers (`make build`, `make fix-license`, …) | safe |
@@ -98,6 +99,7 @@ For HTTP/SSE mode add `sse --http-addr :9090 --http-path /mcp`.
 | **Add a new MCP tool** | 1) create package in `pkg/tools/...` 2) update `docs/tools/<tool>.md` 3) add to feature flag map 4) go‑vet + tests |
 | **Bug fix** | reproduce with unit test first → fix → ensure lint/test pass |
 | **Docs** | update both README **and** the per‑tool doc; regenerate table of contents |
+| **Helm chart changes** | update `charts/snmcp/README.md`; keep repo install instructions current |
 | **Release prep** | bump version tag, update changelog, run `goreleaser release --snapshot` |
 
 ---
