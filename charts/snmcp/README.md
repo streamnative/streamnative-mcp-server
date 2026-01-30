@@ -10,6 +10,24 @@ This Helm chart deploys the StreamNative MCP Server on Kubernetes with **Multi-S
 
 ## Installation
 
+Install from the StreamNative Helm repository:
+
+```bash
+helm repo add streamnative https://charts.streamnative.io
+helm repo update
+
+helm install snmcp streamnative/snmcp \
+  --set pulsar.webServiceURL=http://pulsar.example.com:8080
+```
+
+Optional: check available chart versions
+
+```bash
+helm search repo streamnative/snmcp
+```
+
+Install from local chart (for development):
+
 ```bash
 helm install snmcp ./charts/snmcp \
   --set pulsar.webServiceURL=http://pulsar.example.com:8080
@@ -65,14 +83,14 @@ The container listens on port 9090. Use `service.port` or Ingress to expose a di
 ### Basic Installation
 
 ```bash
-helm install snmcp ./charts/snmcp \
+helm install snmcp streamnative/snmcp \
   --set pulsar.webServiceURL=http://pulsar:8080
 ```
 
 ### With Ingress
 
 ```bash
-helm install snmcp ./charts/snmcp \
+helm install snmcp streamnative/snmcp \
   --set pulsar.webServiceURL=http://pulsar:8080 \
   --set ingress.enabled=true \
   --set ingress.hosts[0].host=mcp.example.com \
@@ -83,7 +101,7 @@ helm install snmcp ./charts/snmcp \
 ### Read-Only Mode with Limited Features
 
 ```bash
-helm install snmcp ./charts/snmcp \
+helm install snmcp streamnative/snmcp \
   --set pulsar.webServiceURL=http://pulsar:8080 \
   --set server.readOnly=true \
   --set server.features="{pulsar-admin,pulsar-client}"
@@ -98,7 +116,7 @@ kubectl create secret generic pulsar-tls \
   --from-file=tls.crt=./tls.crt \
   --from-file=tls.key=./tls.key
 
-helm install snmcp ./charts/snmcp \
+helm install snmcp streamnative/snmcp \
   --set pulsar.webServiceURL=https://pulsar:8443 \
   --set pulsar.tls.enabled=true \
   --set pulsar.tls.secretName=pulsar-tls \

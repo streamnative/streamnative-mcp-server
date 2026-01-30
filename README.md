@@ -51,6 +51,10 @@ StreamNative MCP Server releases the Docker Image to [streamnative/snmcp](https:
 docker pull streamnative/snmcp 
 ```
 
+### Helm Chart (Kubernetes)
+
+See [charts/snmcp/README.md](charts/snmcp/README.md) for Helm installation via the StreamNative chart repository.
+
 ### From Github Release
 
 Visit https://github.com/streamnative/streamnative-mcp-server/releases to get the latest binary of StreamNative MCP Server.
@@ -97,10 +101,10 @@ bin/snmcp stdio --organization my-org --key-file /path/to/key-file.json --pulsar
 bin/snmcp stdio --use-external-kafka --kafka-bootstrap-servers localhost:9092 --kafka-auth-type SASL_SSL --kafka-auth-mechanism PLAIN --kafka-auth-user user --kafka-auth-pass pass --kafka-use-tls --kafka-schema-registry-url https://sr.local --kafka-schema-registry-auth-user user --kafka-schema-registry-auth-pass pass
 
 # Start MCP server with external Pulsar
-snmcp stdio --use-external-pulsar --pulsar-web-service-url http://pulsar.example.com:8080
-bin/snmcp stdio --use-external-pulsar --pulsar-web-service-url http://pulsar.example.com:8080  --pulsar-token "xxx"
+bin/snmcp stdio --use-external-pulsar --pulsar-web-service-url http://pulsar.example.com:8080
+bin/snmcp stdio --use-external-pulsar --pulsar-web-service-url http://pulsar.example.com:8080 --pulsar-token "xxx"
 
-# Start MCP server with SSE by docker with StreamNative Cloud authentication
+# Start MCP server with stdio by docker with StreamNative Cloud authentication
 docker run -i --rm -e SNMCP_ORGANIZATION=my-org -e SNMCP_KEY_FILE=/key.json -v /path/to/key-file.json:/key.json -p 9090:9090 streamnative/snmcp stdio
 ```
 
@@ -108,17 +112,17 @@ docker run -i --rm -e SNMCP_ORGANIZATION=my-org -e SNMCP_KEY_FILE=/key.json -v /
 
 ```bash
 # Start MCP server with SSE and StreamNative Cloud authentication
-snmcp sse --http-addr :9090 --http-path /mcp --organization my-org --key-file /path/to/key-file.json
+bin/snmcp sse --http-addr :9090 --http-path /mcp --organization my-org --key-file /path/to/key-file.json
 
 # Start MCP server with SSE and pre-configured StreamNative Cloud context
 # When --pulsar-instance and --pulsar-cluster are provided, context management tools are disabled
-snmcp sse --http-addr :9090 --http-path /mcp --organization my-org --key-file /path/to/key-file.json --pulsar-instance my-instance --pulsar-cluster my-cluster
+bin/snmcp sse --http-addr :9090 --http-path /mcp --organization my-org --key-file /path/to/key-file.json --pulsar-instance my-instance --pulsar-cluster my-cluster
 
 # Start MCP server with SSE and external Kafka
-snmcp sse --http-addr :9090 --http-path /mcp --use-external-kafka --kafka-bootstrap-servers localhost:9092
+bin/snmcp sse --http-addr :9090 --http-path /mcp --use-external-kafka --kafka-bootstrap-servers localhost:9092
 
 # Start MCP server with SSE and external Pulsar
-snmcp sse --http-addr :9090 --http-path /mcp --use-external-pulsar --pulsar-web-service-url http://pulsar.example.com:8080
+bin/snmcp sse --http-addr :9090 --http-path /mcp --use-external-pulsar --pulsar-web-service-url http://pulsar.example.com:8080
 
 # Start MCP server with SSE by docker with StreamNative Cloud authentication
 docker run -i --rm -e SNMCP_ORGANIZATION=my-org -e SNMCP_KEY_FILE=/key.json -v /path/to/key-file.json:/key.json -p 9090:9090 streamnative/snmcp sse
@@ -130,7 +134,7 @@ When running the SSE server with external Pulsar, you can enable **multi-session
 
 ```bash
 # Start SSE server with multi-session Pulsar mode
-snmcp sse --http-addr :9090 --http-path /mcp \
+bin/snmcp sse --http-addr :9090 --http-path /mcp \
   --use-external-pulsar \
   --pulsar-web-service-url http://pulsar.example.com:8080 \
   --multi-session-pulsar \
@@ -163,10 +167,11 @@ snmcp sse --http-addr :9090 --http-path /mcp \
 
 ```
 Usage:
-  snmcp [command]
+  bin/snmcp [command]
 
 Available Commands:
   stdio       Start stdio server
+  sse         Start sse server
   help        Help about any command
 
 Flags:
@@ -175,7 +180,7 @@ Flags:
       --config-dir string                      If present, the config directory to use
       --enable-command-logging                 When enabled, the server will log all command requests and responses to the log file
       --features strings                       Features to enable, defaults to `all`
-  -h, --help                                   help for snmcp
+  -h, --help                                   help for bin/snmcp
       --issuer string                          The OAuth 2.0 issuer endpoint (default "https://auth.streamnative.cloud/")
       --kafka-auth-mechanism string            The auth mechanism to use for Kafka
       --kafka-auth-pass string                 The auth password to use for Kafka
@@ -213,7 +218,7 @@ Flags:
       --multi-session-pulsar                   Enable per-user Pulsar sessions based on Authorization header tokens (only for external Pulsar mode)
       --session-cache-size int                 Maximum number of cached Pulsar sessions when multi-session is enabled (default 100)
       --session-ttl-minutes int                Session TTL in minutes before eviction when multi-session is enabled (default 30)
-  -v, --version                                version for snmcp
+  -v, --version                                version for bin/snmcp
 ```
 
 ## Tool Configuration
@@ -303,7 +308,7 @@ npm install -g @modelcontextprotocol/inspector
 
 ```bash
 # Inspect a stdio server
-mcp-inspector stdio --command "snmcp stdio --organization my-org --key-file /path/to/key-file.json"
+mcp-inspector stdio --command "bin/snmcp stdio --organization my-org --key-file /path/to/key-file.json"
 
 # Inspect an SSE server
 mcp-inspector sse --url "http://localhost:9090/mcp"
@@ -452,5 +457,4 @@ This project uses [semver](https://semver.org/) semantics.
 ## License
 
 Licensed under the Apache License Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
-
 
