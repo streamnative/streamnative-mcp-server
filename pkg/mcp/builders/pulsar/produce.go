@@ -59,6 +59,11 @@ func NewPulsarClientProduceToolBuilder() *PulsarClientProduceToolBuilder {
 // BuildTools builds the Pulsar Client Producer tool list
 // This is the core method implementing the ToolBuilder interface
 func (b *PulsarClientProduceToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]server.ServerTool, error) {
+	// Skip registration if in read-only mode
+	if config.ReadOnly {
+		return nil, nil
+	}
+
 	// Check features - return empty list if no required features are present
 	if !b.HasAnyRequiredFeature(config.Features) {
 		return nil, nil
