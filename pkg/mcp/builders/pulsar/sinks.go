@@ -776,10 +776,6 @@ func validateSinkArchiveArgs(archive, sinkType string) error {
 }
 
 func (b *PulsarAdminSinksToolBuilder) resolveSinkArchive(admin cmdutils.Client, config *utils.SinkConfig, archive, sinkType string) (string, error) {
-	if archive != "" && sinkType != "" {
-		return "", fmt.Errorf("cannot specify both 'archive' and 'sink-type'")
-	}
-
 	if sinkType != "" {
 		resolved, err := b.validateSinkType(admin, sinkType)
 		if err != nil {
