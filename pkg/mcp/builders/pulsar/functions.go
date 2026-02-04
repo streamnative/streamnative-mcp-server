@@ -516,7 +516,7 @@ func (b *PulsarAdminFunctionsToolBuilder) handleFunctionQuerystate(_ context.Con
 // handleFunctionCreate handles the create operation
 func (b *PulsarAdminFunctionsToolBuilder) handleFunctionCreate(_ context.Context, client cmdutils.Client, tenant, namespace, name string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Build function configuration from request parameters to validate
-	functionConfig, err := b.buildFunctionConfig(tenant, namespace, name, request, false)
+	functionConfig, err := b.buildFunctionConfig(tenant, namespace, name, request)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to build function configuration for '%s' in tenant '%s' namespace '%s': %v. Please verify all required parameters are provided correctly.",
 			name, tenant, namespace, err)), nil
@@ -551,7 +551,7 @@ func (b *PulsarAdminFunctionsToolBuilder) handleFunctionUpdate(_ context.Context
 	admin := client.Functions()
 
 	// Build function configuration from request parameters
-	config, err := b.buildFunctionConfig(tenant, namespace, name, request, true)
+	config, err := b.buildFunctionConfig(tenant, namespace, name, request)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to build function configuration for '%s' in tenant '%s' namespace '%s': %v. Please verify all parameters are provided correctly.",
 			name, tenant, namespace, err)), nil
@@ -740,8 +740,7 @@ func (b *PulsarAdminFunctionsToolBuilder) parseFunctionIdentity(request mcp.Call
 }
 
 // buildFunctionConfig builds a Pulsar Function configuration from MCP request parameters
-func (b *PulsarAdminFunctionsToolBuilder) buildFunctionConfig(tenant, namespace, name string, request mcp.CallToolRequest, isUpdate bool) (*utils.FunctionConfig, error) {
-	_ = isUpdate
+func (b *PulsarAdminFunctionsToolBuilder) buildFunctionConfig(tenant, namespace, name string, request mcp.CallToolRequest) (*utils.FunctionConfig, error) {
 	config := &utils.FunctionConfig{}
 	args := request.GetArguments()
 
@@ -998,24 +997,60 @@ func (b *PulsarAdminFunctionsToolBuilder) buildFunctionConfig(tenant, namespace,
 		config.WindowConfig.SlidingIntervalDurationMs = &value
 	}
 
-	if functionType, ok := getStringArg(args, "functionType"); ok && functionType != "" {
-		jar := fmt.Sprintf("builtin://%s", functionType)
-		config.Jar = &jar
-	} else if config.FunctionType != nil && *config.FunctionType != "" {
-		jar := fmt.Sprintf("builtin://%s", *config.FunctionType)
+	functionTypeArg, _ := getStringArg(args, "functionType")
+	jarArg, _ := getStringArg(args, "jar")
+	pyArg, _ := getStringArg(args, "py")
+	goArg, _ := getStringArg(args, "go")
+
+	functionTypeValue := functionTypeArg
+	if functionTypeValue == "" && config.FunctionType != nil {
+		functionTypeValue = *config.FunctionType
+	}
+	jarValue := jarArg
+	if jarValue == "" && config.Jar != nil {
+		jarValue = *config.Jar
+	}
+	pyValue := pyArg
+	if pyValue == "" && config.Py != nil {
+		pyValue = *config.Py
+	}
+	goValue := goArg
+	if goValue == "" && config.Go != nil {
+		goValue = *config.Go
+	}
+
+	if functionTypeValue != "" && (jarValue != "" || pyValue != "" || goValue != "") {
+		return nil, fmt.Errorf("functionType is mutually exclusive with jar, py, and go")
+	}
+	providedPackages := 0
+	if jarValue != "" {
+		providedPackages++
+	}
+	if pyValue != "" {
+		providedPackages++
+	}
+	if goValue != "" {
+		providedPackages++
+	}
+	if providedPackages > 1 {
+		return nil, fmt.Errorf("jar, py, and go are mutually exclusive")
+	}
+
+	if functionTypeValue != "" {
+		jar := fmt.Sprintf("builtin://%s", functionTypeValue)
 		config.Jar = &jar
 	}
 
-	if jar, ok := getStringArg(args, "jar"); ok && jar != "" {
-		config.Jar = &jar
+	if jarValue != "" {
+		config.Jar = &jarValue
 	}
 
-	if py, ok := getStringArg(args, "py"); ok && py != "" {
-		config.Py = &py
+	if pyValue != "" {
+		config.Py = &pyValue
 	}
 
-	if goFile, ok := getStringArg(args, "go"); ok && goFile != "" {
-		config.Go = &goFile
+	if goValue != "" {
+		config.Go = &goValue
 	}
 
 	if config.Go != nil {
@@ -1041,15 +1076,15 @@ func (b *PulsarAdminFunctionsToolBuilder) buildFunctionConfig(tenant, namespace,
 
 	formatFunctionConfig(config)
 
-	if isUpdate {
-		return config, nil
-	}
 	return config, nil
 }
 
 func parseFullyQualifiedFunctionName(fqfn string) (functionIdentity, error) {
 	parts := strings.Split(fqfn, "/")
 	if len(parts) != 3 {
+		return functionIdentity{}, fmt.Errorf("fully qualified function names must be of the form tenant/namespace/name")
+	}
+	if parts[0] == "" || parts[1] == "" || parts[2] == "" {
 		return functionIdentity{}, fmt.Errorf("fully qualified function names must be of the form tenant/namespace/name")
 	}
 	return functionIdentity{
@@ -1128,7 +1163,7 @@ func checkArgsForUpdate(functionConfig *utils.FunctionConfig) error {
 
 func inferMissingFunctionName(funcConf *utils.FunctionConfig) {
 	className := funcConf.ClassName
-	domains := strings.Split(className, "\\.")
+	domains := strings.Split(className, ".")
 	if len(domains) == 0 {
 		funcConf.Name = funcConf.ClassName
 		return

@@ -42,6 +42,18 @@ func TestParseFunctionIdentity(t *testing.T) {
 	require.Error(t, err)
 
 	req = mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]any{
+		"fqfn": "tenant//name",
+	}}}
+	_, err = builder.parseFunctionIdentity(req, "get")
+	require.Error(t, err)
+
+	req = mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]any{
+		"fqfn": "//name",
+	}}}
+	_, err = builder.parseFunctionIdentity(req, "get")
+	require.Error(t, err)
+
+	req = mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]any{
 		"tenant": "t",
 	}}}
 	_, err = builder.parseFunctionIdentity(req, "get")
@@ -92,4 +104,36 @@ func TestCheckArgsForUpdate(t *testing.T) {
 	require.NotEmpty(t, config.Name)
 	require.Equal(t, defaultTenant, config.Tenant)
 	require.Equal(t, defaultNamespace, config.Namespace)
+}
+
+func TestBuildFunctionConfigMutualExclusion(t *testing.T) {
+	builder := NewPulsarAdminFunctionsToolBuilder()
+
+	req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]any{
+		"functionType": "identity",
+		"jar":          "builtin://identity",
+	}}}
+	_, err := builder.buildFunctionConfig("public", "default", "name", req)
+	require.Error(t, err)
+
+	req = mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]any{
+		"functionType": "identity",
+		"py":           "echo.py",
+	}}}
+	_, err = builder.buildFunctionConfig("public", "default", "name", req)
+	require.Error(t, err)
+
+	req = mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]any{
+		"functionType": "identity",
+		"go":           "echo",
+	}}}
+	_, err = builder.buildFunctionConfig("public", "default", "name", req)
+	require.Error(t, err)
+
+	req = mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]any{
+		"jar": "builtin://identity",
+		"py":  "echo.py",
+	}}}
+	_, err = builder.buildFunctionConfig("public", "default", "name", req)
+	require.Error(t, err)
 }
