@@ -39,6 +39,24 @@ die() {
   exit 1
 }
 
+collect_logs() {
+  log "collecting debug logs"
+  if command -v kubectl >/dev/null 2>&1; then
+    log "snmcp logs (last 200 lines)"
+    kubectl logs "deployment/${SNMCP_RELEASE}" \
+      --namespace "$SNMCP_NAMESPACE" \
+      --tail=200 \
+      || true
+  fi
+
+  if command -v docker >/dev/null 2>&1; then
+    if docker ps -a --format '{{.Names}}' | grep -qx "$PULSAR_CONTAINER"; then
+      log "pulsar container logs (last 200 lines)"
+      docker logs --tail 200 "$PULSAR_CONTAINER" || true
+    fi
+  fi
+}
+
 require_cmd() {
   command -v "$1" >/dev/null 2>&1 || die "missing command: $1"
 }
@@ -194,7 +212,10 @@ run_tests() {
 
   local http_base="http://127.0.0.1:${SNMCP_LOCAL_PORT}${SNMCP_HTTP_PATH}"
   log "running snmcp-e2e against ${http_base}"
-  E2E_HTTP_BASE="$http_base" "$SNMCP_E2E_BIN"
+  if ! E2E_HTTP_BASE="$http_base" "$SNMCP_E2E_BIN"; then
+    collect_logs
+    return 1
+  fi
 }
 
 cleanup() {

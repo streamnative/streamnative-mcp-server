@@ -61,6 +61,7 @@ WORKDIR /server
 
 # Copy binary from builder
 COPY --from=builder /build/snmcp /server/snmcp
+COPY --from=builder /build/cmd/snmcp-e2e/testdata/functions/echo.py /server/e2e/functions/echo.py
 
 # Change ownership
 RUN chown -R snmcp:snmcp /server
