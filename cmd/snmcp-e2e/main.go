@@ -141,6 +141,10 @@ func run(ctx context.Context, cfg config) error {
 	functionInputTopic := fmt.Sprintf("persistent://%s/function-input-%d", namespace, suffix)
 	functionOutputTopic := fmt.Sprintf("persistent://%s/function-output-%d", namespace, suffix)
 	functionName := fmt.Sprintf("echo-%d", suffix)
+	sinkInputTopic := fmt.Sprintf("persistent://%s/sink-input-%d", namespace, suffix)
+	sinkName := fmt.Sprintf("file-sink-%d", suffix)
+	sinkPath := fmt.Sprintf("/tmp/snmcp-e2e-sink-%d", suffix)
+	sinkPathUpdated := fmt.Sprintf("/tmp/snmcp-e2e-sink-updated-%d", suffix)
 
 	result, err := callTool(ctx, adminClient, "pulsar_admin_tenant", map[string]any{
 		"resource":        "tenant",
@@ -322,6 +326,80 @@ func run(ctx context.Context, cfg config) error {
 		"name":      functionName,
 	})
 	if err := requireToolOK(result, err, "pulsar_admin_functions delete"); err != nil {
+		return err
+	}
+
+	result, err = callTool(ctx, adminClient, "pulsar_admin_topic", map[string]any{
+		"resource":   "topic",
+		"operation":  "create",
+		"topic":      sinkInputTopic,
+		"partitions": float64(0),
+	})
+	if err := requireToolOK(result, err, "pulsar_admin_topic create sink input"); err != nil {
+		return err
+	}
+
+	builtInSinks, err := listBuiltInSinks(ctx, adminClient)
+	if err != nil {
+		return err
+	}
+	if !hasBuiltInSink(builtInSinks, "file") {
+		return fmt.Errorf("built-in sink 'file' not available")
+	}
+
+	result, err = callTool(ctx, adminClient, "pulsar_admin_sinks", map[string]any{
+		"operation": "create",
+		"tenant":    tenant,
+		"namespace": namespaceName,
+		"name":      sinkName,
+		"sink-type": "file",
+		"inputs":    []string{sinkInputTopic},
+		"sink-config": map[string]any{
+			"path": sinkPath,
+		},
+	})
+	if err := requireToolOK(result, err, "pulsar_admin_sinks create"); err != nil {
+		return err
+	}
+
+	if err := waitForSinkRunning(ctx, adminClient, tenant, namespaceName, sinkName, 60*time.Second); err != nil {
+		return err
+	}
+
+	result, err = callTool(ctx, adminClient, "pulsar_admin_sinks", map[string]any{
+		"operation": "update",
+		"tenant":    tenant,
+		"namespace": namespaceName,
+		"name":      sinkName,
+		"sink-type": "file",
+		"sink-config": map[string]any{
+			"path": sinkPathUpdated,
+		},
+	})
+	if err := requireToolOK(result, err, "pulsar_admin_sinks update"); err != nil {
+		return err
+	}
+
+	result, err = callTool(ctx, adminClient, "pulsar_admin_sinks", map[string]any{
+		"operation": "get",
+		"tenant":    tenant,
+		"namespace": namespaceName,
+		"name":      sinkName,
+	})
+	if err := requireToolOK(result, err, "pulsar_admin_sinks get"); err != nil {
+		return err
+	}
+	if err := assertSinkConfigPath(firstText(result), sinkPathUpdated); err != nil {
+		return err
+	}
+
+	result, err = callTool(ctx, adminClient, "pulsar_admin_sinks", map[string]any{
+		"operation": "delete",
+		"tenant":    tenant,
+		"namespace": namespaceName,
+		"name":      sinkName,
+	})
+	if err := requireToolOK(result, err, "pulsar_admin_sinks delete"); err != nil {
 		return err
 	}
 
@@ -633,6 +711,128 @@ func assertFunctionUserConfig(raw string, key string) error {
 	}
 	if _, ok := userConfig[key]; !ok {
 		return fmt.Errorf("userConfig missing key: %s", key)
+	}
+	return nil
+}
+
+type connectorDefinition struct {
+	Name string `json:"name"`
+}
+
+func listBuiltInSinks(ctx context.Context, c *client.Client) ([]connectorDefinition, error) {
+	result, err := callTool(ctx, c, "pulsar_admin_sinks", map[string]any{
+		"operation": "list-built-in",
+	})
+	if err := requireToolOK(result, err, "pulsar_admin_sinks list-built-in"); err != nil {
+		return nil, err
+	}
+	raw := firstText(result)
+	if raw == "" {
+		return nil, errors.New("empty built-in sink list result")
+	}
+	var sinks []connectorDefinition
+	if err := json.Unmarshal([]byte(raw), &sinks); err != nil {
+		return nil, fmt.Errorf("failed to parse built-in sink list: %w", err)
+	}
+	return sinks, nil
+}
+
+func hasBuiltInSink(definitions []connectorDefinition, name string) bool {
+	for _, definition := range definitions {
+		if definition.Name == name {
+			return true
+		}
+	}
+	return false
+}
+
+type sinkStatus struct {
+	NumInstances int                  `json:"numInstances"`
+	NumRunning   int                  `json:"numRunning"`
+	Instances    []sinkInstanceStatus `json:"instances"`
+}
+
+type sinkInstanceStatus struct {
+	InstanceID int                    `json:"instanceId"`
+	Status     sinkInstanceStatusData `json:"status"`
+}
+
+type sinkInstanceStatusData struct {
+	Running bool   `json:"running"`
+	Err     string `json:"error"`
+}
+
+func waitForSinkRunning(ctx context.Context, c *client.Client, tenant, namespace, name string, timeout time.Duration) error {
+	deadline := time.Now().Add(timeout)
+	for time.Now().Before(deadline) {
+		status, err := getSinkStatus(ctx, c, tenant, namespace, name)
+		if err == nil && allSinkInstancesRunning(status) {
+			return nil
+		}
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-time.After(2 * time.Second):
+		}
+	}
+	return fmt.Errorf("sink %s did not reach running state within %s", name, timeout.String())
+}
+
+func getSinkStatus(ctx context.Context, c *client.Client, tenant, namespace, name string) (sinkStatus, error) {
+	result, err := callTool(ctx, c, "pulsar_admin_sinks", map[string]any{
+		"operation": "status",
+		"tenant":    tenant,
+		"namespace": namespace,
+		"name":      name,
+	})
+	if err := requireToolOK(result, err, "pulsar_admin_sinks status"); err != nil {
+		return sinkStatus{}, err
+	}
+	raw := firstText(result)
+	if raw == "" {
+		return sinkStatus{}, errors.New("empty sink status result")
+	}
+	var status sinkStatus
+	if err := json.Unmarshal([]byte(raw), &status); err != nil {
+		return sinkStatus{}, fmt.Errorf("failed to parse sink status: %w", err)
+	}
+	return status, nil
+}
+
+func allSinkInstancesRunning(status sinkStatus) bool {
+	if status.NumInstances == 0 || status.NumRunning < status.NumInstances {
+		return false
+	}
+	for _, instance := range status.Instances {
+		if !instance.Status.Running {
+			return false
+		}
+	}
+	return true
+}
+
+type sinkConfig struct {
+	Configs map[string]interface{} `json:"configs"`
+}
+
+func assertSinkConfigPath(raw string, expected string) error {
+	if raw == "" {
+		return errors.New("empty sink config result")
+	}
+	var config sinkConfig
+	if err := json.Unmarshal([]byte(raw), &config); err != nil {
+		return fmt.Errorf("failed to parse sink config: %w", err)
+	}
+	if config.Configs == nil {
+		return errors.New("missing configs in sink config")
+	}
+	value, ok := config.Configs["path"]
+	if !ok {
+		return errors.New("missing configs.path in sink config")
+	}
+	actual := fmt.Sprintf("%v", value)
+	if actual != expected {
+		return fmt.Errorf("unexpected sink config path: %s", actual)
 	}
 	return nil
 }
