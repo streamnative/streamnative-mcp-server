@@ -24,6 +24,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -142,9 +143,8 @@ func run(ctx context.Context, cfg config) error {
 	functionOutputTopic := fmt.Sprintf("persistent://%s/function-output-%d", namespace, suffix)
 	functionName := fmt.Sprintf("echo-%d", suffix)
 	sinkInputTopic := fmt.Sprintf("persistent://%s/sink-input-%d", namespace, suffix)
-	sinkName := fmt.Sprintf("file-sink-%d", suffix)
-	sinkPath := fmt.Sprintf("/tmp/snmcp-e2e-sink-%d", suffix)
-	sinkPathUpdated := fmt.Sprintf("/tmp/snmcp-e2e-sink-updated-%d", suffix)
+	sinkName := fmt.Sprintf("e2e-sink-%d", suffix)
+	sinkParallelismUpdated := 2
 
 	result, err := callTool(ctx, adminClient, "pulsar_admin_tenant", map[string]any{
 		"resource":        "tenant",
@@ -343,8 +343,9 @@ func run(ctx context.Context, cfg config) error {
 	if err != nil {
 		return err
 	}
-	if !hasBuiltInSink(builtInSinks, "file") {
-		return fmt.Errorf("built-in sink 'file' not available")
+	sinkType, err := selectSinkType(builtInSinks, []string{"data-generator", "batch-data-generator"})
+	if err != nil {
+		return err
 	}
 
 	result, err = callTool(ctx, adminClient, "pulsar_admin_sinks", map[string]any{
@@ -352,29 +353,24 @@ func run(ctx context.Context, cfg config) error {
 		"tenant":    tenant,
 		"namespace": namespaceName,
 		"name":      sinkName,
-		"sink-type": "file",
+		"sink-type": sinkType,
 		"inputs":    []string{sinkInputTopic},
-		"sink-config": map[string]any{
-			"path": sinkPath,
-		},
 	})
 	if err := requireToolOK(result, err, "pulsar_admin_sinks create"); err != nil {
 		return err
 	}
 
-	if err := waitForSinkRunning(ctx, adminClient, tenant, namespaceName, sinkName, 60*time.Second); err != nil {
+	if _, err := getSinkStatus(ctx, adminClient, tenant, namespaceName, sinkName); err != nil {
 		return err
 	}
 
 	result, err = callTool(ctx, adminClient, "pulsar_admin_sinks", map[string]any{
-		"operation": "update",
-		"tenant":    tenant,
-		"namespace": namespaceName,
-		"name":      sinkName,
-		"sink-type": "file",
-		"sink-config": map[string]any{
-			"path": sinkPathUpdated,
-		},
+		"operation":   "update",
+		"tenant":      tenant,
+		"namespace":   namespaceName,
+		"name":        sinkName,
+		"sink-type":   sinkType,
+		"parallelism": float64(sinkParallelismUpdated),
 	})
 	if err := requireToolOK(result, err, "pulsar_admin_sinks update"); err != nil {
 		return err
@@ -389,7 +385,7 @@ func run(ctx context.Context, cfg config) error {
 	if err := requireToolOK(result, err, "pulsar_admin_sinks get"); err != nil {
 		return err
 	}
-	if err := assertSinkConfigPath(firstText(result), sinkPathUpdated); err != nil {
+	if err := assertSinkParallelism(firstText(result), sinkParallelismUpdated); err != nil {
 		return err
 	}
 
@@ -737,13 +733,22 @@ func listBuiltInSinks(ctx context.Context, c *client.Client) ([]connectorDefinit
 	return sinks, nil
 }
 
-func hasBuiltInSink(definitions []connectorDefinition, name string) bool {
+func selectSinkType(definitions []connectorDefinition, preferred []string) (string, error) {
+	available := make(map[string]struct{}, len(definitions))
 	for _, definition := range definitions {
-		if definition.Name == name {
-			return true
+		available[definition.Name] = struct{}{}
+	}
+	for _, name := range preferred {
+		if _, ok := available[name]; ok {
+			return name, nil
 		}
 	}
-	return false
+	names := make([]string, 0, len(definitions))
+	for name := range available {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	return "", fmt.Errorf("no supported sink type available; found: %s", strings.Join(names, ", "))
 }
 
 type sinkStatus struct {
@@ -760,22 +765,6 @@ type sinkInstanceStatus struct {
 type sinkInstanceStatusData struct {
 	Running bool   `json:"running"`
 	Err     string `json:"error"`
-}
-
-func waitForSinkRunning(ctx context.Context, c *client.Client, tenant, namespace, name string, timeout time.Duration) error {
-	deadline := time.Now().Add(timeout)
-	for time.Now().Before(deadline) {
-		status, err := getSinkStatus(ctx, c, tenant, namespace, name)
-		if err == nil && allSinkInstancesRunning(status) {
-			return nil
-		}
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		case <-time.After(2 * time.Second):
-		}
-	}
-	return fmt.Errorf("sink %s did not reach running state within %s", name, timeout.String())
 }
 
 func getSinkStatus(ctx context.Context, c *client.Client, tenant, namespace, name string) (sinkStatus, error) {
@@ -799,23 +788,12 @@ func getSinkStatus(ctx context.Context, c *client.Client, tenant, namespace, nam
 	return status, nil
 }
 
-func allSinkInstancesRunning(status sinkStatus) bool {
-	if status.NumInstances == 0 || status.NumRunning < status.NumInstances {
-		return false
-	}
-	for _, instance := range status.Instances {
-		if !instance.Status.Running {
-			return false
-		}
-	}
-	return true
-}
-
 type sinkConfig struct {
-	Configs map[string]interface{} `json:"configs"`
+	Configs     map[string]interface{} `json:"configs"`
+	Parallelism int                    `json:"parallelism"`
 }
 
-func assertSinkConfigPath(raw string, expected string) error {
+func assertSinkParallelism(raw string, expected int) error {
 	if raw == "" {
 		return errors.New("empty sink config result")
 	}
@@ -823,16 +801,8 @@ func assertSinkConfigPath(raw string, expected string) error {
 	if err := json.Unmarshal([]byte(raw), &config); err != nil {
 		return fmt.Errorf("failed to parse sink config: %w", err)
 	}
-	if config.Configs == nil {
-		return errors.New("missing configs in sink config")
-	}
-	value, ok := config.Configs["path"]
-	if !ok {
-		return errors.New("missing configs.path in sink config")
-	}
-	actual := fmt.Sprintf("%v", value)
-	if actual != expected {
-		return fmt.Errorf("unexpected sink config path: %s", actual)
+	if config.Parallelism != expected {
+		return fmt.Errorf("unexpected sink parallelism: %d", config.Parallelism)
 	}
 	return nil
 }
