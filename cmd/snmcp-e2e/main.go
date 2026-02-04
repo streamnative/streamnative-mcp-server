@@ -283,8 +283,12 @@ func run(ctx context.Context, cfg config) error {
 	if err := requireToolOK(result, err, "pulsar_admin_functions trigger"); err != nil {
 		return err
 	}
-	if !strings.Contains(firstText(result), triggerValue) {
-		return fmt.Errorf("unexpected trigger result: %s", firstText(result))
+	triggerResult := firstText(result)
+	logf(cfg.verbose, "trigger result: %s", triggerResult)
+	if !strings.Contains(triggerResult, triggerValue) {
+		if err := waitForTriggerOutput(ctx, adminClient, functionOutputTopic, fmt.Sprintf("trigger-sub-%d", suffix), triggerValue, 30*time.Second, cfg.verbose); err != nil {
+			return fmt.Errorf("unexpected trigger result: %s; output check failed: %w", triggerResult, err)
+		}
 	}
 
 	result, err = callTool(ctx, adminClient, "pulsar_admin_functions", map[string]any{
@@ -631,6 +635,60 @@ func assertFunctionUserConfig(raw string, key string) error {
 		return fmt.Errorf("userConfig missing key: %s", key)
 	}
 	return nil
+}
+
+type consumeResponse struct {
+	MessagesConsumed int              `json:"messages_consumed"`
+	Messages         []consumeMessage `json:"messages"`
+}
+
+type consumeMessage struct {
+	Data string `json:"data"`
+}
+
+func waitForTriggerOutput(ctx context.Context, c *client.Client, topic, subscription, expected string, timeout time.Duration, verbose bool) error {
+	deadline := time.Now().Add(timeout)
+	for time.Now().Before(deadline) {
+		result, err := callTool(ctx, c, "pulsar_client_consume", map[string]any{
+			"topic":             topic,
+			"subscription-name": subscription,
+			"initial-position":  "earliest",
+			"num-messages":      float64(1),
+			"timeout":           float64(5),
+			"subscription-type": "exclusive",
+			"subscription-mode": "durable",
+			"show-properties":   false,
+			"hide-payload":      false,
+		})
+		if err := requireToolOK(result, err, "pulsar_client_consume trigger output"); err != nil {
+			return err
+		}
+
+		raw := firstText(result)
+		if raw != "" {
+			var resp consumeResponse
+			if err := json.Unmarshal([]byte(raw), &resp); err != nil {
+				return fmt.Errorf("failed to parse trigger output: %w", err)
+			}
+			if resp.MessagesConsumed > 0 {
+				for _, msg := range resp.Messages {
+					if strings.Contains(msg.Data, expected) {
+						return nil
+					}
+				}
+				return fmt.Errorf("trigger output does not contain expected value: %s", expected)
+			}
+		}
+
+		logf(verbose, "trigger output not ready yet, retrying")
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-time.After(2 * time.Second):
+		}
+	}
+
+	return fmt.Errorf("trigger output not available after %s", timeout.String())
 }
 
 func runConcurrent(ctx context.Context, adminClient, testClient *client.Client, topic, subscription string) error {
