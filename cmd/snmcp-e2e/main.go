@@ -134,7 +134,8 @@ func run(ctx context.Context, cfg config) error {
 
 	suffix := time.Now().UnixNano()
 	tenant := fmt.Sprintf("e2e-%d", suffix)
-	namespace := fmt.Sprintf("%s/ns-%d", tenant, suffix)
+	namespaceName := fmt.Sprintf("ns-%d", suffix)
+	namespace := fmt.Sprintf("%s/%s", tenant, namespaceName)
 	topic := fmt.Sprintf("persistent://%s/topic-%d", namespace, suffix)
 	concurrentTopic := fmt.Sprintf("persistent://%s/topic-concurrent-%d", namespace, suffix)
 	functionInputTopic := fmt.Sprintf("persistent://%s/function-input-%d", namespace, suffix)
@@ -232,10 +233,19 @@ func run(ctx context.Context, cfg config) error {
 		return err
 	}
 
+	logf(cfg.verbose, "creating function: tenant=%s namespace=%s name=%s inputs=%v output=%s py=%s classname=%s",
+		tenant,
+		namespaceName,
+		functionName,
+		[]string{functionInputTopic},
+		functionOutputTopic,
+		"/server/e2e/functions/echo.py",
+		"echo.EchoFunction",
+	)
 	result, err = callTool(ctx, adminClient, "pulsar_admin_functions", map[string]any{
 		"operation": "create",
 		"tenant":    tenant,
-		"namespace": namespace,
+		"namespace": namespaceName,
 		"name":      functionName,
 		"classname": "echo.EchoFunction",
 		"inputs":    []string{functionInputTopic},
@@ -246,14 +256,14 @@ func run(ctx context.Context, cfg config) error {
 		return err
 	}
 
-	if err := waitForFunctionRunning(ctx, adminClient, tenant, namespace, functionName, 60*time.Second); err != nil {
+	if err := waitForFunctionRunning(ctx, adminClient, tenant, namespaceName, functionName, 60*time.Second); err != nil {
 		return err
 	}
 
 	result, err = callTool(ctx, adminClient, "pulsar_admin_functions", map[string]any{
 		"operation":  "stats",
 		"tenant":     tenant,
-		"namespace":  namespace,
+		"namespace":  namespaceName,
 		"name":       functionName,
 		"instanceId": float64(0),
 	})
@@ -265,7 +275,7 @@ func run(ctx context.Context, cfg config) error {
 	result, err = callTool(ctx, adminClient, "pulsar_admin_functions", map[string]any{
 		"operation":    "trigger",
 		"tenant":       tenant,
-		"namespace":    namespace,
+		"namespace":    namespaceName,
 		"name":         functionName,
 		"topic":        functionInputTopic,
 		"triggerValue": triggerValue,
@@ -280,7 +290,7 @@ func run(ctx context.Context, cfg config) error {
 	result, err = callTool(ctx, adminClient, "pulsar_admin_functions", map[string]any{
 		"operation":  "update",
 		"tenant":     tenant,
-		"namespace":  namespace,
+		"namespace":  namespaceName,
 		"name":       functionName,
 		"userConfig": map[string]any{"updated": true},
 	})
@@ -291,7 +301,7 @@ func run(ctx context.Context, cfg config) error {
 	result, err = callTool(ctx, adminClient, "pulsar_admin_functions", map[string]any{
 		"operation": "get",
 		"tenant":    tenant,
-		"namespace": namespace,
+		"namespace": namespaceName,
 		"name":      functionName,
 	})
 	if err := requireToolOK(result, err, "pulsar_admin_functions get"); err != nil {
@@ -304,7 +314,7 @@ func run(ctx context.Context, cfg config) error {
 	result, err = callTool(ctx, adminClient, "pulsar_admin_functions", map[string]any{
 		"operation": "delete",
 		"tenant":    tenant,
-		"namespace": namespace,
+		"namespace": namespaceName,
 		"name":      functionName,
 	})
 	if err := requireToolOK(result, err, "pulsar_admin_functions delete"); err != nil {
