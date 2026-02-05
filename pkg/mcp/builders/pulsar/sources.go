@@ -18,6 +18,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
+	"sort"
 	"strings"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
@@ -26,6 +28,7 @@ import (
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
+	"gopkg.in/yaml.v2"
 )
 
 // PulsarAdminSourcesToolBuilder implements the ToolBuilder interface for Pulsar admin sources
@@ -112,14 +115,15 @@ func (b *PulsarAdminSourcesToolBuilder) buildSourcesTool() mcp.Tool {
 			mcp.Description("The tenant name. Tenants are the primary organizational unit in Pulsar, "+
 				"providing multi-tenancy and resource isolation. Sources deployed within a tenant "+
 				"inherit its permissions and resource quotas. "+
-				"Required for all operations except 'list-built-in'.")),
+				"Defaults to 'public' if not provided.")),
 		mcp.WithString("namespace",
 			mcp.Description("The namespace name. Namespaces are logical groupings of topics and sources "+
 				"within a tenant. They encapsulate configuration policies and access control. "+
 				"Sources in a namespace typically publish to topics within the same namespace. "+
-				"Required for all operations except 'list-built-in'.")),
+				"Defaults to 'default' if not provided.")),
 		mcp.WithString("name",
 			mcp.Description("The source name. Required for all operations except 'list' and 'list-built-in'. "+
+				"Can be provided via source-config-file for create/update. "+
 				"Names should be descriptive of the source's purpose and must be unique within a namespace. "+
 				"Source names are used in metrics, logs, and when addressing the source via APIs.")),
 		mcp.WithString("archive",
@@ -132,11 +136,20 @@ func (b *PulsarAdminSourcesToolBuilder) buildSourcesTool() mcp.Tool {
 				"Specifies which built-in connector to use, such as 'kafka', 'jdbc', 'file', etc. "+
 				"Use 'list-built-in' operation to see available source types. "+
 				"Either source-type or archive must be specified, but not both.")),
+		mcp.WithString("source-config-file",
+			mcp.Description("Path to a YAML source configuration file. Optional for 'create' and 'update'. "+
+				"When provided, the file is loaded before applying explicit parameters.")),
 		mcp.WithString("destination-topic-name",
 			mcp.Description("The Pulsar topic to which data is published. Required for 'create' operation, optional for 'update'. "+
 				"Specified in the format 'persistent://tenant/namespace/topic'. "+
 				"This is the topic where the source will send the data it extracts from the external system. "+
 				"The topic will be automatically created if it doesn't exist.")),
+		mcp.WithObject("producer-config",
+			mcp.Description("Custom producer configuration as JSON object. Optional for 'create' and 'update'.")),
+		mcp.WithString("batch-builder",
+			mcp.Description("Batch builder type (DEFAULT or KEY_BASED). Optional for 'create' and 'update'.")),
+		mcp.WithObject("batch-source-config",
+			mcp.Description("Batch source configuration as JSON object. Optional for 'create' and 'update'.")),
 		mcp.WithString("deserialization-classname",
 			mcp.Description("The SerDe (Serialization/Deserialization) classname for the source. Optional for 'create' and 'update'. "+
 				"Specifies how to convert data from the external system into Pulsar messages. "+
@@ -164,12 +177,28 @@ func (b *PulsarAdminSourcesToolBuilder) buildSourcesTool() mcp.Tool {
 				"Higher values improve throughput but require more resources. "+
 				"Default is 1 (single instance). Recommended to align with both source capacity "+
 				"and destination topic partition count.")),
+		mcp.WithNumber("cpu",
+			mcp.Description("CPU cores allocated per source instance. Optional for 'create' and 'update'. "+
+				"Applicable to process and container runtimes.")),
+		mcp.WithNumber("ram",
+			mcp.Description("RAM bytes allocated per source instance. Optional for 'create' and 'update'. "+
+				"Applicable to process and container runtimes.")),
+		mcp.WithNumber("disk",
+			mcp.Description("Disk bytes allocated per source instance. Optional for 'create' and 'update'. "+
+				"Applicable to process and container runtimes.")),
+		mcp.WithString("custom-runtime-options",
+			mcp.Description("Runtime customization options. Optional for 'create' and 'update'.")),
+		mcp.WithObject("secrets",
+			mcp.Description("Secrets configuration map. Optional for 'create' and 'update'. "+
+				"Specify as a JSON object where values describe how secrets are fetched.")),
 		mcp.WithObject("source-config",
 			mcp.Description("User-defined source config key/values. Optional for 'create' and 'update' operations. "+
 				"Provides configuration parameters specific to the source connector being used. "+
 				"For example, database connection details, Kafka bootstrap servers, credentials, etc. "+
 				"Specify as a JSON object with configuration properties required by the specific source type. "+
 				"Example: {\"topic\": \"external-kafka-topic\", \"bootstrapServers\": \"kafka:9092\"}")),
+		mcp.WithBoolean("update-auth-data",
+			mcp.Description("Whether to update authentication data during source update. Optional for 'update' only.")),
 	)
 }
 
@@ -218,18 +247,27 @@ func (b *PulsarAdminSourcesToolBuilder) buildSourcesHandler(readOnly bool) func(
 			return b.handleListBuiltInSources(ctx, admin)
 		}
 
-		// Extract common parameters (all operations except list-built-in require tenant and namespace)
-		tenant, err := request.RequireString("tenant")
-		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'tenant': %v. A tenant is required for operation '%s'.", err, operation)), nil
+		args := request.GetArguments()
+
+		if operation == "create" || operation == "update" {
+			name, _ := getStringArg(args, "name")
+			tenant, _ := getStringArg(args, "tenant")
+			namespace, _ := getStringArg(args, "namespace")
+			if operation == "create" {
+				return b.handleSourceCreate(ctx, admin, tenant, namespace, name, request)
+			}
+			return b.handleSourceUpdate(ctx, admin, tenant, namespace, name, request)
 		}
 
-		namespace, err := request.RequireString("namespace")
-		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'namespace': %v. A namespace is required for operation '%s'.", err, operation)), nil
+		tenant, _ := getStringArg(args, "tenant")
+		namespace, _ := getStringArg(args, "namespace")
+		if tenant == "" {
+			tenant = defaultTenant
+		}
+		if namespace == "" {
+			namespace = defaultNamespace
 		}
 
-		// For all operations except 'list', name is required
 		var name string
 		if operation != "list" {
 			name, err = request.RequireString("name")
@@ -246,10 +284,6 @@ func (b *PulsarAdminSourcesToolBuilder) buildSourcesHandler(readOnly bool) func(
 			return b.handleSourceGet(ctx, admin, tenant, namespace, name)
 		case "status":
 			return b.handleSourceStatus(ctx, admin, tenant, namespace, name)
-		case "create":
-			return b.handleSourceCreate(ctx, admin, request)
-		case "update":
-			return b.handleSourceUpdate(ctx, admin, request)
 		case "delete":
 			return b.handleSourceDelete(ctx, admin, tenant, namespace, name)
 		case "start":
@@ -319,232 +353,90 @@ func (b *PulsarAdminSourcesToolBuilder) handleSourceStatus(_ context.Context, ad
 }
 
 // handleSourceCreate handles creating a new source
-func (b *PulsarAdminSourcesToolBuilder) handleSourceCreate(_ context.Context, admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	tenant, err := request.RequireString("tenant")
+func (b *PulsarAdminSourcesToolBuilder) handleSourceCreate(_ context.Context, admin cmdutils.Client, tenant, namespace, name string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	if _, err := request.RequireString("destination-topic-name"); err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'destination-topic-name': %v. This is the Pulsar topic where the source will publish data.", err)), nil
+	}
+
+	config, archiveArg, sourceTypeArg, err := b.buildSourceConfig(tenant, namespace, name, request)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get tenant: %v", err)), nil
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to build source configuration for '%s': %v. Please verify all required parameters are provided correctly.", name, err)), nil
 	}
 
-	namespace, err := request.RequireString("namespace")
+	if err := validateSourceArchiveArgs(archiveArg, sourceTypeArg); err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Invalid parameters: %v", err)), nil
+	}
+
+	uploadArchive, err := b.resolveSourceArchive(admin, config, archiveArg, sourceTypeArg)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace: %v", err)), nil
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to resolve source archive: %v", err)), nil
 	}
 
-	name, err := request.RequireString("name")
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get name: %v", err)), nil
+	b.applySourceDefaults(config)
+	if config.Name == "" {
+		return mcp.NewToolResultError("Source name not specified. Provide the 'name' parameter or set it in the source-config-file."), nil
 	}
-
-	// Create a new SourceData object
-	sourceData := &utils.SourceData{
-		Tenant:     tenant,
-		Namespace:  namespace,
-		Name:       name,
-		SourceConf: &utils.SourceConfig{},
-	}
-
-	// Get optional parameters
-	archive := request.GetString("archive", "")
-	if archive != "" {
-		sourceData.Archive = archive
-	}
-
-	sourceType := request.GetString("source-type", "")
-	if sourceType != "" {
-		sourceData.SourceType = sourceType
-	}
-
-	destTopic := request.GetString("destination-topic-name", "")
-	if destTopic != "" {
-		sourceData.DestinationTopicName = destTopic
-	}
-
-	deserializationClassName := request.GetString("deserialization-classname", "")
-	if deserializationClassName != "" {
-		sourceData.DeserializationClassName = deserializationClassName
-	}
-
-	schemaType := request.GetString("schema-type", "")
-	if schemaType != "" {
-		sourceData.SchemaType = schemaType
-	}
-
-	className := request.GetString("classname", "")
-	if className != "" {
-		sourceData.ClassName = className
-	}
-
-	processingGuarantees := request.GetString("processing-guarantees", "")
-	if processingGuarantees != "" {
-		sourceData.ProcessingGuarantees = processingGuarantees
-	}
-
-	parallelismFloat := request.GetFloat("parallelism", 1)
-	if parallelismFloat >= 0 {
-		sourceData.Parallelism = int(parallelismFloat)
-	}
-
-	// Get source config if available
-	var sourceConfigMap map[string]interface{}
-	sourceConfigObj, ok := request.GetArguments()["source-config"]
-	if ok && sourceConfigObj != nil {
-		if configMap, isMap := sourceConfigObj.(map[string]interface{}); isMap {
-			sourceConfigMap = configMap
-			// Convert to JSON string
-			sourceConfigJSON, err := json.Marshal(sourceConfigMap)
-			if err != nil {
-				return mcp.NewToolResultError(fmt.Sprintf("Failed to marshal source-config: %v. Ensure the source configuration is a valid JSON object.", err)), nil
-			}
-			sourceData.SourceConfigString = string(sourceConfigJSON)
-		}
-	}
-
-	// Validate inputs
-	if sourceData.Archive == "" && sourceData.SourceType == "" {
-		return mcp.NewToolResultError("Missing required parameter: Either 'archive' or 'source-type' must be specified for source creation. Use 'archive' for custom connectors or 'source-type' for built-in connectors."), nil
-	}
-
-	if sourceData.Archive != "" && sourceData.SourceType != "" {
-		return mcp.NewToolResultError("Invalid parameters: Cannot specify both 'archive' and 'source-type'. Use only one of these parameters based on your connector type."), nil
-	}
-
-	if sourceData.DestinationTopicName == "" {
+	if config.TopicName == "" {
 		return mcp.NewToolResultError("Missing required parameter: 'destination-topic-name' must be specified. This is the Pulsar topic where the source will publish data."), nil
 	}
-
-	// Process the arguments
-	err = b.processSourceArguments(sourceData)
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to process arguments: %v", err)), nil
+	if err := validateSourceConfig(config); err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to validate source configuration for '%s': %v.", config.Name, err)), nil
 	}
 
-	// Create the source
-	if sourceData.Archive != "" && b.isPackageURLSupported(sourceData.Archive) {
-		err = admin.Sources().CreateSourceWithURL(sourceData.SourceConf, sourceData.Archive)
+	if uploadArchive != "" && b.isPackageURLSupported(uploadArchive) {
+		err = admin.Sources().CreateSourceWithURL(config, uploadArchive)
 	} else {
-		err = admin.Sources().CreateSource(sourceData.SourceConf, sourceData.Archive)
+		err = admin.Sources().CreateSource(config, uploadArchive)
 	}
 
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to create source '%s' in tenant '%s' namespace '%s': %v. Verify all parameters are correct and required resources exist.",
-			name, tenant, namespace, err)), nil
+			config.Name, config.Tenant, config.Namespace, err)), nil
 	}
 
 	return mcp.NewToolResultText(fmt.Sprintf("Created source '%s' successfully in tenant '%s' namespace '%s'. The source will start pulling data from the external system and publishing to the destination topic.",
-		name, tenant, namespace)), nil
+		config.Name, config.Tenant, config.Namespace)), nil
 }
 
 // handleSourceUpdate handles updating an existing source
-func (b *PulsarAdminSourcesToolBuilder) handleSourceUpdate(_ context.Context, admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	tenant, err := request.RequireString("tenant")
+func (b *PulsarAdminSourcesToolBuilder) handleSourceUpdate(_ context.Context, admin cmdutils.Client, tenant, namespace, name string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	config, archiveArg, sourceTypeArg, err := b.buildSourceConfig(tenant, namespace, name, request)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get tenant: %v", err)), nil
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to build source configuration for '%s': %v. Please verify all parameters are provided correctly.", name, err)), nil
 	}
 
-	namespace, err := request.RequireString("namespace")
+	if err := validateSourceArchiveArgs(archiveArg, sourceTypeArg); err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Invalid parameters: %v", err)), nil
+	}
+
+	uploadArchive, err := b.resolveSourceArchive(admin, config, archiveArg, sourceTypeArg)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get namespace: %v", err)), nil
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to resolve source archive: %v", err)), nil
 	}
 
-	name, err := request.RequireString("name")
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get name: %v", err)), nil
+	b.applySourceDefaults(config)
+	if config.Name == "" {
+		return mcp.NewToolResultError("Source name not specified. Provide the 'name' parameter or set it in the source-config-file."), nil
 	}
 
-	// Create a new SourceData object
-	sourceData := &utils.SourceData{
-		Tenant:     tenant,
-		Namespace:  namespace,
-		Name:       name,
-		SourceConf: &utils.SourceConfig{},
+	updateOptions := utils.NewUpdateOptions()
+	if updateAuthData, ok := getBoolArg(request.GetArguments(), "update-auth-data"); ok {
+		updateOptions.UpdateAuthData = updateAuthData
 	}
 
-	// Get optional parameters
-	archive := request.GetString("archive", "")
-	if archive != "" {
-		sourceData.Archive = archive
-	}
-
-	sourceType := request.GetString("source-type", "")
-	if sourceType != "" {
-		sourceData.SourceType = sourceType
-	}
-
-	destTopic := request.GetString("destination-topic-name", "")
-	if destTopic != "" {
-		sourceData.DestinationTopicName = destTopic
-	}
-
-	deserializationClassName := request.GetString("deserialization-classname", "")
-	if deserializationClassName != "" {
-		sourceData.DeserializationClassName = deserializationClassName
-	}
-
-	schemaType := request.GetString("schema-type", "")
-	if schemaType != "" {
-		sourceData.SchemaType = schemaType
-	}
-
-	className := request.GetString("classname", "")
-	if className != "" {
-		sourceData.ClassName = className
-	}
-
-	processingGuarantees := request.GetString("processing-guarantees", "")
-	if processingGuarantees != "" {
-		sourceData.ProcessingGuarantees = processingGuarantees
-	}
-
-	parallelismFloat := request.GetFloat("parallelism", 1)
-	if parallelismFloat >= 0 {
-		sourceData.Parallelism = int(parallelismFloat)
-	}
-
-	// Get source config if available
-	var sourceConfigMap map[string]interface{}
-	sourceConfigObj, ok := request.GetArguments()["source-config"]
-	if ok && sourceConfigObj != nil {
-		if configMap, isMap := sourceConfigObj.(map[string]interface{}); isMap {
-			sourceConfigMap = configMap
-			// Convert to JSON string
-			sourceConfigJSON, err := json.Marshal(sourceConfigMap)
-			if err != nil {
-				return mcp.NewToolResultError(fmt.Sprintf("Failed to marshal source-config: %v. Ensure the source configuration is a valid JSON object.", err)), nil
-			}
-			sourceData.SourceConfigString = string(sourceConfigJSON)
-		}
-	}
-
-	// Validate inputs if both are specified
-	if sourceData.Archive != "" && sourceData.SourceType != "" {
-		return mcp.NewToolResultError("Invalid parameters: Cannot specify both 'archive' and 'source-type'. Use only one of these parameters based on your connector type."), nil
-	}
-
-	// Process the arguments
-	err = b.processSourceArguments(sourceData)
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to process arguments: %v", err)), nil
-	}
-
-	// Create update options
-	updateOptions := &utils.UpdateOptions{
-		UpdateAuthData: true,
-	}
-
-	// Update the source
-	if sourceData.Archive != "" && b.isPackageURLSupported(sourceData.Archive) {
-		err = admin.Sources().UpdateSourceWithURL(sourceData.SourceConf, sourceData.Archive, updateOptions)
+	if uploadArchive != "" && b.isPackageURLSupported(uploadArchive) {
+		err = admin.Sources().UpdateSourceWithURL(config, uploadArchive, updateOptions)
 	} else {
-		err = admin.Sources().UpdateSource(sourceData.SourceConf, sourceData.Archive, updateOptions)
+		err = admin.Sources().UpdateSource(config, uploadArchive, updateOptions)
 	}
 
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to update source '%s' in tenant '%s' namespace '%s': %v. Verify the source exists and all parameters are valid.",
-			name, tenant, namespace, err)), nil
+			config.Name, config.Tenant, config.Namespace, err)), nil
 	}
 
 	return mcp.NewToolResultText(fmt.Sprintf("Updated source '%s' successfully in tenant '%s' namespace '%s'. The source may need to be restarted to apply all changes.",
-		name, tenant, namespace)), nil
+		config.Name, config.Tenant, config.Namespace)), nil
 }
 
 // handleSourceDelete handles deleting a source
@@ -611,98 +503,238 @@ func (b *PulsarAdminSourcesToolBuilder) handleListBuiltInSources(_ context.Conte
 	return mcp.NewToolResultText(string(sourcesJSON)), nil
 }
 
-// processSourceArguments is a simplified version of the pulsarctl function to process source arguments
-func (b *PulsarAdminSourcesToolBuilder) processSourceArguments(sourceData *utils.SourceData) error {
-	// Initialize config if needed
-	if sourceData.SourceConf == nil {
-		sourceData.SourceConf = new(utils.SourceConfig)
-	}
+func (b *PulsarAdminSourcesToolBuilder) buildSourceConfig(tenant, namespace, name string, request mcp.CallToolRequest) (*utils.SourceConfig, string, string, error) {
+	config := &utils.SourceConfig{}
+	args := request.GetArguments()
 
-	// Set basic config values
-	sourceData.SourceConf.Tenant = sourceData.Tenant
-	sourceData.SourceConf.Namespace = sourceData.Namespace
-	sourceData.SourceConf.Name = sourceData.Name
-
-	// Set destination topic if provided
-	if sourceData.DestinationTopicName != "" {
-		sourceData.SourceConf.TopicName = sourceData.DestinationTopicName
-	}
-
-	// Set deserialization class name if provided
-	if sourceData.DeserializationClassName != "" {
-		sourceData.SourceConf.SerdeClassName = sourceData.DeserializationClassName
-	}
-
-	// Set schema type if provided
-	if sourceData.SchemaType != "" {
-		sourceData.SourceConf.SchemaType = sourceData.SchemaType
-	}
-
-	// Set class name if provided
-	if sourceData.ClassName != "" {
-		sourceData.SourceConf.ClassName = sourceData.ClassName
-	}
-
-	// Set processing guarantees if provided
-	if sourceData.ProcessingGuarantees != "" {
-		sourceData.SourceConf.ProcessingGuarantees = sourceData.ProcessingGuarantees
-	}
-
-	// Set parallelism if provided
-	if sourceData.Parallelism != 0 {
-		sourceData.SourceConf.Parallelism = sourceData.Parallelism
-	} else if sourceData.SourceConf.Parallelism <= 0 {
-		sourceData.SourceConf.Parallelism = 1
-	}
-
-	// Handle archive and source-type
-	if sourceData.Archive != "" && sourceData.SourceType != "" {
-		return fmt.Errorf("cannot specify both archive and source-type")
-	}
-
-	if sourceData.Archive != "" {
-		sourceData.SourceConf.Archive = sourceData.Archive
-	}
-
-	if sourceData.SourceType != "" {
-		// In a real implementation, we would validate the source type here
-		sourceData.SourceConf.Archive = sourceData.SourceType
-	}
-
-	// Parse source config if provided
-	if sourceData.SourceConfigString != "" {
-		var configs map[string]interface{}
-		if err := json.Unmarshal([]byte(sourceData.SourceConfigString), &configs); err != nil {
-			return fmt.Errorf("failed to parse source config: %v", err)
+	if configFile, ok := getStringArg(args, "source-config-file"); ok && configFile != "" {
+		//nolint:gosec
+		data, err := os.ReadFile(configFile)
+		if err != nil {
+			return nil, "", "", fmt.Errorf("load source config file failed: %w", err)
 		}
-		sourceData.SourceConf.Configs = configs
+		if err := yaml.Unmarshal(data, config); err != nil {
+			return nil, "", "", fmt.Errorf("unmarshal source config file error: %w", err)
+		}
 	}
 
+	if tenant != "" {
+		config.Tenant = tenant
+	}
+	if namespace != "" {
+		config.Namespace = namespace
+	}
+	if name != "" {
+		config.Name = name
+	}
+
+	if destinationTopic, ok := getStringArg(args, "destination-topic-name"); ok && destinationTopic != "" {
+		config.TopicName = destinationTopic
+	}
+
+	if deserializationClassName, ok := getStringArg(args, "deserialization-classname"); ok && deserializationClassName != "" {
+		config.SerdeClassName = deserializationClassName
+	}
+
+	if schemaType, ok := getStringArg(args, "schema-type"); ok && schemaType != "" {
+		config.SchemaType = schemaType
+	}
+
+	if className, ok := getStringArg(args, "classname"); ok && className != "" {
+		config.ClassName = className
+	}
+
+	if processingGuarantees, ok := getStringArg(args, "processing-guarantees"); ok && processingGuarantees != "" {
+		config.ProcessingGuarantees = processingGuarantees
+	}
+
+	if parallelism, ok, err := parseOptionalIntArg(args, "parallelism"); err != nil {
+		return nil, "", "", err
+	} else if ok {
+		config.Parallelism = parallelism
+	}
+
+	if cpu, ok, err := parseOptionalFloatArg(args, "cpu"); err != nil {
+		return nil, "", "", err
+	} else if ok {
+		config.Resources = ensureResources(config.Resources)
+		config.Resources.CPU = cpu
+	}
+
+	if ram, ok, err := parseOptionalInt64Arg(args, "ram"); err != nil {
+		return nil, "", "", err
+	} else if ok {
+		config.Resources = ensureResources(config.Resources)
+		config.Resources.RAM = ram
+	}
+
+	if disk, ok, err := parseOptionalInt64Arg(args, "disk"); err != nil {
+		return nil, "", "", err
+	} else if ok {
+		config.Resources = ensureResources(config.Resources)
+		config.Resources.Disk = disk
+	}
+
+	if sourceConfigValue, exists := args["source-config"]; exists && sourceConfigValue != nil {
+		sourceConfig, err := decodeInterfaceMap(sourceConfigValue)
+		if err != nil {
+			return nil, "", "", fmt.Errorf("invalid source-config: %w", err)
+		}
+		config.Configs = sourceConfig
+	}
+
+	if producerConfigValue, exists := args["producer-config"]; exists && producerConfigValue != nil {
+		producerConfig, err := decodeProducerConfig(producerConfigValue)
+		if err != nil {
+			return nil, "", "", fmt.Errorf("invalid producer-config: %w", err)
+		}
+		config.ProducerConfig = producerConfig
+	}
+
+	if batchBuilder, ok := getStringArg(args, "batch-builder"); ok && batchBuilder != "" {
+		config.BatchBuilder = batchBuilder
+	}
+
+	if batchSourceConfigValue, exists := args["batch-source-config"]; exists && batchSourceConfigValue != nil {
+		batchSourceConfig, err := decodeBatchSourceConfig(batchSourceConfigValue)
+		if err != nil {
+			return nil, "", "", fmt.Errorf("invalid batch-source-config: %w", err)
+		}
+		config.BatchSourceConfig = batchSourceConfig
+	}
+
+	if customRuntimeOptions, ok := getStringArg(args, "custom-runtime-options"); ok && customRuntimeOptions != "" {
+		config.CustomRuntimeOptions = customRuntimeOptions
+	}
+
+	if secretsValue, exists := args["secrets"]; exists && secretsValue != nil {
+		secrets, err := decodeInterfaceMap(secretsValue)
+		if err != nil {
+			return nil, "", "", fmt.Errorf("invalid secrets: %w", err)
+		}
+		config.Secrets = secrets
+	}
+
+	b.normalizeSourceConfigMaps(config)
+
+	archiveArg, _ := getStringArg(args, "archive")
+	sourceTypeArg, _ := getStringArg(args, "source-type")
+
+	return config, archiveArg, sourceTypeArg, nil
+}
+
+func (b *PulsarAdminSourcesToolBuilder) normalizeSourceConfigMaps(config *utils.SourceConfig) {
+	if config.Configs != nil {
+		if converted, ok := convertMap(config.Configs).(map[string]interface{}); ok {
+			config.Configs = converted
+		}
+	}
+
+	if config.Secrets != nil {
+		if converted, ok := convertMap(config.Secrets).(map[string]interface{}); ok {
+			config.Secrets = converted
+		}
+	}
+
+	if config.Secrets == nil {
+		config.Secrets = make(map[string]interface{})
+	}
+}
+
+func (b *PulsarAdminSourcesToolBuilder) applySourceDefaults(config *utils.SourceConfig) {
+	if config.Tenant == "" {
+		config.Tenant = defaultTenant
+	}
+	if config.Namespace == "" {
+		config.Namespace = defaultNamespace
+	}
+	if config.Parallelism <= 0 {
+		config.Parallelism = 1
+	}
+}
+
+func validateSourceConfig(config *utils.SourceConfig) error {
+	if config.Archive == "" {
+		return fmt.Errorf("source archive not specified")
+	}
+	if config.Name == "" {
+		return fmt.Errorf("source name not specified")
+	}
 	return nil
+}
+
+func validateSourceArchiveArgs(archive, sourceType string) error {
+	if archive != "" && sourceType != "" {
+		return fmt.Errorf("cannot specify both 'archive' and 'source-type'")
+	}
+	return nil
+}
+
+func (b *PulsarAdminSourcesToolBuilder) resolveSourceArchive(admin cmdutils.Client, config *utils.SourceConfig, archive, sourceType string) (string, error) {
+	if sourceType != "" {
+		resolved, err := b.validateSourceType(admin, sourceType)
+		if err != nil {
+			return "", err
+		}
+		config.Archive = resolved
+		return "", nil
+	}
+
+	if archive != "" {
+		config.Archive = archive
+		return archive, nil
+	}
+
+	if config.Archive != "" {
+		if strings.HasPrefix(config.Archive, "builtin://") {
+			return "", nil
+		}
+		return config.Archive, nil
+	}
+
+	return "", nil
+}
+
+func (b *PulsarAdminSourcesToolBuilder) validateSourceType(admin cmdutils.Client, sourceType string) (string, error) {
+	builtins, err := admin.Sources().GetBuiltInSources()
+	if err != nil {
+		return "", fmt.Errorf("failed to list built-in sources: %w", err)
+	}
+
+	names := make([]string, 0, len(builtins))
+	for _, builtin := range builtins {
+		names = append(names, builtin.Name)
+		if builtin.Name == sourceType {
+			return "builtin://" + sourceType, nil
+		}
+	}
+
+	sort.Strings(names)
+	return "", fmt.Errorf("invalid source-type %q. Available sources: %s", sourceType, strings.Join(names, ", "))
+}
+
+func decodeProducerConfig(value interface{}) (*utils.ProducerConfig, error) {
+	var config utils.ProducerConfig
+	if err := decodeInto(value, &config); err != nil {
+		return nil, err
+	}
+	return &config, nil
+}
+
+func decodeBatchSourceConfig(value interface{}) (*utils.BatchSourceConfig, error) {
+	var config utils.BatchSourceConfig
+	if err := decodeInto(value, &config); err != nil {
+		return nil, err
+	}
+	return &config, nil
 }
 
 // isPackageURLSupported checks if the package URL is supported
 // Validates URLs for Pulsar source packages
 func (b *PulsarAdminSourcesToolBuilder) isPackageURLSupported(archive string) bool {
-	if archive == "" {
-		return false
-	}
-
-	// Check for supported URL schemes for Pulsar source packages
-	supportedSchemes := []string{
-		"http://",
-		"https://",
-		"file://",
-		"function://", // Pulsar function package URL
-		"source://",   // Pulsar source package URL
-	}
-
-	for _, scheme := range supportedSchemes {
-		if strings.HasPrefix(archive, scheme) {
-			return true
-		}
-	}
-
-	// Also check if it's a local file path (not a URL)
-	return !strings.Contains(archive, "://")
+	return archive != "" && (strings.HasPrefix(archive, "http") ||
+		strings.HasPrefix(archive, "file") ||
+		strings.HasPrefix(archive, "function") ||
+		strings.HasPrefix(archive, "sink") ||
+		strings.HasPrefix(archive, "source"))
 }

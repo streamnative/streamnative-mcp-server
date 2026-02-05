@@ -116,7 +116,7 @@ setup_pulsar() {
     -e PULSAR_PREFIX_brokerClientAuthenticationParameters="token:${ADMIN_TOKEN}" \
     -v "$TOKEN_SECRET_FILE:/pulsarctl/test/auth/token/secret.key:ro" \
     "$PULSAR_IMAGE" \
-    bash -lc 'set -- $(hostname -i); export PULSAR_PREFIX_advertisedAddress=$1; bin/apply-config-from-env.py /pulsar/conf/standalone.conf; exec bin/pulsar standalone' \
+    bash -lc 'set -- $(hostname -i); export PULSAR_PREFIX_advertisedAddress=$1; export JAVA_HOME=/opt/jvm; export PATH="$JAVA_HOME/bin:$PATH"; bin/apply-config-from-env.py /pulsar/conf/standalone.conf; exec bin/pulsar standalone' \
     >/dev/null
 
   log "waiting for pulsar to be ready"

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # Multi-stage build for multi-platform support
-FROM --platform=$BUILDPLATFORM golang:1.24-alpine AS builder
+FROM --platform=$BUILDPLATFORM golang:1.25-alpine AS builder
 
 # Install build dependencies
 RUN apk add --no-cache git make
@@ -41,9 +41,9 @@ ARG BUILD_DATE
 # Build the binary for the target platform
 RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
     go build -ldflags "\
-        -X main.version=${VERSION} \
-        -X main.commit=${COMMIT} \
-        -X main.date=${BUILD_DATE}" \
+    -X main.version=${VERSION} \
+    -X main.commit=${COMMIT} \
+    -X main.date=${BUILD_DATE}" \
     -o snmcp cmd/streamnative-mcp-server/main.go
 
 # Final stage - minimal Alpine image

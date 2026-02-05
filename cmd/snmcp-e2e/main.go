@@ -24,6 +24,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -141,6 +142,12 @@ func run(ctx context.Context, cfg config) error {
 	functionInputTopic := fmt.Sprintf("persistent://%s/function-input-%d", namespace, suffix)
 	functionOutputTopic := fmt.Sprintf("persistent://%s/function-output-%d", namespace, suffix)
 	functionName := fmt.Sprintf("echo-%d", suffix)
+	sinkInputTopic := fmt.Sprintf("persistent://%s/sink-input-%d", namespace, suffix)
+	sinkName := fmt.Sprintf("e2e-sink-%d", suffix)
+	sinkParallelismUpdated := 2
+	sourceOutputTopic := fmt.Sprintf("persistent://%s/source-output-%d", namespace, suffix)
+	sourceName := fmt.Sprintf("e2e-source-%d", suffix)
+	sourceParallelismUpdated := 2
 
 	result, err := callTool(ctx, adminClient, "pulsar_admin_tenant", map[string]any{
 		"resource":        "tenant",
@@ -322,6 +329,149 @@ func run(ctx context.Context, cfg config) error {
 		"name":      functionName,
 	})
 	if err := requireToolOK(result, err, "pulsar_admin_functions delete"); err != nil {
+		return err
+	}
+
+	result, err = callTool(ctx, adminClient, "pulsar_admin_topic", map[string]any{
+		"resource":   "topic",
+		"operation":  "create",
+		"topic":      sinkInputTopic,
+		"partitions": float64(0),
+	})
+	if err := requireToolOK(result, err, "pulsar_admin_topic create sink input"); err != nil {
+		return err
+	}
+
+	builtInSinks, err := listBuiltInSinks(ctx, adminClient)
+	if err != nil {
+		return err
+	}
+	sinkType, err := selectSinkType(builtInSinks, []string{"data-generator", "batch-data-generator"})
+	if err != nil {
+		return err
+	}
+
+	result, err = callTool(ctx, adminClient, "pulsar_admin_sinks", map[string]any{
+		"operation": "create",
+		"tenant":    tenant,
+		"namespace": namespaceName,
+		"name":      sinkName,
+		"sink-type": sinkType,
+		"inputs":    []string{sinkInputTopic},
+	})
+	if err := requireToolOK(result, err, "pulsar_admin_sinks create"); err != nil {
+		return err
+	}
+
+	if _, err := getSinkStatus(ctx, adminClient, tenant, namespaceName, sinkName); err != nil {
+		return err
+	}
+
+	result, err = callTool(ctx, adminClient, "pulsar_admin_sinks", map[string]any{
+		"operation":   "update",
+		"tenant":      tenant,
+		"namespace":   namespaceName,
+		"name":        sinkName,
+		"sink-type":   sinkType,
+		"parallelism": float64(sinkParallelismUpdated),
+	})
+	if err := requireToolOK(result, err, "pulsar_admin_sinks update"); err != nil {
+		return err
+	}
+
+	result, err = callTool(ctx, adminClient, "pulsar_admin_sinks", map[string]any{
+		"operation": "get",
+		"tenant":    tenant,
+		"namespace": namespaceName,
+		"name":      sinkName,
+	})
+	if err := requireToolOK(result, err, "pulsar_admin_sinks get"); err != nil {
+		return err
+	}
+	if err := assertSinkParallelism(firstText(result), sinkParallelismUpdated); err != nil {
+		return err
+	}
+
+	result, err = callTool(ctx, adminClient, "pulsar_admin_sinks", map[string]any{
+		"operation": "delete",
+		"tenant":    tenant,
+		"namespace": namespaceName,
+		"name":      sinkName,
+	})
+	if err := requireToolOK(result, err, "pulsar_admin_sinks delete"); err != nil {
+		return err
+	}
+
+	result, err = callTool(ctx, adminClient, "pulsar_admin_topic", map[string]any{
+		"resource":   "topic",
+		"operation":  "create",
+		"topic":      sourceOutputTopic,
+		"partitions": float64(0),
+	})
+	if err := requireToolOK(result, err, "pulsar_admin_topic create source output"); err != nil {
+		return err
+	}
+
+	builtInSources, err := listBuiltInSources(ctx, adminClient)
+	if err != nil {
+		return err
+	}
+	sourceType, err := selectSourceType(builtInSources, []string{"data-generator", "batch-data-generator"})
+	if err != nil {
+		return err
+	}
+
+	result, err = callTool(ctx, adminClient, "pulsar_admin_sources", map[string]any{
+		"operation":              "create",
+		"tenant":                 tenant,
+		"namespace":              namespaceName,
+		"name":                   sourceName,
+		"source-type":            sourceType,
+		"destination-topic-name": sourceOutputTopic,
+		"source-config": map[string]any{
+			"sleepBetweenMessages": "60000",
+		},
+	})
+	if err := requireToolOK(result, err, "pulsar_admin_sources create"); err != nil {
+		return err
+	}
+
+	if err := waitForSourceRunning(ctx, adminClient, tenant, namespaceName, sourceName, 60*time.Second); err != nil {
+		return err
+	}
+
+	result, err = callTool(ctx, adminClient, "pulsar_admin_sources", map[string]any{
+		"operation":   "update",
+		"tenant":      tenant,
+		"namespace":   namespaceName,
+		"name":        sourceName,
+		"source-type": sourceType,
+		"parallelism": float64(sourceParallelismUpdated),
+	})
+	if err := requireToolOK(result, err, "pulsar_admin_sources update"); err != nil {
+		return err
+	}
+
+	result, err = callTool(ctx, adminClient, "pulsar_admin_sources", map[string]any{
+		"operation": "get",
+		"tenant":    tenant,
+		"namespace": namespaceName,
+		"name":      sourceName,
+	})
+	if err := requireToolOK(result, err, "pulsar_admin_sources get"); err != nil {
+		return err
+	}
+	if err := assertSourceParallelism(firstText(result), sourceParallelismUpdated); err != nil {
+		return err
+	}
+
+	result, err = callTool(ctx, adminClient, "pulsar_admin_sources", map[string]any{
+		"operation": "delete",
+		"tenant":    tenant,
+		"namespace": namespaceName,
+		"name":      sourceName,
+	})
+	if err := requireToolOK(result, err, "pulsar_admin_sources delete"); err != nil {
 		return err
 	}
 
@@ -633,6 +783,210 @@ func assertFunctionUserConfig(raw string, key string) error {
 	}
 	if _, ok := userConfig[key]; !ok {
 		return fmt.Errorf("userConfig missing key: %s", key)
+	}
+	return nil
+}
+
+type connectorDefinition struct {
+	Name string `json:"name"`
+}
+
+func listBuiltInSinks(ctx context.Context, c *client.Client) ([]connectorDefinition, error) {
+	result, err := callTool(ctx, c, "pulsar_admin_sinks", map[string]any{
+		"operation": "list-built-in",
+	})
+	if err := requireToolOK(result, err, "pulsar_admin_sinks list-built-in"); err != nil {
+		return nil, err
+	}
+	raw := firstText(result)
+	if raw == "" {
+		return nil, errors.New("empty built-in sink list result")
+	}
+	var sinks []connectorDefinition
+	if err := json.Unmarshal([]byte(raw), &sinks); err != nil {
+		return nil, fmt.Errorf("failed to parse built-in sink list: %w", err)
+	}
+	return sinks, nil
+}
+
+func selectSinkType(definitions []connectorDefinition, preferred []string) (string, error) {
+	available := make(map[string]struct{}, len(definitions))
+	for _, definition := range definitions {
+		available[definition.Name] = struct{}{}
+	}
+	for _, name := range preferred {
+		if _, ok := available[name]; ok {
+			return name, nil
+		}
+	}
+	names := make([]string, 0, len(definitions))
+	for name := range available {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	return "", fmt.Errorf("no supported sink type available; found: %s", strings.Join(names, ", "))
+}
+
+func listBuiltInSources(ctx context.Context, c *client.Client) ([]connectorDefinition, error) {
+	result, err := callTool(ctx, c, "pulsar_admin_sources", map[string]any{
+		"operation": "list-built-in",
+	})
+	if err := requireToolOK(result, err, "pulsar_admin_sources list-built-in"); err != nil {
+		return nil, err
+	}
+	raw := firstText(result)
+	if raw == "" {
+		return nil, errors.New("empty built-in source list result")
+	}
+	var sources []connectorDefinition
+	if err := json.Unmarshal([]byte(raw), &sources); err != nil {
+		return nil, fmt.Errorf("failed to parse built-in source list: %w", err)
+	}
+	return sources, nil
+}
+
+func selectSourceType(definitions []connectorDefinition, preferred []string) (string, error) {
+	available := make(map[string]struct{}, len(definitions))
+	for _, definition := range definitions {
+		available[definition.Name] = struct{}{}
+	}
+	for _, name := range preferred {
+		if _, ok := available[name]; ok {
+			return name, nil
+		}
+	}
+	names := make([]string, 0, len(definitions))
+	for name := range available {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	return "", fmt.Errorf("no supported source type available; found: %s", strings.Join(names, ", "))
+}
+
+type sinkStatus struct {
+	NumInstances int                  `json:"numInstances"`
+	NumRunning   int                  `json:"numRunning"`
+	Instances    []sinkInstanceStatus `json:"instances"`
+}
+
+type sinkInstanceStatus struct {
+	InstanceID int                    `json:"instanceId"`
+	Status     sinkInstanceStatusData `json:"status"`
+}
+
+type sinkInstanceStatusData struct {
+	Running bool   `json:"running"`
+	Err     string `json:"error"`
+}
+
+func getSinkStatus(ctx context.Context, c *client.Client, tenant, namespace, name string) (sinkStatus, error) {
+	result, err := callTool(ctx, c, "pulsar_admin_sinks", map[string]any{
+		"operation": "status",
+		"tenant":    tenant,
+		"namespace": namespace,
+		"name":      name,
+	})
+	if err := requireToolOK(result, err, "pulsar_admin_sinks status"); err != nil {
+		return sinkStatus{}, err
+	}
+	raw := firstText(result)
+	if raw == "" {
+		return sinkStatus{}, errors.New("empty sink status result")
+	}
+	var status sinkStatus
+	if err := json.Unmarshal([]byte(raw), &status); err != nil {
+		return sinkStatus{}, fmt.Errorf("failed to parse sink status: %w", err)
+	}
+	return status, nil
+}
+
+type sourceStatus struct {
+	NumInstances int                    `json:"numInstances"`
+	NumRunning   int                    `json:"numRunning"`
+	Instances    []sourceInstanceStatus `json:"instances"`
+}
+
+type sourceInstanceStatus struct {
+	InstanceID int                      `json:"instanceId"`
+	Status     sourceInstanceStatusData `json:"status"`
+}
+
+type sourceInstanceStatusData struct {
+	Running bool   `json:"running"`
+	Err     string `json:"error"`
+}
+
+func waitForSourceRunning(ctx context.Context, c *client.Client, tenant, namespace, name string, timeout time.Duration) error {
+	deadline := time.Now().Add(timeout)
+	for time.Now().Before(deadline) {
+		status, err := getSourceStatus(ctx, c, tenant, namespace, name)
+		if err == nil && status.NumRunning > 0 {
+			return nil
+		}
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-time.After(2 * time.Second):
+		}
+	}
+	return fmt.Errorf("source %s did not reach running state within %s", name, timeout.String())
+}
+
+func getSourceStatus(ctx context.Context, c *client.Client, tenant, namespace, name string) (sourceStatus, error) {
+	result, err := callTool(ctx, c, "pulsar_admin_sources", map[string]any{
+		"operation": "status",
+		"tenant":    tenant,
+		"namespace": namespace,
+		"name":      name,
+	})
+	if err := requireToolOK(result, err, "pulsar_admin_sources status"); err != nil {
+		return sourceStatus{}, err
+	}
+	raw := firstText(result)
+	if raw == "" {
+		return sourceStatus{}, errors.New("empty source status result")
+	}
+	var status sourceStatus
+	if err := json.Unmarshal([]byte(raw), &status); err != nil {
+		return sourceStatus{}, fmt.Errorf("failed to parse source status: %w", err)
+	}
+	return status, nil
+}
+
+type sinkConfig struct {
+	Configs     map[string]interface{} `json:"configs"`
+	Parallelism int                    `json:"parallelism"`
+}
+
+func assertSinkParallelism(raw string, expected int) error {
+	if raw == "" {
+		return errors.New("empty sink config result")
+	}
+	var config sinkConfig
+	if err := json.Unmarshal([]byte(raw), &config); err != nil {
+		return fmt.Errorf("failed to parse sink config: %w", err)
+	}
+	if config.Parallelism != expected {
+		return fmt.Errorf("unexpected sink parallelism: %d", config.Parallelism)
+	}
+	return nil
+}
+
+type sourceConfig struct {
+	Configs     map[string]interface{} `json:"configs"`
+	Parallelism int                    `json:"parallelism"`
+}
+
+func assertSourceParallelism(raw string, expected int) error {
+	if raw == "" {
+		return errors.New("empty source config result")
+	}
+	var config sourceConfig
+	if err := json.Unmarshal([]byte(raw), &config); err != nil {
+		return fmt.Errorf("failed to parse source config: %w", err)
+	}
+	if config.Parallelism != expected {
+		return fmt.Errorf("unexpected source parallelism: %d", config.Parallelism)
 	}
 	return nil
 }
