@@ -16,7 +16,9 @@ package pftools
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -93,6 +95,7 @@ func NewPulsarFunctionManager(snServer *Server, readOnly bool, options *ManagerO
 		v2adminClient:       v2adminClient,
 		pulsarClient:        pulsarClient,
 		fnToToolMap:         make(map[string]*FunctionTool),
+		failedFunctions:     make(map[string]*functionFailureState),
 		mutex:               sync.RWMutex{},
 		producerCache:       make(map[string]pulsarclient.Producer),
 		producerMutex:       sync.RWMutex{},
@@ -171,37 +174,91 @@ func (m *PulsarFunctionManager) updateFunctions() {
 		fullName := getFunctionFullName(fn.Tenant, fn.Namespace, fn.Name)
 		seenFunctions[fullName] = true
 
+		configHash, hashErr := computeFunctionConfigHash(fn)
+		if hashErr != nil {
+			log.Printf("Failed to compute config hash for function %s: %v", fullName, hashErr)
+		}
+
 		// Check if we already have this function
 		m.mutex.RLock()
-		_, exists := m.fnToToolMap[fullName]
+		existingFn, exists := m.fnToToolMap[fullName]
+		failureState, hasFailure := m.failedFunctions[fullName]
 		m.mutex.RUnlock()
+
+		if hasFailure && configHash != "" && failureState.configHash != configHash {
+			m.mutex.Lock()
+			delete(m.failedFunctions, fullName)
+			m.mutex.Unlock()
+			hasFailure = false
+			failureState = nil
+		}
 
 		changed := false
 		if exists {
 			// Check if the function has changed
-			existingFn, exists := m.fnToToolMap[fullName]
-			if exists {
-				if !cmp.Equal(*existingFn.Function, *fn) {
-					changed = true
-				}
-				if !existingFn.SchemaFetchSuccess {
-					changed = true
-				}
+			if !cmp.Equal(*existingFn.Function, *fn) {
+				changed = true
+			}
+			if !existingFn.SchemaFetchSuccess {
+				changed = true
 			}
 			if !changed {
 				continue
 			}
 		}
 
+		if hasFailure && configHash != "" && failureState.configHash == configHash {
+			if shouldSkipFailure(failureState, m.pollInterval, time.Now()) {
+				continue
+			}
+		}
+
 		// Convert function to tool
+		attemptAt := time.Now()
 		fnTool, err := m.convertFunctionToTool(fn)
-		if err != nil || !fnTool.SchemaFetchSuccess {
-			if err != nil {
-				log.Printf("Failed to convert function %s to tool: %v", fullName, err)
-			} else {
-				log.Printf("Failed to fetch schema for function %s, retry later...", fullName)
+		if err != nil || (fnTool != nil && !fnTool.SchemaFetchSuccess) {
+			failureErr := err
+			if failureErr == nil && fnTool != nil && fnTool.SchemaFetchError != nil {
+				failureErr = fnTool.SchemaFetchError
+			}
+			if failureErr == nil {
+				failureErr = errors.New("schema fetch failed")
+			}
+
+			category := classifyConvertError(failureErr)
+			errorMsg := failureErr.Error()
+			logNow := shouldLogFailure(failureState, configHash, category, errorMsg)
+
+			if configHash != "" {
+				newState := &functionFailureState{
+					configHash:    configHash,
+					category:      category,
+					lastError:     errorMsg,
+					lastAttemptAt: attemptAt,
+				}
+				if logNow {
+					newState.lastLoggedAt = time.Now()
+				} else if failureState != nil {
+					newState.lastLoggedAt = failureState.lastLoggedAt
+				}
+				m.mutex.Lock()
+				m.failedFunctions[fullName] = newState
+				m.mutex.Unlock()
+			}
+			if logNow {
+				if err != nil {
+					log.Printf("Failed to convert function %s to tool: %v (category=%s)", fullName, failureErr, category)
+				} else {
+					log.Printf("Failed to fetch schema for function %s, retry later: %v (category=%s)", fullName, failureErr, category)
+				}
 			}
 			continue
+		}
+
+		if hasFailure {
+			m.mutex.Lock()
+			delete(m.failedFunctions, fullName)
+			m.mutex.Unlock()
 		}
 
 		if changed {
@@ -248,10 +305,59 @@ func (m *PulsarFunctionManager) updateFunctions() {
 				m.mcpServer.DeleteTools(fnTool.Tool.Name)
 			}
 			delete(m.fnToToolMap, fullName)
+			delete(m.failedFunctions, fullName)
 			log.Printf("Removed function %s from MCP tools [%s]", fullName, fnTool.Tool.Name)
 		}
 	}
 	m.mutex.Unlock()
+}
+
+func computeFunctionConfigHash(fn *utils.FunctionConfig) (string, error) {
+	if fn == nil {
+		return "", errors.New("function config is nil")
+	}
+	data, err := json.Marshal(fn)
+	if err != nil {
+		return "", err
+	}
+	sum := sha256.Sum256(data)
+	return fmt.Sprintf("%x", sum[:]), nil
+}
+
+func shouldSkipFailure(state *functionFailureState, pollInterval time.Duration, now time.Time) bool {
+	if state == nil {
+		return false
+	}
+	switch state.category {
+	case failurePermanent:
+		return true
+	case failureRetryable:
+		if state.lastAttemptAt.IsZero() {
+			return false
+		}
+		return now.Sub(state.lastAttemptAt) < pollInterval
+	default:
+		return true
+	}
+}
+
+func shouldLogFailure(prev *functionFailureState, configHash string, category failureCategory, errMsg string) bool {
+	if prev == nil {
+		return true
+	}
+	if configHash == "" {
+		return true
+	}
+	if prev.configHash != configHash {
+		return true
+	}
+	if prev.category != category {
+		return true
+	}
+	if prev.lastError != errMsg {
+		return true
+	}
+	return false
 }
 
 // getFunctionsList retrieves all functions from the specified tenants/namespaces
@@ -354,9 +460,10 @@ func (m *PulsarFunctionManager) getFunctionsInNamespace(tenant, namespace string
 // convertFunctionToTool converts a Pulsar Function to an MCP Tool
 func (m *PulsarFunctionManager) convertFunctionToTool(fn *utils.FunctionConfig) (*FunctionTool, error) {
 	schemaFetchSuccess := true
+	var schemaFetchErr error
 	// Determine input and output topics
 	if len(fn.InputSpecs) == 0 {
-		return nil, fmt.Errorf("function has no input topics")
+		return nil, ErrFunctionNoInputTopics
 	}
 
 	var inputTopic string
@@ -366,7 +473,7 @@ func (m *PulsarFunctionManager) convertFunctionToTool(fn *utils.FunctionConfig) 
 		break
 	}
 	if inputTopic == "" {
-		return nil, fmt.Errorf("function has no input topics")
+		return nil, ErrFunctionNoInputTopics
 	}
 
 	// Get schema for input topic
@@ -378,7 +485,12 @@ func (m *PulsarFunctionManager) convertFunctionToTool(fn *utils.FunctionConfig) 
 			if restError.Code != 404 {
 				log.Printf("Failed to get schema for input topic %s: %v", inputTopic, err)
 				schemaFetchSuccess = false
+				schemaFetchErr = errors.Join(schemaFetchErr, err)
 			}
+		} else {
+			log.Printf("Failed to get schema for input topic %s: %v", inputTopic, err)
+			schemaFetchSuccess = false
+			schemaFetchErr = errors.Join(schemaFetchErr, err)
 		}
 	}
 
@@ -394,7 +506,12 @@ func (m *PulsarFunctionManager) convertFunctionToTool(fn *utils.FunctionConfig) 
 				if restError.Code != 404 {
 					log.Printf("Failed to get schema for output topic %s: %v", outputTopic, err)
 					schemaFetchSuccess = false
+					schemaFetchErr = errors.Join(schemaFetchErr, err)
 				}
+			} else {
+				log.Printf("Failed to get schema for output topic %s: %v", outputTopic, err)
+				schemaFetchSuccess = false
+				schemaFetchErr = errors.Join(schemaFetchErr, err)
 			}
 		}
 	}
@@ -409,12 +526,12 @@ func (m *PulsarFunctionManager) convertFunctionToTool(fn *utils.FunctionConfig) 
 
 	schemaConverter, err := schema.ConverterFactory(inputSchema.Type)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create schema converter: %w", err)
+		return nil, errors.Join(ErrSchemaConversionFailed, err)
 	}
 
 	toolInputSchemaProperties, err := schemaConverter.ToMCPToolInputSchemaProperties(inputSchema.PulsarSchemaInfo)
 	if err != nil {
-		return nil, fmt.Errorf("failed to convert input schema to MCP tool input schema properties: %w", err)
+		return nil, errors.Join(ErrSchemaConversionFailed, err)
 	}
 
 	toolInputSchemaProperties = append(toolInputSchemaProperties, mcp.WithDescription(description))
@@ -441,6 +558,7 @@ func (m *PulsarFunctionManager) convertFunctionToTool(fn *utils.FunctionConfig) 
 		OutputTopic:        outputTopic,
 		Tool:               tool,
 		SchemaFetchSuccess: schemaFetchSuccess,
+		SchemaFetchError:   schemaFetchErr,
 	}, nil
 }
 

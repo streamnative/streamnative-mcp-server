@@ -61,3 +61,46 @@ func TestIsNotFoundError(t *testing.T) {
 		}
 	})
 }
+
+func TestClassifyConvertError(t *testing.T) {
+	t.Run("no input topics is permanent", func(t *testing.T) {
+		if classifyConvertError(ErrFunctionNoInputTopics) != failurePermanent {
+			t.Fatalf("expected permanent for no input topics")
+		}
+	})
+
+	t.Run("schema conversion is permanent", func(t *testing.T) {
+		err := errors.Join(ErrSchemaConversionFailed, errors.New("boom"))
+		if classifyConvertError(err) != failurePermanent {
+			t.Fatalf("expected permanent for schema conversion failure")
+		}
+	})
+
+	t.Run("network error is retryable", func(t *testing.T) {
+		err := errors.New("connection refused")
+		if classifyConvertError(err) != failureRetryable {
+			t.Fatalf("expected retryable for network error")
+		}
+	})
+
+	t.Run("auth error is retryable", func(t *testing.T) {
+		err := errors.New("token expired")
+		if classifyConvertError(err) != failureRetryable {
+			t.Fatalf("expected retryable for auth error")
+		}
+	})
+
+	t.Run("cluster error is retryable", func(t *testing.T) {
+		err := rest.Error{Code: 503, Reason: "no healthy upstream"}
+		if classifyConvertError(err) != failureRetryable {
+			t.Fatalf("expected retryable for cluster error")
+		}
+	})
+
+	t.Run("unknown error is unknown", func(t *testing.T) {
+		err := errors.New("something else")
+		if classifyConvertError(err) != failureUnknown {
+			t.Fatalf("expected unknown for generic error")
+		}
+	})
+}
