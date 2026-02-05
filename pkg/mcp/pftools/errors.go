@@ -28,6 +28,10 @@ var (
 	ErrFunctionNotFound = errors.New("function not found")
 	// ErrNotOurMessage indicates a message that should be ignored.
 	ErrNotOurMessage = errors.New("not our message")
+	// ErrFunctionNoInputTopics indicates the function has no input topics.
+	ErrFunctionNoInputTopics = errors.New("function has no input topics")
+	// ErrSchemaConversionFailed indicates the schema conversion failed.
+	ErrSchemaConversionFailed = errors.New("schema conversion failed")
 )
 
 // IsClusterUnhealthy checks if an error indicates cluster health issues
@@ -127,4 +131,18 @@ func isNotFoundText(text string) bool {
 		return true
 	}
 	return false
+}
+
+// classifyConvertError reports whether a conversion failure is retryable.
+func classifyConvertError(err error) failureCategory {
+	if err == nil {
+		return failureUnknown
+	}
+	if errors.Is(err, ErrFunctionNoInputTopics) || errors.Is(err, ErrSchemaConversionFailed) {
+		return failurePermanent
+	}
+	if IsClusterUnhealthy(err) || IsAuthError(err) || IsNetworkError(err) {
+		return failureRetryable
+	}
+	return failureUnknown
 }

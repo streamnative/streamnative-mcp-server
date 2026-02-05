@@ -32,6 +32,7 @@ type PulsarFunctionManager struct {
 	v2adminClient       cmdutils.Client
 	pulsarClient        pulsar.Client
 	fnToToolMap         map[string]*FunctionTool
+	failedFunctions     map[string]*functionFailureState
 	mutex               sync.RWMutex
 	producerCache       map[string]pulsar.Producer
 	producerMutex       sync.RWMutex
@@ -58,6 +59,7 @@ type FunctionTool struct {
 	OutputTopic        string
 	Tool               mcp.Tool
 	SchemaFetchSuccess bool
+	SchemaFetchError   error
 }
 
 // SchemaInfo represents schema metadata for Pulsar functions.
@@ -65,6 +67,22 @@ type SchemaInfo struct {
 	Type             string
 	Definition       map[string]interface{}
 	PulsarSchemaInfo *utils.SchemaInfo
+}
+
+type failureCategory string
+
+const (
+	failurePermanent failureCategory = "permanent"
+	failureRetryable failureCategory = "retryable"
+	failureUnknown   failureCategory = "unknown"
+)
+
+type functionFailureState struct {
+	configHash    string
+	category      failureCategory
+	lastError     string
+	lastLoggedAt  time.Time
+	lastAttemptAt time.Time
 }
 
 // CircuitBreaker guards function invocations to prevent repeated failures.
