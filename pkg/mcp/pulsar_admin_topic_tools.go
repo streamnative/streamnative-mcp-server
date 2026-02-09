@@ -16,7 +16,7 @@ package mcp
 
 import (
 	"context"
-	"fmt"
+	"log"
 
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
@@ -34,7 +34,7 @@ func PulsarAdminTopicTools(readOnly bool, features []string) []server.ServerTool
 	tools, err := builder.BuildTools(context.Background(), config)
 	if err != nil {
 		// In production environment, this should use proper logging
-		fmt.Printf("Failed to build Pulsar Admin Topic tools: %v\n", err)
+		log.Printf("Failed to build Pulsar Admin Topic tools: %v", err)
 		return nil
 	}
 
