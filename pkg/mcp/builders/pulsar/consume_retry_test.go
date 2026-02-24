@@ -105,8 +105,8 @@ func TestIsLookupRetryableSubscribeError(t *testing.T) {
 }
 
 func TestConsumeSubscribeBackoff(t *testing.T) {
-	assert.Equal(t, consumeSubscribeBackoffFirst, consumeSubscribeBackoff(1))
+	assert.Equal(t, consumeSubscribeBackoffStep1, consumeSubscribeBackoff(1))
 	assert.Equal(t, consumeSubscribeBackoffStep2, consumeSubscribeBackoff(2))
-	assert.Equal(t, consumeSubscribeBackoffThird, consumeSubscribeBackoff(3))
-	assert.Equal(t, consumeSubscribeBackoffThird, consumeSubscribeBackoff(100))
+	assert.Equal(t, consumeSubscribeBackoffStep3, consumeSubscribeBackoff(3))
+	assert.Equal(t, consumeSubscribeBackoffStep3, consumeSubscribeBackoff(100))
 }

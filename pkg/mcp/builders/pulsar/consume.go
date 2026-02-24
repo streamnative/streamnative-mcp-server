@@ -30,9 +30,9 @@ import (
 
 const (
 	consumeSubscribeMaxAttempts  = 3
-	consumeSubscribeBackoffFirst = 200 * time.Millisecond
+	consumeSubscribeBackoffStep1 = 200 * time.Millisecond
 	consumeSubscribeBackoffStep2 = 500 * time.Millisecond
-	consumeSubscribeBackoffThird = 1 * time.Second
+	consumeSubscribeBackoffStep3 = 1 * time.Second
 )
 
 type consumerSubscribeFunc func(pulsar.ConsumerOptions) (pulsar.Consumer, error)
@@ -366,11 +366,11 @@ func subscribeConsumerWithRetryConfig(
 func consumeSubscribeBackoff(attempt int) time.Duration {
 	switch attempt {
 	case 1:
-		return consumeSubscribeBackoffFirst
+		return consumeSubscribeBackoffStep1
 	case 2:
 		return consumeSubscribeBackoffStep2
 	default:
-		return consumeSubscribeBackoffThird
+		return consumeSubscribeBackoffStep3
 	}
 }
 
