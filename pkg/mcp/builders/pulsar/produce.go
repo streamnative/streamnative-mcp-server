@@ -221,7 +221,6 @@ func (b *PulsarClientProduceToolBuilder) buildProduceHandler(readOnly bool) func
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to create Pulsar client: %v", err)), nil
 		}
-		defer client.Close()
 
 		// Prepare producer options
 		producerOpts := pulsar.ProducerOptions{
