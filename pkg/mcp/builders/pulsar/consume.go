@@ -28,6 +28,15 @@ import (
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
 
+const (
+	consumeSubscribeMaxAttempts  = 3
+	consumeSubscribeBackoffStep1 = 200 * time.Millisecond
+	consumeSubscribeBackoffStep2 = 500 * time.Millisecond
+	consumeSubscribeBackoffStep3 = 1 * time.Second
+)
+
+type consumerSubscribeFunc func(pulsar.ConsumerOptions) (pulsar.Consumer, error)
+
 // PulsarClientConsumeToolBuilder implements the ToolBuilder interface for Pulsar Client Consumer tools
 // It provides functionality to build Pulsar message consumption tools
 // /nolint:revive
@@ -176,7 +185,6 @@ func (b *PulsarClientConsumeToolBuilder) buildConsumeHandler(_ bool) func(contex
 		if err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to create Pulsar client: %v", err)), nil
 		}
-		defer client.Close()
 
 		// Prepare consumer options
 		consumerOpts := pulsar.ConsumerOptions{
@@ -220,9 +228,9 @@ func (b *PulsarClientConsumeToolBuilder) buildConsumeHandler(_ bool) func(contex
 		}
 
 		// Create consumer
-		consumer, err := client.Subscribe(consumerOpts)
+		consumer, attempts, err := subscribeConsumerWithRetry(ctx, client.Subscribe, consumerOpts)
 		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to create consumer: %v", err)), nil
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to create consumer (attempts=%d): %v", attempts, err)), nil
 		}
 		defer consumer.Close()
 
@@ -299,6 +307,99 @@ func (b *PulsarClientConsumeToolBuilder) buildConsumeHandler(_ bool) func(contex
 }
 
 // Unified error handling and utility functions
+
+func subscribeConsumerWithRetry(
+	ctx context.Context,
+	subscribe consumerSubscribeFunc,
+	options pulsar.ConsumerOptions,
+) (pulsar.Consumer, int, error) {
+	return subscribeConsumerWithRetryConfig(
+		ctx,
+		subscribe,
+		options,
+		consumeSubscribeMaxAttempts,
+		consumeSubscribeBackoff,
+	)
+}
+
+func subscribeConsumerWithRetryConfig(
+	ctx context.Context,
+	subscribe consumerSubscribeFunc,
+	options pulsar.ConsumerOptions,
+	maxAttempts int,
+	backoffFn func(attempt int) time.Duration,
+) (pulsar.Consumer, int, error) {
+	if maxAttempts < 1 {
+		maxAttempts = 1
+	}
+	if backoffFn == nil {
+		backoffFn = consumeSubscribeBackoff
+	}
+
+	var lastErr error
+	attemptsMade := 0
+	for attempt := 1; attempt <= maxAttempts; attempt++ {
+		attemptsMade = attempt
+		consumer, err := subscribe(options)
+		if err == nil {
+			return consumer, attempt, nil
+		}
+
+		lastErr = err
+		if !isLookupRetryableSubscribeError(err) || attempt == maxAttempts {
+			break
+		}
+
+		if waitErr := waitForRetryBackoff(ctx, backoffFn(attempt)); waitErr != nil {
+			return nil, attemptsMade, fmt.Errorf(
+				"subscribe retry interrupted after %d attempt(s), last error: %v: %w",
+				attemptsMade,
+				lastErr,
+				waitErr,
+			)
+		}
+	}
+
+	return nil, attemptsMade, fmt.Errorf("failed to create consumer after %d attempt(s): %w", attemptsMade, lastErr)
+}
+
+func consumeSubscribeBackoff(attempt int) time.Duration {
+	switch attempt {
+	case 1:
+		return consumeSubscribeBackoffStep1
+	case 2:
+		return consumeSubscribeBackoffStep2
+	default:
+		return consumeSubscribeBackoffStep3
+	}
+}
+
+func waitForRetryBackoff(ctx context.Context, delay time.Duration) error {
+	if delay <= 0 {
+		return nil
+	}
+
+	timer := time.NewTimer(delay)
+	defer timer.Stop()
+
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-timer.C:
+		return nil
+	}
+}
+
+func isLookupRetryableSubscribeError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	errMsg := strings.ToLower(err.Error())
+	return strings.Contains(errMsg, "servicenotready") ||
+		strings.Contains(errMsg, "please redo the lookup") ||
+		strings.Contains(errMsg, "not served by this instance")
+}
 
 // handleError provides unified error handling
 func (b *PulsarClientConsumeToolBuilder) handleError(operation string, err error) *mcp.CallToolResult {
