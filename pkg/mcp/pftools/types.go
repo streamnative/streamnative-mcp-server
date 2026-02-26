@@ -23,6 +23,7 @@ import (
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
+	"github.com/sirupsen/logrus"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 )
 
@@ -40,6 +41,7 @@ type PulsarFunctionManager struct {
 	stopCh              chan struct{}
 	callInProgressMap   map[string]context.CancelFunc
 	mcpServer           *server.MCPServer
+	logger              *logrus.Logger
 	readOnly            bool
 	defaultTimeout      time.Duration
 	circuitBreakers     map[string]*CircuitBreaker
