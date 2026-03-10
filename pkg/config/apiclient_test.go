@@ -413,8 +413,7 @@ func TestSession_InitializationOnlyOnce(t *testing.T) {
 
 func TestJWTTokenSource(t *testing.T) {
 	// Test JWT token source implementation
-	//nolint:gosec
-	jwtToken := "test.jwt.token"
+	jwtToken := "test-token"
 	source := NewJWTTokenSource(jwtToken)
 
 	token, err := source.Token()
@@ -426,11 +425,11 @@ func TestJWTTokenSource(t *testing.T) {
 
 func TestNewSNCloudSession_JWT(t *testing.T) {
 	// Test session creation with JWT token
+	jwtToken := "test-token"
 	ctx := SNCloudContext{
-		APIURL:    "https://api.example.com",
-		LogAPIURL: "https://logs.example.com",
-		//nolint:gosec
-		JWTToken:    "test.jwt.token",
+		APIURL:      "https://api.example.com",
+		LogAPIURL:   "https://logs.example.com",
+		JWTToken:    jwtToken,
 		Timeout:     30 * time.Second,
 		Audience:    "test-audience",
 		KeyFilePath: "/path/to/key.json",
@@ -447,7 +446,7 @@ func TestNewSNCloudSession_JWT(t *testing.T) {
 	// Test that JWT token source works
 	token, err := session.TokenSource.Token()
 	require.NoError(t, err)
-	assert.Equal(t, "test.jwt.token", token.AccessToken)
+	assert.Equal(t, jwtToken, token.AccessToken)
 }
 
 func TestNewSNCloudSession_OAuth_InitializationError(t *testing.T) {

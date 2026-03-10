@@ -32,8 +32,8 @@ func TestExtractBearerToken(t *testing.T) {
 	}{
 		{
 			name:          "valid bearer token",
-			authHeader:    "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test",
-			expectedToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test",
+			authHeader:    "Bearer sample-token-123",
+			expectedToken: "sample-token-123",
 		},
 		{
 			name:          "empty header",
