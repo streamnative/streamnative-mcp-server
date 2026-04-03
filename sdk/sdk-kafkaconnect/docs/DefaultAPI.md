@@ -53,7 +53,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/streamnative/cloud-cli/pkg/kafkaconnect"
+	openapiclient "github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect"
 )
 
 func main() {
@@ -125,7 +125,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/streamnative/cloud-cli/pkg/kafkaconnect"
+	openapiclient "github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect"
 )
 
 func main() {
@@ -191,7 +191,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/streamnative/cloud-cli/pkg/kafkaconnect"
+	openapiclient "github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect"
 )
 
 func main() {
@@ -259,7 +259,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/streamnative/cloud-cli/pkg/kafkaconnect"
+	openapiclient "github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect"
 )
 
 func main() {
@@ -327,7 +327,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/streamnative/cloud-cli/pkg/kafkaconnect"
+	openapiclient "github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect"
 )
 
 func main() {
@@ -395,7 +395,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/streamnative/cloud-cli/pkg/kafkaconnect"
+	openapiclient "github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect"
 )
 
 func main() {
@@ -463,7 +463,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/streamnative/cloud-cli/pkg/kafkaconnect"
+	openapiclient "github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect"
 )
 
 func main() {
@@ -531,7 +531,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/streamnative/cloud-cli/pkg/kafkaconnect"
+	openapiclient "github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect"
 )
 
 func main() {
@@ -599,7 +599,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/streamnative/cloud-cli/pkg/kafkaconnect"
+	openapiclient "github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect"
 )
 
 func main() {
@@ -667,7 +667,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/streamnative/cloud-cli/pkg/kafkaconnect"
+	openapiclient "github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect"
 )
 
 func main() {
@@ -735,7 +735,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/streamnative/cloud-cli/pkg/kafkaconnect"
+	openapiclient "github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect"
 )
 
 func main() {
@@ -806,7 +806,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/streamnative/cloud-cli/pkg/kafkaconnect"
+	openapiclient "github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect"
 )
 
 func main() {
@@ -874,7 +874,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/streamnative/cloud-cli/pkg/kafkaconnect"
+	openapiclient "github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect"
 )
 
 func main() {
@@ -933,7 +933,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/streamnative/cloud-cli/pkg/kafkaconnect"
+	openapiclient "github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect"
 )
 
 func main() {
@@ -997,7 +997,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/streamnative/cloud-cli/pkg/kafkaconnect"
+	openapiclient "github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect"
 )
 
 func main() {
@@ -1056,7 +1056,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/streamnative/cloud-cli/pkg/kafkaconnect"
+	openapiclient "github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect"
 )
 
 func main() {
@@ -1115,7 +1115,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/streamnative/cloud-cli/pkg/kafkaconnect"
+	openapiclient "github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect"
 )
 
 func main() {
@@ -1181,7 +1181,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/streamnative/cloud-cli/pkg/kafkaconnect"
+	openapiclient "github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect"
 )
 
 func main() {
@@ -1247,7 +1247,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/streamnative/cloud-cli/pkg/kafkaconnect"
+	openapiclient "github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect"
 )
 
 func main() {
@@ -1319,7 +1319,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/streamnative/cloud-cli/pkg/kafkaconnect"
+	openapiclient "github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect"
 )
 
 func main() {
@@ -1385,7 +1385,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/streamnative/cloud-cli/pkg/kafkaconnect"
+	openapiclient "github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect"
 )
 
 func main() {
@@ -1451,7 +1451,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/streamnative/cloud-cli/pkg/kafkaconnect"
+	openapiclient "github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect"
 )
 
 func main() {
@@ -1521,7 +1521,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/streamnative/cloud-cli/pkg/kafkaconnect"
+	openapiclient "github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect"
 )
 
 func main() {
@@ -1595,7 +1595,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/streamnative/cloud-cli/pkg/kafkaconnect"
+	openapiclient "github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect"
 )
 
 func main() {
@@ -1669,7 +1669,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/streamnative/cloud-cli/pkg/kafkaconnect"
+	openapiclient "github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect"
 )
 
 func main() {
@@ -1740,7 +1740,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/streamnative/cloud-cli/pkg/kafkaconnect"
+	openapiclient "github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect"
 )
 
 func main() {
@@ -1806,7 +1806,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/streamnative/cloud-cli/pkg/kafkaconnect"
+	openapiclient "github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect"
 )
 
 func main() {
@@ -1872,7 +1872,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/streamnative/cloud-cli/pkg/kafkaconnect"
+	openapiclient "github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect"
 )
 
 func main() {
@@ -1931,7 +1931,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/streamnative/cloud-cli/pkg/kafkaconnect"
+	openapiclient "github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect"
 )
 
 func main() {
@@ -1999,7 +1999,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/streamnative/cloud-cli/pkg/kafkaconnect"
+	openapiclient "github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect"
 )
 
 func main() {
@@ -2067,7 +2067,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/streamnative/cloud-cli/pkg/kafkaconnect"
+	openapiclient "github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect"
 )
 
 func main() {

@@ -20,7 +20,7 @@ var _ MappedNullable = &WorkerStatus{}
 // WorkerStatus struct for WorkerStatus
 type WorkerStatus struct {
 	Message *string `json:"message,omitempty"`
-	Status *string `json:"status,omitempty"`
+	Status  *string `json:"status,omitempty"`
 }
 
 // NewWorkerStatus instantiates a new WorkerStatus object
@@ -105,7 +105,7 @@ func (o *WorkerStatus) SetStatus(v string) {
 }
 
 func (o WorkerStatus) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -158,5 +158,3 @@ func (v *NullableWorkerStatus) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

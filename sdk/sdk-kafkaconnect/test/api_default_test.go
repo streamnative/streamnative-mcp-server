@@ -11,10 +11,10 @@ package kafkaconnect
 
 import (
 	"context"
+	openapiclient "github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
-	openapiclient "github.com/streamnative/cloud-cli/pkg/kafkaconnect"
 )
 
 func Test_kafkaconnect_DefaultAPIService(t *testing.T) {
@@ -24,7 +24,7 @@ func Test_kafkaconnect_DefaultAPIService(t *testing.T) {
 
 	t.Run("Test DefaultAPIService AlterConnectorOffsets", func(t *testing.T) {
 
-		t.Skip("skip test")  // remove to run test
+		t.Skip("skip test") // remove to run test
 
 		var connector string
 
@@ -38,7 +38,7 @@ func Test_kafkaconnect_DefaultAPIService(t *testing.T) {
 
 	t.Run("Test DefaultAPIService CreateConnector", func(t *testing.T) {
 
-		t.Skip("skip test")  // remove to run test
+		t.Skip("skip test") // remove to run test
 
 		resp, httpRes, err := apiClient.DefaultAPI.CreateConnector(context.Background()).Execute()
 
@@ -50,7 +50,7 @@ func Test_kafkaconnect_DefaultAPIService(t *testing.T) {
 
 	t.Run("Test DefaultAPIService DestroyConnector", func(t *testing.T) {
 
-		t.Skip("skip test")  // remove to run test
+		t.Skip("skip test") // remove to run test
 
 		var connector string
 
@@ -63,7 +63,7 @@ func Test_kafkaconnect_DefaultAPIService(t *testing.T) {
 
 	t.Run("Test DefaultAPIService GetConnector", func(t *testing.T) {
 
-		t.Skip("skip test")  // remove to run test
+		t.Skip("skip test") // remove to run test
 
 		var connector string
 
@@ -77,7 +77,7 @@ func Test_kafkaconnect_DefaultAPIService(t *testing.T) {
 
 	t.Run("Test DefaultAPIService GetConnectorActiveTopics", func(t *testing.T) {
 
-		t.Skip("skip test")  // remove to run test
+		t.Skip("skip test") // remove to run test
 
 		var connector string
 
@@ -91,7 +91,7 @@ func Test_kafkaconnect_DefaultAPIService(t *testing.T) {
 
 	t.Run("Test DefaultAPIService GetConnectorConfig", func(t *testing.T) {
 
-		t.Skip("skip test")  // remove to run test
+		t.Skip("skip test") // remove to run test
 
 		var connector string
 
@@ -105,7 +105,7 @@ func Test_kafkaconnect_DefaultAPIService(t *testing.T) {
 
 	t.Run("Test DefaultAPIService GetConnectorConfigDef", func(t *testing.T) {
 
-		t.Skip("skip test")  // remove to run test
+		t.Skip("skip test") // remove to run test
 
 		var pluginName string
 
@@ -119,7 +119,7 @@ func Test_kafkaconnect_DefaultAPIService(t *testing.T) {
 
 	t.Run("Test DefaultAPIService GetConnectorStatus", func(t *testing.T) {
 
-		t.Skip("skip test")  // remove to run test
+		t.Skip("skip test") // remove to run test
 
 		var connector string
 
@@ -133,7 +133,7 @@ func Test_kafkaconnect_DefaultAPIService(t *testing.T) {
 
 	t.Run("Test DefaultAPIService GetOffsets", func(t *testing.T) {
 
-		t.Skip("skip test")  // remove to run test
+		t.Skip("skip test") // remove to run test
 
 		var connector string
 
@@ -147,7 +147,7 @@ func Test_kafkaconnect_DefaultAPIService(t *testing.T) {
 
 	t.Run("Test DefaultAPIService GetTaskConfigs", func(t *testing.T) {
 
-		t.Skip("skip test")  // remove to run test
+		t.Skip("skip test") // remove to run test
 
 		var connector string
 
@@ -161,7 +161,7 @@ func Test_kafkaconnect_DefaultAPIService(t *testing.T) {
 
 	t.Run("Test DefaultAPIService GetTaskStatus", func(t *testing.T) {
 
-		t.Skip("skip test")  // remove to run test
+		t.Skip("skip test") // remove to run test
 
 		var connector string
 		var task int32
@@ -176,7 +176,7 @@ func Test_kafkaconnect_DefaultAPIService(t *testing.T) {
 
 	t.Run("Test DefaultAPIService GetTasksConfig", func(t *testing.T) {
 
-		t.Skip("skip test")  // remove to run test
+		t.Skip("skip test") // remove to run test
 
 		var connector string
 
@@ -190,7 +190,7 @@ func Test_kafkaconnect_DefaultAPIService(t *testing.T) {
 
 	t.Run("Test DefaultAPIService HealthCheck", func(t *testing.T) {
 
-		t.Skip("skip test")  // remove to run test
+		t.Skip("skip test") // remove to run test
 
 		resp, httpRes, err := apiClient.DefaultAPI.HealthCheck(context.Background()).Execute()
 
@@ -202,7 +202,7 @@ func Test_kafkaconnect_DefaultAPIService(t *testing.T) {
 
 	t.Run("Test DefaultAPIService ListConnectorPlugins", func(t *testing.T) {
 
-		t.Skip("skip test")  // remove to run test
+		t.Skip("skip test") // remove to run test
 
 		resp, httpRes, err := apiClient.DefaultAPI.ListConnectorPlugins(context.Background()).Execute()
 
@@ -214,7 +214,7 @@ func Test_kafkaconnect_DefaultAPIService(t *testing.T) {
 
 	t.Run("Test DefaultAPIService ListConnectorPluginsCatalog", func(t *testing.T) {
 
-		t.Skip("skip test")  // remove to run test
+		t.Skip("skip test") // remove to run test
 
 		resp, httpRes, err := apiClient.DefaultAPI.ListConnectorPluginsCatalog(context.Background()).Execute()
 
@@ -226,7 +226,7 @@ func Test_kafkaconnect_DefaultAPIService(t *testing.T) {
 
 	t.Run("Test DefaultAPIService ListConnectors", func(t *testing.T) {
 
-		t.Skip("skip test")  // remove to run test
+		t.Skip("skip test") // remove to run test
 
 		resp, httpRes, err := apiClient.DefaultAPI.ListConnectors(context.Background()).Execute()
 
@@ -238,7 +238,7 @@ func Test_kafkaconnect_DefaultAPIService(t *testing.T) {
 
 	t.Run("Test DefaultAPIService PauseConnector", func(t *testing.T) {
 
-		t.Skip("skip test")  // remove to run test
+		t.Skip("skip test") // remove to run test
 
 		var connector string
 
@@ -251,7 +251,7 @@ func Test_kafkaconnect_DefaultAPIService(t *testing.T) {
 
 	t.Run("Test DefaultAPIService PauseConnectorV2", func(t *testing.T) {
 
-		t.Skip("skip test")  // remove to run test
+		t.Skip("skip test") // remove to run test
 
 		var connector string
 
@@ -264,7 +264,7 @@ func Test_kafkaconnect_DefaultAPIService(t *testing.T) {
 
 	t.Run("Test DefaultAPIService PutConnectorConfig", func(t *testing.T) {
 
-		t.Skip("skip test")  // remove to run test
+		t.Skip("skip test") // remove to run test
 
 		var connector string
 
@@ -278,7 +278,7 @@ func Test_kafkaconnect_DefaultAPIService(t *testing.T) {
 
 	t.Run("Test DefaultAPIService ResetConnectorActiveTopics", func(t *testing.T) {
 
-		t.Skip("skip test")  // remove to run test
+		t.Skip("skip test") // remove to run test
 
 		var connector string
 
@@ -291,7 +291,7 @@ func Test_kafkaconnect_DefaultAPIService(t *testing.T) {
 
 	t.Run("Test DefaultAPIService ResetConnectorActiveTopicsV2", func(t *testing.T) {
 
-		t.Skip("skip test")  // remove to run test
+		t.Skip("skip test") // remove to run test
 
 		var connector string
 
@@ -304,7 +304,7 @@ func Test_kafkaconnect_DefaultAPIService(t *testing.T) {
 
 	t.Run("Test DefaultAPIService ResetConnectorOffsets", func(t *testing.T) {
 
-		t.Skip("skip test")  // remove to run test
+		t.Skip("skip test") // remove to run test
 
 		var connector string
 
@@ -318,7 +318,7 @@ func Test_kafkaconnect_DefaultAPIService(t *testing.T) {
 
 	t.Run("Test DefaultAPIService RestartConnector", func(t *testing.T) {
 
-		t.Skip("skip test")  // remove to run test
+		t.Skip("skip test") // remove to run test
 
 		var connector string
 
@@ -332,7 +332,7 @@ func Test_kafkaconnect_DefaultAPIService(t *testing.T) {
 
 	t.Run("Test DefaultAPIService RestartConnectorV2", func(t *testing.T) {
 
-		t.Skip("skip test")  // remove to run test
+		t.Skip("skip test") // remove to run test
 
 		var connector string
 
@@ -346,7 +346,7 @@ func Test_kafkaconnect_DefaultAPIService(t *testing.T) {
 
 	t.Run("Test DefaultAPIService RestartTask", func(t *testing.T) {
 
-		t.Skip("skip test")  // remove to run test
+		t.Skip("skip test") // remove to run test
 
 		var connector string
 		var task int32
@@ -360,7 +360,7 @@ func Test_kafkaconnect_DefaultAPIService(t *testing.T) {
 
 	t.Run("Test DefaultAPIService ResumeConnector", func(t *testing.T) {
 
-		t.Skip("skip test")  // remove to run test
+		t.Skip("skip test") // remove to run test
 
 		var connector string
 
@@ -373,7 +373,7 @@ func Test_kafkaconnect_DefaultAPIService(t *testing.T) {
 
 	t.Run("Test DefaultAPIService ResumeConnectorV2", func(t *testing.T) {
 
-		t.Skip("skip test")  // remove to run test
+		t.Skip("skip test") // remove to run test
 
 		var connector string
 
@@ -386,7 +386,7 @@ func Test_kafkaconnect_DefaultAPIService(t *testing.T) {
 
 	t.Run("Test DefaultAPIService ServerInfo", func(t *testing.T) {
 
-		t.Skip("skip test")  // remove to run test
+		t.Skip("skip test") // remove to run test
 
 		resp, httpRes, err := apiClient.DefaultAPI.ServerInfo(context.Background()).Execute()
 
@@ -398,7 +398,7 @@ func Test_kafkaconnect_DefaultAPIService(t *testing.T) {
 
 	t.Run("Test DefaultAPIService StopConnector", func(t *testing.T) {
 
-		t.Skip("skip test")  // remove to run test
+		t.Skip("skip test") // remove to run test
 
 		var connector string
 
@@ -411,7 +411,7 @@ func Test_kafkaconnect_DefaultAPIService(t *testing.T) {
 
 	t.Run("Test DefaultAPIService StopConnectorV2", func(t *testing.T) {
 
-		t.Skip("skip test")  // remove to run test
+		t.Skip("skip test") // remove to run test
 
 		var connector string
 
@@ -424,7 +424,7 @@ func Test_kafkaconnect_DefaultAPIService(t *testing.T) {
 
 	t.Run("Test DefaultAPIService ValidateConfigs", func(t *testing.T) {
 
-		t.Skip("skip test")  // remove to run test
+		t.Skip("skip test") // remove to run test
 
 		var pluginName string
 

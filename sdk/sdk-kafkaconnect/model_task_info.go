@@ -20,7 +20,7 @@ var _ MappedNullable = &TaskInfo{}
 // TaskInfo struct for TaskInfo
 type TaskInfo struct {
 	Config *map[string]string `json:"config,omitempty"`
-	Id *ConnectorTaskId `json:"id,omitempty"`
+	Id     *ConnectorTaskId   `json:"id,omitempty"`
 }
 
 // NewTaskInfo instantiates a new TaskInfo object
@@ -105,7 +105,7 @@ func (o *TaskInfo) SetId(v ConnectorTaskId) {
 }
 
 func (o TaskInfo) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -158,5 +158,3 @@ func (v *NullableTaskInfo) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

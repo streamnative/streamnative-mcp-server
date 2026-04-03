@@ -22,7 +22,7 @@ go get golang.org/x/net/context
 Put the package under your project folder and add the following in import:
 
 ```go
-import kafkaconnect "github.com/streamnative/cloud-cli/pkg/kafkaconnect"
+import kafkaconnect "github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect"
 ```
 
 To use a proxy, set the environment variable `HTTP_PROXY`:
