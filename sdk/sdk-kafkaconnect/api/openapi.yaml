@@ -1,0 +1,1697 @@
+openapi: 3.0.1
+info:
+  title: Kafka Connect With Pulsar API
+  version: 0.0.1
+servers:
+- url: /admin/kafkaconnect
+paths:
+  /:
+    get:
+      operationId: serverInfo
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerInfo'
+          description: Connect worker details
+      security:
+      - basicAuth: []
+  /connector-plugins:
+    get:
+      operationId: listConnectorPlugins
+      parameters:
+      - description: Whether to list only connectors instead of all plugins
+        explode: true
+        in: query
+        name: connectorsOnly
+        required: false
+        schema:
+          default: true
+          type: boolean
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/PluginInfo'
+                type: array
+          description: Connector plugins
+        "4XX":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Client error
+        "5XX":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Server error
+      security:
+      - basicAuth: []
+      summary: List all connector plugins installed
+  /connector-plugins/catalog:
+    get:
+      operationId: listConnectorPluginsCatalog
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/FunctionMeshConnectorDefinition'
+                type: array
+          description: Connector catalog
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Internal server error
+      security:
+      - basicAuth: []
+      summary: List all connector catalog
+  /connector-plugins/{pluginName}/config:
+    get:
+      operationId: getConnectorConfigDef
+      parameters:
+      - explode: false
+        in: path
+        name: pluginName
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ConfigKeyInfo'
+                type: array
+          description: Connector configuration definition
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Connector plugin not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Internal server error
+      security:
+      - basicAuth: []
+      summary: Get the configuration definition for the specified pluginName
+  /connector-plugins/{pluginName}/config/validate:
+    put:
+      operationId: validateConfigs
+      parameters:
+      - explode: false
+        in: path
+        name: pluginName
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties:
+                type: string
+              type: object
+      responses:
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Validation endpoint is not supported
+      security:
+      - basicAuth: []
+      summary: Validate the provided configuration against the configuration definition
+        for the specified pluginName
+  /connectors:
+    get:
+      operationId: listConnectors
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+          description: Active connectors
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: The requester doesn't have permission to perform this operation
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Internal server error
+      security:
+      - basicAuth: []
+    post:
+      operationId: createConnector
+      parameters:
+      - explode: true
+        in: query
+        name: forward
+        required: false
+        schema:
+          type: boolean
+        style: form
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateConnectorRequest'
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectorInfo'
+          description: Connector created successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Invalid connector configuration
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: The requester doesn't have permission to perform this operation
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Connector already exists or request conflicts with current
+            state
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Internal server error
+      security:
+      - basicAuth: []
+  /connectors/{connector}:
+    delete:
+      operationId: destroyConnector
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      - explode: true
+        in: query
+        name: forward
+        required: false
+        schema:
+          type: boolean
+        style: form
+      responses:
+        "204":
+          description: Connector deleted successfully
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: The requester doesn't have permission to perform this operation
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Connector not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Internal server error
+      security:
+      - basicAuth: []
+    get:
+      operationId: getConnector
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectorInfo'
+          description: Connector details
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: The requester doesn't have permission to perform this operation
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Connector not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Internal server error
+      security:
+      - basicAuth: []
+  /connectors/{connector}/config:
+    get:
+      operationId: getConnectorConfig
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+          description: Connector configuration
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: The requester doesn't have permission to perform this operation
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Connector not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Internal server error
+      security:
+      - basicAuth: []
+    put:
+      operationId: putConnectorConfig
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      - explode: true
+        in: query
+        name: forward
+        required: false
+        schema:
+          type: boolean
+        style: form
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties:
+                type: string
+              type: object
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectorInfo'
+          description: Connector updated successfully
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectorInfo'
+          description: Connector created successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Invalid connector configuration
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: The requester doesn't have permission to perform this operation
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Connector not found
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Request conflicts with current connector state
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Internal server error
+      security:
+      - basicAuth: []
+  /connectors/{connector}/offsets:
+    delete:
+      operationId: resetConnectorOffsets
+      parameters:
+      - explode: true
+        in: query
+        name: forward
+        required: false
+        schema:
+          type: boolean
+        style: form
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+          description: Offsets reset successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Invalid offsets request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: The requester doesn't have permission to perform this operation
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Connector not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Internal server error
+      security:
+      - basicAuth: []
+    get:
+      operationId: getOffsets
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectorOffsets'
+          description: Connector offsets
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: The requester doesn't have permission to perform this operation
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Connector not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Internal server error
+      security:
+      - basicAuth: []
+    patch:
+      operationId: alterConnectorOffsets
+      parameters:
+      - explode: true
+        in: query
+        name: forward
+        required: false
+        schema:
+          type: boolean
+        style: form
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConnectorOffsets'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+          description: Offsets altered successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Invalid offsets request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: The requester doesn't have permission to perform this operation
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Connector not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Internal server error
+      security:
+      - basicAuth: []
+  /connectors/{connector}/pause:
+    put:
+      operationId: pauseConnector
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "202":
+          description: Pause request accepted
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: The requester doesn't have permission to perform this operation
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Connector not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Internal server error
+      security:
+      - basicAuth: []
+  /connectors/{connector}/restart:
+    post:
+      operationId: restartConnector
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      - explode: true
+        in: query
+        name: includeTasks
+        required: false
+        schema:
+          default: false
+          type: boolean
+        style: form
+      - explode: true
+        in: query
+        name: onlyFailed
+        required: false
+        schema:
+          default: false
+          type: boolean
+        style: form
+      - explode: true
+        in: query
+        name: forward
+        required: false
+        schema:
+          type: boolean
+        style: form
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectorStateInfo'
+          description: Restart request accepted
+        "204":
+          description: Connector restarted without task payload
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Invalid restart request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: The requester doesn't have permission to perform this operation
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Connector not found
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Request conflicts with current connector state
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Internal server error
+      security:
+      - basicAuth: []
+  /connectors/{connector}/resume:
+    put:
+      operationId: resumeConnector
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "202":
+          description: Resume request accepted
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: The requester doesn't have permission to perform this operation
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Connector not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Internal server error
+      security:
+      - basicAuth: []
+  /connectors/{connector}/status:
+    get:
+      operationId: getConnectorStatus
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectorStateInfo'
+          description: Connector status
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: The requester doesn't have permission to perform this operation
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Connector not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Internal server error
+      security:
+      - basicAuth: []
+  /connectors/{connector}/stop:
+    put:
+      operationId: stopConnector
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      - explode: true
+        in: query
+        name: forward
+        required: false
+        schema:
+          type: boolean
+        style: form
+      responses:
+        "202":
+          description: Stop request accepted
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: The requester doesn't have permission to perform this operation
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Connector not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Internal server error
+      security:
+      - basicAuth: []
+  /connectors/{connector}/tasks:
+    get:
+      operationId: getTaskConfigs
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/TaskInfo'
+                type: array
+          description: Task configurations
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: The requester doesn't have permission to perform this operation
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Connector not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Internal server error
+      security:
+      - basicAuth: []
+  /connectors/{connector}/tasks-config:
+    get:
+      deprecated: true
+      operationId: getTasksConfig
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+          description: Task configurations
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: The requester doesn't have permission to perform this operation
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Connector not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Internal server error
+      security:
+      - basicAuth: []
+  /connectors/{connector}/tasks/{task}/restart:
+    post:
+      operationId: restartTask
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      - explode: false
+        in: path
+        name: task
+        required: true
+        schema:
+          format: int32
+          type: integer
+        style: simple
+      - explode: true
+        in: query
+        name: forward
+        required: false
+        schema:
+          type: boolean
+        style: form
+      responses:
+        "204":
+          description: Task restarted successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Invalid restart request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: The requester doesn't have permission to perform this operation
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Connector or task not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Internal server error
+      security:
+      - basicAuth: []
+  /connectors/{connector}/tasks/{task}/status:
+    get:
+      operationId: getTaskStatus
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      - explode: false
+        in: path
+        name: task
+        required: true
+        schema:
+          format: int32
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskState'
+          description: Task status
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: The requester doesn't have permission to perform this operation
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Connector or task not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Internal server error
+      security:
+      - basicAuth: []
+  /connectors/{connector}/topics:
+    get:
+      operationId: getConnectorActiveTopics
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+          description: Connector active topics
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: The requester doesn't have permission to perform this operation
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Connector not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Internal server error
+      security:
+      - basicAuth: []
+  /connectors/{connector}/topics/reset:
+    put:
+      operationId: resetConnectorActiveTopics
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "202":
+          description: Active topics reset request accepted
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: The requester doesn't have permission to perform this operation
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Connector not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Internal server error
+      security:
+      - basicAuth: []
+  /connectors/{connector}/topics:reset:
+    put:
+      operationId: resetConnectorActiveTopicsV2
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "202":
+          description: Active topics reset request accepted
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: The requester doesn't have permission to perform this operation
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Connector not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Internal server error
+      security:
+      - basicAuth: []
+  /connectors/{connector}:pause:
+    put:
+      operationId: pauseConnectorV2
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "202":
+          description: Pause request accepted
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: The requester doesn't have permission to perform this operation
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Connector not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Internal server error
+      security:
+      - basicAuth: []
+  /connectors/{connector}:restart:
+    post:
+      operationId: restartConnectorV2
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      - explode: true
+        in: query
+        name: includeTasks
+        required: false
+        schema:
+          default: false
+          type: boolean
+        style: form
+      - explode: true
+        in: query
+        name: onlyFailed
+        required: false
+        schema:
+          default: false
+          type: boolean
+        style: form
+      - explode: true
+        in: query
+        name: forward
+        required: false
+        schema:
+          type: boolean
+        style: form
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectorStateInfo'
+          description: Restart request accepted
+        "204":
+          description: Connector restarted without task payload
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Invalid restart request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: The requester doesn't have permission to perform this operation
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Connector not found
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Request conflicts with current connector state
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Internal server error
+      security:
+      - basicAuth: []
+  /connectors/{connector}:resume:
+    put:
+      operationId: resumeConnectorV2
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "202":
+          description: Resume request accepted
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: The requester doesn't have permission to perform this operation
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Connector not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Internal server error
+      security:
+      - basicAuth: []
+  /connectors/{connector}:stop:
+    put:
+      operationId: stopConnectorV2
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      - explode: true
+        in: query
+        name: forward
+        required: false
+        schema:
+          type: boolean
+        style: form
+      responses:
+        "202":
+          description: Stop request accepted
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: The requester doesn't have permission to perform this operation
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Connector not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+          description: Internal server error
+      security:
+      - basicAuth: []
+  /health:
+    get:
+      operationId: healthCheck
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkerStatus'
+          description: Worker is healthy
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkerStatus'
+          description: Worker is unhealthy
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkerStatus'
+          description: Worker is starting
+      security:
+      - basicAuth: []
+      summary: Health check endpoint to verify worker readiness and liveness
+components:
+  schemas:
+    ConfigFieldDefinition:
+      example:
+        fieldName: fieldName
+        typeName: typeName
+        attributes:
+          key: attributes
+      properties:
+        attributes:
+          additionalProperties:
+            type: string
+          type: object
+        fieldName:
+          type: string
+        typeName:
+          type: string
+      type: object
+    ConfigInfo:
+      properties:
+        definition:
+          $ref: '#/components/schemas/ConfigKeyInfo'
+        value:
+          $ref: '#/components/schemas/ConfigValueInfo'
+      type: object
+    ConfigInfos:
+      properties:
+        configs:
+          items:
+            $ref: '#/components/schemas/ConfigInfo'
+          type: array
+        error_count:
+          format: int32
+          type: integer
+        groups:
+          items:
+            type: string
+          type: array
+        name:
+          type: string
+      type: object
+    ConfigKeyInfo:
+      example:
+        order_in_group: 6
+        importance: importance
+        documentation: documentation
+        name: name
+        width: width
+        default_value: default_value
+        dependents:
+        - dependents
+        - dependents
+        display_name: display_name
+        type: type
+        required: true
+        group: group
+        order: 0
+      properties:
+        default_value:
+          type: string
+        dependents:
+          items:
+            type: string
+          type: array
+        display_name:
+          type: string
+        documentation:
+          type: string
+        group:
+          type: string
+        importance:
+          type: string
+        name:
+          type: string
+        order:
+          format: int32
+          type: integer
+        order_in_group:
+          format: int32
+          type: integer
+          writeOnly: true
+        required:
+          type: boolean
+        type:
+          type: string
+        width:
+          type: string
+      type: object
+    ConfigValueInfo:
+      properties:
+        errors:
+          items:
+            type: string
+          type: array
+        name:
+          type: string
+        recommended_values:
+          items:
+            type: string
+          type: array
+        value:
+          type: string
+        visible:
+          type: boolean
+      type: object
+    ConnectorInfo:
+      example:
+        name: name
+        type: source
+        config:
+          key: config
+        tasks:
+        - task: 0
+          connector: connector
+        - task: 0
+          connector: connector
+      properties:
+        config:
+          additionalProperties:
+            type: string
+          type: object
+        name:
+          type: string
+        tasks:
+          items:
+            $ref: '#/components/schemas/ConnectorTaskId'
+          type: array
+        type:
+          enum:
+          - source
+          - sink
+          - unknown
+          type: string
+      type: object
+    ConnectorOffset:
+      example:
+        partition:
+          key: "{}"
+        offset:
+          key: "{}"
+      properties:
+        offset:
+          additionalProperties:
+            type: object
+          type: object
+        partition:
+          additionalProperties:
+            type: object
+          type: object
+      type: object
+    ConnectorOffsets:
+      example:
+        offsets:
+        - partition:
+            key: "{}"
+          offset:
+            key: "{}"
+        - partition:
+            key: "{}"
+          offset:
+            key: "{}"
+      properties:
+        offsets:
+          items:
+            $ref: '#/components/schemas/ConnectorOffset'
+          type: array
+      type: object
+    ConnectorState:
+      example:
+        msg: msg
+        trace: trace
+        state: state
+        worker_id: worker_id
+      properties:
+        msg:
+          type: string
+          writeOnly: true
+        state:
+          type: string
+        trace:
+          type: string
+        worker_id:
+          type: string
+      type: object
+    ConnectorStateInfo:
+      example:
+        connector:
+          msg: msg
+          trace: trace
+          state: state
+          worker_id: worker_id
+        name: name
+        type: source
+        tasks:
+        - msg: msg
+          trace: trace
+          id: 0
+          state: state
+          worker_id: worker_id
+        - msg: msg
+          trace: trace
+          id: 0
+          state: state
+          worker_id: worker_id
+      properties:
+        connector:
+          $ref: '#/components/schemas/ConnectorState'
+        name:
+          type: string
+        tasks:
+          items:
+            $ref: '#/components/schemas/TaskState'
+          type: array
+        type:
+          enum:
+          - source
+          - sink
+          - unknown
+          type: string
+      type: object
+    ConnectorTaskId:
+      example:
+        task: 0
+        connector: connector
+      properties:
+        connector:
+          type: string
+        task:
+          format: int32
+          type: integer
+      type: object
+    CreateConnectorRequest:
+      example:
+        initial_state: RUNNING
+        name: name
+        config:
+          key: config
+      properties:
+        config:
+          additionalProperties:
+            type: string
+          type: object
+        initial_state:
+          enum:
+          - RUNNING
+          - PAUSED
+          - STOPPED
+          type: string
+        name:
+          type: string
+      type: object
+    ErrorMessage:
+      example:
+        error_code: 0
+        message: message
+      properties:
+        error_code:
+          format: int32
+          type: integer
+        message:
+          type: string
+      type: object
+    FunctionMeshConnectorDefinition:
+      example:
+        sinkTypeClassName: sinkTypeClassName
+        sinkConfigFieldDefinitions:
+        - fieldName: fieldName
+          typeName: typeName
+          attributes:
+            key: attributes
+        - fieldName: fieldName
+          typeName: typeName
+          attributes:
+            key: attributes
+        sourceDocLink: sourceDocLink
+        description: description
+        sourceConfigFieldDefinitions:
+        - fieldName: fieldName
+          typeName: typeName
+          attributes:
+            key: attributes
+        - fieldName: fieldName
+          typeName: typeName
+          attributes:
+            key: attributes
+        version: version
+        typeClassName: typeClassName
+        iconLink: iconLink
+        imageRegistry: imageRegistry
+        sinkDocLink: sinkDocLink
+        defaultSerdeClassName: defaultSerdeClassName
+        name: name
+        sinkConfigClass: sinkConfigClass
+        jarFullName: jarFullName
+        imageRepository: imageRepository
+        jar: jar
+        sinkClass: sinkClass
+        sourceConfigClass: sourceConfigClass
+        defaultSchemaType: defaultSchemaType
+        id: id
+        sourceClass: sourceClass
+        sourceTypeClassName: sourceTypeClassName
+        imageTag: imageTag
+      properties:
+        defaultSchemaType:
+          type: string
+        defaultSerdeClassName:
+          type: string
+        description:
+          type: string
+        iconLink:
+          type: string
+        id:
+          type: string
+        imageRegistry:
+          type: string
+        imageRepository:
+          type: string
+        imageTag:
+          type: string
+        jar:
+          type: string
+        jarFullName:
+          type: string
+        name:
+          type: string
+        sinkClass:
+          type: string
+        sinkConfigClass:
+          type: string
+        sinkConfigFieldDefinitions:
+          items:
+            $ref: '#/components/schemas/ConfigFieldDefinition'
+          type: array
+        sinkDocLink:
+          type: string
+        sinkTypeClassName:
+          type: string
+        sourceClass:
+          type: string
+        sourceConfigClass:
+          type: string
+        sourceConfigFieldDefinitions:
+          items:
+            $ref: '#/components/schemas/ConfigFieldDefinition'
+          type: array
+        sourceDocLink:
+          type: string
+        sourceTypeClassName:
+          type: string
+        typeClassName:
+          type: string
+        version:
+          type: string
+      type: object
+    Message:
+      example:
+        message: message
+      properties:
+        message:
+          type: string
+      type: object
+    PluginInfo:
+      example:
+        type: type
+        class: class
+        version: version
+      properties:
+        class:
+          type: string
+        type:
+          type: string
+        version:
+          type: string
+      type: object
+    ServerInfo:
+      example:
+        kafka_cluster_id: kafka_cluster_id
+        commit: commit
+        version: version
+      properties:
+        commit:
+          type: string
+        kafka_cluster_id:
+          type: string
+        version:
+          type: string
+      type: object
+    TaskInfo:
+      example:
+        id:
+          task: 0
+          connector: connector
+        config:
+          key: config
+      properties:
+        config:
+          additionalProperties:
+            type: string
+          type: object
+        id:
+          $ref: '#/components/schemas/ConnectorTaskId'
+      type: object
+    TaskState:
+      example:
+        msg: msg
+        trace: trace
+        id: 0
+        state: state
+        worker_id: worker_id
+      properties:
+        id:
+          format: int32
+          type: integer
+        msg:
+          type: string
+          writeOnly: true
+        state:
+          type: string
+        trace:
+          type: string
+        worker_id:
+          type: string
+      type: object
+    WorkerStatus:
+      example:
+        message: message
+        status: status
+      properties:
+        message:
+          type: string
+        status:
+          type: string
+      type: object
+  securitySchemes:
+    basicAuth:
+      scheme: basic
+      type: http

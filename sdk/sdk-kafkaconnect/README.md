@@ -74,7 +74,7 @@ ctx = context.WithValue(context.Background(), kafkaconnect.ContextOperationServe
 
 ## Documentation for API Endpoints
 
-All URIs are relative to *http://localhost*
+All URIs are relative to */admin/kafkaconnect*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
@@ -95,14 +95,19 @@ Class | Method | HTTP request | Description
 *DefaultAPI* | [**ListConnectorPluginsCatalog**](docs/DefaultAPI.md#listconnectorpluginscatalog) | **Get** /connector-plugins/catalog | List all connector catalog
 *DefaultAPI* | [**ListConnectors**](docs/DefaultAPI.md#listconnectors) | **Get** /connectors | 
 *DefaultAPI* | [**PauseConnector**](docs/DefaultAPI.md#pauseconnector) | **Put** /connectors/{connector}/pause | 
+*DefaultAPI* | [**PauseConnectorV2**](docs/DefaultAPI.md#pauseconnectorv2) | **Put** /connectors/{connector}:pause | 
 *DefaultAPI* | [**PutConnectorConfig**](docs/DefaultAPI.md#putconnectorconfig) | **Put** /connectors/{connector}/config | 
 *DefaultAPI* | [**ResetConnectorActiveTopics**](docs/DefaultAPI.md#resetconnectoractivetopics) | **Put** /connectors/{connector}/topics/reset | 
+*DefaultAPI* | [**ResetConnectorActiveTopicsV2**](docs/DefaultAPI.md#resetconnectoractivetopicsv2) | **Put** /connectors/{connector}/topics:reset | 
 *DefaultAPI* | [**ResetConnectorOffsets**](docs/DefaultAPI.md#resetconnectoroffsets) | **Delete** /connectors/{connector}/offsets | 
 *DefaultAPI* | [**RestartConnector**](docs/DefaultAPI.md#restartconnector) | **Post** /connectors/{connector}/restart | 
+*DefaultAPI* | [**RestartConnectorV2**](docs/DefaultAPI.md#restartconnectorv2) | **Post** /connectors/{connector}:restart | 
 *DefaultAPI* | [**RestartTask**](docs/DefaultAPI.md#restarttask) | **Post** /connectors/{connector}/tasks/{task}/restart | 
 *DefaultAPI* | [**ResumeConnector**](docs/DefaultAPI.md#resumeconnector) | **Put** /connectors/{connector}/resume | 
+*DefaultAPI* | [**ResumeConnectorV2**](docs/DefaultAPI.md#resumeconnectorv2) | **Put** /connectors/{connector}:resume | 
 *DefaultAPI* | [**ServerInfo**](docs/DefaultAPI.md#serverinfo) | **Get** / | 
 *DefaultAPI* | [**StopConnector**](docs/DefaultAPI.md#stopconnector) | **Put** /connectors/{connector}/stop | 
+*DefaultAPI* | [**StopConnectorV2**](docs/DefaultAPI.md#stopconnectorv2) | **Put** /connectors/{connector}:stop | 
 *DefaultAPI* | [**ValidateConfigs**](docs/DefaultAPI.md#validateconfigs) | **Put** /connector-plugins/{pluginName}/config/validate | Validate the provided configuration against the configuration definition for the specified pluginName
 
 
@@ -114,17 +119,20 @@ Class | Method | HTTP request | Description
  - [ConfigKeyInfo](docs/ConfigKeyInfo.md)
  - [ConfigValueInfo](docs/ConfigValueInfo.md)
  - [ConnectorInfo](docs/ConnectorInfo.md)
+ - [ConnectorOffset](docs/ConnectorOffset.md)
+ - [ConnectorOffsets](docs/ConnectorOffsets.md)
  - [ConnectorState](docs/ConnectorState.md)
  - [ConnectorStateInfo](docs/ConnectorStateInfo.md)
  - [ConnectorTaskId](docs/ConnectorTaskId.md)
  - [CreateConnectorRequest](docs/CreateConnectorRequest.md)
+ - [ErrorMessage](docs/ErrorMessage.md)
  - [FunctionMeshConnectorDefinition](docs/FunctionMeshConnectorDefinition.md)
+ - [Message](docs/Message.md)
  - [PluginInfo](docs/PluginInfo.md)
- - [SNConnectorOffset](docs/SNConnectorOffset.md)
- - [SNConnectorOffsets](docs/SNConnectorOffsets.md)
  - [ServerInfo](docs/ServerInfo.md)
  - [TaskInfo](docs/TaskInfo.md)
  - [TaskState](docs/TaskState.md)
+ - [WorkerStatus](docs/WorkerStatus.md)
 
 
 ## Documentation For Authorization

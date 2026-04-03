@@ -93,7 +93,7 @@ func NewConfiguration() *Configuration {
 		Debug:         false,
 		Servers: ServerConfigurations{
 			{
-				URL:         "",
+				URL:         "/admin/kafkaconnect",
 				Description: "No description provided",
 			},
 		},
