@@ -19,15 +19,16 @@ import (
 	"strings"
 )
 
+
 // DefaultAPIService DefaultAPI service
 type DefaultAPIService service
 
 type ApiAlterConnectorOffsetsRequest struct {
-	ctx                context.Context
-	ApiService         *DefaultAPIService
-	connector          string
-	forward            *bool
-	sNConnectorOffsets *SNConnectorOffsets
+	ctx context.Context
+	ApiService *DefaultAPIService
+	connector string
+	forward *bool
+	connectorOffsets *ConnectorOffsets
 }
 
 func (r ApiAlterConnectorOffsetsRequest) Forward(forward bool) ApiAlterConnectorOffsetsRequest {
@@ -35,41 +36,43 @@ func (r ApiAlterConnectorOffsetsRequest) Forward(forward bool) ApiAlterConnector
 	return r
 }
 
-func (r ApiAlterConnectorOffsetsRequest) SNConnectorOffsets(sNConnectorOffsets SNConnectorOffsets) ApiAlterConnectorOffsetsRequest {
-	r.sNConnectorOffsets = &sNConnectorOffsets
+func (r ApiAlterConnectorOffsetsRequest) ConnectorOffsets(connectorOffsets ConnectorOffsets) ApiAlterConnectorOffsetsRequest {
+	r.connectorOffsets = &connectorOffsets
 	return r
 }
 
-func (r ApiAlterConnectorOffsetsRequest) Execute() (*http.Response, error) {
+func (r ApiAlterConnectorOffsetsRequest) Execute() (*Message, *http.Response, error) {
 	return r.ApiService.AlterConnectorOffsetsExecute(r)
 }
 
 /*
 AlterConnectorOffsets Method for AlterConnectorOffsets
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param connector
-	@return ApiAlterConnectorOffsetsRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param connector
+ @return ApiAlterConnectorOffsetsRequest
 */
 func (a *DefaultAPIService) AlterConnectorOffsets(ctx context.Context, connector string) ApiAlterConnectorOffsetsRequest {
 	return ApiAlterConnectorOffsetsRequest{
 		ApiService: a,
-		ctx:        ctx,
-		connector:  connector,
+		ctx: ctx,
+		connector: connector,
 	}
 }
 
 // Execute executes the request
-func (a *DefaultAPIService) AlterConnectorOffsetsExecute(r ApiAlterConnectorOffsetsRequest) (*http.Response, error) {
+//  @return Message
+func (a *DefaultAPIService) AlterConnectorOffsetsExecute(r ApiAlterConnectorOffsetsRequest) (*Message, *http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPatch
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPatch
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *Message
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.AlterConnectorOffsets")
 	if err != nil {
-		return nil, &GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/connectors/{connector}/offsets"
@@ -100,22 +103,22 @@ func (a *DefaultAPIService) AlterConnectorOffsetsExecute(r ApiAlterConnectorOffs
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
 	// body params
-	localVarPostBody = r.sNConnectorOffsets
+	localVarPostBody = r.connectorOffsets
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
-		return nil, err
+		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, err := a.client.callAPI(req)
 	if err != nil || localVarHTTPResponse == nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
@@ -123,16 +126,68 @@ func (a *DefaultAPIService) AlterConnectorOffsetsExecute(r ApiAlterConnectorOffs
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		return localVarHTTPResponse, newErr
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
-	return localVarHTTPResponse, nil
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
 type ApiCreateConnectorRequest struct {
-	ctx                    context.Context
-	ApiService             *DefaultAPIService
-	forward                *bool
+	ctx context.Context
+	ApiService *DefaultAPIService
+	forward *bool
 	createConnectorRequest *CreateConnectorRequest
 }
 
@@ -146,34 +201,36 @@ func (r ApiCreateConnectorRequest) CreateConnectorRequest(createConnectorRequest
 	return r
 }
 
-func (r ApiCreateConnectorRequest) Execute() (*http.Response, error) {
+func (r ApiCreateConnectorRequest) Execute() (*ConnectorInfo, *http.Response, error) {
 	return r.ApiService.CreateConnectorExecute(r)
 }
 
 /*
 CreateConnector Method for CreateConnector
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiCreateConnectorRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiCreateConnectorRequest
 */
 func (a *DefaultAPIService) CreateConnector(ctx context.Context) ApiCreateConnectorRequest {
 	return ApiCreateConnectorRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-func (a *DefaultAPIService) CreateConnectorExecute(r ApiCreateConnectorRequest) (*http.Response, error) {
+//  @return ConnectorInfo
+func (a *DefaultAPIService) CreateConnectorExecute(r ApiCreateConnectorRequest) (*ConnectorInfo, *http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ConnectorInfo
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.CreateConnector")
 	if err != nil {
-		return nil, &GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/connectors"
@@ -206,19 +263,19 @@ func (a *DefaultAPIService) CreateConnectorExecute(r ApiCreateConnectorRequest) 
 	localVarPostBody = r.createConnectorRequest
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
-		return nil, err
+		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, err := a.client.callAPI(req)
 	if err != nil || localVarHTTPResponse == nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
@@ -226,17 +283,69 @@ func (a *DefaultAPIService) CreateConnectorExecute(r ApiCreateConnectorRequest) 
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		return localVarHTTPResponse, newErr
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
-	return localVarHTTPResponse, nil
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
 type ApiDestroyConnectorRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *DefaultAPIService
-	connector  string
-	forward    *bool
+	connector string
+	forward *bool
 }
 
 func (r ApiDestroyConnectorRequest) Forward(forward bool) ApiDestroyConnectorRequest {
@@ -251,24 +360,24 @@ func (r ApiDestroyConnectorRequest) Execute() (*http.Response, error) {
 /*
 DestroyConnector Method for DestroyConnector
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param connector
-	@return ApiDestroyConnectorRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param connector
+ @return ApiDestroyConnectorRequest
 */
 func (a *DefaultAPIService) DestroyConnector(ctx context.Context, connector string) ApiDestroyConnectorRequest {
 	return ApiDestroyConnectorRequest{
 		ApiService: a,
-		ctx:        ctx,
-		connector:  connector,
+		ctx: ctx,
+		connector: connector,
 	}
 }
 
 // Execute executes the request
 func (a *DefaultAPIService) DestroyConnectorExecute(r ApiDestroyConnectorRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodDelete
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.DestroyConnector")
@@ -325,6 +434,38 @@ func (a *DefaultAPIService) DestroyConnectorExecute(r ApiDestroyConnectorRequest
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
 		return localVarHTTPResponse, newErr
 	}
 
@@ -332,9 +473,9 @@ func (a *DefaultAPIService) DestroyConnectorExecute(r ApiDestroyConnectorRequest
 }
 
 type ApiGetConnectorRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *DefaultAPIService
-	connector  string
+	connector string
 }
 
 func (r ApiGetConnectorRequest) Execute() (*ConnectorInfo, *http.Response, error) {
@@ -344,27 +485,26 @@ func (r ApiGetConnectorRequest) Execute() (*ConnectorInfo, *http.Response, error
 /*
 GetConnector Method for GetConnector
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param connector
-	@return ApiGetConnectorRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param connector
+ @return ApiGetConnectorRequest
 */
 func (a *DefaultAPIService) GetConnector(ctx context.Context, connector string) ApiGetConnectorRequest {
 	return ApiGetConnectorRequest{
 		ApiService: a,
-		ctx:        ctx,
-		connector:  connector,
+		ctx: ctx,
+		connector: connector,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ConnectorInfo
+//  @return ConnectorInfo
 func (a *DefaultAPIService) GetConnectorExecute(r ApiGetConnectorRequest) (*ConnectorInfo, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ConnectorInfo
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ConnectorInfo
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.GetConnector")
@@ -418,14 +558,38 @@ func (a *DefaultAPIService) GetConnectorExecute(r ApiGetConnectorRequest) (*Conn
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		var v ConnectorInfo
-		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-		if err != nil {
-			newErr.error = err.Error()
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-		newErr.model = v
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -442,41 +606,43 @@ func (a *DefaultAPIService) GetConnectorExecute(r ApiGetConnectorRequest) (*Conn
 }
 
 type ApiGetConnectorActiveTopicsRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *DefaultAPIService
-	connector  string
+	connector string
 }
 
-func (r ApiGetConnectorActiveTopicsRequest) Execute() (*http.Response, error) {
+func (r ApiGetConnectorActiveTopicsRequest) Execute() (map[string]interface{}, *http.Response, error) {
 	return r.ApiService.GetConnectorActiveTopicsExecute(r)
 }
 
 /*
 GetConnectorActiveTopics Method for GetConnectorActiveTopics
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param connector
-	@return ApiGetConnectorActiveTopicsRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param connector
+ @return ApiGetConnectorActiveTopicsRequest
 */
 func (a *DefaultAPIService) GetConnectorActiveTopics(ctx context.Context, connector string) ApiGetConnectorActiveTopicsRequest {
 	return ApiGetConnectorActiveTopicsRequest{
 		ApiService: a,
-		ctx:        ctx,
-		connector:  connector,
+		ctx: ctx,
+		connector: connector,
 	}
 }
 
 // Execute executes the request
-func (a *DefaultAPIService) GetConnectorActiveTopicsExecute(r ApiGetConnectorActiveTopicsRequest) (*http.Response, error) {
+//  @return map[string]interface{}
+func (a *DefaultAPIService) GetConnectorActiveTopicsExecute(r ApiGetConnectorActiveTopicsRequest) (map[string]interface{}, *http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodGet
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.GetConnectorActiveTopics")
 	if err != nil {
-		return nil, &GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/connectors/{connector}/topics"
@@ -505,19 +671,19 @@ func (a *DefaultAPIService) GetConnectorActiveTopicsExecute(r ApiGetConnectorAct
 	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
-		return nil, err
+		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, err := a.client.callAPI(req)
 	if err != nil || localVarHTTPResponse == nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
@@ -525,46 +691,86 @@ func (a *DefaultAPIService) GetConnectorActiveTopicsExecute(r ApiGetConnectorAct
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		return localVarHTTPResponse, newErr
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
-	return localVarHTTPResponse, nil
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
 type ApiGetConnectorConfigRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *DefaultAPIService
-	connector  string
+	connector string
 }
 
-func (r ApiGetConnectorConfigRequest) Execute() (map[string]string, *http.Response, error) {
+func (r ApiGetConnectorConfigRequest) Execute() (map[string]interface{}, *http.Response, error) {
 	return r.ApiService.GetConnectorConfigExecute(r)
 }
 
 /*
 GetConnectorConfig Method for GetConnectorConfig
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param connector
-	@return ApiGetConnectorConfigRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param connector
+ @return ApiGetConnectorConfigRequest
 */
 func (a *DefaultAPIService) GetConnectorConfig(ctx context.Context, connector string) ApiGetConnectorConfigRequest {
 	return ApiGetConnectorConfigRequest{
 		ApiService: a,
-		ctx:        ctx,
-		connector:  connector,
+		ctx: ctx,
+		connector: connector,
 	}
 }
 
 // Execute executes the request
-//
-//	@return map[string]string
-func (a *DefaultAPIService) GetConnectorConfigExecute(r ApiGetConnectorConfigRequest) (map[string]string, *http.Response, error) {
+//  @return map[string]interface{}
+func (a *DefaultAPIService) GetConnectorConfigExecute(r ApiGetConnectorConfigRequest) (map[string]interface{}, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue map[string]string
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.GetConnectorConfig")
@@ -618,14 +824,38 @@ func (a *DefaultAPIService) GetConnectorConfigExecute(r ApiGetConnectorConfigReq
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		var v map[string]string
-		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-		if err != nil {
-			newErr.error = err.Error()
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-		newErr.model = v
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -642,7 +872,7 @@ func (a *DefaultAPIService) GetConnectorConfigExecute(r ApiGetConnectorConfigReq
 }
 
 type ApiGetConnectorConfigDefRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *DefaultAPIService
 	pluginName string
 }
@@ -654,27 +884,26 @@ func (r ApiGetConnectorConfigDefRequest) Execute() ([]ConfigKeyInfo, *http.Respo
 /*
 GetConnectorConfigDef Get the configuration definition for the specified pluginName
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param pluginName
-	@return ApiGetConnectorConfigDefRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param pluginName
+ @return ApiGetConnectorConfigDefRequest
 */
 func (a *DefaultAPIService) GetConnectorConfigDef(ctx context.Context, pluginName string) ApiGetConnectorConfigDefRequest {
 	return ApiGetConnectorConfigDefRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 		pluginName: pluginName,
 	}
 }
 
 // Execute executes the request
-//
-//	@return []ConfigKeyInfo
+//  @return []ConfigKeyInfo
 func (a *DefaultAPIService) GetConnectorConfigDefExecute(r ApiGetConnectorConfigDefRequest) ([]ConfigKeyInfo, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue []ConfigKeyInfo
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []ConfigKeyInfo
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.GetConnectorConfigDef")
@@ -728,14 +957,27 @@ func (a *DefaultAPIService) GetConnectorConfigDefExecute(r ApiGetConnectorConfig
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		var v []ConfigKeyInfo
-		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-		if err != nil {
-			newErr.error = err.Error()
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-		newErr.model = v
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -752,9 +994,9 @@ func (a *DefaultAPIService) GetConnectorConfigDefExecute(r ApiGetConnectorConfig
 }
 
 type ApiGetConnectorStatusRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *DefaultAPIService
-	connector  string
+	connector string
 }
 
 func (r ApiGetConnectorStatusRequest) Execute() (*ConnectorStateInfo, *http.Response, error) {
@@ -764,27 +1006,26 @@ func (r ApiGetConnectorStatusRequest) Execute() (*ConnectorStateInfo, *http.Resp
 /*
 GetConnectorStatus Method for GetConnectorStatus
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param connector
-	@return ApiGetConnectorStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param connector
+ @return ApiGetConnectorStatusRequest
 */
 func (a *DefaultAPIService) GetConnectorStatus(ctx context.Context, connector string) ApiGetConnectorStatusRequest {
 	return ApiGetConnectorStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		connector:  connector,
+		ctx: ctx,
+		connector: connector,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ConnectorStateInfo
+//  @return ConnectorStateInfo
 func (a *DefaultAPIService) GetConnectorStatusExecute(r ApiGetConnectorStatusRequest) (*ConnectorStateInfo, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ConnectorStateInfo
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ConnectorStateInfo
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.GetConnectorStatus")
@@ -838,14 +1079,38 @@ func (a *DefaultAPIService) GetConnectorStatusExecute(r ApiGetConnectorStatusReq
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		var v ConnectorStateInfo
-		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-		if err != nil {
-			newErr.error = err.Error()
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-		newErr.model = v
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -862,39 +1127,38 @@ func (a *DefaultAPIService) GetConnectorStatusExecute(r ApiGetConnectorStatusReq
 }
 
 type ApiGetOffsetsRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *DefaultAPIService
-	connector  string
+	connector string
 }
 
-func (r ApiGetOffsetsRequest) Execute() (*SNConnectorOffsets, *http.Response, error) {
+func (r ApiGetOffsetsRequest) Execute() (*ConnectorOffsets, *http.Response, error) {
 	return r.ApiService.GetOffsetsExecute(r)
 }
 
 /*
 GetOffsets Method for GetOffsets
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param connector
-	@return ApiGetOffsetsRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param connector
+ @return ApiGetOffsetsRequest
 */
 func (a *DefaultAPIService) GetOffsets(ctx context.Context, connector string) ApiGetOffsetsRequest {
 	return ApiGetOffsetsRequest{
 		ApiService: a,
-		ctx:        ctx,
-		connector:  connector,
+		ctx: ctx,
+		connector: connector,
 	}
 }
 
 // Execute executes the request
-//
-//	@return SNConnectorOffsets
-func (a *DefaultAPIService) GetOffsetsExecute(r ApiGetOffsetsRequest) (*SNConnectorOffsets, *http.Response, error) {
+//  @return ConnectorOffsets
+func (a *DefaultAPIService) GetOffsetsExecute(r ApiGetOffsetsRequest) (*ConnectorOffsets, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *SNConnectorOffsets
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ConnectorOffsets
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.GetOffsets")
@@ -948,14 +1212,38 @@ func (a *DefaultAPIService) GetOffsetsExecute(r ApiGetOffsetsRequest) (*SNConnec
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		var v SNConnectorOffsets
-		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-		if err != nil {
-			newErr.error = err.Error()
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-		newErr.model = v
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -972,9 +1260,9 @@ func (a *DefaultAPIService) GetOffsetsExecute(r ApiGetOffsetsRequest) (*SNConnec
 }
 
 type ApiGetTaskConfigsRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *DefaultAPIService
-	connector  string
+	connector string
 }
 
 func (r ApiGetTaskConfigsRequest) Execute() ([]TaskInfo, *http.Response, error) {
@@ -984,27 +1272,26 @@ func (r ApiGetTaskConfigsRequest) Execute() ([]TaskInfo, *http.Response, error) 
 /*
 GetTaskConfigs Method for GetTaskConfigs
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param connector
-	@return ApiGetTaskConfigsRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param connector
+ @return ApiGetTaskConfigsRequest
 */
 func (a *DefaultAPIService) GetTaskConfigs(ctx context.Context, connector string) ApiGetTaskConfigsRequest {
 	return ApiGetTaskConfigsRequest{
 		ApiService: a,
-		ctx:        ctx,
-		connector:  connector,
+		ctx: ctx,
+		connector: connector,
 	}
 }
 
 // Execute executes the request
-//
-//	@return []TaskInfo
+//  @return []TaskInfo
 func (a *DefaultAPIService) GetTaskConfigsExecute(r ApiGetTaskConfigsRequest) ([]TaskInfo, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue []TaskInfo
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []TaskInfo
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.GetTaskConfigs")
@@ -1058,14 +1345,38 @@ func (a *DefaultAPIService) GetTaskConfigsExecute(r ApiGetTaskConfigsRequest) ([
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		var v []TaskInfo
-		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-		if err != nil {
-			newErr.error = err.Error()
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-		newErr.model = v
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -1082,10 +1393,10 @@ func (a *DefaultAPIService) GetTaskConfigsExecute(r ApiGetTaskConfigsRequest) ([
 }
 
 type ApiGetTaskStatusRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *DefaultAPIService
-	connector  string
-	task       int32
+	connector string
+	task int32
 }
 
 func (r ApiGetTaskStatusRequest) Execute() (*TaskState, *http.Response, error) {
@@ -1095,29 +1406,28 @@ func (r ApiGetTaskStatusRequest) Execute() (*TaskState, *http.Response, error) {
 /*
 GetTaskStatus Method for GetTaskStatus
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param connector
-	@param task
-	@return ApiGetTaskStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param connector
+ @param task
+ @return ApiGetTaskStatusRequest
 */
 func (a *DefaultAPIService) GetTaskStatus(ctx context.Context, connector string, task int32) ApiGetTaskStatusRequest {
 	return ApiGetTaskStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		connector:  connector,
-		task:       task,
+		ctx: ctx,
+		connector: connector,
+		task: task,
 	}
 }
 
 // Execute executes the request
-//
-//	@return TaskState
+//  @return TaskState
 func (a *DefaultAPIService) GetTaskStatusExecute(r ApiGetTaskStatusRequest) (*TaskState, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *TaskState
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *TaskState
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.GetTaskStatus")
@@ -1172,14 +1482,38 @@ func (a *DefaultAPIService) GetTaskStatusExecute(r ApiGetTaskStatusRequest) (*Ta
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		var v TaskState
-		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-		if err != nil {
-			newErr.error = err.Error()
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-		newErr.model = v
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -1196,43 +1530,41 @@ func (a *DefaultAPIService) GetTaskStatusExecute(r ApiGetTaskStatusRequest) (*Ta
 }
 
 type ApiGetTasksConfigRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *DefaultAPIService
-	connector  string
+	connector string
 }
 
-func (r ApiGetTasksConfigRequest) Execute() (*map[string]map[string]string, *http.Response, error) {
+func (r ApiGetTasksConfigRequest) Execute() (map[string]interface{}, *http.Response, error) {
 	return r.ApiService.GetTasksConfigExecute(r)
 }
 
 /*
 GetTasksConfig Method for GetTasksConfig
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param connector
-	@return ApiGetTasksConfigRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param connector
+ @return ApiGetTasksConfigRequest
 
 Deprecated
 */
 func (a *DefaultAPIService) GetTasksConfig(ctx context.Context, connector string) ApiGetTasksConfigRequest {
 	return ApiGetTasksConfigRequest{
 		ApiService: a,
-		ctx:        ctx,
-		connector:  connector,
+		ctx: ctx,
+		connector: connector,
 	}
 }
 
 // Execute executes the request
-//
-//	@return map[string]map[string]string
-//
+//  @return map[string]interface{}
 // Deprecated
-func (a *DefaultAPIService) GetTasksConfigExecute(r ApiGetTasksConfigRequest) (*map[string]map[string]string, *http.Response, error) {
+func (a *DefaultAPIService) GetTasksConfigExecute(r ApiGetTasksConfigRequest) (map[string]interface{}, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *map[string]map[string]string
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.GetTasksConfig")
@@ -1286,14 +1618,38 @@ func (a *DefaultAPIService) GetTasksConfigExecute(r ApiGetTasksConfigRequest) (*
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		var v map[string]map[string]string
-		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-		if err != nil {
-			newErr.error = err.Error()
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-		newErr.model = v
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -1310,38 +1666,40 @@ func (a *DefaultAPIService) GetTasksConfigExecute(r ApiGetTasksConfigRequest) (*
 }
 
 type ApiHealthCheckRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *DefaultAPIService
 }
 
-func (r ApiHealthCheckRequest) Execute() (*http.Response, error) {
+func (r ApiHealthCheckRequest) Execute() (*WorkerStatus, *http.Response, error) {
 	return r.ApiService.HealthCheckExecute(r)
 }
 
 /*
 HealthCheck Health check endpoint to verify worker readiness and liveness
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiHealthCheckRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiHealthCheckRequest
 */
 func (a *DefaultAPIService) HealthCheck(ctx context.Context) ApiHealthCheckRequest {
 	return ApiHealthCheckRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-func (a *DefaultAPIService) HealthCheckExecute(r ApiHealthCheckRequest) (*http.Response, error) {
+//  @return WorkerStatus
+func (a *DefaultAPIService) HealthCheckExecute(r ApiHealthCheckRequest) (*WorkerStatus, *http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodGet
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *WorkerStatus
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.HealthCheck")
 	if err != nil {
-		return nil, &GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/health"
@@ -1369,19 +1727,19 @@ func (a *DefaultAPIService) HealthCheckExecute(r ApiHealthCheckRequest) (*http.R
 	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
-		return nil, err
+		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, err := a.client.callAPI(req)
 	if err != nil || localVarHTTPResponse == nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
@@ -1389,15 +1747,45 @@ func (a *DefaultAPIService) HealthCheckExecute(r ApiHealthCheckRequest) (*http.R
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		return localVarHTTPResponse, newErr
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v WorkerStatus
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
+			var v WorkerStatus
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
-	return localVarHTTPResponse, nil
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
 type ApiListConnectorPluginsRequest struct {
-	ctx            context.Context
-	ApiService     *DefaultAPIService
+	ctx context.Context
+	ApiService *DefaultAPIService
 	connectorsOnly *bool
 }
 
@@ -1414,25 +1802,24 @@ func (r ApiListConnectorPluginsRequest) Execute() ([]PluginInfo, *http.Response,
 /*
 ListConnectorPlugins List all connector plugins installed
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiListConnectorPluginsRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiListConnectorPluginsRequest
 */
 func (a *DefaultAPIService) ListConnectorPlugins(ctx context.Context) ApiListConnectorPluginsRequest {
 	return ApiListConnectorPluginsRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return []PluginInfo
+//  @return []PluginInfo
 func (a *DefaultAPIService) ListConnectorPluginsExecute(r ApiListConnectorPluginsRequest) ([]PluginInfo, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue []PluginInfo
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []PluginInfo
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.ListConnectorPlugins")
@@ -1491,14 +1878,27 @@ func (a *DefaultAPIService) ListConnectorPluginsExecute(r ApiListConnectorPlugin
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		var v []PluginInfo
-		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-		if err != nil {
-			newErr.error = err.Error()
+		if localVarHTTPResponse.StatusCode >= 400 && localVarHTTPResponse.StatusCode < 500 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-		newErr.model = v
+		if localVarHTTPResponse.StatusCode >= 500 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -1515,7 +1915,7 @@ func (a *DefaultAPIService) ListConnectorPluginsExecute(r ApiListConnectorPlugin
 }
 
 type ApiListConnectorPluginsCatalogRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *DefaultAPIService
 }
 
@@ -1526,25 +1926,24 @@ func (r ApiListConnectorPluginsCatalogRequest) Execute() ([]FunctionMeshConnecto
 /*
 ListConnectorPluginsCatalog List all connector catalog
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiListConnectorPluginsCatalogRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiListConnectorPluginsCatalogRequest
 */
 func (a *DefaultAPIService) ListConnectorPluginsCatalog(ctx context.Context) ApiListConnectorPluginsCatalogRequest {
 	return ApiListConnectorPluginsCatalogRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return []FunctionMeshConnectorDefinition
+//  @return []FunctionMeshConnectorDefinition
 func (a *DefaultAPIService) ListConnectorPluginsCatalogExecute(r ApiListConnectorPluginsCatalogRequest) ([]FunctionMeshConnectorDefinition, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue []FunctionMeshConnectorDefinition
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []FunctionMeshConnectorDefinition
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.ListConnectorPluginsCatalog")
@@ -1597,14 +1996,16 @@ func (a *DefaultAPIService) ListConnectorPluginsCatalogExecute(r ApiListConnecto
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		var v []FunctionMeshConnectorDefinition
-		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-		if err != nil {
-			newErr.error = err.Error()
-			return localVarReturnValue, localVarHTTPResponse, newErr
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
 		}
-		newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -1621,38 +2022,40 @@ func (a *DefaultAPIService) ListConnectorPluginsCatalogExecute(r ApiListConnecto
 }
 
 type ApiListConnectorsRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *DefaultAPIService
 }
 
-func (r ApiListConnectorsRequest) Execute() (*http.Response, error) {
+func (r ApiListConnectorsRequest) Execute() (map[string]interface{}, *http.Response, error) {
 	return r.ApiService.ListConnectorsExecute(r)
 }
 
 /*
 ListConnectors Method for ListConnectors
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiListConnectorsRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiListConnectorsRequest
 */
 func (a *DefaultAPIService) ListConnectors(ctx context.Context) ApiListConnectorsRequest {
 	return ApiListConnectorsRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-func (a *DefaultAPIService) ListConnectorsExecute(r ApiListConnectorsRequest) (*http.Response, error) {
+//  @return map[string]interface{}
+func (a *DefaultAPIService) ListConnectorsExecute(r ApiListConnectorsRequest) (map[string]interface{}, *http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodGet
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.ListConnectors")
 	if err != nil {
-		return nil, &GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/connectors"
@@ -1680,19 +2083,19 @@ func (a *DefaultAPIService) ListConnectorsExecute(r ApiListConnectorsRequest) (*
 	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
-		return nil, err
+		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, err := a.client.callAPI(req)
 	if err != nil || localVarHTTPResponse == nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
@@ -1700,16 +2103,46 @@ func (a *DefaultAPIService) ListConnectorsExecute(r ApiListConnectorsRequest) (*
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		return localVarHTTPResponse, newErr
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
-	return localVarHTTPResponse, nil
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
 type ApiPauseConnectorRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *DefaultAPIService
-	connector  string
+	connector string
 }
 
 func (r ApiPauseConnectorRequest) Execute() (*http.Response, error) {
@@ -1719,24 +2152,24 @@ func (r ApiPauseConnectorRequest) Execute() (*http.Response, error) {
 /*
 PauseConnector Method for PauseConnector
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param connector
-	@return ApiPauseConnectorRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param connector
+ @return ApiPauseConnectorRequest
 */
 func (a *DefaultAPIService) PauseConnector(ctx context.Context, connector string) ApiPauseConnectorRequest {
 	return ApiPauseConnectorRequest{
 		ApiService: a,
-		ctx:        ctx,
-		connector:  connector,
+		ctx: ctx,
+		connector: connector,
 	}
 }
 
 // Execute executes the request
 func (a *DefaultAPIService) PauseConnectorExecute(r ApiPauseConnectorRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPut
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.PauseConnector")
@@ -1790,6 +2223,160 @@ func (a *DefaultAPIService) PauseConnectorExecute(r ApiPauseConnectorRequest) (*
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
+type ApiPauseConnectorV2Request struct {
+	ctx context.Context
+	ApiService *DefaultAPIService
+	connector string
+}
+
+func (r ApiPauseConnectorV2Request) Execute() (*http.Response, error) {
+	return r.ApiService.PauseConnectorV2Execute(r)
+}
+
+/*
+PauseConnectorV2 Method for PauseConnectorV2
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param connector
+ @return ApiPauseConnectorV2Request
+*/
+func (a *DefaultAPIService) PauseConnectorV2(ctx context.Context, connector string) ApiPauseConnectorV2Request {
+	return ApiPauseConnectorV2Request{
+		ApiService: a,
+		ctx: ctx,
+		connector: connector,
+	}
+}
+
+// Execute executes the request
+func (a *DefaultAPIService) PauseConnectorV2Execute(r ApiPauseConnectorV2Request) (*http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.PauseConnectorV2")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/connectors/{connector}:pause"
+	localVarPath = strings.Replace(localVarPath, "{"+"connector"+"}", url.PathEscape(parameterValueToString(r.connector, "connector")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
 		return localVarHTTPResponse, newErr
 	}
 
@@ -1797,10 +2384,10 @@ func (a *DefaultAPIService) PauseConnectorExecute(r ApiPauseConnectorRequest) (*
 }
 
 type ApiPutConnectorConfigRequest struct {
-	ctx         context.Context
-	ApiService  *DefaultAPIService
-	connector   string
-	forward     *bool
+	ctx context.Context
+	ApiService *DefaultAPIService
+	connector string
+	forward *bool
 	requestBody *map[string]string
 }
 
@@ -1814,36 +2401,38 @@ func (r ApiPutConnectorConfigRequest) RequestBody(requestBody map[string]string)
 	return r
 }
 
-func (r ApiPutConnectorConfigRequest) Execute() (*http.Response, error) {
+func (r ApiPutConnectorConfigRequest) Execute() (*ConnectorInfo, *http.Response, error) {
 	return r.ApiService.PutConnectorConfigExecute(r)
 }
 
 /*
 PutConnectorConfig Method for PutConnectorConfig
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param connector
-	@return ApiPutConnectorConfigRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param connector
+ @return ApiPutConnectorConfigRequest
 */
 func (a *DefaultAPIService) PutConnectorConfig(ctx context.Context, connector string) ApiPutConnectorConfigRequest {
 	return ApiPutConnectorConfigRequest{
 		ApiService: a,
-		ctx:        ctx,
-		connector:  connector,
+		ctx: ctx,
+		connector: connector,
 	}
 }
 
 // Execute executes the request
-func (a *DefaultAPIService) PutConnectorConfigExecute(r ApiPutConnectorConfigRequest) (*http.Response, error) {
+//  @return ConnectorInfo
+func (a *DefaultAPIService) PutConnectorConfigExecute(r ApiPutConnectorConfigRequest) (*ConnectorInfo, *http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPut
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ConnectorInfo
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.PutConnectorConfig")
 	if err != nil {
-		return nil, &GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/connectors/{connector}/config"
@@ -1877,19 +2466,19 @@ func (a *DefaultAPIService) PutConnectorConfigExecute(r ApiPutConnectorConfigReq
 	localVarPostBody = r.requestBody
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
-		return nil, err
+		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, err := a.client.callAPI(req)
 	if err != nil || localVarHTTPResponse == nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
@@ -1897,16 +2486,79 @@ func (a *DefaultAPIService) PutConnectorConfigExecute(r ApiPutConnectorConfigReq
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		return localVarHTTPResponse, newErr
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
-	return localVarHTTPResponse, nil
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
 type ApiResetConnectorActiveTopicsRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *DefaultAPIService
-	connector  string
+	connector string
 }
 
 func (r ApiResetConnectorActiveTopicsRequest) Execute() (*http.Response, error) {
@@ -1916,24 +2568,24 @@ func (r ApiResetConnectorActiveTopicsRequest) Execute() (*http.Response, error) 
 /*
 ResetConnectorActiveTopics Method for ResetConnectorActiveTopics
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param connector
-	@return ApiResetConnectorActiveTopicsRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param connector
+ @return ApiResetConnectorActiveTopicsRequest
 */
 func (a *DefaultAPIService) ResetConnectorActiveTopics(ctx context.Context, connector string) ApiResetConnectorActiveTopicsRequest {
 	return ApiResetConnectorActiveTopicsRequest{
 		ApiService: a,
-		ctx:        ctx,
-		connector:  connector,
+		ctx: ctx,
+		connector: connector,
 	}
 }
 
 // Execute executes the request
 func (a *DefaultAPIService) ResetConnectorActiveTopicsExecute(r ApiResetConnectorActiveTopicsRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPut
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.ResetConnectorActiveTopics")
@@ -1987,66 +2639,89 @@ func (a *DefaultAPIService) ResetConnectorActiveTopicsExecute(r ApiResetConnecto
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
 		return localVarHTTPResponse, newErr
 	}
 
 	return localVarHTTPResponse, nil
 }
 
-type ApiResetConnectorOffsetsRequest struct {
-	ctx        context.Context
+type ApiResetConnectorActiveTopicsV2Request struct {
+	ctx context.Context
 	ApiService *DefaultAPIService
-	connector  string
-	forward    *bool
+	connector string
 }
 
-func (r ApiResetConnectorOffsetsRequest) Forward(forward bool) ApiResetConnectorOffsetsRequest {
-	r.forward = &forward
-	return r
-}
-
-func (r ApiResetConnectorOffsetsRequest) Execute() (*http.Response, error) {
-	return r.ApiService.ResetConnectorOffsetsExecute(r)
+func (r ApiResetConnectorActiveTopicsV2Request) Execute() (*http.Response, error) {
+	return r.ApiService.ResetConnectorActiveTopicsV2Execute(r)
 }
 
 /*
-ResetConnectorOffsets Method for ResetConnectorOffsets
+ResetConnectorActiveTopicsV2 Method for ResetConnectorActiveTopicsV2
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param connector
-	@return ApiResetConnectorOffsetsRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param connector
+ @return ApiResetConnectorActiveTopicsV2Request
 */
-func (a *DefaultAPIService) ResetConnectorOffsets(ctx context.Context, connector string) ApiResetConnectorOffsetsRequest {
-	return ApiResetConnectorOffsetsRequest{
+func (a *DefaultAPIService) ResetConnectorActiveTopicsV2(ctx context.Context, connector string) ApiResetConnectorActiveTopicsV2Request {
+	return ApiResetConnectorActiveTopicsV2Request{
 		ApiService: a,
-		ctx:        ctx,
-		connector:  connector,
+		ctx: ctx,
+		connector: connector,
 	}
 }
 
 // Execute executes the request
-func (a *DefaultAPIService) ResetConnectorOffsetsExecute(r ApiResetConnectorOffsetsRequest) (*http.Response, error) {
+func (a *DefaultAPIService) ResetConnectorActiveTopicsV2Execute(r ApiResetConnectorActiveTopicsV2Request) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodDelete
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.ResetConnectorOffsets")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.ResetConnectorActiveTopicsV2")
 	if err != nil {
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/connectors/{connector}/offsets"
+	localVarPath := localBasePath + "/connectors/{connector}/topics:reset"
 	localVarPath = strings.Replace(localVarPath, "{"+"connector"+"}", url.PathEscape(parameterValueToString(r.connector, "connector")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
-	if r.forward != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "forward", r.forward, "form", "")
-	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -2086,19 +2761,204 @@ func (a *DefaultAPIService) ResetConnectorOffsetsExecute(r ApiResetConnectorOffs
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
 		return localVarHTTPResponse, newErr
 	}
 
 	return localVarHTTPResponse, nil
 }
 
+type ApiResetConnectorOffsetsRequest struct {
+	ctx context.Context
+	ApiService *DefaultAPIService
+	connector string
+	forward *bool
+}
+
+func (r ApiResetConnectorOffsetsRequest) Forward(forward bool) ApiResetConnectorOffsetsRequest {
+	r.forward = &forward
+	return r
+}
+
+func (r ApiResetConnectorOffsetsRequest) Execute() (*Message, *http.Response, error) {
+	return r.ApiService.ResetConnectorOffsetsExecute(r)
+}
+
+/*
+ResetConnectorOffsets Method for ResetConnectorOffsets
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param connector
+ @return ApiResetConnectorOffsetsRequest
+*/
+func (a *DefaultAPIService) ResetConnectorOffsets(ctx context.Context, connector string) ApiResetConnectorOffsetsRequest {
+	return ApiResetConnectorOffsetsRequest{
+		ApiService: a,
+		ctx: ctx,
+		connector: connector,
+	}
+}
+
+// Execute executes the request
+//  @return Message
+func (a *DefaultAPIService) ResetConnectorOffsetsExecute(r ApiResetConnectorOffsetsRequest) (*Message, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *Message
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.ResetConnectorOffsets")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/connectors/{connector}/offsets"
+	localVarPath = strings.Replace(localVarPath, "{"+"connector"+"}", url.PathEscape(parameterValueToString(r.connector, "connector")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.forward != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "forward", r.forward, "form", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 type ApiRestartConnectorRequest struct {
-	ctx          context.Context
-	ApiService   *DefaultAPIService
-	connector    string
+	ctx context.Context
+	ApiService *DefaultAPIService
+	connector string
 	includeTasks *bool
-	onlyFailed   *bool
-	forward      *bool
+	onlyFailed *bool
+	forward *bool
 }
 
 func (r ApiRestartConnectorRequest) IncludeTasks(includeTasks bool) ApiRestartConnectorRequest {
@@ -2116,36 +2976,38 @@ func (r ApiRestartConnectorRequest) Forward(forward bool) ApiRestartConnectorReq
 	return r
 }
 
-func (r ApiRestartConnectorRequest) Execute() (*http.Response, error) {
+func (r ApiRestartConnectorRequest) Execute() (*ConnectorStateInfo, *http.Response, error) {
 	return r.ApiService.RestartConnectorExecute(r)
 }
 
 /*
 RestartConnector Method for RestartConnector
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param connector
-	@return ApiRestartConnectorRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param connector
+ @return ApiRestartConnectorRequest
 */
 func (a *DefaultAPIService) RestartConnector(ctx context.Context, connector string) ApiRestartConnectorRequest {
 	return ApiRestartConnectorRequest{
 		ApiService: a,
-		ctx:        ctx,
-		connector:  connector,
+		ctx: ctx,
+		connector: connector,
 	}
 }
 
 // Execute executes the request
-func (a *DefaultAPIService) RestartConnectorExecute(r ApiRestartConnectorRequest) (*http.Response, error) {
+//  @return ConnectorStateInfo
+func (a *DefaultAPIService) RestartConnectorExecute(r ApiRestartConnectorRequest) (*ConnectorStateInfo, *http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ConnectorStateInfo
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.RestartConnector")
 	if err != nil {
-		return nil, &GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/connectors/{connector}/restart"
@@ -2189,19 +3051,19 @@ func (a *DefaultAPIService) RestartConnectorExecute(r ApiRestartConnectorRequest
 	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
-		return nil, err
+		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, err := a.client.callAPI(req)
 	if err != nil || localVarHTTPResponse == nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
@@ -2209,18 +3071,269 @@ func (a *DefaultAPIService) RestartConnectorExecute(r ApiRestartConnectorRequest
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		return localVarHTTPResponse, newErr
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
-	return localVarHTTPResponse, nil
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiRestartConnectorV2Request struct {
+	ctx context.Context
+	ApiService *DefaultAPIService
+	connector string
+	includeTasks *bool
+	onlyFailed *bool
+	forward *bool
+}
+
+func (r ApiRestartConnectorV2Request) IncludeTasks(includeTasks bool) ApiRestartConnectorV2Request {
+	r.includeTasks = &includeTasks
+	return r
+}
+
+func (r ApiRestartConnectorV2Request) OnlyFailed(onlyFailed bool) ApiRestartConnectorV2Request {
+	r.onlyFailed = &onlyFailed
+	return r
+}
+
+func (r ApiRestartConnectorV2Request) Forward(forward bool) ApiRestartConnectorV2Request {
+	r.forward = &forward
+	return r
+}
+
+func (r ApiRestartConnectorV2Request) Execute() (*ConnectorStateInfo, *http.Response, error) {
+	return r.ApiService.RestartConnectorV2Execute(r)
+}
+
+/*
+RestartConnectorV2 Method for RestartConnectorV2
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param connector
+ @return ApiRestartConnectorV2Request
+*/
+func (a *DefaultAPIService) RestartConnectorV2(ctx context.Context, connector string) ApiRestartConnectorV2Request {
+	return ApiRestartConnectorV2Request{
+		ApiService: a,
+		ctx: ctx,
+		connector: connector,
+	}
+}
+
+// Execute executes the request
+//  @return ConnectorStateInfo
+func (a *DefaultAPIService) RestartConnectorV2Execute(r ApiRestartConnectorV2Request) (*ConnectorStateInfo, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ConnectorStateInfo
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.RestartConnectorV2")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/connectors/{connector}:restart"
+	localVarPath = strings.Replace(localVarPath, "{"+"connector"+"}", url.PathEscape(parameterValueToString(r.connector, "connector")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.includeTasks != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "includeTasks", r.includeTasks, "form", "")
+	} else {
+		var defaultValue bool = false
+		r.includeTasks = &defaultValue
+	}
+	if r.onlyFailed != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "onlyFailed", r.onlyFailed, "form", "")
+	} else {
+		var defaultValue bool = false
+		r.onlyFailed = &defaultValue
+	}
+	if r.forward != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "forward", r.forward, "form", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
 type ApiRestartTaskRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *DefaultAPIService
-	connector  string
-	task       int32
-	forward    *bool
+	connector string
+	task int32
+	forward *bool
 }
 
 func (r ApiRestartTaskRequest) Forward(forward bool) ApiRestartTaskRequest {
@@ -2235,26 +3348,26 @@ func (r ApiRestartTaskRequest) Execute() (*http.Response, error) {
 /*
 RestartTask Method for RestartTask
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param connector
-	@param task
-	@return ApiRestartTaskRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param connector
+ @param task
+ @return ApiRestartTaskRequest
 */
 func (a *DefaultAPIService) RestartTask(ctx context.Context, connector string, task int32) ApiRestartTaskRequest {
 	return ApiRestartTaskRequest{
 		ApiService: a,
-		ctx:        ctx,
-		connector:  connector,
-		task:       task,
+		ctx: ctx,
+		connector: connector,
+		task: task,
 	}
 }
 
 // Execute executes the request
 func (a *DefaultAPIService) RestartTaskExecute(r ApiRestartTaskRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.RestartTask")
@@ -2312,6 +3425,49 @@ func (a *DefaultAPIService) RestartTaskExecute(r ApiRestartTaskRequest) (*http.R
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
 		return localVarHTTPResponse, newErr
 	}
 
@@ -2319,9 +3475,9 @@ func (a *DefaultAPIService) RestartTaskExecute(r ApiRestartTaskRequest) (*http.R
 }
 
 type ApiResumeConnectorRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *DefaultAPIService
-	connector  string
+	connector string
 }
 
 func (r ApiResumeConnectorRequest) Execute() (*http.Response, error) {
@@ -2331,24 +3487,24 @@ func (r ApiResumeConnectorRequest) Execute() (*http.Response, error) {
 /*
 ResumeConnector Method for ResumeConnector
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param connector
-	@return ApiResumeConnectorRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param connector
+ @return ApiResumeConnectorRequest
 */
 func (a *DefaultAPIService) ResumeConnector(ctx context.Context, connector string) ApiResumeConnectorRequest {
 	return ApiResumeConnectorRequest{
 		ApiService: a,
-		ctx:        ctx,
-		connector:  connector,
+		ctx: ctx,
+		connector: connector,
 	}
 }
 
 // Execute executes the request
 func (a *DefaultAPIService) ResumeConnectorExecute(r ApiResumeConnectorRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPut
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.ResumeConnector")
@@ -2402,6 +3558,160 @@ func (a *DefaultAPIService) ResumeConnectorExecute(r ApiResumeConnectorRequest) 
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
+type ApiResumeConnectorV2Request struct {
+	ctx context.Context
+	ApiService *DefaultAPIService
+	connector string
+}
+
+func (r ApiResumeConnectorV2Request) Execute() (*http.Response, error) {
+	return r.ApiService.ResumeConnectorV2Execute(r)
+}
+
+/*
+ResumeConnectorV2 Method for ResumeConnectorV2
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param connector
+ @return ApiResumeConnectorV2Request
+*/
+func (a *DefaultAPIService) ResumeConnectorV2(ctx context.Context, connector string) ApiResumeConnectorV2Request {
+	return ApiResumeConnectorV2Request{
+		ApiService: a,
+		ctx: ctx,
+		connector: connector,
+	}
+}
+
+// Execute executes the request
+func (a *DefaultAPIService) ResumeConnectorV2Execute(r ApiResumeConnectorV2Request) (*http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.ResumeConnectorV2")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/connectors/{connector}:resume"
+	localVarPath = strings.Replace(localVarPath, "{"+"connector"+"}", url.PathEscape(parameterValueToString(r.connector, "connector")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
 		return localVarHTTPResponse, newErr
 	}
 
@@ -2409,7 +3719,7 @@ func (a *DefaultAPIService) ResumeConnectorExecute(r ApiResumeConnectorRequest) 
 }
 
 type ApiServerInfoRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *DefaultAPIService
 }
 
@@ -2420,25 +3730,24 @@ func (r ApiServerInfoRequest) Execute() (*ServerInfo, *http.Response, error) {
 /*
 ServerInfo Method for ServerInfo
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiServerInfoRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiServerInfoRequest
 */
 func (a *DefaultAPIService) ServerInfo(ctx context.Context) ApiServerInfoRequest {
 	return ApiServerInfoRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ServerInfo
+//  @return ServerInfo
 func (a *DefaultAPIService) ServerInfoExecute(r ApiServerInfoRequest) (*ServerInfo, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ServerInfo
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ServerInfo
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.ServerInfo")
@@ -2491,14 +3800,6 @@ func (a *DefaultAPIService) ServerInfoExecute(r ApiServerInfoRequest) (*ServerIn
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		var v ServerInfo
-		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-		if err != nil {
-			newErr.error = err.Error()
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -2515,10 +3816,10 @@ func (a *DefaultAPIService) ServerInfoExecute(r ApiServerInfoRequest) (*ServerIn
 }
 
 type ApiStopConnectorRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *DefaultAPIService
-	connector  string
-	forward    *bool
+	connector string
+	forward *bool
 }
 
 func (r ApiStopConnectorRequest) Forward(forward bool) ApiStopConnectorRequest {
@@ -2533,24 +3834,24 @@ func (r ApiStopConnectorRequest) Execute() (*http.Response, error) {
 /*
 StopConnector Method for StopConnector
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param connector
-	@return ApiStopConnectorRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param connector
+ @return ApiStopConnectorRequest
 */
 func (a *DefaultAPIService) StopConnector(ctx context.Context, connector string) ApiStopConnectorRequest {
 	return ApiStopConnectorRequest{
 		ApiService: a,
-		ctx:        ctx,
-		connector:  connector,
+		ctx: ctx,
+		connector: connector,
 	}
 }
 
 // Execute executes the request
 func (a *DefaultAPIService) StopConnectorExecute(r ApiStopConnectorRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPut
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.StopConnector")
@@ -2607,6 +3908,169 @@ func (a *DefaultAPIService) StopConnectorExecute(r ApiStopConnectorRequest) (*ht
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
+type ApiStopConnectorV2Request struct {
+	ctx context.Context
+	ApiService *DefaultAPIService
+	connector string
+	forward *bool
+}
+
+func (r ApiStopConnectorV2Request) Forward(forward bool) ApiStopConnectorV2Request {
+	r.forward = &forward
+	return r
+}
+
+func (r ApiStopConnectorV2Request) Execute() (*http.Response, error) {
+	return r.ApiService.StopConnectorV2Execute(r)
+}
+
+/*
+StopConnectorV2 Method for StopConnectorV2
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param connector
+ @return ApiStopConnectorV2Request
+*/
+func (a *DefaultAPIService) StopConnectorV2(ctx context.Context, connector string) ApiStopConnectorV2Request {
+	return ApiStopConnectorV2Request{
+		ApiService: a,
+		ctx: ctx,
+		connector: connector,
+	}
+}
+
+// Execute executes the request
+func (a *DefaultAPIService) StopConnectorV2Execute(r ApiStopConnectorV2Request) (*http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.StopConnectorV2")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/connectors/{connector}:stop"
+	localVarPath = strings.Replace(localVarPath, "{"+"connector"+"}", url.PathEscape(parameterValueToString(r.connector, "connector")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.forward != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "forward", r.forward, "form", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
 		return localVarHTTPResponse, newErr
 	}
 
@@ -2614,9 +4078,9 @@ func (a *DefaultAPIService) StopConnectorExecute(r ApiStopConnectorRequest) (*ht
 }
 
 type ApiValidateConfigsRequest struct {
-	ctx         context.Context
-	ApiService  *DefaultAPIService
-	pluginName  string
+	ctx context.Context
+	ApiService *DefaultAPIService
+	pluginName string
 	requestBody *map[string]string
 }
 
@@ -2625,39 +4089,36 @@ func (r ApiValidateConfigsRequest) RequestBody(requestBody map[string]string) Ap
 	return r
 }
 
-func (r ApiValidateConfigsRequest) Execute() (*ConfigInfos, *http.Response, error) {
+func (r ApiValidateConfigsRequest) Execute() (*http.Response, error) {
 	return r.ApiService.ValidateConfigsExecute(r)
 }
 
 /*
 ValidateConfigs Validate the provided configuration against the configuration definition for the specified pluginName
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param pluginName
-	@return ApiValidateConfigsRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param pluginName
+ @return ApiValidateConfigsRequest
 */
 func (a *DefaultAPIService) ValidateConfigs(ctx context.Context, pluginName string) ApiValidateConfigsRequest {
 	return ApiValidateConfigsRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 		pluginName: pluginName,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ConfigInfos
-func (a *DefaultAPIService) ValidateConfigsExecute(r ApiValidateConfigsRequest) (*ConfigInfos, *http.Response, error) {
+func (a *DefaultAPIService) ValidateConfigsExecute(r ApiValidateConfigsRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPut
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ConfigInfos
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.ValidateConfigs")
 	if err != nil {
-		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/connector-plugins/{pluginName}/config/validate"
@@ -2688,19 +4149,19 @@ func (a *DefaultAPIService) ValidateConfigsExecute(r ApiValidateConfigsRequest) 
 	localVarPostBody = r.requestBody
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
-		return localVarReturnValue, nil, err
+		return nil, err
 	}
 
 	localVarHTTPResponse, err := a.client.callAPI(req)
 	if err != nil || localVarHTTPResponse == nil {
-		return localVarReturnValue, localVarHTTPResponse, err
+		return localVarHTTPResponse, err
 	}
 
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
-		return localVarReturnValue, localVarHTTPResponse, err
+		return localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
@@ -2708,25 +4169,18 @@ func (a *DefaultAPIService) ValidateConfigsExecute(r ApiValidateConfigsRequest) 
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		var v ConfigInfos
-		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-		if err != nil {
-			newErr.error = err.Error()
-			return localVarReturnValue, localVarHTTPResponse, newErr
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v ErrorMessage
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
 		}
-		newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-		newErr.model = v
-		return localVarReturnValue, localVarHTTPResponse, newErr
+		return localVarHTTPResponse, newErr
 	}
 
-	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-	if err != nil {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: err.Error(),
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	return localVarReturnValue, localVarHTTPResponse, nil
+	return localVarHTTPResponse, nil
 }

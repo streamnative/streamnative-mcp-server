@@ -19,9 +19,9 @@ var _ MappedNullable = &ConnectorState{}
 
 // ConnectorState struct for ConnectorState
 type ConnectorState struct {
-	Msg      *string `json:"msg,omitempty"`
-	State    *string `json:"state,omitempty"`
-	Trace    *string `json:"trace,omitempty"`
+	Msg *string `json:"msg,omitempty"`
+	State *string `json:"state,omitempty"`
+	Trace *string `json:"trace,omitempty"`
 	WorkerId *string `json:"worker_id,omitempty"`
 }
 
@@ -171,7 +171,7 @@ func (o *ConnectorState) SetWorkerId(v string) {
 }
 
 func (o ConnectorState) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -230,3 +230,5 @@ func (v *NullableConnectorState) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

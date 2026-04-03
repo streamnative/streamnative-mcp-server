@@ -1,3 +1,6 @@
-module github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect
+module github.com/streamnative/cloud-cli/pkg/kafkaconnect
 
 go 1.18
+
+require (
+)

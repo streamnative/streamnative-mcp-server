@@ -19,29 +19,29 @@ var _ MappedNullable = &FunctionMeshConnectorDefinition{}
 
 // FunctionMeshConnectorDefinition struct for FunctionMeshConnectorDefinition
 type FunctionMeshConnectorDefinition struct {
-	DefaultSchemaType            *string                 `json:"defaultSchemaType,omitempty"`
-	DefaultSerdeClassName        *string                 `json:"defaultSerdeClassName,omitempty"`
-	Description                  *string                 `json:"description,omitempty"`
-	IconLink                     *string                 `json:"iconLink,omitempty"`
-	Id                           *string                 `json:"id,omitempty"`
-	ImageRegistry                *string                 `json:"imageRegistry,omitempty"`
-	ImageRepository              *string                 `json:"imageRepository,omitempty"`
-	ImageTag                     *string                 `json:"imageTag,omitempty"`
-	Jar                          *string                 `json:"jar,omitempty"`
-	JarFullName                  *string                 `json:"jarFullName,omitempty"`
-	Name                         *string                 `json:"name,omitempty"`
-	SinkClass                    *string                 `json:"sinkClass,omitempty"`
-	SinkConfigClass              *string                 `json:"sinkConfigClass,omitempty"`
-	SinkConfigFieldDefinitions   []ConfigFieldDefinition `json:"sinkConfigFieldDefinitions,omitempty"`
-	SinkDocLink                  *string                 `json:"sinkDocLink,omitempty"`
-	SinkTypeClassName            *string                 `json:"sinkTypeClassName,omitempty"`
-	SourceClass                  *string                 `json:"sourceClass,omitempty"`
-	SourceConfigClass            *string                 `json:"sourceConfigClass,omitempty"`
+	DefaultSchemaType *string `json:"defaultSchemaType,omitempty"`
+	DefaultSerdeClassName *string `json:"defaultSerdeClassName,omitempty"`
+	Description *string `json:"description,omitempty"`
+	IconLink *string `json:"iconLink,omitempty"`
+	Id *string `json:"id,omitempty"`
+	ImageRegistry *string `json:"imageRegistry,omitempty"`
+	ImageRepository *string `json:"imageRepository,omitempty"`
+	ImageTag *string `json:"imageTag,omitempty"`
+	Jar *string `json:"jar,omitempty"`
+	JarFullName *string `json:"jarFullName,omitempty"`
+	Name *string `json:"name,omitempty"`
+	SinkClass *string `json:"sinkClass,omitempty"`
+	SinkConfigClass *string `json:"sinkConfigClass,omitempty"`
+	SinkConfigFieldDefinitions []ConfigFieldDefinition `json:"sinkConfigFieldDefinitions,omitempty"`
+	SinkDocLink *string `json:"sinkDocLink,omitempty"`
+	SinkTypeClassName *string `json:"sinkTypeClassName,omitempty"`
+	SourceClass *string `json:"sourceClass,omitempty"`
+	SourceConfigClass *string `json:"sourceConfigClass,omitempty"`
 	SourceConfigFieldDefinitions []ConfigFieldDefinition `json:"sourceConfigFieldDefinitions,omitempty"`
-	SourceDocLink                *string                 `json:"sourceDocLink,omitempty"`
-	SourceTypeClassName          *string                 `json:"sourceTypeClassName,omitempty"`
-	TypeClassName                *string                 `json:"typeClassName,omitempty"`
-	Version                      *string                 `json:"version,omitempty"`
+	SourceDocLink *string `json:"sourceDocLink,omitempty"`
+	SourceTypeClassName *string `json:"sourceTypeClassName,omitempty"`
+	TypeClassName *string `json:"typeClassName,omitempty"`
+	Version *string `json:"version,omitempty"`
 }
 
 // NewFunctionMeshConnectorDefinition instantiates a new FunctionMeshConnectorDefinition object
@@ -798,7 +798,7 @@ func (o *FunctionMeshConnectorDefinition) SetVersion(v string) {
 }
 
 func (o FunctionMeshConnectorDefinition) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -914,3 +914,5 @@ func (v *NullableFunctionMeshConnectorDefinition) UnmarshalJSON(src []byte) erro
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

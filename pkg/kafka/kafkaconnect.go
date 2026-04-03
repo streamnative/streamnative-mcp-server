@@ -188,7 +188,7 @@ func (c *connectImpl) GetInfo(_ context.Context) (map[string]interface{}, error)
 // ListConnectors lists all connectors
 func (c *connectImpl) ListConnectors(_ context.Context) ([]string, error) {
 	// Make request
-	resp, err := c.client.DefaultAPI.ListConnectors(c.ctx).Execute()
+	_, resp, err := c.client.DefaultAPI.ListConnectors(c.ctx).Execute()
 	if err != nil {
 		return nil, fmt.Errorf("failed to list connectors: %w", err)
 	}
@@ -243,7 +243,7 @@ func (c *connectImpl) CreateConnector(_ context.Context, name string, config map
 	payload.SetConfig(config)
 
 	// Make request
-	resp, err := c.client.DefaultAPI.CreateConnector(c.ctx).CreateConnectorRequest(payload).Execute()
+	_, resp, err := c.client.DefaultAPI.CreateConnector(c.ctx).CreateConnectorRequest(payload).Execute()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create connector: %w", err)
 	}
@@ -294,7 +294,7 @@ func (c *connectImpl) UpdateConnector(_ context.Context, name string, config map
 	}
 
 	// Make request
-	resp, err := c.client.DefaultAPI.PutConnectorConfig(c.ctx, name).RequestBody(stringConfig).Execute()
+	_, resp, err := c.client.DefaultAPI.PutConnectorConfig(c.ctx, name).RequestBody(stringConfig).Execute()
 	if err != nil {
 		return nil, fmt.Errorf("failed to update connector: %w", err)
 	}
@@ -367,7 +367,7 @@ func (c *connectImpl) ResumeConnector(_ context.Context, name string) error {
 // RestartConnector restarts a connector
 func (c *connectImpl) RestartConnector(_ context.Context, name string) error {
 	// Make request
-	_, err := c.client.DefaultAPI.RestartConnector(c.ctx, name).Execute()
+	_, _, err := c.client.DefaultAPI.RestartConnector(c.ctx, name).Execute()
 	if err != nil {
 		return fmt.Errorf("failed to restart connector: %w", err)
 	}
@@ -378,9 +378,20 @@ func (c *connectImpl) RestartConnector(_ context.Context, name string) error {
 // GetConnectorConfig gets the configuration of a connector
 func (c *connectImpl) GetConnectorConfig(_ context.Context, name string) (map[string]string, error) {
 	// Make request
-	config, _, err := c.client.DefaultAPI.GetConnectorConfig(c.ctx, name).Execute()
+	_, resp, err := c.client.DefaultAPI.GetConnectorConfig(c.ctx, name).Execute()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get connector config: %w", err)
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response: %w", err)
+	}
+
+	var config map[string]string
+	if err := json.Unmarshal(body, &config); err != nil {
+		return nil, fmt.Errorf("failed to parse connector config: %w", err)
 	}
 
 	return config, nil
@@ -532,7 +543,7 @@ func (c *connectImpl) ValidateConfig(_ context.Context, pluginClass string, conf
 	}
 
 	// Make request
-	_, resp, err := c.client.DefaultAPI.ValidateConfigs(c.ctx, pluginClass).RequestBody(stringConfig).Execute()
+	resp, err := c.client.DefaultAPI.ValidateConfigs(c.ctx, pluginClass).RequestBody(stringConfig).Execute()
 	if err != nil {
 		return nil, fmt.Errorf("failed to validate connector config: %w", err)
 	}

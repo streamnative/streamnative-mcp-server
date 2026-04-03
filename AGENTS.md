@@ -1,141 +1,217 @@
-# AGENTS.md  
-Guide for autonomous coding agents (e.g., OpenAI Codex) working in **streamnative-mcp-server**
+# AGENTS.md
+Guide for autonomous coding agents working in `streamnative-mcp-server`.
 
 ---
 
-## 1 | Project snapshot
-* **What it is** – A fast, developer-friendly **Model Context Protocol (MCP) server** that lets LLM agents talk to **Apache Kafka, Apache Pulsar, and StreamNative Cloud** through a single, consistent interface.  
-* **Key outputs** – A single Go binary named **`snmcp`** (and a Docker image) that can run as a *stdio* or *SSE* server.  
-* **Primary language / tooling** – Go 1.22+, `make`, `golangci-lint`, `goreleaser`.
+## 1 | Project Snapshot
+
+- **What it is**: A Go-based Model Context Protocol (MCP) server that exposes StreamNative Cloud, Apache Kafka, and Apache Pulsar operations through one MCP surface.
+- **Primary binary**: `bin/snmcp`, built from `cmd/streamnative-mcp-server/main.go`.
+- **Server modes**: `stdio` and `sse`.
+- **Current stack**: Go `1.25.6`, `cobra`, `mark3labs/mcp-go`, Docker, Helm, GoReleaser.
+- **Published container names**: `streamnative/mcp-server` and `streamnative/snmcp`.
 
 ---
 
-## 2 | Repo map (orient yourself quickly)
+## 2 | Repository Map
 
-| Path | What lives here | Touch with care? |
-|------|-----------------|------------------|
-| `cmd/streamnative-mcp-server/` | `main.go` entry‑point for the CLI/server | **yes** |
-| `pkg/` | Core library packages (Kafka tools, Pulsar tools, cloud integration, feature gating) | yes |
-| `sdk/` | Thin Go client helpers (generated) | can be re‑generated |
-| `charts/` | Helm charts (snmcp chart + values + README) | **yes** |
-| `docs/tools/` | One Markdown file per MCP tool – these are surfaced to the LLM at runtime | **yes** |
-| `.github/workflows/` | CI (lint, unit test, release) | only if changing CI |
-| `Makefile` | Local build helpers (`make build`, `make fix-license`, …) | safe |
+| Path | Purpose | Notes |
+|------|---------|-------|
+| `cmd/streamnative-mcp-server/` | Root CLI entrypoint | Owns the `snmcp` command and top-level Cobra wiring |
+| `cmd/snmcp-e2e/` | Go E2E client | Used by chart and SSE authentication end-to-end tests |
+| `pkg/cmd/mcp/` | Transport/bootstrap layer | Completes config, creates sessions, starts `stdio` or `sse` servers |
+| `pkg/mcp/` | Core MCP server logic | Feature flags, prompts, context tools, wrapper registration, runtime instructions |
+| `pkg/mcp/builders/kafka/` | Kafka tool builders | Preferred home for Kafka MCP tool schemas and handlers |
+| `pkg/mcp/builders/pulsar/` | Pulsar tool builders | Preferred home for Pulsar MCP tool schemas and handlers |
+| `pkg/mcp/session/` | Multi-session Pulsar support | SSE bearer-token session cache and eviction logic |
+| `pkg/config/` | CLI/config resolution | StreamNative Cloud, external Kafka, external Pulsar options |
+| `pkg/kafka/`, `pkg/pulsar/`, `pkg/auth/`, `pkg/schema/` | Service/session/auth/schema helpers | Touch carefully; these support the tool layer |
+| `docs/tools/` | Tool-facing Markdown docs | These docs are surfaced to MCP clients at runtime |
+| `charts/snmcp/` | Helm chart | Deploys SSE mode with multi-session Pulsar support |
+| `charts/snmcp/e2e/` | Chart test fixtures | Test tokens, local values, and auth fixtures for E2E |
+| `scripts/e2e-test.sh` | Local chart E2E harness | Uses Docker, Kind, Helm, kubectl, and `cmd/snmcp-e2e` |
+| `sdk/sdk-apiserver/` | Local generated SDK module | Referenced via `replace` in root `go.mod` |
+| `sdk/sdk-kafkaconnect/` | Local generated SDK module | OpenAPI-generated code; avoid casual hand-edits |
+| `.github/workflows/` | CI pipelines | Unit tests, lint, GoReleaser, chart E2E |
 
 ---
 
-## 3 | Required dev workflow
+## 3 | Current Architecture Notes
 
-> **Agents MUST follow every step below before committing code or opening a PR.**
+- `cmd/streamnative-mcp-server/main.go` creates the root `snmcp` command, adds shared config flags, and attaches `stdio` and `sse` subcommands.
+- `pkg/cmd/mcp/mcp.go` selects one runtime mode:
+  - `--key-file` => StreamNative Cloud mode. This defaults to `all` features, or forces `streamnative-cloud` into the selected feature set.
+  - `--use-external-kafka` => Kafka-only mode. Extra feature flags are rejected and Kafka admin/client features are inferred automatically.
+  - `--use-external-pulsar` => Pulsar-only mode. Extra feature flags are rejected and `all-pulsar` is inferred automatically.
+- Most CLI flags are also exposed through `SNMCP_*` environment variables. The default local state/config directory is `~/.snmcp` unless `--config-dir` or `SNMCP_CONFIG_DIR` overrides it.
+- `pkg/cmd/mcp/server.go` is the current tool registration hub. It wires sessions, builds the MCP server, and registers each tool family.
+- The `pkg/mcp/*_tools.go` files are mostly registration wrappers. The actual tool schemas and handlers live in `pkg/mcp/builders/...`.
+- New MCP tool work should follow the builder pattern under `pkg/mcp/builders/{kafka,pulsar}`. Do not create a new `pkg/tools/...` tree.
+- `pkg/cmd/mcp/sse.go` exposes the SSE endpoint, message endpoint, and unauthenticated health probes:
+  - `<httpPath>/sse`
+  - `<httpPath>/message`
+  - `<httpPath>/healthz`
+  - `<httpPath>/readyz`
+- Multi-session Pulsar mode only exists for `sse` with external Pulsar. It uses bearer tokens and the cache in `pkg/mcp/session/`.
+- `pkg/mcp/pftools/` and `pkg/mcp/pulsar_functions_as_tools.go` dynamically expose deployed Pulsar Functions as MCP tools. Changes here affect runtime-generated tool surfaces and should be reviewed carefully.
+- Logging currently uses `logrus`, not `zap`.
 
-1. **Install deps**  
+---
+
+## 4 | Required Local Workflow
+
+Agents should match the current repository workflow, not a generic Go template.
+
+1. **Dependencies**
    ```bash
-   brew install golangci-lint            # or use the install script
-   go install github.com/elastic/go-licenser@latest
+   go mod verify
+   go mod download
    ```
 
-2. **Build & unit tests**  
+2. **Formatting and module hygiene**
    ```bash
-   make build            # invokes `go build …` with version metadata
-   go test ./...         # _there are few tests today – add more!_
-   ```
-
-3. **Static analysis & formatting**  
-   Run `golangci-lint run` and ensure **zero** issues. Linters enabled include `govet`, `staticcheck`, `revive`, `gosec`, etc.  
-   Follow `go fmt` / `goimports` import grouping.
-
-4. **License headers**  
-   ```bash
-   make fix-license      # injects Apache 2.0 headers via go-licenser
-   ```
-
-5. **Generate artifacts** (only if you edited code‑gen files)  
-   ```bash
-   go generate ./...
+   go fmt ./...
    go mod tidy
    ```
+   Both commands are enforced by CI and must leave no diff behind.
 
-6. **Commit & conventional message**  
-   Use **Conventional Commits** (`feat:`, `fix:`, `docs:` …). Keep title ≤ 72 chars and add a body explaining _why_.
-
-7. **Run the full release checks locally (optional but recommended)**  
+3. **Lint**
    ```bash
-   goreleaser release --snapshot --clean  # mirrors CI pipeline
+   golangci-lint run --timeout=3m
+   ```
+   CI currently installs `golangci-lint` `v2.7.2`.
+
+4. **Tests**
+   ```bash
+   go test -race ./...
    ```
 
+5. **Build**
+   ```bash
+   make build
+   ```
+   This builds `bin/snmcp` with version, commit, and build-date ldflags. It is a host build only; cross-platform packaging is handled by GoReleaser.
+
+6. **License headers**
+   ```bash
+   make license-check
+   make license-fix
+   ```
+   Use these when you add files or touch headers. The repo uses `license-eye`, not `go-licenser`.
+
+7. **Chart / E2E changes**
+   If you touch `charts/**`, `cmd/snmcp-e2e/**`, or `scripts/e2e-test.sh`, also run:
+   ```bash
+   ./scripts/e2e-test.sh all
+   ```
+   This requires Docker, Kind, Helm, and kubectl.
+
+8. **Release-related changes**
+   For changes that affect packaging, Docker images, or release metadata, also run:
+   ```bash
+   goreleaser release --snapshot --clean
+   ```
+   GoReleaser also runs `go mod tidy` and `go generate ./...` in `before.hooks`, so run `go generate ./...` locally when you touch generated inputs or release plumbing.
+
 ---
 
-## 4 | How to run the server locally
+## 5 | Local Runbook
 
 ```bash
-# StreamNative Cloud (stdio)
-bin/snmcp stdio --organization $ORG --key-file my_sa.json
-# External Kafka
+# Build
+make build
+
+# StreamNative Cloud over stdio
+bin/snmcp stdio --organization "$ORG" --key-file /path/to/key.json
+
+# External Kafka over stdio
 bin/snmcp stdio --use-external-kafka --kafka-bootstrap-servers localhost:9092
-# External Pulsar
+
+# External Pulsar over stdio
 bin/snmcp stdio --use-external-pulsar --pulsar-web-service-url http://localhost:8080
+
+# SSE mode
+bin/snmcp sse --http-addr :9090 --http-path /mcp --organization "$ORG" --key-file /path/to/key.json
+
+# SSE multi-session Pulsar mode
+bin/snmcp sse \
+  --http-addr :9090 \
+  --http-path /mcp \
+  --use-external-pulsar \
+  --pulsar-web-service-url http://localhost:8080 \
+  --multi-session-pulsar
 ```
 
-For HTTP/SSE mode add `sse --http-addr :9090 --http-path /mcp`.
-
----
-
-## 5 | Coding conventions
-
-* **Package layout** – one feature per package; avoid cyclic imports.  
-* **Error handling** – wrap with `fmt.Errorf("context: %w", err)`; export sentinel errors where appropriate.  
-* **Logging** – rely on `zap` (already imported) with structured fields.  
-* **Tests** – use Go’s `testing` plus `testify/require`. When adding a tool, write at least:
-  * happy‑path invocation
-  * typical error path
-  * integration stub (may be skipped with `-short`)
-
----
-
-## 6 | Common tasks for agents
-
-| Task | Checklist |
-|------|-----------|
-| **Add a new MCP tool** | 1) create package in `pkg/tools/...` 2) update `docs/tools/<tool>.md` 3) add to feature flag map 4) go‑vet + tests |
-| **Bug fix** | reproduce with unit test first → fix → ensure lint/test pass |
-| **Docs** | update both README **and** the per‑tool doc; regenerate table of contents |
-| **Helm chart changes** | update `charts/snmcp/README.md`; keep repo install instructions current |
-| **Release prep** | bump version tag, update changelog, run `goreleaser release --snapshot` |
-
----
-
-## 7 | Programmatic checks the agent MUST run
+For chart-based local development:
 
 ```bash
-go vet ./...
-golangci-lint run
-go test ./...
-make build                    # binary must compile for darwin/amd64 & linux/amd64
+helm install snmcp ./charts/snmcp \
+  --set pulsar.webServiceURL=http://pulsar.example.com:8080
 ```
 
-Codex **must not** finish a task until all checks pass locally. If CI fails, iterate until green.
+---
+
+## 6 | Coding Conventions For This Repo
+
+- Prefer small, reviewable changes that preserve the current builder-and-wrapper architecture.
+- Wrap errors with context using `%w`.
+- Keep feature gating aligned with `pkg/mcp/features.go`.
+- Respect `--read-only` behavior. Write-capable tools must not leak into read-only mode.
+- Put tests next to the code they validate. Builder packages already contain unit and parity tests; extend those patterns instead of inventing a separate layout.
+- If you change public CLI flags, startup behavior, feature names, or connection examples, update `README.md`.
+- If you change a runtime-visible tool, update the matching file in `docs/tools/`.
+- If you change Helm values, update `charts/snmcp/README.md` and template assumptions together.
+- Generated SDK directories are local modules. Prefer regenerating from source specs/config rather than manually editing generated files unless you are making a deliberate patch.
+- `.golangci.yml` enables `gofmt` and `goimports`, but CI explicitly checks `go fmt ./...`, `go mod tidy`, and `golangci-lint run`. Keep your local workflow aligned with those concrete commands.
 
 ---
 
-## 8 | Pull‑request etiquette
+## 7 | Common Tasks
 
-* Open PR against `main`, no new branches needed.  
-* Include a **Summary**, **Testing plan**, and **Docs updated** checklist.  
-* Mention which `--features` flags were affected, so reviewers know what to smoke‑test.  
-* If the change affects the public CLI, update `README.md` usage examples.
-
----
-
-## 9 | AGENTS.md spec compliance
-
-This file follows the AGENTS.md spec described in the Codex system message (scope, precedence, required programmatic checks, etc.).  
-
-* Its scope is the **entire repository**.  
-* Deeper‑level AGENTS.md (not currently present) may override these instructions for their subtree.  
-* Direct human instructions in a prompt override anything here.
+| Task | Expected steps |
+|------|----------------|
+| **Add or extend an MCP tool** | Implement or update the builder in `pkg/mcp/builders/{kafka,pulsar}`; wire or update the wrapper in `pkg/mcp/*_tools.go` if needed; update `pkg/mcp/features.go` when feature gates change; add or update tests; update `docs/tools/<tool>.md` |
+| **Change CLI or configuration flow** | Update `pkg/config/`, `pkg/cmd/mcp/`, and any affected README examples; verify mode-selection rules still make sense |
+| **Change SSE or auth/session behavior** | Review `pkg/cmd/mcp/sse.go`, `pkg/mcp/session/`, `cmd/snmcp-e2e/`, `scripts/e2e-test.sh`, and `charts/snmcp/templates/` together |
+| **Change Helm chart behavior** | Update `values.yaml`, templates, and `charts/snmcp/README.md` together; rerun the E2E harness |
+| **Change generated SDKs** | Update the relevant source spec/config, regenerate, keep the root `replace` directives valid, and avoid partial manual edits |
+| **Release prep** | Check `goreleaser` inputs, Docker image naming, chart metadata, and run `goreleaser release --snapshot --clean` |
 
 ---
 
-Happy hacking! 🚀
+## 8 | Programmatic Checks To Run Before Finishing
 
-@CLAUDE.md as reference.
+```bash
+go mod verify
+go mod download
+go fmt ./...
+go mod tidy
+golangci-lint run --timeout=3m
+go test -race ./...
+make build
+```
+
+When the change touches the chart or E2E harness:
+
+```bash
+./scripts/e2e-test.sh all
+```
+
+Do not mark work complete while these checks are still failing.
+
+---
+
+## 9 | Commit And PR Expectations
+
+- Use Conventional Commits such as `feat:`, `fix:`, `docs:`, or `refactor:`.
+- Open PRs against `main` unless a release branch is explicitly requested.
+- Include a short summary, a concrete testing section, and a docs-updated note.
+- Mention any affected feature flags, CLI flags, SSE paths, or Helm values so reviewers know what to smoke-test.
+
+---
+
+## 10 | Scope
+
+- This file applies to the entire repository.
+- If a deeper `AGENTS.md` is added later, it overrides this file for its subtree.
+- Direct user instructions still take precedence.

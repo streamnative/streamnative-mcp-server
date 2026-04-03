@@ -19,18 +19,18 @@ var _ MappedNullable = &ConfigKeyInfo{}
 
 // ConfigKeyInfo struct for ConfigKeyInfo
 type ConfigKeyInfo struct {
-	DefaultValue  *string  `json:"default_value,omitempty"`
-	Dependents    []string `json:"dependents,omitempty"`
-	DisplayName   *string  `json:"display_name,omitempty"`
-	Documentation *string  `json:"documentation,omitempty"`
-	Group         *string  `json:"group,omitempty"`
-	Importance    *string  `json:"importance,omitempty"`
-	Name          *string  `json:"name,omitempty"`
-	Order         *int32   `json:"order,omitempty"`
-	OrderInGroup  *int32   `json:"order_in_group,omitempty"`
-	Required      *bool    `json:"required,omitempty"`
-	Type          *string  `json:"type,omitempty"`
-	Width         *string  `json:"width,omitempty"`
+	DefaultValue *string `json:"default_value,omitempty"`
+	Dependents []string `json:"dependents,omitempty"`
+	DisplayName *string `json:"display_name,omitempty"`
+	Documentation *string `json:"documentation,omitempty"`
+	Group *string `json:"group,omitempty"`
+	Importance *string `json:"importance,omitempty"`
+	Name *string `json:"name,omitempty"`
+	Order *int32 `json:"order,omitempty"`
+	OrderInGroup *int32 `json:"order_in_group,omitempty"`
+	Required *bool `json:"required,omitempty"`
+	Type *string `json:"type,omitempty"`
+	Width *string `json:"width,omitempty"`
 }
 
 // NewConfigKeyInfo instantiates a new ConfigKeyInfo object
@@ -435,7 +435,7 @@ func (o *ConfigKeyInfo) SetWidth(v string) {
 }
 
 func (o ConfigKeyInfo) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -518,3 +518,5 @@ func (v *NullableConfigKeyInfo) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

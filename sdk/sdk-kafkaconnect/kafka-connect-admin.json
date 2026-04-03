@@ -4,13 +4,16 @@
     "title" : "Kafka Connect With Pulsar API",
     "version" : "0.0.1"
   },
+  "servers" : [ {
+    "url" : "/admin/kafkaconnect"
+  } ],
   "paths" : {
     "/" : {
       "get" : {
         "operationId" : "serverInfo",
         "responses" : {
-          "default" : {
-            "description" : "default response",
+          "200" : {
+            "description" : "Connect worker details",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -39,8 +42,8 @@
           }
         } ],
         "responses" : {
-          "default" : {
-            "description" : "default response",
+          "200" : {
+            "description" : "Connector plugins",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -48,6 +51,26 @@
                   "items" : {
                     "$ref" : "#/components/schemas/PluginInfo"
                   }
+                }
+              }
+            }
+          },
+          "4XX" : {
+            "description" : "Client error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "5XX" : {
+            "description" : "Server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
                 }
               }
             }
@@ -63,8 +86,8 @@
         "summary" : "List all connector catalog",
         "operationId" : "listConnectorPluginsCatalog",
         "responses" : {
-          "default" : {
-            "description" : "default response",
+          "200" : {
+            "description" : "Connector catalog",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -72,6 +95,16 @@
                   "items" : {
                     "$ref" : "#/components/schemas/FunctionMeshConnectorDefinition"
                   }
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
                 }
               }
             }
@@ -95,8 +128,8 @@
           }
         } ],
         "responses" : {
-          "default" : {
-            "description" : "default response",
+          "200" : {
+            "description" : "Connector configuration definition",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -104,6 +137,26 @@
                   "items" : {
                     "$ref" : "#/components/schemas/ConfigKeyInfo"
                   }
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Connector plugin not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
                 }
               }
             }
@@ -139,12 +192,12 @@
           }
         },
         "responses" : {
-          "default" : {
-            "description" : "default response",
+          "400" : {
+            "description" : "Validation endpoint is not supported",
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/ConfigInfos"
+                  "$ref" : "#/components/schemas/ErrorMessage"
                 }
               }
             }
@@ -159,10 +212,34 @@
       "get" : {
         "operationId" : "listConnectors",
         "responses" : {
-          "default" : {
-            "description" : "default response",
+          "200" : {
+            "description" : "Active connectors",
             "content" : {
-              "application/json" : { }
+              "application/json" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "The requester doesn't have permission to perform this operation",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
             }
           }
         },
@@ -189,10 +266,54 @@
           }
         },
         "responses" : {
-          "default" : {
-            "description" : "default response",
+          "201" : {
+            "description" : "Connector created successfully",
             "content" : {
-              "application/json" : { }
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ConnectorInfo"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid connector configuration",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "The requester doesn't have permission to perform this operation",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Connector already exists or request conflicts with current state",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
             }
           }
         },
@@ -213,12 +334,42 @@
           }
         } ],
         "responses" : {
-          "default" : {
-            "description" : "default response",
+          "200" : {
+            "description" : "Connector details",
             "content" : {
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/ConnectorInfo"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "The requester doesn't have permission to perform this operation",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Connector not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
                 }
               }
             }
@@ -245,10 +396,37 @@
           }
         } ],
         "responses" : {
-          "default" : {
-            "description" : "default response",
+          "204" : {
+            "description" : "Connector deleted successfully"
+          },
+          "403" : {
+            "description" : "The requester doesn't have permission to perform this operation",
             "content" : {
-              "application/json" : { }
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Connector not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
             }
           }
         },
@@ -269,15 +447,42 @@
           }
         } ],
         "responses" : {
-          "default" : {
-            "description" : "default response",
+          "200" : {
+            "description" : "Connector configuration",
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "object",
-                  "additionalProperties" : {
-                    "type" : "string"
-                  }
+                  "type" : "object"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "The requester doesn't have permission to perform this operation",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Connector not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
                 }
               }
             }
@@ -316,10 +521,74 @@
           }
         },
         "responses" : {
-          "default" : {
-            "description" : "default response",
+          "200" : {
+            "description" : "Connector updated successfully",
             "content" : {
-              "application/json" : { }
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ConnectorInfo"
+                }
+              }
+            }
+          },
+          "201" : {
+            "description" : "Connector created successfully",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ConnectorInfo"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid connector configuration",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "The requester doesn't have permission to perform this operation",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Connector not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Request conflicts with current connector state",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
             }
           }
         },
@@ -340,12 +609,42 @@
           }
         } ],
         "responses" : {
-          "default" : {
-            "description" : "default response",
+          "200" : {
+            "description" : "Connector offsets",
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/SNConnectorOffsets"
+                  "$ref" : "#/components/schemas/ConnectorOffsets"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "The requester doesn't have permission to perform this operation",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Connector not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
                 }
               }
             }
@@ -372,10 +671,54 @@
           }
         } ],
         "responses" : {
-          "default" : {
-            "description" : "default response",
+          "200" : {
+            "description" : "Offsets reset successfully",
             "content" : {
-              "application/json" : { }
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Message"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid offsets request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "The requester doesn't have permission to perform this operation",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Connector not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
             }
           }
         },
@@ -403,16 +746,60 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/SNConnectorOffsets"
+                "$ref" : "#/components/schemas/ConnectorOffsets"
               }
             }
           }
         },
         "responses" : {
-          "default" : {
-            "description" : "default response",
+          "200" : {
+            "description" : "Offsets altered successfully",
             "content" : {
-              "application/json" : { }
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Message"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid offsets request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "The requester doesn't have permission to perform this operation",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Connector not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
             }
           }
         },
@@ -433,10 +820,37 @@
           }
         } ],
         "responses" : {
-          "default" : {
-            "description" : "default response",
+          "202" : {
+            "description" : "Pause request accepted"
+          },
+          "403" : {
+            "description" : "The requester doesn't have permission to perform this operation",
             "content" : {
-              "application/json" : { }
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Connector not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
             }
           }
         },
@@ -477,10 +891,67 @@
           }
         } ],
         "responses" : {
-          "default" : {
-            "description" : "default response",
+          "202" : {
+            "description" : "Restart request accepted",
             "content" : {
-              "application/json" : { }
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ConnectorStateInfo"
+                }
+              }
+            }
+          },
+          "204" : {
+            "description" : "Connector restarted without task payload"
+          },
+          "400" : {
+            "description" : "Invalid restart request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "The requester doesn't have permission to perform this operation",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Connector not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Request conflicts with current connector state",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
             }
           }
         },
@@ -501,10 +972,37 @@
           }
         } ],
         "responses" : {
-          "default" : {
-            "description" : "default response",
+          "202" : {
+            "description" : "Resume request accepted"
+          },
+          "403" : {
+            "description" : "The requester doesn't have permission to perform this operation",
             "content" : {
-              "application/json" : { }
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Connector not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
             }
           }
         },
@@ -525,12 +1023,42 @@
           }
         } ],
         "responses" : {
-          "default" : {
-            "description" : "default response",
+          "200" : {
+            "description" : "Connector status",
             "content" : {
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/ConnectorStateInfo"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "The requester doesn't have permission to perform this operation",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Connector not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
                 }
               }
             }
@@ -559,10 +1087,37 @@
           }
         } ],
         "responses" : {
-          "default" : {
-            "description" : "default response",
+          "202" : {
+            "description" : "Stop request accepted"
+          },
+          "403" : {
+            "description" : "The requester doesn't have permission to perform this operation",
             "content" : {
-              "application/json" : { }
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Connector not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
             }
           }
         },
@@ -583,8 +1138,8 @@
           }
         } ],
         "responses" : {
-          "default" : {
-            "description" : "default response",
+          "200" : {
+            "description" : "Task configurations",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -592,6 +1147,36 @@
                   "items" : {
                     "$ref" : "#/components/schemas/TaskInfo"
                   }
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "The requester doesn't have permission to perform this operation",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Connector not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
                 }
               }
             }
@@ -614,18 +1199,42 @@
           }
         } ],
         "responses" : {
-          "default" : {
-            "description" : "default response",
+          "200" : {
+            "description" : "Task configurations",
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "object",
-                  "additionalProperties" : {
-                    "type" : "object",
-                    "additionalProperties" : {
-                      "type" : "string"
-                    }
-                  }
+                  "type" : "object"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "The requester doesn't have permission to perform this operation",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Connector not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
                 }
               }
             }
@@ -663,10 +1272,47 @@
           }
         } ],
         "responses" : {
-          "default" : {
-            "description" : "default response",
+          "204" : {
+            "description" : "Task restarted successfully"
+          },
+          "400" : {
+            "description" : "Invalid restart request",
             "content" : {
-              "application/json" : { }
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "The requester doesn't have permission to perform this operation",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Connector or task not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
             }
           }
         },
@@ -695,12 +1341,42 @@
           }
         } ],
         "responses" : {
-          "default" : {
-            "description" : "default response",
+          "200" : {
+            "description" : "Task status",
             "content" : {
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/TaskState"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "The requester doesn't have permission to perform this operation",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Connector or task not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
                 }
               }
             }
@@ -723,10 +1399,44 @@
           }
         } ],
         "responses" : {
-          "default" : {
-            "description" : "default response",
+          "200" : {
+            "description" : "Connector active topics",
             "content" : {
-              "application/json" : { }
+              "application/json" : {
+                "schema" : {
+                  "type" : "object"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "The requester doesn't have permission to perform this operation",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Connector not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
             }
           }
         },
@@ -747,10 +1457,348 @@
           }
         } ],
         "responses" : {
-          "default" : {
-            "description" : "default response",
+          "202" : {
+            "description" : "Active topics reset request accepted"
+          },
+          "403" : {
+            "description" : "The requester doesn't have permission to perform this operation",
             "content" : {
-              "application/json" : { }
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Connector not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/connectors/{connector}/topics:reset" : {
+      "put" : {
+        "operationId" : "resetConnectorActiveTopicsV2",
+        "parameters" : [ {
+          "name" : "connector",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "202" : {
+            "description" : "Active topics reset request accepted"
+          },
+          "403" : {
+            "description" : "The requester doesn't have permission to perform this operation",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Connector not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/connectors/{connector}:pause" : {
+      "put" : {
+        "operationId" : "pauseConnectorV2",
+        "parameters" : [ {
+          "name" : "connector",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "202" : {
+            "description" : "Pause request accepted"
+          },
+          "403" : {
+            "description" : "The requester doesn't have permission to perform this operation",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Connector not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/connectors/{connector}:restart" : {
+      "post" : {
+        "operationId" : "restartConnectorV2",
+        "parameters" : [ {
+          "name" : "connector",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "includeTasks",
+          "in" : "query",
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        }, {
+          "name" : "onlyFailed",
+          "in" : "query",
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        }, {
+          "name" : "forward",
+          "in" : "query",
+          "schema" : {
+            "type" : "boolean"
+          }
+        } ],
+        "responses" : {
+          "202" : {
+            "description" : "Restart request accepted",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ConnectorStateInfo"
+                }
+              }
+            }
+          },
+          "204" : {
+            "description" : "Connector restarted without task payload"
+          },
+          "400" : {
+            "description" : "Invalid restart request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "The requester doesn't have permission to perform this operation",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Connector not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Request conflicts with current connector state",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/connectors/{connector}:resume" : {
+      "put" : {
+        "operationId" : "resumeConnectorV2",
+        "parameters" : [ {
+          "name" : "connector",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "202" : {
+            "description" : "Resume request accepted"
+          },
+          "403" : {
+            "description" : "The requester doesn't have permission to perform this operation",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Connector not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "basicAuth" : [ ]
+        } ]
+      }
+    },
+    "/connectors/{connector}:stop" : {
+      "put" : {
+        "operationId" : "stopConnectorV2",
+        "parameters" : [ {
+          "name" : "connector",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "forward",
+          "in" : "query",
+          "schema" : {
+            "type" : "boolean"
+          }
+        } ],
+        "responses" : {
+          "202" : {
+            "description" : "Stop request accepted"
+          },
+          "403" : {
+            "description" : "The requester doesn't have permission to perform this operation",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Connector not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorMessage"
+                }
+              }
             }
           }
         },
@@ -764,10 +1812,34 @@
         "summary" : "Health check endpoint to verify worker readiness and liveness",
         "operationId" : "healthCheck",
         "responses" : {
-          "default" : {
-            "description" : "default response",
+          "200" : {
+            "description" : "Worker is healthy",
             "content" : {
-              "application/json" : { }
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/WorkerStatus"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Worker is unhealthy",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/WorkerStatus"
+                }
+              }
+            }
+          },
+          "503" : {
+            "description" : "Worker is starting",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/WorkerStatus"
+                }
+              }
             }
           }
         },
@@ -928,6 +2000,34 @@
           }
         }
       },
+      "ConnectorOffset" : {
+        "type" : "object",
+        "properties" : {
+          "offset" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "object"
+            }
+          },
+          "partition" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "object"
+            }
+          }
+        }
+      },
+      "ConnectorOffsets" : {
+        "type" : "object",
+        "properties" : {
+          "offsets" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ConnectorOffset"
+            }
+          }
+        }
+      },
       "ConnectorState" : {
         "type" : "object",
         "properties" : {
@@ -993,6 +2093,18 @@
             "enum" : [ "RUNNING", "PAUSED", "STOPPED" ]
           },
           "name" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ErrorMessage" : {
+        "type" : "object",
+        "properties" : {
+          "error_code" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "message" : {
             "type" : "string"
           }
         }
@@ -1077,6 +2189,14 @@
           }
         }
       },
+      "Message" : {
+        "type" : "object",
+        "properties" : {
+          "message" : {
+            "type" : "string"
+          }
+        }
+      },
       "PluginInfo" : {
         "type" : "object",
         "properties" : {
@@ -1088,35 +2208,6 @@
           },
           "version" : {
             "type" : "string"
-          }
-        }
-      },
-      "SNConnectorOffset" : {
-        "type" : "object",
-        "properties" : {
-          "offset" : {
-            "type" : "object",
-            "additionalProperties" : {
-              "type" : "integer",
-              "format" : "int32"
-            }
-          },
-          "partition" : {
-            "type" : "object",
-            "additionalProperties" : {
-              "type" : "string"
-            }
-          }
-        }
-      },
-      "SNConnectorOffsets" : {
-        "type" : "object",
-        "properties" : {
-          "offsets" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/SNConnectorOffset"
-            }
           }
         }
       },
@@ -1166,6 +2257,17 @@
             "type" : "string"
           },
           "worker_id" : {
+            "type" : "string"
+          }
+        }
+      },
+      "WorkerStatus" : {
+        "type" : "object",
+        "properties" : {
+          "message" : {
+            "type" : "string"
+          },
+          "status" : {
             "type" : "string"
           }
         }
