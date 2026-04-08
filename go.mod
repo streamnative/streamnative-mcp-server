@@ -16,7 +16,7 @@ require (
 	github.com/spf13/viper v1.20.1
 	github.com/streamnative/pulsarctl v0.6.2-0.20260203104241-b294ba45a405
 	github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserver v0.0.0-20250506174209-b67ea08ddd82
-	github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect v0.0.0-00010101000000-000000000000
+	github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect v0.0.0-20260403124140-a43ce3cfd3d3
 	github.com/stretchr/testify v1.11.1
 	github.com/twmb/franz-go v1.18.1
 	github.com/twmb/franz-go/pkg/kadm v1.16.0
