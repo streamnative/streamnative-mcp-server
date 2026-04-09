@@ -91,6 +91,14 @@ This tool provides a comprehensive set of operations to manage the entire functi
   - `namespace` (string, optional): The namespace name (default: `default`)
   - `name` (string, required): The function name (unless `fqfn` is provided)
 
+- **download**: Download function package data from Pulsar to local storage
+  - `destinationFile` (string, required): Local file path where the downloaded content should be written
+  - `path` (string, optional): Direct Pulsar package storage path to download from
+  - `fqfn` (string, optional): Fully qualified function name `tenant/namespace/name` when downloading by function identity
+  - `tenant` (string, optional): The tenant name (default: `public`) when downloading by function identity
+  - `namespace` (string, optional): The namespace name (default: `default`) when downloading by function identity
+  - `name` (string, required unless `path` or `fqfn` is provided): The function name when downloading by function identity
+
 - **start**: Start a stopped function
   - `fqfn` (string, optional): Fully qualified function name `tenant/namespace/name`
   - `tenant` (string, optional): The tenant name (default: `public`)
@@ -132,3 +140,7 @@ This tool provides a comprehensive set of operations to manage the entire functi
   - `topic` (string, optional): The specific topic to trigger on
   - `triggerValue` (string, optional): The value to trigger the function with
   - `triggerFile` (string, optional): File path containing the trigger value
+
+- **upload**: Upload a local file into Pulsar function package storage
+  - `sourceFile` (string, required): Local file path whose content should be uploaded
+  - `path` (string, required): Pulsar package storage path where the file should be stored

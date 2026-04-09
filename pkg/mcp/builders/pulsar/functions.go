@@ -107,11 +107,13 @@ func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsTool() mcp.To
 		"- create: Deploy a new function with specified parameters\n" +
 		"- update: Update the configuration of an existing function\n" +
 		"- delete: Delete a function\n" +
+		"- download: Download function package data from Pulsar to a local file\n" +
 		"- start: Start a stopped function\n" +
 		"- stop: Stop a running function\n" +
 		"- restart: Restart a function\n" +
 		"- putstate: Store state in a function's state store\n" +
-		"- trigger: Manually trigger a function with a specific value"
+		"- trigger: Manually trigger a function with a specific value\n" +
+		"- upload: Upload a local file into Pulsar function package storage"
 
 	return mcp.NewTool("pulsar_admin_functions",
 		mcp.WithDescription(toolDesc),
@@ -265,6 +267,16 @@ func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsTool() mcp.To
 			mcp.Description("Window sliding interval in milliseconds.")),
 		mcp.WithString("functionConfigFile",
 			mcp.Description("Path to a YAML config file that specifies the function configuration.")),
+		mcp.WithString("sourceFile",
+			mcp.Description("Path to the local file that should be uploaded into Pulsar function package storage. "+
+				"Required for the 'upload' operation.")),
+		mcp.WithString("path",
+			mcp.Description("Pulsar package storage path. Required for the 'upload' operation. "+
+				"For 'download', provide this to download directly from package storage. "+
+				"When omitted for 'download', identify the function with fqfn or tenant/namespace/name instead.")),
+		mcp.WithString("destinationFile",
+			mcp.Description("Local file path where downloaded function package data should be written. "+
+				"Required for the 'download' operation.")),
 		mcp.WithBoolean("updateAuthData",
 			mcp.Description("Whether to update auth data on update operations.")),
 		mcp.WithString("key",
@@ -314,29 +326,21 @@ func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsHandler(readO
 		}
 
 		// Check if the operation is valid
-		validOperations := map[string]bool{
-			"list": true, "get": true, "status": true, "stats": true, "querystate": true,
-			"create": true, "update": true, "delete": true, "start": true, "stop": true,
-			"restart": true, "putstate": true, "trigger": true,
-		}
-
-		if !validOperations[operation] {
-			return b.handleError("validate operation", fmt.Errorf("invalid operation: '%s'. Supported operations: list, get, status, stats, querystate, create, update, delete, start, stop, restart, putstate, trigger", operation)), nil
+		if !isSupportedFunctionOperation(operation) {
+			return b.handleError("validate operation", fmt.Errorf("invalid operation: '%s'. Supported operations: list, get, status, stats, querystate, create, update, delete, download, start, stop, restart, putstate, trigger, upload", operation)), nil
 		}
 
 		// Check write permissions for write operations
-		writeOperations := map[string]bool{
-			"create": true, "update": true, "delete": true, "start": true,
-			"stop": true, "restart": true, "putstate": true, "trigger": true,
+		if readOnly && isReadOnlyRestrictedFunctionOperation(operation) {
+			return b.handleError("check permissions", fmt.Errorf("operation '%s' not allowed in read-only mode. Read-only mode restricts modifications and package transfer operations for Pulsar Functions", operation)), nil
 		}
 
-		if readOnly && writeOperations[operation] {
-			return b.handleError("check permissions", fmt.Errorf("operation '%s' not allowed in read-only mode. Read-only mode restricts modifications to Pulsar Functions", operation)), nil
-		}
-
-		identity, err := b.parseFunctionIdentity(request, operation)
-		if err != nil {
-			return b.handleError("get function identity", err), nil
+		var identity functionIdentity
+		if operation != "download" && operation != "upload" {
+			identity, err = b.parseFunctionIdentity(request, operation)
+			if err != nil {
+				return b.handleError("get function identity", err), nil
+			}
 		}
 
 		// Handle operation using delegated handlers
@@ -375,6 +379,8 @@ func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsHandler(readO
 			return b.handleFunctionUpdate(ctx, client, identity.Tenant, identity.Namespace, identity.Name, request)
 		case "delete":
 			return b.handleFunctionDelete(ctx, client, identity.Tenant, identity.Namespace, identity.Name)
+		case "download":
+			return b.handleFunctionDownload(ctx, client, request)
 		case "start":
 			return b.handleFunctionStart(ctx, client, identity.Tenant, identity.Namespace, identity.Name)
 		case "stop":
@@ -406,6 +412,8 @@ func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsHandler(readO
 			}
 			topic := request.GetString("topic", "")
 			return b.handleFunctionTrigger(ctx, client, identity.Tenant, identity.Namespace, identity.Name, triggerValue, triggerFile, topic)
+		case "upload":
+			return b.handleFunctionUpload(ctx, client, request)
 		default:
 			return b.handleError("handle operation", fmt.Errorf("unsupported operation: %s", operation)), nil
 		}
@@ -596,6 +604,68 @@ func (b *PulsarAdminFunctionsToolBuilder) handleFunctionDelete(_ context.Context
 		name, tenant, namespace)), nil
 }
 
+// handleFunctionDownload handles downloading function package data from Pulsar.
+func (b *PulsarAdminFunctionsToolBuilder) handleFunctionDownload(_ context.Context, client cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	admin := client.Functions()
+
+	target, err := b.parseFunctionDownloadTarget(request)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to parse function download request: %v", err)), nil
+	}
+
+	if target.UsePath {
+		err = admin.DownloadFunction(target.Path, target.DestinationFile)
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to download function package from Pulsar path '%s' to '%s': %v.",
+				target.Path, target.DestinationFile, err)), nil
+		}
+
+		return mcp.NewToolResultText(fmt.Sprintf("Downloaded function package from Pulsar path '%s' to '%s' successfully.",
+			target.Path, target.DestinationFile)), nil
+	}
+
+	err = admin.DownloadFunctionByNs(target.DestinationFile, target.Identity.Tenant, target.Identity.Namespace, target.Identity.Name)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to download function '%s' in tenant '%s' namespace '%s' to '%s': %v.",
+			target.Identity.Name, target.Identity.Tenant, target.Identity.Namespace, target.DestinationFile, err)), nil
+	}
+
+	return mcp.NewToolResultText(fmt.Sprintf("Downloaded function '%s' from tenant '%s' namespace '%s' to '%s' successfully.",
+		target.Identity.Name, target.Identity.Tenant, target.Identity.Namespace, target.DestinationFile)), nil
+}
+
+// handleFunctionUpload handles uploading a local file to Pulsar function package storage.
+func (b *PulsarAdminFunctionsToolBuilder) handleFunctionUpload(_ context.Context, client cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	admin := client.Functions()
+
+	sourceFile, err := request.RequireString("sourceFile")
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'sourceFile' for function.upload: %v", err)), nil
+	}
+	sourceFile = strings.TrimSpace(sourceFile)
+	if sourceFile == "" {
+		return mcp.NewToolResultError("Parameter 'sourceFile' for function.upload cannot be empty"), nil
+	}
+
+	path, err := request.RequireString("path")
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'path' for function.upload: %v", err)), nil
+	}
+	path = strings.TrimSpace(path)
+	if path == "" {
+		return mcp.NewToolResultError("Parameter 'path' for function.upload cannot be empty"), nil
+	}
+
+	err = admin.Upload(sourceFile, path)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to upload function package '%s' to Pulsar path '%s': %v.",
+			sourceFile, path, err)), nil
+	}
+
+	return mcp.NewToolResultText(fmt.Sprintf("Uploaded function package '%s' to Pulsar path '%s' successfully.",
+		sourceFile, path)), nil
+}
+
 // handleFunctionStart handles the start operation
 func (b *PulsarAdminFunctionsToolBuilder) handleFunctionStart(_ context.Context, client cmdutils.Client, tenant, namespace, name string) (*mcp.CallToolResult, error) {
 	admin := client.Functions()
@@ -694,10 +764,58 @@ type functionIdentity struct {
 	Name      string
 }
 
+type functionDownloadTarget struct {
+	DestinationFile string
+	Path            string
+	Identity        functionIdentity
+	UsePath         bool
+}
+
 const (
 	defaultTenant    = "public"
 	defaultNamespace = "default"
 )
+
+var supportedFunctionOperations = map[string]struct{}{
+	"list":       {},
+	"get":        {},
+	"status":     {},
+	"stats":      {},
+	"querystate": {},
+	"create":     {},
+	"update":     {},
+	"delete":     {},
+	"download":   {},
+	"start":      {},
+	"stop":       {},
+	"restart":    {},
+	"putstate":   {},
+	"trigger":    {},
+	"upload":     {},
+}
+
+var readOnlyRestrictedFunctionOperations = map[string]struct{}{
+	"create":   {},
+	"update":   {},
+	"delete":   {},
+	"download": {},
+	"start":    {},
+	"stop":     {},
+	"restart":  {},
+	"putstate": {},
+	"trigger":  {},
+	"upload":   {},
+}
+
+func isSupportedFunctionOperation(operation string) bool {
+	_, ok := supportedFunctionOperations[operation]
+	return ok
+}
+
+func isReadOnlyRestrictedFunctionOperation(operation string) bool {
+	_, ok := readOnlyRestrictedFunctionOperations[operation]
+	return ok
+}
 
 func (b *PulsarAdminFunctionsToolBuilder) parseFunctionIdentity(request mcp.CallToolRequest, operation string) (functionIdentity, error) {
 	args := request.GetArguments()
@@ -736,6 +854,37 @@ func (b *PulsarAdminFunctionsToolBuilder) parseFunctionIdentity(request mcp.Call
 		Tenant:    tenant,
 		Namespace: namespace,
 		Name:      name,
+	}, nil
+}
+
+func (b *PulsarAdminFunctionsToolBuilder) parseFunctionDownloadTarget(request mcp.CallToolRequest) (functionDownloadTarget, error) {
+	destinationFile, err := request.RequireString("destinationFile")
+	if err != nil {
+		return functionDownloadTarget{}, fmt.Errorf("missing required parameter 'destinationFile' for operation 'download': %w", err)
+	}
+	destinationFile = strings.TrimSpace(destinationFile)
+	if destinationFile == "" {
+		return functionDownloadTarget{}, fmt.Errorf("parameter 'destinationFile' for operation 'download' cannot be empty")
+	}
+
+	path, _ := getStringArg(request.GetArguments(), "path")
+	path = strings.TrimSpace(path)
+	if path != "" {
+		return functionDownloadTarget{
+			DestinationFile: destinationFile,
+			Path:            path,
+			UsePath:         true,
+		}, nil
+	}
+
+	identity, err := b.parseFunctionIdentity(request, "download")
+	if err != nil {
+		return functionDownloadTarget{}, err
+	}
+
+	return functionDownloadTarget{
+		DestinationFile: destinationFile,
+		Identity:        identity,
 	}, nil
 }
 
