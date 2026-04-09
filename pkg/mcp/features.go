@@ -28,6 +28,7 @@ const (
 	FeatureKafkaAdminKafkaConnect       Feature = "kafka-admin-kafka-connect"
 	FeaturePulsarAdmin                  Feature = "pulsar-admin"
 	FeaturePulsarAdminBrokersStatus     Feature = "pulsar-admin-brokers-status"
+	FeaturePulsarAdminBrokerStats       Feature = "pulsar-admin-broker-stats"
 	FeaturePulsarAdminBrokers           Feature = "pulsar-admin-brokers"
 	FeaturePulsarAdminClusters          Feature = "pulsar-admin-clusters"
 	FeaturePulsarAdminFunctions         Feature = "pulsar-admin-functions"
