@@ -121,6 +121,13 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) BuildTools(_ context.Context, co
 		Handler: getHandler,
 	})
 
+	antiAffinityNamespacesTool := b.buildNamespaceGetAntiAffinityNamespacesTool()
+	antiAffinityNamespacesHandler := b.buildNamespaceGetAntiAffinityNamespacesHandler()
+	tools = append(tools, server.ServerTool{
+		Tool:    antiAffinityNamespacesTool,
+		Handler: antiAffinityNamespacesHandler,
+	})
+
 	// Add write operations if not in read-only mode
 	if !config.ReadOnly {
 		// Add set policy tool
@@ -332,6 +339,23 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceRemovePolicyTool()
 	)
 }
 
+// buildNamespaceGetAntiAffinityNamespacesTool builds the anti-affinity namespace lookup tool.
+func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceGetAntiAffinityNamespacesTool() mcp.Tool {
+	return mcp.NewTool("pulsar_admin_namespace_policy_get_anti_affinity_namespaces",
+		mcp.WithDescription("Get the list of namespaces that belong to the same anti-affinity group. "+
+			"This matches `pulsarctl namespaces get-anti-affinity-namespaces` and requires tenant admin permissions."),
+		mcp.WithString("group", mcp.Required(),
+			mcp.Description("Anti-affinity group name to query."),
+		),
+		mcp.WithString("cluster",
+			mcp.Description("Cluster name to scope the lookup. Optional when the broker can infer it."),
+		),
+		mcp.WithString("tenant",
+			mcp.Description("Tenant name used for authorization. Optional, but recommended when the caller administers multiple tenants."),
+		),
+	)
+}
+
 // buildNamespaceGetPoliciesHandler builds the get policies handler
 func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceGetPoliciesHandler() func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
@@ -358,6 +382,40 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceGetPoliciesHandler
 		}
 
 		return b.marshalResponse(policies)
+	}
+}
+
+// buildNamespaceGetAntiAffinityNamespacesHandler builds the anti-affinity namespace lookup handler.
+func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceGetAntiAffinityNamespacesHandler() func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		group, err := request.RequireString("group")
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get anti-affinity group: %v", err)), nil
+		}
+		group = strings.TrimSpace(group)
+		if group == "" {
+			return mcp.NewToolResultError("Failed to get anti-affinity group: value cannot be empty"), nil
+		}
+
+		tenant := strings.TrimSpace(request.GetString("tenant", ""))
+		cluster := strings.TrimSpace(request.GetString("cluster", ""))
+
+		session := mcpCtx.GetPulsarSession(ctx)
+		if session == nil {
+			return mcp.NewToolResultError("Pulsar session not found in context"), nil
+		}
+
+		client, err := session.GetAdminClient()
+		if err != nil {
+			return b.handleError("get admin client", err), nil
+		}
+
+		namespaces, err := client.Namespaces().GetAntiAffinityNamespaces(tenant, cluster, group)
+		if err != nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Failed to get anti-affinity namespaces: %v", err)), nil
+		}
+
+		return b.marshalResponse(namespaces)
 	}
 }
 

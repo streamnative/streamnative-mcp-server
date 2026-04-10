@@ -15,10 +15,12 @@
 package pulsar
 
 import (
+	"context"
 	"testing"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
 	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	"github.com/stretchr/testify/require"
 )
 
@@ -31,6 +33,62 @@ func TestBuildNamespaceSetPolicyToolIncludesBacklogPolicyArgument(t *testing.T) 
 	require.Contains(t, tool.InputSchema.Properties, "backlog-policy")
 	require.Contains(t, tool.InputSchema.Properties, "enabled")
 	require.Contains(t, tool.InputSchema.Required, "policy")
+}
+
+func TestBuildNamespaceGetAntiAffinityNamespacesTool(t *testing.T) {
+	builder := NewPulsarAdminNamespacePolicyToolBuilder()
+
+	tool := builder.buildNamespaceGetAntiAffinityNamespacesTool()
+
+	require.Contains(t, tool.InputSchema.Properties, "group")
+	require.Contains(t, tool.InputSchema.Properties, "cluster")
+	require.Contains(t, tool.InputSchema.Properties, "tenant")
+	require.Contains(t, tool.InputSchema.Required, "group")
+}
+
+func TestBuildNamespacePolicyToolsIncludesAntiAffinityLookup(t *testing.T) {
+	builder := NewPulsarAdminNamespacePolicyToolBuilder()
+
+	tools, err := builder.BuildTools(context.Background(), builders.ToolBuildConfig{
+		Features: []string{"pulsar-admin-namespace-policy"},
+	})
+	require.NoError(t, err)
+	require.Len(t, tools, 4)
+
+	names := make([]string, 0, len(tools))
+	for _, tool := range tools {
+		names = append(names, tool.Tool.Name)
+	}
+	require.Contains(t, names, "pulsar_admin_namespace_policy_get_anti_affinity_namespaces")
+
+	readOnlyTools, err := builder.BuildTools(context.Background(), builders.ToolBuildConfig{
+		Features: []string{"pulsar-admin-namespace-policy"},
+		ReadOnly: true,
+	})
+	require.NoError(t, err)
+	require.Len(t, readOnlyTools, 2)
+
+	readOnlyNames := make([]string, 0, len(readOnlyTools))
+	for _, tool := range readOnlyTools {
+		readOnlyNames = append(readOnlyNames, tool.Tool.Name)
+	}
+	require.Contains(t, readOnlyNames, "pulsar_admin_namespace_policy_get_anti_affinity_namespaces")
+}
+
+func TestNamespaceGetAntiAffinityNamespacesHandlerRequiresGroup(t *testing.T) {
+	builder := NewPulsarAdminNamespacePolicyToolBuilder()
+	handler := builder.buildNamespaceGetAntiAffinityNamespacesHandler()
+
+	result, err := handler(context.Background(), mcp.CallToolRequest{
+		Params: mcp.CallToolParams{Arguments: map[string]any{}},
+	})
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	require.True(t, result.IsError)
+
+	text, ok := result.Content[0].(mcp.TextContent)
+	require.True(t, ok)
+	require.Contains(t, text.Text, "anti-affinity group")
 }
 
 func TestBuildTopicAutoCreationConfigEnabled(t *testing.T) {

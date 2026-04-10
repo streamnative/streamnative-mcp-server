@@ -5,6 +5,11 @@ Tools for managing Pulsar namespace policies.
 - **pulsar_admin_namespace_policy_get**: Get the full policy set for a namespace
   - `namespace` (string, required): Namespace in `tenant/namespace` format
 
+- **pulsar_admin_namespace_policy_get_anti_affinity_namespaces**: Get namespaces in the same anti-affinity group
+  - `group` (string, required): Anti-affinity group name
+  - `cluster` (string): Cluster name used to scope the lookup
+  - `tenant` (string): Tenant name used for authorization
+
 - **pulsar_admin_namespace_policy_set**: Set a namespace policy
   - `namespace` (string, required): Namespace in `tenant/namespace` format
   - `policy` (string, required): One of:

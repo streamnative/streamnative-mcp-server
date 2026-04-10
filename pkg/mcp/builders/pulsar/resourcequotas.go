@@ -45,7 +45,7 @@ func NewPulsarAdminResourceQuotasToolBuilder() *PulsarAdminResourceQuotasToolBui
 	}
 
 	features := []string{
-		"pulsar-admin-resourcequotas",
+		"pulsar-admin-resource-quotas",
 		"all",
 		"all-pulsar",
 		"pulsar-admin",

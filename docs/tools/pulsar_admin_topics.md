@@ -5,6 +5,15 @@ Manage Apache Pulsar topics. Topics are the core messaging entities in Pulsar th
 - **topic**
   - **get**: Get metadata for a topic
     - `topic` (string, required): The fully qualified topic name
+  - **get-permissions**: Get the current topic permissions for every role
+    - `topic` (string, required): The fully qualified topic name
+  - **grant-permissions**: Grant topic permissions to a role
+    - `topic` (string, required): The fully qualified topic name
+    - `role` (string, required): The role to grant permissions to
+    - `actions` (array of strings, required): Allowed values are `produce`, `consume`, `sources`, `sinks`, `functions`, `packages`
+  - **revoke-permissions**: Revoke all topic permissions from a role
+    - `topic` (string, required): The fully qualified topic name
+    - `role` (string, required): The role to revoke permissions from
   - **create**: Create a new topic with optional partitions
     - `topic` (string, required): The fully qualified topic name
     - `partitions` (number, required): The number of partitions (0 for non-partitioned)
@@ -26,8 +35,9 @@ Manage Apache Pulsar topics. Topics are the core messaging entities in Pulsar th
     - `topic` (string, required): The fully qualified topic name
   - **last-message-id**: Get the last message ID of a topic
     - `topic` (string, required): The fully qualified topic name
-  - **status**: Get the status of a topic
+  - **compact-status**: Get compaction status for a topic (`status` is still accepted as a legacy alias)
     - `topic` (string, required): The fully qualified topic name
+    - `wait` (boolean, optional): Poll until the compaction finishes
   - **unload**: Unload a topic from broker memory
     - `topic` (string, required): The fully qualified topic name
   - **terminate**: Terminate a topic (close all producers and mark as inactive)
@@ -42,6 +52,7 @@ Manage Apache Pulsar topics. Topics are the core messaging entities in Pulsar th
     - `messageId` (string, required): Message ID up to which to offload (format: ledgerId:entryId)
   - **offload-status**: Check the status of data offloading for a topic
     - `topic` (string, required): The fully qualified topic name
+    - `wait` (boolean, optional): Poll until the offload finishes
 
 - **topics**
   - **list**: List all topics in a namespace
