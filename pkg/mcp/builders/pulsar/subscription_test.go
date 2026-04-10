@@ -15,6 +15,7 @@
 package pulsar
 
 import (
+	"encoding/base64"
 	"strings"
 	"testing"
 
@@ -79,6 +80,26 @@ func TestGetInt64Arg(t *testing.T) {
 	require.Error(t, err)
 }
 
+func TestValidateSubscriptionPeekCount(t *testing.T) {
+	require.NoError(t, validateSubscriptionPeekCount(1))
+
+	err := validateSubscriptionPeekCount(0)
+	require.EqualError(t, err, "Parameter 'count' for subscription.peek must be greater than 0")
+
+	err = validateSubscriptionPeekCount(maxSubscriptionPeekCount + 1)
+	require.EqualError(t, err, "Parameter 'count' for subscription.peek must be less than or equal to 100")
+}
+
+func TestValidateSubscriptionMessageLookupIDs(t *testing.T) {
+	require.NoError(t, validateSubscriptionMessageLookupIDs(0, 0))
+
+	err := validateSubscriptionMessageLookupIDs(-1, 0)
+	require.EqualError(t, err, "Parameter 'ledgerId' for subscription.get-message-by-id must be greater than or equal to 0")
+
+	err = validateSubscriptionMessageLookupIDs(0, -1)
+	require.EqualError(t, err, "Parameter 'entryId' for subscription.get-message-by-id must be greater than or equal to 0")
+}
+
 func TestBuildSubscriptionMessageData(t *testing.T) {
 	message := utils.NewMessage(
 		"persistent://public/default/example",
@@ -91,6 +112,21 @@ func TestBuildSubscriptionMessageData(t *testing.T) {
 	require.Equal(t, "persistent://public/default/example", data.Topic)
 	require.Equal(t, "7:9:-1:-1", data.MessageID)
 	require.Equal(t, "hello", data.Payload)
+	require.Equal(t, base64.StdEncoding.EncodeToString([]byte("hello")), data.PayloadBase64)
 	require.Equal(t, map[string]string{"region": "us-west"}, data.Properties)
 	require.True(t, strings.Contains(data.PayloadHex, "68 65 6c 6c 6f"))
+}
+
+func TestBuildSubscriptionMessageDataPreservesBinaryPayload(t *testing.T) {
+	payload := []byte{0xff, 0x00, 0x01, 'a'}
+	message := utils.NewMessage(
+		"persistent://public/default/example",
+		utils.MessageID{LedgerID: 11, EntryID: 13, PartitionIndex: -1, BatchIndex: -1},
+		payload,
+		nil,
+	)
+
+	data := newSubscriptionMessageData(message)
+	require.Equal(t, base64.StdEncoding.EncodeToString(payload), data.PayloadBase64)
+	require.True(t, strings.Contains(data.PayloadHex, "ff 00 01 61"))
 }

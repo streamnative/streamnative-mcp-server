@@ -27,8 +27,13 @@ Manage Pulsar topic subscriptions, which represent consumer groups reading from 
 - **peek**: Peek messages for a subscription without advancing the cursor
   - `topic` (string, required): The fully qualified topic name
   - `subscription` (string, required): The subscription name
-  - `count` (number, optional): Number of messages to return, default is 1
+  - `count` (number, optional): Number of messages to return, default is 1, maximum is 100
 - **get-message-by-id**: Read a message by ledger ID and entry ID
   - `topic` (string, required): The fully qualified topic name
-  - `ledgerId` (number, required): Ledger ID of the message
-  - `entryId` (number, required): Entry ID of the message
+  - `ledgerId` (number, required): Non-negative ledger ID of the message
+  - `entryId` (number, required): Non-negative entry ID of the message
+
+Message payloads returned by `peek` and `get-message-by-id` include:
+- `payload`: text view of the payload
+- `payloadBase64`: lossless base64 encoding of the raw bytes
+- `payloadHex`: hexadecimal dump for debugging

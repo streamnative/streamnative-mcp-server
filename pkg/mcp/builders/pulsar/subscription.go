@@ -16,6 +16,7 @@ package pulsar
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -49,12 +50,15 @@ var readOnlyRestrictedSubscriptionOperations = map[string]struct{}{
 	"reset-cursor": {},
 }
 
+const maxSubscriptionPeekCount int64 = 100
+
 type subscriptionMessageData struct {
-	Topic      string            `json:"topic,omitempty"`
-	MessageID  string            `json:"messageId"`
-	Properties map[string]string `json:"properties,omitempty"`
-	Payload    string            `json:"payload"`
-	PayloadHex string            `json:"payloadHex"`
+	Topic         string            `json:"topic,omitempty"`
+	MessageID     string            `json:"messageId"`
+	Properties    map[string]string `json:"properties,omitempty"`
+	Payload       string            `json:"payload"`
+	PayloadBase64 string            `json:"payloadBase64"`
+	PayloadHex    string            `json:"payloadHex"`
 }
 
 // PulsarAdminSubscriptionToolBuilder implements the ToolBuilder interface for Pulsar Admin Subscription tools
@@ -163,17 +167,17 @@ func (b *PulsarAdminSubscriptionToolBuilder) buildSubscriptionTool() mcp.Tool {
 		mcp.WithNumber("count",
 			mcp.Description("The number of messages to skip (required for 'skip' operation) or peek (optional for 'peek', default 1). "+
 				"For 'skip', this moves the subscription cursor forward by the specified number of messages without processing them. "+
-				"For 'peek', this limits how many messages are returned without moving the cursor."),
+				"For 'peek', this limits how many messages are returned without moving the cursor. Maximum: 100."),
 		),
 		mcp.WithNumber("expireTimeInSeconds",
 			mcp.Description("Expire messages older than the specified seconds (required for 'expire' operation). "+
 				"This moves the subscription cursor to skip all messages published before the specified time."),
 		),
 		mcp.WithNumber("ledgerId",
-			mcp.Description("Ledger ID used by 'get-message-by-id'. Must be an integer."),
+			mcp.Description("Ledger ID used by 'get-message-by-id'. Must be a non-negative integer."),
 		),
 		mcp.WithNumber("entryId",
-			mcp.Description("Entry ID used by 'get-message-by-id'. Must be an integer."),
+			mcp.Description("Entry ID used by 'get-message-by-id'. Must be a non-negative integer."),
 		),
 		mcp.WithBoolean("force",
 			mcp.Description("Force deletion of subscription (optional for 'delete' operation). "+
@@ -452,8 +456,8 @@ func (b *PulsarAdminSubscriptionToolBuilder) handleSubsPeek(admin cmdutils.Clien
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Invalid parameter 'count' for subscription.peek: %v", err)), nil
 	}
-	if count <= 0 {
-		return mcp.NewToolResultError("Parameter 'count' for subscription.peek must be greater than 0"), nil
+	if err := validateSubscriptionPeekCount(count); err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
 	}
 
 	messages, err := admin.Subscriptions().PeekMessages(*topicName, subscription, int(count))
@@ -487,6 +491,9 @@ func (b *PulsarAdminSubscriptionToolBuilder) handleSubsGetMessageByID(admin cmdu
 	entryID, err := requireInt64Arg(request, "entryId")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing or invalid required parameter 'entryId' for subscription.get-message-by-id: %v", err)), nil
+	}
+	if err := validateSubscriptionMessageLookupIDs(ledgerID, entryID); err != nil {
+		return mcp.NewToolResultError(err.Error()), nil
 	}
 
 	messages, err := admin.Subscriptions().GetMessagesByID(*topicName, ledgerID, entryID)
@@ -566,6 +573,33 @@ func getInt64Arg(request mcp.CallToolRequest, key string, defaultValue int64) (i
 	return int64(value), nil
 }
 
+func validateSubscriptionPeekCount(count int64) error {
+	if count <= 0 {
+		return fmt.Errorf("Parameter 'count' for subscription.peek must be greater than 0")
+	}
+	if count > int64(maxPlatformInt()) {
+		return fmt.Errorf("Parameter 'count' for subscription.peek exceeds the platform integer limit")
+	}
+	if count > maxSubscriptionPeekCount {
+		return fmt.Errorf("Parameter 'count' for subscription.peek must be less than or equal to %d", maxSubscriptionPeekCount)
+	}
+	return nil
+}
+
+func validateSubscriptionMessageLookupIDs(ledgerID, entryID int64) error {
+	if ledgerID < 0 {
+		return fmt.Errorf("Parameter 'ledgerId' for subscription.get-message-by-id must be greater than or equal to 0")
+	}
+	if entryID < 0 {
+		return fmt.Errorf("Parameter 'entryId' for subscription.get-message-by-id must be greater than or equal to 0")
+	}
+	return nil
+}
+
+func maxPlatformInt() int {
+	return int(^uint(0) >> 1)
+}
+
 func buildSubscriptionMessageData(messages []*utils.Message) []subscriptionMessageData {
 	result := make([]subscriptionMessageData, 0, len(messages))
 	for _, message := range messages {
@@ -580,10 +614,11 @@ func newSubscriptionMessageData(message *utils.Message) subscriptionMessageData 
 	}
 
 	return subscriptionMessageData{
-		Topic:      message.Topic,
-		MessageID:  message.GetMessageID().String(),
-		Properties: message.GetProperties(),
-		Payload:    string(message.GetPayload()),
-		PayloadHex: hex.Dump(message.GetPayload()),
+		Topic:         message.Topic,
+		MessageID:     message.GetMessageID().String(),
+		Properties:    message.GetProperties(),
+		Payload:       string(message.GetPayload()),
+		PayloadBase64: base64.StdEncoding.EncodeToString(message.GetPayload()),
+		PayloadHex:    hex.Dump(message.GetPayload()),
 	}
 }

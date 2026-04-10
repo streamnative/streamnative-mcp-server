@@ -17,6 +17,7 @@ package pulsar
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
 	"github.com/mark3labs/mcp-go/mcp"
@@ -86,4 +87,49 @@ func TestTopicGrantPermissionsBlockedInReadOnlyMode(t *testing.T) {
 	text, ok := result.Content[0].(mcp.TextContent)
 	require.True(t, ok)
 	require.Contains(t, text.Text, "read-only mode")
+}
+
+func TestWaitForTopicLongRunningStatusStopsOnContextCancellation(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	err := waitForTopicLongRunningStatus(ctx, true, time.Millisecond, func() bool {
+		return true
+	}, func() error {
+		return nil
+	})
+
+	require.ErrorIs(t, err, context.Canceled)
+}
+
+func TestWaitForTopicLongRunningStatusPollsUntilComplete(t *testing.T) {
+	ctx := context.Background()
+	attempts := 0
+	running := true
+
+	err := waitForTopicLongRunningStatus(ctx, true, time.Millisecond, func() bool {
+		return running
+	}, func() error {
+		attempts++
+		if attempts == 2 {
+			running = false
+		}
+		return nil
+	})
+
+	require.NoError(t, err)
+	require.Equal(t, 2, attempts)
+}
+
+func TestWaitForTopicLongRunningStatusReturnsRefreshError(t *testing.T) {
+	ctx := context.Background()
+	expectedErr := context.DeadlineExceeded
+
+	err := waitForTopicLongRunningStatus(ctx, true, time.Millisecond, func() bool {
+		return true
+	}, func() error {
+		return expectedErr
+	})
+
+	require.ErrorIs(t, err, expectedErr)
 }

@@ -17,6 +17,7 @@ package pulsar
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"slices"
 	"strings"
@@ -45,6 +46,8 @@ var readOnlyRestrictedTopicOperations = map[string]struct{}{
 var topicOperationAliases = map[string]string{
 	"status": "compact-status",
 }
+
+const topicStatusPollInterval = time.Second
 
 // PulsarAdminTopicToolBuilder implements the ToolBuilder interface for Pulsar Admin Topic tools
 // It provides functionality to build Pulsar topic management tools
@@ -279,7 +282,7 @@ func (b *PulsarAdminTopicToolBuilder) buildTopicHandler(readOnly bool) func(cont
 			case "last-message-id":
 				return b.handleTopicLastMessageID(admin, request)
 			case "compact-status":
-				return b.handleTopicCompactStatus(admin, request)
+				return b.handleTopicCompactStatus(ctx, admin, request)
 			case "unload":
 				return b.handleTopicUnload(admin, request)
 			case "terminate":
@@ -291,7 +294,7 @@ func (b *PulsarAdminTopicToolBuilder) buildTopicHandler(readOnly bool) func(cont
 			case "offload":
 				return b.handleTopicOffload(admin, request)
 			case "offload-status":
-				return b.handleTopicOffloadStatus(admin, request)
+				return b.handleTopicOffloadStatus(ctx, admin, request)
 			default:
 				return mcp.NewToolResultError(fmt.Sprintf("Unknown topic operation: %s", operation)), nil
 			}
@@ -812,7 +815,7 @@ func (b *PulsarAdminTopicToolBuilder) handleTopicLastMessageID(admin cmdutils.Cl
 }
 
 // handleTopicCompactStatus gets the compaction status of a topic.
-func (b *PulsarAdminTopicToolBuilder) handleTopicCompactStatus(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicToolBuilder) handleTopicCompactStatus(ctx context.Context, admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := request.RequireString("topic")
 	if err != nil {
@@ -836,12 +839,19 @@ func (b *PulsarAdminTopicToolBuilder) handleTopicCompactStatus(admin cmdutils.Cl
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get compaction status for topic '%s': %v", topic, err)), nil
 	}
 
-	for wait && status.Status == utils.RUNNING {
-		time.Sleep(time.Second)
+	err = waitForTopicLongRunningStatus(ctx, wait, topicStatusPollInterval, func() bool {
+		return status.Status == utils.RUNNING
+	}, func() error {
 		status, err = admin.Topics().CompactStatus(*topicName)
-		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get compaction status for topic '%s': %v", topic, err)), nil
+		return err
+	})
+	if err != nil {
+		if isTopicStatusWaitInterrupted(err) {
+			return mcp.NewToolResultError(fmt.Sprintf(
+				"Waiting for compaction status for topic '%s' was interrupted: %v", topic, err,
+			)), nil
 		}
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to get compaction status for topic '%s': %v", topic, err)), nil
 	}
 
 	return b.marshalResponse(status)
@@ -919,7 +929,7 @@ func (b *PulsarAdminTopicToolBuilder) handleTopicOffload(admin cmdutils.Client, 
 }
 
 // handleTopicOffloadStatus checks the status of data offloading for a topic
-func (b *PulsarAdminTopicToolBuilder) handleTopicOffloadStatus(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicToolBuilder) handleTopicOffloadStatus(ctx context.Context, admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := request.RequireString("topic")
 	if err != nil {
@@ -938,15 +948,60 @@ func (b *PulsarAdminTopicToolBuilder) handleTopicOffloadStatus(admin cmdutils.Cl
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get offload status for topic '%s': %v", topic, err)), nil
 	}
 
-	for request.GetBool("wait", false) && status.Status == utils.RUNNING {
-		time.Sleep(time.Second)
+	err = waitForTopicLongRunningStatus(ctx, request.GetBool("wait", false), topicStatusPollInterval, func() bool {
+		return status.Status == utils.RUNNING
+	}, func() error {
 		status, err = admin.Topics().OffloadStatus(*topicName)
-		if err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Failed to get offload status for topic '%s': %v", topic, err)), nil
+		return err
+	})
+	if err != nil {
+		if isTopicStatusWaitInterrupted(err) {
+			return mcp.NewToolResultError(fmt.Sprintf(
+				"Waiting for offload status for topic '%s' was interrupted: %v", topic, err,
+			)), nil
 		}
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to get offload status for topic '%s': %v", topic, err)), nil
 	}
 
 	return b.marshalResponse(status)
+}
+
+func waitForTopicLongRunningStatus(
+	ctx context.Context,
+	wait bool,
+	pollInterval time.Duration,
+	isRunning func() bool,
+	refresh func() error,
+) error {
+	if !wait || !isRunning() {
+		return nil
+	}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	if pollInterval <= 0 {
+		pollInterval = topicStatusPollInterval
+	}
+
+	ticker := time.NewTicker(pollInterval)
+	defer ticker.Stop()
+
+	for isRunning() {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-ticker.C:
+			if err := refresh(); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func isTopicStatusWaitInterrupted(err error) bool {
+	return errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded)
 }
 
 func parseTopicActions(actions []string) ([]utils.AuthAction, error) {
