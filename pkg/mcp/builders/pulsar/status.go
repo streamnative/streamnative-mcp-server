@@ -95,10 +95,6 @@ func (b *PulsarAdminStatusToolBuilder) buildStatusHandler() func(context.Context
 			return b.handleError("get Pulsar configuration", err), nil
 		}
 
-		if cfg.WebServiceURL == "" {
-			cfg.WebServiceURL = admin.DefaultWebServiceURL
-		}
-
 		authProvider, err := pulsaradminauth.GetAuthProvider((*pulsaradminconfig.Config)(cfg))
 		if err != nil {
 			return b.handleError("build status auth provider", err), nil

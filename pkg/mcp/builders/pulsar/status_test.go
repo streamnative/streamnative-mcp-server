@@ -19,7 +19,10 @@ import (
 	"testing"
 
 	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
+	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
+	pulsarsession "github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -55,5 +58,27 @@ func TestPulsarAdminStatusToolBuilder(t *testing.T) {
 		require.NoError(t, callErr)
 		require.NotNil(t, result)
 		assert.True(t, result.IsError)
+	})
+
+	t.Run("Handler_EmptyWebServiceURL", func(t *testing.T) {
+		tools, err := builder.BuildTools(context.Background(), builders.ToolBuildConfig{
+			Features: []string{"pulsar-admin-brokers-status"},
+		})
+		require.NoError(t, err)
+		require.Len(t, tools, 1)
+
+		ctx := mcpCtx.WithPulsarSession(context.Background(), &pulsarsession.Session{
+			PulsarCtlConfig: &cmdutils.ClusterConfig{},
+		})
+
+		result, callErr := tools[0].Handler(ctx, mcp.CallToolRequest{})
+		require.NoError(t, callErr)
+		require.NotNil(t, result)
+		assert.True(t, result.IsError)
+		require.Len(t, result.Content, 1)
+
+		text, ok := result.Content[0].(mcp.TextContent)
+		require.True(t, ok)
+		assert.Contains(t, text.Text, "Please set the cluster context first")
 	})
 }

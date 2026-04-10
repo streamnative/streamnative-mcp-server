@@ -191,7 +191,7 @@ func (s *Session) GetPulsarCtlConfig() (*cmdutils.ClusterConfig, error) {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 
-	if s.PulsarCtlConfig == nil {
+	if s.PulsarCtlConfig == nil || s.PulsarCtlConfig.WebServiceURL == "" {
 		return nil, fmt.Errorf("err: ContextNotSetErr: Please set the cluster context first")
 	}
 
