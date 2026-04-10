@@ -84,20 +84,20 @@ func TestValidateSubscriptionPeekCount(t *testing.T) {
 	require.NoError(t, validateSubscriptionPeekCount(1))
 
 	err := validateSubscriptionPeekCount(0)
-	require.EqualError(t, err, "Parameter 'count' for subscription.peek must be greater than 0")
+	require.EqualError(t, err, "parameter 'count' for subscription.peek must be greater than 0")
 
 	err = validateSubscriptionPeekCount(maxSubscriptionPeekCount + 1)
-	require.EqualError(t, err, "Parameter 'count' for subscription.peek must be less than or equal to 100")
+	require.EqualError(t, err, "parameter 'count' for subscription.peek must be less than or equal to 100")
 }
 
 func TestValidateSubscriptionMessageLookupIDs(t *testing.T) {
 	require.NoError(t, validateSubscriptionMessageLookupIDs(0, 0))
 
 	err := validateSubscriptionMessageLookupIDs(-1, 0)
-	require.EqualError(t, err, "Parameter 'ledgerId' for subscription.get-message-by-id must be greater than or equal to 0")
+	require.EqualError(t, err, "parameter 'ledgerId' for subscription.get-message-by-id must be greater than or equal to 0")
 
 	err = validateSubscriptionMessageLookupIDs(0, -1)
-	require.EqualError(t, err, "Parameter 'entryId' for subscription.get-message-by-id must be greater than or equal to 0")
+	require.EqualError(t, err, "parameter 'entryId' for subscription.get-message-by-id must be greater than or equal to 0")
 }
 
 func TestBuildSubscriptionMessageData(t *testing.T) {

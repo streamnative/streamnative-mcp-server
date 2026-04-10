@@ -575,23 +575,23 @@ func getInt64Arg(request mcp.CallToolRequest, key string, defaultValue int64) (i
 
 func validateSubscriptionPeekCount(count int64) error {
 	if count <= 0 {
-		return fmt.Errorf("Parameter 'count' for subscription.peek must be greater than 0")
+		return fmt.Errorf("parameter 'count' for subscription.peek must be greater than 0")
 	}
 	if count > int64(maxPlatformInt()) {
-		return fmt.Errorf("Parameter 'count' for subscription.peek exceeds the platform integer limit")
+		return fmt.Errorf("parameter 'count' for subscription.peek exceeds the platform integer limit")
 	}
 	if count > maxSubscriptionPeekCount {
-		return fmt.Errorf("Parameter 'count' for subscription.peek must be less than or equal to %d", maxSubscriptionPeekCount)
+		return fmt.Errorf("parameter 'count' for subscription.peek must be less than or equal to %d", maxSubscriptionPeekCount)
 	}
 	return nil
 }
 
 func validateSubscriptionMessageLookupIDs(ledgerID, entryID int64) error {
 	if ledgerID < 0 {
-		return fmt.Errorf("Parameter 'ledgerId' for subscription.get-message-by-id must be greater than or equal to 0")
+		return fmt.Errorf("parameter 'ledgerId' for subscription.get-message-by-id must be greater than or equal to 0")
 	}
 	if entryID < 0 {
-		return fmt.Errorf("Parameter 'entryId' for subscription.get-message-by-id must be greater than or equal to 0")
+		return fmt.Errorf("parameter 'entryId' for subscription.get-message-by-id must be greater than or equal to 0")
 	}
 	return nil
 }
