@@ -46,7 +46,7 @@ func NewPulsarAdminNsIsolationPolicyToolBuilder() *PulsarAdminNsIsolationPolicyT
 	}
 
 	features := []string{
-		"pulsar-admin-nsisolationpolicy",
+		"pulsar-admin-ns-isolation-policy",
 		"all",
 		"all-pulsar",
 		"pulsar-admin",

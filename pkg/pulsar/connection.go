@@ -186,6 +186,19 @@ func (s *Session) GetAdminV3Client() (cmdutils.Client, error) {
 	return s.AdminV3Client, nil
 }
 
+// GetPulsarCtlConfig returns a copy of the underlying pulsarctl configuration.
+func (s *Session) GetPulsarCtlConfig() (*cmdutils.ClusterConfig, error) {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	if s.PulsarCtlConfig == nil || s.PulsarCtlConfig.WebServiceURL == "" {
+		return nil, fmt.Errorf("err: ContextNotSetErr: Please set the cluster context first")
+	}
+
+	cfg := *s.PulsarCtlConfig
+	return &cfg, nil
+}
+
 // GetPulsarClient returns the Pulsar data client.
 func (s *Session) GetPulsarClient() (pulsar.Client, error) {
 	s.mutex.RLock()

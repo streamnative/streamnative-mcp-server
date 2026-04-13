@@ -2,40 +2,63 @@
 
 Tools for managing Pulsar namespace policies.
 
-- **pulsar_admin_namespace_policy_get**: Get configuration policies of a namespace
-  - `namespace` (string, required): The namespace name (format: tenant/namespace)
-  
-- **pulsar_admin_namespace_policy_set**: Set a policy for a namespace
-  - `namespace` (string, required): The namespace name (format: tenant/namespace)
-  - `policy` (string, required): Type of policy to set, options include:
-    - `message-ttl`: Sets time to live for messages
-    - `retention`: Sets retention policy for messages
-    - `permission`: Grants permissions to a role
-    - `replication-clusters`: Sets clusters to replicate to
-    - `backlog-quota`: Sets backlog quota policy
-    - `topic-auto-creation`: Configures automatic topic creation
-    - `schema-validation`: Sets schema validation enforcement
-    - `schema-auto-update`: Sets schema auto-update strategy
-    - `auto-update-schema`: Controls if schemas can be automatically updated
-    - `offload-threshold`: Sets threshold for data offloading
-    - `offload-deletion-lag`: Sets time to wait before deleting offloaded data
-    - `compaction-threshold`: Sets threshold for topic compaction
-    - `max-producers-per-topic`: Limits producers per topic
-    - `max-consumers-per-topic`: Limits consumers per topic
-    - `max-consumers-per-subscription`: Limits consumers per subscription
-    - `anti-affinity-group`: Sets anti-affinity group for isolation
-    - `persistence`: Sets persistence configuration
-    - `deduplication`: Controls message deduplication
-    - `encryption-required`: Controls message encryption
-    - `subscription-auth-mode`: Sets subscription auth mode
-    - `subscription-permission`: Grants permissions to access a subscription
-    - `dispatch-rate`: Sets message dispatch rate
-    - `replicator-dispatch-rate`: Sets replicator dispatch rate
-    - `subscribe-rate`: Sets subscribe rate per consumer
-    - `subscription-dispatch-rate`: Sets subscription dispatch rate
-    - `publish-rate`: Sets maximum message publish rate
-  - Additional parameters vary based on the policy type
+- **pulsar_admin_namespace_policy_get**: Get the full policy set for a namespace
+  - `namespace` (string, required): Namespace in `tenant/namespace` format
 
-- **pulsar_admin_namespace_policy_remove**: Remove a policy from a namespace
-  - `namespace` (string, required): The namespace name (format: tenant/namespace)
-  - `policy` (string, required): Type of policy to remove 
+- **pulsar_admin_namespace_policy_get_anti_affinity_namespaces**: Get namespaces in the same anti-affinity group
+  - `group` (string, required): Anti-affinity group name
+  - `cluster` (string): Cluster name used to scope the lookup
+  - `tenant` (string): Tenant name used for authorization
+
+- **pulsar_admin_namespace_policy_set**: Set a namespace policy
+  - `namespace` (string, required): Namespace in `tenant/namespace` format
+  - `policy` (string, required): One of:
+    - `message-ttl`
+    - `retention`
+    - `permission`
+    - `replication-clusters`
+    - `backlog-quota`
+    - `topic-auto-creation`
+    - `schema-validation`
+    - `schema-auto-update`
+    - `auto-update-schema`
+    - `offload-threshold`
+    - `offload-deletion-lag`
+    - `compaction-threshold`
+    - `max-producers-per-topic`
+    - `max-consumers-per-topic`
+    - `max-consumers-per-subscription`
+    - `anti-affinity-group`
+    - `persistence`
+    - `deduplication`
+    - `encryption-required`
+    - `subscription-auth-mode`
+    - `subscription-permission`
+    - `dispatch-rate`
+    - `replicator-dispatch-rate`
+    - `subscribe-rate`
+    - `subscription-dispatch-rate`
+    - `publish-rate`
+  - Common policy-specific parameters:
+    - `ttl` (string): For `message-ttl`
+    - `time`, `size` (string): For `retention`
+    - `role`, `actions` (array): For `permission`
+    - `clusters` (array): For `replication-clusters`
+    - `limit-size`, `limit-time`, `backlog-policy`, `type`: For `backlog-quota`
+    - `enabled`, `topic-type`, `partitions`: For `topic-auto-creation`
+    - `enabled`: For `schema-validation`, `auto-update-schema`, `deduplication`, `encryption-required`
+    - `compatibility`: For `schema-auto-update`
+    - `lag`: For `offload-deletion-lag`
+    - `count`: For `max-*` policies
+    - `group`: For `anti-affinity-group`
+    - `ensemble-size`, `write-quorum-size`, `ack-quorum-size`, `ml-mark-delete-max-rate`: For `persistence`
+    - `mode`: For `subscription-auth-mode`
+    - `subscription`, `roles`: For `subscription-permission`
+    - `msg-rate`, `byte-rate`, `period`: For dispatch and publish rate policies
+    - `subscribe-rate`, `period`: For `subscribe-rate`
+
+- **pulsar_admin_namespace_policy_remove**: Remove a namespace policy override
+  - `namespace` (string, required): Namespace in `tenant/namespace` format
+  - `policy` (string, required): One of `backlog-quota`, `topic-auto-creation`, `offload-deletion-lag`, `anti-affinity-group`, `permission`, `subscription-permission`
+  - `role` (string): Required for `permission` and `subscription-permission`
+  - `subscription` (string): Required for `subscription-permission`

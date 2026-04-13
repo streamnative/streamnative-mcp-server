@@ -43,7 +43,7 @@ func NewPulsarAdminBrokerStatsToolBuilder() *PulsarAdminBrokerStatsToolBuilder {
 	}
 
 	features := []string{
-		"pulsar-admin-brokers-status",
+		"pulsar-admin-broker-stats",
 		"all",
 		"all-pulsar",
 		"pulsar-admin",

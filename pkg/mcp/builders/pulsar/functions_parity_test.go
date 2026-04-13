@@ -69,6 +69,55 @@ func TestParseFunctionIdentity(t *testing.T) {
 	require.Equal(t, "ns", identity.Namespace)
 }
 
+func TestFunctionOperationCoverageIncludesFileTransfer(t *testing.T) {
+	require.True(t, isSupportedFunctionOperation("download"))
+	require.True(t, isSupportedFunctionOperation("upload"))
+	require.True(t, isReadOnlyRestrictedFunctionOperation("download"))
+	require.True(t, isReadOnlyRestrictedFunctionOperation("upload"))
+}
+
+func TestParseFunctionDownloadTarget(t *testing.T) {
+	builder := NewPulsarAdminFunctionsToolBuilder()
+
+	req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]any{
+		"destinationFile": "/tmp/function.nar",
+		"path":            "public/default/function.nar",
+	}}}
+	target, err := builder.parseFunctionDownloadTarget(req)
+	require.NoError(t, err)
+	require.True(t, target.UsePath)
+	require.Equal(t, "/tmp/function.nar", target.DestinationFile)
+	require.Equal(t, "public/default/function.nar", target.Path)
+
+	req = mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]any{
+		"destinationFile": "/tmp/function.nar",
+		"fqfn":            "tenant/ns/name",
+	}}}
+	target, err = builder.parseFunctionDownloadTarget(req)
+	require.NoError(t, err)
+	require.False(t, target.UsePath)
+	require.Equal(t, "/tmp/function.nar", target.DestinationFile)
+	require.Equal(t, "tenant", target.Identity.Tenant)
+	require.Equal(t, "ns", target.Identity.Namespace)
+	require.Equal(t, "name", target.Identity.Name)
+}
+
+func TestParseFunctionDownloadTargetErrors(t *testing.T) {
+	builder := NewPulsarAdminFunctionsToolBuilder()
+
+	req := mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]any{
+		"path": "public/default/function.nar",
+	}}}
+	_, err := builder.parseFunctionDownloadTarget(req)
+	require.Error(t, err)
+
+	req = mcp.CallToolRequest{Params: mcp.CallToolParams{Arguments: map[string]any{
+		"destinationFile": "/tmp/function.nar",
+	}}}
+	_, err = builder.parseFunctionDownloadTarget(req)
+	require.Error(t, err)
+}
+
 func TestValidateFunctionConfigs(t *testing.T) {
 	jar := "builtin://identity"
 	config := &utils.FunctionConfig{

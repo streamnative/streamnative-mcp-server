@@ -115,6 +115,7 @@ func newMcpServer(_ context.Context, configOpts *ServerOptions, logrusLogger *lo
 	}
 
 	mcp.PulsarAdminAddBrokersTools(s, configOpts.ReadOnly, configOpts.Features)
+	mcp.PulsarAdminAddStatusTools(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.PulsarAdminAddBrokerStatsTools(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.PulsarAdminAddClusterTools(s, configOpts.ReadOnly, configOpts.Features)
 	mcp.PulsarAdminAddFunctionsWorkerTools(s, configOpts.ReadOnly, configOpts.Features)

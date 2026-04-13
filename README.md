@@ -262,12 +262,13 @@ The StreamNative MCP Server allows you to enable or disable specific groups of f
 | `pulsar-admin`                 | Pulsar administrative operations (all admin tools)|  |
 | `pulsar-client`                | Pulsar client operations (produce/consume)        | [pulsar_client_consume.md](docs/tools/pulsar_client_consume.md), [pulsar_client_produce.md](docs/tools/pulsar_client_produce.md) |
 | `pulsar-admin-brokers`         | Manage Pulsar brokers                            | [pulsar_admin_brokers.md](docs/tools/pulsar_admin_brokers.md) |
+| `pulsar-admin-brokers-status`  | Check Pulsar broker or proxy status              | [pulsar_admin_status.md](docs/tools/pulsar_admin_status.md) |
 | `pulsar-admin-broker-stats`    | Access Pulsar broker statistics                   | [pulsar_admin_broker_stats.md](docs/tools/pulsar_admin_broker_stats.md) |
 | `pulsar-admin-clusters`        | Manage Pulsar clusters                            | [pulsar_admin_clusters.md](docs/tools/pulsar_admin_clusters.md) |
 | `pulsar-admin-functions-worker`| Manage Pulsar Function workers                    | [pulsar_admin_functions_worker.md](docs/tools/pulsar_admin_functions_worker.md) |
 | `pulsar-admin-namespaces`      | Manage Pulsar namespaces                          | [pulsar_admin_namespaces.md](docs/tools/pulsar_admin_namespaces.md) |
 | `pulsar-admin-namespace-policy`| Configure Pulsar namespace policies               | [pulsar_admin_namespace_policy.md](docs/tools/pulsar_admin_namespace_policy.md) |
-| `pulsar-admin-isolation-policy`| Manage namespace isolation policies               | [pulsar_admin_nsisolationpolicy.md](docs/tools/pulsar_admin_nsisolationpolicy.md) |
+| `pulsar-admin-ns-isolation-policy`| Manage namespace isolation policies               | [pulsar_admin_nsisolationpolicy.md](docs/tools/pulsar_admin_nsisolationpolicy.md) |
 | `pulsar-admin-packages`        | Manage Pulsar packages                            | [pulsar_admin_packages.md](docs/tools/pulsar_admin_packages.md) |
 | `pulsar-admin-resource-quotas` | Configure resource quotas                         | [pulsar_admin_resource_quotas.md](docs/tools/pulsar_admin_resource_quotas.md) |
 | `pulsar-admin-schemas`         | Manage Pulsar schemas                             | [pulsar_admin_schemas.md](docs/tools/pulsar_admin_schemas.md) |

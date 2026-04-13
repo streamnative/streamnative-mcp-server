@@ -17,9 +17,11 @@ package pulsar
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
 	"github.com/mark3labs/mcp-go/mcp"
@@ -28,6 +30,24 @@ import (
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
+
+var readOnlyRestrictedTopicOperations = map[string]struct{}{
+	"create":             {},
+	"delete":             {},
+	"unload":             {},
+	"terminate":          {},
+	"compact":            {},
+	"update":             {},
+	"offload":            {},
+	"grant-permissions":  {},
+	"revoke-permissions": {},
+}
+
+var topicOperationAliases = map[string]string{
+	"status": "compact-status",
+}
+
+const topicStatusPollInterval = time.Second
 
 // PulsarAdminTopicToolBuilder implements the ToolBuilder interface for Pulsar Admin Topic tools
 // It provides functionality to build Pulsar topic management tools
@@ -105,6 +125,9 @@ func (b *PulsarAdminTopicToolBuilder) buildTopicTool() mcp.Tool {
 	operationDesc := "Operation to perform. Available operations:\n" +
 		"- list: List all topics in a namespace\n" +
 		"- get: Get metadata for a topic\n" +
+		"- get-permissions: Get topic permissions for all roles\n" +
+		"- grant-permissions: Grant topic permissions to a role\n" +
+		"- revoke-permissions: Revoke topic permissions from a role\n" +
 		"- create: Create a new topic with optional partitions\n" +
 		"- delete: Delete a topic\n" +
 		"- stats: Get stats for a topic\n" +
@@ -113,7 +136,7 @@ func (b *PulsarAdminTopicToolBuilder) buildTopicTool() mcp.Tool {
 		"- internal-info: Get internal info for a topic\n" +
 		"- bundle-range: Get the bundle range of a topic\n" +
 		"- last-message-id: Get the last message ID of a topic\n" +
-		"- status: Get the status of a topic\n" +
+		"- compact-status: Get compaction status for a topic (legacy alias: status)\n" +
 		"- unload: Unload a topic\n" +
 		"- terminate: Terminate a topic\n" +
 		"- compact: Trigger compaction on a topic\n" +
@@ -175,6 +198,22 @@ func (b *PulsarAdminTopicToolBuilder) buildTopicTool() mcp.Tool {
 				"Format is 'ledgerId:entryId' representing a position in the topic's message log. "+
 				"For offload operations, specifies the message up to which data should be moved to long-term storage."),
 		),
+		mcp.WithBoolean("wait",
+			mcp.Description("Wait for the long-running status operation to finish. Optional for 'compact-status' (and legacy 'status') and 'offload-status'."),
+		),
+		mcp.WithString("role",
+			mcp.Description("Role name. Required for 'grant-permissions' and 'revoke-permissions' operations."),
+		),
+		mcp.WithArray("actions",
+			mcp.Description("List of topic permissions to grant. Required for 'grant-permissions'. "+
+				"Allowed values: produce, consume, sources, sinks, functions, packages."),
+			mcp.Items(
+				map[string]interface{}{
+					"type":        "string",
+					"description": "auth action",
+				},
+			),
+		),
 	)
 }
 
@@ -195,11 +234,10 @@ func (b *PulsarAdminTopicToolBuilder) buildTopicHandler(readOnly bool) func(cont
 
 		// Normalize parameters
 		resource = strings.ToLower(resource)
-		operation = strings.ToLower(operation)
+		operation = normalizeTopicOperation(operation)
 
 		// Validate write operations in read-only mode
-		if readOnly && (operation == "create" || operation == "delete" || operation == "unload" ||
-			operation == "terminate" || operation == "compact" || operation == "update" || operation == "offload") {
+		if readOnly && isReadOnlyRestrictedTopicOperation(operation) {
 			return mcp.NewToolResultError("Write operations are not allowed in read-only mode"), nil
 		}
 
@@ -221,6 +259,12 @@ func (b *PulsarAdminTopicToolBuilder) buildTopicHandler(readOnly bool) func(cont
 			switch operation {
 			case "get":
 				return b.handleTopicGet(admin, request)
+			case "get-permissions":
+				return b.handleTopicGetPermissions(admin, request)
+			case "grant-permissions":
+				return b.handleTopicGrantPermissions(admin, request)
+			case "revoke-permissions":
+				return b.handleTopicRevokePermissions(admin, request)
 			case "create":
 				return b.handleTopicCreate(admin, request)
 			case "delete":
@@ -237,8 +281,8 @@ func (b *PulsarAdminTopicToolBuilder) buildTopicHandler(readOnly bool) func(cont
 				return b.handleTopicBundleRange(admin, request)
 			case "last-message-id":
 				return b.handleTopicLastMessageID(admin, request)
-			case "status":
-				return b.handleTopicStatus(admin, request)
+			case "compact-status":
+				return b.handleTopicCompactStatus(ctx, admin, request)
 			case "unload":
 				return b.handleTopicUnload(admin, request)
 			case "terminate":
@@ -250,7 +294,7 @@ func (b *PulsarAdminTopicToolBuilder) buildTopicHandler(readOnly bool) func(cont
 			case "offload":
 				return b.handleTopicOffload(admin, request)
 			case "offload-status":
-				return b.handleTopicOffloadStatus(admin, request)
+				return b.handleTopicOffloadStatus(ctx, admin, request)
 			default:
 				return mcp.NewToolResultError(fmt.Sprintf("Unknown topic operation: %s", operation)), nil
 			}
@@ -265,6 +309,20 @@ func (b *PulsarAdminTopicToolBuilder) buildTopicHandler(readOnly bool) func(cont
 			return mcp.NewToolResultError(fmt.Sprintf("Unknown resource: %s", resource)), nil
 		}
 	}
+}
+
+func isReadOnlyRestrictedTopicOperation(operation string) bool {
+	_, ok := readOnlyRestrictedTopicOperations[strings.ToLower(operation)]
+	return ok
+}
+
+func normalizeTopicOperation(operation string) string {
+	normalized := strings.ToLower(strings.TrimSpace(operation))
+	if alias, ok := topicOperationAliases[normalized]; ok {
+		return alias
+	}
+
+	return normalized
 }
 
 // Unified error handling and utility functions
@@ -338,6 +396,95 @@ func (b *PulsarAdminTopicToolBuilder) handleTopicGet(admin cmdutils.Client, requ
 	}
 
 	return b.marshalResponse(metadata)
+}
+
+// handleTopicGetPermissions gets topic permissions for all roles.
+func (b *PulsarAdminTopicToolBuilder) handleTopicGetPermissions(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	topic, err := request.RequireString("topic")
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.get-permissions: %v", err)), nil
+	}
+
+	topicName, err := utils.GetTopicName(topic)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Invalid topic name '%s': %v", topic, err)), nil
+	}
+
+	permissions, err := admin.Topics().GetPermissions(*topicName)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to get permissions for topic '%s': %v", topic, err)), nil
+	}
+
+	return b.marshalResponse(permissions)
+}
+
+// handleTopicGrantPermissions grants topic permissions to a role.
+func (b *PulsarAdminTopicToolBuilder) handleTopicGrantPermissions(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	topic, err := request.RequireString("topic")
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.grant-permissions: %v", err)), nil
+	}
+
+	role, err := request.RequireString("role")
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'role' for topic.grant-permissions: %v", err)), nil
+	}
+	role = strings.TrimSpace(role)
+	if role == "" {
+		return mcp.NewToolResultError("Missing required parameter 'role' for topic.grant-permissions"), nil
+	}
+
+	actions, err := request.RequireStringSlice("actions")
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'actions' for topic.grant-permissions: %v", err)), nil
+	}
+	if len(actions) == 0 {
+		return mcp.NewToolResultError("Missing required parameter 'actions' for topic.grant-permissions"), nil
+	}
+
+	topicName, err := utils.GetTopicName(topic)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Invalid topic name '%s': %v", topic, err)), nil
+	}
+
+	authActions, err := parseTopicActions(actions)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to parse actions: %v", err)), nil
+	}
+
+	if err := admin.Topics().GrantPermission(*topicName, role, authActions); err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to grant permissions for topic '%s': %v", topic, err)), nil
+	}
+
+	return mcp.NewToolResultText(fmt.Sprintf("Granted %v permission(s) to role %s on topic %s", actions, role, topicName.String())), nil
+}
+
+// handleTopicRevokePermissions revokes topic permissions from a role.
+func (b *PulsarAdminTopicToolBuilder) handleTopicRevokePermissions(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	topic, err := request.RequireString("topic")
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.revoke-permissions: %v", err)), nil
+	}
+
+	role, err := request.RequireString("role")
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'role' for topic.revoke-permissions: %v", err)), nil
+	}
+	role = strings.TrimSpace(role)
+	if role == "" {
+		return mcp.NewToolResultError("Missing required parameter 'role' for topic.revoke-permissions"), nil
+	}
+
+	topicName, err := utils.GetTopicName(topic)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Invalid topic name '%s': %v", topic, err)), nil
+	}
+
+	if err := admin.Topics().RevokePermission(*topicName, role); err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to revoke permissions for topic '%s': %v", topic, err)), nil
+	}
+
+	return mcp.NewToolResultText(fmt.Sprintf("Revoked all permissions from role %s on topic %s", role, topicName.String())), nil
 }
 
 // handleTopicStats gets the stats for an existing topic
@@ -572,7 +719,7 @@ func (b *PulsarAdminTopicToolBuilder) handleTopicCompact(admin cmdutils.Client, 
 	}
 
 	return mcp.NewToolResultText(fmt.Sprintf("Successfully triggered compaction for topic '%s'. "+
-		"Run 'topic.status' to check compaction status.", topicName.String())), nil
+		"Use operation='compact-status' to check compaction status.", topicName.String())), nil
 }
 
 // handleTopicInternalStats gets the internal stats for a topic
@@ -667,12 +814,12 @@ func (b *PulsarAdminTopicToolBuilder) handleTopicLastMessageID(admin cmdutils.Cl
 	return b.marshalResponse(messageID)
 }
 
-// handleTopicStatus gets the status of a topic
-func (b *PulsarAdminTopicToolBuilder) handleTopicStatus(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+// handleTopicCompactStatus gets the compaction status of a topic.
+func (b *PulsarAdminTopicToolBuilder) handleTopicCompactStatus(ctx context.Context, admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := request.RequireString("topic")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.status: %v", err)), nil
+		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'topic' for topic.compact-status: %v", err)), nil
 	}
 
 	// Get topic name
@@ -681,19 +828,30 @@ func (b *PulsarAdminTopicToolBuilder) handleTopicStatus(admin cmdutils.Client, r
 		return mcp.NewToolResultError(fmt.Sprintf("Invalid topic name '%s': %v", topic, err)), nil
 	}
 
-	// Get topic metadata for status check
-	metadata, err := admin.Topics().GetMetadata(*topicName)
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to get status for topic '%s': %v", topic, err)), nil
+	if !topicName.IsPersistent() {
+		return mcp.NewToolResultError("Need to provide a persistent topic"), nil
 	}
 
-	// Create status object with available information
-	status := struct {
-		Metadata interface{} `json:"metadata"`
-		Active   bool        `json:"active"`
-	}{
-		Metadata: metadata,
-		Active:   true, // If metadata retrieval succeeded, topic is active
+	wait := request.GetBool("wait", false)
+
+	status, err := admin.Topics().CompactStatus(*topicName)
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to get compaction status for topic '%s': %v", topic, err)), nil
+	}
+
+	err = waitForTopicLongRunningStatus(ctx, wait, topicStatusPollInterval, func() bool {
+		return status.Status == utils.RUNNING
+	}, func() error {
+		status, err = admin.Topics().CompactStatus(*topicName)
+		return err
+	})
+	if err != nil {
+		if isTopicStatusWaitInterrupted(err) {
+			return mcp.NewToolResultError(fmt.Sprintf(
+				"Waiting for compaction status for topic '%s' was interrupted: %v", topic, err,
+			)), nil
+		}
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to get compaction status for topic '%s': %v", topic, err)), nil
 	}
 
 	return b.marshalResponse(status)
@@ -771,7 +929,7 @@ func (b *PulsarAdminTopicToolBuilder) handleTopicOffload(admin cmdutils.Client, 
 }
 
 // handleTopicOffloadStatus checks the status of data offloading for a topic
-func (b *PulsarAdminTopicToolBuilder) handleTopicOffloadStatus(admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicToolBuilder) handleTopicOffloadStatus(ctx context.Context, admin cmdutils.Client, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get required parameters
 	topic, err := request.RequireString("topic")
 	if err != nil {
@@ -790,5 +948,71 @@ func (b *PulsarAdminTopicToolBuilder) handleTopicOffloadStatus(admin cmdutils.Cl
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to get offload status for topic '%s': %v", topic, err)), nil
 	}
 
+	err = waitForTopicLongRunningStatus(ctx, request.GetBool("wait", false), topicStatusPollInterval, func() bool {
+		return status.Status == utils.RUNNING
+	}, func() error {
+		status, err = admin.Topics().OffloadStatus(*topicName)
+		return err
+	})
+	if err != nil {
+		if isTopicStatusWaitInterrupted(err) {
+			return mcp.NewToolResultError(fmt.Sprintf(
+				"Waiting for offload status for topic '%s' was interrupted: %v", topic, err,
+			)), nil
+		}
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to get offload status for topic '%s': %v", topic, err)), nil
+	}
+
 	return b.marshalResponse(status)
+}
+
+func waitForTopicLongRunningStatus(
+	ctx context.Context,
+	wait bool,
+	pollInterval time.Duration,
+	isRunning func() bool,
+	refresh func() error,
+) error {
+	if !wait || !isRunning() {
+		return nil
+	}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	if pollInterval <= 0 {
+		pollInterval = topicStatusPollInterval
+	}
+
+	ticker := time.NewTicker(pollInterval)
+	defer ticker.Stop()
+
+	for isRunning() {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-ticker.C:
+			if err := refresh(); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func isTopicStatusWaitInterrupted(err error) bool {
+	return errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded)
+}
+
+func parseTopicActions(actions []string) ([]utils.AuthAction, error) {
+	parsed := make([]utils.AuthAction, 0, len(actions))
+	for _, action := range actions {
+		authAction, err := utils.ParseAuthAction(action)
+		if err != nil {
+			return nil, err
+		}
+		parsed = append(parsed, authAction)
+	}
+
+	return parsed, nil
 }
