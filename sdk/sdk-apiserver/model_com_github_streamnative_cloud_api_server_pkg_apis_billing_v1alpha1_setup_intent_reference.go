@@ -16,7 +16,7 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntentReference SetupIntentReference represents a SetupIntent Reference.
 type ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntentReference struct {
-	Name      *string `json:"name,omitempty"`
+	Name *string `json:"name,omitempty"`
 	Namespace *string `json:"namespace,omitempty"`
 }
 
@@ -147,3 +147,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupI
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

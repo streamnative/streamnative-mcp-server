@@ -18,10 +18,10 @@ import (
 type ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1SecurityContext struct {
 	FsGroup *int64 `json:"fsGroup,omitempty"`
 	// ReadOnlyRootFilesystem specifies whether the container use a read-only filesystem.
-	ReadOnlyRootFilesystem *bool  `json:"readOnlyRootFilesystem,omitempty"`
-	RunAsGroup             *int64 `json:"runAsGroup,omitempty"`
-	RunAsNonRoot           *bool  `json:"runAsNonRoot,omitempty"`
-	RunAsUser              *int64 `json:"runAsUser,omitempty"`
+	ReadOnlyRootFilesystem *bool `json:"readOnlyRootFilesystem,omitempty"`
+	RunAsGroup *int64 `json:"runAsGroup,omitempty"`
+	RunAsNonRoot *bool `json:"runAsNonRoot,omitempty"`
+	RunAsUser *int64 `json:"runAsUser,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1SecurityContext instantiates a new ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1SecurityContext object
@@ -256,3 +256,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Securi
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

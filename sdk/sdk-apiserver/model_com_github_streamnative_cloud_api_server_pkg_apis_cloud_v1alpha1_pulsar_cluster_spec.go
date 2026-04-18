@@ -17,20 +17,20 @@ import (
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarClusterSpec PulsarClusterSpec defines the desired state of PulsarCluster
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarClusterSpec struct {
 	BookKeeperSetRef *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1BookKeeperSetReference `json:"bookKeeperSetRef,omitempty"`
-	Bookkeeper       *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1BookKeeper             `json:"bookkeeper,omitempty"`
-	Broker           ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Broker                  `json:"broker"`
-	Config           *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Config                 `json:"config,omitempty"`
+	Bookkeeper *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1BookKeeper `json:"bookkeeper,omitempty"`
+	Broker ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Broker `json:"broker"`
+	Config *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Config `json:"config,omitempty"`
 	// Name to display to our users
-	DisplayName       *string                                                                        `json:"displayName,omitempty"`
-	EndpointAccess    []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1EndpointAccess        `json:"endpointAccess,omitempty"`
-	InstanceName      string                                                                         `json:"instanceName"`
-	Location          string                                                                         `json:"location"`
-	MaintenanceWindow *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1MaintenanceWindow      `json:"maintenanceWindow,omitempty"`
-	PoolMemberRef     *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemberReference    `json:"poolMemberRef,omitempty"`
-	ReleaseChannel    *string                                                                        `json:"releaseChannel,omitempty"`
-	ServiceEndpoints  []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarServiceEndpoint `json:"serviceEndpoints,omitempty"`
-	Tolerations       []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Toleration            `json:"tolerations,omitempty"`
-	ZooKeeperSetRef   *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1ZooKeeperSetReference  `json:"zooKeeperSetRef,omitempty"`
+	DisplayName *string `json:"displayName,omitempty"`
+	EndpointAccess []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1EndpointAccess `json:"endpointAccess,omitempty"`
+	InstanceName string `json:"instanceName"`
+	Location string `json:"location"`
+	MaintenanceWindow *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1MaintenanceWindow `json:"maintenanceWindow,omitempty"`
+	PoolMemberRef *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemberReference `json:"poolMemberRef,omitempty"`
+	ReleaseChannel *string `json:"releaseChannel,omitempty"`
+	ServiceEndpoints []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarServiceEndpoint `json:"serviceEndpoints,omitempty"`
+	Tolerations []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Toleration `json:"tolerations,omitempty"`
+	ZooKeeperSetRef *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1ZooKeeperSetReference `json:"zooKeeperSetRef,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarClusterSpec instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarClusterSpec object
@@ -559,3 +559,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarCl
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

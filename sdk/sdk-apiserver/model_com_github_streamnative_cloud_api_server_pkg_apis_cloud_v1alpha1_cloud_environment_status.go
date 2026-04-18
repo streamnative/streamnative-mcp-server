@@ -17,7 +17,7 @@ import (
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1CloudEnvironmentStatus CloudEnvironmentStatus defines the observed state of CloudEnvironment
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1CloudEnvironmentStatus struct {
 	// Conditions contains details for the current state of underlying resource
-	Conditions     []V1Condition                                                         `json:"conditions,omitempty"`
+	Conditions []V1Condition `json:"conditions,omitempty"`
 	DefaultGateway *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1GatewayStatus `json:"defaultGateway,omitempty"`
 }
 
@@ -148,3 +148,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1CloudEnv
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

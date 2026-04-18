@@ -16,8 +16,8 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RegionInfo struct for ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RegionInfo
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RegionInfo struct {
-	Region string   `json:"region"`
-	Zones  []string `json:"zones"`
+	Region string `json:"region"`
+	Zones []string `json:"zones"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RegionInfo instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RegionInfo object
@@ -133,3 +133,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RegionIn
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

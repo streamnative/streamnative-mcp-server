@@ -18,7 +18,7 @@ import (
 type ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Volume struct {
 	ConfigMap *V1ConfigMapVolumeSource `json:"configMap,omitempty"`
 	// Volume's name. Must be a DNS_LABEL and unique within the pod. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-	Name   string                `json:"name"`
+	Name string `json:"name"`
 	Secret *V1SecretVolumeSource `json:"secret,omitempty"`
 }
 
@@ -177,3 +177,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Volume
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

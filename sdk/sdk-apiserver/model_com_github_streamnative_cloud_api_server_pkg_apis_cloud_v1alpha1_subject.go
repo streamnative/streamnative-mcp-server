@@ -16,9 +16,9 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Subject struct for ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Subject
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Subject struct {
-	ApiGroup  string  `json:"apiGroup"`
-	Kind      string  `json:"kind"`
-	Name      string  `json:"name"`
+	ApiGroup string `json:"apiGroup"`
+	Kind string `json:"kind"`
+	Name string `json:"name"`
 	Namespace *string `json:"namespace,omitempty"`
 }
 
@@ -198,3 +198,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Subject)
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

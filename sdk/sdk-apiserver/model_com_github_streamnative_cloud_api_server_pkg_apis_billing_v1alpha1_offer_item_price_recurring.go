@@ -20,8 +20,8 @@ type ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1OfferItemPriceRecu
 	// Specifies billing frequency. Either `day`, `week`, `month` or `year`.
 	Interval *string `json:"interval,omitempty"`
 	// The number of intervals between subscription billings. For example, `interval=month` and `interval_count=3` bills every 3 months. Maximum of one-year interval is allowed (1 year, 12 months, or 52 weeks).
-	IntervalCount *int64  `json:"intervalCount,omitempty"`
-	UsageType     *string `json:"usageType,omitempty"`
+	IntervalCount *int64 `json:"intervalCount,omitempty"`
+	UsageType *string `json:"usageType,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1OfferItemPriceRecurring instantiates a new ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1OfferItemPriceRecurring object
@@ -221,3 +221,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1OfferI
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

@@ -16,7 +16,7 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolRef PoolRef is a reference to a pool with a given name.
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolRef struct {
-	Name      string `json:"name"`
+	Name string `json:"name"`
 	Namespace string `json:"namespace"`
 }
 
@@ -133,3 +133,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolRef)
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

@@ -16,8 +16,8 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentTemplate VvpDeploymentTemplate defines the desired state of VvpDeployment
 type ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentTemplate struct {
-	Deployment  ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentTemplateSpec `json:"deployment"`
-	SyncingMode *string                                                                            `json:"syncingMode,omitempty"`
+	Deployment ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentTemplateSpec `json:"deployment"`
+	SyncingMode *string `json:"syncingMode,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentTemplate instantiates a new ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentTemplate object
@@ -140,3 +140,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDep
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

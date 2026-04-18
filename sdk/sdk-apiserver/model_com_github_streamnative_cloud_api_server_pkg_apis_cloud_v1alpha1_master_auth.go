@@ -21,8 +21,8 @@ type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1MasterAuth struct {
 	// ClientKey is base64-encoded private key used by clients to authenticate to the cluster endpoint.
 	ClientKey *string `json:"clientKey,omitempty"`
 	// ClusterCaCertificate is base64-encoded public certificate that is the root of trust for the cluster.
-	ClusterCaCertificate *string                                                            `json:"clusterCaCertificate,omitempty"`
-	Exec                 *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1ExecConfig `json:"exec,omitempty"`
+	ClusterCaCertificate *string `json:"clusterCaCertificate,omitempty"`
+	Exec *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1ExecConfig `json:"exec,omitempty"`
 	// Password is the password to use for HTTP basic authentication to the master endpoint.
 	Password *string `json:"password,omitempty"`
 	// Username is the username to use for HTTP basic authentication to the master endpoint.
@@ -296,3 +296,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1MasterAu
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

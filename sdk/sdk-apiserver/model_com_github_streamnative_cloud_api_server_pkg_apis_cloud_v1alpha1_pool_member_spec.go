@@ -16,21 +16,21 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemberSpec PoolMemberSpec defines the desired state of PoolMember
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemberSpec struct {
-	Aws               *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1AwsPoolMemberSpec               `json:"aws,omitempty"`
-	Azure             *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1AzurePoolMemberSpec             `json:"azure,omitempty"`
+	Aws *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1AwsPoolMemberSpec `json:"aws,omitempty"`
+	Azure *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1AzurePoolMemberSpec `json:"azure,omitempty"`
 	ConnectionOptions *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemberConnectionOptionsSpec `json:"connectionOptions,omitempty"`
-	Domains           []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Domain                         `json:"domains,omitempty"`
-	FunctionMesh      *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemberPulsarSpec            `json:"functionMesh,omitempty"`
-	Gcloud            *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1GCloudPoolMemberSpec            `json:"gcloud,omitempty"`
-	Generic           *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1GenericPoolMemberSpec           `json:"generic,omitempty"`
-	Istio             *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemberIstioSpec             `json:"istio,omitempty"`
-	Monitoring        *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemberMonitoring            `json:"monitoring,omitempty"`
-	PoolName          string                                                                                  `json:"poolName"`
-	Pulsar            *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemberPulsarSpec            `json:"pulsar,omitempty"`
-	SupportAccess     *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1SupportAccessOptionsSpec        `json:"supportAccess,omitempty"`
-	Taints            []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Taint                          `json:"taints,omitempty"`
-	TieredStorage     *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemberTieredStorageSpec     `json:"tieredStorage,omitempty"`
-	Type              string                                                                                  `json:"type"`
+	Domains []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Domain `json:"domains,omitempty"`
+	FunctionMesh *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemberPulsarSpec `json:"functionMesh,omitempty"`
+	Gcloud *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1GCloudPoolMemberSpec `json:"gcloud,omitempty"`
+	Generic *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1GenericPoolMemberSpec `json:"generic,omitempty"`
+	Istio *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemberIstioSpec `json:"istio,omitempty"`
+	Monitoring *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemberMonitoring `json:"monitoring,omitempty"`
+	PoolName string `json:"poolName"`
+	Pulsar *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemberPulsarSpec `json:"pulsar,omitempty"`
+	SupportAccess *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1SupportAccessOptionsSpec `json:"supportAccess,omitempty"`
+	Taints []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Taint `json:"taints,omitempty"`
+	TieredStorage *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemberTieredStorageSpec `json:"tieredStorage,omitempty"`
+	Type string `json:"type"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemberSpec instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemberSpec object
@@ -601,3 +601,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemb
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

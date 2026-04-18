@@ -17,10 +17,10 @@ import (
 // ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1UserMetadata UserMetadata Specify the metadata for the resource we are deploying.
 type ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1UserMetadata struct {
 	Annotations *map[string]string `json:"annotations,omitempty"`
-	DisplayName *string            `json:"displayName,omitempty"`
-	Labels      *map[string]string `json:"labels,omitempty"`
-	Name        *string            `json:"name,omitempty"`
-	Namespace   *string            `json:"namespace,omitempty"`
+	DisplayName *string `json:"displayName,omitempty"`
+	Labels *map[string]string `json:"labels,omitempty"`
+	Name *string `json:"name,omitempty"`
+	Namespace *string `json:"namespace,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1UserMetadata instantiates a new ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1UserMetadata object
@@ -255,3 +255,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1UserMe
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

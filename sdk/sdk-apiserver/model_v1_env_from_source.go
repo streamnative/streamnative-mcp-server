@@ -18,7 +18,7 @@ import (
 type V1EnvFromSource struct {
 	ConfigMapRef *V1ConfigMapEnvSource `json:"configMapRef,omitempty"`
 	// An optional identifier to prepend to each key in the ConfigMap. Must be a C_IDENTIFIER.
-	Prefix    *string            `json:"prefix,omitempty"`
+	Prefix *string `json:"prefix,omitempty"`
 	SecretRef *V1SecretEnvSource `json:"secretRef,omitempty"`
 }
 
@@ -184,3 +184,5 @@ func (v *NullableV1EnvFromSource) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

@@ -19,8 +19,8 @@ type ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1OfferItem struct {
 	// Key is the item key within the offer and subscription.
 	Key *string `json:"key,omitempty"`
 	// Metadata is an unstructured key value map stored with an item.
-	Metadata *map[string]string                                                       `json:"metadata,omitempty"`
-	Price    *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1OfferItemPrice `json:"price,omitempty"`
+	Metadata *map[string]string `json:"metadata,omitempty"`
+	Price *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1OfferItemPrice `json:"price,omitempty"`
 	PriceRef *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PriceReference `json:"priceRef,omitempty"`
 	// Quantity for this item.
 	Quantity *string `json:"quantity,omitempty"`
@@ -258,3 +258,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1OfferI
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

@@ -16,9 +16,9 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntentSpec PaymentIntentSpec defines the desired state of PaymentIntent
 type ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntentSpec struct {
-	Stripe           *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1StripePaymentIntent `json:"stripe,omitempty"`
-	SubscriptionName *string                                                                       `json:"subscriptionName,omitempty"`
-	Type             *string                                                                       `json:"type,omitempty"`
+	Stripe *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1StripePaymentIntent `json:"stripe,omitempty"`
+	SubscriptionName *string `json:"subscriptionName,omitempty"`
+	Type *string `json:"type,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntentSpec instantiates a new ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntentSpec object
@@ -183,3 +183,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Paymen
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

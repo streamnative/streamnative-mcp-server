@@ -17,8 +17,8 @@ import (
 // ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1OfferItemPrice OfferItemPrice is used to specify a custom price for a given product.
 type ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1OfferItemPrice struct {
 	// Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase.
-	Currency  *string                                                                           `json:"currency,omitempty"`
-	Product   *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1ProductReference        `json:"product,omitempty"`
+	Currency *string `json:"currency,omitempty"`
+	Product *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1ProductReference `json:"product,omitempty"`
 	Recurring *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1OfferItemPriceRecurring `json:"recurring,omitempty"`
 	// Tiers are Stripes billing tiers like
 	Tiers []ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Tier `json:"tiers,omitempty"`
@@ -295,3 +295,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1OfferI
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

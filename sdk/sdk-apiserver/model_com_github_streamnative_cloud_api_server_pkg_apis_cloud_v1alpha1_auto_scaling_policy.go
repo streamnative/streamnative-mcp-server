@@ -16,7 +16,7 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1AutoScalingPolicy AutoScalingPolicy defines the min/max replicas for component is autoscaling enabled.
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1AutoScalingPolicy struct {
-	MaxReplicas int32  `json:"maxReplicas"`
+	MaxReplicas int32 `json:"maxReplicas"`
 	MinReplicas *int32 `json:"minReplicas,omitempty"`
 }
 
@@ -140,3 +140,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1AutoScal
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

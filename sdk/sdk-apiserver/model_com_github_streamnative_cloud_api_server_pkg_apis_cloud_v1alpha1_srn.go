@@ -16,16 +16,16 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Srn Srn Deprecated
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Srn struct {
-	Cluster      *string `json:"cluster,omitempty"`
-	Instance     *string `json:"instance,omitempty"`
-	Namespace    *string `json:"namespace,omitempty"`
+	Cluster *string `json:"cluster,omitempty"`
+	Instance *string `json:"instance,omitempty"`
+	Namespace *string `json:"namespace,omitempty"`
 	Organization *string `json:"organization,omitempty"`
-	Schema       *string `json:"schema,omitempty"`
+	Schema *string `json:"schema,omitempty"`
 	Subscription *string `json:"subscription,omitempty"`
-	Tenant       *string `json:"tenant,omitempty"`
-	TopicDomain  *string `json:"topicDomain,omitempty"`
-	TopicName    *string `json:"topicName,omitempty"`
-	Version      *string `json:"version,omitempty"`
+	Tenant *string `json:"tenant,omitempty"`
+	TopicDomain *string `json:"topicDomain,omitempty"`
+	TopicName *string `json:"topicName,omitempty"`
+	Version *string `json:"version,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Srn instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Srn object
@@ -435,3 +435,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Srn) Unm
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

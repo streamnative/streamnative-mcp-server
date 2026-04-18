@@ -16,9 +16,9 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1ConditionGroup ConditionGroup Deprecated
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1ConditionGroup struct {
-	ConditionGroups []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1ConditionGroup       `json:"conditionGroups,omitempty"`
-	Conditions      []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RoleBindingCondition `json:"conditions"`
-	Relation        *int32                                                                        `json:"relation,omitempty"`
+	ConditionGroups []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1ConditionGroup `json:"conditionGroups,omitempty"`
+	Conditions []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RoleBindingCondition `json:"conditions"`
+	Relation *int32 `json:"relation,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1ConditionGroup instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1ConditionGroup object
@@ -176,3 +176,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Conditio
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

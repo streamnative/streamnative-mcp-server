@@ -19,10 +19,10 @@ type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolSpec struct {
 	// CloudFeature indicates features this pool wants to enable/disable by default for all Pulsar clusters created on it
 	CloudFeature *map[string]bool `json:"cloudFeature,omitempty"`
 	// This feild is used by `cloud-manager` and `cloud-billing-reporter` to potentially charge different rates for our customers. It is imperative that we correctly set this field if a pool is a \"Pro\" tier or no tier.
-	DeploymentType *string                                                               `json:"deploymentType,omitempty"`
-	Gcloud         map[string]interface{}                                                `json:"gcloud,omitempty"`
-	Sharing        *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1SharingConfig `json:"sharing,omitempty"`
-	Type           string                                                                `json:"type"`
+	DeploymentType *string `json:"deploymentType,omitempty"`
+	Gcloud map[string]interface{} `json:"gcloud,omitempty"`
+	Sharing *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1SharingConfig `json:"sharing,omitempty"`
+	Type string `json:"type"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolSpec instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolSpec object
@@ -250,3 +250,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolSpec
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

@@ -149,3 +149,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Produc
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

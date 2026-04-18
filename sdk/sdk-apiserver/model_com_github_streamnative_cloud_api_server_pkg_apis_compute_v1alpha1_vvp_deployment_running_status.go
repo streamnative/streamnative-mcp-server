@@ -19,7 +19,7 @@ import (
 type ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentRunningStatus struct {
 	// Conditions is an array of current observed conditions.
 	Conditions []ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentStatusCondition `json:"conditions,omitempty"`
-	JobId      *string                                                                                 `json:"jobId,omitempty"`
+	JobId *string `json:"jobId,omitempty"`
 	// Time is a wrapper around time.Time which supports correct marshaling to YAML and JSON.  Wrappers are provided for many of the factory methods that the time package offers.
 	TransitionTime *time.Time `json:"transitionTime,omitempty"`
 }
@@ -186,3 +186,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDep
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

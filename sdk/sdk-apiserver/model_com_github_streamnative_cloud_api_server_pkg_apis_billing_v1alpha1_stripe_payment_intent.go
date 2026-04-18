@@ -17,7 +17,7 @@ import (
 // ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1StripePaymentIntent struct for ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1StripePaymentIntent
 type ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1StripePaymentIntent struct {
 	ClientSecret *string `json:"clientSecret,omitempty"`
-	Id           *string `json:"id,omitempty"`
+	Id *string `json:"id,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1StripePaymentIntent instantiates a new ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1StripePaymentIntent object
@@ -147,3 +147,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Stripe
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

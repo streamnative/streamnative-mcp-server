@@ -1,7 +1,7 @@
-module github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserver
+module github.com/GIT_USER_ID/GIT_REPO_ID/sncloud
 
-go 1.24.0
+go 1.13
 
-toolchain go1.24.4
-
-require golang.org/x/oauth2 v0.34.0
+require (
+	golang.org/x/oauth2 v0.0.0-20210323180902-22b0adad7558
+)

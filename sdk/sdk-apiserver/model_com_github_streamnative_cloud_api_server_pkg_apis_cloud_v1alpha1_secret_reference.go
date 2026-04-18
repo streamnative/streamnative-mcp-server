@@ -16,7 +16,7 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1SecretReference struct for ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1SecretReference
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1SecretReference struct {
-	Name      string  `json:"name"`
+	Name string `json:"name"`
 	Namespace *string `json:"namespace,omitempty"`
 }
 
@@ -140,3 +140,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1SecretRe
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

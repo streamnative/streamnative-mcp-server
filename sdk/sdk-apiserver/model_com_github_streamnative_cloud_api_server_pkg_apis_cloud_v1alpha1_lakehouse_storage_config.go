@@ -18,10 +18,10 @@ import (
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1LakehouseStorageConfig struct {
 	CatalogConnectionUrl string `json:"catalogConnectionUrl"`
 	// todo: maybe we need to support mount secrets as the catalog credentials?
-	CatalogCredentials string  `json:"catalogCredentials"`
-	CatalogType        *string `json:"catalogType,omitempty"`
-	CatalogWarehouse   string  `json:"catalogWarehouse"`
-	LakehouseType      *string `json:"lakehouseType,omitempty"`
+	CatalogCredentials string `json:"catalogCredentials"`
+	CatalogType *string `json:"catalogType,omitempty"`
+	CatalogWarehouse string `json:"catalogWarehouse"`
+	LakehouseType *string `json:"lakehouseType,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1LakehouseStorageConfig instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1LakehouseStorageConfig object
@@ -235,3 +235,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Lakehous
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

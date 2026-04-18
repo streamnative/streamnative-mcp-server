@@ -19,7 +19,7 @@ type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemberMonitoring
 	// Project is the Google project containing UO components.
 	Project string `json:"project"`
 	// VMTenant identifies the VM tenant to use (accountID or accountID:projectID).
-	VmTenant         string                                                                 `json:"vmTenant"`
+	VmTenant string `json:"vmTenant"`
 	VmagentSecretRef ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1SecretReference `json:"vmagentSecretRef"`
 	// VMinsertBackendServiceName identifies the backend service for vminsert.
 	VminsertBackendServiceName string `json:"vminsertBackendServiceName"`
@@ -194,3 +194,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemb
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

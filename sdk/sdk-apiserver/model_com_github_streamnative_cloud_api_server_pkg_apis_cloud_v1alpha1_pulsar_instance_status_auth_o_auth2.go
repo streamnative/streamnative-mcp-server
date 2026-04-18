@@ -16,7 +16,7 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarInstanceStatusAuthOAuth2 struct for ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarInstanceStatusAuthOAuth2
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarInstanceStatusAuthOAuth2 struct {
-	Audience  string `json:"audience"`
+	Audience string `json:"audience"`
 	IssuerURL string `json:"issuerURL"`
 }
 
@@ -133,3 +133,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarIn
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

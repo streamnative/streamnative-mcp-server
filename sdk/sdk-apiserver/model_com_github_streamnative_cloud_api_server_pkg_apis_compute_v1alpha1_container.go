@@ -27,14 +27,14 @@ type ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Container struct {
 	// Docker image name.
 	Image *string `json:"image,omitempty"`
 	// Image pull policy.  Possible enum values:  - `\"Always\"` means that kubelet always attempts to pull the latest image. Container will fail If the pull fails.  - `\"IfNotPresent\"` means that kubelet pulls if the image isn't present on disk. Container will fail if the image isn't present and the pull fails.  - `\"Never\"` means that kubelet never pulls an image, but only uses a local image. Container will fail if the image isn't present
-	ImagePullPolicy *string  `json:"imagePullPolicy,omitempty"`
-	LivenessProbe   *V1Probe `json:"livenessProbe,omitempty"`
+	ImagePullPolicy *string `json:"imagePullPolicy,omitempty"`
+	LivenessProbe *V1Probe `json:"livenessProbe,omitempty"`
 	// Name of the container specified as a DNS_LABEL. Each container in a pod must have a unique name (DNS_LABEL).
-	Name            string                                                                    `json:"name"`
-	ReadinessProbe  *V1Probe                                                                  `json:"readinessProbe,omitempty"`
-	Resources       *V1ResourceRequirements                                                   `json:"resources,omitempty"`
+	Name string `json:"name"`
+	ReadinessProbe *V1Probe `json:"readinessProbe,omitempty"`
+	Resources *V1ResourceRequirements `json:"resources,omitempty"`
 	SecurityContext *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1SecurityContext `json:"securityContext,omitempty"`
-	StartupProbe    *V1Probe                                                                  `json:"startupProbe,omitempty"`
+	StartupProbe *V1Probe `json:"startupProbe,omitempty"`
 	// Pod volumes to mount into the container's filesystem.
 	VolumeMounts []V1VolumeMount `json:"volumeMounts,omitempty"`
 	// Container's working directory.
@@ -581,3 +581,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Contai
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

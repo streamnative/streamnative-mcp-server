@@ -18,7 +18,7 @@ import (
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RBACStatus struct {
 	FailedClusterRoles []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1FailedClusterRole `json:"failedClusterRoles,omitempty"`
 	FailedRoleBindings []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1FailedRoleBinding `json:"failedRoleBindings,omitempty"`
-	FailedRoles        []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1FailedRole        `json:"failedRoles,omitempty"`
+	FailedRoles []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1FailedRole `json:"failedRoles,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RBACStatus instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RBACStatus object
@@ -183,3 +183,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RBACStat
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

@@ -16,7 +16,7 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscriptionSpec AWSSubscriptionSpec defines the desired state of AWSSubscription
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubscriptionSpec struct {
-	CustomerID  *string `json:"customerID,omitempty"`
+	CustomerID *string `json:"customerID,omitempty"`
 	ProductCode *string `json:"productCode,omitempty"`
 }
 
@@ -147,3 +147,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2AWSSubsc
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

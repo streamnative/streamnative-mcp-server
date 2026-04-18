@@ -18,11 +18,12 @@ import (
 	"net/url"
 )
 
+
 // ComputeStreamnativeIoApiService ComputeStreamnativeIoApi service
 type ComputeStreamnativeIoApiService service
 
 type ApiGetComputeStreamnativeIoAPIGroupRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *ComputeStreamnativeIoApiService
 }
 
@@ -35,25 +36,24 @@ GetComputeStreamnativeIoAPIGroup Method for GetComputeStreamnativeIoAPIGroup
 
 get information of a group
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiGetComputeStreamnativeIoAPIGroupRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiGetComputeStreamnativeIoAPIGroupRequest
 */
 func (a *ComputeStreamnativeIoApiService) GetComputeStreamnativeIoAPIGroup(ctx context.Context) ApiGetComputeStreamnativeIoAPIGroupRequest {
 	return ApiGetComputeStreamnativeIoAPIGroupRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1APIGroup
+//  @return V1APIGroup
 func (a *ComputeStreamnativeIoApiService) GetComputeStreamnativeIoAPIGroupExecute(r ApiGetComputeStreamnativeIoAPIGroupRequest) (*V1APIGroup, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1APIGroup
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1APIGroup
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ComputeStreamnativeIoApiService.GetComputeStreamnativeIoAPIGroup")

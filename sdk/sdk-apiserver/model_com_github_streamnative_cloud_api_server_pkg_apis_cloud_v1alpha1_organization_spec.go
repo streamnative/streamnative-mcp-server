@@ -16,24 +16,24 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1OrganizationSpec OrganizationSpec defines the desired state of Organization
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1OrganizationSpec struct {
-	AwsMarketplaceToken *string                                                                    `json:"awsMarketplaceToken,omitempty"`
-	BillingAccount      *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1BillingAccountSpec `json:"billingAccount,omitempty"`
+	AwsMarketplaceToken *string `json:"awsMarketplaceToken,omitempty"`
+	BillingAccount *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1BillingAccountSpec `json:"billingAccount,omitempty"`
 	// Organiztion ID of this org's billing parent.  Once set, this org will inherit parent org's subscription, paymentMetthod and have \"inherited\" as billing type
 	BillingParent *string `json:"billingParent,omitempty"`
 	// BillingType indicates the method of subscription that the organization uses. It is primarily consumed by the cloud-manager to be able to distinguish between invoiced subscriptions.
 	BillingType *string `json:"billingType,omitempty"`
 	// CloudFeature indicates features this org wants to enable/disable
-	CloudFeature   *map[string]bool                                                `json:"cloudFeature,omitempty"`
+	CloudFeature *map[string]bool `json:"cloudFeature,omitempty"`
 	DefaultPoolRef *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolRef `json:"defaultPoolRef,omitempty"`
 	// Name to display to our users
-	DisplayName *string                                                                        `json:"displayName,omitempty"`
-	Domains     []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Domain                `json:"domains,omitempty"`
-	Gcloud      *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1GCloudOrganizationSpec `json:"gcloud,omitempty"`
+	DisplayName *string `json:"displayName,omitempty"`
+	Domains []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Domain `json:"domains,omitempty"`
+	Gcloud *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1GCloudOrganizationSpec `json:"gcloud,omitempty"`
 	// Metadata is user-visible (and possibly editable) metadata.
-	Metadata *map[string]string                                                         `json:"metadata,omitempty"`
-	Stripe   *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1OrganizationStripe `json:"stripe,omitempty"`
-	Suger    *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1OrganizationSuger  `json:"suger,omitempty"`
-	Type     *string                                                                    `json:"type,omitempty"`
+	Metadata *map[string]string `json:"metadata,omitempty"`
+	Stripe *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1OrganizationStripe `json:"stripe,omitempty"`
+	Suger *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1OrganizationSuger `json:"suger,omitempty"`
+	Type *string `json:"type,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1OrganizationSpec instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1OrganizationSpec object
@@ -548,3 +548,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Organiza
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

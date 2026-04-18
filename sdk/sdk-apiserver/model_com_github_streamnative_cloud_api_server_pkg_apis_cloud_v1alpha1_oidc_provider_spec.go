@@ -16,7 +16,7 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1OIDCProviderSpec OIDCProviderSpec defines the desired state of OIDCProvider
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1OIDCProviderSpec struct {
-	Description  string `json:"description"`
+	Description string `json:"description"`
 	DiscoveryUrl string `json:"discoveryUrl"`
 }
 
@@ -133,3 +133,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1OIDCProv
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

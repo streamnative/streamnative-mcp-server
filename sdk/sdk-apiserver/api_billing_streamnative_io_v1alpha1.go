@@ -19,17 +19,18 @@ import (
 	"strings"
 )
 
+
 // BillingStreamnativeIoV1alpha1ApiService BillingStreamnativeIoV1alpha1Api service
 type BillingStreamnativeIoV1alpha1ApiService service
 
 type ApiCreateBillingStreamnativeIoV1alpha1NamespacedCustomerPortalRequestRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	namespace    string
-	body         *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1CustomerPortalRequest
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	namespace string
+	body *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1CustomerPortalRequest
+	dryRun *string
 	fieldManager *string
-	pretty       *string
+	pretty *string
 }
 
 func (r ApiCreateBillingStreamnativeIoV1alpha1NamespacedCustomerPortalRequestRequest) Body(body ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1CustomerPortalRequest) ApiCreateBillingStreamnativeIoV1alpha1NamespacedCustomerPortalRequestRequest {
@@ -64,27 +65,26 @@ CreateBillingStreamnativeIoV1alpha1NamespacedCustomerPortalRequest Method for Cr
 
 create a CustomerPortalRequest
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiCreateBillingStreamnativeIoV1alpha1NamespacedCustomerPortalRequestRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiCreateBillingStreamnativeIoV1alpha1NamespacedCustomerPortalRequestRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1alpha1NamespacedCustomerPortalRequest(ctx context.Context, namespace string) ApiCreateBillingStreamnativeIoV1alpha1NamespacedCustomerPortalRequestRequest {
 	return ApiCreateBillingStreamnativeIoV1alpha1NamespacedCustomerPortalRequestRequest{
 		ApiService: a,
-		ctx:        ctx,
-		namespace:  namespace,
+		ctx: ctx,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1CustomerPortalRequest
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1CustomerPortalRequest
 func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1alpha1NamespacedCustomerPortalRequestExecute(r ApiCreateBillingStreamnativeIoV1alpha1NamespacedCustomerPortalRequestRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1CustomerPortalRequest, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1CustomerPortalRequest
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1CustomerPortalRequest
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.CreateBillingStreamnativeIoV1alpha1NamespacedCustomerPortalRequest")
@@ -168,12 +168,12 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1a
 }
 
 type ApiCreateBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	namespace    string
-	body         *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	namespace string
+	body *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
+	pretty *string
+	dryRun *string
 	fieldManager *string
 }
 
@@ -209,27 +209,26 @@ CreateBillingStreamnativeIoV1alpha1NamespacedPaymentIntent Method for CreateBill
 
 create a PaymentIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiCreateBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiCreateBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1alpha1NamespacedPaymentIntent(ctx context.Context, namespace string) ApiCreateBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest {
 	return ApiCreateBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest{
 		ApiService: a,
-		ctx:        ctx,
-		namespace:  namespace,
+		ctx: ctx,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
 func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1alpha1NamespacedPaymentIntentExecute(r ApiCreateBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.CreateBillingStreamnativeIoV1alpha1NamespacedPaymentIntent")
@@ -313,13 +312,13 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1a
 }
 
 type ApiCreateBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	namespace    string
-	body         *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	body *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
+	pretty *string
+	dryRun *string
 	fieldManager *string
 }
 
@@ -355,29 +354,28 @@ CreateBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatus Method for Crea
 
 create status of a PaymentIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the PaymentIntent
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiCreateBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the PaymentIntent
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiCreateBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatus(ctx context.Context, name string, namespace string) ApiCreateBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest {
 	return ApiCreateBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
 func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusExecute(r ApiCreateBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.CreateBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatus")
@@ -462,12 +460,12 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1a
 }
 
 type ApiCreateBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	namespace    string
-	body         *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	namespace string
+	body *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
+	pretty *string
+	dryRun *string
 	fieldManager *string
 }
 
@@ -503,27 +501,26 @@ CreateBillingStreamnativeIoV1alpha1NamespacedPrivateOffer Method for CreateBilli
 
 create a PrivateOffer
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiCreateBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiCreateBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1alpha1NamespacedPrivateOffer(ctx context.Context, namespace string) ApiCreateBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest {
 	return ApiCreateBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest{
 		ApiService: a,
-		ctx:        ctx,
-		namespace:  namespace,
+		ctx: ctx,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
 func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1alpha1NamespacedPrivateOfferExecute(r ApiCreateBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.CreateBillingStreamnativeIoV1alpha1NamespacedPrivateOffer")
@@ -607,13 +604,13 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1a
 }
 
 type ApiCreateBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	namespace    string
-	body         *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	body *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
+	pretty *string
+	dryRun *string
 	fieldManager *string
 }
 
@@ -649,29 +646,28 @@ CreateBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatus Method for Creat
 
 create status of a PrivateOffer
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the PrivateOffer
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiCreateBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the PrivateOffer
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiCreateBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatus(ctx context.Context, name string, namespace string) ApiCreateBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest {
 	return ApiCreateBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
 func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusExecute(r ApiCreateBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.CreateBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatus")
@@ -756,12 +752,12 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1a
 }
 
 type ApiCreateBillingStreamnativeIoV1alpha1NamespacedProductRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	namespace    string
-	body         *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	namespace string
+	body *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
+	pretty *string
+	dryRun *string
 	fieldManager *string
 }
 
@@ -797,27 +793,26 @@ CreateBillingStreamnativeIoV1alpha1NamespacedProduct Method for CreateBillingStr
 
 create a Product
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiCreateBillingStreamnativeIoV1alpha1NamespacedProductRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiCreateBillingStreamnativeIoV1alpha1NamespacedProductRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1alpha1NamespacedProduct(ctx context.Context, namespace string) ApiCreateBillingStreamnativeIoV1alpha1NamespacedProductRequest {
 	return ApiCreateBillingStreamnativeIoV1alpha1NamespacedProductRequest{
 		ApiService: a,
-		ctx:        ctx,
-		namespace:  namespace,
+		ctx: ctx,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
 func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1alpha1NamespacedProductExecute(r ApiCreateBillingStreamnativeIoV1alpha1NamespacedProductRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.CreateBillingStreamnativeIoV1alpha1NamespacedProduct")
@@ -901,13 +896,13 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1a
 }
 
 type ApiCreateBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	namespace    string
-	body         *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	body *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
+	pretty *string
+	dryRun *string
 	fieldManager *string
 }
 
@@ -943,29 +938,28 @@ CreateBillingStreamnativeIoV1alpha1NamespacedProductStatus Method for CreateBill
 
 create status of a Product
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the Product
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiCreateBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the Product
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiCreateBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1alpha1NamespacedProductStatus(ctx context.Context, name string, namespace string) ApiCreateBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest {
 	return ApiCreateBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
 func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1alpha1NamespacedProductStatusExecute(r ApiCreateBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.CreateBillingStreamnativeIoV1alpha1NamespacedProductStatus")
@@ -1050,12 +1044,12 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1a
 }
 
 type ApiCreateBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	namespace    string
-	body         *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	namespace string
+	body *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
+	pretty *string
+	dryRun *string
 	fieldManager *string
 }
 
@@ -1091,27 +1085,26 @@ CreateBillingStreamnativeIoV1alpha1NamespacedSetupIntent Method for CreateBillin
 
 create a SetupIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiCreateBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiCreateBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1alpha1NamespacedSetupIntent(ctx context.Context, namespace string) ApiCreateBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest {
 	return ApiCreateBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest{
 		ApiService: a,
-		ctx:        ctx,
-		namespace:  namespace,
+		ctx: ctx,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
 func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1alpha1NamespacedSetupIntentExecute(r ApiCreateBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.CreateBillingStreamnativeIoV1alpha1NamespacedSetupIntent")
@@ -1195,13 +1188,13 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1a
 }
 
 type ApiCreateBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	namespace    string
-	body         *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	body *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
+	pretty *string
+	dryRun *string
 	fieldManager *string
 }
 
@@ -1237,29 +1230,28 @@ CreateBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatus Method for Create
 
 create status of a SetupIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the SetupIntent
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiCreateBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the SetupIntent
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiCreateBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatus(ctx context.Context, name string, namespace string) ApiCreateBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest {
 	return ApiCreateBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
 func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusExecute(r ApiCreateBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.CreateBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatus")
@@ -1344,12 +1336,12 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1a
 }
 
 type ApiCreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	namespace    string
-	body         *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	namespace string
+	body *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
+	pretty *string
+	dryRun *string
 	fieldManager *string
 }
 
@@ -1385,27 +1377,26 @@ CreateBillingStreamnativeIoV1alpha1NamespacedSubscription Method for CreateBilli
 
 create a Subscription
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiCreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiCreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1alpha1NamespacedSubscription(ctx context.Context, namespace string) ApiCreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest {
 	return ApiCreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest{
 		ApiService: a,
-		ctx:        ctx,
-		namespace:  namespace,
+		ctx: ctx,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
 func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionExecute(r ApiCreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.CreateBillingStreamnativeIoV1alpha1NamespacedSubscription")
@@ -1489,12 +1480,12 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1a
 }
 
 type ApiCreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	namespace    string
-	body         *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	namespace string
+	body *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
+	pretty *string
+	dryRun *string
 	fieldManager *string
 }
 
@@ -1530,27 +1521,26 @@ CreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntent Method for Creat
 
 create a SubscriptionIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiCreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiCreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntent(ctx context.Context, namespace string) ApiCreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest {
 	return ApiCreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest{
 		ApiService: a,
-		ctx:        ctx,
-		namespace:  namespace,
+		ctx: ctx,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
 func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentExecute(r ApiCreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.CreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntent")
@@ -1634,13 +1624,13 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1a
 }
 
 type ApiCreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	namespace    string
-	body         *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	body *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
+	pretty *string
+	dryRun *string
 	fieldManager *string
 }
 
@@ -1676,29 +1666,28 @@ CreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatus Method for
 
 create status of a SubscriptionIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the SubscriptionIntent
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiCreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the SubscriptionIntent
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiCreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatus(ctx context.Context, name string, namespace string) ApiCreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest {
 	return ApiCreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
 func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusExecute(r ApiCreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.CreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatus")
@@ -1783,13 +1772,13 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1a
 }
 
 type ApiCreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	namespace    string
-	body         *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	body *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
+	pretty *string
+	dryRun *string
 	fieldManager *string
 }
 
@@ -1825,29 +1814,28 @@ CreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatus Method for Creat
 
 create status of a Subscription
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the Subscription
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiCreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the Subscription
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiCreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatus(ctx context.Context, name string, namespace string) ApiCreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest {
 	return ApiCreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
 func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusExecute(r ApiCreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.CreateBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatus")
@@ -1932,11 +1920,11 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1a
 }
 
 type ApiCreateBillingStreamnativeIoV1alpha1PublicOfferRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	body         *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	body *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
+	pretty *string
+	dryRun *string
 	fieldManager *string
 }
 
@@ -1972,25 +1960,24 @@ CreateBillingStreamnativeIoV1alpha1PublicOffer Method for CreateBillingStreamnat
 
 create a PublicOffer
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiCreateBillingStreamnativeIoV1alpha1PublicOfferRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiCreateBillingStreamnativeIoV1alpha1PublicOfferRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1alpha1PublicOffer(ctx context.Context) ApiCreateBillingStreamnativeIoV1alpha1PublicOfferRequest {
 	return ApiCreateBillingStreamnativeIoV1alpha1PublicOfferRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
 func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1alpha1PublicOfferExecute(r ApiCreateBillingStreamnativeIoV1alpha1PublicOfferRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.CreateBillingStreamnativeIoV1alpha1PublicOffer")
@@ -2073,12 +2060,12 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1a
 }
 
 type ApiCreateBillingStreamnativeIoV1alpha1PublicOfferStatusRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	body         *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	body *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
+	pretty *string
+	dryRun *string
 	fieldManager *string
 }
 
@@ -2114,27 +2101,26 @@ CreateBillingStreamnativeIoV1alpha1PublicOfferStatus Method for CreateBillingStr
 
 create status of a PublicOffer
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the PublicOffer
-	@return ApiCreateBillingStreamnativeIoV1alpha1PublicOfferStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the PublicOffer
+ @return ApiCreateBillingStreamnativeIoV1alpha1PublicOfferStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1alpha1PublicOfferStatus(ctx context.Context, name string) ApiCreateBillingStreamnativeIoV1alpha1PublicOfferStatusRequest {
 	return ApiCreateBillingStreamnativeIoV1alpha1PublicOfferStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
+		ctx: ctx,
+		name: name,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
 func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1alpha1PublicOfferStatusExecute(r ApiCreateBillingStreamnativeIoV1alpha1PublicOfferStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.CreateBillingStreamnativeIoV1alpha1PublicOfferStatus")
@@ -2218,12 +2204,12 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1a
 }
 
 type ApiCreateBillingStreamnativeIoV1alpha1SugerEntitlementReviewRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	body         *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SugerEntitlementReview
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	body *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SugerEntitlementReview
+	dryRun *string
 	fieldManager *string
-	pretty       *string
+	pretty *string
 }
 
 func (r ApiCreateBillingStreamnativeIoV1alpha1SugerEntitlementReviewRequest) Body(body ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SugerEntitlementReview) ApiCreateBillingStreamnativeIoV1alpha1SugerEntitlementReviewRequest {
@@ -2258,25 +2244,24 @@ CreateBillingStreamnativeIoV1alpha1SugerEntitlementReview Method for CreateBilli
 
 create a SugerEntitlementReview
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiCreateBillingStreamnativeIoV1alpha1SugerEntitlementReviewRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiCreateBillingStreamnativeIoV1alpha1SugerEntitlementReviewRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1alpha1SugerEntitlementReview(ctx context.Context) ApiCreateBillingStreamnativeIoV1alpha1SugerEntitlementReviewRequest {
 	return ApiCreateBillingStreamnativeIoV1alpha1SugerEntitlementReviewRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SugerEntitlementReview
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SugerEntitlementReview
 func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1alpha1SugerEntitlementReviewExecute(r ApiCreateBillingStreamnativeIoV1alpha1SugerEntitlementReviewRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SugerEntitlementReview, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SugerEntitlementReview
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SugerEntitlementReview
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.CreateBillingStreamnativeIoV1alpha1SugerEntitlementReview")
@@ -2359,11 +2344,11 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1a
 }
 
 type ApiCreateBillingStreamnativeIoV1alpha1TestClockRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	body         *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	body *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
+	pretty *string
+	dryRun *string
 	fieldManager *string
 }
 
@@ -2399,25 +2384,24 @@ CreateBillingStreamnativeIoV1alpha1TestClock Method for CreateBillingStreamnativ
 
 create a TestClock
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiCreateBillingStreamnativeIoV1alpha1TestClockRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiCreateBillingStreamnativeIoV1alpha1TestClockRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1alpha1TestClock(ctx context.Context) ApiCreateBillingStreamnativeIoV1alpha1TestClockRequest {
 	return ApiCreateBillingStreamnativeIoV1alpha1TestClockRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
 func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1alpha1TestClockExecute(r ApiCreateBillingStreamnativeIoV1alpha1TestClockRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.CreateBillingStreamnativeIoV1alpha1TestClock")
@@ -2500,12 +2484,12 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1a
 }
 
 type ApiCreateBillingStreamnativeIoV1alpha1TestClockStatusRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	body         *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	body *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
+	pretty *string
+	dryRun *string
 	fieldManager *string
 }
 
@@ -2541,27 +2525,26 @@ CreateBillingStreamnativeIoV1alpha1TestClockStatus Method for CreateBillingStrea
 
 create status of a TestClock
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the TestClock
-	@return ApiCreateBillingStreamnativeIoV1alpha1TestClockStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the TestClock
+ @return ApiCreateBillingStreamnativeIoV1alpha1TestClockStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1alpha1TestClockStatus(ctx context.Context, name string) ApiCreateBillingStreamnativeIoV1alpha1TestClockStatusRequest {
 	return ApiCreateBillingStreamnativeIoV1alpha1TestClockStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
+		ctx: ctx,
+		name: name,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
 func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1alpha1TestClockStatusExecute(r ApiCreateBillingStreamnativeIoV1alpha1TestClockStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.CreateBillingStreamnativeIoV1alpha1TestClockStatus")
@@ -2645,22 +2628,22 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) CreateBillingStreamnativeIoV1a
 }
 
 type ApiDeleteBillingStreamnativeIoV1alpha1CollectionNamespacedPaymentIntentRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	namespace            string
-	pretty               *string
-	continue_            *string
-	dryRun               *string
-	fieldSelector        *string
-	gracePeriodSeconds   *int32
-	labelSelector        *string
-	limit                *int32
-	orphanDependents     *bool
-	propagationPolicy    *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	namespace string
+	pretty *string
+	continue_ *string
+	dryRun *string
+	fieldSelector *string
+	gracePeriodSeconds *int32
+	labelSelector *string
+	limit *int32
+	orphanDependents *bool
+	propagationPolicy *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	body                 *V1DeleteOptions
+	timeoutSeconds *int32
+	body *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -2749,27 +2732,26 @@ DeleteBillingStreamnativeIoV1alpha1CollectionNamespacedPaymentIntent Method for 
 
 delete collection of PaymentIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiDeleteBillingStreamnativeIoV1alpha1CollectionNamespacedPaymentIntentRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiDeleteBillingStreamnativeIoV1alpha1CollectionNamespacedPaymentIntentRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1CollectionNamespacedPaymentIntent(ctx context.Context, namespace string) ApiDeleteBillingStreamnativeIoV1alpha1CollectionNamespacedPaymentIntentRequest {
 	return ApiDeleteBillingStreamnativeIoV1alpha1CollectionNamespacedPaymentIntentRequest{
 		ApiService: a,
-		ctx:        ctx,
-		namespace:  namespace,
+		ctx: ctx,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1Status
+//  @return V1Status
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1CollectionNamespacedPaymentIntentExecute(r ApiDeleteBillingStreamnativeIoV1alpha1CollectionNamespacedPaymentIntentRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodDelete
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1Status
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.DeleteBillingStreamnativeIoV1alpha1CollectionNamespacedPaymentIntent")
@@ -2877,22 +2859,22 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1a
 }
 
 type ApiDeleteBillingStreamnativeIoV1alpha1CollectionNamespacedPrivateOfferRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	namespace            string
-	pretty               *string
-	continue_            *string
-	dryRun               *string
-	fieldSelector        *string
-	gracePeriodSeconds   *int32
-	labelSelector        *string
-	limit                *int32
-	orphanDependents     *bool
-	propagationPolicy    *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	namespace string
+	pretty *string
+	continue_ *string
+	dryRun *string
+	fieldSelector *string
+	gracePeriodSeconds *int32
+	labelSelector *string
+	limit *int32
+	orphanDependents *bool
+	propagationPolicy *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	body                 *V1DeleteOptions
+	timeoutSeconds *int32
+	body *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -2981,27 +2963,26 @@ DeleteBillingStreamnativeIoV1alpha1CollectionNamespacedPrivateOffer Method for D
 
 delete collection of PrivateOffer
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiDeleteBillingStreamnativeIoV1alpha1CollectionNamespacedPrivateOfferRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiDeleteBillingStreamnativeIoV1alpha1CollectionNamespacedPrivateOfferRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1CollectionNamespacedPrivateOffer(ctx context.Context, namespace string) ApiDeleteBillingStreamnativeIoV1alpha1CollectionNamespacedPrivateOfferRequest {
 	return ApiDeleteBillingStreamnativeIoV1alpha1CollectionNamespacedPrivateOfferRequest{
 		ApiService: a,
-		ctx:        ctx,
-		namespace:  namespace,
+		ctx: ctx,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1Status
+//  @return V1Status
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1CollectionNamespacedPrivateOfferExecute(r ApiDeleteBillingStreamnativeIoV1alpha1CollectionNamespacedPrivateOfferRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodDelete
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1Status
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.DeleteBillingStreamnativeIoV1alpha1CollectionNamespacedPrivateOffer")
@@ -3109,22 +3090,22 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1a
 }
 
 type ApiDeleteBillingStreamnativeIoV1alpha1CollectionNamespacedProductRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	namespace            string
-	pretty               *string
-	continue_            *string
-	dryRun               *string
-	fieldSelector        *string
-	gracePeriodSeconds   *int32
-	labelSelector        *string
-	limit                *int32
-	orphanDependents     *bool
-	propagationPolicy    *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	namespace string
+	pretty *string
+	continue_ *string
+	dryRun *string
+	fieldSelector *string
+	gracePeriodSeconds *int32
+	labelSelector *string
+	limit *int32
+	orphanDependents *bool
+	propagationPolicy *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	body                 *V1DeleteOptions
+	timeoutSeconds *int32
+	body *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -3213,27 +3194,26 @@ DeleteBillingStreamnativeIoV1alpha1CollectionNamespacedProduct Method for Delete
 
 delete collection of Product
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiDeleteBillingStreamnativeIoV1alpha1CollectionNamespacedProductRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiDeleteBillingStreamnativeIoV1alpha1CollectionNamespacedProductRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1CollectionNamespacedProduct(ctx context.Context, namespace string) ApiDeleteBillingStreamnativeIoV1alpha1CollectionNamespacedProductRequest {
 	return ApiDeleteBillingStreamnativeIoV1alpha1CollectionNamespacedProductRequest{
 		ApiService: a,
-		ctx:        ctx,
-		namespace:  namespace,
+		ctx: ctx,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1Status
+//  @return V1Status
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1CollectionNamespacedProductExecute(r ApiDeleteBillingStreamnativeIoV1alpha1CollectionNamespacedProductRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodDelete
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1Status
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.DeleteBillingStreamnativeIoV1alpha1CollectionNamespacedProduct")
@@ -3341,22 +3321,22 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1a
 }
 
 type ApiDeleteBillingStreamnativeIoV1alpha1CollectionNamespacedSetupIntentRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	namespace            string
-	pretty               *string
-	continue_            *string
-	dryRun               *string
-	fieldSelector        *string
-	gracePeriodSeconds   *int32
-	labelSelector        *string
-	limit                *int32
-	orphanDependents     *bool
-	propagationPolicy    *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	namespace string
+	pretty *string
+	continue_ *string
+	dryRun *string
+	fieldSelector *string
+	gracePeriodSeconds *int32
+	labelSelector *string
+	limit *int32
+	orphanDependents *bool
+	propagationPolicy *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	body                 *V1DeleteOptions
+	timeoutSeconds *int32
+	body *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -3445,27 +3425,26 @@ DeleteBillingStreamnativeIoV1alpha1CollectionNamespacedSetupIntent Method for De
 
 delete collection of SetupIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiDeleteBillingStreamnativeIoV1alpha1CollectionNamespacedSetupIntentRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiDeleteBillingStreamnativeIoV1alpha1CollectionNamespacedSetupIntentRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1CollectionNamespacedSetupIntent(ctx context.Context, namespace string) ApiDeleteBillingStreamnativeIoV1alpha1CollectionNamespacedSetupIntentRequest {
 	return ApiDeleteBillingStreamnativeIoV1alpha1CollectionNamespacedSetupIntentRequest{
 		ApiService: a,
-		ctx:        ctx,
-		namespace:  namespace,
+		ctx: ctx,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1Status
+//  @return V1Status
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1CollectionNamespacedSetupIntentExecute(r ApiDeleteBillingStreamnativeIoV1alpha1CollectionNamespacedSetupIntentRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodDelete
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1Status
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.DeleteBillingStreamnativeIoV1alpha1CollectionNamespacedSetupIntent")
@@ -3573,22 +3552,22 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1a
 }
 
 type ApiDeleteBillingStreamnativeIoV1alpha1CollectionNamespacedSubscriptionRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	namespace            string
-	pretty               *string
-	continue_            *string
-	dryRun               *string
-	fieldSelector        *string
-	gracePeriodSeconds   *int32
-	labelSelector        *string
-	limit                *int32
-	orphanDependents     *bool
-	propagationPolicy    *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	namespace string
+	pretty *string
+	continue_ *string
+	dryRun *string
+	fieldSelector *string
+	gracePeriodSeconds *int32
+	labelSelector *string
+	limit *int32
+	orphanDependents *bool
+	propagationPolicy *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	body                 *V1DeleteOptions
+	timeoutSeconds *int32
+	body *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -3677,27 +3656,26 @@ DeleteBillingStreamnativeIoV1alpha1CollectionNamespacedSubscription Method for D
 
 delete collection of Subscription
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiDeleteBillingStreamnativeIoV1alpha1CollectionNamespacedSubscriptionRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiDeleteBillingStreamnativeIoV1alpha1CollectionNamespacedSubscriptionRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1CollectionNamespacedSubscription(ctx context.Context, namespace string) ApiDeleteBillingStreamnativeIoV1alpha1CollectionNamespacedSubscriptionRequest {
 	return ApiDeleteBillingStreamnativeIoV1alpha1CollectionNamespacedSubscriptionRequest{
 		ApiService: a,
-		ctx:        ctx,
-		namespace:  namespace,
+		ctx: ctx,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1Status
+//  @return V1Status
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1CollectionNamespacedSubscriptionExecute(r ApiDeleteBillingStreamnativeIoV1alpha1CollectionNamespacedSubscriptionRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodDelete
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1Status
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.DeleteBillingStreamnativeIoV1alpha1CollectionNamespacedSubscription")
@@ -3805,22 +3783,22 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1a
 }
 
 type ApiDeleteBillingStreamnativeIoV1alpha1CollectionNamespacedSubscriptionIntentRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	namespace            string
-	pretty               *string
-	continue_            *string
-	dryRun               *string
-	fieldSelector        *string
-	gracePeriodSeconds   *int32
-	labelSelector        *string
-	limit                *int32
-	orphanDependents     *bool
-	propagationPolicy    *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	namespace string
+	pretty *string
+	continue_ *string
+	dryRun *string
+	fieldSelector *string
+	gracePeriodSeconds *int32
+	labelSelector *string
+	limit *int32
+	orphanDependents *bool
+	propagationPolicy *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	body                 *V1DeleteOptions
+	timeoutSeconds *int32
+	body *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -3909,27 +3887,26 @@ DeleteBillingStreamnativeIoV1alpha1CollectionNamespacedSubscriptionIntent Method
 
 delete collection of SubscriptionIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiDeleteBillingStreamnativeIoV1alpha1CollectionNamespacedSubscriptionIntentRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiDeleteBillingStreamnativeIoV1alpha1CollectionNamespacedSubscriptionIntentRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1CollectionNamespacedSubscriptionIntent(ctx context.Context, namespace string) ApiDeleteBillingStreamnativeIoV1alpha1CollectionNamespacedSubscriptionIntentRequest {
 	return ApiDeleteBillingStreamnativeIoV1alpha1CollectionNamespacedSubscriptionIntentRequest{
 		ApiService: a,
-		ctx:        ctx,
-		namespace:  namespace,
+		ctx: ctx,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1Status
+//  @return V1Status
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1CollectionNamespacedSubscriptionIntentExecute(r ApiDeleteBillingStreamnativeIoV1alpha1CollectionNamespacedSubscriptionIntentRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodDelete
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1Status
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.DeleteBillingStreamnativeIoV1alpha1CollectionNamespacedSubscriptionIntent")
@@ -4037,21 +4014,21 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1a
 }
 
 type ApiDeleteBillingStreamnativeIoV1alpha1CollectionPublicOfferRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	pretty               *string
-	continue_            *string
-	dryRun               *string
-	fieldSelector        *string
-	gracePeriodSeconds   *int32
-	labelSelector        *string
-	limit                *int32
-	orphanDependents     *bool
-	propagationPolicy    *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	pretty *string
+	continue_ *string
+	dryRun *string
+	fieldSelector *string
+	gracePeriodSeconds *int32
+	labelSelector *string
+	limit *int32
+	orphanDependents *bool
+	propagationPolicy *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	body                 *V1DeleteOptions
+	timeoutSeconds *int32
+	body *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -4140,25 +4117,24 @@ DeleteBillingStreamnativeIoV1alpha1CollectionPublicOffer Method for DeleteBillin
 
 delete collection of PublicOffer
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiDeleteBillingStreamnativeIoV1alpha1CollectionPublicOfferRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiDeleteBillingStreamnativeIoV1alpha1CollectionPublicOfferRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1CollectionPublicOffer(ctx context.Context) ApiDeleteBillingStreamnativeIoV1alpha1CollectionPublicOfferRequest {
 	return ApiDeleteBillingStreamnativeIoV1alpha1CollectionPublicOfferRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1Status
+//  @return V1Status
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1CollectionPublicOfferExecute(r ApiDeleteBillingStreamnativeIoV1alpha1CollectionPublicOfferRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodDelete
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1Status
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.DeleteBillingStreamnativeIoV1alpha1CollectionPublicOffer")
@@ -4265,21 +4241,21 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1a
 }
 
 type ApiDeleteBillingStreamnativeIoV1alpha1CollectionTestClockRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	pretty               *string
-	continue_            *string
-	dryRun               *string
-	fieldSelector        *string
-	gracePeriodSeconds   *int32
-	labelSelector        *string
-	limit                *int32
-	orphanDependents     *bool
-	propagationPolicy    *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	pretty *string
+	continue_ *string
+	dryRun *string
+	fieldSelector *string
+	gracePeriodSeconds *int32
+	labelSelector *string
+	limit *int32
+	orphanDependents *bool
+	propagationPolicy *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	body                 *V1DeleteOptions
+	timeoutSeconds *int32
+	body *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -4368,25 +4344,24 @@ DeleteBillingStreamnativeIoV1alpha1CollectionTestClock Method for DeleteBillingS
 
 delete collection of TestClock
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiDeleteBillingStreamnativeIoV1alpha1CollectionTestClockRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiDeleteBillingStreamnativeIoV1alpha1CollectionTestClockRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1CollectionTestClock(ctx context.Context) ApiDeleteBillingStreamnativeIoV1alpha1CollectionTestClockRequest {
 	return ApiDeleteBillingStreamnativeIoV1alpha1CollectionTestClockRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1Status
+//  @return V1Status
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1CollectionTestClockExecute(r ApiDeleteBillingStreamnativeIoV1alpha1CollectionTestClockRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodDelete
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1Status
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.DeleteBillingStreamnativeIoV1alpha1CollectionTestClock")
@@ -4493,16 +4468,16 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1a
 }
 
 type ApiDeleteBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest struct {
-	ctx                context.Context
-	ApiService         *BillingStreamnativeIoV1alpha1ApiService
-	name               string
-	namespace          string
-	pretty             *string
-	dryRun             *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	pretty *string
+	dryRun *string
 	gracePeriodSeconds *int32
-	orphanDependents   *bool
-	propagationPolicy  *string
-	body               *V1DeleteOptions
+	orphanDependents *bool
+	propagationPolicy *string
+	body *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -4549,29 +4524,28 @@ DeleteBillingStreamnativeIoV1alpha1NamespacedPaymentIntent Method for DeleteBill
 
 delete a PaymentIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the PaymentIntent
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiDeleteBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the PaymentIntent
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiDeleteBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1NamespacedPaymentIntent(ctx context.Context, name string, namespace string) ApiDeleteBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest {
 	return ApiDeleteBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1Status
+//  @return V1Status
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1NamespacedPaymentIntentExecute(r ApiDeleteBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodDelete
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1Status
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.DeleteBillingStreamnativeIoV1alpha1NamespacedPaymentIntent")
@@ -4659,16 +4633,16 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1a
 }
 
 type ApiDeleteBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest struct {
-	ctx                context.Context
-	ApiService         *BillingStreamnativeIoV1alpha1ApiService
-	name               string
-	namespace          string
-	pretty             *string
-	dryRun             *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	pretty *string
+	dryRun *string
 	gracePeriodSeconds *int32
-	orphanDependents   *bool
-	propagationPolicy  *string
-	body               *V1DeleteOptions
+	orphanDependents *bool
+	propagationPolicy *string
+	body *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -4715,29 +4689,28 @@ DeleteBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatus Method for Dele
 
 delete status of a PaymentIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the PaymentIntent
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiDeleteBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the PaymentIntent
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiDeleteBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatus(ctx context.Context, name string, namespace string) ApiDeleteBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest {
 	return ApiDeleteBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1Status
+//  @return V1Status
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusExecute(r ApiDeleteBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodDelete
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1Status
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.DeleteBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatus")
@@ -4825,16 +4798,16 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1a
 }
 
 type ApiDeleteBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest struct {
-	ctx                context.Context
-	ApiService         *BillingStreamnativeIoV1alpha1ApiService
-	name               string
-	namespace          string
-	pretty             *string
-	dryRun             *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	pretty *string
+	dryRun *string
 	gracePeriodSeconds *int32
-	orphanDependents   *bool
-	propagationPolicy  *string
-	body               *V1DeleteOptions
+	orphanDependents *bool
+	propagationPolicy *string
+	body *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -4881,29 +4854,28 @@ DeleteBillingStreamnativeIoV1alpha1NamespacedPrivateOffer Method for DeleteBilli
 
 delete a PrivateOffer
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the PrivateOffer
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiDeleteBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the PrivateOffer
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiDeleteBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1NamespacedPrivateOffer(ctx context.Context, name string, namespace string) ApiDeleteBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest {
 	return ApiDeleteBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1Status
+//  @return V1Status
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1NamespacedPrivateOfferExecute(r ApiDeleteBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodDelete
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1Status
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.DeleteBillingStreamnativeIoV1alpha1NamespacedPrivateOffer")
@@ -4991,16 +4963,16 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1a
 }
 
 type ApiDeleteBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest struct {
-	ctx                context.Context
-	ApiService         *BillingStreamnativeIoV1alpha1ApiService
-	name               string
-	namespace          string
-	pretty             *string
-	dryRun             *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	pretty *string
+	dryRun *string
 	gracePeriodSeconds *int32
-	orphanDependents   *bool
-	propagationPolicy  *string
-	body               *V1DeleteOptions
+	orphanDependents *bool
+	propagationPolicy *string
+	body *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -5047,29 +5019,28 @@ DeleteBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatus Method for Delet
 
 delete status of a PrivateOffer
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the PrivateOffer
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiDeleteBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the PrivateOffer
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiDeleteBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatus(ctx context.Context, name string, namespace string) ApiDeleteBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest {
 	return ApiDeleteBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1Status
+//  @return V1Status
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusExecute(r ApiDeleteBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodDelete
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1Status
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.DeleteBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatus")
@@ -5157,16 +5128,16 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1a
 }
 
 type ApiDeleteBillingStreamnativeIoV1alpha1NamespacedProductRequest struct {
-	ctx                context.Context
-	ApiService         *BillingStreamnativeIoV1alpha1ApiService
-	name               string
-	namespace          string
-	pretty             *string
-	dryRun             *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	pretty *string
+	dryRun *string
 	gracePeriodSeconds *int32
-	orphanDependents   *bool
-	propagationPolicy  *string
-	body               *V1DeleteOptions
+	orphanDependents *bool
+	propagationPolicy *string
+	body *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -5213,29 +5184,28 @@ DeleteBillingStreamnativeIoV1alpha1NamespacedProduct Method for DeleteBillingStr
 
 delete a Product
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the Product
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiDeleteBillingStreamnativeIoV1alpha1NamespacedProductRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the Product
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiDeleteBillingStreamnativeIoV1alpha1NamespacedProductRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1NamespacedProduct(ctx context.Context, name string, namespace string) ApiDeleteBillingStreamnativeIoV1alpha1NamespacedProductRequest {
 	return ApiDeleteBillingStreamnativeIoV1alpha1NamespacedProductRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1Status
+//  @return V1Status
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1NamespacedProductExecute(r ApiDeleteBillingStreamnativeIoV1alpha1NamespacedProductRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodDelete
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1Status
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.DeleteBillingStreamnativeIoV1alpha1NamespacedProduct")
@@ -5323,16 +5293,16 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1a
 }
 
 type ApiDeleteBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest struct {
-	ctx                context.Context
-	ApiService         *BillingStreamnativeIoV1alpha1ApiService
-	name               string
-	namespace          string
-	pretty             *string
-	dryRun             *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	pretty *string
+	dryRun *string
 	gracePeriodSeconds *int32
-	orphanDependents   *bool
-	propagationPolicy  *string
-	body               *V1DeleteOptions
+	orphanDependents *bool
+	propagationPolicy *string
+	body *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -5379,29 +5349,28 @@ DeleteBillingStreamnativeIoV1alpha1NamespacedProductStatus Method for DeleteBill
 
 delete status of a Product
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the Product
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiDeleteBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the Product
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiDeleteBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1NamespacedProductStatus(ctx context.Context, name string, namespace string) ApiDeleteBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest {
 	return ApiDeleteBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1Status
+//  @return V1Status
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1NamespacedProductStatusExecute(r ApiDeleteBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodDelete
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1Status
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.DeleteBillingStreamnativeIoV1alpha1NamespacedProductStatus")
@@ -5489,16 +5458,16 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1a
 }
 
 type ApiDeleteBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest struct {
-	ctx                context.Context
-	ApiService         *BillingStreamnativeIoV1alpha1ApiService
-	name               string
-	namespace          string
-	pretty             *string
-	dryRun             *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	pretty *string
+	dryRun *string
 	gracePeriodSeconds *int32
-	orphanDependents   *bool
-	propagationPolicy  *string
-	body               *V1DeleteOptions
+	orphanDependents *bool
+	propagationPolicy *string
+	body *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -5545,29 +5514,28 @@ DeleteBillingStreamnativeIoV1alpha1NamespacedSetupIntent Method for DeleteBillin
 
 delete a SetupIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the SetupIntent
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiDeleteBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the SetupIntent
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiDeleteBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1NamespacedSetupIntent(ctx context.Context, name string, namespace string) ApiDeleteBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest {
 	return ApiDeleteBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1Status
+//  @return V1Status
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1NamespacedSetupIntentExecute(r ApiDeleteBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodDelete
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1Status
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.DeleteBillingStreamnativeIoV1alpha1NamespacedSetupIntent")
@@ -5655,16 +5623,16 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1a
 }
 
 type ApiDeleteBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest struct {
-	ctx                context.Context
-	ApiService         *BillingStreamnativeIoV1alpha1ApiService
-	name               string
-	namespace          string
-	pretty             *string
-	dryRun             *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	pretty *string
+	dryRun *string
 	gracePeriodSeconds *int32
-	orphanDependents   *bool
-	propagationPolicy  *string
-	body               *V1DeleteOptions
+	orphanDependents *bool
+	propagationPolicy *string
+	body *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -5711,29 +5679,28 @@ DeleteBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatus Method for Delete
 
 delete status of a SetupIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the SetupIntent
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiDeleteBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the SetupIntent
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiDeleteBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatus(ctx context.Context, name string, namespace string) ApiDeleteBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest {
 	return ApiDeleteBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1Status
+//  @return V1Status
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusExecute(r ApiDeleteBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodDelete
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1Status
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.DeleteBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatus")
@@ -5821,16 +5788,16 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1a
 }
 
 type ApiDeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest struct {
-	ctx                context.Context
-	ApiService         *BillingStreamnativeIoV1alpha1ApiService
-	name               string
-	namespace          string
-	pretty             *string
-	dryRun             *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	pretty *string
+	dryRun *string
 	gracePeriodSeconds *int32
-	orphanDependents   *bool
-	propagationPolicy  *string
-	body               *V1DeleteOptions
+	orphanDependents *bool
+	propagationPolicy *string
+	body *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -5877,29 +5844,28 @@ DeleteBillingStreamnativeIoV1alpha1NamespacedSubscription Method for DeleteBilli
 
 delete a Subscription
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the Subscription
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiDeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the Subscription
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiDeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1NamespacedSubscription(ctx context.Context, name string, namespace string) ApiDeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest {
 	return ApiDeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1Status
+//  @return V1Status
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionExecute(r ApiDeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodDelete
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1Status
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.DeleteBillingStreamnativeIoV1alpha1NamespacedSubscription")
@@ -5987,16 +5953,16 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1a
 }
 
 type ApiDeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest struct {
-	ctx                context.Context
-	ApiService         *BillingStreamnativeIoV1alpha1ApiService
-	name               string
-	namespace          string
-	pretty             *string
-	dryRun             *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	pretty *string
+	dryRun *string
 	gracePeriodSeconds *int32
-	orphanDependents   *bool
-	propagationPolicy  *string
-	body               *V1DeleteOptions
+	orphanDependents *bool
+	propagationPolicy *string
+	body *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -6043,29 +6009,28 @@ DeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntent Method for Delet
 
 delete a SubscriptionIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the SubscriptionIntent
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiDeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the SubscriptionIntent
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiDeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntent(ctx context.Context, name string, namespace string) ApiDeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest {
 	return ApiDeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1Status
+//  @return V1Status
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentExecute(r ApiDeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodDelete
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1Status
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.DeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntent")
@@ -6153,16 +6118,16 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1a
 }
 
 type ApiDeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest struct {
-	ctx                context.Context
-	ApiService         *BillingStreamnativeIoV1alpha1ApiService
-	name               string
-	namespace          string
-	pretty             *string
-	dryRun             *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	pretty *string
+	dryRun *string
 	gracePeriodSeconds *int32
-	orphanDependents   *bool
-	propagationPolicy  *string
-	body               *V1DeleteOptions
+	orphanDependents *bool
+	propagationPolicy *string
+	body *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -6209,29 +6174,28 @@ DeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatus Method for
 
 delete status of a SubscriptionIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the SubscriptionIntent
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiDeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the SubscriptionIntent
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiDeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatus(ctx context.Context, name string, namespace string) ApiDeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest {
 	return ApiDeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1Status
+//  @return V1Status
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusExecute(r ApiDeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodDelete
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1Status
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.DeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatus")
@@ -6319,16 +6283,16 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1a
 }
 
 type ApiDeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest struct {
-	ctx                context.Context
-	ApiService         *BillingStreamnativeIoV1alpha1ApiService
-	name               string
-	namespace          string
-	pretty             *string
-	dryRun             *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	pretty *string
+	dryRun *string
 	gracePeriodSeconds *int32
-	orphanDependents   *bool
-	propagationPolicy  *string
-	body               *V1DeleteOptions
+	orphanDependents *bool
+	propagationPolicy *string
+	body *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -6375,29 +6339,28 @@ DeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatus Method for Delet
 
 delete status of a Subscription
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the Subscription
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiDeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the Subscription
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiDeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatus(ctx context.Context, name string, namespace string) ApiDeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest {
 	return ApiDeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1Status
+//  @return V1Status
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusExecute(r ApiDeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodDelete
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1Status
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.DeleteBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatus")
@@ -6485,15 +6448,15 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1a
 }
 
 type ApiDeleteBillingStreamnativeIoV1alpha1PublicOfferRequest struct {
-	ctx                context.Context
-	ApiService         *BillingStreamnativeIoV1alpha1ApiService
-	name               string
-	pretty             *string
-	dryRun             *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	pretty *string
+	dryRun *string
 	gracePeriodSeconds *int32
-	orphanDependents   *bool
-	propagationPolicy  *string
-	body               *V1DeleteOptions
+	orphanDependents *bool
+	propagationPolicy *string
+	body *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -6540,27 +6503,26 @@ DeleteBillingStreamnativeIoV1alpha1PublicOffer Method for DeleteBillingStreamnat
 
 delete a PublicOffer
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the PublicOffer
-	@return ApiDeleteBillingStreamnativeIoV1alpha1PublicOfferRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the PublicOffer
+ @return ApiDeleteBillingStreamnativeIoV1alpha1PublicOfferRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1PublicOffer(ctx context.Context, name string) ApiDeleteBillingStreamnativeIoV1alpha1PublicOfferRequest {
 	return ApiDeleteBillingStreamnativeIoV1alpha1PublicOfferRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
+		ctx: ctx,
+		name: name,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1Status
+//  @return V1Status
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1PublicOfferExecute(r ApiDeleteBillingStreamnativeIoV1alpha1PublicOfferRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodDelete
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1Status
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.DeleteBillingStreamnativeIoV1alpha1PublicOffer")
@@ -6647,15 +6609,15 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1a
 }
 
 type ApiDeleteBillingStreamnativeIoV1alpha1PublicOfferStatusRequest struct {
-	ctx                context.Context
-	ApiService         *BillingStreamnativeIoV1alpha1ApiService
-	name               string
-	pretty             *string
-	dryRun             *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	pretty *string
+	dryRun *string
 	gracePeriodSeconds *int32
-	orphanDependents   *bool
-	propagationPolicy  *string
-	body               *V1DeleteOptions
+	orphanDependents *bool
+	propagationPolicy *string
+	body *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -6702,27 +6664,26 @@ DeleteBillingStreamnativeIoV1alpha1PublicOfferStatus Method for DeleteBillingStr
 
 delete status of a PublicOffer
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the PublicOffer
-	@return ApiDeleteBillingStreamnativeIoV1alpha1PublicOfferStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the PublicOffer
+ @return ApiDeleteBillingStreamnativeIoV1alpha1PublicOfferStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1PublicOfferStatus(ctx context.Context, name string) ApiDeleteBillingStreamnativeIoV1alpha1PublicOfferStatusRequest {
 	return ApiDeleteBillingStreamnativeIoV1alpha1PublicOfferStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
+		ctx: ctx,
+		name: name,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1Status
+//  @return V1Status
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1PublicOfferStatusExecute(r ApiDeleteBillingStreamnativeIoV1alpha1PublicOfferStatusRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodDelete
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1Status
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.DeleteBillingStreamnativeIoV1alpha1PublicOfferStatus")
@@ -6809,15 +6770,15 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1a
 }
 
 type ApiDeleteBillingStreamnativeIoV1alpha1TestClockRequest struct {
-	ctx                context.Context
-	ApiService         *BillingStreamnativeIoV1alpha1ApiService
-	name               string
-	pretty             *string
-	dryRun             *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	pretty *string
+	dryRun *string
 	gracePeriodSeconds *int32
-	orphanDependents   *bool
-	propagationPolicy  *string
-	body               *V1DeleteOptions
+	orphanDependents *bool
+	propagationPolicy *string
+	body *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -6864,27 +6825,26 @@ DeleteBillingStreamnativeIoV1alpha1TestClock Method for DeleteBillingStreamnativ
 
 delete a TestClock
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the TestClock
-	@return ApiDeleteBillingStreamnativeIoV1alpha1TestClockRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the TestClock
+ @return ApiDeleteBillingStreamnativeIoV1alpha1TestClockRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1TestClock(ctx context.Context, name string) ApiDeleteBillingStreamnativeIoV1alpha1TestClockRequest {
 	return ApiDeleteBillingStreamnativeIoV1alpha1TestClockRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
+		ctx: ctx,
+		name: name,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1Status
+//  @return V1Status
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1TestClockExecute(r ApiDeleteBillingStreamnativeIoV1alpha1TestClockRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodDelete
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1Status
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.DeleteBillingStreamnativeIoV1alpha1TestClock")
@@ -6971,15 +6931,15 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1a
 }
 
 type ApiDeleteBillingStreamnativeIoV1alpha1TestClockStatusRequest struct {
-	ctx                context.Context
-	ApiService         *BillingStreamnativeIoV1alpha1ApiService
-	name               string
-	pretty             *string
-	dryRun             *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	pretty *string
+	dryRun *string
 	gracePeriodSeconds *int32
-	orphanDependents   *bool
-	propagationPolicy  *string
-	body               *V1DeleteOptions
+	orphanDependents *bool
+	propagationPolicy *string
+	body *V1DeleteOptions
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -7026,27 +6986,26 @@ DeleteBillingStreamnativeIoV1alpha1TestClockStatus Method for DeleteBillingStrea
 
 delete status of a TestClock
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the TestClock
-	@return ApiDeleteBillingStreamnativeIoV1alpha1TestClockStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the TestClock
+ @return ApiDeleteBillingStreamnativeIoV1alpha1TestClockStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1TestClockStatus(ctx context.Context, name string) ApiDeleteBillingStreamnativeIoV1alpha1TestClockStatusRequest {
 	return ApiDeleteBillingStreamnativeIoV1alpha1TestClockStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
+		ctx: ctx,
+		name: name,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1Status
+//  @return V1Status
 func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1alpha1TestClockStatusExecute(r ApiDeleteBillingStreamnativeIoV1alpha1TestClockStatusRequest) (*V1Status, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodDelete
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1Status
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1Status
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.DeleteBillingStreamnativeIoV1alpha1TestClockStatus")
@@ -7133,7 +7092,7 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) DeleteBillingStreamnativeIoV1a
 }
 
 type ApiGetBillingStreamnativeIoV1alpha1APIResourcesRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *BillingStreamnativeIoV1alpha1ApiService
 }
 
@@ -7146,25 +7105,24 @@ GetBillingStreamnativeIoV1alpha1APIResources Method for GetBillingStreamnativeIo
 
 get available resources
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiGetBillingStreamnativeIoV1alpha1APIResourcesRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiGetBillingStreamnativeIoV1alpha1APIResourcesRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) GetBillingStreamnativeIoV1alpha1APIResources(ctx context.Context) ApiGetBillingStreamnativeIoV1alpha1APIResourcesRequest {
 	return ApiGetBillingStreamnativeIoV1alpha1APIResourcesRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1APIResourceList
+//  @return V1APIResourceList
 func (a *BillingStreamnativeIoV1alpha1ApiService) GetBillingStreamnativeIoV1alpha1APIResourcesExecute(r ApiGetBillingStreamnativeIoV1alpha1APIResourcesRequest) (*V1APIResourceList, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1APIResourceList
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1APIResourceList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.GetBillingStreamnativeIoV1alpha1APIResources")
@@ -7233,19 +7191,19 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) GetBillingStreamnativeIoV1alph
 }
 
 type ApiListBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	namespace            string
-	pretty               *string
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	namespace string
+	pretty *string
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -7317,27 +7275,26 @@ ListBillingStreamnativeIoV1alpha1NamespacedPaymentIntent Method for ListBillingS
 
 list or watch objects of kind PaymentIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiListBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiListBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alpha1NamespacedPaymentIntent(ctx context.Context, namespace string) ApiListBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest {
 	return ApiListBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest{
 		ApiService: a,
-		ctx:        ctx,
-		namespace:  namespace,
+		ctx: ctx,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntentList
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntentList
 func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alpha1NamespacedPaymentIntentExecute(r ApiListBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntentList, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntentList
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntentList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ListBillingStreamnativeIoV1alpha1NamespacedPaymentIntent")
@@ -7437,19 +7394,19 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alp
 }
 
 type ApiListBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	namespace            string
-	pretty               *string
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	namespace string
+	pretty *string
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -7521,27 +7478,26 @@ ListBillingStreamnativeIoV1alpha1NamespacedPrivateOffer Method for ListBillingSt
 
 list or watch objects of kind PrivateOffer
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiListBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiListBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alpha1NamespacedPrivateOffer(ctx context.Context, namespace string) ApiListBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest {
 	return ApiListBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest{
 		ApiService: a,
-		ctx:        ctx,
-		namespace:  namespace,
+		ctx: ctx,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOfferList
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOfferList
 func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alpha1NamespacedPrivateOfferExecute(r ApiListBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOfferList, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOfferList
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOfferList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ListBillingStreamnativeIoV1alpha1NamespacedPrivateOffer")
@@ -7641,19 +7597,19 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alp
 }
 
 type ApiListBillingStreamnativeIoV1alpha1NamespacedProductRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	namespace            string
-	pretty               *string
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	namespace string
+	pretty *string
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -7725,27 +7681,26 @@ ListBillingStreamnativeIoV1alpha1NamespacedProduct Method for ListBillingStreamn
 
 list or watch objects of kind Product
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiListBillingStreamnativeIoV1alpha1NamespacedProductRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiListBillingStreamnativeIoV1alpha1NamespacedProductRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alpha1NamespacedProduct(ctx context.Context, namespace string) ApiListBillingStreamnativeIoV1alpha1NamespacedProductRequest {
 	return ApiListBillingStreamnativeIoV1alpha1NamespacedProductRequest{
 		ApiService: a,
-		ctx:        ctx,
-		namespace:  namespace,
+		ctx: ctx,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1ProductList
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1ProductList
 func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alpha1NamespacedProductExecute(r ApiListBillingStreamnativeIoV1alpha1NamespacedProductRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1ProductList, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1ProductList
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1ProductList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ListBillingStreamnativeIoV1alpha1NamespacedProduct")
@@ -7845,19 +7800,19 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alp
 }
 
 type ApiListBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	namespace            string
-	pretty               *string
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	namespace string
+	pretty *string
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -7929,27 +7884,26 @@ ListBillingStreamnativeIoV1alpha1NamespacedSetupIntent Method for ListBillingStr
 
 list or watch objects of kind SetupIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiListBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiListBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alpha1NamespacedSetupIntent(ctx context.Context, namespace string) ApiListBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest {
 	return ApiListBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest{
 		ApiService: a,
-		ctx:        ctx,
-		namespace:  namespace,
+		ctx: ctx,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntentList
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntentList
 func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alpha1NamespacedSetupIntentExecute(r ApiListBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntentList, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntentList
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntentList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ListBillingStreamnativeIoV1alpha1NamespacedSetupIntent")
@@ -8049,19 +8003,19 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alp
 }
 
 type ApiListBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	namespace            string
-	pretty               *string
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	namespace string
+	pretty *string
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -8133,27 +8087,26 @@ ListBillingStreamnativeIoV1alpha1NamespacedSubscription Method for ListBillingSt
 
 list or watch objects of kind Subscription
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiListBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiListBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alpha1NamespacedSubscription(ctx context.Context, namespace string) ApiListBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest {
 	return ApiListBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest{
 		ApiService: a,
-		ctx:        ctx,
-		namespace:  namespace,
+		ctx: ctx,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionList
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionList
 func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alpha1NamespacedSubscriptionExecute(r ApiListBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionList, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionList
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ListBillingStreamnativeIoV1alpha1NamespacedSubscription")
@@ -8253,19 +8206,19 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alp
 }
 
 type ApiListBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	namespace            string
-	pretty               *string
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	namespace string
+	pretty *string
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -8337,27 +8290,26 @@ ListBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntent Method for ListBil
 
 list or watch objects of kind SubscriptionIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiListBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiListBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntent(ctx context.Context, namespace string) ApiListBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest {
 	return ApiListBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest{
 		ApiService: a,
-		ctx:        ctx,
-		namespace:  namespace,
+		ctx: ctx,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntentList
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntentList
 func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentExecute(r ApiListBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntentList, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntentList
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntentList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ListBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntent")
@@ -8457,18 +8409,18 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alp
 }
 
 type ApiListBillingStreamnativeIoV1alpha1PaymentIntentForAllNamespacesRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	pretty               *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -8540,25 +8492,24 @@ ListBillingStreamnativeIoV1alpha1PaymentIntentForAllNamespaces Method for ListBi
 
 list or watch objects of kind PaymentIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiListBillingStreamnativeIoV1alpha1PaymentIntentForAllNamespacesRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiListBillingStreamnativeIoV1alpha1PaymentIntentForAllNamespacesRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alpha1PaymentIntentForAllNamespaces(ctx context.Context) ApiListBillingStreamnativeIoV1alpha1PaymentIntentForAllNamespacesRequest {
 	return ApiListBillingStreamnativeIoV1alpha1PaymentIntentForAllNamespacesRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntentList
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntentList
 func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alpha1PaymentIntentForAllNamespacesExecute(r ApiListBillingStreamnativeIoV1alpha1PaymentIntentForAllNamespacesRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntentList, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntentList
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntentList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ListBillingStreamnativeIoV1alpha1PaymentIntentForAllNamespaces")
@@ -8657,18 +8608,18 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alp
 }
 
 type ApiListBillingStreamnativeIoV1alpha1PrivateOfferForAllNamespacesRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	pretty               *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -8740,25 +8691,24 @@ ListBillingStreamnativeIoV1alpha1PrivateOfferForAllNamespaces Method for ListBil
 
 list or watch objects of kind PrivateOffer
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiListBillingStreamnativeIoV1alpha1PrivateOfferForAllNamespacesRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiListBillingStreamnativeIoV1alpha1PrivateOfferForAllNamespacesRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alpha1PrivateOfferForAllNamespaces(ctx context.Context) ApiListBillingStreamnativeIoV1alpha1PrivateOfferForAllNamespacesRequest {
 	return ApiListBillingStreamnativeIoV1alpha1PrivateOfferForAllNamespacesRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOfferList
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOfferList
 func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alpha1PrivateOfferForAllNamespacesExecute(r ApiListBillingStreamnativeIoV1alpha1PrivateOfferForAllNamespacesRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOfferList, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOfferList
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOfferList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ListBillingStreamnativeIoV1alpha1PrivateOfferForAllNamespaces")
@@ -8857,18 +8807,18 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alp
 }
 
 type ApiListBillingStreamnativeIoV1alpha1ProductForAllNamespacesRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	pretty               *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -8940,25 +8890,24 @@ ListBillingStreamnativeIoV1alpha1ProductForAllNamespaces Method for ListBillingS
 
 list or watch objects of kind Product
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiListBillingStreamnativeIoV1alpha1ProductForAllNamespacesRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiListBillingStreamnativeIoV1alpha1ProductForAllNamespacesRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alpha1ProductForAllNamespaces(ctx context.Context) ApiListBillingStreamnativeIoV1alpha1ProductForAllNamespacesRequest {
 	return ApiListBillingStreamnativeIoV1alpha1ProductForAllNamespacesRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1ProductList
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1ProductList
 func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alpha1ProductForAllNamespacesExecute(r ApiListBillingStreamnativeIoV1alpha1ProductForAllNamespacesRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1ProductList, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1ProductList
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1ProductList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ListBillingStreamnativeIoV1alpha1ProductForAllNamespaces")
@@ -9057,18 +9006,18 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alp
 }
 
 type ApiListBillingStreamnativeIoV1alpha1PublicOfferRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	pretty               *string
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	pretty *string
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -9140,25 +9089,24 @@ ListBillingStreamnativeIoV1alpha1PublicOffer Method for ListBillingStreamnativeI
 
 list or watch objects of kind PublicOffer
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiListBillingStreamnativeIoV1alpha1PublicOfferRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiListBillingStreamnativeIoV1alpha1PublicOfferRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alpha1PublicOffer(ctx context.Context) ApiListBillingStreamnativeIoV1alpha1PublicOfferRequest {
 	return ApiListBillingStreamnativeIoV1alpha1PublicOfferRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOfferList
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOfferList
 func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alpha1PublicOfferExecute(r ApiListBillingStreamnativeIoV1alpha1PublicOfferRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOfferList, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOfferList
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOfferList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ListBillingStreamnativeIoV1alpha1PublicOffer")
@@ -9257,18 +9205,18 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alp
 }
 
 type ApiListBillingStreamnativeIoV1alpha1SetupIntentForAllNamespacesRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	pretty               *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -9340,25 +9288,24 @@ ListBillingStreamnativeIoV1alpha1SetupIntentForAllNamespaces Method for ListBill
 
 list or watch objects of kind SetupIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiListBillingStreamnativeIoV1alpha1SetupIntentForAllNamespacesRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiListBillingStreamnativeIoV1alpha1SetupIntentForAllNamespacesRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alpha1SetupIntentForAllNamespaces(ctx context.Context) ApiListBillingStreamnativeIoV1alpha1SetupIntentForAllNamespacesRequest {
 	return ApiListBillingStreamnativeIoV1alpha1SetupIntentForAllNamespacesRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntentList
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntentList
 func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alpha1SetupIntentForAllNamespacesExecute(r ApiListBillingStreamnativeIoV1alpha1SetupIntentForAllNamespacesRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntentList, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntentList
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntentList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ListBillingStreamnativeIoV1alpha1SetupIntentForAllNamespaces")
@@ -9457,18 +9404,18 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alp
 }
 
 type ApiListBillingStreamnativeIoV1alpha1SubscriptionForAllNamespacesRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	pretty               *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -9540,25 +9487,24 @@ ListBillingStreamnativeIoV1alpha1SubscriptionForAllNamespaces Method for ListBil
 
 list or watch objects of kind Subscription
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiListBillingStreamnativeIoV1alpha1SubscriptionForAllNamespacesRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiListBillingStreamnativeIoV1alpha1SubscriptionForAllNamespacesRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alpha1SubscriptionForAllNamespaces(ctx context.Context) ApiListBillingStreamnativeIoV1alpha1SubscriptionForAllNamespacesRequest {
 	return ApiListBillingStreamnativeIoV1alpha1SubscriptionForAllNamespacesRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionList
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionList
 func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alpha1SubscriptionForAllNamespacesExecute(r ApiListBillingStreamnativeIoV1alpha1SubscriptionForAllNamespacesRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionList, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionList
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ListBillingStreamnativeIoV1alpha1SubscriptionForAllNamespaces")
@@ -9657,18 +9603,18 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alp
 }
 
 type ApiListBillingStreamnativeIoV1alpha1SubscriptionIntentForAllNamespacesRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	pretty               *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -9740,25 +9686,24 @@ ListBillingStreamnativeIoV1alpha1SubscriptionIntentForAllNamespaces Method for L
 
 list or watch objects of kind SubscriptionIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiListBillingStreamnativeIoV1alpha1SubscriptionIntentForAllNamespacesRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiListBillingStreamnativeIoV1alpha1SubscriptionIntentForAllNamespacesRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alpha1SubscriptionIntentForAllNamespaces(ctx context.Context) ApiListBillingStreamnativeIoV1alpha1SubscriptionIntentForAllNamespacesRequest {
 	return ApiListBillingStreamnativeIoV1alpha1SubscriptionIntentForAllNamespacesRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntentList
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntentList
 func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alpha1SubscriptionIntentForAllNamespacesExecute(r ApiListBillingStreamnativeIoV1alpha1SubscriptionIntentForAllNamespacesRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntentList, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntentList
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntentList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ListBillingStreamnativeIoV1alpha1SubscriptionIntentForAllNamespaces")
@@ -9857,18 +9802,18 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alp
 }
 
 type ApiListBillingStreamnativeIoV1alpha1TestClockRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	pretty               *string
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	pretty *string
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -9940,25 +9885,24 @@ ListBillingStreamnativeIoV1alpha1TestClock Method for ListBillingStreamnativeIoV
 
 list or watch objects of kind TestClock
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiListBillingStreamnativeIoV1alpha1TestClockRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiListBillingStreamnativeIoV1alpha1TestClockRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alpha1TestClock(ctx context.Context) ApiListBillingStreamnativeIoV1alpha1TestClockRequest {
 	return ApiListBillingStreamnativeIoV1alpha1TestClockRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClockList
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClockList
 func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alpha1TestClockExecute(r ApiListBillingStreamnativeIoV1alpha1TestClockRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClockList, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClockList
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClockList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ListBillingStreamnativeIoV1alpha1TestClock")
@@ -10057,15 +10001,15 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ListBillingStreamnativeIoV1alp
 }
 
 type ApiPatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	namespace    string
-	body         *map[string]interface{}
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	body *map[string]interface{}
+	pretty *string
+	dryRun *string
 	fieldManager *string
-	force        *bool
+	force *bool
 }
 
 func (r ApiPatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest) Body(body map[string]interface{}) ApiPatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest {
@@ -10106,29 +10050,28 @@ PatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntent Method for PatchBillin
 
 partially update the specified PaymentIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the PaymentIntent
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiPatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the PaymentIntent
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiPatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntent(ctx context.Context, name string, namespace string) ApiPatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest {
 	return ApiPatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
 func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentExecute(r ApiPatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPatch
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
+		localVarHTTPMethod   = http.MethodPatch
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.PatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntent")
@@ -10216,15 +10159,15 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1al
 }
 
 type ApiPatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	namespace    string
-	body         *map[string]interface{}
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	body *map[string]interface{}
+	pretty *string
+	dryRun *string
 	fieldManager *string
-	force        *bool
+	force *bool
 }
 
 func (r ApiPatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest) Body(body map[string]interface{}) ApiPatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest {
@@ -10265,29 +10208,28 @@ PatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatus Method for Patch
 
 partially update status of the specified PaymentIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the PaymentIntent
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiPatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the PaymentIntent
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiPatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatus(ctx context.Context, name string, namespace string) ApiPatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest {
 	return ApiPatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
 func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusExecute(r ApiPatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPatch
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
+		localVarHTTPMethod   = http.MethodPatch
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.PatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatus")
@@ -10375,15 +10317,15 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1al
 }
 
 type ApiPatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	namespace    string
-	body         *map[string]interface{}
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	body *map[string]interface{}
+	pretty *string
+	dryRun *string
 	fieldManager *string
-	force        *bool
+	force *bool
 }
 
 func (r ApiPatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest) Body(body map[string]interface{}) ApiPatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest {
@@ -10424,29 +10366,28 @@ PatchBillingStreamnativeIoV1alpha1NamespacedPrivateOffer Method for PatchBilling
 
 partially update the specified PrivateOffer
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the PrivateOffer
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiPatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the PrivateOffer
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiPatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1alpha1NamespacedPrivateOffer(ctx context.Context, name string, namespace string) ApiPatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest {
 	return ApiPatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
 func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferExecute(r ApiPatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPatch
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
+		localVarHTTPMethod   = http.MethodPatch
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.PatchBillingStreamnativeIoV1alpha1NamespacedPrivateOffer")
@@ -10534,15 +10475,15 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1al
 }
 
 type ApiPatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	namespace    string
-	body         *map[string]interface{}
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	body *map[string]interface{}
+	pretty *string
+	dryRun *string
 	fieldManager *string
-	force        *bool
+	force *bool
 }
 
 func (r ApiPatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest) Body(body map[string]interface{}) ApiPatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest {
@@ -10583,29 +10524,28 @@ PatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatus Method for PatchB
 
 partially update status of the specified PrivateOffer
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the PrivateOffer
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiPatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the PrivateOffer
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiPatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatus(ctx context.Context, name string, namespace string) ApiPatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest {
 	return ApiPatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
 func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusExecute(r ApiPatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPatch
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
+		localVarHTTPMethod   = http.MethodPatch
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.PatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatus")
@@ -10693,15 +10633,15 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1al
 }
 
 type ApiPatchBillingStreamnativeIoV1alpha1NamespacedProductRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	namespace    string
-	body         *map[string]interface{}
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	body *map[string]interface{}
+	pretty *string
+	dryRun *string
 	fieldManager *string
-	force        *bool
+	force *bool
 }
 
 func (r ApiPatchBillingStreamnativeIoV1alpha1NamespacedProductRequest) Body(body map[string]interface{}) ApiPatchBillingStreamnativeIoV1alpha1NamespacedProductRequest {
@@ -10742,29 +10682,28 @@ PatchBillingStreamnativeIoV1alpha1NamespacedProduct Method for PatchBillingStrea
 
 partially update the specified Product
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the Product
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiPatchBillingStreamnativeIoV1alpha1NamespacedProductRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the Product
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiPatchBillingStreamnativeIoV1alpha1NamespacedProductRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1alpha1NamespacedProduct(ctx context.Context, name string, namespace string) ApiPatchBillingStreamnativeIoV1alpha1NamespacedProductRequest {
 	return ApiPatchBillingStreamnativeIoV1alpha1NamespacedProductRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
 func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1alpha1NamespacedProductExecute(r ApiPatchBillingStreamnativeIoV1alpha1NamespacedProductRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPatch
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
+		localVarHTTPMethod   = http.MethodPatch
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.PatchBillingStreamnativeIoV1alpha1NamespacedProduct")
@@ -10852,15 +10791,15 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1al
 }
 
 type ApiPatchBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	namespace    string
-	body         *map[string]interface{}
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	body *map[string]interface{}
+	pretty *string
+	dryRun *string
 	fieldManager *string
-	force        *bool
+	force *bool
 }
 
 func (r ApiPatchBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest) Body(body map[string]interface{}) ApiPatchBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest {
@@ -10901,29 +10840,28 @@ PatchBillingStreamnativeIoV1alpha1NamespacedProductStatus Method for PatchBillin
 
 partially update status of the specified Product
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the Product
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiPatchBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the Product
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiPatchBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1alpha1NamespacedProductStatus(ctx context.Context, name string, namespace string) ApiPatchBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest {
 	return ApiPatchBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
 func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1alpha1NamespacedProductStatusExecute(r ApiPatchBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPatch
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
+		localVarHTTPMethod   = http.MethodPatch
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.PatchBillingStreamnativeIoV1alpha1NamespacedProductStatus")
@@ -11011,15 +10949,15 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1al
 }
 
 type ApiPatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	namespace    string
-	body         *map[string]interface{}
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	body *map[string]interface{}
+	pretty *string
+	dryRun *string
 	fieldManager *string
-	force        *bool
+	force *bool
 }
 
 func (r ApiPatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest) Body(body map[string]interface{}) ApiPatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest {
@@ -11060,29 +10998,28 @@ PatchBillingStreamnativeIoV1alpha1NamespacedSetupIntent Method for PatchBillingS
 
 partially update the specified SetupIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the SetupIntent
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiPatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the SetupIntent
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiPatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1alpha1NamespacedSetupIntent(ctx context.Context, name string, namespace string) ApiPatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest {
 	return ApiPatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
 func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentExecute(r ApiPatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPatch
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
+		localVarHTTPMethod   = http.MethodPatch
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.PatchBillingStreamnativeIoV1alpha1NamespacedSetupIntent")
@@ -11170,15 +11107,15 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1al
 }
 
 type ApiPatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	namespace    string
-	body         *map[string]interface{}
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	body *map[string]interface{}
+	pretty *string
+	dryRun *string
 	fieldManager *string
-	force        *bool
+	force *bool
 }
 
 func (r ApiPatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest) Body(body map[string]interface{}) ApiPatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest {
@@ -11219,29 +11156,28 @@ PatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatus Method for PatchBi
 
 partially update status of the specified SetupIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the SetupIntent
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiPatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the SetupIntent
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiPatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatus(ctx context.Context, name string, namespace string) ApiPatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest {
 	return ApiPatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
 func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusExecute(r ApiPatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPatch
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
+		localVarHTTPMethod   = http.MethodPatch
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.PatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatus")
@@ -11329,15 +11265,15 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1al
 }
 
 type ApiPatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	namespace    string
-	body         *map[string]interface{}
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	body *map[string]interface{}
+	pretty *string
+	dryRun *string
 	fieldManager *string
-	force        *bool
+	force *bool
 }
 
 func (r ApiPatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest) Body(body map[string]interface{}) ApiPatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest {
@@ -11378,29 +11314,28 @@ PatchBillingStreamnativeIoV1alpha1NamespacedSubscription Method for PatchBilling
 
 partially update the specified Subscription
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the Subscription
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiPatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the Subscription
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiPatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1alpha1NamespacedSubscription(ctx context.Context, name string, namespace string) ApiPatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest {
 	return ApiPatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
 func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionExecute(r ApiPatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPatch
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
+		localVarHTTPMethod   = http.MethodPatch
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.PatchBillingStreamnativeIoV1alpha1NamespacedSubscription")
@@ -11488,15 +11423,15 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1al
 }
 
 type ApiPatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	namespace    string
-	body         *map[string]interface{}
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	body *map[string]interface{}
+	pretty *string
+	dryRun *string
 	fieldManager *string
-	force        *bool
+	force *bool
 }
 
 func (r ApiPatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest) Body(body map[string]interface{}) ApiPatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest {
@@ -11537,29 +11472,28 @@ PatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntent Method for PatchB
 
 partially update the specified SubscriptionIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the SubscriptionIntent
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiPatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the SubscriptionIntent
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiPatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntent(ctx context.Context, name string, namespace string) ApiPatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest {
 	return ApiPatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
 func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentExecute(r ApiPatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPatch
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
+		localVarHTTPMethod   = http.MethodPatch
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.PatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntent")
@@ -11647,15 +11581,15 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1al
 }
 
 type ApiPatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	namespace    string
-	body         *map[string]interface{}
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	body *map[string]interface{}
+	pretty *string
+	dryRun *string
 	fieldManager *string
-	force        *bool
+	force *bool
 }
 
 func (r ApiPatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest) Body(body map[string]interface{}) ApiPatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest {
@@ -11696,29 +11630,28 @@ PatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatus Method for 
 
 partially update status of the specified SubscriptionIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the SubscriptionIntent
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiPatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the SubscriptionIntent
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiPatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatus(ctx context.Context, name string, namespace string) ApiPatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest {
 	return ApiPatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
 func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusExecute(r ApiPatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPatch
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
+		localVarHTTPMethod   = http.MethodPatch
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.PatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatus")
@@ -11806,15 +11739,15 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1al
 }
 
 type ApiPatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	namespace    string
-	body         *map[string]interface{}
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	body *map[string]interface{}
+	pretty *string
+	dryRun *string
 	fieldManager *string
-	force        *bool
+	force *bool
 }
 
 func (r ApiPatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest) Body(body map[string]interface{}) ApiPatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest {
@@ -11855,29 +11788,28 @@ PatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatus Method for PatchB
 
 partially update status of the specified Subscription
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the Subscription
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiPatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the Subscription
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiPatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatus(ctx context.Context, name string, namespace string) ApiPatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest {
 	return ApiPatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
 func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusExecute(r ApiPatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPatch
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
+		localVarHTTPMethod   = http.MethodPatch
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.PatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatus")
@@ -11965,14 +11897,14 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1al
 }
 
 type ApiPatchBillingStreamnativeIoV1alpha1PublicOfferRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	body         *map[string]interface{}
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	body *map[string]interface{}
+	pretty *string
+	dryRun *string
 	fieldManager *string
-	force        *bool
+	force *bool
 }
 
 func (r ApiPatchBillingStreamnativeIoV1alpha1PublicOfferRequest) Body(body map[string]interface{}) ApiPatchBillingStreamnativeIoV1alpha1PublicOfferRequest {
@@ -12013,27 +11945,26 @@ PatchBillingStreamnativeIoV1alpha1PublicOffer Method for PatchBillingStreamnativ
 
 partially update the specified PublicOffer
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the PublicOffer
-	@return ApiPatchBillingStreamnativeIoV1alpha1PublicOfferRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the PublicOffer
+ @return ApiPatchBillingStreamnativeIoV1alpha1PublicOfferRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1alpha1PublicOffer(ctx context.Context, name string) ApiPatchBillingStreamnativeIoV1alpha1PublicOfferRequest {
 	return ApiPatchBillingStreamnativeIoV1alpha1PublicOfferRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
+		ctx: ctx,
+		name: name,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
 func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1alpha1PublicOfferExecute(r ApiPatchBillingStreamnativeIoV1alpha1PublicOfferRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPatch
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
+		localVarHTTPMethod   = http.MethodPatch
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.PatchBillingStreamnativeIoV1alpha1PublicOffer")
@@ -12120,14 +12051,14 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1al
 }
 
 type ApiPatchBillingStreamnativeIoV1alpha1PublicOfferStatusRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	body         *map[string]interface{}
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	body *map[string]interface{}
+	pretty *string
+	dryRun *string
 	fieldManager *string
-	force        *bool
+	force *bool
 }
 
 func (r ApiPatchBillingStreamnativeIoV1alpha1PublicOfferStatusRequest) Body(body map[string]interface{}) ApiPatchBillingStreamnativeIoV1alpha1PublicOfferStatusRequest {
@@ -12168,27 +12099,26 @@ PatchBillingStreamnativeIoV1alpha1PublicOfferStatus Method for PatchBillingStrea
 
 partially update status of the specified PublicOffer
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the PublicOffer
-	@return ApiPatchBillingStreamnativeIoV1alpha1PublicOfferStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the PublicOffer
+ @return ApiPatchBillingStreamnativeIoV1alpha1PublicOfferStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1alpha1PublicOfferStatus(ctx context.Context, name string) ApiPatchBillingStreamnativeIoV1alpha1PublicOfferStatusRequest {
 	return ApiPatchBillingStreamnativeIoV1alpha1PublicOfferStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
+		ctx: ctx,
+		name: name,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
 func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1alpha1PublicOfferStatusExecute(r ApiPatchBillingStreamnativeIoV1alpha1PublicOfferStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPatch
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
+		localVarHTTPMethod   = http.MethodPatch
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.PatchBillingStreamnativeIoV1alpha1PublicOfferStatus")
@@ -12275,14 +12205,14 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1al
 }
 
 type ApiPatchBillingStreamnativeIoV1alpha1TestClockRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	body         *map[string]interface{}
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	body *map[string]interface{}
+	pretty *string
+	dryRun *string
 	fieldManager *string
-	force        *bool
+	force *bool
 }
 
 func (r ApiPatchBillingStreamnativeIoV1alpha1TestClockRequest) Body(body map[string]interface{}) ApiPatchBillingStreamnativeIoV1alpha1TestClockRequest {
@@ -12323,27 +12253,26 @@ PatchBillingStreamnativeIoV1alpha1TestClock Method for PatchBillingStreamnativeI
 
 partially update the specified TestClock
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the TestClock
-	@return ApiPatchBillingStreamnativeIoV1alpha1TestClockRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the TestClock
+ @return ApiPatchBillingStreamnativeIoV1alpha1TestClockRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1alpha1TestClock(ctx context.Context, name string) ApiPatchBillingStreamnativeIoV1alpha1TestClockRequest {
 	return ApiPatchBillingStreamnativeIoV1alpha1TestClockRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
+		ctx: ctx,
+		name: name,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
 func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1alpha1TestClockExecute(r ApiPatchBillingStreamnativeIoV1alpha1TestClockRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPatch
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
+		localVarHTTPMethod   = http.MethodPatch
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.PatchBillingStreamnativeIoV1alpha1TestClock")
@@ -12430,14 +12359,14 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1al
 }
 
 type ApiPatchBillingStreamnativeIoV1alpha1TestClockStatusRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	body         *map[string]interface{}
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	body *map[string]interface{}
+	pretty *string
+	dryRun *string
 	fieldManager *string
-	force        *bool
+	force *bool
 }
 
 func (r ApiPatchBillingStreamnativeIoV1alpha1TestClockStatusRequest) Body(body map[string]interface{}) ApiPatchBillingStreamnativeIoV1alpha1TestClockStatusRequest {
@@ -12478,27 +12407,26 @@ PatchBillingStreamnativeIoV1alpha1TestClockStatus Method for PatchBillingStreamn
 
 partially update status of the specified TestClock
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the TestClock
-	@return ApiPatchBillingStreamnativeIoV1alpha1TestClockStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the TestClock
+ @return ApiPatchBillingStreamnativeIoV1alpha1TestClockStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1alpha1TestClockStatus(ctx context.Context, name string) ApiPatchBillingStreamnativeIoV1alpha1TestClockStatusRequest {
 	return ApiPatchBillingStreamnativeIoV1alpha1TestClockStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
+		ctx: ctx,
+		name: name,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
 func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1alpha1TestClockStatusExecute(r ApiPatchBillingStreamnativeIoV1alpha1TestClockStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPatch
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
+		localVarHTTPMethod   = http.MethodPatch
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.PatchBillingStreamnativeIoV1alpha1TestClockStatus")
@@ -12585,11 +12513,11 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) PatchBillingStreamnativeIoV1al
 }
 
 type ApiReadBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *BillingStreamnativeIoV1alpha1ApiService
-	name       string
-	namespace  string
-	pretty     *string
+	name string
+	namespace string
+	pretty *string
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -12607,29 +12535,28 @@ ReadBillingStreamnativeIoV1alpha1NamespacedPaymentIntent Method for ReadBillingS
 
 read the specified PaymentIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the PaymentIntent
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiReadBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the PaymentIntent
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiReadBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alpha1NamespacedPaymentIntent(ctx context.Context, name string, namespace string) ApiReadBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest {
 	return ApiReadBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alpha1NamespacedPaymentIntentExecute(r ApiReadBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ReadBillingStreamnativeIoV1alpha1NamespacedPaymentIntent")
@@ -12703,11 +12630,11 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alp
 }
 
 type ApiReadBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *BillingStreamnativeIoV1alpha1ApiService
-	name       string
-	namespace  string
-	pretty     *string
+	name string
+	namespace string
+	pretty *string
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -12725,29 +12652,28 @@ ReadBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatus Method for ReadBi
 
 read status of the specified PaymentIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the PaymentIntent
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiReadBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the PaymentIntent
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiReadBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatus(ctx context.Context, name string, namespace string) ApiReadBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest {
 	return ApiReadBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusExecute(r ApiReadBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ReadBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatus")
@@ -12821,11 +12747,11 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alp
 }
 
 type ApiReadBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *BillingStreamnativeIoV1alpha1ApiService
-	name       string
-	namespace  string
-	pretty     *string
+	name string
+	namespace string
+	pretty *string
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -12843,29 +12769,28 @@ ReadBillingStreamnativeIoV1alpha1NamespacedPrivateOffer Method for ReadBillingSt
 
 read the specified PrivateOffer
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the PrivateOffer
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiReadBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the PrivateOffer
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiReadBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alpha1NamespacedPrivateOffer(ctx context.Context, name string, namespace string) ApiReadBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest {
 	return ApiReadBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alpha1NamespacedPrivateOfferExecute(r ApiReadBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ReadBillingStreamnativeIoV1alpha1NamespacedPrivateOffer")
@@ -12939,11 +12864,11 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alp
 }
 
 type ApiReadBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *BillingStreamnativeIoV1alpha1ApiService
-	name       string
-	namespace  string
-	pretty     *string
+	name string
+	namespace string
+	pretty *string
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -12961,29 +12886,28 @@ ReadBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatus Method for ReadBil
 
 read status of the specified PrivateOffer
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the PrivateOffer
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiReadBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the PrivateOffer
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiReadBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatus(ctx context.Context, name string, namespace string) ApiReadBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest {
 	return ApiReadBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusExecute(r ApiReadBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ReadBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatus")
@@ -13057,11 +12981,11 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alp
 }
 
 type ApiReadBillingStreamnativeIoV1alpha1NamespacedProductRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *BillingStreamnativeIoV1alpha1ApiService
-	name       string
-	namespace  string
-	pretty     *string
+	name string
+	namespace string
+	pretty *string
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -13079,29 +13003,28 @@ ReadBillingStreamnativeIoV1alpha1NamespacedProduct Method for ReadBillingStreamn
 
 read the specified Product
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the Product
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiReadBillingStreamnativeIoV1alpha1NamespacedProductRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the Product
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiReadBillingStreamnativeIoV1alpha1NamespacedProductRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alpha1NamespacedProduct(ctx context.Context, name string, namespace string) ApiReadBillingStreamnativeIoV1alpha1NamespacedProductRequest {
 	return ApiReadBillingStreamnativeIoV1alpha1NamespacedProductRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alpha1NamespacedProductExecute(r ApiReadBillingStreamnativeIoV1alpha1NamespacedProductRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ReadBillingStreamnativeIoV1alpha1NamespacedProduct")
@@ -13175,11 +13098,11 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alp
 }
 
 type ApiReadBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *BillingStreamnativeIoV1alpha1ApiService
-	name       string
-	namespace  string
-	pretty     *string
+	name string
+	namespace string
+	pretty *string
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -13197,29 +13120,28 @@ ReadBillingStreamnativeIoV1alpha1NamespacedProductStatus Method for ReadBillingS
 
 read status of the specified Product
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the Product
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiReadBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the Product
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiReadBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alpha1NamespacedProductStatus(ctx context.Context, name string, namespace string) ApiReadBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest {
 	return ApiReadBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alpha1NamespacedProductStatusExecute(r ApiReadBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ReadBillingStreamnativeIoV1alpha1NamespacedProductStatus")
@@ -13293,11 +13215,11 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alp
 }
 
 type ApiReadBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *BillingStreamnativeIoV1alpha1ApiService
-	name       string
-	namespace  string
-	pretty     *string
+	name string
+	namespace string
+	pretty *string
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -13315,29 +13237,28 @@ ReadBillingStreamnativeIoV1alpha1NamespacedSetupIntent Method for ReadBillingStr
 
 read the specified SetupIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the SetupIntent
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiReadBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the SetupIntent
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiReadBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alpha1NamespacedSetupIntent(ctx context.Context, name string, namespace string) ApiReadBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest {
 	return ApiReadBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alpha1NamespacedSetupIntentExecute(r ApiReadBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ReadBillingStreamnativeIoV1alpha1NamespacedSetupIntent")
@@ -13411,11 +13332,11 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alp
 }
 
 type ApiReadBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *BillingStreamnativeIoV1alpha1ApiService
-	name       string
-	namespace  string
-	pretty     *string
+	name string
+	namespace string
+	pretty *string
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -13433,29 +13354,28 @@ ReadBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatus Method for ReadBill
 
 read status of the specified SetupIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the SetupIntent
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiReadBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the SetupIntent
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiReadBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatus(ctx context.Context, name string, namespace string) ApiReadBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest {
 	return ApiReadBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusExecute(r ApiReadBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ReadBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatus")
@@ -13529,11 +13449,11 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alp
 }
 
 type ApiReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *BillingStreamnativeIoV1alpha1ApiService
-	name       string
-	namespace  string
-	pretty     *string
+	name string
+	namespace string
+	pretty *string
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -13551,29 +13471,28 @@ ReadBillingStreamnativeIoV1alpha1NamespacedSubscription Method for ReadBillingSt
 
 read the specified Subscription
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the Subscription
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the Subscription
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alpha1NamespacedSubscription(ctx context.Context, name string, namespace string) ApiReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest {
 	return ApiReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionExecute(r ApiReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ReadBillingStreamnativeIoV1alpha1NamespacedSubscription")
@@ -13647,11 +13566,11 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alp
 }
 
 type ApiReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *BillingStreamnativeIoV1alpha1ApiService
-	name       string
-	namespace  string
-	pretty     *string
+	name string
+	namespace string
+	pretty *string
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -13669,29 +13588,28 @@ ReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntent Method for ReadBil
 
 read the specified SubscriptionIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the SubscriptionIntent
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the SubscriptionIntent
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntent(ctx context.Context, name string, namespace string) ApiReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest {
 	return ApiReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentExecute(r ApiReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntent")
@@ -13765,11 +13683,11 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alp
 }
 
 type ApiReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *BillingStreamnativeIoV1alpha1ApiService
-	name       string
-	namespace  string
-	pretty     *string
+	name string
+	namespace string
+	pretty *string
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -13787,29 +13705,28 @@ ReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatus Method for R
 
 read status of the specified SubscriptionIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the SubscriptionIntent
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the SubscriptionIntent
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatus(ctx context.Context, name string, namespace string) ApiReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest {
 	return ApiReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusExecute(r ApiReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatus")
@@ -13883,11 +13800,11 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alp
 }
 
 type ApiReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *BillingStreamnativeIoV1alpha1ApiService
-	name       string
-	namespace  string
-	pretty     *string
+	name string
+	namespace string
+	pretty *string
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -13905,29 +13822,28 @@ ReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatus Method for ReadBil
 
 read status of the specified Subscription
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the Subscription
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the Subscription
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatus(ctx context.Context, name string, namespace string) ApiReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest {
 	return ApiReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusExecute(r ApiReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ReadBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatus")
@@ -14001,10 +13917,10 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alp
 }
 
 type ApiReadBillingStreamnativeIoV1alpha1PublicOfferRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *BillingStreamnativeIoV1alpha1ApiService
-	name       string
-	pretty     *string
+	name string
+	pretty *string
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -14022,27 +13938,26 @@ ReadBillingStreamnativeIoV1alpha1PublicOffer Method for ReadBillingStreamnativeI
 
 read the specified PublicOffer
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the PublicOffer
-	@return ApiReadBillingStreamnativeIoV1alpha1PublicOfferRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the PublicOffer
+ @return ApiReadBillingStreamnativeIoV1alpha1PublicOfferRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alpha1PublicOffer(ctx context.Context, name string) ApiReadBillingStreamnativeIoV1alpha1PublicOfferRequest {
 	return ApiReadBillingStreamnativeIoV1alpha1PublicOfferRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
+		ctx: ctx,
+		name: name,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alpha1PublicOfferExecute(r ApiReadBillingStreamnativeIoV1alpha1PublicOfferRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ReadBillingStreamnativeIoV1alpha1PublicOffer")
@@ -14115,10 +14030,10 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alp
 }
 
 type ApiReadBillingStreamnativeIoV1alpha1PublicOfferStatusRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *BillingStreamnativeIoV1alpha1ApiService
-	name       string
-	pretty     *string
+	name string
+	pretty *string
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -14136,27 +14051,26 @@ ReadBillingStreamnativeIoV1alpha1PublicOfferStatus Method for ReadBillingStreamn
 
 read status of the specified PublicOffer
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the PublicOffer
-	@return ApiReadBillingStreamnativeIoV1alpha1PublicOfferStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the PublicOffer
+ @return ApiReadBillingStreamnativeIoV1alpha1PublicOfferStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alpha1PublicOfferStatus(ctx context.Context, name string) ApiReadBillingStreamnativeIoV1alpha1PublicOfferStatusRequest {
 	return ApiReadBillingStreamnativeIoV1alpha1PublicOfferStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
+		ctx: ctx,
+		name: name,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alpha1PublicOfferStatusExecute(r ApiReadBillingStreamnativeIoV1alpha1PublicOfferStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ReadBillingStreamnativeIoV1alpha1PublicOfferStatus")
@@ -14229,10 +14143,10 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alp
 }
 
 type ApiReadBillingStreamnativeIoV1alpha1TestClockRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *BillingStreamnativeIoV1alpha1ApiService
-	name       string
-	pretty     *string
+	name string
+	pretty *string
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -14250,27 +14164,26 @@ ReadBillingStreamnativeIoV1alpha1TestClock Method for ReadBillingStreamnativeIoV
 
 read the specified TestClock
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the TestClock
-	@return ApiReadBillingStreamnativeIoV1alpha1TestClockRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the TestClock
+ @return ApiReadBillingStreamnativeIoV1alpha1TestClockRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alpha1TestClock(ctx context.Context, name string) ApiReadBillingStreamnativeIoV1alpha1TestClockRequest {
 	return ApiReadBillingStreamnativeIoV1alpha1TestClockRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
+		ctx: ctx,
+		name: name,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alpha1TestClockExecute(r ApiReadBillingStreamnativeIoV1alpha1TestClockRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ReadBillingStreamnativeIoV1alpha1TestClock")
@@ -14343,10 +14256,10 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alp
 }
 
 type ApiReadBillingStreamnativeIoV1alpha1TestClockStatusRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *BillingStreamnativeIoV1alpha1ApiService
-	name       string
-	pretty     *string
+	name string
+	pretty *string
 }
 
 // If &#39;true&#39;, then the output is pretty printed.
@@ -14364,27 +14277,26 @@ ReadBillingStreamnativeIoV1alpha1TestClockStatus Method for ReadBillingStreamnat
 
 read status of the specified TestClock
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the TestClock
-	@return ApiReadBillingStreamnativeIoV1alpha1TestClockStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the TestClock
+ @return ApiReadBillingStreamnativeIoV1alpha1TestClockStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alpha1TestClockStatus(ctx context.Context, name string) ApiReadBillingStreamnativeIoV1alpha1TestClockStatusRequest {
 	return ApiReadBillingStreamnativeIoV1alpha1TestClockStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
+		ctx: ctx,
+		name: name,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alpha1TestClockStatusExecute(r ApiReadBillingStreamnativeIoV1alpha1TestClockStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ReadBillingStreamnativeIoV1alpha1TestClockStatus")
@@ -14457,13 +14369,13 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ReadBillingStreamnativeIoV1alp
 }
 
 type ApiReplaceBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	namespace    string
-	body         *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	body *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
+	pretty *string
+	dryRun *string
 	fieldManager *string
 }
 
@@ -14499,29 +14411,28 @@ ReplaceBillingStreamnativeIoV1alpha1NamespacedPaymentIntent Method for ReplaceBi
 
 replace the specified PaymentIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the PaymentIntent
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiReplaceBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the PaymentIntent
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiReplaceBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1alpha1NamespacedPaymentIntent(ctx context.Context, name string, namespace string) ApiReplaceBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest {
 	return ApiReplaceBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1alpha1NamespacedPaymentIntentExecute(r ApiReplaceBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPut
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ReplaceBillingStreamnativeIoV1alpha1NamespacedPaymentIntent")
@@ -14606,13 +14517,13 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1
 }
 
 type ApiReplaceBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	namespace    string
-	body         *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	body *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
+	pretty *string
+	dryRun *string
 	fieldManager *string
 }
 
@@ -14648,29 +14559,28 @@ ReplaceBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatus Method for Rep
 
 replace status of the specified PaymentIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the PaymentIntent
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiReplaceBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the PaymentIntent
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiReplaceBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatus(ctx context.Context, name string, namespace string) ApiReplaceBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest {
 	return ApiReplaceBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusExecute(r ApiReplaceBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPut
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ReplaceBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatus")
@@ -14755,13 +14665,13 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1
 }
 
 type ApiReplaceBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	namespace    string
-	body         *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	body *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
+	pretty *string
+	dryRun *string
 	fieldManager *string
 }
 
@@ -14797,29 +14707,28 @@ ReplaceBillingStreamnativeIoV1alpha1NamespacedPrivateOffer Method for ReplaceBil
 
 replace the specified PrivateOffer
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the PrivateOffer
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiReplaceBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the PrivateOffer
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiReplaceBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1alpha1NamespacedPrivateOffer(ctx context.Context, name string, namespace string) ApiReplaceBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest {
 	return ApiReplaceBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1alpha1NamespacedPrivateOfferExecute(r ApiReplaceBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPut
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ReplaceBillingStreamnativeIoV1alpha1NamespacedPrivateOffer")
@@ -14904,13 +14813,13 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1
 }
 
 type ApiReplaceBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	namespace    string
-	body         *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	body *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
+	pretty *string
+	dryRun *string
 	fieldManager *string
 }
 
@@ -14946,29 +14855,28 @@ ReplaceBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatus Method for Repl
 
 replace status of the specified PrivateOffer
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the PrivateOffer
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiReplaceBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the PrivateOffer
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiReplaceBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatus(ctx context.Context, name string, namespace string) ApiReplaceBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest {
 	return ApiReplaceBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusExecute(r ApiReplaceBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPut
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PrivateOffer
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ReplaceBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatus")
@@ -15053,13 +14961,13 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1
 }
 
 type ApiReplaceBillingStreamnativeIoV1alpha1NamespacedProductRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	namespace    string
-	body         *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	body *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
+	pretty *string
+	dryRun *string
 	fieldManager *string
 }
 
@@ -15095,29 +15003,28 @@ ReplaceBillingStreamnativeIoV1alpha1NamespacedProduct Method for ReplaceBillingS
 
 replace the specified Product
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the Product
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiReplaceBillingStreamnativeIoV1alpha1NamespacedProductRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the Product
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiReplaceBillingStreamnativeIoV1alpha1NamespacedProductRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1alpha1NamespacedProduct(ctx context.Context, name string, namespace string) ApiReplaceBillingStreamnativeIoV1alpha1NamespacedProductRequest {
 	return ApiReplaceBillingStreamnativeIoV1alpha1NamespacedProductRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1alpha1NamespacedProductExecute(r ApiReplaceBillingStreamnativeIoV1alpha1NamespacedProductRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPut
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ReplaceBillingStreamnativeIoV1alpha1NamespacedProduct")
@@ -15202,13 +15109,13 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1
 }
 
 type ApiReplaceBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	namespace    string
-	body         *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	body *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
+	pretty *string
+	dryRun *string
 	fieldManager *string
 }
 
@@ -15244,29 +15151,28 @@ ReplaceBillingStreamnativeIoV1alpha1NamespacedProductStatus Method for ReplaceBi
 
 replace status of the specified Product
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the Product
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiReplaceBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the Product
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiReplaceBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1alpha1NamespacedProductStatus(ctx context.Context, name string, namespace string) ApiReplaceBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest {
 	return ApiReplaceBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1alpha1NamespacedProductStatusExecute(r ApiReplaceBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPut
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Product
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ReplaceBillingStreamnativeIoV1alpha1NamespacedProductStatus")
@@ -15351,13 +15257,13 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1
 }
 
 type ApiReplaceBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	namespace    string
-	body         *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	body *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
+	pretty *string
+	dryRun *string
 	fieldManager *string
 }
 
@@ -15393,29 +15299,28 @@ ReplaceBillingStreamnativeIoV1alpha1NamespacedSetupIntent Method for ReplaceBill
 
 replace the specified SetupIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the SetupIntent
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiReplaceBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the SetupIntent
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiReplaceBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1alpha1NamespacedSetupIntent(ctx context.Context, name string, namespace string) ApiReplaceBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest {
 	return ApiReplaceBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1alpha1NamespacedSetupIntentExecute(r ApiReplaceBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPut
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ReplaceBillingStreamnativeIoV1alpha1NamespacedSetupIntent")
@@ -15500,13 +15405,13 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1
 }
 
 type ApiReplaceBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	namespace    string
-	body         *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	body *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
+	pretty *string
+	dryRun *string
 	fieldManager *string
 }
 
@@ -15542,29 +15447,28 @@ ReplaceBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatus Method for Repla
 
 replace status of the specified SetupIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the SetupIntent
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiReplaceBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the SetupIntent
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiReplaceBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatus(ctx context.Context, name string, namespace string) ApiReplaceBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest {
 	return ApiReplaceBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusExecute(r ApiReplaceBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPut
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ReplaceBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatus")
@@ -15649,13 +15553,13 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1
 }
 
 type ApiReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	namespace    string
-	body         *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	body *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
+	pretty *string
+	dryRun *string
 	fieldManager *string
 }
 
@@ -15691,29 +15595,28 @@ ReplaceBillingStreamnativeIoV1alpha1NamespacedSubscription Method for ReplaceBil
 
 replace the specified Subscription
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the Subscription
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the Subscription
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1alpha1NamespacedSubscription(ctx context.Context, name string, namespace string) ApiReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest {
 	return ApiReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionExecute(r ApiReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPut
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ReplaceBillingStreamnativeIoV1alpha1NamespacedSubscription")
@@ -15798,13 +15701,13 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1
 }
 
 type ApiReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	namespace    string
-	body         *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	body *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
+	pretty *string
+	dryRun *string
 	fieldManager *string
 }
 
@@ -15840,29 +15743,28 @@ ReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntent Method for Repl
 
 replace the specified SubscriptionIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the SubscriptionIntent
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the SubscriptionIntent
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntent(ctx context.Context, name string, namespace string) ApiReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest {
 	return ApiReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentExecute(r ApiReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPut
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntent")
@@ -15947,13 +15849,13 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1
 }
 
 type ApiReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	namespace    string
-	body         *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	body *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
+	pretty *string
+	dryRun *string
 	fieldManager *string
 }
 
@@ -15989,29 +15891,28 @@ ReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatus Method fo
 
 replace status of the specified SubscriptionIntent
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the SubscriptionIntent
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the SubscriptionIntent
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatus(ctx context.Context, name string, namespace string) ApiReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest {
 	return ApiReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusExecute(r ApiReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPut
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionIntent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatus")
@@ -16096,13 +15997,13 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1
 }
 
 type ApiReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	namespace    string
-	body         *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	body *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
+	pretty *string
+	dryRun *string
 	fieldManager *string
 }
 
@@ -16138,29 +16039,28 @@ ReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatus Method for Repl
 
 replace status of the specified Subscription
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the Subscription
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the Subscription
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatus(ctx context.Context, name string, namespace string) ApiReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest {
 	return ApiReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusExecute(r ApiReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPut
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscription
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ReplaceBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatus")
@@ -16245,12 +16145,12 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1
 }
 
 type ApiReplaceBillingStreamnativeIoV1alpha1PublicOfferRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	body         *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	body *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
+	pretty *string
+	dryRun *string
 	fieldManager *string
 }
 
@@ -16286,27 +16186,26 @@ ReplaceBillingStreamnativeIoV1alpha1PublicOffer Method for ReplaceBillingStreamn
 
 replace the specified PublicOffer
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the PublicOffer
-	@return ApiReplaceBillingStreamnativeIoV1alpha1PublicOfferRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the PublicOffer
+ @return ApiReplaceBillingStreamnativeIoV1alpha1PublicOfferRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1alpha1PublicOffer(ctx context.Context, name string) ApiReplaceBillingStreamnativeIoV1alpha1PublicOfferRequest {
 	return ApiReplaceBillingStreamnativeIoV1alpha1PublicOfferRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
+		ctx: ctx,
+		name: name,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1alpha1PublicOfferExecute(r ApiReplaceBillingStreamnativeIoV1alpha1PublicOfferRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPut
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ReplaceBillingStreamnativeIoV1alpha1PublicOffer")
@@ -16390,12 +16289,12 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1
 }
 
 type ApiReplaceBillingStreamnativeIoV1alpha1PublicOfferStatusRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	body         *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	body *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
+	pretty *string
+	dryRun *string
 	fieldManager *string
 }
 
@@ -16431,27 +16330,26 @@ ReplaceBillingStreamnativeIoV1alpha1PublicOfferStatus Method for ReplaceBillingS
 
 replace status of the specified PublicOffer
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the PublicOffer
-	@return ApiReplaceBillingStreamnativeIoV1alpha1PublicOfferStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the PublicOffer
+ @return ApiReplaceBillingStreamnativeIoV1alpha1PublicOfferStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1alpha1PublicOfferStatus(ctx context.Context, name string) ApiReplaceBillingStreamnativeIoV1alpha1PublicOfferStatusRequest {
 	return ApiReplaceBillingStreamnativeIoV1alpha1PublicOfferStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
+		ctx: ctx,
+		name: name,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1alpha1PublicOfferStatusExecute(r ApiReplaceBillingStreamnativeIoV1alpha1PublicOfferStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPut
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOffer
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ReplaceBillingStreamnativeIoV1alpha1PublicOfferStatus")
@@ -16535,12 +16433,12 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1
 }
 
 type ApiReplaceBillingStreamnativeIoV1alpha1TestClockRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	body         *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	body *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
+	pretty *string
+	dryRun *string
 	fieldManager *string
 }
 
@@ -16576,27 +16474,26 @@ ReplaceBillingStreamnativeIoV1alpha1TestClock Method for ReplaceBillingStreamnat
 
 replace the specified TestClock
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the TestClock
-	@return ApiReplaceBillingStreamnativeIoV1alpha1TestClockRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the TestClock
+ @return ApiReplaceBillingStreamnativeIoV1alpha1TestClockRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1alpha1TestClock(ctx context.Context, name string) ApiReplaceBillingStreamnativeIoV1alpha1TestClockRequest {
 	return ApiReplaceBillingStreamnativeIoV1alpha1TestClockRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
+		ctx: ctx,
+		name: name,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1alpha1TestClockExecute(r ApiReplaceBillingStreamnativeIoV1alpha1TestClockRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPut
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ReplaceBillingStreamnativeIoV1alpha1TestClock")
@@ -16680,12 +16577,12 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1
 }
 
 type ApiReplaceBillingStreamnativeIoV1alpha1TestClockStatusRequest struct {
-	ctx          context.Context
-	ApiService   *BillingStreamnativeIoV1alpha1ApiService
-	name         string
-	body         *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
-	pretty       *string
-	dryRun       *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	body *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
+	pretty *string
+	dryRun *string
 	fieldManager *string
 }
 
@@ -16721,27 +16618,26 @@ ReplaceBillingStreamnativeIoV1alpha1TestClockStatus Method for ReplaceBillingStr
 
 replace status of the specified TestClock
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the TestClock
-	@return ApiReplaceBillingStreamnativeIoV1alpha1TestClockStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the TestClock
+ @return ApiReplaceBillingStreamnativeIoV1alpha1TestClockStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1alpha1TestClockStatus(ctx context.Context, name string) ApiReplaceBillingStreamnativeIoV1alpha1TestClockStatusRequest {
 	return ApiReplaceBillingStreamnativeIoV1alpha1TestClockStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
+		ctx: ctx,
+		name: name,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
+//  @return ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
 func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1alpha1TestClockStatusExecute(r ApiReplaceBillingStreamnativeIoV1alpha1TestClockStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPut
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClock
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.ReplaceBillingStreamnativeIoV1alpha1TestClockStatus")
@@ -16825,20 +16721,20 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) ReplaceBillingStreamnativeIoV1
 }
 
 type ApiWatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	name                 string
-	namespace            string
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	pretty               *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -16910,29 +16806,28 @@ WatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntent Method for WatchBillin
 
 watch changes to an object of kind PaymentIntent. deprecated: use the 'watch' parameter with a list operation instead, filtered to a single item with the 'fieldSelector' parameter.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the PaymentIntent
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiWatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the PaymentIntent
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiWatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntent(ctx context.Context, name string, namespace string) ApiWatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest {
 	return ApiWatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1WatchEvent
+//  @return V1WatchEvent
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentExecute(r ApiWatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1WatchEvent
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.WatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntent")
@@ -17033,19 +16928,19 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1al
 }
 
 type ApiWatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentListRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	namespace            string
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	pretty               *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	namespace string
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -17117,27 +17012,26 @@ WatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentList Method for WatchBi
 
 watch individual changes to a list of PaymentIntent. deprecated: use the 'watch' parameter with a list operation instead.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiWatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentListRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiWatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentListRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentList(ctx context.Context, namespace string) ApiWatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentListRequest {
 	return ApiWatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentListRequest{
 		ApiService: a,
-		ctx:        ctx,
-		namespace:  namespace,
+		ctx: ctx,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1WatchEvent
+//  @return V1WatchEvent
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentListExecute(r ApiWatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentListRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1WatchEvent
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.WatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentList")
@@ -17237,20 +17131,20 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1al
 }
 
 type ApiWatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	name                 string
-	namespace            string
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	pretty               *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -17322,29 +17216,28 @@ WatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatus Method for Watch
 
 watch changes to status of an object of kind PaymentIntent. deprecated: use the 'watch' parameter with a list operation instead, filtered to a single item with the 'fieldSelector' parameter.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the PaymentIntent
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiWatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the PaymentIntent
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiWatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatus(ctx context.Context, name string, namespace string) ApiWatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest {
 	return ApiWatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1WatchEvent
+//  @return V1WatchEvent
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusExecute(r ApiWatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatusRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1WatchEvent
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.WatchBillingStreamnativeIoV1alpha1NamespacedPaymentIntentStatus")
@@ -17445,20 +17338,20 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1al
 }
 
 type ApiWatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	name                 string
-	namespace            string
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	pretty               *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -17530,29 +17423,28 @@ WatchBillingStreamnativeIoV1alpha1NamespacedPrivateOffer Method for WatchBilling
 
 watch changes to an object of kind PrivateOffer. deprecated: use the 'watch' parameter with a list operation instead, filtered to a single item with the 'fieldSelector' parameter.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the PrivateOffer
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiWatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the PrivateOffer
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiWatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1NamespacedPrivateOffer(ctx context.Context, name string, namespace string) ApiWatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest {
 	return ApiWatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1WatchEvent
+//  @return V1WatchEvent
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferExecute(r ApiWatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1WatchEvent
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.WatchBillingStreamnativeIoV1alpha1NamespacedPrivateOffer")
@@ -17653,19 +17545,19 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1al
 }
 
 type ApiWatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferListRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	namespace            string
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	pretty               *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	namespace string
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -17737,27 +17629,26 @@ WatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferList Method for WatchBil
 
 watch individual changes to a list of PrivateOffer. deprecated: use the 'watch' parameter with a list operation instead.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiWatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferListRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiWatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferListRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferList(ctx context.Context, namespace string) ApiWatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferListRequest {
 	return ApiWatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferListRequest{
 		ApiService: a,
-		ctx:        ctx,
-		namespace:  namespace,
+		ctx: ctx,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1WatchEvent
+//  @return V1WatchEvent
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferListExecute(r ApiWatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferListRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1WatchEvent
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.WatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferList")
@@ -17857,20 +17748,20 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1al
 }
 
 type ApiWatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	name                 string
-	namespace            string
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	pretty               *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -17942,29 +17833,28 @@ WatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatus Method for WatchB
 
 watch changes to status of an object of kind PrivateOffer. deprecated: use the 'watch' parameter with a list operation instead, filtered to a single item with the 'fieldSelector' parameter.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the PrivateOffer
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiWatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the PrivateOffer
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiWatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatus(ctx context.Context, name string, namespace string) ApiWatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest {
 	return ApiWatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1WatchEvent
+//  @return V1WatchEvent
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusExecute(r ApiWatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatusRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1WatchEvent
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.WatchBillingStreamnativeIoV1alpha1NamespacedPrivateOfferStatus")
@@ -18065,20 +17955,20 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1al
 }
 
 type ApiWatchBillingStreamnativeIoV1alpha1NamespacedProductRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	name                 string
-	namespace            string
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	pretty               *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -18150,29 +18040,28 @@ WatchBillingStreamnativeIoV1alpha1NamespacedProduct Method for WatchBillingStrea
 
 watch changes to an object of kind Product. deprecated: use the 'watch' parameter with a list operation instead, filtered to a single item with the 'fieldSelector' parameter.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the Product
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiWatchBillingStreamnativeIoV1alpha1NamespacedProductRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the Product
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiWatchBillingStreamnativeIoV1alpha1NamespacedProductRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1NamespacedProduct(ctx context.Context, name string, namespace string) ApiWatchBillingStreamnativeIoV1alpha1NamespacedProductRequest {
 	return ApiWatchBillingStreamnativeIoV1alpha1NamespacedProductRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1WatchEvent
+//  @return V1WatchEvent
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1NamespacedProductExecute(r ApiWatchBillingStreamnativeIoV1alpha1NamespacedProductRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1WatchEvent
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.WatchBillingStreamnativeIoV1alpha1NamespacedProduct")
@@ -18273,19 +18162,19 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1al
 }
 
 type ApiWatchBillingStreamnativeIoV1alpha1NamespacedProductListRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	namespace            string
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	pretty               *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	namespace string
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -18357,27 +18246,26 @@ WatchBillingStreamnativeIoV1alpha1NamespacedProductList Method for WatchBillingS
 
 watch individual changes to a list of Product. deprecated: use the 'watch' parameter with a list operation instead.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiWatchBillingStreamnativeIoV1alpha1NamespacedProductListRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiWatchBillingStreamnativeIoV1alpha1NamespacedProductListRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1NamespacedProductList(ctx context.Context, namespace string) ApiWatchBillingStreamnativeIoV1alpha1NamespacedProductListRequest {
 	return ApiWatchBillingStreamnativeIoV1alpha1NamespacedProductListRequest{
 		ApiService: a,
-		ctx:        ctx,
-		namespace:  namespace,
+		ctx: ctx,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1WatchEvent
+//  @return V1WatchEvent
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1NamespacedProductListExecute(r ApiWatchBillingStreamnativeIoV1alpha1NamespacedProductListRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1WatchEvent
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.WatchBillingStreamnativeIoV1alpha1NamespacedProductList")
@@ -18477,20 +18365,20 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1al
 }
 
 type ApiWatchBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	name                 string
-	namespace            string
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	pretty               *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -18562,29 +18450,28 @@ WatchBillingStreamnativeIoV1alpha1NamespacedProductStatus Method for WatchBillin
 
 watch changes to status of an object of kind Product. deprecated: use the 'watch' parameter with a list operation instead, filtered to a single item with the 'fieldSelector' parameter.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the Product
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiWatchBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the Product
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiWatchBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1NamespacedProductStatus(ctx context.Context, name string, namespace string) ApiWatchBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest {
 	return ApiWatchBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1WatchEvent
+//  @return V1WatchEvent
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1NamespacedProductStatusExecute(r ApiWatchBillingStreamnativeIoV1alpha1NamespacedProductStatusRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1WatchEvent
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.WatchBillingStreamnativeIoV1alpha1NamespacedProductStatus")
@@ -18685,20 +18572,20 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1al
 }
 
 type ApiWatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	name                 string
-	namespace            string
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	pretty               *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -18770,29 +18657,28 @@ WatchBillingStreamnativeIoV1alpha1NamespacedSetupIntent Method for WatchBillingS
 
 watch changes to an object of kind SetupIntent. deprecated: use the 'watch' parameter with a list operation instead, filtered to a single item with the 'fieldSelector' parameter.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the SetupIntent
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiWatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the SetupIntent
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiWatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1NamespacedSetupIntent(ctx context.Context, name string, namespace string) ApiWatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest {
 	return ApiWatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1WatchEvent
+//  @return V1WatchEvent
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentExecute(r ApiWatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1WatchEvent
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.WatchBillingStreamnativeIoV1alpha1NamespacedSetupIntent")
@@ -18893,19 +18779,19 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1al
 }
 
 type ApiWatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentListRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	namespace            string
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	pretty               *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	namespace string
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -18977,27 +18863,26 @@ WatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentList Method for WatchBill
 
 watch individual changes to a list of SetupIntent. deprecated: use the 'watch' parameter with a list operation instead.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiWatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentListRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiWatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentListRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentList(ctx context.Context, namespace string) ApiWatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentListRequest {
 	return ApiWatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentListRequest{
 		ApiService: a,
-		ctx:        ctx,
-		namespace:  namespace,
+		ctx: ctx,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1WatchEvent
+//  @return V1WatchEvent
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentListExecute(r ApiWatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentListRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1WatchEvent
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.WatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentList")
@@ -19097,20 +18982,20 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1al
 }
 
 type ApiWatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	name                 string
-	namespace            string
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	pretty               *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -19182,29 +19067,28 @@ WatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatus Method for WatchBi
 
 watch changes to status of an object of kind SetupIntent. deprecated: use the 'watch' parameter with a list operation instead, filtered to a single item with the 'fieldSelector' parameter.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the SetupIntent
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiWatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the SetupIntent
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiWatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatus(ctx context.Context, name string, namespace string) ApiWatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest {
 	return ApiWatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1WatchEvent
+//  @return V1WatchEvent
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusExecute(r ApiWatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatusRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1WatchEvent
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.WatchBillingStreamnativeIoV1alpha1NamespacedSetupIntentStatus")
@@ -19305,20 +19189,20 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1al
 }
 
 type ApiWatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	name                 string
-	namespace            string
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	pretty               *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -19390,29 +19274,28 @@ WatchBillingStreamnativeIoV1alpha1NamespacedSubscription Method for WatchBilling
 
 watch changes to an object of kind Subscription. deprecated: use the 'watch' parameter with a list operation instead, filtered to a single item with the 'fieldSelector' parameter.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the Subscription
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiWatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the Subscription
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiWatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1NamespacedSubscription(ctx context.Context, name string, namespace string) ApiWatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest {
 	return ApiWatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1WatchEvent
+//  @return V1WatchEvent
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionExecute(r ApiWatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1WatchEvent
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.WatchBillingStreamnativeIoV1alpha1NamespacedSubscription")
@@ -19513,20 +19396,20 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1al
 }
 
 type ApiWatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	name                 string
-	namespace            string
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	pretty               *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -19598,29 +19481,28 @@ WatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntent Method for WatchB
 
 watch changes to an object of kind SubscriptionIntent. deprecated: use the 'watch' parameter with a list operation instead, filtered to a single item with the 'fieldSelector' parameter.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the SubscriptionIntent
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiWatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the SubscriptionIntent
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiWatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntent(ctx context.Context, name string, namespace string) ApiWatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest {
 	return ApiWatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1WatchEvent
+//  @return V1WatchEvent
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentExecute(r ApiWatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1WatchEvent
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.WatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntent")
@@ -19721,19 +19603,19 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1al
 }
 
 type ApiWatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentListRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	namespace            string
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	pretty               *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	namespace string
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -19805,27 +19687,26 @@ WatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentList Method for Wa
 
 watch individual changes to a list of SubscriptionIntent. deprecated: use the 'watch' parameter with a list operation instead.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiWatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentListRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiWatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentListRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentList(ctx context.Context, namespace string) ApiWatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentListRequest {
 	return ApiWatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentListRequest{
 		ApiService: a,
-		ctx:        ctx,
-		namespace:  namespace,
+		ctx: ctx,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1WatchEvent
+//  @return V1WatchEvent
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentListExecute(r ApiWatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentListRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1WatchEvent
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.WatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentList")
@@ -19925,20 +19806,20 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1al
 }
 
 type ApiWatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	name                 string
-	namespace            string
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	pretty               *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -20010,29 +19891,28 @@ WatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatus Method for 
 
 watch changes to status of an object of kind SubscriptionIntent. deprecated: use the 'watch' parameter with a list operation instead, filtered to a single item with the 'fieldSelector' parameter.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the SubscriptionIntent
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiWatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the SubscriptionIntent
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiWatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatus(ctx context.Context, name string, namespace string) ApiWatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest {
 	return ApiWatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1WatchEvent
+//  @return V1WatchEvent
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusExecute(r ApiWatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatusRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1WatchEvent
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.WatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionIntentStatus")
@@ -20133,19 +20013,19 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1al
 }
 
 type ApiWatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionListRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	namespace            string
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	pretty               *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	namespace string
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -20217,27 +20097,26 @@ WatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionList Method for WatchBil
 
 watch individual changes to a list of Subscription. deprecated: use the 'watch' parameter with a list operation instead.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiWatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionListRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiWatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionListRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionList(ctx context.Context, namespace string) ApiWatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionListRequest {
 	return ApiWatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionListRequest{
 		ApiService: a,
-		ctx:        ctx,
-		namespace:  namespace,
+		ctx: ctx,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1WatchEvent
+//  @return V1WatchEvent
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionListExecute(r ApiWatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionListRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1WatchEvent
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.WatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionList")
@@ -20337,20 +20216,20 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1al
 }
 
 type ApiWatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	name                 string
-	namespace            string
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	pretty               *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -20422,29 +20301,28 @@ WatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatus Method for WatchB
 
 watch changes to status of an object of kind Subscription. deprecated: use the 'watch' parameter with a list operation instead, filtered to a single item with the 'fieldSelector' parameter.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the Subscription
-	@param namespace object name and auth scope, such as for teams and projects
-	@return ApiWatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the Subscription
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiWatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatus(ctx context.Context, name string, namespace string) ApiWatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest {
 	return ApiWatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
-		namespace:  namespace,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1WatchEvent
+//  @return V1WatchEvent
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusExecute(r ApiWatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatusRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1WatchEvent
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.WatchBillingStreamnativeIoV1alpha1NamespacedSubscriptionStatus")
@@ -20545,18 +20423,18 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1al
 }
 
 type ApiWatchBillingStreamnativeIoV1alpha1PaymentIntentListForAllNamespacesRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	pretty               *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -20628,25 +20506,24 @@ WatchBillingStreamnativeIoV1alpha1PaymentIntentListForAllNamespaces Method for W
 
 watch individual changes to a list of PaymentIntent. deprecated: use the 'watch' parameter with a list operation instead.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiWatchBillingStreamnativeIoV1alpha1PaymentIntentListForAllNamespacesRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiWatchBillingStreamnativeIoV1alpha1PaymentIntentListForAllNamespacesRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1PaymentIntentListForAllNamespaces(ctx context.Context) ApiWatchBillingStreamnativeIoV1alpha1PaymentIntentListForAllNamespacesRequest {
 	return ApiWatchBillingStreamnativeIoV1alpha1PaymentIntentListForAllNamespacesRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1WatchEvent
+//  @return V1WatchEvent
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1PaymentIntentListForAllNamespacesExecute(r ApiWatchBillingStreamnativeIoV1alpha1PaymentIntentListForAllNamespacesRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1WatchEvent
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.WatchBillingStreamnativeIoV1alpha1PaymentIntentListForAllNamespaces")
@@ -20745,18 +20622,18 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1al
 }
 
 type ApiWatchBillingStreamnativeIoV1alpha1PrivateOfferListForAllNamespacesRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	pretty               *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -20828,25 +20705,24 @@ WatchBillingStreamnativeIoV1alpha1PrivateOfferListForAllNamespaces Method for Wa
 
 watch individual changes to a list of PrivateOffer. deprecated: use the 'watch' parameter with a list operation instead.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiWatchBillingStreamnativeIoV1alpha1PrivateOfferListForAllNamespacesRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiWatchBillingStreamnativeIoV1alpha1PrivateOfferListForAllNamespacesRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1PrivateOfferListForAllNamespaces(ctx context.Context) ApiWatchBillingStreamnativeIoV1alpha1PrivateOfferListForAllNamespacesRequest {
 	return ApiWatchBillingStreamnativeIoV1alpha1PrivateOfferListForAllNamespacesRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1WatchEvent
+//  @return V1WatchEvent
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1PrivateOfferListForAllNamespacesExecute(r ApiWatchBillingStreamnativeIoV1alpha1PrivateOfferListForAllNamespacesRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1WatchEvent
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.WatchBillingStreamnativeIoV1alpha1PrivateOfferListForAllNamespaces")
@@ -20945,18 +20821,18 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1al
 }
 
 type ApiWatchBillingStreamnativeIoV1alpha1ProductListForAllNamespacesRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	pretty               *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -21028,25 +20904,24 @@ WatchBillingStreamnativeIoV1alpha1ProductListForAllNamespaces Method for WatchBi
 
 watch individual changes to a list of Product. deprecated: use the 'watch' parameter with a list operation instead.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiWatchBillingStreamnativeIoV1alpha1ProductListForAllNamespacesRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiWatchBillingStreamnativeIoV1alpha1ProductListForAllNamespacesRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1ProductListForAllNamespaces(ctx context.Context) ApiWatchBillingStreamnativeIoV1alpha1ProductListForAllNamespacesRequest {
 	return ApiWatchBillingStreamnativeIoV1alpha1ProductListForAllNamespacesRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1WatchEvent
+//  @return V1WatchEvent
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1ProductListForAllNamespacesExecute(r ApiWatchBillingStreamnativeIoV1alpha1ProductListForAllNamespacesRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1WatchEvent
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.WatchBillingStreamnativeIoV1alpha1ProductListForAllNamespaces")
@@ -21145,19 +21020,19 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1al
 }
 
 type ApiWatchBillingStreamnativeIoV1alpha1PublicOfferRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	name                 string
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	pretty               *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -21229,27 +21104,26 @@ WatchBillingStreamnativeIoV1alpha1PublicOffer Method for WatchBillingStreamnativ
 
 watch changes to an object of kind PublicOffer. deprecated: use the 'watch' parameter with a list operation instead, filtered to a single item with the 'fieldSelector' parameter.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the PublicOffer
-	@return ApiWatchBillingStreamnativeIoV1alpha1PublicOfferRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the PublicOffer
+ @return ApiWatchBillingStreamnativeIoV1alpha1PublicOfferRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1PublicOffer(ctx context.Context, name string) ApiWatchBillingStreamnativeIoV1alpha1PublicOfferRequest {
 	return ApiWatchBillingStreamnativeIoV1alpha1PublicOfferRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
+		ctx: ctx,
+		name: name,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1WatchEvent
+//  @return V1WatchEvent
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1PublicOfferExecute(r ApiWatchBillingStreamnativeIoV1alpha1PublicOfferRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1WatchEvent
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.WatchBillingStreamnativeIoV1alpha1PublicOffer")
@@ -21349,18 +21223,18 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1al
 }
 
 type ApiWatchBillingStreamnativeIoV1alpha1PublicOfferListRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	pretty               *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -21432,25 +21306,24 @@ WatchBillingStreamnativeIoV1alpha1PublicOfferList Method for WatchBillingStreamn
 
 watch individual changes to a list of PublicOffer. deprecated: use the 'watch' parameter with a list operation instead.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiWatchBillingStreamnativeIoV1alpha1PublicOfferListRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiWatchBillingStreamnativeIoV1alpha1PublicOfferListRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1PublicOfferList(ctx context.Context) ApiWatchBillingStreamnativeIoV1alpha1PublicOfferListRequest {
 	return ApiWatchBillingStreamnativeIoV1alpha1PublicOfferListRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1WatchEvent
+//  @return V1WatchEvent
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1PublicOfferListExecute(r ApiWatchBillingStreamnativeIoV1alpha1PublicOfferListRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1WatchEvent
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.WatchBillingStreamnativeIoV1alpha1PublicOfferList")
@@ -21549,19 +21422,19 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1al
 }
 
 type ApiWatchBillingStreamnativeIoV1alpha1PublicOfferStatusRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	name                 string
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	pretty               *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -21633,27 +21506,26 @@ WatchBillingStreamnativeIoV1alpha1PublicOfferStatus Method for WatchBillingStrea
 
 watch changes to status of an object of kind PublicOffer. deprecated: use the 'watch' parameter with a list operation instead, filtered to a single item with the 'fieldSelector' parameter.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the PublicOffer
-	@return ApiWatchBillingStreamnativeIoV1alpha1PublicOfferStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the PublicOffer
+ @return ApiWatchBillingStreamnativeIoV1alpha1PublicOfferStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1PublicOfferStatus(ctx context.Context, name string) ApiWatchBillingStreamnativeIoV1alpha1PublicOfferStatusRequest {
 	return ApiWatchBillingStreamnativeIoV1alpha1PublicOfferStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
+		ctx: ctx,
+		name: name,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1WatchEvent
+//  @return V1WatchEvent
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1PublicOfferStatusExecute(r ApiWatchBillingStreamnativeIoV1alpha1PublicOfferStatusRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1WatchEvent
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.WatchBillingStreamnativeIoV1alpha1PublicOfferStatus")
@@ -21753,18 +21625,18 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1al
 }
 
 type ApiWatchBillingStreamnativeIoV1alpha1SetupIntentListForAllNamespacesRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	pretty               *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -21836,25 +21708,24 @@ WatchBillingStreamnativeIoV1alpha1SetupIntentListForAllNamespaces Method for Wat
 
 watch individual changes to a list of SetupIntent. deprecated: use the 'watch' parameter with a list operation instead.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiWatchBillingStreamnativeIoV1alpha1SetupIntentListForAllNamespacesRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiWatchBillingStreamnativeIoV1alpha1SetupIntentListForAllNamespacesRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1SetupIntentListForAllNamespaces(ctx context.Context) ApiWatchBillingStreamnativeIoV1alpha1SetupIntentListForAllNamespacesRequest {
 	return ApiWatchBillingStreamnativeIoV1alpha1SetupIntentListForAllNamespacesRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1WatchEvent
+//  @return V1WatchEvent
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1SetupIntentListForAllNamespacesExecute(r ApiWatchBillingStreamnativeIoV1alpha1SetupIntentListForAllNamespacesRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1WatchEvent
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.WatchBillingStreamnativeIoV1alpha1SetupIntentListForAllNamespaces")
@@ -21953,18 +21824,18 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1al
 }
 
 type ApiWatchBillingStreamnativeIoV1alpha1SubscriptionIntentListForAllNamespacesRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	pretty               *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -22036,25 +21907,24 @@ WatchBillingStreamnativeIoV1alpha1SubscriptionIntentListForAllNamespaces Method 
 
 watch individual changes to a list of SubscriptionIntent. deprecated: use the 'watch' parameter with a list operation instead.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiWatchBillingStreamnativeIoV1alpha1SubscriptionIntentListForAllNamespacesRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiWatchBillingStreamnativeIoV1alpha1SubscriptionIntentListForAllNamespacesRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1SubscriptionIntentListForAllNamespaces(ctx context.Context) ApiWatchBillingStreamnativeIoV1alpha1SubscriptionIntentListForAllNamespacesRequest {
 	return ApiWatchBillingStreamnativeIoV1alpha1SubscriptionIntentListForAllNamespacesRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1WatchEvent
+//  @return V1WatchEvent
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1SubscriptionIntentListForAllNamespacesExecute(r ApiWatchBillingStreamnativeIoV1alpha1SubscriptionIntentListForAllNamespacesRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1WatchEvent
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.WatchBillingStreamnativeIoV1alpha1SubscriptionIntentListForAllNamespaces")
@@ -22153,18 +22023,18 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1al
 }
 
 type ApiWatchBillingStreamnativeIoV1alpha1SubscriptionListForAllNamespacesRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	pretty               *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -22236,25 +22106,24 @@ WatchBillingStreamnativeIoV1alpha1SubscriptionListForAllNamespaces Method for Wa
 
 watch individual changes to a list of Subscription. deprecated: use the 'watch' parameter with a list operation instead.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiWatchBillingStreamnativeIoV1alpha1SubscriptionListForAllNamespacesRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiWatchBillingStreamnativeIoV1alpha1SubscriptionListForAllNamespacesRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1SubscriptionListForAllNamespaces(ctx context.Context) ApiWatchBillingStreamnativeIoV1alpha1SubscriptionListForAllNamespacesRequest {
 	return ApiWatchBillingStreamnativeIoV1alpha1SubscriptionListForAllNamespacesRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1WatchEvent
+//  @return V1WatchEvent
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1SubscriptionListForAllNamespacesExecute(r ApiWatchBillingStreamnativeIoV1alpha1SubscriptionListForAllNamespacesRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1WatchEvent
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.WatchBillingStreamnativeIoV1alpha1SubscriptionListForAllNamespaces")
@@ -22353,19 +22222,19 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1al
 }
 
 type ApiWatchBillingStreamnativeIoV1alpha1TestClockRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	name                 string
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	pretty               *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -22437,27 +22306,26 @@ WatchBillingStreamnativeIoV1alpha1TestClock Method for WatchBillingStreamnativeI
 
 watch changes to an object of kind TestClock. deprecated: use the 'watch' parameter with a list operation instead, filtered to a single item with the 'fieldSelector' parameter.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the TestClock
-	@return ApiWatchBillingStreamnativeIoV1alpha1TestClockRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the TestClock
+ @return ApiWatchBillingStreamnativeIoV1alpha1TestClockRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1TestClock(ctx context.Context, name string) ApiWatchBillingStreamnativeIoV1alpha1TestClockRequest {
 	return ApiWatchBillingStreamnativeIoV1alpha1TestClockRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
+		ctx: ctx,
+		name: name,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1WatchEvent
+//  @return V1WatchEvent
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1TestClockExecute(r ApiWatchBillingStreamnativeIoV1alpha1TestClockRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1WatchEvent
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.WatchBillingStreamnativeIoV1alpha1TestClock")
@@ -22557,18 +22425,18 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1al
 }
 
 type ApiWatchBillingStreamnativeIoV1alpha1TestClockListRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	pretty               *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -22640,25 +22508,24 @@ WatchBillingStreamnativeIoV1alpha1TestClockList Method for WatchBillingStreamnat
 
 watch individual changes to a list of TestClock. deprecated: use the 'watch' parameter with a list operation instead.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiWatchBillingStreamnativeIoV1alpha1TestClockListRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiWatchBillingStreamnativeIoV1alpha1TestClockListRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1TestClockList(ctx context.Context) ApiWatchBillingStreamnativeIoV1alpha1TestClockListRequest {
 	return ApiWatchBillingStreamnativeIoV1alpha1TestClockListRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1WatchEvent
+//  @return V1WatchEvent
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1TestClockListExecute(r ApiWatchBillingStreamnativeIoV1alpha1TestClockListRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1WatchEvent
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.WatchBillingStreamnativeIoV1alpha1TestClockList")
@@ -22757,19 +22624,19 @@ func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1al
 }
 
 type ApiWatchBillingStreamnativeIoV1alpha1TestClockStatusRequest struct {
-	ctx                  context.Context
-	ApiService           *BillingStreamnativeIoV1alpha1ApiService
-	name                 string
-	allowWatchBookmarks  *bool
-	continue_            *string
-	fieldSelector        *string
-	labelSelector        *string
-	limit                *int32
-	pretty               *string
-	resourceVersion      *string
+	ctx context.Context
+	ApiService *BillingStreamnativeIoV1alpha1ApiService
+	name string
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
 	resourceVersionMatch *string
-	timeoutSeconds       *int32
-	watch                *bool
+	timeoutSeconds *int32
+	watch *bool
 }
 
 // allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
@@ -22841,27 +22708,26 @@ WatchBillingStreamnativeIoV1alpha1TestClockStatus Method for WatchBillingStreamn
 
 watch changes to status of an object of kind TestClock. deprecated: use the 'watch' parameter with a list operation instead, filtered to a single item with the 'fieldSelector' parameter.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param name name of the TestClock
-	@return ApiWatchBillingStreamnativeIoV1alpha1TestClockStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the TestClock
+ @return ApiWatchBillingStreamnativeIoV1alpha1TestClockStatusRequest
 */
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1TestClockStatus(ctx context.Context, name string) ApiWatchBillingStreamnativeIoV1alpha1TestClockStatusRequest {
 	return ApiWatchBillingStreamnativeIoV1alpha1TestClockStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		name:       name,
+		ctx: ctx,
+		name: name,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1WatchEvent
+//  @return V1WatchEvent
 func (a *BillingStreamnativeIoV1alpha1ApiService) WatchBillingStreamnativeIoV1alpha1TestClockStatusExecute(r ApiWatchBillingStreamnativeIoV1alpha1TestClockStatusRequest) (*V1WatchEvent, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1WatchEvent
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1WatchEvent
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BillingStreamnativeIoV1alpha1ApiService.WatchBillingStreamnativeIoV1alpha1TestClockStatus")

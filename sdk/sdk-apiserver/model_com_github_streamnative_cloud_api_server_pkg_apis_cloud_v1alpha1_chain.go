@@ -16,7 +16,7 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Chain Chain specifies a named chain for a role definition array.
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Chain struct {
-	Name      *string                                                                 `json:"name,omitempty"`
+	Name *string `json:"name,omitempty"`
 	RoleChain []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RoleDefinition `json:"roleChain,omitempty"`
 }
 
@@ -147,3 +147,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Chain) U
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

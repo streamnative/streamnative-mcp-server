@@ -17,7 +17,7 @@ import (
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemberIstioGatewaySpec struct for ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemberIstioGatewaySpec
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemberIstioGatewaySpec struct {
 	Selector ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemberIstioGatewaySelector `json:"selector"`
-	Tls      ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemberIstioGatewayTls      `json:"tls"`
+	Tls ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemberIstioGatewayTls `json:"tls"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemberIstioGatewaySpec instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemberIstioGatewaySpec object
@@ -133,3 +133,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolMemb
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

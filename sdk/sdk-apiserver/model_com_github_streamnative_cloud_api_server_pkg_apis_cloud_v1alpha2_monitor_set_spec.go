@@ -17,10 +17,10 @@ import (
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSetSpec MonitorSetSpec defines the desired state of MonitorSet
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorSetSpec struct {
 	// AvailabilityMode decides whether servers should be in one zone or multiple zones If unspecified, defaults to zonal.
-	AvailabilityMode *string                                                                     `json:"availabilityMode,omitempty"`
-	PoolMemberRef    *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2PoolMemberReference `json:"poolMemberRef,omitempty"`
+	AvailabilityMode *string `json:"availabilityMode,omitempty"`
+	PoolMemberRef *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2PoolMemberReference `json:"poolMemberRef,omitempty"`
 	// Replicas is the desired number of monitoring servers. If unspecified, defaults to 1.
-	Replicas *int32           `json:"replicas,omitempty"`
+	Replicas *int32 `json:"replicas,omitempty"`
 	Selector *V1LabelSelector `json:"selector,omitempty"`
 }
 
@@ -221,3 +221,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2MonitorS
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

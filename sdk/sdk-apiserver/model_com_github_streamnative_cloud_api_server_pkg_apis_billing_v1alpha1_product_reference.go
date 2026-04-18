@@ -16,7 +16,7 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1ProductReference ProductReference references a Product object.
 type ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1ProductReference struct {
-	Name      *string `json:"name,omitempty"`
+	Name *string `json:"name,omitempty"`
 	Namespace *string `json:"namespace,omitempty"`
 }
 
@@ -147,3 +147,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Produc
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+
