@@ -64,26 +64,41 @@ var (
 
 // RegisterPrompts registers prompt handlers on the server.
 func RegisterPrompts(s *server.MCPServer) {
-	s.AddPrompt(mcp.NewPrompt("list-sncloud-clusters",
-		mcp.WithPromptDescription("List all clusters from the StreamNative Cloud"),
-	), HandleListPulsarClusters)
-	s.AddPrompt(mcp.NewPrompt("read-sncloud-cluster",
-		mcp.WithPromptDescription("Read a cluster from the StreamNative Cloud"),
-		mcp.WithArgument("name", mcp.RequiredArgument(), mcp.ArgumentDescription("The name of the cluster")),
-	), handleReadPulsarCluster)
+	s.AddPrompt(NewListSNCloudClustersPrompt(), HandleListSNCloudClusters)
+	s.AddPrompt(NewReadSNCloudClusterPrompt(), HandleReadSNCloudCluster)
 	s.AddPrompt(
-		mcp.NewPrompt("build-sncloud-serverless-cluster",
-			mcp.WithPromptDescription("Build a Serverless cluster in the StreamNative Cloud"),
-			mcp.WithArgument("instance-name", mcp.RequiredArgument(), mcp.ArgumentDescription("The name of the Pulsar instance, cannot reuse the name of existing instance.")),
-			mcp.WithArgument("cluster-name", mcp.RequiredArgument(), mcp.ArgumentDescription("The name of the Pulsar cluster, cannot reuse the name of existing cluster.")),
-			mcp.WithArgument("provider", mcp.ArgumentDescription("The cloud provider, could be `aws`, `gcp`, `azure`. If the selected provider do not serve serverless cluster, the prompt will return an error. If not specified, the system will use a random provider depending on the availability.")),
-		),
-		handleBuildServerlessPulsarCluster,
+		NewBuildSNCloudServerlessClusterPrompt(),
+		HandleBuildSNCloudServerlessCluster,
 	)
 }
 
-// HandleListPulsarClusters handles listing StreamNative Cloud clusters.
-func HandleListPulsarClusters(ctx context.Context, _ mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
+// NewListSNCloudClustersPrompt creates the reusable StreamNative Cloud cluster list prompt definition.
+func NewListSNCloudClustersPrompt() mcp.Prompt {
+	return mcp.NewPrompt("list-sncloud-clusters",
+		mcp.WithPromptDescription("List clusters available in the current StreamNative Cloud session."),
+	)
+}
+
+// NewReadSNCloudClusterPrompt creates the reusable StreamNative Cloud cluster read prompt definition.
+func NewReadSNCloudClusterPrompt() mcp.Prompt {
+	return mcp.NewPrompt("read-sncloud-cluster",
+		mcp.WithPromptDescription("Read details for a StreamNative Cloud cluster."),
+		mcp.WithArgument("name", mcp.RequiredArgument(), mcp.ArgumentDescription("The name of the cluster")),
+	)
+}
+
+// NewBuildSNCloudServerlessClusterPrompt creates the reusable serverless cluster build prompt definition.
+func NewBuildSNCloudServerlessClusterPrompt() mcp.Prompt {
+	return mcp.NewPrompt("build-sncloud-serverless-cluster",
+		mcp.WithPromptDescription("Build a serverless cluster in StreamNative Cloud."),
+		mcp.WithArgument("instance-name", mcp.RequiredArgument(), mcp.ArgumentDescription("The name of the Pulsar instance, cannot reuse the name of existing instance.")),
+		mcp.WithArgument("cluster-name", mcp.RequiredArgument(), mcp.ArgumentDescription("The name of the Pulsar cluster, cannot reuse the name of existing cluster.")),
+		mcp.WithArgument("provider", mcp.ArgumentDescription("The cloud provider, could be `aws`, `gcp`, `azure`. If the selected provider do not serve serverless cluster, the prompt will return an error. If not specified, the system will use a random provider depending on the availability.")),
+	)
+}
+
+// HandleListSNCloudClusters handles listing StreamNative Cloud clusters.
+func HandleListSNCloudClusters(ctx context.Context, _ mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
 	// Get API client from session
 	session := context2.GetSNCloudSession(ctx)
 	if session == nil {
@@ -149,12 +164,13 @@ func HandleListPulsarClusters(ctx context.Context, _ mcp.GetPromptRequest) (*mcp
 	}
 
 	return &mcp.GetPromptResult{
-		Description: fmt.Sprintf("Pulsar clusters from StreamNative Cloud organization %s, you can use `sncloud_context_use_cluster` tool to switch to selected cluster, and use pulsar and kafka tools to interact with the cluster.", session.Ctx.Organization),
+		Description: fmt.Sprintf("Clusters from StreamNative Cloud organization %s. Use `sncloud_context_use_cluster` to bind the current session to a cluster before running cluster-specific tools.", session.Ctx.Organization),
 		Messages:    messages,
 	}, nil
 }
 
-func handleReadPulsarCluster(ctx context.Context, request mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
+// HandleReadSNCloudCluster handles reading a StreamNative Cloud cluster.
+func HandleReadSNCloudCluster(ctx context.Context, request mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
 	// Get API client from session
 	session := context2.GetSNCloudSession(ctx)
 	if session == nil {
@@ -211,12 +227,13 @@ func handleReadPulsarCluster(ctx context.Context, request mcp.GetPromptRequest) 
 	}
 
 	return &mcp.GetPromptResult{
-		Description: fmt.Sprintf("Detailed information of Pulsar cluster %s, you can use `sncloud_context_use_cluster` tool to switch to this cluster, and use pulsar and kafka tools to interact with the cluster.", name),
+		Description: fmt.Sprintf("Detailed information for StreamNative Cloud cluster %s. Use `sncloud_context_use_cluster` to bind the current session to this cluster before running cluster-specific tools.", name),
 		Messages:    messages,
 	}, nil
 }
 
-func handleBuildServerlessPulsarCluster(ctx context.Context, request mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
+// HandleBuildSNCloudServerlessCluster handles building a serverless StreamNative Cloud cluster definition.
+func HandleBuildSNCloudServerlessCluster(ctx context.Context, request mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
 	// Get API client from session
 	session := context2.GetSNCloudSession(ctx)
 	if session == nil {

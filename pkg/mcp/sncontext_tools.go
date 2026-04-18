@@ -113,7 +113,7 @@ func handleSetContext(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 }
 
 func handleAvailableContexts(ctx context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	promptResponse, err := HandleListPulsarClusters(ctx, mcp.GetPromptRequest{})
+	promptResponse, err := HandleListSNCloudClusters(ctx, mcp.GetPromptRequest{})
 	if err != nil || promptResponse == nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to list pulsar clusters: %v", err)), nil
 	}

@@ -26,6 +26,7 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
+	"github.com/streamnative/streamnative-mcp-server/pkg/config"
 	context2 "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 	sncloud "github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserver"
 )
@@ -37,38 +38,44 @@ func StreamNativeAddResourceTools(s *server.MCPServer, readOnly bool, features [
 	}
 
 	if !readOnly {
-		// Add Apply tool
-		applyTool := mcp.NewTool("sncloud_resources_apply",
-			mcp.WithDescription("Apply StreamNative Cloud resources from JSON definitions. This tool allows you to apply (create or update) StreamNative Cloud resources such as PulsarInstances and PulsarClusters using JSON definitions. Please give feedback to USER if the resource is applied with error, and ask USER to check the resource definition."),
-			mcp.WithString("json_content", mcp.Required(),
-				mcp.Description("The JSON content to apply."),
-			),
-			mcp.WithBoolean("dry_run",
-				mcp.Description("If true, only validate the resource without applying it to the server."),
-				mcp.DefaultBool(false),
-			),
-			mcp.WithToolAnnotation(mcp.ToolAnnotation{
-				Title: "Apply StreamNative Cloud Resources",
-			}),
-		)
-		// Add delete tool
-		deleteTool := mcp.NewTool("sncloud_resources_delete",
-			mcp.WithDescription("Delete StreamNative Cloud resources. This tool allows you to delete StreamNative Cloud resources such as PulsarInstances and PulsarClusters."),
-			mcp.WithString("name", mcp.Required(),
-				mcp.Description("The name of the resource to delete."),
-			),
-			mcp.WithString("type", mcp.Required(),
-				mcp.Description("The type of the resource to delete, it can be PulsarInstance or PulsarCluster."),
-				mcp.Enum("PulsarInstance", "PulsarCluster"),
-			),
-			mcp.WithToolAnnotation(mcp.ToolAnnotation{
-				Title:           "Delete StreamNative Cloud Resources",
-				DestructiveHint: &[]bool{true}[0],
-			}),
-		)
-		s.AddTool(applyTool, handleStreamNativeResourcesApply)
-		s.AddTool(deleteTool, handleStreamNativeResourcesDelete)
+		s.AddTool(NewSNCloudResourcesApplyTool(), HandleSNCloudResourcesApply)
+		s.AddTool(NewSNCloudResourcesDeleteTool(), HandleSNCloudResourcesDelete)
 	}
+}
+
+// NewSNCloudResourcesApplyTool creates the reusable StreamNative Cloud apply tool definition.
+func NewSNCloudResourcesApplyTool() mcp.Tool {
+	return mcp.NewTool("sncloud_resources_apply",
+		mcp.WithDescription("Apply StreamNative Cloud resources from JSON definitions in the organization bound to the current session."),
+		mcp.WithString("json_content", mcp.Required(),
+			mcp.Description("The JSON content to apply."),
+		),
+		mcp.WithBoolean("dry_run",
+			mcp.Description("If true, only validate the resource without applying it to the server."),
+			mcp.DefaultBool(false),
+		),
+		mcp.WithToolAnnotation(mcp.ToolAnnotation{
+			Title: "Apply StreamNative Cloud Resources",
+		}),
+	)
+}
+
+// NewSNCloudResourcesDeleteTool creates the reusable StreamNative Cloud delete tool definition.
+func NewSNCloudResourcesDeleteTool() mcp.Tool {
+	return mcp.NewTool("sncloud_resources_delete",
+		mcp.WithDescription("Delete StreamNative Cloud resources in the organization bound to the current session."),
+		mcp.WithString("name", mcp.Required(),
+			mcp.Description("The name of the resource to delete."),
+		),
+		mcp.WithString("type", mcp.Required(),
+			mcp.Description("The type of the resource to delete, it can be PulsarInstance or PulsarCluster."),
+			mcp.Enum("PulsarInstance", "PulsarCluster"),
+		),
+		mcp.WithToolAnnotation(mcp.ToolAnnotation{
+			Title:           "Delete StreamNative Cloud Resources",
+			DestructiveHint: &[]bool{true}[0],
+		}),
+	)
 }
 
 // Resource represents a StreamNative resource manifest.
@@ -86,11 +93,9 @@ type Metadata struct {
 	Labels    map[string]string `json:"labels" yaml:"labels"`
 }
 
-// handleStreamNativeResourcesApply handles the streaming_cloud_resources_apply tool
-func handleStreamNativeResourcesApply(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	// Get necessary parameters
-	snConfig := common.GetOptions(ctx)
-	organization := snConfig.Organization
+// HandleSNCloudResourcesApply handles the StreamNative Cloud resource apply tool.
+func HandleSNCloudResourcesApply(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	organization := resolveSNCloudOrganization(ctx)
 	if organization == "" {
 		return mcp.NewToolResultError("No organization is set. Please set the organization using the appropriate context tool."), nil
 	}
@@ -339,10 +344,12 @@ func applyPulsarCluster(ctx context.Context, apiClient *sncloud.APIClient, jsonC
 	return fmt.Sprintf("PulsarCluster %q %s", name, verb), nil
 }
 
-// handleStreamNativeResourcesDelete handles the streaming_cloud_resources_delete tool
-func handleStreamNativeResourcesDelete(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	snConfig := common.GetOptions(ctx)
-	organization := snConfig.Organization
+// HandleSNCloudResourcesDelete handles the StreamNative Cloud resource delete tool.
+func HandleSNCloudResourcesDelete(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	organization := resolveSNCloudOrganization(ctx)
+	if organization == "" {
+		return mcp.NewToolResultError("No organization is set. Please set the organization using the appropriate context tool."), nil
+	}
 
 	name, err := request.RequireString("name")
 	if err != nil {
@@ -382,4 +389,23 @@ func handleStreamNativeResourcesDelete(ctx context.Context, request mcp.CallTool
 	}
 
 	return mcp.NewToolResultText(fmt.Sprintf("Resource %q %s deleted", name, resourceType)), nil
+}
+
+func resolveSNCloudOrganization(ctx context.Context) string {
+	if session := context2.GetSNCloudSession(ctx); session != nil {
+		if organization := strings.TrimSpace(session.Ctx.Organization); organization != "" {
+			return organization
+		}
+	}
+
+	if organization := strings.TrimSpace(context2.GetSNCloudOrganization(ctx)); organization != "" {
+		return organization
+	}
+
+	options, ok := ctx.Value(common.OptionsKey).(*config.Options)
+	if ok && options != nil {
+		return strings.TrimSpace(options.Organization)
+	}
+
+	return ""
 }
