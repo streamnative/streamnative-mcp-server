@@ -56,7 +56,7 @@ Display logs of resources in StreamNative Cloud, including Pulsar functions, sou
 
 #### sncloud_resources_apply
 
-Apply (create or update) StreamNative Cloud resources from JSON definitions. This tool manages infrastructure resources such as PulsarInstances and PulsarClusters in the organization currently bound to the session.
+Apply (create or update) StreamNative Cloud resources from JSON definitions. This tool manages infrastructure resources such as PulsarInstances, PulsarClusters, and KafkaClusters in the organization currently bound to the session.
 
 - **sncloud_resources_apply**
   - `json_content` (string, required): The JSON content to apply, defining the resource according to the StreamNative Cloud API schema
@@ -65,6 +65,7 @@ Apply (create or update) StreamNative Cloud resources from JSON definitions. Thi
 Supported resource types:
 - PulsarInstance (apiVersion: cloud.streamnative.io/v1alpha1)
 - PulsarCluster (apiVersion: cloud.streamnative.io/v1alpha1)
+- KafkaCluster (apiVersion: cloud.streamnative.io/v1alpha1)
 
 ---
 
@@ -75,6 +76,6 @@ Delete StreamNative Cloud resources. This tool removes resources from the organi
 - **sncloud_resources_delete**
   - `name` (string, required): The name of the resource to delete
   - `type` (string, required): The type of the resource to delete
-    - Options: PulsarInstance, PulsarCluster
+    - Options: PulsarInstance, PulsarCluster, KafkaCluster
 
 This is a destructive operation that cannot be undone. Use with caution. 

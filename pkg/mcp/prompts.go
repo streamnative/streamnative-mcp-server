@@ -192,7 +192,10 @@ func HandleReadSNCloudCluster(ctx context.Context, request mcp.GetPromptRequest)
 		return nil, fmt.Errorf("failed to list pulsar clusters: %v", err)
 	}
 	defer func() { _ = clustersBody.Body.Close() }()
-	var cluster sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarCluster
+	var (
+		cluster     sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarCluster
+		clusterJSON []byte
+	)
 	for _, c := range clusters.Items {
 		if *c.Metadata.Name == name {
 			cluster = c
@@ -200,17 +203,36 @@ func HandleReadSNCloudCluster(ctx context.Context, request mcp.GetPromptRequest)
 		}
 	}
 
-	if cluster.Metadata == nil {
-		return nil, fmt.Errorf("failed to find pulsar cluster: %s", name)
-	}
+	if cluster.Metadata != nil {
+		if len(cluster.Metadata.ManagedFields) > 0 {
+			cluster.Metadata.ManagedFields = nil
+		}
 
-	if cluster.Metadata != nil && len(cluster.Metadata.ManagedFields) > 0 {
-		cluster.Metadata.ManagedFields = nil
-	}
+		clusterJSON, err = json.Marshal(cluster)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal pulsar cluster: %v", err)
+		}
+	} else {
+		kafkaCluster, bdy, err := apiClient.CloudStreamnativeIoV1alpha1Api.ReadCloudStreamnativeIoV1alpha1NamespacedKafkaCluster(ctx, name, session.Ctx.Organization).Execute()
+		defer func() {
+			if bdy != nil && bdy.Body != nil {
+				_ = bdy.Body.Close()
+			}
+		}()
+		if err != nil {
+			return nil, fmt.Errorf("failed to read kafka cluster: %v", err)
+		}
 
-	context, err := json.Marshal(cluster)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal cluster: %v", err)
+		if kafkaCluster.Metadata == nil {
+			return nil, fmt.Errorf("failed to find cluster: %s", name)
+		}
+		if len(kafkaCluster.Metadata.ManagedFields) > 0 {
+			kafkaCluster.Metadata.ManagedFields = nil
+		}
+		clusterJSON, err = json.Marshal(kafkaCluster)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal kafka cluster: %v", err)
+		}
 	}
 
 	var messages = make(
@@ -221,7 +243,7 @@ func HandleReadSNCloudCluster(ctx context.Context, request mcp.GetPromptRequest)
 	messages[0] = mcp.PromptMessage{
 		Content: mcp.TextContent{
 			Type: "text",
-			Text: string(context),
+			Text: string(clusterJSON),
 		},
 		Role: mcp.RoleUser,
 	}

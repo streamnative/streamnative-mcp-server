@@ -2,6 +2,7 @@ package mcp
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -157,5 +158,242 @@ func TestHandleSNCloudResourcesApplyUsesSessionOrganization(t *testing.T) {
 		if strings.Contains(path, "/options-org/") {
 			t.Fatalf("expected options organization to be ignored, got %q", path)
 		}
+	}
+}
+
+func TestHandleSNCloudResourcesApplySupportsKafkaClusterUpdate(t *testing.T) {
+	t.Parallel()
+
+	var (
+		putBody  map[string]any
+		putQuery string
+	)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.Method == http.MethodGet && r.URL.Path == "/apis/cloud.streamnative.io/v1alpha1/namespaces/session-org/kafkaclusters/kc-test":
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"apiVersion":"cloud.streamnative.io/v1alpha1","kind":"KafkaCluster","metadata":{"name":"kc-test","resourceVersion":"7"}}`))
+		case r.Method == http.MethodPut && r.URL.Path == "/apis/cloud.streamnative.io/v1alpha1/namespaces/session-org/kafkaclusters/kc-test":
+			putQuery = r.URL.RawQuery
+			defer func() { _ = r.Body.Close() }()
+			if err := json.NewDecoder(r.Body).Decode(&putBody); err != nil {
+				t.Fatalf("failed to decode PUT body: %v", err)
+			}
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"metadata":{"name":"kc-test","resourceVersion":"8"}}`))
+		default:
+			t.Fatalf("unexpected request: %s %s", r.Method, r.URL.String())
+		}
+	}))
+	defer server.Close()
+
+	session, err := config.NewSNCloudSession(config.SNCloudContext{
+		JWTToken:     "token",
+		APIURL:       server.URL,
+		LogAPIURL:    server.URL,
+		Organization: "session-org",
+	})
+	if err != nil {
+		t.Fatalf("failed to create session: %v", err)
+	}
+
+	ctx := context.Background()
+	ctx = WithSNCloudSession(ctx, session)
+
+	result, err := HandleSNCloudResourcesApply(ctx, mcp.CallToolRequest{
+		Params: mcp.CallToolParams{
+			Arguments: map[string]any{
+				"json_content": `{"apiVersion":"cloud.streamnative.io/v1alpha1","kind":"KafkaCluster","metadata":{"name":"kc-test"},"spec":{"instanceName":"inst-1"}}`,
+			},
+		},
+	})
+	if err != nil {
+		t.Fatalf("expected no handler error, got %v", err)
+	}
+	if result.IsError {
+		t.Fatalf("expected successful result, got error result: %+v", result)
+	}
+
+	if putQuery != "" {
+		t.Fatalf("expected update without dryRun query, got %q", putQuery)
+	}
+
+	metadata, ok := putBody["metadata"].(map[string]any)
+	if !ok {
+		t.Fatalf("expected metadata map in update body, got %+v", putBody["metadata"])
+	}
+	if got := metadata["resourceVersion"]; got != "7" {
+		t.Fatalf("expected propagated resourceVersion 7, got %#v", got)
+	}
+	if got := metadata["namespace"]; got != "session-org" {
+		t.Fatalf("expected session organization namespace, got %#v", got)
+	}
+}
+
+func TestHandleSNCloudResourcesApplySupportsKafkaClusterDryRunCreate(t *testing.T) {
+	t.Parallel()
+
+	var (
+		postBody  map[string]any
+		postQuery string
+	)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.Method == http.MethodGet && r.URL.Path == "/apis/cloud.streamnative.io/v1alpha1/namespaces/session-org/kafkaclusters/kc-dry-run":
+			http.NotFound(w, r)
+		case r.Method == http.MethodPost && r.URL.Path == "/apis/cloud.streamnative.io/v1alpha1/namespaces/session-org/kafkaclusters":
+			postQuery = r.URL.RawQuery
+			defer func() { _ = r.Body.Close() }()
+			if err := json.NewDecoder(r.Body).Decode(&postBody); err != nil {
+				t.Fatalf("failed to decode POST body: %v", err)
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusCreated)
+			_, _ = w.Write([]byte(`{"metadata":{"name":"kc-dry-run"}}`))
+		default:
+			t.Fatalf("unexpected request: %s %s", r.Method, r.URL.String())
+		}
+	}))
+	defer server.Close()
+
+	session, err := config.NewSNCloudSession(config.SNCloudContext{
+		JWTToken:     "token",
+		APIURL:       server.URL,
+		LogAPIURL:    server.URL,
+		Organization: "session-org",
+	})
+	if err != nil {
+		t.Fatalf("failed to create session: %v", err)
+	}
+
+	ctx := context.Background()
+	ctx = WithSNCloudSession(ctx, session)
+
+	result, err := HandleSNCloudResourcesApply(ctx, mcp.CallToolRequest{
+		Params: mcp.CallToolParams{
+			Arguments: map[string]any{
+				"json_content": `{"apiVersion":"cloud.streamnative.io/v1alpha1","kind":"KafkaCluster","metadata":{"name":"kc-dry-run"},"spec":{"instanceName":"inst-1"}}`,
+				"dry_run":      true,
+			},
+		},
+	})
+	if err != nil {
+		t.Fatalf("expected no handler error, got %v", err)
+	}
+	if result.IsError {
+		t.Fatalf("expected successful result, got error result: %+v", result)
+	}
+	if !strings.Contains(postQuery, "dryRun=All") {
+		t.Fatalf("expected dryRun query parameter, got %q", postQuery)
+	}
+
+	metadata, ok := postBody["metadata"].(map[string]any)
+	if !ok {
+		t.Fatalf("expected metadata map in create body, got %+v", postBody["metadata"])
+	}
+	if got := metadata["namespace"]; got != "session-org" {
+		t.Fatalf("expected session organization namespace, got %#v", got)
+	}
+}
+
+func TestHandleSNCloudResourcesDeleteSupportsKafkaCluster(t *testing.T) {
+	t.Parallel()
+
+	var deletePath string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodDelete {
+			t.Fatalf("unexpected method %s", r.Method)
+		}
+		deletePath = r.URL.Path
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"status":"Success"}`))
+	}))
+	defer server.Close()
+
+	session, err := config.NewSNCloudSession(config.SNCloudContext{
+		JWTToken:     "token",
+		APIURL:       server.URL,
+		LogAPIURL:    server.URL,
+		Organization: "session-org",
+	})
+	if err != nil {
+		t.Fatalf("failed to create session: %v", err)
+	}
+
+	ctx := context.Background()
+	ctx = WithSNCloudSession(ctx, session)
+
+	result, err := HandleSNCloudResourcesDelete(ctx, mcp.CallToolRequest{
+		Params: mcp.CallToolParams{
+			Arguments: map[string]any{
+				"name": "kc-test",
+				"type": "KafkaCluster",
+			},
+		},
+	})
+	if err != nil {
+		t.Fatalf("expected no handler error, got %v", err)
+	}
+	if result.IsError {
+		t.Fatalf("expected successful result, got error result: %+v", result)
+	}
+
+	expectedPath := "/apis/cloud.streamnative.io/v1alpha1/namespaces/session-org/kafkaclusters/kc-test"
+	if deletePath != expectedPath {
+		t.Fatalf("expected delete path %q, got %q", expectedPath, deletePath)
+	}
+}
+
+func TestHandleReadSNCloudClusterFallsBackToKafkaCluster(t *testing.T) {
+	t.Parallel()
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/apis/cloud.streamnative.io/v1alpha1/namespaces/session-org/pulsarclusters":
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"items":[]}`))
+		case "/apis/cloud.streamnative.io/v1alpha1/namespaces/session-org/kafkaclusters/kc-test":
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"apiVersion":"cloud.streamnative.io/v1alpha1","kind":"KafkaCluster","metadata":{"name":"kc-test","managedFields":[{"manager":"controller"}]},"spec":{"instanceName":"inst-1"}}`))
+		default:
+			t.Fatalf("unexpected path %s", r.URL.Path)
+		}
+	}))
+	defer server.Close()
+
+	session, err := config.NewSNCloudSession(config.SNCloudContext{
+		JWTToken:     "token",
+		APIURL:       server.URL,
+		LogAPIURL:    server.URL,
+		Organization: "session-org",
+	})
+	if err != nil {
+		t.Fatalf("failed to create session: %v", err)
+	}
+
+	ctx := context.Background()
+	ctx = WithSNCloudSession(ctx, session)
+
+	result, err := HandleReadSNCloudCluster(ctx, mcp.GetPromptRequest{
+		Params: mcp.GetPromptParams{
+			Arguments: map[string]string{"name": "kc-test"},
+		},
+	})
+	if err != nil {
+		t.Fatalf("expected no handler error, got %v", err)
+	}
+	if len(result.Messages) != 1 {
+		t.Fatalf("expected one prompt message, got %d", len(result.Messages))
+	}
+
+	text, ok := result.Messages[0].Content.(mcp.TextContent)
+	if !ok {
+		t.Fatalf("expected text content, got %T", result.Messages[0].Content)
+	}
+	if !strings.Contains(text.Text, `"kind":"KafkaCluster"`) {
+		t.Fatalf("expected KafkaCluster payload, got %q", text.Text)
+	}
+	if strings.Contains(text.Text, "managedFields") {
+		t.Fatalf("expected managedFields to be removed, got %q", text.Text)
 	}
 }

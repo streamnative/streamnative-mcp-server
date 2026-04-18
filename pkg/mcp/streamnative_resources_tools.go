@@ -68,8 +68,8 @@ func NewSNCloudResourcesDeleteTool() mcp.Tool {
 			mcp.Description("The name of the resource to delete."),
 		),
 		mcp.WithString("type", mcp.Required(),
-			mcp.Description("The type of the resource to delete, it can be PulsarInstance or PulsarCluster."),
-			mcp.Enum("PulsarInstance", "PulsarCluster"),
+			mcp.Description("The type of the resource to delete, it can be PulsarInstance, PulsarCluster, or KafkaCluster."),
+			mcp.Enum("PulsarInstance", "PulsarCluster", "KafkaCluster"),
 		),
 		mcp.WithToolAnnotation(mcp.ToolAnnotation{
 			Title:           "Delete StreamNative Cloud Resources",
@@ -162,6 +162,8 @@ func applyResource(ctx context.Context, apiClient *sncloud.APIClient, resource R
 		return applyPulsarInstance(ctx, apiClient, jsonContent, organization, dryRun)
 	case apiVersion == "cloud.streamnative.io/v1alpha1" && kind == "PulsarCluster":
 		return applyPulsarCluster(ctx, apiClient, jsonContent, organization, dryRun)
+	case apiVersion == "cloud.streamnative.io/v1alpha1" && kind == "KafkaCluster":
+		return applyKafkaCluster(ctx, apiClient, jsonContent, organization, dryRun)
 	// Can add handling for more resource types
 	default:
 		return "", fmt.Errorf("unsupported resource type: %s/%s", apiVersion, kind)
@@ -344,6 +346,102 @@ func applyPulsarCluster(ctx context.Context, apiClient *sncloud.APIClient, jsonC
 	return fmt.Sprintf("PulsarCluster %q %s", name, verb), nil
 }
 
+func applyKafkaCluster(ctx context.Context, apiClient *sncloud.APIClient, jsonContent string, organization string, dryRun bool) (string, error) {
+	var cluster sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1KafkaCluster
+	if err := json.Unmarshal([]byte(jsonContent), &cluster); err != nil {
+		return "", fmt.Errorf("failed to unmarshal JSON to KafkaCluster: %v", err)
+	}
+
+	if cluster.Metadata == nil {
+		cluster.Metadata = &sncloud.V1ObjectMeta{}
+	}
+	if cluster.Metadata.Namespace == nil || *cluster.Metadata.Namespace == "" {
+		ns := organization
+		cluster.Metadata.Namespace = &ns
+	}
+
+	name := ""
+	if cluster.Metadata.Name != nil {
+		name = *cluster.Metadata.Name
+	}
+
+	exists := false
+	var existingResourceVersion *string
+	if name != "" {
+		existingCluster, bdy, err := apiClient.CloudStreamnativeIoV1alpha1Api.ReadCloudStreamnativeIoV1alpha1NamespacedKafkaCluster(ctx, name, organization).Execute()
+		defer func() {
+			if bdy != nil && bdy.Body != nil {
+				_ = bdy.Body.Close()
+			}
+		}()
+		if err == nil {
+			exists = true
+			if existingCluster.Metadata != nil && existingCluster.Metadata.ResourceVersion != nil {
+				existingResourceVersion = existingCluster.Metadata.ResourceVersion
+			}
+		}
+	}
+
+	var verb string
+	if exists {
+		verb = "updated"
+		if existingResourceVersion != nil && cluster.Metadata.ResourceVersion == nil {
+			cluster.Metadata.ResourceVersion = existingResourceVersion
+		}
+
+		request := apiClient.CloudStreamnativeIoV1alpha1Api.ReplaceCloudStreamnativeIoV1alpha1NamespacedKafkaCluster(
+			ctx, name, organization).Body(cluster)
+		if dryRun {
+			request = request.DryRun("All")
+		}
+		_, bdy, err := request.Execute()
+		defer func() {
+			if bdy != nil && bdy.Body != nil {
+				_ = bdy.Body.Close()
+			}
+		}()
+		if err != nil {
+			if bdy == nil || bdy.Body == nil {
+				return "", fmt.Errorf("failed to %s KafkaCluster: %v", verb, err)
+			}
+			body, innerErr := io.ReadAll(bdy.Body)
+			if innerErr != nil {
+				return "", fmt.Errorf("failed to read body: %v", innerErr)
+			}
+			return "", fmt.Errorf("failed to %s KafkaCluster: %v (%s)", verb, err, string(body))
+		}
+	} else {
+		verb = "created"
+
+		request := apiClient.CloudStreamnativeIoV1alpha1Api.CreateCloudStreamnativeIoV1alpha1NamespacedKafkaCluster(
+			ctx, organization).Body(cluster)
+		if dryRun {
+			request = request.DryRun("All")
+		}
+		_, bdy, err := request.Execute()
+		defer func() {
+			if bdy != nil && bdy.Body != nil {
+				_ = bdy.Body.Close()
+			}
+		}()
+		if err != nil {
+			if bdy == nil || bdy.Body == nil {
+				return "", fmt.Errorf("failed to %s KafkaCluster: %v", verb, err)
+			}
+			body, innerErr := io.ReadAll(bdy.Body)
+			if innerErr != nil {
+				return "", fmt.Errorf("failed to read body: %v", innerErr)
+			}
+			return "", fmt.Errorf("failed to %s KafkaCluster: %v (%s)", verb, err, string(body))
+		}
+	}
+
+	if dryRun {
+		return fmt.Sprintf("KafkaCluster %q would be %s (dry run)", name, verb), nil
+	}
+	return fmt.Sprintf("KafkaCluster %q %s", name, verb), nil
+}
+
 // HandleSNCloudResourcesDelete handles the StreamNative Cloud resource delete tool.
 func HandleSNCloudResourcesDelete(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	organization := resolveSNCloudOrganization(ctx)
@@ -379,6 +477,9 @@ func HandleSNCloudResourcesDelete(ctx context.Context, request mcp.CallToolReque
 	case "PulsarCluster":
 		//nolint:bodyclose
 		_, _, err = apiClient.CloudStreamnativeIoV1alpha1Api.DeleteCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(ctx, name, organization).Execute()
+	case "KafkaCluster":
+		//nolint:bodyclose
+		_, _, err = apiClient.CloudStreamnativeIoV1alpha1Api.DeleteCloudStreamnativeIoV1alpha1NamespacedKafkaCluster(ctx, name, organization).Execute()
 	default:
 		return mcp.NewToolResultError(fmt.Sprintf("Unsupported resource type: %s", resourceType)), nil
 	}
