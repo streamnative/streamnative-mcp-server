@@ -15,8 +15,8 @@ import (
 	"time"
 )
 
-// ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition Condition represents an observation of an object's state. Conditions are an extension mechanism intended to be used when the details of an observation are not a priori known or would not apply to all instances of a given Kind.  Conditions should be added to explicitly convey properties that users and components care about rather than requiring those properties to be inferred from other observations. Once defined, the meaning of a Condition can not be changed arbitrarily - it becomes part of the API, and has the same backwards- and forwards-compatibility concerns of any other part of the API.
-type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition struct {
+// ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner struct for ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner
+type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner struct {
 	// Time is a wrapper around time.Time which supports correct marshaling to YAML and JSON.  Wrappers are provided for many of the factory methods that the time package offers.
 	LastTransitionTime *time.Time `json:"lastTransitionTime,omitempty"`
 	Message *string `json:"message,omitempty"`
@@ -27,22 +27,22 @@ type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition struct {
 	Type string `json:"type"`
 }
 
-// NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition object
+// NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition(status string, type_ string) *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition {
-	this := ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition{}
+func NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner(status string, type_ string) *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner {
+	this := ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner{}
 	this.Status = status
 	this.Type = type_
 	return &this
 }
 
-// NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1ConditionWithDefaults instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition object
+// NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInnerWithDefaults instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1ConditionWithDefaults() *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition {
-	this := ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition{}
+func NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInnerWithDefaults() *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner {
+	this := ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner{}
 	var status string = ""
 	this.Status = status
 	var type_ string = ""
@@ -51,7 +51,7 @@ func NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1ConditionWithDefa
 }
 
 // GetLastTransitionTime returns the LastTransitionTime field value if set, zero value otherwise.
-func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) GetLastTransitionTime() time.Time {
+func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner) GetLastTransitionTime() time.Time {
 	if o == nil || o.LastTransitionTime == nil {
 		var ret time.Time
 		return ret
@@ -61,7 +61,7 @@ func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) GetLa
 
 // GetLastTransitionTimeOk returns a tuple with the LastTransitionTime field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) GetLastTransitionTimeOk() (*time.Time, bool) {
+func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner) GetLastTransitionTimeOk() (*time.Time, bool) {
 	if o == nil || o.LastTransitionTime == nil {
 		return nil, false
 	}
@@ -69,7 +69,7 @@ func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) GetLa
 }
 
 // HasLastTransitionTime returns a boolean if a field has been set.
-func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) HasLastTransitionTime() bool {
+func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner) HasLastTransitionTime() bool {
 	if o != nil && o.LastTransitionTime != nil {
 		return true
 	}
@@ -78,12 +78,12 @@ func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) HasLa
 }
 
 // SetLastTransitionTime gets a reference to the given time.Time and assigns it to the LastTransitionTime field.
-func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) SetLastTransitionTime(v time.Time) {
+func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner) SetLastTransitionTime(v time.Time) {
 	o.LastTransitionTime = &v
 }
 
 // GetMessage returns the Message field value if set, zero value otherwise.
-func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) GetMessage() string {
+func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner) GetMessage() string {
 	if o == nil || o.Message == nil {
 		var ret string
 		return ret
@@ -93,7 +93,7 @@ func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) GetMe
 
 // GetMessageOk returns a tuple with the Message field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) GetMessageOk() (*string, bool) {
+func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner) GetMessageOk() (*string, bool) {
 	if o == nil || o.Message == nil {
 		return nil, false
 	}
@@ -101,7 +101,7 @@ func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) GetMe
 }
 
 // HasMessage returns a boolean if a field has been set.
-func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) HasMessage() bool {
+func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner) HasMessage() bool {
 	if o != nil && o.Message != nil {
 		return true
 	}
@@ -110,12 +110,12 @@ func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) HasMe
 }
 
 // SetMessage gets a reference to the given string and assigns it to the Message field.
-func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) SetMessage(v string) {
+func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner) SetMessage(v string) {
 	o.Message = &v
 }
 
 // GetObservedGeneration returns the ObservedGeneration field value if set, zero value otherwise.
-func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) GetObservedGeneration() int64 {
+func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner) GetObservedGeneration() int64 {
 	if o == nil || o.ObservedGeneration == nil {
 		var ret int64
 		return ret
@@ -125,7 +125,7 @@ func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) GetOb
 
 // GetObservedGenerationOk returns a tuple with the ObservedGeneration field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) GetObservedGenerationOk() (*int64, bool) {
+func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner) GetObservedGenerationOk() (*int64, bool) {
 	if o == nil || o.ObservedGeneration == nil {
 		return nil, false
 	}
@@ -133,7 +133,7 @@ func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) GetOb
 }
 
 // HasObservedGeneration returns a boolean if a field has been set.
-func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) HasObservedGeneration() bool {
+func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner) HasObservedGeneration() bool {
 	if o != nil && o.ObservedGeneration != nil {
 		return true
 	}
@@ -142,12 +142,12 @@ func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) HasOb
 }
 
 // SetObservedGeneration gets a reference to the given int64 and assigns it to the ObservedGeneration field.
-func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) SetObservedGeneration(v int64) {
+func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner) SetObservedGeneration(v int64) {
 	o.ObservedGeneration = &v
 }
 
 // GetReason returns the Reason field value if set, zero value otherwise.
-func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) GetReason() string {
+func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner) GetReason() string {
 	if o == nil || o.Reason == nil {
 		var ret string
 		return ret
@@ -157,7 +157,7 @@ func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) GetRe
 
 // GetReasonOk returns a tuple with the Reason field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) GetReasonOk() (*string, bool) {
+func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner) GetReasonOk() (*string, bool) {
 	if o == nil || o.Reason == nil {
 		return nil, false
 	}
@@ -165,7 +165,7 @@ func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) GetRe
 }
 
 // HasReason returns a boolean if a field has been set.
-func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) HasReason() bool {
+func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner) HasReason() bool {
 	if o != nil && o.Reason != nil {
 		return true
 	}
@@ -174,12 +174,12 @@ func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) HasRe
 }
 
 // SetReason gets a reference to the given string and assigns it to the Reason field.
-func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) SetReason(v string) {
+func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner) SetReason(v string) {
 	o.Reason = &v
 }
 
 // GetStatus returns the Status field value
-func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) GetStatus() string {
+func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner) GetStatus() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -190,7 +190,7 @@ func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) GetSt
 
 // GetStatusOk returns a tuple with the Status field value
 // and a boolean to check if the value has been set.
-func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) GetStatusOk() (*string, bool) {
+func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner) GetStatusOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -198,12 +198,12 @@ func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) GetSt
 }
 
 // SetStatus sets field value
-func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) SetStatus(v string) {
+func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner) SetStatus(v string) {
 	o.Status = v
 }
 
 // GetType returns the Type field value
-func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) GetType() string {
+func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner) GetType() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -214,7 +214,7 @@ func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) GetTy
 
 // GetTypeOk returns a tuple with the Type field value
 // and a boolean to check if the value has been set.
-func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) GetTypeOk() (*string, bool) {
+func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner) GetTypeOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -222,11 +222,11 @@ func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) GetTy
 }
 
 // SetType sets field value
-func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) SetType(v string) {
+func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner) SetType(v string) {
 	o.Type = v
 }
 
-func (o ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) MarshalJSON() ([]byte, error) {
+func (o ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if o.LastTransitionTime != nil {
 		toSerialize["lastTransitionTime"] = o.LastTransitionTime
@@ -249,38 +249,38 @@ func (o ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) Marsha
 	return json.Marshal(toSerialize)
 }
 
-type NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition struct {
-	value *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition
+type NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner struct {
+	value *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner
 	isSet bool
 }
 
-func (v NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) Get() *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition {
+func (v NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner) Get() *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner {
 	return v.value
 }
 
-func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) Set(val *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) {
+func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner) Set(val *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) IsSet() bool {
+func (v NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) Unset() {
+func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition(val *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition {
-	return &NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition{value: val, isSet: true}
+func NewNullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner(val *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner) *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner {
+	return &NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner{value: val, isSet: true}
 }
 
-func (v NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) MarshalJSON() ([]byte, error) {
+func (v NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition) UnmarshalJSON(src []byte) error {
+func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatusConditionsInner) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

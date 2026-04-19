@@ -36,6 +36,10 @@ func NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolRef(name stri
 // but it doesn't guarantee that properties required by API are set
 func NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolRefWithDefaults() *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolRef {
 	this := ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolRef{}
+	var name string = ""
+	this.Name = name
+	var namespace string = ""
+	this.Namespace = namespace
 	return &this
 }
 

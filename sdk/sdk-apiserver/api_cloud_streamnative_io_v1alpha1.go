@@ -1759,6 +1759,298 @@ func (a *CloudStreamnativeIoV1alpha1ApiService) CreateCloudStreamnativeIoV1alpha
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type ApiCreateCloudStreamnativeIoV1alpha1NamespacedInstanceRequest struct {
+	ctx context.Context
+	ApiService *CloudStreamnativeIoV1alpha1ApiService
+	namespace string
+	body *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance
+	pretty *string
+	dryRun *string
+	fieldManager *string
+}
+
+func (r ApiCreateCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) Body(body ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance) ApiCreateCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.body = &body
+	return r
+}
+
+// If &#39;true&#39;, then the output is pretty printed.
+func (r ApiCreateCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) Pretty(pretty string) ApiCreateCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.pretty = &pretty
+	return r
+}
+
+// When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed
+func (r ApiCreateCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) DryRun(dryRun string) ApiCreateCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.dryRun = &dryRun
+	return r
+}
+
+// fieldManager is a name associated with the actor or entity that is making these changes. The value must be less than or 128 characters long, and only contain printable characters, as defined by https://golang.org/pkg/unicode/#IsPrint.
+func (r ApiCreateCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) FieldManager(fieldManager string) ApiCreateCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.fieldManager = &fieldManager
+	return r
+}
+
+func (r ApiCreateCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) Execute() (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance, *http.Response, error) {
+	return r.ApiService.CreateCloudStreamnativeIoV1alpha1NamespacedInstanceExecute(r)
+}
+
+/*
+CreateCloudStreamnativeIoV1alpha1NamespacedInstance Method for CreateCloudStreamnativeIoV1alpha1NamespacedInstance
+
+create a Instance
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiCreateCloudStreamnativeIoV1alpha1NamespacedInstanceRequest
+*/
+func (a *CloudStreamnativeIoV1alpha1ApiService) CreateCloudStreamnativeIoV1alpha1NamespacedInstance(ctx context.Context, namespace string) ApiCreateCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	return ApiCreateCloudStreamnativeIoV1alpha1NamespacedInstanceRequest{
+		ApiService: a,
+		ctx: ctx,
+		namespace: namespace,
+	}
+}
+
+// Execute executes the request
+//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance
+func (a *CloudStreamnativeIoV1alpha1ApiService) CreateCloudStreamnativeIoV1alpha1NamespacedInstanceExecute(r ApiCreateCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha1ApiService.CreateCloudStreamnativeIoV1alpha1NamespacedInstance")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/instances"
+	localVarPath = strings.Replace(localVarPath, "{"+"namespace"+"}", url.PathEscape(parameterToString(r.namespace, "")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.body == nil {
+		return localVarReturnValue, nil, reportError("body is required and must be specified")
+	}
+
+	if r.pretty != nil {
+		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	}
+	if r.dryRun != nil {
+		localVarQueryParams.Add("dryRun", parameterToString(*r.dryRun, ""))
+	}
+	if r.fieldManager != nil {
+		localVarQueryParams.Add("fieldManager", parameterToString(*r.fieldManager, ""))
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/yaml", "application/vnd.kubernetes.protobuf"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.body
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiCreateCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest struct {
+	ctx context.Context
+	ApiService *CloudStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	body *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance
+	pretty *string
+	dryRun *string
+	fieldManager *string
+}
+
+func (r ApiCreateCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) Body(body ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance) ApiCreateCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest {
+	r.body = &body
+	return r
+}
+
+// If &#39;true&#39;, then the output is pretty printed.
+func (r ApiCreateCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) Pretty(pretty string) ApiCreateCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest {
+	r.pretty = &pretty
+	return r
+}
+
+// When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed
+func (r ApiCreateCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) DryRun(dryRun string) ApiCreateCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest {
+	r.dryRun = &dryRun
+	return r
+}
+
+// fieldManager is a name associated with the actor or entity that is making these changes. The value must be less than or 128 characters long, and only contain printable characters, as defined by https://golang.org/pkg/unicode/#IsPrint.
+func (r ApiCreateCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) FieldManager(fieldManager string) ApiCreateCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest {
+	r.fieldManager = &fieldManager
+	return r
+}
+
+func (r ApiCreateCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) Execute() (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance, *http.Response, error) {
+	return r.ApiService.CreateCloudStreamnativeIoV1alpha1NamespacedInstanceStatusExecute(r)
+}
+
+/*
+CreateCloudStreamnativeIoV1alpha1NamespacedInstanceStatus Method for CreateCloudStreamnativeIoV1alpha1NamespacedInstanceStatus
+
+create status of a Instance
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the Instance
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiCreateCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest
+*/
+func (a *CloudStreamnativeIoV1alpha1ApiService) CreateCloudStreamnativeIoV1alpha1NamespacedInstanceStatus(ctx context.Context, name string, namespace string) ApiCreateCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest {
+	return ApiCreateCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest{
+		ApiService: a,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
+	}
+}
+
+// Execute executes the request
+//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance
+func (a *CloudStreamnativeIoV1alpha1ApiService) CreateCloudStreamnativeIoV1alpha1NamespacedInstanceStatusExecute(r ApiCreateCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha1ApiService.CreateCloudStreamnativeIoV1alpha1NamespacedInstanceStatus")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/instances/{name}/status"
+	localVarPath = strings.Replace(localVarPath, "{"+"name"+"}", url.PathEscape(parameterToString(r.name, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"namespace"+"}", url.PathEscape(parameterToString(r.namespace, "")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.body == nil {
+		return localVarReturnValue, nil, reportError("body is required and must be specified")
+	}
+
+	if r.pretty != nil {
+		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	}
+	if r.dryRun != nil {
+		localVarQueryParams.Add("dryRun", parameterToString(*r.dryRun, ""))
+	}
+	if r.fieldManager != nil {
+		localVarQueryParams.Add("fieldManager", parameterToString(*r.fieldManager, ""))
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/yaml", "application/vnd.kubernetes.protobuf"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.body
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 type ApiCreateCloudStreamnativeIoV1alpha1NamespacedKafkaClusterRequest struct {
 	ctx context.Context
 	ApiService *CloudStreamnativeIoV1alpha1ApiService
@@ -8585,6 +8877,237 @@ func (a *CloudStreamnativeIoV1alpha1ApiService) DeleteCloudStreamnativeIoV1alpha
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type ApiDeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstanceRequest struct {
+	ctx context.Context
+	ApiService *CloudStreamnativeIoV1alpha1ApiService
+	namespace string
+	pretty *string
+	continue_ *string
+	dryRun *string
+	fieldSelector *string
+	gracePeriodSeconds *int32
+	labelSelector *string
+	limit *int32
+	orphanDependents *bool
+	propagationPolicy *string
+	resourceVersion *string
+	resourceVersionMatch *string
+	timeoutSeconds *int32
+	body *V1DeleteOptions
+}
+
+// If &#39;true&#39;, then the output is pretty printed.
+func (r ApiDeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstanceRequest) Pretty(pretty string) ApiDeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstanceRequest {
+	r.pretty = &pretty
+	return r
+}
+
+// The continue option should be set when retrieving more results from the server. Since this value is server defined, clients may only use the continue value from a previous query result with identical query parameters (except for the value of continue) and the server may reject a continue value it does not recognize. If the specified continue value is no longer valid whether due to expiration (generally five to fifteen minutes) or a configuration change on the server, the server will respond with a 410 ResourceExpired error together with a continue token. If the client needs a consistent list, it must restart their list without the continue field. Otherwise, the client may send another list request with the token received with the 410 error, the server will respond with a list starting from the next key, but from the latest snapshot, which is inconsistent from the previous list results - objects that are created, modified, or deleted after the first list request will be included in the response, as long as their keys are after the \&quot;next key\&quot;.  This field is not supported when watch is true. Clients may start a watch from the last resourceVersion value returned by the server and not miss any modifications.
+func (r ApiDeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstanceRequest) Continue_(continue_ string) ApiDeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstanceRequest {
+	r.continue_ = &continue_
+	return r
+}
+
+// When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed
+func (r ApiDeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstanceRequest) DryRun(dryRun string) ApiDeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstanceRequest {
+	r.dryRun = &dryRun
+	return r
+}
+
+// A selector to restrict the list of returned objects by their fields. Defaults to everything.
+func (r ApiDeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstanceRequest) FieldSelector(fieldSelector string) ApiDeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstanceRequest {
+	r.fieldSelector = &fieldSelector
+	return r
+}
+
+// The duration in seconds before the object should be deleted. Value must be non-negative integer. The value zero indicates delete immediately. If this value is nil, the default grace period for the specified type will be used. Defaults to a per object value if not specified. zero means delete immediately.
+func (r ApiDeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstanceRequest) GracePeriodSeconds(gracePeriodSeconds int32) ApiDeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstanceRequest {
+	r.gracePeriodSeconds = &gracePeriodSeconds
+	return r
+}
+
+// A selector to restrict the list of returned objects by their labels. Defaults to everything.
+func (r ApiDeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstanceRequest) LabelSelector(labelSelector string) ApiDeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstanceRequest {
+	r.labelSelector = &labelSelector
+	return r
+}
+
+// limit is a maximum number of responses to return for a list call. If more items exist, the server will set the &#x60;continue&#x60; field on the list metadata to a value that can be used with the same initial query to retrieve the next set of results. Setting a limit may return fewer than the requested amount of items (up to zero items) in the event all requested objects are filtered out and clients should only use the presence of the continue field to determine whether more results are available. Servers may choose not to support the limit argument and will return all of the available results. If limit is specified and the continue field is empty, clients may assume that no more results are available. This field is not supported if watch is true.  The server guarantees that the objects returned when using continue will be identical to issuing a single list call without a limit - that is, no objects created, modified, or deleted after the first request is issued will be included in any subsequent continued requests. This is sometimes referred to as a consistent snapshot, and ensures that a client that is using limit to receive smaller chunks of a very large result can ensure they see all possible objects. If objects are updated during a chunked list the version of the object that was present at the time the first list result was calculated is returned.
+func (r ApiDeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstanceRequest) Limit(limit int32) ApiDeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstanceRequest {
+	r.limit = &limit
+	return r
+}
+
+// Deprecated: please use the PropagationPolicy, this field will be deprecated in 1.7. Should the dependent objects be orphaned. If true/false, the \&quot;orphan\&quot; finalizer will be added to/removed from the object&#39;s finalizers list. Either this field or PropagationPolicy may be set, but not both.
+func (r ApiDeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstanceRequest) OrphanDependents(orphanDependents bool) ApiDeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstanceRequest {
+	r.orphanDependents = &orphanDependents
+	return r
+}
+
+// Whether and how garbage collection will be performed. Either this field or OrphanDependents may be set, but not both. The default policy is decided by the existing finalizer set in the metadata.finalizers and the resource-specific default policy. Acceptable values are: &#39;Orphan&#39; - orphan the dependents; &#39;Background&#39; - allow the garbage collector to delete the dependents in the background; &#39;Foreground&#39; - a cascading policy that deletes all dependents in the foreground.
+func (r ApiDeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstanceRequest) PropagationPolicy(propagationPolicy string) ApiDeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstanceRequest {
+	r.propagationPolicy = &propagationPolicy
+	return r
+}
+
+// resourceVersion sets a constraint on what resource versions a request may be served from. See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset
+func (r ApiDeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstanceRequest) ResourceVersion(resourceVersion string) ApiDeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstanceRequest {
+	r.resourceVersion = &resourceVersion
+	return r
+}
+
+// resourceVersionMatch determines how resourceVersion is applied to list calls. It is highly recommended that resourceVersionMatch be set for list calls where resourceVersion is set See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset
+func (r ApiDeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstanceRequest) ResourceVersionMatch(resourceVersionMatch string) ApiDeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstanceRequest {
+	r.resourceVersionMatch = &resourceVersionMatch
+	return r
+}
+
+// Timeout for the list/watch call. This limits the duration of the call, regardless of any activity or inactivity.
+func (r ApiDeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstanceRequest) TimeoutSeconds(timeoutSeconds int32) ApiDeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstanceRequest {
+	r.timeoutSeconds = &timeoutSeconds
+	return r
+}
+
+func (r ApiDeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstanceRequest) Body(body V1DeleteOptions) ApiDeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstanceRequest {
+	r.body = &body
+	return r
+}
+
+func (r ApiDeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstanceRequest) Execute() (*V1Status, *http.Response, error) {
+	return r.ApiService.DeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstanceExecute(r)
+}
+
+/*
+DeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstance Method for DeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstance
+
+delete collection of Instance
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiDeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstanceRequest
+*/
+func (a *CloudStreamnativeIoV1alpha1ApiService) DeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstance(ctx context.Context, namespace string) ApiDeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstanceRequest {
+	return ApiDeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstanceRequest{
+		ApiService: a,
+		ctx: ctx,
+		namespace: namespace,
+	}
+}
+
+// Execute executes the request
+//  @return V1Status
+func (a *CloudStreamnativeIoV1alpha1ApiService) DeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstanceExecute(r ApiDeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstanceRequest) (*V1Status, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1Status
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha1ApiService.DeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstance")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/instances"
+	localVarPath = strings.Replace(localVarPath, "{"+"namespace"+"}", url.PathEscape(parameterToString(r.namespace, "")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.pretty != nil {
+		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	}
+	if r.continue_ != nil {
+		localVarQueryParams.Add("continue", parameterToString(*r.continue_, ""))
+	}
+	if r.dryRun != nil {
+		localVarQueryParams.Add("dryRun", parameterToString(*r.dryRun, ""))
+	}
+	if r.fieldSelector != nil {
+		localVarQueryParams.Add("fieldSelector", parameterToString(*r.fieldSelector, ""))
+	}
+	if r.gracePeriodSeconds != nil {
+		localVarQueryParams.Add("gracePeriodSeconds", parameterToString(*r.gracePeriodSeconds, ""))
+	}
+	if r.labelSelector != nil {
+		localVarQueryParams.Add("labelSelector", parameterToString(*r.labelSelector, ""))
+	}
+	if r.limit != nil {
+		localVarQueryParams.Add("limit", parameterToString(*r.limit, ""))
+	}
+	if r.orphanDependents != nil {
+		localVarQueryParams.Add("orphanDependents", parameterToString(*r.orphanDependents, ""))
+	}
+	if r.propagationPolicy != nil {
+		localVarQueryParams.Add("propagationPolicy", parameterToString(*r.propagationPolicy, ""))
+	}
+	if r.resourceVersion != nil {
+		localVarQueryParams.Add("resourceVersion", parameterToString(*r.resourceVersion, ""))
+	}
+	if r.resourceVersionMatch != nil {
+		localVarQueryParams.Add("resourceVersionMatch", parameterToString(*r.resourceVersionMatch, ""))
+	}
+	if r.timeoutSeconds != nil {
+		localVarQueryParams.Add("timeoutSeconds", parameterToString(*r.timeoutSeconds, ""))
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/yaml", "application/vnd.kubernetes.protobuf"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.body
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 type ApiDeleteCloudStreamnativeIoV1alpha1CollectionNamespacedKafkaClusterRequest struct {
 	ctx context.Context
 	ApiService *CloudStreamnativeIoV1alpha1ApiService
@@ -13519,6 +14042,336 @@ func (a *CloudStreamnativeIoV1alpha1ApiService) DeleteCloudStreamnativeIoV1alpha
 	}
 
 	localVarPath := localBasePath + "/apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/identitypools/{name}/status"
+	localVarPath = strings.Replace(localVarPath, "{"+"name"+"}", url.PathEscape(parameterToString(r.name, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"namespace"+"}", url.PathEscape(parameterToString(r.namespace, "")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.pretty != nil {
+		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	}
+	if r.dryRun != nil {
+		localVarQueryParams.Add("dryRun", parameterToString(*r.dryRun, ""))
+	}
+	if r.gracePeriodSeconds != nil {
+		localVarQueryParams.Add("gracePeriodSeconds", parameterToString(*r.gracePeriodSeconds, ""))
+	}
+	if r.orphanDependents != nil {
+		localVarQueryParams.Add("orphanDependents", parameterToString(*r.orphanDependents, ""))
+	}
+	if r.propagationPolicy != nil {
+		localVarQueryParams.Add("propagationPolicy", parameterToString(*r.propagationPolicy, ""))
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/yaml", "application/vnd.kubernetes.protobuf"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.body
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceRequest struct {
+	ctx context.Context
+	ApiService *CloudStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	pretty *string
+	dryRun *string
+	gracePeriodSeconds *int32
+	orphanDependents *bool
+	propagationPolicy *string
+	body *V1DeleteOptions
+}
+
+// If &#39;true&#39;, then the output is pretty printed.
+func (r ApiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) Pretty(pretty string) ApiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.pretty = &pretty
+	return r
+}
+
+// When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed
+func (r ApiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) DryRun(dryRun string) ApiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.dryRun = &dryRun
+	return r
+}
+
+// The duration in seconds before the object should be deleted. Value must be non-negative integer. The value zero indicates delete immediately. If this value is nil, the default grace period for the specified type will be used. Defaults to a per object value if not specified. zero means delete immediately.
+func (r ApiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) GracePeriodSeconds(gracePeriodSeconds int32) ApiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.gracePeriodSeconds = &gracePeriodSeconds
+	return r
+}
+
+// Deprecated: please use the PropagationPolicy, this field will be deprecated in 1.7. Should the dependent objects be orphaned. If true/false, the \&quot;orphan\&quot; finalizer will be added to/removed from the object&#39;s finalizers list. Either this field or PropagationPolicy may be set, but not both.
+func (r ApiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) OrphanDependents(orphanDependents bool) ApiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.orphanDependents = &orphanDependents
+	return r
+}
+
+// Whether and how garbage collection will be performed. Either this field or OrphanDependents may be set, but not both. The default policy is decided by the existing finalizer set in the metadata.finalizers and the resource-specific default policy. Acceptable values are: &#39;Orphan&#39; - orphan the dependents; &#39;Background&#39; - allow the garbage collector to delete the dependents in the background; &#39;Foreground&#39; - a cascading policy that deletes all dependents in the foreground.
+func (r ApiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) PropagationPolicy(propagationPolicy string) ApiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.propagationPolicy = &propagationPolicy
+	return r
+}
+
+func (r ApiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) Body(body V1DeleteOptions) ApiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.body = &body
+	return r
+}
+
+func (r ApiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) Execute() (*V1Status, *http.Response, error) {
+	return r.ApiService.DeleteCloudStreamnativeIoV1alpha1NamespacedInstanceExecute(r)
+}
+
+/*
+DeleteCloudStreamnativeIoV1alpha1NamespacedInstance Method for DeleteCloudStreamnativeIoV1alpha1NamespacedInstance
+
+delete a Instance
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the Instance
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceRequest
+*/
+func (a *CloudStreamnativeIoV1alpha1ApiService) DeleteCloudStreamnativeIoV1alpha1NamespacedInstance(ctx context.Context, name string, namespace string) ApiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	return ApiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceRequest{
+		ApiService: a,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
+	}
+}
+
+// Execute executes the request
+//  @return V1Status
+func (a *CloudStreamnativeIoV1alpha1ApiService) DeleteCloudStreamnativeIoV1alpha1NamespacedInstanceExecute(r ApiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) (*V1Status, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1Status
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha1ApiService.DeleteCloudStreamnativeIoV1alpha1NamespacedInstance")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/instances/{name}"
+	localVarPath = strings.Replace(localVarPath, "{"+"name"+"}", url.PathEscape(parameterToString(r.name, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"namespace"+"}", url.PathEscape(parameterToString(r.namespace, "")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.pretty != nil {
+		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	}
+	if r.dryRun != nil {
+		localVarQueryParams.Add("dryRun", parameterToString(*r.dryRun, ""))
+	}
+	if r.gracePeriodSeconds != nil {
+		localVarQueryParams.Add("gracePeriodSeconds", parameterToString(*r.gracePeriodSeconds, ""))
+	}
+	if r.orphanDependents != nil {
+		localVarQueryParams.Add("orphanDependents", parameterToString(*r.orphanDependents, ""))
+	}
+	if r.propagationPolicy != nil {
+		localVarQueryParams.Add("propagationPolicy", parameterToString(*r.propagationPolicy, ""))
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/yaml", "application/vnd.kubernetes.protobuf"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.body
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest struct {
+	ctx context.Context
+	ApiService *CloudStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	pretty *string
+	dryRun *string
+	gracePeriodSeconds *int32
+	orphanDependents *bool
+	propagationPolicy *string
+	body *V1DeleteOptions
+}
+
+// If &#39;true&#39;, then the output is pretty printed.
+func (r ApiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) Pretty(pretty string) ApiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest {
+	r.pretty = &pretty
+	return r
+}
+
+// When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed
+func (r ApiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) DryRun(dryRun string) ApiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest {
+	r.dryRun = &dryRun
+	return r
+}
+
+// The duration in seconds before the object should be deleted. Value must be non-negative integer. The value zero indicates delete immediately. If this value is nil, the default grace period for the specified type will be used. Defaults to a per object value if not specified. zero means delete immediately.
+func (r ApiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) GracePeriodSeconds(gracePeriodSeconds int32) ApiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest {
+	r.gracePeriodSeconds = &gracePeriodSeconds
+	return r
+}
+
+// Deprecated: please use the PropagationPolicy, this field will be deprecated in 1.7. Should the dependent objects be orphaned. If true/false, the \&quot;orphan\&quot; finalizer will be added to/removed from the object&#39;s finalizers list. Either this field or PropagationPolicy may be set, but not both.
+func (r ApiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) OrphanDependents(orphanDependents bool) ApiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest {
+	r.orphanDependents = &orphanDependents
+	return r
+}
+
+// Whether and how garbage collection will be performed. Either this field or OrphanDependents may be set, but not both. The default policy is decided by the existing finalizer set in the metadata.finalizers and the resource-specific default policy. Acceptable values are: &#39;Orphan&#39; - orphan the dependents; &#39;Background&#39; - allow the garbage collector to delete the dependents in the background; &#39;Foreground&#39; - a cascading policy that deletes all dependents in the foreground.
+func (r ApiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) PropagationPolicy(propagationPolicy string) ApiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest {
+	r.propagationPolicy = &propagationPolicy
+	return r
+}
+
+func (r ApiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) Body(body V1DeleteOptions) ApiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest {
+	r.body = &body
+	return r
+}
+
+func (r ApiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) Execute() (*V1Status, *http.Response, error) {
+	return r.ApiService.DeleteCloudStreamnativeIoV1alpha1NamespacedInstanceStatusExecute(r)
+}
+
+/*
+DeleteCloudStreamnativeIoV1alpha1NamespacedInstanceStatus Method for DeleteCloudStreamnativeIoV1alpha1NamespacedInstanceStatus
+
+delete status of a Instance
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the Instance
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest
+*/
+func (a *CloudStreamnativeIoV1alpha1ApiService) DeleteCloudStreamnativeIoV1alpha1NamespacedInstanceStatus(ctx context.Context, name string, namespace string) ApiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest {
+	return ApiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest{
+		ApiService: a,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
+	}
+}
+
+// Execute executes the request
+//  @return V1Status
+func (a *CloudStreamnativeIoV1alpha1ApiService) DeleteCloudStreamnativeIoV1alpha1NamespacedInstanceStatusExecute(r ApiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) (*V1Status, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1Status
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha1ApiService.DeleteCloudStreamnativeIoV1alpha1NamespacedInstanceStatus")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/instances/{name}/status"
 	localVarPath = strings.Replace(localVarPath, "{"+"name"+"}", url.PathEscape(parameterToString(r.name, "")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"namespace"+"}", url.PathEscape(parameterToString(r.namespace, "")), -1)
 
@@ -20162,6 +21015,205 @@ func (a *CloudStreamnativeIoV1alpha1ApiService) ListCloudStreamnativeIoV1alpha1I
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type ApiListCloudStreamnativeIoV1alpha1InstanceForAllNamespacesRequest struct {
+	ctx context.Context
+	ApiService *CloudStreamnativeIoV1alpha1ApiService
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
+	resourceVersionMatch *string
+	timeoutSeconds *int32
+	watch *bool
+}
+
+// allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
+func (r ApiListCloudStreamnativeIoV1alpha1InstanceForAllNamespacesRequest) AllowWatchBookmarks(allowWatchBookmarks bool) ApiListCloudStreamnativeIoV1alpha1InstanceForAllNamespacesRequest {
+	r.allowWatchBookmarks = &allowWatchBookmarks
+	return r
+}
+
+// The continue option should be set when retrieving more results from the server. Since this value is server defined, clients may only use the continue value from a previous query result with identical query parameters (except for the value of continue) and the server may reject a continue value it does not recognize. If the specified continue value is no longer valid whether due to expiration (generally five to fifteen minutes) or a configuration change on the server, the server will respond with a 410 ResourceExpired error together with a continue token. If the client needs a consistent list, it must restart their list without the continue field. Otherwise, the client may send another list request with the token received with the 410 error, the server will respond with a list starting from the next key, but from the latest snapshot, which is inconsistent from the previous list results - objects that are created, modified, or deleted after the first list request will be included in the response, as long as their keys are after the \&quot;next key\&quot;.  This field is not supported when watch is true. Clients may start a watch from the last resourceVersion value returned by the server and not miss any modifications.
+func (r ApiListCloudStreamnativeIoV1alpha1InstanceForAllNamespacesRequest) Continue_(continue_ string) ApiListCloudStreamnativeIoV1alpha1InstanceForAllNamespacesRequest {
+	r.continue_ = &continue_
+	return r
+}
+
+// A selector to restrict the list of returned objects by their fields. Defaults to everything.
+func (r ApiListCloudStreamnativeIoV1alpha1InstanceForAllNamespacesRequest) FieldSelector(fieldSelector string) ApiListCloudStreamnativeIoV1alpha1InstanceForAllNamespacesRequest {
+	r.fieldSelector = &fieldSelector
+	return r
+}
+
+// A selector to restrict the list of returned objects by their labels. Defaults to everything.
+func (r ApiListCloudStreamnativeIoV1alpha1InstanceForAllNamespacesRequest) LabelSelector(labelSelector string) ApiListCloudStreamnativeIoV1alpha1InstanceForAllNamespacesRequest {
+	r.labelSelector = &labelSelector
+	return r
+}
+
+// limit is a maximum number of responses to return for a list call. If more items exist, the server will set the &#x60;continue&#x60; field on the list metadata to a value that can be used with the same initial query to retrieve the next set of results. Setting a limit may return fewer than the requested amount of items (up to zero items) in the event all requested objects are filtered out and clients should only use the presence of the continue field to determine whether more results are available. Servers may choose not to support the limit argument and will return all of the available results. If limit is specified and the continue field is empty, clients may assume that no more results are available. This field is not supported if watch is true.  The server guarantees that the objects returned when using continue will be identical to issuing a single list call without a limit - that is, no objects created, modified, or deleted after the first request is issued will be included in any subsequent continued requests. This is sometimes referred to as a consistent snapshot, and ensures that a client that is using limit to receive smaller chunks of a very large result can ensure they see all possible objects. If objects are updated during a chunked list the version of the object that was present at the time the first list result was calculated is returned.
+func (r ApiListCloudStreamnativeIoV1alpha1InstanceForAllNamespacesRequest) Limit(limit int32) ApiListCloudStreamnativeIoV1alpha1InstanceForAllNamespacesRequest {
+	r.limit = &limit
+	return r
+}
+
+// If &#39;true&#39;, then the output is pretty printed.
+func (r ApiListCloudStreamnativeIoV1alpha1InstanceForAllNamespacesRequest) Pretty(pretty string) ApiListCloudStreamnativeIoV1alpha1InstanceForAllNamespacesRequest {
+	r.pretty = &pretty
+	return r
+}
+
+// resourceVersion sets a constraint on what resource versions a request may be served from. See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset
+func (r ApiListCloudStreamnativeIoV1alpha1InstanceForAllNamespacesRequest) ResourceVersion(resourceVersion string) ApiListCloudStreamnativeIoV1alpha1InstanceForAllNamespacesRequest {
+	r.resourceVersion = &resourceVersion
+	return r
+}
+
+// resourceVersionMatch determines how resourceVersion is applied to list calls. It is highly recommended that resourceVersionMatch be set for list calls where resourceVersion is set See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset
+func (r ApiListCloudStreamnativeIoV1alpha1InstanceForAllNamespacesRequest) ResourceVersionMatch(resourceVersionMatch string) ApiListCloudStreamnativeIoV1alpha1InstanceForAllNamespacesRequest {
+	r.resourceVersionMatch = &resourceVersionMatch
+	return r
+}
+
+// Timeout for the list/watch call. This limits the duration of the call, regardless of any activity or inactivity.
+func (r ApiListCloudStreamnativeIoV1alpha1InstanceForAllNamespacesRequest) TimeoutSeconds(timeoutSeconds int32) ApiListCloudStreamnativeIoV1alpha1InstanceForAllNamespacesRequest {
+	r.timeoutSeconds = &timeoutSeconds
+	return r
+}
+
+// Watch for changes to the described resources and return them as a stream of add, update, and remove notifications. Specify resourceVersion.
+func (r ApiListCloudStreamnativeIoV1alpha1InstanceForAllNamespacesRequest) Watch(watch bool) ApiListCloudStreamnativeIoV1alpha1InstanceForAllNamespacesRequest {
+	r.watch = &watch
+	return r
+}
+
+func (r ApiListCloudStreamnativeIoV1alpha1InstanceForAllNamespacesRequest) Execute() (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceList, *http.Response, error) {
+	return r.ApiService.ListCloudStreamnativeIoV1alpha1InstanceForAllNamespacesExecute(r)
+}
+
+/*
+ListCloudStreamnativeIoV1alpha1InstanceForAllNamespaces Method for ListCloudStreamnativeIoV1alpha1InstanceForAllNamespaces
+
+list or watch objects of kind Instance
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiListCloudStreamnativeIoV1alpha1InstanceForAllNamespacesRequest
+*/
+func (a *CloudStreamnativeIoV1alpha1ApiService) ListCloudStreamnativeIoV1alpha1InstanceForAllNamespaces(ctx context.Context) ApiListCloudStreamnativeIoV1alpha1InstanceForAllNamespacesRequest {
+	return ApiListCloudStreamnativeIoV1alpha1InstanceForAllNamespacesRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceList
+func (a *CloudStreamnativeIoV1alpha1ApiService) ListCloudStreamnativeIoV1alpha1InstanceForAllNamespacesExecute(r ApiListCloudStreamnativeIoV1alpha1InstanceForAllNamespacesRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceList, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceList
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha1ApiService.ListCloudStreamnativeIoV1alpha1InstanceForAllNamespaces")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/apis/cloud.streamnative.io/v1alpha1/instances"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.allowWatchBookmarks != nil {
+		localVarQueryParams.Add("allowWatchBookmarks", parameterToString(*r.allowWatchBookmarks, ""))
+	}
+	if r.continue_ != nil {
+		localVarQueryParams.Add("continue", parameterToString(*r.continue_, ""))
+	}
+	if r.fieldSelector != nil {
+		localVarQueryParams.Add("fieldSelector", parameterToString(*r.fieldSelector, ""))
+	}
+	if r.labelSelector != nil {
+		localVarQueryParams.Add("labelSelector", parameterToString(*r.labelSelector, ""))
+	}
+	if r.limit != nil {
+		localVarQueryParams.Add("limit", parameterToString(*r.limit, ""))
+	}
+	if r.pretty != nil {
+		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	}
+	if r.resourceVersion != nil {
+		localVarQueryParams.Add("resourceVersion", parameterToString(*r.resourceVersion, ""))
+	}
+	if r.resourceVersionMatch != nil {
+		localVarQueryParams.Add("resourceVersionMatch", parameterToString(*r.resourceVersionMatch, ""))
+	}
+	if r.timeoutSeconds != nil {
+		localVarQueryParams.Add("timeoutSeconds", parameterToString(*r.timeoutSeconds, ""))
+	}
+	if r.watch != nil {
+		localVarQueryParams.Add("watch", parameterToString(*r.watch, ""))
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/yaml", "application/vnd.kubernetes.protobuf", "application/json;stream=watch", "application/vnd.kubernetes.protobuf;stream=watch"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 type ApiListCloudStreamnativeIoV1alpha1KafkaClusterForAllNamespacesRequest struct {
 	ctx context.Context
 	ApiService *CloudStreamnativeIoV1alpha1ApiService
@@ -21083,6 +22135,209 @@ func (a *CloudStreamnativeIoV1alpha1ApiService) ListCloudStreamnativeIoV1alpha1N
 	}
 
 	localVarPath := localBasePath + "/apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/identitypools"
+	localVarPath = strings.Replace(localVarPath, "{"+"namespace"+"}", url.PathEscape(parameterToString(r.namespace, "")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.pretty != nil {
+		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	}
+	if r.allowWatchBookmarks != nil {
+		localVarQueryParams.Add("allowWatchBookmarks", parameterToString(*r.allowWatchBookmarks, ""))
+	}
+	if r.continue_ != nil {
+		localVarQueryParams.Add("continue", parameterToString(*r.continue_, ""))
+	}
+	if r.fieldSelector != nil {
+		localVarQueryParams.Add("fieldSelector", parameterToString(*r.fieldSelector, ""))
+	}
+	if r.labelSelector != nil {
+		localVarQueryParams.Add("labelSelector", parameterToString(*r.labelSelector, ""))
+	}
+	if r.limit != nil {
+		localVarQueryParams.Add("limit", parameterToString(*r.limit, ""))
+	}
+	if r.resourceVersion != nil {
+		localVarQueryParams.Add("resourceVersion", parameterToString(*r.resourceVersion, ""))
+	}
+	if r.resourceVersionMatch != nil {
+		localVarQueryParams.Add("resourceVersionMatch", parameterToString(*r.resourceVersionMatch, ""))
+	}
+	if r.timeoutSeconds != nil {
+		localVarQueryParams.Add("timeoutSeconds", parameterToString(*r.timeoutSeconds, ""))
+	}
+	if r.watch != nil {
+		localVarQueryParams.Add("watch", parameterToString(*r.watch, ""))
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/yaml", "application/vnd.kubernetes.protobuf", "application/json;stream=watch", "application/vnd.kubernetes.protobuf;stream=watch"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiListCloudStreamnativeIoV1alpha1NamespacedInstanceRequest struct {
+	ctx context.Context
+	ApiService *CloudStreamnativeIoV1alpha1ApiService
+	namespace string
+	pretty *string
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	resourceVersion *string
+	resourceVersionMatch *string
+	timeoutSeconds *int32
+	watch *bool
+}
+
+// If &#39;true&#39;, then the output is pretty printed.
+func (r ApiListCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) Pretty(pretty string) ApiListCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.pretty = &pretty
+	return r
+}
+
+// allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
+func (r ApiListCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) AllowWatchBookmarks(allowWatchBookmarks bool) ApiListCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.allowWatchBookmarks = &allowWatchBookmarks
+	return r
+}
+
+// The continue option should be set when retrieving more results from the server. Since this value is server defined, clients may only use the continue value from a previous query result with identical query parameters (except for the value of continue) and the server may reject a continue value it does not recognize. If the specified continue value is no longer valid whether due to expiration (generally five to fifteen minutes) or a configuration change on the server, the server will respond with a 410 ResourceExpired error together with a continue token. If the client needs a consistent list, it must restart their list without the continue field. Otherwise, the client may send another list request with the token received with the 410 error, the server will respond with a list starting from the next key, but from the latest snapshot, which is inconsistent from the previous list results - objects that are created, modified, or deleted after the first list request will be included in the response, as long as their keys are after the \&quot;next key\&quot;.  This field is not supported when watch is true. Clients may start a watch from the last resourceVersion value returned by the server and not miss any modifications.
+func (r ApiListCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) Continue_(continue_ string) ApiListCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.continue_ = &continue_
+	return r
+}
+
+// A selector to restrict the list of returned objects by their fields. Defaults to everything.
+func (r ApiListCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) FieldSelector(fieldSelector string) ApiListCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.fieldSelector = &fieldSelector
+	return r
+}
+
+// A selector to restrict the list of returned objects by their labels. Defaults to everything.
+func (r ApiListCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) LabelSelector(labelSelector string) ApiListCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.labelSelector = &labelSelector
+	return r
+}
+
+// limit is a maximum number of responses to return for a list call. If more items exist, the server will set the &#x60;continue&#x60; field on the list metadata to a value that can be used with the same initial query to retrieve the next set of results. Setting a limit may return fewer than the requested amount of items (up to zero items) in the event all requested objects are filtered out and clients should only use the presence of the continue field to determine whether more results are available. Servers may choose not to support the limit argument and will return all of the available results. If limit is specified and the continue field is empty, clients may assume that no more results are available. This field is not supported if watch is true.  The server guarantees that the objects returned when using continue will be identical to issuing a single list call without a limit - that is, no objects created, modified, or deleted after the first request is issued will be included in any subsequent continued requests. This is sometimes referred to as a consistent snapshot, and ensures that a client that is using limit to receive smaller chunks of a very large result can ensure they see all possible objects. If objects are updated during a chunked list the version of the object that was present at the time the first list result was calculated is returned.
+func (r ApiListCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) Limit(limit int32) ApiListCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.limit = &limit
+	return r
+}
+
+// resourceVersion sets a constraint on what resource versions a request may be served from. See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset
+func (r ApiListCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) ResourceVersion(resourceVersion string) ApiListCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.resourceVersion = &resourceVersion
+	return r
+}
+
+// resourceVersionMatch determines how resourceVersion is applied to list calls. It is highly recommended that resourceVersionMatch be set for list calls where resourceVersion is set See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset
+func (r ApiListCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) ResourceVersionMatch(resourceVersionMatch string) ApiListCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.resourceVersionMatch = &resourceVersionMatch
+	return r
+}
+
+// Timeout for the list/watch call. This limits the duration of the call, regardless of any activity or inactivity.
+func (r ApiListCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) TimeoutSeconds(timeoutSeconds int32) ApiListCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.timeoutSeconds = &timeoutSeconds
+	return r
+}
+
+// Watch for changes to the described resources and return them as a stream of add, update, and remove notifications. Specify resourceVersion.
+func (r ApiListCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) Watch(watch bool) ApiListCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.watch = &watch
+	return r
+}
+
+func (r ApiListCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) Execute() (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceList, *http.Response, error) {
+	return r.ApiService.ListCloudStreamnativeIoV1alpha1NamespacedInstanceExecute(r)
+}
+
+/*
+ListCloudStreamnativeIoV1alpha1NamespacedInstance Method for ListCloudStreamnativeIoV1alpha1NamespacedInstance
+
+list or watch objects of kind Instance
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiListCloudStreamnativeIoV1alpha1NamespacedInstanceRequest
+*/
+func (a *CloudStreamnativeIoV1alpha1ApiService) ListCloudStreamnativeIoV1alpha1NamespacedInstance(ctx context.Context, namespace string) ApiListCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	return ApiListCloudStreamnativeIoV1alpha1NamespacedInstanceRequest{
+		ApiService: a,
+		ctx: ctx,
+		namespace: namespace,
+	}
+}
+
+// Execute executes the request
+//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceList
+func (a *CloudStreamnativeIoV1alpha1ApiService) ListCloudStreamnativeIoV1alpha1NamespacedInstanceExecute(r ApiListCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceList, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceList
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha1ApiService.ListCloudStreamnativeIoV1alpha1NamespacedInstance")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/instances"
 	localVarPath = strings.Replace(localVarPath, "{"+"namespace"+"}", url.PathEscape(parameterToString(r.namespace, "")), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -29083,6 +30338,322 @@ func (a *CloudStreamnativeIoV1alpha1ApiService) PatchCloudStreamnativeIoV1alpha1
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type ApiPatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest struct {
+	ctx context.Context
+	ApiService *CloudStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	body *map[string]interface{}
+	pretty *string
+	dryRun *string
+	fieldManager *string
+	force *bool
+}
+
+func (r ApiPatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) Body(body map[string]interface{}) ApiPatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.body = &body
+	return r
+}
+
+// If &#39;true&#39;, then the output is pretty printed.
+func (r ApiPatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) Pretty(pretty string) ApiPatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.pretty = &pretty
+	return r
+}
+
+// When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed
+func (r ApiPatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) DryRun(dryRun string) ApiPatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.dryRun = &dryRun
+	return r
+}
+
+// fieldManager is a name associated with the actor or entity that is making these changes. The value must be less than or 128 characters long, and only contain printable characters, as defined by https://golang.org/pkg/unicode/#IsPrint. This field is required for apply requests (application/apply-patch) but optional for non-apply patch types (JsonPatch, MergePatch, StrategicMergePatch).
+func (r ApiPatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) FieldManager(fieldManager string) ApiPatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.fieldManager = &fieldManager
+	return r
+}
+
+// Force is going to \&quot;force\&quot; Apply requests. It means user will re-acquire conflicting fields owned by other people. Force flag must be unset for non-apply patch requests.
+func (r ApiPatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) Force(force bool) ApiPatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.force = &force
+	return r
+}
+
+func (r ApiPatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) Execute() (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance, *http.Response, error) {
+	return r.ApiService.PatchCloudStreamnativeIoV1alpha1NamespacedInstanceExecute(r)
+}
+
+/*
+PatchCloudStreamnativeIoV1alpha1NamespacedInstance Method for PatchCloudStreamnativeIoV1alpha1NamespacedInstance
+
+partially update the specified Instance
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the Instance
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiPatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest
+*/
+func (a *CloudStreamnativeIoV1alpha1ApiService) PatchCloudStreamnativeIoV1alpha1NamespacedInstance(ctx context.Context, name string, namespace string) ApiPatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	return ApiPatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest{
+		ApiService: a,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
+	}
+}
+
+// Execute executes the request
+//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance
+func (a *CloudStreamnativeIoV1alpha1ApiService) PatchCloudStreamnativeIoV1alpha1NamespacedInstanceExecute(r ApiPatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPatch
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha1ApiService.PatchCloudStreamnativeIoV1alpha1NamespacedInstance")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/instances/{name}"
+	localVarPath = strings.Replace(localVarPath, "{"+"name"+"}", url.PathEscape(parameterToString(r.name, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"namespace"+"}", url.PathEscape(parameterToString(r.namespace, "")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.body == nil {
+		return localVarReturnValue, nil, reportError("body is required and must be specified")
+	}
+
+	if r.pretty != nil {
+		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	}
+	if r.dryRun != nil {
+		localVarQueryParams.Add("dryRun", parameterToString(*r.dryRun, ""))
+	}
+	if r.fieldManager != nil {
+		localVarQueryParams.Add("fieldManager", parameterToString(*r.fieldManager, ""))
+	}
+	if r.force != nil {
+		localVarQueryParams.Add("force", parameterToString(*r.force, ""))
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json-patch+json", "application/merge-patch+json", "application/strategic-merge-patch+json", "application/apply-patch+yaml"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/yaml", "application/vnd.kubernetes.protobuf"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.body
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiPatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest struct {
+	ctx context.Context
+	ApiService *CloudStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	body *map[string]interface{}
+	pretty *string
+	dryRun *string
+	fieldManager *string
+	force *bool
+}
+
+func (r ApiPatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) Body(body map[string]interface{}) ApiPatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest {
+	r.body = &body
+	return r
+}
+
+// If &#39;true&#39;, then the output is pretty printed.
+func (r ApiPatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) Pretty(pretty string) ApiPatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest {
+	r.pretty = &pretty
+	return r
+}
+
+// When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed
+func (r ApiPatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) DryRun(dryRun string) ApiPatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest {
+	r.dryRun = &dryRun
+	return r
+}
+
+// fieldManager is a name associated with the actor or entity that is making these changes. The value must be less than or 128 characters long, and only contain printable characters, as defined by https://golang.org/pkg/unicode/#IsPrint. This field is required for apply requests (application/apply-patch) but optional for non-apply patch types (JsonPatch, MergePatch, StrategicMergePatch).
+func (r ApiPatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) FieldManager(fieldManager string) ApiPatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest {
+	r.fieldManager = &fieldManager
+	return r
+}
+
+// Force is going to \&quot;force\&quot; Apply requests. It means user will re-acquire conflicting fields owned by other people. Force flag must be unset for non-apply patch requests.
+func (r ApiPatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) Force(force bool) ApiPatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest {
+	r.force = &force
+	return r
+}
+
+func (r ApiPatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) Execute() (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance, *http.Response, error) {
+	return r.ApiService.PatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusExecute(r)
+}
+
+/*
+PatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatus Method for PatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatus
+
+partially update status of the specified Instance
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the Instance
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiPatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest
+*/
+func (a *CloudStreamnativeIoV1alpha1ApiService) PatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatus(ctx context.Context, name string, namespace string) ApiPatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest {
+	return ApiPatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest{
+		ApiService: a,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
+	}
+}
+
+// Execute executes the request
+//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance
+func (a *CloudStreamnativeIoV1alpha1ApiService) PatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusExecute(r ApiPatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPatch
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha1ApiService.PatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatus")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/instances/{name}/status"
+	localVarPath = strings.Replace(localVarPath, "{"+"name"+"}", url.PathEscape(parameterToString(r.name, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"namespace"+"}", url.PathEscape(parameterToString(r.namespace, "")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.body == nil {
+		return localVarReturnValue, nil, reportError("body is required and must be specified")
+	}
+
+	if r.pretty != nil {
+		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	}
+	if r.dryRun != nil {
+		localVarQueryParams.Add("dryRun", parameterToString(*r.dryRun, ""))
+	}
+	if r.fieldManager != nil {
+		localVarQueryParams.Add("fieldManager", parameterToString(*r.fieldManager, ""))
+	}
+	if r.force != nil {
+		localVarQueryParams.Add("force", parameterToString(*r.force, ""))
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json-patch+json", "application/merge-patch+json", "application/strategic-merge-patch+json", "application/apply-patch+yaml"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/yaml", "application/vnd.kubernetes.protobuf"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.body
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 type ApiPatchCloudStreamnativeIoV1alpha1NamespacedKafkaClusterRequest struct {
 	ctx context.Context
 	ApiService *CloudStreamnativeIoV1alpha1ApiService
@@ -35519,6 +37090,240 @@ func (a *CloudStreamnativeIoV1alpha1ApiService) ReadCloudStreamnativeIoV1alpha1N
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type ApiReadCloudStreamnativeIoV1alpha1NamespacedInstanceRequest struct {
+	ctx context.Context
+	ApiService *CloudStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	pretty *string
+}
+
+// If &#39;true&#39;, then the output is pretty printed.
+func (r ApiReadCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) Pretty(pretty string) ApiReadCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.pretty = &pretty
+	return r
+}
+
+func (r ApiReadCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) Execute() (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance, *http.Response, error) {
+	return r.ApiService.ReadCloudStreamnativeIoV1alpha1NamespacedInstanceExecute(r)
+}
+
+/*
+ReadCloudStreamnativeIoV1alpha1NamespacedInstance Method for ReadCloudStreamnativeIoV1alpha1NamespacedInstance
+
+read the specified Instance
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the Instance
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiReadCloudStreamnativeIoV1alpha1NamespacedInstanceRequest
+*/
+func (a *CloudStreamnativeIoV1alpha1ApiService) ReadCloudStreamnativeIoV1alpha1NamespacedInstance(ctx context.Context, name string, namespace string) ApiReadCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	return ApiReadCloudStreamnativeIoV1alpha1NamespacedInstanceRequest{
+		ApiService: a,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
+	}
+}
+
+// Execute executes the request
+//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance
+func (a *CloudStreamnativeIoV1alpha1ApiService) ReadCloudStreamnativeIoV1alpha1NamespacedInstanceExecute(r ApiReadCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha1ApiService.ReadCloudStreamnativeIoV1alpha1NamespacedInstance")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/instances/{name}"
+	localVarPath = strings.Replace(localVarPath, "{"+"name"+"}", url.PathEscape(parameterToString(r.name, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"namespace"+"}", url.PathEscape(parameterToString(r.namespace, "")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.pretty != nil {
+		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/yaml", "application/vnd.kubernetes.protobuf"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiReadCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest struct {
+	ctx context.Context
+	ApiService *CloudStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	pretty *string
+}
+
+// If &#39;true&#39;, then the output is pretty printed.
+func (r ApiReadCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) Pretty(pretty string) ApiReadCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest {
+	r.pretty = &pretty
+	return r
+}
+
+func (r ApiReadCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) Execute() (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance, *http.Response, error) {
+	return r.ApiService.ReadCloudStreamnativeIoV1alpha1NamespacedInstanceStatusExecute(r)
+}
+
+/*
+ReadCloudStreamnativeIoV1alpha1NamespacedInstanceStatus Method for ReadCloudStreamnativeIoV1alpha1NamespacedInstanceStatus
+
+read status of the specified Instance
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the Instance
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiReadCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest
+*/
+func (a *CloudStreamnativeIoV1alpha1ApiService) ReadCloudStreamnativeIoV1alpha1NamespacedInstanceStatus(ctx context.Context, name string, namespace string) ApiReadCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest {
+	return ApiReadCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest{
+		ApiService: a,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
+	}
+}
+
+// Execute executes the request
+//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance
+func (a *CloudStreamnativeIoV1alpha1ApiService) ReadCloudStreamnativeIoV1alpha1NamespacedInstanceStatusExecute(r ApiReadCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha1ApiService.ReadCloudStreamnativeIoV1alpha1NamespacedInstanceStatus")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/instances/{name}/status"
+	localVarPath = strings.Replace(localVarPath, "{"+"name"+"}", url.PathEscape(parameterToString(r.name, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"namespace"+"}", url.PathEscape(parameterToString(r.namespace, "")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.pretty != nil {
+		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/yaml", "application/vnd.kubernetes.protobuf"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 type ApiReadCloudStreamnativeIoV1alpha1NamespacedKafkaClusterRequest struct {
 	ctx context.Context
 	ApiService *CloudStreamnativeIoV1alpha1ApiService
@@ -40940,6 +42745,302 @@ func (a *CloudStreamnativeIoV1alpha1ApiService) ReplaceCloudStreamnativeIoV1alph
 	}
 
 	localVarPath := localBasePath + "/apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/identitypools/{name}/status"
+	localVarPath = strings.Replace(localVarPath, "{"+"name"+"}", url.PathEscape(parameterToString(r.name, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"namespace"+"}", url.PathEscape(parameterToString(r.namespace, "")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.body == nil {
+		return localVarReturnValue, nil, reportError("body is required and must be specified")
+	}
+
+	if r.pretty != nil {
+		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	}
+	if r.dryRun != nil {
+		localVarQueryParams.Add("dryRun", parameterToString(*r.dryRun, ""))
+	}
+	if r.fieldManager != nil {
+		localVarQueryParams.Add("fieldManager", parameterToString(*r.fieldManager, ""))
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/yaml", "application/vnd.kubernetes.protobuf"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.body
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceRequest struct {
+	ctx context.Context
+	ApiService *CloudStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	body *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance
+	pretty *string
+	dryRun *string
+	fieldManager *string
+}
+
+func (r ApiReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) Body(body ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance) ApiReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.body = &body
+	return r
+}
+
+// If &#39;true&#39;, then the output is pretty printed.
+func (r ApiReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) Pretty(pretty string) ApiReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.pretty = &pretty
+	return r
+}
+
+// When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed
+func (r ApiReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) DryRun(dryRun string) ApiReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.dryRun = &dryRun
+	return r
+}
+
+// fieldManager is a name associated with the actor or entity that is making these changes. The value must be less than or 128 characters long, and only contain printable characters, as defined by https://golang.org/pkg/unicode/#IsPrint.
+func (r ApiReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) FieldManager(fieldManager string) ApiReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.fieldManager = &fieldManager
+	return r
+}
+
+func (r ApiReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) Execute() (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance, *http.Response, error) {
+	return r.ApiService.ReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceExecute(r)
+}
+
+/*
+ReplaceCloudStreamnativeIoV1alpha1NamespacedInstance Method for ReplaceCloudStreamnativeIoV1alpha1NamespacedInstance
+
+replace the specified Instance
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the Instance
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceRequest
+*/
+func (a *CloudStreamnativeIoV1alpha1ApiService) ReplaceCloudStreamnativeIoV1alpha1NamespacedInstance(ctx context.Context, name string, namespace string) ApiReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	return ApiReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceRequest{
+		ApiService: a,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
+	}
+}
+
+// Execute executes the request
+//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance
+func (a *CloudStreamnativeIoV1alpha1ApiService) ReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceExecute(r ApiReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha1ApiService.ReplaceCloudStreamnativeIoV1alpha1NamespacedInstance")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/instances/{name}"
+	localVarPath = strings.Replace(localVarPath, "{"+"name"+"}", url.PathEscape(parameterToString(r.name, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"namespace"+"}", url.PathEscape(parameterToString(r.namespace, "")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.body == nil {
+		return localVarReturnValue, nil, reportError("body is required and must be specified")
+	}
+
+	if r.pretty != nil {
+		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	}
+	if r.dryRun != nil {
+		localVarQueryParams.Add("dryRun", parameterToString(*r.dryRun, ""))
+	}
+	if r.fieldManager != nil {
+		localVarQueryParams.Add("fieldManager", parameterToString(*r.fieldManager, ""))
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/yaml", "application/vnd.kubernetes.protobuf"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.body
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest struct {
+	ctx context.Context
+	ApiService *CloudStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	body *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance
+	pretty *string
+	dryRun *string
+	fieldManager *string
+}
+
+func (r ApiReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) Body(body ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance) ApiReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest {
+	r.body = &body
+	return r
+}
+
+// If &#39;true&#39;, then the output is pretty printed.
+func (r ApiReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) Pretty(pretty string) ApiReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest {
+	r.pretty = &pretty
+	return r
+}
+
+// When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed
+func (r ApiReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) DryRun(dryRun string) ApiReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest {
+	r.dryRun = &dryRun
+	return r
+}
+
+// fieldManager is a name associated with the actor or entity that is making these changes. The value must be less than or 128 characters long, and only contain printable characters, as defined by https://golang.org/pkg/unicode/#IsPrint.
+func (r ApiReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) FieldManager(fieldManager string) ApiReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest {
+	r.fieldManager = &fieldManager
+	return r
+}
+
+func (r ApiReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) Execute() (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance, *http.Response, error) {
+	return r.ApiService.ReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceStatusExecute(r)
+}
+
+/*
+ReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceStatus Method for ReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceStatus
+
+replace status of the specified Instance
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the Instance
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest
+*/
+func (a *CloudStreamnativeIoV1alpha1ApiService) ReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceStatus(ctx context.Context, name string, namespace string) ApiReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest {
+	return ApiReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest{
+		ApiService: a,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
+	}
+}
+
+// Execute executes the request
+//  @return ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance
+func (a *CloudStreamnativeIoV1alpha1ApiService) ReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceStatusExecute(r ApiReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha1ApiService.ReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceStatus")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/instances/{name}/status"
 	localVarPath = strings.Replace(localVarPath, "{"+"name"+"}", url.PathEscape(parameterToString(r.name, "")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"namespace"+"}", url.PathEscape(parameterToString(r.namespace, "")), -1)
 
@@ -47749,6 +49850,205 @@ func (a *CloudStreamnativeIoV1alpha1ApiService) WatchCloudStreamnativeIoV1alpha1
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type ApiWatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespacesRequest struct {
+	ctx context.Context
+	ApiService *CloudStreamnativeIoV1alpha1ApiService
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
+	resourceVersionMatch *string
+	timeoutSeconds *int32
+	watch *bool
+}
+
+// allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
+func (r ApiWatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespacesRequest) AllowWatchBookmarks(allowWatchBookmarks bool) ApiWatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespacesRequest {
+	r.allowWatchBookmarks = &allowWatchBookmarks
+	return r
+}
+
+// The continue option should be set when retrieving more results from the server. Since this value is server defined, clients may only use the continue value from a previous query result with identical query parameters (except for the value of continue) and the server may reject a continue value it does not recognize. If the specified continue value is no longer valid whether due to expiration (generally five to fifteen minutes) or a configuration change on the server, the server will respond with a 410 ResourceExpired error together with a continue token. If the client needs a consistent list, it must restart their list without the continue field. Otherwise, the client may send another list request with the token received with the 410 error, the server will respond with a list starting from the next key, but from the latest snapshot, which is inconsistent from the previous list results - objects that are created, modified, or deleted after the first list request will be included in the response, as long as their keys are after the \&quot;next key\&quot;.  This field is not supported when watch is true. Clients may start a watch from the last resourceVersion value returned by the server and not miss any modifications.
+func (r ApiWatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespacesRequest) Continue_(continue_ string) ApiWatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespacesRequest {
+	r.continue_ = &continue_
+	return r
+}
+
+// A selector to restrict the list of returned objects by their fields. Defaults to everything.
+func (r ApiWatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespacesRequest) FieldSelector(fieldSelector string) ApiWatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespacesRequest {
+	r.fieldSelector = &fieldSelector
+	return r
+}
+
+// A selector to restrict the list of returned objects by their labels. Defaults to everything.
+func (r ApiWatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespacesRequest) LabelSelector(labelSelector string) ApiWatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespacesRequest {
+	r.labelSelector = &labelSelector
+	return r
+}
+
+// limit is a maximum number of responses to return for a list call. If more items exist, the server will set the &#x60;continue&#x60; field on the list metadata to a value that can be used with the same initial query to retrieve the next set of results. Setting a limit may return fewer than the requested amount of items (up to zero items) in the event all requested objects are filtered out and clients should only use the presence of the continue field to determine whether more results are available. Servers may choose not to support the limit argument and will return all of the available results. If limit is specified and the continue field is empty, clients may assume that no more results are available. This field is not supported if watch is true.  The server guarantees that the objects returned when using continue will be identical to issuing a single list call without a limit - that is, no objects created, modified, or deleted after the first request is issued will be included in any subsequent continued requests. This is sometimes referred to as a consistent snapshot, and ensures that a client that is using limit to receive smaller chunks of a very large result can ensure they see all possible objects. If objects are updated during a chunked list the version of the object that was present at the time the first list result was calculated is returned.
+func (r ApiWatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespacesRequest) Limit(limit int32) ApiWatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespacesRequest {
+	r.limit = &limit
+	return r
+}
+
+// If &#39;true&#39;, then the output is pretty printed.
+func (r ApiWatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespacesRequest) Pretty(pretty string) ApiWatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespacesRequest {
+	r.pretty = &pretty
+	return r
+}
+
+// resourceVersion sets a constraint on what resource versions a request may be served from. See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset
+func (r ApiWatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespacesRequest) ResourceVersion(resourceVersion string) ApiWatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespacesRequest {
+	r.resourceVersion = &resourceVersion
+	return r
+}
+
+// resourceVersionMatch determines how resourceVersion is applied to list calls. It is highly recommended that resourceVersionMatch be set for list calls where resourceVersion is set See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset
+func (r ApiWatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespacesRequest) ResourceVersionMatch(resourceVersionMatch string) ApiWatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespacesRequest {
+	r.resourceVersionMatch = &resourceVersionMatch
+	return r
+}
+
+// Timeout for the list/watch call. This limits the duration of the call, regardless of any activity or inactivity.
+func (r ApiWatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespacesRequest) TimeoutSeconds(timeoutSeconds int32) ApiWatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespacesRequest {
+	r.timeoutSeconds = &timeoutSeconds
+	return r
+}
+
+// Watch for changes to the described resources and return them as a stream of add, update, and remove notifications. Specify resourceVersion.
+func (r ApiWatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespacesRequest) Watch(watch bool) ApiWatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespacesRequest {
+	r.watch = &watch
+	return r
+}
+
+func (r ApiWatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespacesRequest) Execute() (*V1WatchEvent, *http.Response, error) {
+	return r.ApiService.WatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespacesExecute(r)
+}
+
+/*
+WatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespaces Method for WatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespaces
+
+watch individual changes to a list of Instance. deprecated: use the 'watch' parameter with a list operation instead.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiWatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespacesRequest
+*/
+func (a *CloudStreamnativeIoV1alpha1ApiService) WatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespaces(ctx context.Context) ApiWatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespacesRequest {
+	return ApiWatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespacesRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return V1WatchEvent
+func (a *CloudStreamnativeIoV1alpha1ApiService) WatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespacesExecute(r ApiWatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespacesRequest) (*V1WatchEvent, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1WatchEvent
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha1ApiService.WatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespaces")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/apis/cloud.streamnative.io/v1alpha1/watch/instances"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.allowWatchBookmarks != nil {
+		localVarQueryParams.Add("allowWatchBookmarks", parameterToString(*r.allowWatchBookmarks, ""))
+	}
+	if r.continue_ != nil {
+		localVarQueryParams.Add("continue", parameterToString(*r.continue_, ""))
+	}
+	if r.fieldSelector != nil {
+		localVarQueryParams.Add("fieldSelector", parameterToString(*r.fieldSelector, ""))
+	}
+	if r.labelSelector != nil {
+		localVarQueryParams.Add("labelSelector", parameterToString(*r.labelSelector, ""))
+	}
+	if r.limit != nil {
+		localVarQueryParams.Add("limit", parameterToString(*r.limit, ""))
+	}
+	if r.pretty != nil {
+		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	}
+	if r.resourceVersion != nil {
+		localVarQueryParams.Add("resourceVersion", parameterToString(*r.resourceVersion, ""))
+	}
+	if r.resourceVersionMatch != nil {
+		localVarQueryParams.Add("resourceVersionMatch", parameterToString(*r.resourceVersionMatch, ""))
+	}
+	if r.timeoutSeconds != nil {
+		localVarQueryParams.Add("timeoutSeconds", parameterToString(*r.timeoutSeconds, ""))
+	}
+	if r.watch != nil {
+		localVarQueryParams.Add("watch", parameterToString(*r.watch, ""))
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/yaml", "application/vnd.kubernetes.protobuf", "application/json;stream=watch", "application/vnd.kubernetes.protobuf;stream=watch"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 type ApiWatchCloudStreamnativeIoV1alpha1KafkaClusterListForAllNamespacesRequest struct {
 	ctx context.Context
 	ApiService *CloudStreamnativeIoV1alpha1ApiService
@@ -50325,6 +52625,623 @@ func (a *CloudStreamnativeIoV1alpha1ApiService) WatchCloudStreamnativeIoV1alpha1
 	}
 
 	localVarPath := localBasePath + "/apis/cloud.streamnative.io/v1alpha1/watch/namespaces/{namespace}/identitypools/{name}/status"
+	localVarPath = strings.Replace(localVarPath, "{"+"name"+"}", url.PathEscape(parameterToString(r.name, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"namespace"+"}", url.PathEscape(parameterToString(r.namespace, "")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.allowWatchBookmarks != nil {
+		localVarQueryParams.Add("allowWatchBookmarks", parameterToString(*r.allowWatchBookmarks, ""))
+	}
+	if r.continue_ != nil {
+		localVarQueryParams.Add("continue", parameterToString(*r.continue_, ""))
+	}
+	if r.fieldSelector != nil {
+		localVarQueryParams.Add("fieldSelector", parameterToString(*r.fieldSelector, ""))
+	}
+	if r.labelSelector != nil {
+		localVarQueryParams.Add("labelSelector", parameterToString(*r.labelSelector, ""))
+	}
+	if r.limit != nil {
+		localVarQueryParams.Add("limit", parameterToString(*r.limit, ""))
+	}
+	if r.pretty != nil {
+		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	}
+	if r.resourceVersion != nil {
+		localVarQueryParams.Add("resourceVersion", parameterToString(*r.resourceVersion, ""))
+	}
+	if r.resourceVersionMatch != nil {
+		localVarQueryParams.Add("resourceVersionMatch", parameterToString(*r.resourceVersionMatch, ""))
+	}
+	if r.timeoutSeconds != nil {
+		localVarQueryParams.Add("timeoutSeconds", parameterToString(*r.timeoutSeconds, ""))
+	}
+	if r.watch != nil {
+		localVarQueryParams.Add("watch", parameterToString(*r.watch, ""))
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/yaml", "application/vnd.kubernetes.protobuf", "application/json;stream=watch", "application/vnd.kubernetes.protobuf;stream=watch"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest struct {
+	ctx context.Context
+	ApiService *CloudStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
+	resourceVersionMatch *string
+	timeoutSeconds *int32
+	watch *bool
+}
+
+// allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
+func (r ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) AllowWatchBookmarks(allowWatchBookmarks bool) ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.allowWatchBookmarks = &allowWatchBookmarks
+	return r
+}
+
+// The continue option should be set when retrieving more results from the server. Since this value is server defined, clients may only use the continue value from a previous query result with identical query parameters (except for the value of continue) and the server may reject a continue value it does not recognize. If the specified continue value is no longer valid whether due to expiration (generally five to fifteen minutes) or a configuration change on the server, the server will respond with a 410 ResourceExpired error together with a continue token. If the client needs a consistent list, it must restart their list without the continue field. Otherwise, the client may send another list request with the token received with the 410 error, the server will respond with a list starting from the next key, but from the latest snapshot, which is inconsistent from the previous list results - objects that are created, modified, or deleted after the first list request will be included in the response, as long as their keys are after the \&quot;next key\&quot;.  This field is not supported when watch is true. Clients may start a watch from the last resourceVersion value returned by the server and not miss any modifications.
+func (r ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) Continue_(continue_ string) ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.continue_ = &continue_
+	return r
+}
+
+// A selector to restrict the list of returned objects by their fields. Defaults to everything.
+func (r ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) FieldSelector(fieldSelector string) ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.fieldSelector = &fieldSelector
+	return r
+}
+
+// A selector to restrict the list of returned objects by their labels. Defaults to everything.
+func (r ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) LabelSelector(labelSelector string) ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.labelSelector = &labelSelector
+	return r
+}
+
+// limit is a maximum number of responses to return for a list call. If more items exist, the server will set the &#x60;continue&#x60; field on the list metadata to a value that can be used with the same initial query to retrieve the next set of results. Setting a limit may return fewer than the requested amount of items (up to zero items) in the event all requested objects are filtered out and clients should only use the presence of the continue field to determine whether more results are available. Servers may choose not to support the limit argument and will return all of the available results. If limit is specified and the continue field is empty, clients may assume that no more results are available. This field is not supported if watch is true.  The server guarantees that the objects returned when using continue will be identical to issuing a single list call without a limit - that is, no objects created, modified, or deleted after the first request is issued will be included in any subsequent continued requests. This is sometimes referred to as a consistent snapshot, and ensures that a client that is using limit to receive smaller chunks of a very large result can ensure they see all possible objects. If objects are updated during a chunked list the version of the object that was present at the time the first list result was calculated is returned.
+func (r ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) Limit(limit int32) ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.limit = &limit
+	return r
+}
+
+// If &#39;true&#39;, then the output is pretty printed.
+func (r ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) Pretty(pretty string) ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.pretty = &pretty
+	return r
+}
+
+// resourceVersion sets a constraint on what resource versions a request may be served from. See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset
+func (r ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) ResourceVersion(resourceVersion string) ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.resourceVersion = &resourceVersion
+	return r
+}
+
+// resourceVersionMatch determines how resourceVersion is applied to list calls. It is highly recommended that resourceVersionMatch be set for list calls where resourceVersion is set See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset
+func (r ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) ResourceVersionMatch(resourceVersionMatch string) ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.resourceVersionMatch = &resourceVersionMatch
+	return r
+}
+
+// Timeout for the list/watch call. This limits the duration of the call, regardless of any activity or inactivity.
+func (r ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) TimeoutSeconds(timeoutSeconds int32) ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.timeoutSeconds = &timeoutSeconds
+	return r
+}
+
+// Watch for changes to the described resources and return them as a stream of add, update, and remove notifications. Specify resourceVersion.
+func (r ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) Watch(watch bool) ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	r.watch = &watch
+	return r
+}
+
+func (r ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) Execute() (*V1WatchEvent, *http.Response, error) {
+	return r.ApiService.WatchCloudStreamnativeIoV1alpha1NamespacedInstanceExecute(r)
+}
+
+/*
+WatchCloudStreamnativeIoV1alpha1NamespacedInstance Method for WatchCloudStreamnativeIoV1alpha1NamespacedInstance
+
+watch changes to an object of kind Instance. deprecated: use the 'watch' parameter with a list operation instead, filtered to a single item with the 'fieldSelector' parameter.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the Instance
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest
+*/
+func (a *CloudStreamnativeIoV1alpha1ApiService) WatchCloudStreamnativeIoV1alpha1NamespacedInstance(ctx context.Context, name string, namespace string) ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest {
+	return ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest{
+		ApiService: a,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
+	}
+}
+
+// Execute executes the request
+//  @return V1WatchEvent
+func (a *CloudStreamnativeIoV1alpha1ApiService) WatchCloudStreamnativeIoV1alpha1NamespacedInstanceExecute(r ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest) (*V1WatchEvent, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1WatchEvent
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha1ApiService.WatchCloudStreamnativeIoV1alpha1NamespacedInstance")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/apis/cloud.streamnative.io/v1alpha1/watch/namespaces/{namespace}/instances/{name}"
+	localVarPath = strings.Replace(localVarPath, "{"+"name"+"}", url.PathEscape(parameterToString(r.name, "")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"namespace"+"}", url.PathEscape(parameterToString(r.namespace, "")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.allowWatchBookmarks != nil {
+		localVarQueryParams.Add("allowWatchBookmarks", parameterToString(*r.allowWatchBookmarks, ""))
+	}
+	if r.continue_ != nil {
+		localVarQueryParams.Add("continue", parameterToString(*r.continue_, ""))
+	}
+	if r.fieldSelector != nil {
+		localVarQueryParams.Add("fieldSelector", parameterToString(*r.fieldSelector, ""))
+	}
+	if r.labelSelector != nil {
+		localVarQueryParams.Add("labelSelector", parameterToString(*r.labelSelector, ""))
+	}
+	if r.limit != nil {
+		localVarQueryParams.Add("limit", parameterToString(*r.limit, ""))
+	}
+	if r.pretty != nil {
+		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	}
+	if r.resourceVersion != nil {
+		localVarQueryParams.Add("resourceVersion", parameterToString(*r.resourceVersion, ""))
+	}
+	if r.resourceVersionMatch != nil {
+		localVarQueryParams.Add("resourceVersionMatch", parameterToString(*r.resourceVersionMatch, ""))
+	}
+	if r.timeoutSeconds != nil {
+		localVarQueryParams.Add("timeoutSeconds", parameterToString(*r.timeoutSeconds, ""))
+	}
+	if r.watch != nil {
+		localVarQueryParams.Add("watch", parameterToString(*r.watch, ""))
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/yaml", "application/vnd.kubernetes.protobuf", "application/json;stream=watch", "application/vnd.kubernetes.protobuf;stream=watch"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceListRequest struct {
+	ctx context.Context
+	ApiService *CloudStreamnativeIoV1alpha1ApiService
+	namespace string
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
+	resourceVersionMatch *string
+	timeoutSeconds *int32
+	watch *bool
+}
+
+// allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
+func (r ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceListRequest) AllowWatchBookmarks(allowWatchBookmarks bool) ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceListRequest {
+	r.allowWatchBookmarks = &allowWatchBookmarks
+	return r
+}
+
+// The continue option should be set when retrieving more results from the server. Since this value is server defined, clients may only use the continue value from a previous query result with identical query parameters (except for the value of continue) and the server may reject a continue value it does not recognize. If the specified continue value is no longer valid whether due to expiration (generally five to fifteen minutes) or a configuration change on the server, the server will respond with a 410 ResourceExpired error together with a continue token. If the client needs a consistent list, it must restart their list without the continue field. Otherwise, the client may send another list request with the token received with the 410 error, the server will respond with a list starting from the next key, but from the latest snapshot, which is inconsistent from the previous list results - objects that are created, modified, or deleted after the first list request will be included in the response, as long as their keys are after the \&quot;next key\&quot;.  This field is not supported when watch is true. Clients may start a watch from the last resourceVersion value returned by the server and not miss any modifications.
+func (r ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceListRequest) Continue_(continue_ string) ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceListRequest {
+	r.continue_ = &continue_
+	return r
+}
+
+// A selector to restrict the list of returned objects by their fields. Defaults to everything.
+func (r ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceListRequest) FieldSelector(fieldSelector string) ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceListRequest {
+	r.fieldSelector = &fieldSelector
+	return r
+}
+
+// A selector to restrict the list of returned objects by their labels. Defaults to everything.
+func (r ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceListRequest) LabelSelector(labelSelector string) ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceListRequest {
+	r.labelSelector = &labelSelector
+	return r
+}
+
+// limit is a maximum number of responses to return for a list call. If more items exist, the server will set the &#x60;continue&#x60; field on the list metadata to a value that can be used with the same initial query to retrieve the next set of results. Setting a limit may return fewer than the requested amount of items (up to zero items) in the event all requested objects are filtered out and clients should only use the presence of the continue field to determine whether more results are available. Servers may choose not to support the limit argument and will return all of the available results. If limit is specified and the continue field is empty, clients may assume that no more results are available. This field is not supported if watch is true.  The server guarantees that the objects returned when using continue will be identical to issuing a single list call without a limit - that is, no objects created, modified, or deleted after the first request is issued will be included in any subsequent continued requests. This is sometimes referred to as a consistent snapshot, and ensures that a client that is using limit to receive smaller chunks of a very large result can ensure they see all possible objects. If objects are updated during a chunked list the version of the object that was present at the time the first list result was calculated is returned.
+func (r ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceListRequest) Limit(limit int32) ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceListRequest {
+	r.limit = &limit
+	return r
+}
+
+// If &#39;true&#39;, then the output is pretty printed.
+func (r ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceListRequest) Pretty(pretty string) ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceListRequest {
+	r.pretty = &pretty
+	return r
+}
+
+// resourceVersion sets a constraint on what resource versions a request may be served from. See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset
+func (r ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceListRequest) ResourceVersion(resourceVersion string) ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceListRequest {
+	r.resourceVersion = &resourceVersion
+	return r
+}
+
+// resourceVersionMatch determines how resourceVersion is applied to list calls. It is highly recommended that resourceVersionMatch be set for list calls where resourceVersion is set See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset
+func (r ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceListRequest) ResourceVersionMatch(resourceVersionMatch string) ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceListRequest {
+	r.resourceVersionMatch = &resourceVersionMatch
+	return r
+}
+
+// Timeout for the list/watch call. This limits the duration of the call, regardless of any activity or inactivity.
+func (r ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceListRequest) TimeoutSeconds(timeoutSeconds int32) ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceListRequest {
+	r.timeoutSeconds = &timeoutSeconds
+	return r
+}
+
+// Watch for changes to the described resources and return them as a stream of add, update, and remove notifications. Specify resourceVersion.
+func (r ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceListRequest) Watch(watch bool) ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceListRequest {
+	r.watch = &watch
+	return r
+}
+
+func (r ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceListRequest) Execute() (*V1WatchEvent, *http.Response, error) {
+	return r.ApiService.WatchCloudStreamnativeIoV1alpha1NamespacedInstanceListExecute(r)
+}
+
+/*
+WatchCloudStreamnativeIoV1alpha1NamespacedInstanceList Method for WatchCloudStreamnativeIoV1alpha1NamespacedInstanceList
+
+watch individual changes to a list of Instance. deprecated: use the 'watch' parameter with a list operation instead.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceListRequest
+*/
+func (a *CloudStreamnativeIoV1alpha1ApiService) WatchCloudStreamnativeIoV1alpha1NamespacedInstanceList(ctx context.Context, namespace string) ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceListRequest {
+	return ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceListRequest{
+		ApiService: a,
+		ctx: ctx,
+		namespace: namespace,
+	}
+}
+
+// Execute executes the request
+//  @return V1WatchEvent
+func (a *CloudStreamnativeIoV1alpha1ApiService) WatchCloudStreamnativeIoV1alpha1NamespacedInstanceListExecute(r ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceListRequest) (*V1WatchEvent, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1WatchEvent
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha1ApiService.WatchCloudStreamnativeIoV1alpha1NamespacedInstanceList")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/apis/cloud.streamnative.io/v1alpha1/watch/namespaces/{namespace}/instances"
+	localVarPath = strings.Replace(localVarPath, "{"+"namespace"+"}", url.PathEscape(parameterToString(r.namespace, "")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.allowWatchBookmarks != nil {
+		localVarQueryParams.Add("allowWatchBookmarks", parameterToString(*r.allowWatchBookmarks, ""))
+	}
+	if r.continue_ != nil {
+		localVarQueryParams.Add("continue", parameterToString(*r.continue_, ""))
+	}
+	if r.fieldSelector != nil {
+		localVarQueryParams.Add("fieldSelector", parameterToString(*r.fieldSelector, ""))
+	}
+	if r.labelSelector != nil {
+		localVarQueryParams.Add("labelSelector", parameterToString(*r.labelSelector, ""))
+	}
+	if r.limit != nil {
+		localVarQueryParams.Add("limit", parameterToString(*r.limit, ""))
+	}
+	if r.pretty != nil {
+		localVarQueryParams.Add("pretty", parameterToString(*r.pretty, ""))
+	}
+	if r.resourceVersion != nil {
+		localVarQueryParams.Add("resourceVersion", parameterToString(*r.resourceVersion, ""))
+	}
+	if r.resourceVersionMatch != nil {
+		localVarQueryParams.Add("resourceVersionMatch", parameterToString(*r.resourceVersionMatch, ""))
+	}
+	if r.timeoutSeconds != nil {
+		localVarQueryParams.Add("timeoutSeconds", parameterToString(*r.timeoutSeconds, ""))
+	}
+	if r.watch != nil {
+		localVarQueryParams.Add("watch", parameterToString(*r.watch, ""))
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/yaml", "application/vnd.kubernetes.protobuf", "application/json;stream=watch", "application/vnd.kubernetes.protobuf;stream=watch"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest struct {
+	ctx context.Context
+	ApiService *CloudStreamnativeIoV1alpha1ApiService
+	name string
+	namespace string
+	allowWatchBookmarks *bool
+	continue_ *string
+	fieldSelector *string
+	labelSelector *string
+	limit *int32
+	pretty *string
+	resourceVersion *string
+	resourceVersionMatch *string
+	timeoutSeconds *int32
+	watch *bool
+}
+
+// allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored.
+func (r ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) AllowWatchBookmarks(allowWatchBookmarks bool) ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest {
+	r.allowWatchBookmarks = &allowWatchBookmarks
+	return r
+}
+
+// The continue option should be set when retrieving more results from the server. Since this value is server defined, clients may only use the continue value from a previous query result with identical query parameters (except for the value of continue) and the server may reject a continue value it does not recognize. If the specified continue value is no longer valid whether due to expiration (generally five to fifteen minutes) or a configuration change on the server, the server will respond with a 410 ResourceExpired error together with a continue token. If the client needs a consistent list, it must restart their list without the continue field. Otherwise, the client may send another list request with the token received with the 410 error, the server will respond with a list starting from the next key, but from the latest snapshot, which is inconsistent from the previous list results - objects that are created, modified, or deleted after the first list request will be included in the response, as long as their keys are after the \&quot;next key\&quot;.  This field is not supported when watch is true. Clients may start a watch from the last resourceVersion value returned by the server and not miss any modifications.
+func (r ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) Continue_(continue_ string) ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest {
+	r.continue_ = &continue_
+	return r
+}
+
+// A selector to restrict the list of returned objects by their fields. Defaults to everything.
+func (r ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) FieldSelector(fieldSelector string) ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest {
+	r.fieldSelector = &fieldSelector
+	return r
+}
+
+// A selector to restrict the list of returned objects by their labels. Defaults to everything.
+func (r ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) LabelSelector(labelSelector string) ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest {
+	r.labelSelector = &labelSelector
+	return r
+}
+
+// limit is a maximum number of responses to return for a list call. If more items exist, the server will set the &#x60;continue&#x60; field on the list metadata to a value that can be used with the same initial query to retrieve the next set of results. Setting a limit may return fewer than the requested amount of items (up to zero items) in the event all requested objects are filtered out and clients should only use the presence of the continue field to determine whether more results are available. Servers may choose not to support the limit argument and will return all of the available results. If limit is specified and the continue field is empty, clients may assume that no more results are available. This field is not supported if watch is true.  The server guarantees that the objects returned when using continue will be identical to issuing a single list call without a limit - that is, no objects created, modified, or deleted after the first request is issued will be included in any subsequent continued requests. This is sometimes referred to as a consistent snapshot, and ensures that a client that is using limit to receive smaller chunks of a very large result can ensure they see all possible objects. If objects are updated during a chunked list the version of the object that was present at the time the first list result was calculated is returned.
+func (r ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) Limit(limit int32) ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest {
+	r.limit = &limit
+	return r
+}
+
+// If &#39;true&#39;, then the output is pretty printed.
+func (r ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) Pretty(pretty string) ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest {
+	r.pretty = &pretty
+	return r
+}
+
+// resourceVersion sets a constraint on what resource versions a request may be served from. See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset
+func (r ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) ResourceVersion(resourceVersion string) ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest {
+	r.resourceVersion = &resourceVersion
+	return r
+}
+
+// resourceVersionMatch determines how resourceVersion is applied to list calls. It is highly recommended that resourceVersionMatch be set for list calls where resourceVersion is set See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset
+func (r ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) ResourceVersionMatch(resourceVersionMatch string) ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest {
+	r.resourceVersionMatch = &resourceVersionMatch
+	return r
+}
+
+// Timeout for the list/watch call. This limits the duration of the call, regardless of any activity or inactivity.
+func (r ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) TimeoutSeconds(timeoutSeconds int32) ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest {
+	r.timeoutSeconds = &timeoutSeconds
+	return r
+}
+
+// Watch for changes to the described resources and return them as a stream of add, update, and remove notifications. Specify resourceVersion.
+func (r ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) Watch(watch bool) ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest {
+	r.watch = &watch
+	return r
+}
+
+func (r ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) Execute() (*V1WatchEvent, *http.Response, error) {
+	return r.ApiService.WatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusExecute(r)
+}
+
+/*
+WatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatus Method for WatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatus
+
+watch changes to status of an object of kind Instance. deprecated: use the 'watch' parameter with a list operation instead, filtered to a single item with the 'fieldSelector' parameter.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param name name of the Instance
+ @param namespace object name and auth scope, such as for teams and projects
+ @return ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest
+*/
+func (a *CloudStreamnativeIoV1alpha1ApiService) WatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatus(ctx context.Context, name string, namespace string) ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest {
+	return ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest{
+		ApiService: a,
+		ctx: ctx,
+		name: name,
+		namespace: namespace,
+	}
+}
+
+// Execute executes the request
+//  @return V1WatchEvent
+func (a *CloudStreamnativeIoV1alpha1ApiService) WatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusExecute(r ApiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest) (*V1WatchEvent, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1WatchEvent
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudStreamnativeIoV1alpha1ApiService.WatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatus")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/apis/cloud.streamnative.io/v1alpha1/watch/namespaces/{namespace}/instances/{name}/status"
 	localVarPath = strings.Replace(localVarPath, "{"+"name"+"}", url.PathEscape(parameterToString(r.name, "")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"namespace"+"}", url.PathEscape(parameterToString(r.namespace, "")), -1)
 

@@ -68,8 +68,8 @@ func NewSNCloudResourcesDeleteTool() mcp.Tool {
 			mcp.Description("The name of the resource to delete."),
 		),
 		mcp.WithString("type", mcp.Required(),
-			mcp.Description("The type of the resource to delete, it can be PulsarInstance, PulsarCluster, or KafkaCluster."),
-			mcp.Enum("PulsarInstance", "PulsarCluster", "KafkaCluster"),
+			mcp.Description("The type of the resource to delete, it can be Instance, PulsarInstance, PulsarCluster, or KafkaCluster."),
+			mcp.Enum("Instance", "PulsarInstance", "PulsarCluster", "KafkaCluster"),
 		),
 		mcp.WithToolAnnotation(mcp.ToolAnnotation{
 			Title:           "Delete StreamNative Cloud Resources",
@@ -158,6 +158,8 @@ func applyResource(ctx context.Context, apiClient *sncloud.APIClient, resource R
 
 	// Call different APIs based on resource type
 	switch {
+	case apiVersion == "cloud.streamnative.io/v1alpha1" && kind == "Instance":
+		return applyInstance(ctx, apiClient, jsonContent, organization, dryRun)
 	case apiVersion == "cloud.streamnative.io/v1alpha1" && kind == "PulsarInstance":
 		return applyPulsarInstance(ctx, apiClient, jsonContent, organization, dryRun)
 	case apiVersion == "cloud.streamnative.io/v1alpha1" && kind == "PulsarCluster":
@@ -168,6 +170,102 @@ func applyResource(ctx context.Context, apiClient *sncloud.APIClient, resource R
 	default:
 		return "", fmt.Errorf("unsupported resource type: %s/%s", apiVersion, kind)
 	}
+}
+
+func applyInstance(ctx context.Context, apiClient *sncloud.APIClient, jsonContent string, organization string, dryRun bool) (string, error) {
+	var instance sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance
+	if err := json.Unmarshal([]byte(jsonContent), &instance); err != nil {
+		return "", fmt.Errorf("failed to unmarshal JSON to Instance: %v", err)
+	}
+
+	if instance.Metadata == nil {
+		instance.Metadata = &sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceMetadata{}
+	}
+	if instance.Metadata.Namespace == nil || *instance.Metadata.Namespace == "" {
+		ns := organization
+		instance.Metadata.Namespace = &ns
+	}
+
+	name := ""
+	if instance.Metadata.Name != nil {
+		name = *instance.Metadata.Name
+	}
+
+	exists := false
+	var existingResourceVersion *string
+	if name != "" {
+		existingInstance, bdy, err := apiClient.CloudStreamnativeIoV1alpha1Api.ReadCloudStreamnativeIoV1alpha1NamespacedInstance(ctx, name, organization).Execute()
+		defer func() {
+			if bdy != nil && bdy.Body != nil {
+				_ = bdy.Body.Close()
+			}
+		}()
+		if err == nil {
+			exists = true
+			if existingInstance.Metadata != nil && existingInstance.Metadata.ResourceVersion != nil {
+				existingResourceVersion = existingInstance.Metadata.ResourceVersion
+			}
+		}
+	}
+
+	var verb string
+	if exists {
+		verb = "updated"
+		if existingResourceVersion != nil && instance.Metadata.ResourceVersion == nil {
+			instance.Metadata.ResourceVersion = existingResourceVersion
+		}
+
+		request := apiClient.CloudStreamnativeIoV1alpha1Api.ReplaceCloudStreamnativeIoV1alpha1NamespacedInstance(
+			ctx, name, organization).Body(instance)
+		if dryRun {
+			request = request.DryRun("All")
+		}
+		_, bdy, err := request.Execute()
+		defer func() {
+			if bdy != nil && bdy.Body != nil {
+				_ = bdy.Body.Close()
+			}
+		}()
+		if err != nil {
+			if bdy == nil || bdy.Body == nil {
+				return "", fmt.Errorf("failed to %s Instance: %v", verb, err)
+			}
+			body, innerErr := io.ReadAll(bdy.Body)
+			if innerErr != nil {
+				return "", fmt.Errorf("failed to read body: %v", innerErr)
+			}
+			return "", fmt.Errorf("failed to %s Instance: %v (%s)", verb, err, string(body))
+		}
+	} else {
+		verb = "created"
+
+		request := apiClient.CloudStreamnativeIoV1alpha1Api.CreateCloudStreamnativeIoV1alpha1NamespacedInstance(
+			ctx, organization).Body(instance)
+		if dryRun {
+			request = request.DryRun("All")
+		}
+		_, bdy, err := request.Execute()
+		defer func() {
+			if bdy != nil && bdy.Body != nil {
+				_ = bdy.Body.Close()
+			}
+		}()
+		if err != nil {
+			if bdy == nil || bdy.Body == nil {
+				return "", fmt.Errorf("failed to %s Instance: %v", verb, err)
+			}
+			body, innerErr := io.ReadAll(bdy.Body)
+			if innerErr != nil {
+				return "", fmt.Errorf("failed to read body: %v", innerErr)
+			}
+			return "", fmt.Errorf("failed to %s Instance: %v (%s)", verb, err, string(body))
+		}
+	}
+
+	if dryRun {
+		return fmt.Sprintf("Instance %q would be %s (dry run)", name, verb), nil
+	}
+	return fmt.Sprintf("Instance %q %s", name, verb), nil
 }
 
 // applyPulsarInstance applies PulsarInstance resource
@@ -471,6 +569,9 @@ func HandleSNCloudResourcesDelete(ctx context.Context, request mcp.CallToolReque
 	}
 
 	switch resourceType {
+	case "Instance":
+		//nolint:bodyclose
+		_, _, err = apiClient.CloudStreamnativeIoV1alpha1Api.DeleteCloudStreamnativeIoV1alpha1NamespacedInstance(ctx, name, organization).Execute()
 	case "PulsarInstance":
 		//nolint:bodyclose
 		_, _, err = apiClient.CloudStreamnativeIoV1alpha1Api.DeleteCloudStreamnativeIoV1alpha1NamespacedPulsarInstance(ctx, name, organization).Execute()

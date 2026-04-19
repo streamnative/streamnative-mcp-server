@@ -16,6 +16,8 @@ Method | HTTP request | Description
 [**CreateCloudStreamnativeIoV1alpha1NamespacedCloudEnvironmentStatus**](CloudStreamnativeIoV1alpha1Api.md#CreateCloudStreamnativeIoV1alpha1NamespacedCloudEnvironmentStatus) | **Post** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/cloudenvironments/{name}/status | 
 [**CreateCloudStreamnativeIoV1alpha1NamespacedIdentityPool**](CloudStreamnativeIoV1alpha1Api.md#CreateCloudStreamnativeIoV1alpha1NamespacedIdentityPool) | **Post** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/identitypools | 
 [**CreateCloudStreamnativeIoV1alpha1NamespacedIdentityPoolStatus**](CloudStreamnativeIoV1alpha1Api.md#CreateCloudStreamnativeIoV1alpha1NamespacedIdentityPoolStatus) | **Post** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/identitypools/{name}/status | 
+[**CreateCloudStreamnativeIoV1alpha1NamespacedInstance**](CloudStreamnativeIoV1alpha1Api.md#CreateCloudStreamnativeIoV1alpha1NamespacedInstance) | **Post** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/instances | 
+[**CreateCloudStreamnativeIoV1alpha1NamespacedInstanceStatus**](CloudStreamnativeIoV1alpha1Api.md#CreateCloudStreamnativeIoV1alpha1NamespacedInstanceStatus) | **Post** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/instances/{name}/status | 
 [**CreateCloudStreamnativeIoV1alpha1NamespacedKafkaCluster**](CloudStreamnativeIoV1alpha1Api.md#CreateCloudStreamnativeIoV1alpha1NamespacedKafkaCluster) | **Post** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/kafkaclusters | 
 [**CreateCloudStreamnativeIoV1alpha1NamespacedKafkaClusterStatus**](CloudStreamnativeIoV1alpha1Api.md#CreateCloudStreamnativeIoV1alpha1NamespacedKafkaClusterStatus) | **Post** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/kafkaclusters/{name}/status | 
 [**CreateCloudStreamnativeIoV1alpha1NamespacedOIDCProvider**](CloudStreamnativeIoV1alpha1Api.md#CreateCloudStreamnativeIoV1alpha1NamespacedOIDCProvider) | **Post** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/oidcproviders | 
@@ -59,6 +61,7 @@ Method | HTTP request | Description
 [**DeleteCloudStreamnativeIoV1alpha1CollectionNamespacedCloudConnection**](CloudStreamnativeIoV1alpha1Api.md#DeleteCloudStreamnativeIoV1alpha1CollectionNamespacedCloudConnection) | **Delete** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/cloudconnections | 
 [**DeleteCloudStreamnativeIoV1alpha1CollectionNamespacedCloudEnvironment**](CloudStreamnativeIoV1alpha1Api.md#DeleteCloudStreamnativeIoV1alpha1CollectionNamespacedCloudEnvironment) | **Delete** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/cloudenvironments | 
 [**DeleteCloudStreamnativeIoV1alpha1CollectionNamespacedIdentityPool**](CloudStreamnativeIoV1alpha1Api.md#DeleteCloudStreamnativeIoV1alpha1CollectionNamespacedIdentityPool) | **Delete** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/identitypools | 
+[**DeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstance**](CloudStreamnativeIoV1alpha1Api.md#DeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstance) | **Delete** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/instances | 
 [**DeleteCloudStreamnativeIoV1alpha1CollectionNamespacedKafkaCluster**](CloudStreamnativeIoV1alpha1Api.md#DeleteCloudStreamnativeIoV1alpha1CollectionNamespacedKafkaCluster) | **Delete** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/kafkaclusters | 
 [**DeleteCloudStreamnativeIoV1alpha1CollectionNamespacedOIDCProvider**](CloudStreamnativeIoV1alpha1Api.md#DeleteCloudStreamnativeIoV1alpha1CollectionNamespacedOIDCProvider) | **Delete** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/oidcproviders | 
 [**DeleteCloudStreamnativeIoV1alpha1CollectionNamespacedPool**](CloudStreamnativeIoV1alpha1Api.md#DeleteCloudStreamnativeIoV1alpha1CollectionNamespacedPool) | **Delete** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/pools | 
@@ -83,6 +86,8 @@ Method | HTTP request | Description
 [**DeleteCloudStreamnativeIoV1alpha1NamespacedCloudEnvironmentStatus**](CloudStreamnativeIoV1alpha1Api.md#DeleteCloudStreamnativeIoV1alpha1NamespacedCloudEnvironmentStatus) | **Delete** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/cloudenvironments/{name}/status | 
 [**DeleteCloudStreamnativeIoV1alpha1NamespacedIdentityPool**](CloudStreamnativeIoV1alpha1Api.md#DeleteCloudStreamnativeIoV1alpha1NamespacedIdentityPool) | **Delete** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/identitypools/{name} | 
 [**DeleteCloudStreamnativeIoV1alpha1NamespacedIdentityPoolStatus**](CloudStreamnativeIoV1alpha1Api.md#DeleteCloudStreamnativeIoV1alpha1NamespacedIdentityPoolStatus) | **Delete** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/identitypools/{name}/status | 
+[**DeleteCloudStreamnativeIoV1alpha1NamespacedInstance**](CloudStreamnativeIoV1alpha1Api.md#DeleteCloudStreamnativeIoV1alpha1NamespacedInstance) | **Delete** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/instances/{name} | 
+[**DeleteCloudStreamnativeIoV1alpha1NamespacedInstanceStatus**](CloudStreamnativeIoV1alpha1Api.md#DeleteCloudStreamnativeIoV1alpha1NamespacedInstanceStatus) | **Delete** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/instances/{name}/status | 
 [**DeleteCloudStreamnativeIoV1alpha1NamespacedKafkaCluster**](CloudStreamnativeIoV1alpha1Api.md#DeleteCloudStreamnativeIoV1alpha1NamespacedKafkaCluster) | **Delete** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/kafkaclusters/{name} | 
 [**DeleteCloudStreamnativeIoV1alpha1NamespacedKafkaClusterStatus**](CloudStreamnativeIoV1alpha1Api.md#DeleteCloudStreamnativeIoV1alpha1NamespacedKafkaClusterStatus) | **Delete** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/kafkaclusters/{name}/status | 
 [**DeleteCloudStreamnativeIoV1alpha1NamespacedOIDCProvider**](CloudStreamnativeIoV1alpha1Api.md#DeleteCloudStreamnativeIoV1alpha1NamespacedOIDCProvider) | **Delete** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/oidcproviders/{name} | 
@@ -122,11 +127,13 @@ Method | HTTP request | Description
 [**ListCloudStreamnativeIoV1alpha1ClusterRole**](CloudStreamnativeIoV1alpha1Api.md#ListCloudStreamnativeIoV1alpha1ClusterRole) | **Get** /apis/cloud.streamnative.io/v1alpha1/clusterroles | 
 [**ListCloudStreamnativeIoV1alpha1ClusterRoleBinding**](CloudStreamnativeIoV1alpha1Api.md#ListCloudStreamnativeIoV1alpha1ClusterRoleBinding) | **Get** /apis/cloud.streamnative.io/v1alpha1/clusterrolebindings | 
 [**ListCloudStreamnativeIoV1alpha1IdentityPoolForAllNamespaces**](CloudStreamnativeIoV1alpha1Api.md#ListCloudStreamnativeIoV1alpha1IdentityPoolForAllNamespaces) | **Get** /apis/cloud.streamnative.io/v1alpha1/identitypools | 
+[**ListCloudStreamnativeIoV1alpha1InstanceForAllNamespaces**](CloudStreamnativeIoV1alpha1Api.md#ListCloudStreamnativeIoV1alpha1InstanceForAllNamespaces) | **Get** /apis/cloud.streamnative.io/v1alpha1/instances | 
 [**ListCloudStreamnativeIoV1alpha1KafkaClusterForAllNamespaces**](CloudStreamnativeIoV1alpha1Api.md#ListCloudStreamnativeIoV1alpha1KafkaClusterForAllNamespaces) | **Get** /apis/cloud.streamnative.io/v1alpha1/kafkaclusters | 
 [**ListCloudStreamnativeIoV1alpha1NamespacedAPIKey**](CloudStreamnativeIoV1alpha1Api.md#ListCloudStreamnativeIoV1alpha1NamespacedAPIKey) | **Get** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/apikeys | 
 [**ListCloudStreamnativeIoV1alpha1NamespacedCloudConnection**](CloudStreamnativeIoV1alpha1Api.md#ListCloudStreamnativeIoV1alpha1NamespacedCloudConnection) | **Get** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/cloudconnections | 
 [**ListCloudStreamnativeIoV1alpha1NamespacedCloudEnvironment**](CloudStreamnativeIoV1alpha1Api.md#ListCloudStreamnativeIoV1alpha1NamespacedCloudEnvironment) | **Get** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/cloudenvironments | 
 [**ListCloudStreamnativeIoV1alpha1NamespacedIdentityPool**](CloudStreamnativeIoV1alpha1Api.md#ListCloudStreamnativeIoV1alpha1NamespacedIdentityPool) | **Get** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/identitypools | 
+[**ListCloudStreamnativeIoV1alpha1NamespacedInstance**](CloudStreamnativeIoV1alpha1Api.md#ListCloudStreamnativeIoV1alpha1NamespacedInstance) | **Get** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/instances | 
 [**ListCloudStreamnativeIoV1alpha1NamespacedKafkaCluster**](CloudStreamnativeIoV1alpha1Api.md#ListCloudStreamnativeIoV1alpha1NamespacedKafkaCluster) | **Get** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/kafkaclusters | 
 [**ListCloudStreamnativeIoV1alpha1NamespacedOIDCProvider**](CloudStreamnativeIoV1alpha1Api.md#ListCloudStreamnativeIoV1alpha1NamespacedOIDCProvider) | **Get** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/oidcproviders | 
 [**ListCloudStreamnativeIoV1alpha1NamespacedPool**](CloudStreamnativeIoV1alpha1Api.md#ListCloudStreamnativeIoV1alpha1NamespacedPool) | **Get** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/pools | 
@@ -169,6 +176,8 @@ Method | HTTP request | Description
 [**PatchCloudStreamnativeIoV1alpha1NamespacedCloudEnvironmentStatus**](CloudStreamnativeIoV1alpha1Api.md#PatchCloudStreamnativeIoV1alpha1NamespacedCloudEnvironmentStatus) | **Patch** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/cloudenvironments/{name}/status | 
 [**PatchCloudStreamnativeIoV1alpha1NamespacedIdentityPool**](CloudStreamnativeIoV1alpha1Api.md#PatchCloudStreamnativeIoV1alpha1NamespacedIdentityPool) | **Patch** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/identitypools/{name} | 
 [**PatchCloudStreamnativeIoV1alpha1NamespacedIdentityPoolStatus**](CloudStreamnativeIoV1alpha1Api.md#PatchCloudStreamnativeIoV1alpha1NamespacedIdentityPoolStatus) | **Patch** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/identitypools/{name}/status | 
+[**PatchCloudStreamnativeIoV1alpha1NamespacedInstance**](CloudStreamnativeIoV1alpha1Api.md#PatchCloudStreamnativeIoV1alpha1NamespacedInstance) | **Patch** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/instances/{name} | 
+[**PatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatus**](CloudStreamnativeIoV1alpha1Api.md#PatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatus) | **Patch** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/instances/{name}/status | 
 [**PatchCloudStreamnativeIoV1alpha1NamespacedKafkaCluster**](CloudStreamnativeIoV1alpha1Api.md#PatchCloudStreamnativeIoV1alpha1NamespacedKafkaCluster) | **Patch** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/kafkaclusters/{name} | 
 [**PatchCloudStreamnativeIoV1alpha1NamespacedKafkaClusterStatus**](CloudStreamnativeIoV1alpha1Api.md#PatchCloudStreamnativeIoV1alpha1NamespacedKafkaClusterStatus) | **Patch** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/kafkaclusters/{name}/status | 
 [**PatchCloudStreamnativeIoV1alpha1NamespacedOIDCProvider**](CloudStreamnativeIoV1alpha1Api.md#PatchCloudStreamnativeIoV1alpha1NamespacedOIDCProvider) | **Patch** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/oidcproviders/{name} | 
@@ -213,6 +222,8 @@ Method | HTTP request | Description
 [**ReadCloudStreamnativeIoV1alpha1NamespacedCloudEnvironmentStatus**](CloudStreamnativeIoV1alpha1Api.md#ReadCloudStreamnativeIoV1alpha1NamespacedCloudEnvironmentStatus) | **Get** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/cloudenvironments/{name}/status | 
 [**ReadCloudStreamnativeIoV1alpha1NamespacedIdentityPool**](CloudStreamnativeIoV1alpha1Api.md#ReadCloudStreamnativeIoV1alpha1NamespacedIdentityPool) | **Get** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/identitypools/{name} | 
 [**ReadCloudStreamnativeIoV1alpha1NamespacedIdentityPoolStatus**](CloudStreamnativeIoV1alpha1Api.md#ReadCloudStreamnativeIoV1alpha1NamespacedIdentityPoolStatus) | **Get** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/identitypools/{name}/status | 
+[**ReadCloudStreamnativeIoV1alpha1NamespacedInstance**](CloudStreamnativeIoV1alpha1Api.md#ReadCloudStreamnativeIoV1alpha1NamespacedInstance) | **Get** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/instances/{name} | 
+[**ReadCloudStreamnativeIoV1alpha1NamespacedInstanceStatus**](CloudStreamnativeIoV1alpha1Api.md#ReadCloudStreamnativeIoV1alpha1NamespacedInstanceStatus) | **Get** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/instances/{name}/status | 
 [**ReadCloudStreamnativeIoV1alpha1NamespacedKafkaCluster**](CloudStreamnativeIoV1alpha1Api.md#ReadCloudStreamnativeIoV1alpha1NamespacedKafkaCluster) | **Get** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/kafkaclusters/{name} | 
 [**ReadCloudStreamnativeIoV1alpha1NamespacedKafkaClusterStatus**](CloudStreamnativeIoV1alpha1Api.md#ReadCloudStreamnativeIoV1alpha1NamespacedKafkaClusterStatus) | **Get** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/kafkaclusters/{name}/status | 
 [**ReadCloudStreamnativeIoV1alpha1NamespacedOIDCProvider**](CloudStreamnativeIoV1alpha1Api.md#ReadCloudStreamnativeIoV1alpha1NamespacedOIDCProvider) | **Get** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/oidcproviders/{name} | 
@@ -257,6 +268,8 @@ Method | HTTP request | Description
 [**ReplaceCloudStreamnativeIoV1alpha1NamespacedCloudEnvironmentStatus**](CloudStreamnativeIoV1alpha1Api.md#ReplaceCloudStreamnativeIoV1alpha1NamespacedCloudEnvironmentStatus) | **Put** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/cloudenvironments/{name}/status | 
 [**ReplaceCloudStreamnativeIoV1alpha1NamespacedIdentityPool**](CloudStreamnativeIoV1alpha1Api.md#ReplaceCloudStreamnativeIoV1alpha1NamespacedIdentityPool) | **Put** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/identitypools/{name} | 
 [**ReplaceCloudStreamnativeIoV1alpha1NamespacedIdentityPoolStatus**](CloudStreamnativeIoV1alpha1Api.md#ReplaceCloudStreamnativeIoV1alpha1NamespacedIdentityPoolStatus) | **Put** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/identitypools/{name}/status | 
+[**ReplaceCloudStreamnativeIoV1alpha1NamespacedInstance**](CloudStreamnativeIoV1alpha1Api.md#ReplaceCloudStreamnativeIoV1alpha1NamespacedInstance) | **Put** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/instances/{name} | 
+[**ReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceStatus**](CloudStreamnativeIoV1alpha1Api.md#ReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceStatus) | **Put** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/instances/{name}/status | 
 [**ReplaceCloudStreamnativeIoV1alpha1NamespacedKafkaCluster**](CloudStreamnativeIoV1alpha1Api.md#ReplaceCloudStreamnativeIoV1alpha1NamespacedKafkaCluster) | **Put** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/kafkaclusters/{name} | 
 [**ReplaceCloudStreamnativeIoV1alpha1NamespacedKafkaClusterStatus**](CloudStreamnativeIoV1alpha1Api.md#ReplaceCloudStreamnativeIoV1alpha1NamespacedKafkaClusterStatus) | **Put** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/kafkaclusters/{name}/status | 
 [**ReplaceCloudStreamnativeIoV1alpha1NamespacedOIDCProvider**](CloudStreamnativeIoV1alpha1Api.md#ReplaceCloudStreamnativeIoV1alpha1NamespacedOIDCProvider) | **Put** /apis/cloud.streamnative.io/v1alpha1/namespaces/{namespace}/oidcproviders/{name} | 
@@ -299,6 +312,7 @@ Method | HTTP request | Description
 [**WatchCloudStreamnativeIoV1alpha1ClusterRoleList**](CloudStreamnativeIoV1alpha1Api.md#WatchCloudStreamnativeIoV1alpha1ClusterRoleList) | **Get** /apis/cloud.streamnative.io/v1alpha1/watch/clusterroles | 
 [**WatchCloudStreamnativeIoV1alpha1ClusterRoleStatus**](CloudStreamnativeIoV1alpha1Api.md#WatchCloudStreamnativeIoV1alpha1ClusterRoleStatus) | **Get** /apis/cloud.streamnative.io/v1alpha1/watch/clusterroles/{name}/status | 
 [**WatchCloudStreamnativeIoV1alpha1IdentityPoolListForAllNamespaces**](CloudStreamnativeIoV1alpha1Api.md#WatchCloudStreamnativeIoV1alpha1IdentityPoolListForAllNamespaces) | **Get** /apis/cloud.streamnative.io/v1alpha1/watch/identitypools | 
+[**WatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespaces**](CloudStreamnativeIoV1alpha1Api.md#WatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespaces) | **Get** /apis/cloud.streamnative.io/v1alpha1/watch/instances | 
 [**WatchCloudStreamnativeIoV1alpha1KafkaClusterListForAllNamespaces**](CloudStreamnativeIoV1alpha1Api.md#WatchCloudStreamnativeIoV1alpha1KafkaClusterListForAllNamespaces) | **Get** /apis/cloud.streamnative.io/v1alpha1/watch/kafkaclusters | 
 [**WatchCloudStreamnativeIoV1alpha1NamespacedAPIKey**](CloudStreamnativeIoV1alpha1Api.md#WatchCloudStreamnativeIoV1alpha1NamespacedAPIKey) | **Get** /apis/cloud.streamnative.io/v1alpha1/watch/namespaces/{namespace}/apikeys/{name} | 
 [**WatchCloudStreamnativeIoV1alpha1NamespacedAPIKeyList**](CloudStreamnativeIoV1alpha1Api.md#WatchCloudStreamnativeIoV1alpha1NamespacedAPIKeyList) | **Get** /apis/cloud.streamnative.io/v1alpha1/watch/namespaces/{namespace}/apikeys | 
@@ -312,6 +326,9 @@ Method | HTTP request | Description
 [**WatchCloudStreamnativeIoV1alpha1NamespacedIdentityPool**](CloudStreamnativeIoV1alpha1Api.md#WatchCloudStreamnativeIoV1alpha1NamespacedIdentityPool) | **Get** /apis/cloud.streamnative.io/v1alpha1/watch/namespaces/{namespace}/identitypools/{name} | 
 [**WatchCloudStreamnativeIoV1alpha1NamespacedIdentityPoolList**](CloudStreamnativeIoV1alpha1Api.md#WatchCloudStreamnativeIoV1alpha1NamespacedIdentityPoolList) | **Get** /apis/cloud.streamnative.io/v1alpha1/watch/namespaces/{namespace}/identitypools | 
 [**WatchCloudStreamnativeIoV1alpha1NamespacedIdentityPoolStatus**](CloudStreamnativeIoV1alpha1Api.md#WatchCloudStreamnativeIoV1alpha1NamespacedIdentityPoolStatus) | **Get** /apis/cloud.streamnative.io/v1alpha1/watch/namespaces/{namespace}/identitypools/{name}/status | 
+[**WatchCloudStreamnativeIoV1alpha1NamespacedInstance**](CloudStreamnativeIoV1alpha1Api.md#WatchCloudStreamnativeIoV1alpha1NamespacedInstance) | **Get** /apis/cloud.streamnative.io/v1alpha1/watch/namespaces/{namespace}/instances/{name} | 
+[**WatchCloudStreamnativeIoV1alpha1NamespacedInstanceList**](CloudStreamnativeIoV1alpha1Api.md#WatchCloudStreamnativeIoV1alpha1NamespacedInstanceList) | **Get** /apis/cloud.streamnative.io/v1alpha1/watch/namespaces/{namespace}/instances | 
+[**WatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatus**](CloudStreamnativeIoV1alpha1Api.md#WatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatus) | **Get** /apis/cloud.streamnative.io/v1alpha1/watch/namespaces/{namespace}/instances/{name}/status | 
 [**WatchCloudStreamnativeIoV1alpha1NamespacedKafkaCluster**](CloudStreamnativeIoV1alpha1Api.md#WatchCloudStreamnativeIoV1alpha1NamespacedKafkaCluster) | **Get** /apis/cloud.streamnative.io/v1alpha1/watch/namespaces/{namespace}/kafkaclusters/{name} | 
 [**WatchCloudStreamnativeIoV1alpha1NamespacedKafkaClusterList**](CloudStreamnativeIoV1alpha1Api.md#WatchCloudStreamnativeIoV1alpha1NamespacedKafkaClusterList) | **Get** /apis/cloud.streamnative.io/v1alpha1/watch/namespaces/{namespace}/kafkaclusters | 
 [**WatchCloudStreamnativeIoV1alpha1NamespacedKafkaClusterStatus**](CloudStreamnativeIoV1alpha1Api.md#WatchCloudStreamnativeIoV1alpha1NamespacedKafkaClusterStatus) | **Get** /apis/cloud.streamnative.io/v1alpha1/watch/namespaces/{namespace}/kafkaclusters/{name}/status | 
@@ -1298,6 +1315,165 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1IdentityPool**](ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1IdentityPool.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json, application/yaml, application/vnd.kubernetes.protobuf
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## CreateCloudStreamnativeIoV1alpha1NamespacedInstance
+
+> ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance CreateCloudStreamnativeIoV1alpha1NamespacedInstance(ctx, namespace).Body(body).Pretty(pretty).DryRun(dryRun).FieldManager(fieldManager).Execute()
+
+
+
+
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    namespace := "namespace_example" // string | object name and auth scope, such as for teams and projects
+    body := *openapiclient.NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance() // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance | 
+    pretty := "pretty_example" // string | If 'true', then the output is pretty printed. (optional)
+    dryRun := "dryRun_example" // string | When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed (optional)
+    fieldManager := "fieldManager_example" // string | fieldManager is a name associated with the actor or entity that is making these changes. The value must be less than or 128 characters long, and only contain printable characters, as defined by https://golang.org/pkg/unicode/#IsPrint. (optional)
+
+    configuration := openapiclient.NewConfiguration()
+    apiClient := openapiclient.NewAPIClient(configuration)
+    resp, r, err := apiClient.CloudStreamnativeIoV1alpha1Api.CreateCloudStreamnativeIoV1alpha1NamespacedInstance(context.Background(), namespace).Body(body).Pretty(pretty).DryRun(dryRun).FieldManager(fieldManager).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `CloudStreamnativeIoV1alpha1Api.CreateCloudStreamnativeIoV1alpha1NamespacedInstance``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `CreateCloudStreamnativeIoV1alpha1NamespacedInstance`: ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance
+    fmt.Fprintf(os.Stdout, "Response from `CloudStreamnativeIoV1alpha1Api.CreateCloudStreamnativeIoV1alpha1NamespacedInstance`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**namespace** | **string** | object name and auth scope, such as for teams and projects | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiCreateCloudStreamnativeIoV1alpha1NamespacedInstanceRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **body** | [**ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance**](ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance.md) |  | 
+ **pretty** | **string** | If &#39;true&#39;, then the output is pretty printed. | 
+ **dryRun** | **string** | When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed | 
+ **fieldManager** | **string** | fieldManager is a name associated with the actor or entity that is making these changes. The value must be less than or 128 characters long, and only contain printable characters, as defined by https://golang.org/pkg/unicode/#IsPrint. | 
+
+### Return type
+
+[**ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance**](ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json, application/yaml, application/vnd.kubernetes.protobuf
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## CreateCloudStreamnativeIoV1alpha1NamespacedInstanceStatus
+
+> ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance CreateCloudStreamnativeIoV1alpha1NamespacedInstanceStatus(ctx, name, namespace).Body(body).Pretty(pretty).DryRun(dryRun).FieldManager(fieldManager).Execute()
+
+
+
+
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    name := "name_example" // string | name of the Instance
+    namespace := "namespace_example" // string | object name and auth scope, such as for teams and projects
+    body := *openapiclient.NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance() // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance | 
+    pretty := "pretty_example" // string | If 'true', then the output is pretty printed. (optional)
+    dryRun := "dryRun_example" // string | When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed (optional)
+    fieldManager := "fieldManager_example" // string | fieldManager is a name associated with the actor or entity that is making these changes. The value must be less than or 128 characters long, and only contain printable characters, as defined by https://golang.org/pkg/unicode/#IsPrint. (optional)
+
+    configuration := openapiclient.NewConfiguration()
+    apiClient := openapiclient.NewAPIClient(configuration)
+    resp, r, err := apiClient.CloudStreamnativeIoV1alpha1Api.CreateCloudStreamnativeIoV1alpha1NamespacedInstanceStatus(context.Background(), name, namespace).Body(body).Pretty(pretty).DryRun(dryRun).FieldManager(fieldManager).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `CloudStreamnativeIoV1alpha1Api.CreateCloudStreamnativeIoV1alpha1NamespacedInstanceStatus``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `CreateCloudStreamnativeIoV1alpha1NamespacedInstanceStatus`: ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance
+    fmt.Fprintf(os.Stdout, "Response from `CloudStreamnativeIoV1alpha1Api.CreateCloudStreamnativeIoV1alpha1NamespacedInstanceStatus`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**name** | **string** | name of the Instance | 
+**namespace** | **string** | object name and auth scope, such as for teams and projects | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiCreateCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+ **body** | [**ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance**](ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance.md) |  | 
+ **pretty** | **string** | If &#39;true&#39;, then the output is pretty printed. | 
+ **dryRun** | **string** | When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed | 
+ **fieldManager** | **string** | fieldManager is a name associated with the actor or entity that is making these changes. The value must be less than or 128 characters long, and only contain printable characters, as defined by https://golang.org/pkg/unicode/#IsPrint. | 
+
+### Return type
+
+[**ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance**](ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance.md)
 
 ### Authorization
 
@@ -4812,6 +4988,102 @@ No authorization required
 [[Back to README]](../README.md)
 
 
+## DeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstance
+
+> V1Status DeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstance(ctx, namespace).Pretty(pretty).Continue_(continue_).DryRun(dryRun).FieldSelector(fieldSelector).GracePeriodSeconds(gracePeriodSeconds).LabelSelector(labelSelector).Limit(limit).OrphanDependents(orphanDependents).PropagationPolicy(propagationPolicy).ResourceVersion(resourceVersion).ResourceVersionMatch(resourceVersionMatch).TimeoutSeconds(timeoutSeconds).Body(body).Execute()
+
+
+
+
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    namespace := "namespace_example" // string | object name and auth scope, such as for teams and projects
+    pretty := "pretty_example" // string | If 'true', then the output is pretty printed. (optional)
+    continue_ := "continue__example" // string | The continue option should be set when retrieving more results from the server. Since this value is server defined, clients may only use the continue value from a previous query result with identical query parameters (except for the value of continue) and the server may reject a continue value it does not recognize. If the specified continue value is no longer valid whether due to expiration (generally five to fifteen minutes) or a configuration change on the server, the server will respond with a 410 ResourceExpired error together with a continue token. If the client needs a consistent list, it must restart their list without the continue field. Otherwise, the client may send another list request with the token received with the 410 error, the server will respond with a list starting from the next key, but from the latest snapshot, which is inconsistent from the previous list results - objects that are created, modified, or deleted after the first list request will be included in the response, as long as their keys are after the \"next key\".  This field is not supported when watch is true. Clients may start a watch from the last resourceVersion value returned by the server and not miss any modifications. (optional)
+    dryRun := "dryRun_example" // string | When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed (optional)
+    fieldSelector := "fieldSelector_example" // string | A selector to restrict the list of returned objects by their fields. Defaults to everything. (optional)
+    gracePeriodSeconds := int32(56) // int32 | The duration in seconds before the object should be deleted. Value must be non-negative integer. The value zero indicates delete immediately. If this value is nil, the default grace period for the specified type will be used. Defaults to a per object value if not specified. zero means delete immediately. (optional)
+    labelSelector := "labelSelector_example" // string | A selector to restrict the list of returned objects by their labels. Defaults to everything. (optional)
+    limit := int32(56) // int32 | limit is a maximum number of responses to return for a list call. If more items exist, the server will set the `continue` field on the list metadata to a value that can be used with the same initial query to retrieve the next set of results. Setting a limit may return fewer than the requested amount of items (up to zero items) in the event all requested objects are filtered out and clients should only use the presence of the continue field to determine whether more results are available. Servers may choose not to support the limit argument and will return all of the available results. If limit is specified and the continue field is empty, clients may assume that no more results are available. This field is not supported if watch is true.  The server guarantees that the objects returned when using continue will be identical to issuing a single list call without a limit - that is, no objects created, modified, or deleted after the first request is issued will be included in any subsequent continued requests. This is sometimes referred to as a consistent snapshot, and ensures that a client that is using limit to receive smaller chunks of a very large result can ensure they see all possible objects. If objects are updated during a chunked list the version of the object that was present at the time the first list result was calculated is returned. (optional)
+    orphanDependents := true // bool | Deprecated: please use the PropagationPolicy, this field will be deprecated in 1.7. Should the dependent objects be orphaned. If true/false, the \"orphan\" finalizer will be added to/removed from the object's finalizers list. Either this field or PropagationPolicy may be set, but not both. (optional)
+    propagationPolicy := "propagationPolicy_example" // string | Whether and how garbage collection will be performed. Either this field or OrphanDependents may be set, but not both. The default policy is decided by the existing finalizer set in the metadata.finalizers and the resource-specific default policy. Acceptable values are: 'Orphan' - orphan the dependents; 'Background' - allow the garbage collector to delete the dependents in the background; 'Foreground' - a cascading policy that deletes all dependents in the foreground. (optional)
+    resourceVersion := "resourceVersion_example" // string | resourceVersion sets a constraint on what resource versions a request may be served from. See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset (optional)
+    resourceVersionMatch := "resourceVersionMatch_example" // string | resourceVersionMatch determines how resourceVersion is applied to list calls. It is highly recommended that resourceVersionMatch be set for list calls where resourceVersion is set See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset (optional)
+    timeoutSeconds := int32(56) // int32 | Timeout for the list/watch call. This limits the duration of the call, regardless of any activity or inactivity. (optional)
+    body := *openapiclient.NewV1DeleteOptions() // V1DeleteOptions |  (optional)
+
+    configuration := openapiclient.NewConfiguration()
+    apiClient := openapiclient.NewAPIClient(configuration)
+    resp, r, err := apiClient.CloudStreamnativeIoV1alpha1Api.DeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstance(context.Background(), namespace).Pretty(pretty).Continue_(continue_).DryRun(dryRun).FieldSelector(fieldSelector).GracePeriodSeconds(gracePeriodSeconds).LabelSelector(labelSelector).Limit(limit).OrphanDependents(orphanDependents).PropagationPolicy(propagationPolicy).ResourceVersion(resourceVersion).ResourceVersionMatch(resourceVersionMatch).TimeoutSeconds(timeoutSeconds).Body(body).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `CloudStreamnativeIoV1alpha1Api.DeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstance``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `DeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstance`: V1Status
+    fmt.Fprintf(os.Stdout, "Response from `CloudStreamnativeIoV1alpha1Api.DeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstance`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**namespace** | **string** | object name and auth scope, such as for teams and projects | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiDeleteCloudStreamnativeIoV1alpha1CollectionNamespacedInstanceRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **pretty** | **string** | If &#39;true&#39;, then the output is pretty printed. | 
+ **continue_** | **string** | The continue option should be set when retrieving more results from the server. Since this value is server defined, clients may only use the continue value from a previous query result with identical query parameters (except for the value of continue) and the server may reject a continue value it does not recognize. If the specified continue value is no longer valid whether due to expiration (generally five to fifteen minutes) or a configuration change on the server, the server will respond with a 410 ResourceExpired error together with a continue token. If the client needs a consistent list, it must restart their list without the continue field. Otherwise, the client may send another list request with the token received with the 410 error, the server will respond with a list starting from the next key, but from the latest snapshot, which is inconsistent from the previous list results - objects that are created, modified, or deleted after the first list request will be included in the response, as long as their keys are after the \&quot;next key\&quot;.  This field is not supported when watch is true. Clients may start a watch from the last resourceVersion value returned by the server and not miss any modifications. | 
+ **dryRun** | **string** | When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed | 
+ **fieldSelector** | **string** | A selector to restrict the list of returned objects by their fields. Defaults to everything. | 
+ **gracePeriodSeconds** | **int32** | The duration in seconds before the object should be deleted. Value must be non-negative integer. The value zero indicates delete immediately. If this value is nil, the default grace period for the specified type will be used. Defaults to a per object value if not specified. zero means delete immediately. | 
+ **labelSelector** | **string** | A selector to restrict the list of returned objects by their labels. Defaults to everything. | 
+ **limit** | **int32** | limit is a maximum number of responses to return for a list call. If more items exist, the server will set the &#x60;continue&#x60; field on the list metadata to a value that can be used with the same initial query to retrieve the next set of results. Setting a limit may return fewer than the requested amount of items (up to zero items) in the event all requested objects are filtered out and clients should only use the presence of the continue field to determine whether more results are available. Servers may choose not to support the limit argument and will return all of the available results. If limit is specified and the continue field is empty, clients may assume that no more results are available. This field is not supported if watch is true.  The server guarantees that the objects returned when using continue will be identical to issuing a single list call without a limit - that is, no objects created, modified, or deleted after the first request is issued will be included in any subsequent continued requests. This is sometimes referred to as a consistent snapshot, and ensures that a client that is using limit to receive smaller chunks of a very large result can ensure they see all possible objects. If objects are updated during a chunked list the version of the object that was present at the time the first list result was calculated is returned. | 
+ **orphanDependents** | **bool** | Deprecated: please use the PropagationPolicy, this field will be deprecated in 1.7. Should the dependent objects be orphaned. If true/false, the \&quot;orphan\&quot; finalizer will be added to/removed from the object&#39;s finalizers list. Either this field or PropagationPolicy may be set, but not both. | 
+ **propagationPolicy** | **string** | Whether and how garbage collection will be performed. Either this field or OrphanDependents may be set, but not both. The default policy is decided by the existing finalizer set in the metadata.finalizers and the resource-specific default policy. Acceptable values are: &#39;Orphan&#39; - orphan the dependents; &#39;Background&#39; - allow the garbage collector to delete the dependents in the background; &#39;Foreground&#39; - a cascading policy that deletes all dependents in the foreground. | 
+ **resourceVersion** | **string** | resourceVersion sets a constraint on what resource versions a request may be served from. See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset | 
+ **resourceVersionMatch** | **string** | resourceVersionMatch determines how resourceVersion is applied to list calls. It is highly recommended that resourceVersionMatch be set for list calls where resourceVersion is set See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset | 
+ **timeoutSeconds** | **int32** | Timeout for the list/watch call. This limits the duration of the call, regardless of any activity or inactivity. | 
+ **body** | [**V1DeleteOptions**](V1DeleteOptions.md) |  | 
+
+### Return type
+
+[**V1Status**](V1Status.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json, application/yaml, application/vnd.kubernetes.protobuf
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
 ## DeleteCloudStreamnativeIoV1alpha1CollectionNamespacedKafkaCluster
 
 > V1Status DeleteCloudStreamnativeIoV1alpha1CollectionNamespacedKafkaCluster(ctx, namespace).Pretty(pretty).Continue_(continue_).DryRun(dryRun).FieldSelector(fieldSelector).GracePeriodSeconds(gracePeriodSeconds).LabelSelector(labelSelector).Limit(limit).OrphanDependents(orphanDependents).PropagationPolicy(propagationPolicy).ResourceVersion(resourceVersion).ResourceVersionMatch(resourceVersionMatch).TimeoutSeconds(timeoutSeconds).Body(body).Execute()
@@ -6991,6 +7263,176 @@ Name | Type | Description  | Notes
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiDeleteCloudStreamnativeIoV1alpha1NamespacedIdentityPoolStatusRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+ **pretty** | **string** | If &#39;true&#39;, then the output is pretty printed. | 
+ **dryRun** | **string** | When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed | 
+ **gracePeriodSeconds** | **int32** | The duration in seconds before the object should be deleted. Value must be non-negative integer. The value zero indicates delete immediately. If this value is nil, the default grace period for the specified type will be used. Defaults to a per object value if not specified. zero means delete immediately. | 
+ **orphanDependents** | **bool** | Deprecated: please use the PropagationPolicy, this field will be deprecated in 1.7. Should the dependent objects be orphaned. If true/false, the \&quot;orphan\&quot; finalizer will be added to/removed from the object&#39;s finalizers list. Either this field or PropagationPolicy may be set, but not both. | 
+ **propagationPolicy** | **string** | Whether and how garbage collection will be performed. Either this field or OrphanDependents may be set, but not both. The default policy is decided by the existing finalizer set in the metadata.finalizers and the resource-specific default policy. Acceptable values are: &#39;Orphan&#39; - orphan the dependents; &#39;Background&#39; - allow the garbage collector to delete the dependents in the background; &#39;Foreground&#39; - a cascading policy that deletes all dependents in the foreground. | 
+ **body** | [**V1DeleteOptions**](V1DeleteOptions.md) |  | 
+
+### Return type
+
+[**V1Status**](V1Status.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json, application/yaml, application/vnd.kubernetes.protobuf
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## DeleteCloudStreamnativeIoV1alpha1NamespacedInstance
+
+> V1Status DeleteCloudStreamnativeIoV1alpha1NamespacedInstance(ctx, name, namespace).Pretty(pretty).DryRun(dryRun).GracePeriodSeconds(gracePeriodSeconds).OrphanDependents(orphanDependents).PropagationPolicy(propagationPolicy).Body(body).Execute()
+
+
+
+
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    name := "name_example" // string | name of the Instance
+    namespace := "namespace_example" // string | object name and auth scope, such as for teams and projects
+    pretty := "pretty_example" // string | If 'true', then the output is pretty printed. (optional)
+    dryRun := "dryRun_example" // string | When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed (optional)
+    gracePeriodSeconds := int32(56) // int32 | The duration in seconds before the object should be deleted. Value must be non-negative integer. The value zero indicates delete immediately. If this value is nil, the default grace period for the specified type will be used. Defaults to a per object value if not specified. zero means delete immediately. (optional)
+    orphanDependents := true // bool | Deprecated: please use the PropagationPolicy, this field will be deprecated in 1.7. Should the dependent objects be orphaned. If true/false, the \"orphan\" finalizer will be added to/removed from the object's finalizers list. Either this field or PropagationPolicy may be set, but not both. (optional)
+    propagationPolicy := "propagationPolicy_example" // string | Whether and how garbage collection will be performed. Either this field or OrphanDependents may be set, but not both. The default policy is decided by the existing finalizer set in the metadata.finalizers and the resource-specific default policy. Acceptable values are: 'Orphan' - orphan the dependents; 'Background' - allow the garbage collector to delete the dependents in the background; 'Foreground' - a cascading policy that deletes all dependents in the foreground. (optional)
+    body := *openapiclient.NewV1DeleteOptions() // V1DeleteOptions |  (optional)
+
+    configuration := openapiclient.NewConfiguration()
+    apiClient := openapiclient.NewAPIClient(configuration)
+    resp, r, err := apiClient.CloudStreamnativeIoV1alpha1Api.DeleteCloudStreamnativeIoV1alpha1NamespacedInstance(context.Background(), name, namespace).Pretty(pretty).DryRun(dryRun).GracePeriodSeconds(gracePeriodSeconds).OrphanDependents(orphanDependents).PropagationPolicy(propagationPolicy).Body(body).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `CloudStreamnativeIoV1alpha1Api.DeleteCloudStreamnativeIoV1alpha1NamespacedInstance``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `DeleteCloudStreamnativeIoV1alpha1NamespacedInstance`: V1Status
+    fmt.Fprintf(os.Stdout, "Response from `CloudStreamnativeIoV1alpha1Api.DeleteCloudStreamnativeIoV1alpha1NamespacedInstance`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**name** | **string** | name of the Instance | 
+**namespace** | **string** | object name and auth scope, such as for teams and projects | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+ **pretty** | **string** | If &#39;true&#39;, then the output is pretty printed. | 
+ **dryRun** | **string** | When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed | 
+ **gracePeriodSeconds** | **int32** | The duration in seconds before the object should be deleted. Value must be non-negative integer. The value zero indicates delete immediately. If this value is nil, the default grace period for the specified type will be used. Defaults to a per object value if not specified. zero means delete immediately. | 
+ **orphanDependents** | **bool** | Deprecated: please use the PropagationPolicy, this field will be deprecated in 1.7. Should the dependent objects be orphaned. If true/false, the \&quot;orphan\&quot; finalizer will be added to/removed from the object&#39;s finalizers list. Either this field or PropagationPolicy may be set, but not both. | 
+ **propagationPolicy** | **string** | Whether and how garbage collection will be performed. Either this field or OrphanDependents may be set, but not both. The default policy is decided by the existing finalizer set in the metadata.finalizers and the resource-specific default policy. Acceptable values are: &#39;Orphan&#39; - orphan the dependents; &#39;Background&#39; - allow the garbage collector to delete the dependents in the background; &#39;Foreground&#39; - a cascading policy that deletes all dependents in the foreground. | 
+ **body** | [**V1DeleteOptions**](V1DeleteOptions.md) |  | 
+
+### Return type
+
+[**V1Status**](V1Status.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json, application/yaml, application/vnd.kubernetes.protobuf
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## DeleteCloudStreamnativeIoV1alpha1NamespacedInstanceStatus
+
+> V1Status DeleteCloudStreamnativeIoV1alpha1NamespacedInstanceStatus(ctx, name, namespace).Pretty(pretty).DryRun(dryRun).GracePeriodSeconds(gracePeriodSeconds).OrphanDependents(orphanDependents).PropagationPolicy(propagationPolicy).Body(body).Execute()
+
+
+
+
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    name := "name_example" // string | name of the Instance
+    namespace := "namespace_example" // string | object name and auth scope, such as for teams and projects
+    pretty := "pretty_example" // string | If 'true', then the output is pretty printed. (optional)
+    dryRun := "dryRun_example" // string | When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed (optional)
+    gracePeriodSeconds := int32(56) // int32 | The duration in seconds before the object should be deleted. Value must be non-negative integer. The value zero indicates delete immediately. If this value is nil, the default grace period for the specified type will be used. Defaults to a per object value if not specified. zero means delete immediately. (optional)
+    orphanDependents := true // bool | Deprecated: please use the PropagationPolicy, this field will be deprecated in 1.7. Should the dependent objects be orphaned. If true/false, the \"orphan\" finalizer will be added to/removed from the object's finalizers list. Either this field or PropagationPolicy may be set, but not both. (optional)
+    propagationPolicy := "propagationPolicy_example" // string | Whether and how garbage collection will be performed. Either this field or OrphanDependents may be set, but not both. The default policy is decided by the existing finalizer set in the metadata.finalizers and the resource-specific default policy. Acceptable values are: 'Orphan' - orphan the dependents; 'Background' - allow the garbage collector to delete the dependents in the background; 'Foreground' - a cascading policy that deletes all dependents in the foreground. (optional)
+    body := *openapiclient.NewV1DeleteOptions() // V1DeleteOptions |  (optional)
+
+    configuration := openapiclient.NewConfiguration()
+    apiClient := openapiclient.NewAPIClient(configuration)
+    resp, r, err := apiClient.CloudStreamnativeIoV1alpha1Api.DeleteCloudStreamnativeIoV1alpha1NamespacedInstanceStatus(context.Background(), name, namespace).Pretty(pretty).DryRun(dryRun).GracePeriodSeconds(gracePeriodSeconds).OrphanDependents(orphanDependents).PropagationPolicy(propagationPolicy).Body(body).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `CloudStreamnativeIoV1alpha1Api.DeleteCloudStreamnativeIoV1alpha1NamespacedInstanceStatus``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `DeleteCloudStreamnativeIoV1alpha1NamespacedInstanceStatus`: V1Status
+    fmt.Fprintf(os.Stdout, "Response from `CloudStreamnativeIoV1alpha1Api.DeleteCloudStreamnativeIoV1alpha1NamespacedInstanceStatus`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**name** | **string** | name of the Instance | 
+**namespace** | **string** | object name and auth scope, such as for teams and projects | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiDeleteCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
@@ -10301,6 +10743,90 @@ No authorization required
 [[Back to README]](../README.md)
 
 
+## ListCloudStreamnativeIoV1alpha1InstanceForAllNamespaces
+
+> ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceList ListCloudStreamnativeIoV1alpha1InstanceForAllNamespaces(ctx).AllowWatchBookmarks(allowWatchBookmarks).Continue_(continue_).FieldSelector(fieldSelector).LabelSelector(labelSelector).Limit(limit).Pretty(pretty).ResourceVersion(resourceVersion).ResourceVersionMatch(resourceVersionMatch).TimeoutSeconds(timeoutSeconds).Watch(watch).Execute()
+
+
+
+
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    allowWatchBookmarks := true // bool | allowWatchBookmarks requests watch events with type \"BOOKMARK\". Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server's discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored. (optional)
+    continue_ := "continue__example" // string | The continue option should be set when retrieving more results from the server. Since this value is server defined, clients may only use the continue value from a previous query result with identical query parameters (except for the value of continue) and the server may reject a continue value it does not recognize. If the specified continue value is no longer valid whether due to expiration (generally five to fifteen minutes) or a configuration change on the server, the server will respond with a 410 ResourceExpired error together with a continue token. If the client needs a consistent list, it must restart their list without the continue field. Otherwise, the client may send another list request with the token received with the 410 error, the server will respond with a list starting from the next key, but from the latest snapshot, which is inconsistent from the previous list results - objects that are created, modified, or deleted after the first list request will be included in the response, as long as their keys are after the \"next key\".  This field is not supported when watch is true. Clients may start a watch from the last resourceVersion value returned by the server and not miss any modifications. (optional)
+    fieldSelector := "fieldSelector_example" // string | A selector to restrict the list of returned objects by their fields. Defaults to everything. (optional)
+    labelSelector := "labelSelector_example" // string | A selector to restrict the list of returned objects by their labels. Defaults to everything. (optional)
+    limit := int32(56) // int32 | limit is a maximum number of responses to return for a list call. If more items exist, the server will set the `continue` field on the list metadata to a value that can be used with the same initial query to retrieve the next set of results. Setting a limit may return fewer than the requested amount of items (up to zero items) in the event all requested objects are filtered out and clients should only use the presence of the continue field to determine whether more results are available. Servers may choose not to support the limit argument and will return all of the available results. If limit is specified and the continue field is empty, clients may assume that no more results are available. This field is not supported if watch is true.  The server guarantees that the objects returned when using continue will be identical to issuing a single list call without a limit - that is, no objects created, modified, or deleted after the first request is issued will be included in any subsequent continued requests. This is sometimes referred to as a consistent snapshot, and ensures that a client that is using limit to receive smaller chunks of a very large result can ensure they see all possible objects. If objects are updated during a chunked list the version of the object that was present at the time the first list result was calculated is returned. (optional)
+    pretty := "pretty_example" // string | If 'true', then the output is pretty printed. (optional)
+    resourceVersion := "resourceVersion_example" // string | resourceVersion sets a constraint on what resource versions a request may be served from. See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset (optional)
+    resourceVersionMatch := "resourceVersionMatch_example" // string | resourceVersionMatch determines how resourceVersion is applied to list calls. It is highly recommended that resourceVersionMatch be set for list calls where resourceVersion is set See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset (optional)
+    timeoutSeconds := int32(56) // int32 | Timeout for the list/watch call. This limits the duration of the call, regardless of any activity or inactivity. (optional)
+    watch := true // bool | Watch for changes to the described resources and return them as a stream of add, update, and remove notifications. Specify resourceVersion. (optional)
+
+    configuration := openapiclient.NewConfiguration()
+    apiClient := openapiclient.NewAPIClient(configuration)
+    resp, r, err := apiClient.CloudStreamnativeIoV1alpha1Api.ListCloudStreamnativeIoV1alpha1InstanceForAllNamespaces(context.Background()).AllowWatchBookmarks(allowWatchBookmarks).Continue_(continue_).FieldSelector(fieldSelector).LabelSelector(labelSelector).Limit(limit).Pretty(pretty).ResourceVersion(resourceVersion).ResourceVersionMatch(resourceVersionMatch).TimeoutSeconds(timeoutSeconds).Watch(watch).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `CloudStreamnativeIoV1alpha1Api.ListCloudStreamnativeIoV1alpha1InstanceForAllNamespaces``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `ListCloudStreamnativeIoV1alpha1InstanceForAllNamespaces`: ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceList
+    fmt.Fprintf(os.Stdout, "Response from `CloudStreamnativeIoV1alpha1Api.ListCloudStreamnativeIoV1alpha1InstanceForAllNamespaces`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiListCloudStreamnativeIoV1alpha1InstanceForAllNamespacesRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **allowWatchBookmarks** | **bool** | allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored. | 
+ **continue_** | **string** | The continue option should be set when retrieving more results from the server. Since this value is server defined, clients may only use the continue value from a previous query result with identical query parameters (except for the value of continue) and the server may reject a continue value it does not recognize. If the specified continue value is no longer valid whether due to expiration (generally five to fifteen minutes) or a configuration change on the server, the server will respond with a 410 ResourceExpired error together with a continue token. If the client needs a consistent list, it must restart their list without the continue field. Otherwise, the client may send another list request with the token received with the 410 error, the server will respond with a list starting from the next key, but from the latest snapshot, which is inconsistent from the previous list results - objects that are created, modified, or deleted after the first list request will be included in the response, as long as their keys are after the \&quot;next key\&quot;.  This field is not supported when watch is true. Clients may start a watch from the last resourceVersion value returned by the server and not miss any modifications. | 
+ **fieldSelector** | **string** | A selector to restrict the list of returned objects by their fields. Defaults to everything. | 
+ **labelSelector** | **string** | A selector to restrict the list of returned objects by their labels. Defaults to everything. | 
+ **limit** | **int32** | limit is a maximum number of responses to return for a list call. If more items exist, the server will set the &#x60;continue&#x60; field on the list metadata to a value that can be used with the same initial query to retrieve the next set of results. Setting a limit may return fewer than the requested amount of items (up to zero items) in the event all requested objects are filtered out and clients should only use the presence of the continue field to determine whether more results are available. Servers may choose not to support the limit argument and will return all of the available results. If limit is specified and the continue field is empty, clients may assume that no more results are available. This field is not supported if watch is true.  The server guarantees that the objects returned when using continue will be identical to issuing a single list call without a limit - that is, no objects created, modified, or deleted after the first request is issued will be included in any subsequent continued requests. This is sometimes referred to as a consistent snapshot, and ensures that a client that is using limit to receive smaller chunks of a very large result can ensure they see all possible objects. If objects are updated during a chunked list the version of the object that was present at the time the first list result was calculated is returned. | 
+ **pretty** | **string** | If &#39;true&#39;, then the output is pretty printed. | 
+ **resourceVersion** | **string** | resourceVersion sets a constraint on what resource versions a request may be served from. See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset | 
+ **resourceVersionMatch** | **string** | resourceVersionMatch determines how resourceVersion is applied to list calls. It is highly recommended that resourceVersionMatch be set for list calls where resourceVersion is set See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset | 
+ **timeoutSeconds** | **int32** | Timeout for the list/watch call. This limits the duration of the call, regardless of any activity or inactivity. | 
+ **watch** | **bool** | Watch for changes to the described resources and return them as a stream of add, update, and remove notifications. Specify resourceVersion. | 
+
+### Return type
+
+[**ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceList**](ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceList.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json, application/yaml, application/vnd.kubernetes.protobuf, application/json;stream=watch, application/vnd.kubernetes.protobuf;stream=watch
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
 ## ListCloudStreamnativeIoV1alpha1KafkaClusterForAllNamespaces
 
 > ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1KafkaClusterList ListCloudStreamnativeIoV1alpha1KafkaClusterForAllNamespaces(ctx).AllowWatchBookmarks(allowWatchBookmarks).Continue_(continue_).FieldSelector(fieldSelector).LabelSelector(labelSelector).Limit(limit).Pretty(pretty).ResourceVersion(resourceVersion).ResourceVersionMatch(resourceVersionMatch).TimeoutSeconds(timeoutSeconds).Watch(watch).Execute()
@@ -10730,6 +11256,96 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1IdentityPoolList**](ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1IdentityPoolList.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json, application/yaml, application/vnd.kubernetes.protobuf, application/json;stream=watch, application/vnd.kubernetes.protobuf;stream=watch
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## ListCloudStreamnativeIoV1alpha1NamespacedInstance
+
+> ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceList ListCloudStreamnativeIoV1alpha1NamespacedInstance(ctx, namespace).Pretty(pretty).AllowWatchBookmarks(allowWatchBookmarks).Continue_(continue_).FieldSelector(fieldSelector).LabelSelector(labelSelector).Limit(limit).ResourceVersion(resourceVersion).ResourceVersionMatch(resourceVersionMatch).TimeoutSeconds(timeoutSeconds).Watch(watch).Execute()
+
+
+
+
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    namespace := "namespace_example" // string | object name and auth scope, such as for teams and projects
+    pretty := "pretty_example" // string | If 'true', then the output is pretty printed. (optional)
+    allowWatchBookmarks := true // bool | allowWatchBookmarks requests watch events with type \"BOOKMARK\". Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server's discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored. (optional)
+    continue_ := "continue__example" // string | The continue option should be set when retrieving more results from the server. Since this value is server defined, clients may only use the continue value from a previous query result with identical query parameters (except for the value of continue) and the server may reject a continue value it does not recognize. If the specified continue value is no longer valid whether due to expiration (generally five to fifteen minutes) or a configuration change on the server, the server will respond with a 410 ResourceExpired error together with a continue token. If the client needs a consistent list, it must restart their list without the continue field. Otherwise, the client may send another list request with the token received with the 410 error, the server will respond with a list starting from the next key, but from the latest snapshot, which is inconsistent from the previous list results - objects that are created, modified, or deleted after the first list request will be included in the response, as long as their keys are after the \"next key\".  This field is not supported when watch is true. Clients may start a watch from the last resourceVersion value returned by the server and not miss any modifications. (optional)
+    fieldSelector := "fieldSelector_example" // string | A selector to restrict the list of returned objects by their fields. Defaults to everything. (optional)
+    labelSelector := "labelSelector_example" // string | A selector to restrict the list of returned objects by their labels. Defaults to everything. (optional)
+    limit := int32(56) // int32 | limit is a maximum number of responses to return for a list call. If more items exist, the server will set the `continue` field on the list metadata to a value that can be used with the same initial query to retrieve the next set of results. Setting a limit may return fewer than the requested amount of items (up to zero items) in the event all requested objects are filtered out and clients should only use the presence of the continue field to determine whether more results are available. Servers may choose not to support the limit argument and will return all of the available results. If limit is specified and the continue field is empty, clients may assume that no more results are available. This field is not supported if watch is true.  The server guarantees that the objects returned when using continue will be identical to issuing a single list call without a limit - that is, no objects created, modified, or deleted after the first request is issued will be included in any subsequent continued requests. This is sometimes referred to as a consistent snapshot, and ensures that a client that is using limit to receive smaller chunks of a very large result can ensure they see all possible objects. If objects are updated during a chunked list the version of the object that was present at the time the first list result was calculated is returned. (optional)
+    resourceVersion := "resourceVersion_example" // string | resourceVersion sets a constraint on what resource versions a request may be served from. See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset (optional)
+    resourceVersionMatch := "resourceVersionMatch_example" // string | resourceVersionMatch determines how resourceVersion is applied to list calls. It is highly recommended that resourceVersionMatch be set for list calls where resourceVersion is set See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset (optional)
+    timeoutSeconds := int32(56) // int32 | Timeout for the list/watch call. This limits the duration of the call, regardless of any activity or inactivity. (optional)
+    watch := true // bool | Watch for changes to the described resources and return them as a stream of add, update, and remove notifications. Specify resourceVersion. (optional)
+
+    configuration := openapiclient.NewConfiguration()
+    apiClient := openapiclient.NewAPIClient(configuration)
+    resp, r, err := apiClient.CloudStreamnativeIoV1alpha1Api.ListCloudStreamnativeIoV1alpha1NamespacedInstance(context.Background(), namespace).Pretty(pretty).AllowWatchBookmarks(allowWatchBookmarks).Continue_(continue_).FieldSelector(fieldSelector).LabelSelector(labelSelector).Limit(limit).ResourceVersion(resourceVersion).ResourceVersionMatch(resourceVersionMatch).TimeoutSeconds(timeoutSeconds).Watch(watch).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `CloudStreamnativeIoV1alpha1Api.ListCloudStreamnativeIoV1alpha1NamespacedInstance``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `ListCloudStreamnativeIoV1alpha1NamespacedInstance`: ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceList
+    fmt.Fprintf(os.Stdout, "Response from `CloudStreamnativeIoV1alpha1Api.ListCloudStreamnativeIoV1alpha1NamespacedInstance`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**namespace** | **string** | object name and auth scope, such as for teams and projects | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiListCloudStreamnativeIoV1alpha1NamespacedInstanceRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **pretty** | **string** | If &#39;true&#39;, then the output is pretty printed. | 
+ **allowWatchBookmarks** | **bool** | allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored. | 
+ **continue_** | **string** | The continue option should be set when retrieving more results from the server. Since this value is server defined, clients may only use the continue value from a previous query result with identical query parameters (except for the value of continue) and the server may reject a continue value it does not recognize. If the specified continue value is no longer valid whether due to expiration (generally five to fifteen minutes) or a configuration change on the server, the server will respond with a 410 ResourceExpired error together with a continue token. If the client needs a consistent list, it must restart their list without the continue field. Otherwise, the client may send another list request with the token received with the 410 error, the server will respond with a list starting from the next key, but from the latest snapshot, which is inconsistent from the previous list results - objects that are created, modified, or deleted after the first list request will be included in the response, as long as their keys are after the \&quot;next key\&quot;.  This field is not supported when watch is true. Clients may start a watch from the last resourceVersion value returned by the server and not miss any modifications. | 
+ **fieldSelector** | **string** | A selector to restrict the list of returned objects by their fields. Defaults to everything. | 
+ **labelSelector** | **string** | A selector to restrict the list of returned objects by their labels. Defaults to everything. | 
+ **limit** | **int32** | limit is a maximum number of responses to return for a list call. If more items exist, the server will set the &#x60;continue&#x60; field on the list metadata to a value that can be used with the same initial query to retrieve the next set of results. Setting a limit may return fewer than the requested amount of items (up to zero items) in the event all requested objects are filtered out and clients should only use the presence of the continue field to determine whether more results are available. Servers may choose not to support the limit argument and will return all of the available results. If limit is specified and the continue field is empty, clients may assume that no more results are available. This field is not supported if watch is true.  The server guarantees that the objects returned when using continue will be identical to issuing a single list call without a limit - that is, no objects created, modified, or deleted after the first request is issued will be included in any subsequent continued requests. This is sometimes referred to as a consistent snapshot, and ensures that a client that is using limit to receive smaller chunks of a very large result can ensure they see all possible objects. If objects are updated during a chunked list the version of the object that was present at the time the first list result was calculated is returned. | 
+ **resourceVersion** | **string** | resourceVersion sets a constraint on what resource versions a request may be served from. See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset | 
+ **resourceVersionMatch** | **string** | resourceVersionMatch determines how resourceVersion is applied to list calls. It is highly recommended that resourceVersionMatch be set for list calls where resourceVersion is set See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset | 
+ **timeoutSeconds** | **int32** | Timeout for the list/watch call. This limits the duration of the call, regardless of any activity or inactivity. | 
+ **watch** | **bool** | Watch for changes to the described resources and return them as a stream of add, update, and remove notifications. Specify resourceVersion. | 
+
+### Return type
+
+[**ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceList**](ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceList.md)
 
 ### Authorization
 
@@ -14339,6 +14955,172 @@ No authorization required
 [[Back to README]](../README.md)
 
 
+## PatchCloudStreamnativeIoV1alpha1NamespacedInstance
+
+> ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance PatchCloudStreamnativeIoV1alpha1NamespacedInstance(ctx, name, namespace).Body(body).Pretty(pretty).DryRun(dryRun).FieldManager(fieldManager).Force(force).Execute()
+
+
+
+
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    name := "name_example" // string | name of the Instance
+    namespace := "namespace_example" // string | object name and auth scope, such as for teams and projects
+    body := map[string]interface{}{ ... } // map[string]interface{} | 
+    pretty := "pretty_example" // string | If 'true', then the output is pretty printed. (optional)
+    dryRun := "dryRun_example" // string | When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed (optional)
+    fieldManager := "fieldManager_example" // string | fieldManager is a name associated with the actor or entity that is making these changes. The value must be less than or 128 characters long, and only contain printable characters, as defined by https://golang.org/pkg/unicode/#IsPrint. This field is required for apply requests (application/apply-patch) but optional for non-apply patch types (JsonPatch, MergePatch, StrategicMergePatch). (optional)
+    force := true // bool | Force is going to \"force\" Apply requests. It means user will re-acquire conflicting fields owned by other people. Force flag must be unset for non-apply patch requests. (optional)
+
+    configuration := openapiclient.NewConfiguration()
+    apiClient := openapiclient.NewAPIClient(configuration)
+    resp, r, err := apiClient.CloudStreamnativeIoV1alpha1Api.PatchCloudStreamnativeIoV1alpha1NamespacedInstance(context.Background(), name, namespace).Body(body).Pretty(pretty).DryRun(dryRun).FieldManager(fieldManager).Force(force).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `CloudStreamnativeIoV1alpha1Api.PatchCloudStreamnativeIoV1alpha1NamespacedInstance``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `PatchCloudStreamnativeIoV1alpha1NamespacedInstance`: ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance
+    fmt.Fprintf(os.Stdout, "Response from `CloudStreamnativeIoV1alpha1Api.PatchCloudStreamnativeIoV1alpha1NamespacedInstance`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**name** | **string** | name of the Instance | 
+**namespace** | **string** | object name and auth scope, such as for teams and projects | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiPatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+ **body** | **map[string]interface{}** |  | 
+ **pretty** | **string** | If &#39;true&#39;, then the output is pretty printed. | 
+ **dryRun** | **string** | When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed | 
+ **fieldManager** | **string** | fieldManager is a name associated with the actor or entity that is making these changes. The value must be less than or 128 characters long, and only contain printable characters, as defined by https://golang.org/pkg/unicode/#IsPrint. This field is required for apply requests (application/apply-patch) but optional for non-apply patch types (JsonPatch, MergePatch, StrategicMergePatch). | 
+ **force** | **bool** | Force is going to \&quot;force\&quot; Apply requests. It means user will re-acquire conflicting fields owned by other people. Force flag must be unset for non-apply patch requests. | 
+
+### Return type
+
+[**ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance**](ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: application/json-patch+json, application/merge-patch+json, application/strategic-merge-patch+json, application/apply-patch+yaml
+- **Accept**: application/json, application/yaml, application/vnd.kubernetes.protobuf
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## PatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatus
+
+> ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance PatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatus(ctx, name, namespace).Body(body).Pretty(pretty).DryRun(dryRun).FieldManager(fieldManager).Force(force).Execute()
+
+
+
+
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    name := "name_example" // string | name of the Instance
+    namespace := "namespace_example" // string | object name and auth scope, such as for teams and projects
+    body := map[string]interface{}{ ... } // map[string]interface{} | 
+    pretty := "pretty_example" // string | If 'true', then the output is pretty printed. (optional)
+    dryRun := "dryRun_example" // string | When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed (optional)
+    fieldManager := "fieldManager_example" // string | fieldManager is a name associated with the actor or entity that is making these changes. The value must be less than or 128 characters long, and only contain printable characters, as defined by https://golang.org/pkg/unicode/#IsPrint. This field is required for apply requests (application/apply-patch) but optional for non-apply patch types (JsonPatch, MergePatch, StrategicMergePatch). (optional)
+    force := true // bool | Force is going to \"force\" Apply requests. It means user will re-acquire conflicting fields owned by other people. Force flag must be unset for non-apply patch requests. (optional)
+
+    configuration := openapiclient.NewConfiguration()
+    apiClient := openapiclient.NewAPIClient(configuration)
+    resp, r, err := apiClient.CloudStreamnativeIoV1alpha1Api.PatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatus(context.Background(), name, namespace).Body(body).Pretty(pretty).DryRun(dryRun).FieldManager(fieldManager).Force(force).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `CloudStreamnativeIoV1alpha1Api.PatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatus``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `PatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatus`: ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance
+    fmt.Fprintf(os.Stdout, "Response from `CloudStreamnativeIoV1alpha1Api.PatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatus`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**name** | **string** | name of the Instance | 
+**namespace** | **string** | object name and auth scope, such as for teams and projects | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiPatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+ **body** | **map[string]interface{}** |  | 
+ **pretty** | **string** | If &#39;true&#39;, then the output is pretty printed. | 
+ **dryRun** | **string** | When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed | 
+ **fieldManager** | **string** | fieldManager is a name associated with the actor or entity that is making these changes. The value must be less than or 128 characters long, and only contain printable characters, as defined by https://golang.org/pkg/unicode/#IsPrint. This field is required for apply requests (application/apply-patch) but optional for non-apply patch types (JsonPatch, MergePatch, StrategicMergePatch). | 
+ **force** | **bool** | Force is going to \&quot;force\&quot; Apply requests. It means user will re-acquire conflicting fields owned by other people. Force flag must be unset for non-apply patch requests. | 
+
+### Return type
+
+[**ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance**](ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: application/json-patch+json, application/merge-patch+json, application/strategic-merge-patch+json, application/apply-patch+yaml
+- **Accept**: application/json, application/yaml, application/vnd.kubernetes.protobuf
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
 ## PatchCloudStreamnativeIoV1alpha1NamespacedKafkaCluster
 
 > ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1KafkaCluster PatchCloudStreamnativeIoV1alpha1NamespacedKafkaCluster(ctx, name, namespace).Body(body).Pretty(pretty).DryRun(dryRun).FieldManager(fieldManager).Force(force).Execute()
@@ -17877,6 +18659,156 @@ No authorization required
 [[Back to README]](../README.md)
 
 
+## ReadCloudStreamnativeIoV1alpha1NamespacedInstance
+
+> ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance ReadCloudStreamnativeIoV1alpha1NamespacedInstance(ctx, name, namespace).Pretty(pretty).Execute()
+
+
+
+
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    name := "name_example" // string | name of the Instance
+    namespace := "namespace_example" // string | object name and auth scope, such as for teams and projects
+    pretty := "pretty_example" // string | If 'true', then the output is pretty printed. (optional)
+
+    configuration := openapiclient.NewConfiguration()
+    apiClient := openapiclient.NewAPIClient(configuration)
+    resp, r, err := apiClient.CloudStreamnativeIoV1alpha1Api.ReadCloudStreamnativeIoV1alpha1NamespacedInstance(context.Background(), name, namespace).Pretty(pretty).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `CloudStreamnativeIoV1alpha1Api.ReadCloudStreamnativeIoV1alpha1NamespacedInstance``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `ReadCloudStreamnativeIoV1alpha1NamespacedInstance`: ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance
+    fmt.Fprintf(os.Stdout, "Response from `CloudStreamnativeIoV1alpha1Api.ReadCloudStreamnativeIoV1alpha1NamespacedInstance`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**name** | **string** | name of the Instance | 
+**namespace** | **string** | object name and auth scope, such as for teams and projects | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiReadCloudStreamnativeIoV1alpha1NamespacedInstanceRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+ **pretty** | **string** | If &#39;true&#39;, then the output is pretty printed. | 
+
+### Return type
+
+[**ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance**](ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json, application/yaml, application/vnd.kubernetes.protobuf
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## ReadCloudStreamnativeIoV1alpha1NamespacedInstanceStatus
+
+> ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance ReadCloudStreamnativeIoV1alpha1NamespacedInstanceStatus(ctx, name, namespace).Pretty(pretty).Execute()
+
+
+
+
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    name := "name_example" // string | name of the Instance
+    namespace := "namespace_example" // string | object name and auth scope, such as for teams and projects
+    pretty := "pretty_example" // string | If 'true', then the output is pretty printed. (optional)
+
+    configuration := openapiclient.NewConfiguration()
+    apiClient := openapiclient.NewAPIClient(configuration)
+    resp, r, err := apiClient.CloudStreamnativeIoV1alpha1Api.ReadCloudStreamnativeIoV1alpha1NamespacedInstanceStatus(context.Background(), name, namespace).Pretty(pretty).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `CloudStreamnativeIoV1alpha1Api.ReadCloudStreamnativeIoV1alpha1NamespacedInstanceStatus``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `ReadCloudStreamnativeIoV1alpha1NamespacedInstanceStatus`: ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance
+    fmt.Fprintf(os.Stdout, "Response from `CloudStreamnativeIoV1alpha1Api.ReadCloudStreamnativeIoV1alpha1NamespacedInstanceStatus`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**name** | **string** | name of the Instance | 
+**namespace** | **string** | object name and auth scope, such as for teams and projects | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiReadCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+ **pretty** | **string** | If &#39;true&#39;, then the output is pretty printed. | 
+
+### Return type
+
+[**ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance**](ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json, application/yaml, application/vnd.kubernetes.protobuf
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
 ## ReadCloudStreamnativeIoV1alpha1NamespacedKafkaCluster
 
 > ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1KafkaCluster ReadCloudStreamnativeIoV1alpha1NamespacedKafkaCluster(ctx, name, namespace).Pretty(pretty).Execute()
@@ -21216,6 +22148,168 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1IdentityPool**](ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1IdentityPool.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json, application/yaml, application/vnd.kubernetes.protobuf
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## ReplaceCloudStreamnativeIoV1alpha1NamespacedInstance
+
+> ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance ReplaceCloudStreamnativeIoV1alpha1NamespacedInstance(ctx, name, namespace).Body(body).Pretty(pretty).DryRun(dryRun).FieldManager(fieldManager).Execute()
+
+
+
+
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    name := "name_example" // string | name of the Instance
+    namespace := "namespace_example" // string | object name and auth scope, such as for teams and projects
+    body := *openapiclient.NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance() // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance | 
+    pretty := "pretty_example" // string | If 'true', then the output is pretty printed. (optional)
+    dryRun := "dryRun_example" // string | When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed (optional)
+    fieldManager := "fieldManager_example" // string | fieldManager is a name associated with the actor or entity that is making these changes. The value must be less than or 128 characters long, and only contain printable characters, as defined by https://golang.org/pkg/unicode/#IsPrint. (optional)
+
+    configuration := openapiclient.NewConfiguration()
+    apiClient := openapiclient.NewAPIClient(configuration)
+    resp, r, err := apiClient.CloudStreamnativeIoV1alpha1Api.ReplaceCloudStreamnativeIoV1alpha1NamespacedInstance(context.Background(), name, namespace).Body(body).Pretty(pretty).DryRun(dryRun).FieldManager(fieldManager).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `CloudStreamnativeIoV1alpha1Api.ReplaceCloudStreamnativeIoV1alpha1NamespacedInstance``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `ReplaceCloudStreamnativeIoV1alpha1NamespacedInstance`: ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance
+    fmt.Fprintf(os.Stdout, "Response from `CloudStreamnativeIoV1alpha1Api.ReplaceCloudStreamnativeIoV1alpha1NamespacedInstance`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**name** | **string** | name of the Instance | 
+**namespace** | **string** | object name and auth scope, such as for teams and projects | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+ **body** | [**ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance**](ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance.md) |  | 
+ **pretty** | **string** | If &#39;true&#39;, then the output is pretty printed. | 
+ **dryRun** | **string** | When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed | 
+ **fieldManager** | **string** | fieldManager is a name associated with the actor or entity that is making these changes. The value must be less than or 128 characters long, and only contain printable characters, as defined by https://golang.org/pkg/unicode/#IsPrint. | 
+
+### Return type
+
+[**ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance**](ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json, application/yaml, application/vnd.kubernetes.protobuf
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## ReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceStatus
+
+> ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance ReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceStatus(ctx, name, namespace).Body(body).Pretty(pretty).DryRun(dryRun).FieldManager(fieldManager).Execute()
+
+
+
+
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    name := "name_example" // string | name of the Instance
+    namespace := "namespace_example" // string | object name and auth scope, such as for teams and projects
+    body := *openapiclient.NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance() // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance | 
+    pretty := "pretty_example" // string | If 'true', then the output is pretty printed. (optional)
+    dryRun := "dryRun_example" // string | When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed (optional)
+    fieldManager := "fieldManager_example" // string | fieldManager is a name associated with the actor or entity that is making these changes. The value must be less than or 128 characters long, and only contain printable characters, as defined by https://golang.org/pkg/unicode/#IsPrint. (optional)
+
+    configuration := openapiclient.NewConfiguration()
+    apiClient := openapiclient.NewAPIClient(configuration)
+    resp, r, err := apiClient.CloudStreamnativeIoV1alpha1Api.ReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceStatus(context.Background(), name, namespace).Body(body).Pretty(pretty).DryRun(dryRun).FieldManager(fieldManager).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `CloudStreamnativeIoV1alpha1Api.ReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceStatus``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `ReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceStatus`: ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance
+    fmt.Fprintf(os.Stdout, "Response from `CloudStreamnativeIoV1alpha1Api.ReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceStatus`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**name** | **string** | name of the Instance | 
+**namespace** | **string** | object name and auth scope, such as for teams and projects | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiReplaceCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+ **body** | [**ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance**](ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance.md) |  | 
+ **pretty** | **string** | If &#39;true&#39;, then the output is pretty printed. | 
+ **dryRun** | **string** | When present, indicates that modifications should not be persisted. An invalid or unrecognized dryRun directive will result in an error response and no further processing of the request. Valid values are: - All: all dry run stages will be processed | 
+ **fieldManager** | **string** | fieldManager is a name associated with the actor or entity that is making these changes. The value must be less than or 128 characters long, and only contain printable characters, as defined by https://golang.org/pkg/unicode/#IsPrint. | 
+
+### Return type
+
+[**ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance**](ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance.md)
 
 ### Authorization
 
@@ -24681,6 +25775,90 @@ No authorization required
 [[Back to README]](../README.md)
 
 
+## WatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespaces
+
+> V1WatchEvent WatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespaces(ctx).AllowWatchBookmarks(allowWatchBookmarks).Continue_(continue_).FieldSelector(fieldSelector).LabelSelector(labelSelector).Limit(limit).Pretty(pretty).ResourceVersion(resourceVersion).ResourceVersionMatch(resourceVersionMatch).TimeoutSeconds(timeoutSeconds).Watch(watch).Execute()
+
+
+
+
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    allowWatchBookmarks := true // bool | allowWatchBookmarks requests watch events with type \"BOOKMARK\". Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server's discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored. (optional)
+    continue_ := "continue__example" // string | The continue option should be set when retrieving more results from the server. Since this value is server defined, clients may only use the continue value from a previous query result with identical query parameters (except for the value of continue) and the server may reject a continue value it does not recognize. If the specified continue value is no longer valid whether due to expiration (generally five to fifteen minutes) or a configuration change on the server, the server will respond with a 410 ResourceExpired error together with a continue token. If the client needs a consistent list, it must restart their list without the continue field. Otherwise, the client may send another list request with the token received with the 410 error, the server will respond with a list starting from the next key, but from the latest snapshot, which is inconsistent from the previous list results - objects that are created, modified, or deleted after the first list request will be included in the response, as long as their keys are after the \"next key\".  This field is not supported when watch is true. Clients may start a watch from the last resourceVersion value returned by the server and not miss any modifications. (optional)
+    fieldSelector := "fieldSelector_example" // string | A selector to restrict the list of returned objects by their fields. Defaults to everything. (optional)
+    labelSelector := "labelSelector_example" // string | A selector to restrict the list of returned objects by their labels. Defaults to everything. (optional)
+    limit := int32(56) // int32 | limit is a maximum number of responses to return for a list call. If more items exist, the server will set the `continue` field on the list metadata to a value that can be used with the same initial query to retrieve the next set of results. Setting a limit may return fewer than the requested amount of items (up to zero items) in the event all requested objects are filtered out and clients should only use the presence of the continue field to determine whether more results are available. Servers may choose not to support the limit argument and will return all of the available results. If limit is specified and the continue field is empty, clients may assume that no more results are available. This field is not supported if watch is true.  The server guarantees that the objects returned when using continue will be identical to issuing a single list call without a limit - that is, no objects created, modified, or deleted after the first request is issued will be included in any subsequent continued requests. This is sometimes referred to as a consistent snapshot, and ensures that a client that is using limit to receive smaller chunks of a very large result can ensure they see all possible objects. If objects are updated during a chunked list the version of the object that was present at the time the first list result was calculated is returned. (optional)
+    pretty := "pretty_example" // string | If 'true', then the output is pretty printed. (optional)
+    resourceVersion := "resourceVersion_example" // string | resourceVersion sets a constraint on what resource versions a request may be served from. See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset (optional)
+    resourceVersionMatch := "resourceVersionMatch_example" // string | resourceVersionMatch determines how resourceVersion is applied to list calls. It is highly recommended that resourceVersionMatch be set for list calls where resourceVersion is set See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset (optional)
+    timeoutSeconds := int32(56) // int32 | Timeout for the list/watch call. This limits the duration of the call, regardless of any activity or inactivity. (optional)
+    watch := true // bool | Watch for changes to the described resources and return them as a stream of add, update, and remove notifications. Specify resourceVersion. (optional)
+
+    configuration := openapiclient.NewConfiguration()
+    apiClient := openapiclient.NewAPIClient(configuration)
+    resp, r, err := apiClient.CloudStreamnativeIoV1alpha1Api.WatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespaces(context.Background()).AllowWatchBookmarks(allowWatchBookmarks).Continue_(continue_).FieldSelector(fieldSelector).LabelSelector(labelSelector).Limit(limit).Pretty(pretty).ResourceVersion(resourceVersion).ResourceVersionMatch(resourceVersionMatch).TimeoutSeconds(timeoutSeconds).Watch(watch).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `CloudStreamnativeIoV1alpha1Api.WatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespaces``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `WatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespaces`: V1WatchEvent
+    fmt.Fprintf(os.Stdout, "Response from `CloudStreamnativeIoV1alpha1Api.WatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespaces`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiWatchCloudStreamnativeIoV1alpha1InstanceListForAllNamespacesRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **allowWatchBookmarks** | **bool** | allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored. | 
+ **continue_** | **string** | The continue option should be set when retrieving more results from the server. Since this value is server defined, clients may only use the continue value from a previous query result with identical query parameters (except for the value of continue) and the server may reject a continue value it does not recognize. If the specified continue value is no longer valid whether due to expiration (generally five to fifteen minutes) or a configuration change on the server, the server will respond with a 410 ResourceExpired error together with a continue token. If the client needs a consistent list, it must restart their list without the continue field. Otherwise, the client may send another list request with the token received with the 410 error, the server will respond with a list starting from the next key, but from the latest snapshot, which is inconsistent from the previous list results - objects that are created, modified, or deleted after the first list request will be included in the response, as long as their keys are after the \&quot;next key\&quot;.  This field is not supported when watch is true. Clients may start a watch from the last resourceVersion value returned by the server and not miss any modifications. | 
+ **fieldSelector** | **string** | A selector to restrict the list of returned objects by their fields. Defaults to everything. | 
+ **labelSelector** | **string** | A selector to restrict the list of returned objects by their labels. Defaults to everything. | 
+ **limit** | **int32** | limit is a maximum number of responses to return for a list call. If more items exist, the server will set the &#x60;continue&#x60; field on the list metadata to a value that can be used with the same initial query to retrieve the next set of results. Setting a limit may return fewer than the requested amount of items (up to zero items) in the event all requested objects are filtered out and clients should only use the presence of the continue field to determine whether more results are available. Servers may choose not to support the limit argument and will return all of the available results. If limit is specified and the continue field is empty, clients may assume that no more results are available. This field is not supported if watch is true.  The server guarantees that the objects returned when using continue will be identical to issuing a single list call without a limit - that is, no objects created, modified, or deleted after the first request is issued will be included in any subsequent continued requests. This is sometimes referred to as a consistent snapshot, and ensures that a client that is using limit to receive smaller chunks of a very large result can ensure they see all possible objects. If objects are updated during a chunked list the version of the object that was present at the time the first list result was calculated is returned. | 
+ **pretty** | **string** | If &#39;true&#39;, then the output is pretty printed. | 
+ **resourceVersion** | **string** | resourceVersion sets a constraint on what resource versions a request may be served from. See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset | 
+ **resourceVersionMatch** | **string** | resourceVersionMatch determines how resourceVersion is applied to list calls. It is highly recommended that resourceVersionMatch be set for list calls where resourceVersion is set See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset | 
+ **timeoutSeconds** | **int32** | Timeout for the list/watch call. This limits the duration of the call, regardless of any activity or inactivity. | 
+ **watch** | **bool** | Watch for changes to the described resources and return them as a stream of add, update, and remove notifications. Specify resourceVersion. | 
+
+### Return type
+
+[**V1WatchEvent**](V1WatchEvent.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json, application/yaml, application/vnd.kubernetes.protobuf, application/json;stream=watch, application/vnd.kubernetes.protobuf;stream=watch
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
 ## WatchCloudStreamnativeIoV1alpha1KafkaClusterListForAllNamespaces
 
 > V1WatchEvent WatchCloudStreamnativeIoV1alpha1KafkaClusterListForAllNamespaces(ctx).AllowWatchBookmarks(allowWatchBookmarks).Continue_(continue_).FieldSelector(fieldSelector).LabelSelector(labelSelector).Limit(limit).Pretty(pretty).ResourceVersion(resourceVersion).ResourceVersionMatch(resourceVersionMatch).TimeoutSeconds(timeoutSeconds).Watch(watch).Execute()
@@ -25834,6 +27012,282 @@ Name | Type | Description  | Notes
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiWatchCloudStreamnativeIoV1alpha1NamespacedIdentityPoolStatusRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+ **allowWatchBookmarks** | **bool** | allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored. | 
+ **continue_** | **string** | The continue option should be set when retrieving more results from the server. Since this value is server defined, clients may only use the continue value from a previous query result with identical query parameters (except for the value of continue) and the server may reject a continue value it does not recognize. If the specified continue value is no longer valid whether due to expiration (generally five to fifteen minutes) or a configuration change on the server, the server will respond with a 410 ResourceExpired error together with a continue token. If the client needs a consistent list, it must restart their list without the continue field. Otherwise, the client may send another list request with the token received with the 410 error, the server will respond with a list starting from the next key, but from the latest snapshot, which is inconsistent from the previous list results - objects that are created, modified, or deleted after the first list request will be included in the response, as long as their keys are after the \&quot;next key\&quot;.  This field is not supported when watch is true. Clients may start a watch from the last resourceVersion value returned by the server and not miss any modifications. | 
+ **fieldSelector** | **string** | A selector to restrict the list of returned objects by their fields. Defaults to everything. | 
+ **labelSelector** | **string** | A selector to restrict the list of returned objects by their labels. Defaults to everything. | 
+ **limit** | **int32** | limit is a maximum number of responses to return for a list call. If more items exist, the server will set the &#x60;continue&#x60; field on the list metadata to a value that can be used with the same initial query to retrieve the next set of results. Setting a limit may return fewer than the requested amount of items (up to zero items) in the event all requested objects are filtered out and clients should only use the presence of the continue field to determine whether more results are available. Servers may choose not to support the limit argument and will return all of the available results. If limit is specified and the continue field is empty, clients may assume that no more results are available. This field is not supported if watch is true.  The server guarantees that the objects returned when using continue will be identical to issuing a single list call without a limit - that is, no objects created, modified, or deleted after the first request is issued will be included in any subsequent continued requests. This is sometimes referred to as a consistent snapshot, and ensures that a client that is using limit to receive smaller chunks of a very large result can ensure they see all possible objects. If objects are updated during a chunked list the version of the object that was present at the time the first list result was calculated is returned. | 
+ **pretty** | **string** | If &#39;true&#39;, then the output is pretty printed. | 
+ **resourceVersion** | **string** | resourceVersion sets a constraint on what resource versions a request may be served from. See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset | 
+ **resourceVersionMatch** | **string** | resourceVersionMatch determines how resourceVersion is applied to list calls. It is highly recommended that resourceVersionMatch be set for list calls where resourceVersion is set See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset | 
+ **timeoutSeconds** | **int32** | Timeout for the list/watch call. This limits the duration of the call, regardless of any activity or inactivity. | 
+ **watch** | **bool** | Watch for changes to the described resources and return them as a stream of add, update, and remove notifications. Specify resourceVersion. | 
+
+### Return type
+
+[**V1WatchEvent**](V1WatchEvent.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json, application/yaml, application/vnd.kubernetes.protobuf, application/json;stream=watch, application/vnd.kubernetes.protobuf;stream=watch
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## WatchCloudStreamnativeIoV1alpha1NamespacedInstance
+
+> V1WatchEvent WatchCloudStreamnativeIoV1alpha1NamespacedInstance(ctx, name, namespace).AllowWatchBookmarks(allowWatchBookmarks).Continue_(continue_).FieldSelector(fieldSelector).LabelSelector(labelSelector).Limit(limit).Pretty(pretty).ResourceVersion(resourceVersion).ResourceVersionMatch(resourceVersionMatch).TimeoutSeconds(timeoutSeconds).Watch(watch).Execute()
+
+
+
+
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    name := "name_example" // string | name of the Instance
+    namespace := "namespace_example" // string | object name and auth scope, such as for teams and projects
+    allowWatchBookmarks := true // bool | allowWatchBookmarks requests watch events with type \"BOOKMARK\". Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server's discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored. (optional)
+    continue_ := "continue__example" // string | The continue option should be set when retrieving more results from the server. Since this value is server defined, clients may only use the continue value from a previous query result with identical query parameters (except for the value of continue) and the server may reject a continue value it does not recognize. If the specified continue value is no longer valid whether due to expiration (generally five to fifteen minutes) or a configuration change on the server, the server will respond with a 410 ResourceExpired error together with a continue token. If the client needs a consistent list, it must restart their list without the continue field. Otherwise, the client may send another list request with the token received with the 410 error, the server will respond with a list starting from the next key, but from the latest snapshot, which is inconsistent from the previous list results - objects that are created, modified, or deleted after the first list request will be included in the response, as long as their keys are after the \"next key\".  This field is not supported when watch is true. Clients may start a watch from the last resourceVersion value returned by the server and not miss any modifications. (optional)
+    fieldSelector := "fieldSelector_example" // string | A selector to restrict the list of returned objects by their fields. Defaults to everything. (optional)
+    labelSelector := "labelSelector_example" // string | A selector to restrict the list of returned objects by their labels. Defaults to everything. (optional)
+    limit := int32(56) // int32 | limit is a maximum number of responses to return for a list call. If more items exist, the server will set the `continue` field on the list metadata to a value that can be used with the same initial query to retrieve the next set of results. Setting a limit may return fewer than the requested amount of items (up to zero items) in the event all requested objects are filtered out and clients should only use the presence of the continue field to determine whether more results are available. Servers may choose not to support the limit argument and will return all of the available results. If limit is specified and the continue field is empty, clients may assume that no more results are available. This field is not supported if watch is true.  The server guarantees that the objects returned when using continue will be identical to issuing a single list call without a limit - that is, no objects created, modified, or deleted after the first request is issued will be included in any subsequent continued requests. This is sometimes referred to as a consistent snapshot, and ensures that a client that is using limit to receive smaller chunks of a very large result can ensure they see all possible objects. If objects are updated during a chunked list the version of the object that was present at the time the first list result was calculated is returned. (optional)
+    pretty := "pretty_example" // string | If 'true', then the output is pretty printed. (optional)
+    resourceVersion := "resourceVersion_example" // string | resourceVersion sets a constraint on what resource versions a request may be served from. See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset (optional)
+    resourceVersionMatch := "resourceVersionMatch_example" // string | resourceVersionMatch determines how resourceVersion is applied to list calls. It is highly recommended that resourceVersionMatch be set for list calls where resourceVersion is set See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset (optional)
+    timeoutSeconds := int32(56) // int32 | Timeout for the list/watch call. This limits the duration of the call, regardless of any activity or inactivity. (optional)
+    watch := true // bool | Watch for changes to the described resources and return them as a stream of add, update, and remove notifications. Specify resourceVersion. (optional)
+
+    configuration := openapiclient.NewConfiguration()
+    apiClient := openapiclient.NewAPIClient(configuration)
+    resp, r, err := apiClient.CloudStreamnativeIoV1alpha1Api.WatchCloudStreamnativeIoV1alpha1NamespacedInstance(context.Background(), name, namespace).AllowWatchBookmarks(allowWatchBookmarks).Continue_(continue_).FieldSelector(fieldSelector).LabelSelector(labelSelector).Limit(limit).Pretty(pretty).ResourceVersion(resourceVersion).ResourceVersionMatch(resourceVersionMatch).TimeoutSeconds(timeoutSeconds).Watch(watch).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `CloudStreamnativeIoV1alpha1Api.WatchCloudStreamnativeIoV1alpha1NamespacedInstance``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `WatchCloudStreamnativeIoV1alpha1NamespacedInstance`: V1WatchEvent
+    fmt.Fprintf(os.Stdout, "Response from `CloudStreamnativeIoV1alpha1Api.WatchCloudStreamnativeIoV1alpha1NamespacedInstance`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**name** | **string** | name of the Instance | 
+**namespace** | **string** | object name and auth scope, such as for teams and projects | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+ **allowWatchBookmarks** | **bool** | allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored. | 
+ **continue_** | **string** | The continue option should be set when retrieving more results from the server. Since this value is server defined, clients may only use the continue value from a previous query result with identical query parameters (except for the value of continue) and the server may reject a continue value it does not recognize. If the specified continue value is no longer valid whether due to expiration (generally five to fifteen minutes) or a configuration change on the server, the server will respond with a 410 ResourceExpired error together with a continue token. If the client needs a consistent list, it must restart their list without the continue field. Otherwise, the client may send another list request with the token received with the 410 error, the server will respond with a list starting from the next key, but from the latest snapshot, which is inconsistent from the previous list results - objects that are created, modified, or deleted after the first list request will be included in the response, as long as their keys are after the \&quot;next key\&quot;.  This field is not supported when watch is true. Clients may start a watch from the last resourceVersion value returned by the server and not miss any modifications. | 
+ **fieldSelector** | **string** | A selector to restrict the list of returned objects by their fields. Defaults to everything. | 
+ **labelSelector** | **string** | A selector to restrict the list of returned objects by their labels. Defaults to everything. | 
+ **limit** | **int32** | limit is a maximum number of responses to return for a list call. If more items exist, the server will set the &#x60;continue&#x60; field on the list metadata to a value that can be used with the same initial query to retrieve the next set of results. Setting a limit may return fewer than the requested amount of items (up to zero items) in the event all requested objects are filtered out and clients should only use the presence of the continue field to determine whether more results are available. Servers may choose not to support the limit argument and will return all of the available results. If limit is specified and the continue field is empty, clients may assume that no more results are available. This field is not supported if watch is true.  The server guarantees that the objects returned when using continue will be identical to issuing a single list call without a limit - that is, no objects created, modified, or deleted after the first request is issued will be included in any subsequent continued requests. This is sometimes referred to as a consistent snapshot, and ensures that a client that is using limit to receive smaller chunks of a very large result can ensure they see all possible objects. If objects are updated during a chunked list the version of the object that was present at the time the first list result was calculated is returned. | 
+ **pretty** | **string** | If &#39;true&#39;, then the output is pretty printed. | 
+ **resourceVersion** | **string** | resourceVersion sets a constraint on what resource versions a request may be served from. See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset | 
+ **resourceVersionMatch** | **string** | resourceVersionMatch determines how resourceVersion is applied to list calls. It is highly recommended that resourceVersionMatch be set for list calls where resourceVersion is set See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset | 
+ **timeoutSeconds** | **int32** | Timeout for the list/watch call. This limits the duration of the call, regardless of any activity or inactivity. | 
+ **watch** | **bool** | Watch for changes to the described resources and return them as a stream of add, update, and remove notifications. Specify resourceVersion. | 
+
+### Return type
+
+[**V1WatchEvent**](V1WatchEvent.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json, application/yaml, application/vnd.kubernetes.protobuf, application/json;stream=watch, application/vnd.kubernetes.protobuf;stream=watch
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## WatchCloudStreamnativeIoV1alpha1NamespacedInstanceList
+
+> V1WatchEvent WatchCloudStreamnativeIoV1alpha1NamespacedInstanceList(ctx, namespace).AllowWatchBookmarks(allowWatchBookmarks).Continue_(continue_).FieldSelector(fieldSelector).LabelSelector(labelSelector).Limit(limit).Pretty(pretty).ResourceVersion(resourceVersion).ResourceVersionMatch(resourceVersionMatch).TimeoutSeconds(timeoutSeconds).Watch(watch).Execute()
+
+
+
+
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    namespace := "namespace_example" // string | object name and auth scope, such as for teams and projects
+    allowWatchBookmarks := true // bool | allowWatchBookmarks requests watch events with type \"BOOKMARK\". Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server's discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored. (optional)
+    continue_ := "continue__example" // string | The continue option should be set when retrieving more results from the server. Since this value is server defined, clients may only use the continue value from a previous query result with identical query parameters (except for the value of continue) and the server may reject a continue value it does not recognize. If the specified continue value is no longer valid whether due to expiration (generally five to fifteen minutes) or a configuration change on the server, the server will respond with a 410 ResourceExpired error together with a continue token. If the client needs a consistent list, it must restart their list without the continue field. Otherwise, the client may send another list request with the token received with the 410 error, the server will respond with a list starting from the next key, but from the latest snapshot, which is inconsistent from the previous list results - objects that are created, modified, or deleted after the first list request will be included in the response, as long as their keys are after the \"next key\".  This field is not supported when watch is true. Clients may start a watch from the last resourceVersion value returned by the server and not miss any modifications. (optional)
+    fieldSelector := "fieldSelector_example" // string | A selector to restrict the list of returned objects by their fields. Defaults to everything. (optional)
+    labelSelector := "labelSelector_example" // string | A selector to restrict the list of returned objects by their labels. Defaults to everything. (optional)
+    limit := int32(56) // int32 | limit is a maximum number of responses to return for a list call. If more items exist, the server will set the `continue` field on the list metadata to a value that can be used with the same initial query to retrieve the next set of results. Setting a limit may return fewer than the requested amount of items (up to zero items) in the event all requested objects are filtered out and clients should only use the presence of the continue field to determine whether more results are available. Servers may choose not to support the limit argument and will return all of the available results. If limit is specified and the continue field is empty, clients may assume that no more results are available. This field is not supported if watch is true.  The server guarantees that the objects returned when using continue will be identical to issuing a single list call without a limit - that is, no objects created, modified, or deleted after the first request is issued will be included in any subsequent continued requests. This is sometimes referred to as a consistent snapshot, and ensures that a client that is using limit to receive smaller chunks of a very large result can ensure they see all possible objects. If objects are updated during a chunked list the version of the object that was present at the time the first list result was calculated is returned. (optional)
+    pretty := "pretty_example" // string | If 'true', then the output is pretty printed. (optional)
+    resourceVersion := "resourceVersion_example" // string | resourceVersion sets a constraint on what resource versions a request may be served from. See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset (optional)
+    resourceVersionMatch := "resourceVersionMatch_example" // string | resourceVersionMatch determines how resourceVersion is applied to list calls. It is highly recommended that resourceVersionMatch be set for list calls where resourceVersion is set See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset (optional)
+    timeoutSeconds := int32(56) // int32 | Timeout for the list/watch call. This limits the duration of the call, regardless of any activity or inactivity. (optional)
+    watch := true // bool | Watch for changes to the described resources and return them as a stream of add, update, and remove notifications. Specify resourceVersion. (optional)
+
+    configuration := openapiclient.NewConfiguration()
+    apiClient := openapiclient.NewAPIClient(configuration)
+    resp, r, err := apiClient.CloudStreamnativeIoV1alpha1Api.WatchCloudStreamnativeIoV1alpha1NamespacedInstanceList(context.Background(), namespace).AllowWatchBookmarks(allowWatchBookmarks).Continue_(continue_).FieldSelector(fieldSelector).LabelSelector(labelSelector).Limit(limit).Pretty(pretty).ResourceVersion(resourceVersion).ResourceVersionMatch(resourceVersionMatch).TimeoutSeconds(timeoutSeconds).Watch(watch).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `CloudStreamnativeIoV1alpha1Api.WatchCloudStreamnativeIoV1alpha1NamespacedInstanceList``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `WatchCloudStreamnativeIoV1alpha1NamespacedInstanceList`: V1WatchEvent
+    fmt.Fprintf(os.Stdout, "Response from `CloudStreamnativeIoV1alpha1Api.WatchCloudStreamnativeIoV1alpha1NamespacedInstanceList`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**namespace** | **string** | object name and auth scope, such as for teams and projects | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceListRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **allowWatchBookmarks** | **bool** | allowWatchBookmarks requests watch events with type \&quot;BOOKMARK\&quot;. Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server&#39;s discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored. | 
+ **continue_** | **string** | The continue option should be set when retrieving more results from the server. Since this value is server defined, clients may only use the continue value from a previous query result with identical query parameters (except for the value of continue) and the server may reject a continue value it does not recognize. If the specified continue value is no longer valid whether due to expiration (generally five to fifteen minutes) or a configuration change on the server, the server will respond with a 410 ResourceExpired error together with a continue token. If the client needs a consistent list, it must restart their list without the continue field. Otherwise, the client may send another list request with the token received with the 410 error, the server will respond with a list starting from the next key, but from the latest snapshot, which is inconsistent from the previous list results - objects that are created, modified, or deleted after the first list request will be included in the response, as long as their keys are after the \&quot;next key\&quot;.  This field is not supported when watch is true. Clients may start a watch from the last resourceVersion value returned by the server and not miss any modifications. | 
+ **fieldSelector** | **string** | A selector to restrict the list of returned objects by their fields. Defaults to everything. | 
+ **labelSelector** | **string** | A selector to restrict the list of returned objects by their labels. Defaults to everything. | 
+ **limit** | **int32** | limit is a maximum number of responses to return for a list call. If more items exist, the server will set the &#x60;continue&#x60; field on the list metadata to a value that can be used with the same initial query to retrieve the next set of results. Setting a limit may return fewer than the requested amount of items (up to zero items) in the event all requested objects are filtered out and clients should only use the presence of the continue field to determine whether more results are available. Servers may choose not to support the limit argument and will return all of the available results. If limit is specified and the continue field is empty, clients may assume that no more results are available. This field is not supported if watch is true.  The server guarantees that the objects returned when using continue will be identical to issuing a single list call without a limit - that is, no objects created, modified, or deleted after the first request is issued will be included in any subsequent continued requests. This is sometimes referred to as a consistent snapshot, and ensures that a client that is using limit to receive smaller chunks of a very large result can ensure they see all possible objects. If objects are updated during a chunked list the version of the object that was present at the time the first list result was calculated is returned. | 
+ **pretty** | **string** | If &#39;true&#39;, then the output is pretty printed. | 
+ **resourceVersion** | **string** | resourceVersion sets a constraint on what resource versions a request may be served from. See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset | 
+ **resourceVersionMatch** | **string** | resourceVersionMatch determines how resourceVersion is applied to list calls. It is highly recommended that resourceVersionMatch be set for list calls where resourceVersion is set See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset | 
+ **timeoutSeconds** | **int32** | Timeout for the list/watch call. This limits the duration of the call, regardless of any activity or inactivity. | 
+ **watch** | **bool** | Watch for changes to the described resources and return them as a stream of add, update, and remove notifications. Specify resourceVersion. | 
+
+### Return type
+
+[**V1WatchEvent**](V1WatchEvent.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json, application/yaml, application/vnd.kubernetes.protobuf, application/json;stream=watch, application/vnd.kubernetes.protobuf;stream=watch
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## WatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatus
+
+> V1WatchEvent WatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatus(ctx, name, namespace).AllowWatchBookmarks(allowWatchBookmarks).Continue_(continue_).FieldSelector(fieldSelector).LabelSelector(labelSelector).Limit(limit).Pretty(pretty).ResourceVersion(resourceVersion).ResourceVersionMatch(resourceVersionMatch).TimeoutSeconds(timeoutSeconds).Watch(watch).Execute()
+
+
+
+
+
+### Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    openapiclient "./openapi"
+)
+
+func main() {
+    name := "name_example" // string | name of the Instance
+    namespace := "namespace_example" // string | object name and auth scope, such as for teams and projects
+    allowWatchBookmarks := true // bool | allowWatchBookmarks requests watch events with type \"BOOKMARK\". Servers that do not implement bookmarks may ignore this flag and bookmarks are sent at the server's discretion. Clients should not assume bookmarks are returned at any specific interval, nor may they assume the server will send any BOOKMARK event during a session. If this is not a watch, this field is ignored. (optional)
+    continue_ := "continue__example" // string | The continue option should be set when retrieving more results from the server. Since this value is server defined, clients may only use the continue value from a previous query result with identical query parameters (except for the value of continue) and the server may reject a continue value it does not recognize. If the specified continue value is no longer valid whether due to expiration (generally five to fifteen minutes) or a configuration change on the server, the server will respond with a 410 ResourceExpired error together with a continue token. If the client needs a consistent list, it must restart their list without the continue field. Otherwise, the client may send another list request with the token received with the 410 error, the server will respond with a list starting from the next key, but from the latest snapshot, which is inconsistent from the previous list results - objects that are created, modified, or deleted after the first list request will be included in the response, as long as their keys are after the \"next key\".  This field is not supported when watch is true. Clients may start a watch from the last resourceVersion value returned by the server and not miss any modifications. (optional)
+    fieldSelector := "fieldSelector_example" // string | A selector to restrict the list of returned objects by their fields. Defaults to everything. (optional)
+    labelSelector := "labelSelector_example" // string | A selector to restrict the list of returned objects by their labels. Defaults to everything. (optional)
+    limit := int32(56) // int32 | limit is a maximum number of responses to return for a list call. If more items exist, the server will set the `continue` field on the list metadata to a value that can be used with the same initial query to retrieve the next set of results. Setting a limit may return fewer than the requested amount of items (up to zero items) in the event all requested objects are filtered out and clients should only use the presence of the continue field to determine whether more results are available. Servers may choose not to support the limit argument and will return all of the available results. If limit is specified and the continue field is empty, clients may assume that no more results are available. This field is not supported if watch is true.  The server guarantees that the objects returned when using continue will be identical to issuing a single list call without a limit - that is, no objects created, modified, or deleted after the first request is issued will be included in any subsequent continued requests. This is sometimes referred to as a consistent snapshot, and ensures that a client that is using limit to receive smaller chunks of a very large result can ensure they see all possible objects. If objects are updated during a chunked list the version of the object that was present at the time the first list result was calculated is returned. (optional)
+    pretty := "pretty_example" // string | If 'true', then the output is pretty printed. (optional)
+    resourceVersion := "resourceVersion_example" // string | resourceVersion sets a constraint on what resource versions a request may be served from. See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset (optional)
+    resourceVersionMatch := "resourceVersionMatch_example" // string | resourceVersionMatch determines how resourceVersion is applied to list calls. It is highly recommended that resourceVersionMatch be set for list calls where resourceVersion is set See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions for details.  Defaults to unset (optional)
+    timeoutSeconds := int32(56) // int32 | Timeout for the list/watch call. This limits the duration of the call, regardless of any activity or inactivity. (optional)
+    watch := true // bool | Watch for changes to the described resources and return them as a stream of add, update, and remove notifications. Specify resourceVersion. (optional)
+
+    configuration := openapiclient.NewConfiguration()
+    apiClient := openapiclient.NewAPIClient(configuration)
+    resp, r, err := apiClient.CloudStreamnativeIoV1alpha1Api.WatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatus(context.Background(), name, namespace).AllowWatchBookmarks(allowWatchBookmarks).Continue_(continue_).FieldSelector(fieldSelector).LabelSelector(labelSelector).Limit(limit).Pretty(pretty).ResourceVersion(resourceVersion).ResourceVersionMatch(resourceVersionMatch).TimeoutSeconds(timeoutSeconds).Watch(watch).Execute()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "Error when calling `CloudStreamnativeIoV1alpha1Api.WatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatus``: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+    }
+    // response from `WatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatus`: V1WatchEvent
+    fmt.Fprintf(os.Stdout, "Response from `CloudStreamnativeIoV1alpha1Api.WatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatus`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**name** | **string** | name of the Instance | 
+**namespace** | **string** | object name and auth scope, such as for teams and projects | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiWatchCloudStreamnativeIoV1alpha1NamespacedInstanceStatusRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
