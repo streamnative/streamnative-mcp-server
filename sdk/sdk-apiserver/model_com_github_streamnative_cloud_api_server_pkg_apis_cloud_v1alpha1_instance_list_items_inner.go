@@ -20,7 +20,7 @@ type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceListItemsInn
 	ApiVersion *string `json:"apiVersion,omitempty"`
 	// Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
 	Kind *string `json:"kind,omitempty"`
-	Metadata *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceMetadata `json:"metadata,omitempty"`
+	Metadata *V1ObjectMeta `json:"metadata,omitempty"`
 	Spec *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceSpec `json:"spec,omitempty"`
 	Status *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatus `json:"status,omitempty"`
 }
@@ -107,9 +107,9 @@ func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceListItem
 }
 
 // GetMetadata returns the Metadata field value if set, zero value otherwise.
-func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceListItemsInner) GetMetadata() ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceMetadata {
+func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceListItemsInner) GetMetadata() V1ObjectMeta {
 	if o == nil || o.Metadata == nil {
-		var ret ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceMetadata
+		var ret V1ObjectMeta
 		return ret
 	}
 	return *o.Metadata
@@ -117,7 +117,7 @@ func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceListItem
 
 // GetMetadataOk returns a tuple with the Metadata field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceListItemsInner) GetMetadataOk() (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceMetadata, bool) {
+func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceListItemsInner) GetMetadataOk() (*V1ObjectMeta, bool) {
 	if o == nil || o.Metadata == nil {
 		return nil, false
 	}
@@ -133,8 +133,8 @@ func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceListItem
 	return false
 }
 
-// SetMetadata gets a reference to the given ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceMetadata and assigns it to the Metadata field.
-func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceListItemsInner) SetMetadata(v ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceMetadata) {
+// SetMetadata gets a reference to the given V1ObjectMeta and assigns it to the Metadata field.
+func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceListItemsInner) SetMetadata(v V1ObjectMeta) {
 	o.Metadata = &v
 }
 

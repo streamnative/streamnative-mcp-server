@@ -127550,7 +127550,53 @@ components:
     com.github.streamnative.cloud-api-server.pkg.apis.cloud.v1alpha1.Instance:
       description: Instance
       example:
-        metadata: null
+        metadata:
+          generation: 6
+          finalizers:
+          - finalizers
+          - finalizers
+          resourceVersion: resourceVersion
+          annotations:
+            key: annotations
+          generateName: generateName
+          deletionTimestamp: 2000-01-23 04:56:07 +0000
+          labels:
+            key: labels
+          ownerReferences:
+          - uid: uid
+            controller: true
+            apiVersion: apiVersion
+            kind: kind
+            name: name
+            blockOwnerDeletion: true
+          - uid: uid
+            controller: true
+            apiVersion: apiVersion
+            kind: kind
+            name: name
+            blockOwnerDeletion: true
+          selfLink: selfLink
+          deletionGracePeriodSeconds: 0
+          uid: uid
+          managedFields:
+          - apiVersion: apiVersion
+            fieldsV1: "{}"
+            manager: manager
+            subresource: subresource
+            time: 2000-01-23 04:56:07 +0000
+            operation: operation
+            fieldsType: fieldsType
+          - apiVersion: apiVersion
+            fieldsV1: "{}"
+            manager: manager
+            subresource: subresource
+            time: 2000-01-23 04:56:07 +0000
+            operation: operation
+            fieldsType: fieldsType
+          clusterName: clusterName
+          creationTimestamp: 2000-01-23 04:56:07 +0000
+          name: name
+          namespace: namespace
         apiVersion: apiVersion
         kind: kind
         spec: null
@@ -127567,7 +127613,7 @@ components:
             \ submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds"
           type: string
         metadata:
-          $ref: '#/components/schemas/com_github_streamnative_cloud_api_server_pkg_apis_cloud_v1alpha1_Instance_metadata'
+          $ref: '#/components/schemas/v1.ObjectMeta'
         spec:
           $ref: '#/components/schemas/com_github_streamnative_cloud_api_server_pkg_apis_cloud_v1alpha1_Instance_spec'
         status:
@@ -127895,9 +127941,6 @@ components:
         the time package offers.
       format: date-time
       type: string
-    com_github_streamnative_cloud_api_server_pkg_apis_cloud_v1alpha1_Instance_metadata:
-      allOf:
-      - $ref: '#/components/schemas/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta'
     com_github_streamnative_cloud_api_server_pkg_apis_cloud_v1alpha1_Instance_spec:
       allOf:
       - $ref: '#/components/schemas/com.github.streamnative.cloud-api-server.pkg.apis.cloud.v1alpha1.InstanceSpec'

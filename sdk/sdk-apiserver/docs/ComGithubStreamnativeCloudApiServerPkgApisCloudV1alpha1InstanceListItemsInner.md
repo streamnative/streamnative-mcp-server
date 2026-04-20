@@ -6,7 +6,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **ApiVersion** | Pointer to **string** | APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources | [optional] 
 **Kind** | Pointer to **string** | Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds | [optional] 
-**Metadata** | Pointer to [**ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceMetadata**](ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceMetadata.md) |  | [optional] 
+**Metadata** | Pointer to [**V1ObjectMeta**](V1ObjectMeta.md) |  | [optional] 
 **Spec** | Pointer to [**ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceSpec**](ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceSpec.md) |  | [optional] 
 **Status** | Pointer to [**ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatus**](ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatus.md) |  | [optional] 
 
@@ -81,20 +81,20 @@ HasKind returns a boolean if a field has been set.
 
 ### GetMetadata
 
-`func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceListItemsInner) GetMetadata() ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceMetadata`
+`func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceListItemsInner) GetMetadata() V1ObjectMeta`
 
 GetMetadata returns the Metadata field if non-nil, zero value otherwise.
 
 ### GetMetadataOk
 
-`func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceListItemsInner) GetMetadataOk() (*ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceMetadata, bool)`
+`func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceListItemsInner) GetMetadataOk() (*V1ObjectMeta, bool)`
 
 GetMetadataOk returns a tuple with the Metadata field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetMetadata
 
-`func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceListItemsInner) SetMetadata(v ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceMetadata)`
+`func (o *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceListItemsInner) SetMetadata(v V1ObjectMeta)`
 
 SetMetadata sets Metadata field to given value.
 

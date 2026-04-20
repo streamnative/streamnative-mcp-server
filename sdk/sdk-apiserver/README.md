@@ -945,7 +945,6 @@ Class | Method | HTTP request | Description
  - [ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceList](docs/ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceList.md)
  - [ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceListItemsInner](docs/ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceListItemsInner.md)
  - [ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceListMetadata](docs/ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceListMetadata.md)
- - [ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceMetadata](docs/ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceMetadata.md)
  - [ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceSpec](docs/ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceSpec.md)
  - [ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceSpecPoolRef](docs/ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceSpecPoolRef.md)
  - [ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatus](docs/ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceStatus.md)
@@ -1217,6 +1216,5 @@ Each of these functions takes a value of the given basic type and returns a poin
 * `PtrTime`
 
 ## Author
-
 
 
