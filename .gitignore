@@ -12,3 +12,4 @@ vendor
 agents/
 .serena/
 .envrc
+scripts/update-sdk-apiserver.sh
