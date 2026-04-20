@@ -172,402 +172,331 @@ func applyResource(ctx context.Context, apiClient *sncloud.APIClient, resource R
 	}
 }
 
-func applyInstance(ctx context.Context, apiClient *sncloud.APIClient, jsonContent string, organization string, dryRun bool) (string, error) {
-	var instance sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance
-	if err := json.Unmarshal([]byte(jsonContent), &instance); err != nil {
-		return "", fmt.Errorf("failed to unmarshal JSON to Instance: %v", err)
+type sncloudResourceApplyAdapter[T any] struct {
+	kind string
+
+	ensureMetadata     func(*T)
+	getName            func(*T) *string
+	getNamespace       func(*T) *string
+	setNamespace       func(*T, string)
+	getResourceVersion func(*T) *string
+	setResourceVersion func(*T, *string)
+
+	readExistingResourceVersion func(context.Context, *sncloud.APIClient, string, string) (*string, *http.Response, error)
+	create                      func(context.Context, *sncloud.APIClient, string, T, bool) (*http.Response, error)
+	replace                     func(context.Context, *sncloud.APIClient, string, string, T, bool) (*http.Response, error)
+}
+
+func applyTypedSNCloudResource[T any](
+	ctx context.Context,
+	apiClient *sncloud.APIClient,
+	jsonContent string,
+	organization string,
+	dryRun bool,
+	adapter sncloudResourceApplyAdapter[T],
+) (string, error) {
+	var resource T
+	if err := json.Unmarshal([]byte(jsonContent), &resource); err != nil {
+		return "", fmt.Errorf("failed to unmarshal JSON to %s: %v", adapter.kind, err)
 	}
 
-	if instance.Metadata == nil {
-		instance.Metadata = &sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceMetadata{}
-	}
-	if instance.Metadata.Namespace == nil || *instance.Metadata.Namespace == "" {
-		ns := organization
-		instance.Metadata.Namespace = &ns
+	adapter.ensureMetadata(&resource)
+	if namespace := adapter.getNamespace(&resource); namespace == nil || *namespace == "" {
+		adapter.setNamespace(&resource, organization)
 	}
 
 	name := ""
-	if instance.Metadata.Name != nil {
-		name = *instance.Metadata.Name
+	if resourceName := adapter.getName(&resource); resourceName != nil {
+		name = *resourceName
 	}
 
 	exists := false
 	var existingResourceVersion *string
 	if name != "" {
-		existingInstance, bdy, err := apiClient.CloudStreamnativeIoV1alpha1Api.ReadCloudStreamnativeIoV1alpha1NamespacedInstance(ctx, name, organization).Execute()
-		defer func() {
-			if bdy != nil && bdy.Body != nil {
+		readResourceVersion, bdy, err := adapter.readExistingResourceVersion(ctx, apiClient, name, organization)
+		if bdy != nil && bdy.Body != nil {
+			defer func() {
 				_ = bdy.Body.Close()
-			}
-		}()
+			}()
+		}
 		if err == nil {
 			exists = true
-			if existingInstance.Metadata != nil && existingInstance.Metadata.ResourceVersion != nil {
-				existingResourceVersion = existingInstance.Metadata.ResourceVersion
-			}
+			existingResourceVersion = readResourceVersion
 		}
 	}
 
-	var verb string
+	var (
+		bdy  *http.Response
+		err  error
+		verb string
+	)
+
 	if exists {
 		verb = "updated"
-		if existingResourceVersion != nil && instance.Metadata.ResourceVersion == nil {
-			instance.Metadata.ResourceVersion = existingResourceVersion
+		if existingResourceVersion != nil && adapter.getResourceVersion(&resource) == nil {
+			adapter.setResourceVersion(&resource, existingResourceVersion)
 		}
-
-		request := apiClient.CloudStreamnativeIoV1alpha1Api.ReplaceCloudStreamnativeIoV1alpha1NamespacedInstance(
-			ctx, name, organization).Body(instance)
-		if dryRun {
-			request = request.DryRun("All")
-		}
-		_, bdy, err := request.Execute()
-		defer func() {
-			if bdy != nil && bdy.Body != nil {
-				_ = bdy.Body.Close()
-			}
-		}()
-		if err != nil {
-			if bdy == nil || bdy.Body == nil {
-				return "", fmt.Errorf("failed to %s Instance: %v", verb, err)
-			}
-			body, innerErr := io.ReadAll(bdy.Body)
-			if innerErr != nil {
-				return "", fmt.Errorf("failed to read body: %v", innerErr)
-			}
-			return "", fmt.Errorf("failed to %s Instance: %v (%s)", verb, err, string(body))
-		}
+		bdy, err = adapter.replace(ctx, apiClient, name, organization, resource, dryRun)
 	} else {
 		verb = "created"
-
-		request := apiClient.CloudStreamnativeIoV1alpha1Api.CreateCloudStreamnativeIoV1alpha1NamespacedInstance(
-			ctx, organization).Body(instance)
-		if dryRun {
-			request = request.DryRun("All")
-		}
-		_, bdy, err := request.Execute()
+		bdy, err = adapter.create(ctx, apiClient, organization, resource, dryRun)
+	}
+	if bdy != nil && bdy.Body != nil {
 		defer func() {
-			if bdy != nil && bdy.Body != nil {
-				_ = bdy.Body.Close()
-			}
+			_ = bdy.Body.Close()
 		}()
-		if err != nil {
-			if bdy == nil || bdy.Body == nil {
-				return "", fmt.Errorf("failed to %s Instance: %v", verb, err)
-			}
-			body, innerErr := io.ReadAll(bdy.Body)
-			if innerErr != nil {
-				return "", fmt.Errorf("failed to read body: %v", innerErr)
-			}
-			return "", fmt.Errorf("failed to %s Instance: %v (%s)", verb, err, string(body))
-		}
+	}
+
+	if err != nil {
+		return "", formatSNCloudApplyError(adapter.kind, verb, bdy, err)
 	}
 
 	if dryRun {
-		return fmt.Sprintf("Instance %q would be %s (dry run)", name, verb), nil
+		return fmt.Sprintf("%s %q would be %s (dry run)", adapter.kind, name, verb), nil
 	}
-	return fmt.Sprintf("Instance %q %s", name, verb), nil
+	return fmt.Sprintf("%s %q %s", adapter.kind, name, verb), nil
+}
+
+func applyV1ObjectMetaSNCloudResource[T any](
+	ctx context.Context,
+	apiClient *sncloud.APIClient,
+	jsonContent string,
+	organization string,
+	dryRun bool,
+	kind string,
+	ensureMetadata func(*T) *sncloud.V1ObjectMeta,
+	readExistingResourceVersion func(context.Context, *sncloud.APIClient, string, string) (*string, *http.Response, error),
+	create func(context.Context, *sncloud.APIClient, string, T, bool) (*http.Response, error),
+	replace func(context.Context, *sncloud.APIClient, string, string, T, bool) (*http.Response, error),
+) (string, error) {
+	return applyTypedSNCloudResource(ctx, apiClient, jsonContent, organization, dryRun, sncloudResourceApplyAdapter[T]{
+		kind: kind,
+		ensureMetadata: func(resource *T) {
+			_ = ensureMetadata(resource)
+		},
+		getName: func(resource *T) *string {
+			return ensureMetadata(resource).Name
+		},
+		getNamespace: func(resource *T) *string {
+			return ensureMetadata(resource).Namespace
+		},
+		setNamespace: func(resource *T, namespace string) {
+			ensureMetadata(resource).Namespace = &namespace
+		},
+		getResourceVersion: func(resource *T) *string {
+			return ensureMetadata(resource).ResourceVersion
+		},
+		setResourceVersion: func(resource *T, resourceVersion *string) {
+			ensureMetadata(resource).ResourceVersion = resourceVersion
+		},
+		readExistingResourceVersion: readExistingResourceVersion,
+		create:                      create,
+		replace:                     replace,
+	})
+}
+
+func formatSNCloudApplyError(kind string, verb string, bdy *http.Response, err error) error {
+	if bdy == nil || bdy.Body == nil {
+		return fmt.Errorf("failed to %s %s: %v", verb, kind, err)
+	}
+
+	body, innerErr := io.ReadAll(bdy.Body)
+	if innerErr != nil {
+		return fmt.Errorf("failed to read body: %v", innerErr)
+	}
+	return fmt.Errorf("failed to %s %s: %v (%s)", verb, kind, err, string(body))
+}
+
+func applyInstance(ctx context.Context, apiClient *sncloud.APIClient, jsonContent string, organization string, dryRun bool) (string, error) {
+	return applyTypedSNCloudResource(ctx, apiClient, jsonContent, organization, dryRun, sncloudResourceApplyAdapter[sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance]{
+		kind: "Instance",
+		ensureMetadata: func(resource *sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance) {
+			if resource.Metadata == nil {
+				resource.Metadata = &sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceMetadata{}
+			}
+		},
+		getName: func(resource *sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance) *string {
+			if resource.Metadata == nil {
+				return nil
+			}
+			return resource.Metadata.Name
+		},
+		getNamespace: func(resource *sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance) *string {
+			if resource.Metadata == nil {
+				return nil
+			}
+			return resource.Metadata.Namespace
+		},
+		setNamespace: func(resource *sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance, namespace string) {
+			resource.Metadata.Namespace = &namespace
+		},
+		getResourceVersion: func(resource *sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance) *string {
+			if resource.Metadata == nil {
+				return nil
+			}
+			return resource.Metadata.ResourceVersion
+		},
+		setResourceVersion: func(resource *sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance, resourceVersion *string) {
+			resource.Metadata.ResourceVersion = resourceVersion
+		},
+		readExistingResourceVersion: func(ctx context.Context, apiClient *sncloud.APIClient, name string, organization string) (*string, *http.Response, error) {
+			existingInstance, bdy, err := apiClient.CloudStreamnativeIoV1alpha1Api.ReadCloudStreamnativeIoV1alpha1NamespacedInstance(ctx, name, organization).Execute()
+			if err != nil {
+				return nil, bdy, err
+			}
+			if existingInstance.Metadata == nil {
+				return nil, bdy, nil
+			}
+			return existingInstance.Metadata.ResourceVersion, bdy, nil
+		},
+		create: func(ctx context.Context, apiClient *sncloud.APIClient, organization string, resource sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance, dryRun bool) (*http.Response, error) {
+			request := apiClient.CloudStreamnativeIoV1alpha1Api.CreateCloudStreamnativeIoV1alpha1NamespacedInstance(ctx, organization).Body(resource)
+			if dryRun {
+				request = request.DryRun("All")
+			}
+			_, bdy, err := request.Execute()
+			return bdy, err
+		},
+		replace: func(ctx context.Context, apiClient *sncloud.APIClient, name string, organization string, resource sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance, dryRun bool) (*http.Response, error) {
+			request := apiClient.CloudStreamnativeIoV1alpha1Api.ReplaceCloudStreamnativeIoV1alpha1NamespacedInstance(ctx, name, organization).Body(resource)
+			if dryRun {
+				request = request.DryRun("All")
+			}
+			_, bdy, err := request.Execute()
+			return bdy, err
+		},
+	})
 }
 
 // applyPulsarInstance applies PulsarInstance resource
 func applyPulsarInstance(ctx context.Context, apiClient *sncloud.APIClient, jsonContent string, organization string, dryRun bool) (string, error) {
-	var instance sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarInstance
-	if err := json.Unmarshal([]byte(jsonContent), &instance); err != nil {
-		return "", fmt.Errorf("failed to unmarshal JSON to PulsarInstance: %v", err)
-	}
-
-	// Ensure namespace is set correctly
-	if instance.Metadata == nil {
-		instance.Metadata = &sncloud.V1ObjectMeta{}
-	}
-	if instance.Metadata.Namespace == nil || *instance.Metadata.Namespace == "" {
-		ns := organization
-		instance.Metadata.Namespace = &ns
-	}
-
-	name := ""
-	if instance.Metadata.Name != nil {
-		name = *instance.Metadata.Name
-	}
-
-	// Check if resource already exists
-	exists := false
-	var existingResourceVersion *string
-
-	if name != "" {
-		// Try to get existing resource
-		existingInstance, bdy, err := apiClient.CloudStreamnativeIoV1alpha1Api.ReadCloudStreamnativeIoV1alpha1NamespacedPulsarInstance(ctx, name, organization).Execute()
-		defer func() {
-			if bdy != nil && bdy.Body != nil {
-				_ = bdy.Body.Close()
+	return applyV1ObjectMetaSNCloudResource(
+		ctx,
+		apiClient,
+		jsonContent,
+		organization,
+		dryRun,
+		"PulsarInstance",
+		func(resource *sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarInstance) *sncloud.V1ObjectMeta {
+			if resource.Metadata == nil {
+				resource.Metadata = &sncloud.V1ObjectMeta{}
 			}
-		}()
-		if err == nil {
-			exists = true
-			if existingInstance.Metadata != nil && existingInstance.Metadata.ResourceVersion != nil {
-				existingResourceVersion = existingInstance.Metadata.ResourceVersion
+			return resource.Metadata
+		},
+		func(ctx context.Context, apiClient *sncloud.APIClient, name string, organization string) (*string, *http.Response, error) {
+			existingInstance, bdy, err := apiClient.CloudStreamnativeIoV1alpha1Api.ReadCloudStreamnativeIoV1alpha1NamespacedPulsarInstance(ctx, name, organization).Execute()
+			if err != nil {
+				return nil, bdy, err
 			}
-		}
-	}
-
-	var verb string
-
-	// Convert dryRun bool to string parameter required by API
-	dryRunStr := "All"
-
-	// Create or update based on whether resource exists
-	var bdy *http.Response
-	var err error
-	if exists {
-		verb = "updated"
-		// Make sure resourceVersion is set to support updates
-		if existingResourceVersion != nil {
-			if instance.Metadata.ResourceVersion == nil {
-				instance.Metadata.ResourceVersion = existingResourceVersion
+			if existingInstance.Metadata == nil {
+				return nil, bdy, nil
 			}
-		}
-
-		// Use Replace method to update resource
-		request := apiClient.CloudStreamnativeIoV1alpha1Api.ReplaceCloudStreamnativeIoV1alpha1NamespacedPulsarInstance(
-			ctx, name, organization).Body(instance)
-		if dryRun {
-			request = request.DryRun(dryRunStr)
-		}
-		_, bdy, err = request.Execute()
-		defer func() {
-			if bdy != nil && bdy.Body != nil {
-				_ = bdy.Body.Close()
+			return existingInstance.Metadata.ResourceVersion, bdy, nil
+		},
+		func(ctx context.Context, apiClient *sncloud.APIClient, organization string, resource sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarInstance, dryRun bool) (*http.Response, error) {
+			request := apiClient.CloudStreamnativeIoV1alpha1Api.CreateCloudStreamnativeIoV1alpha1NamespacedPulsarInstance(ctx, organization).Body(resource)
+			if dryRun {
+				request = request.DryRun("All")
 			}
-		}()
-	} else {
-		verb = "created"
-		// Create new resource
-		request := apiClient.CloudStreamnativeIoV1alpha1Api.CreateCloudStreamnativeIoV1alpha1NamespacedPulsarInstance(
-			ctx, organization).Body(instance)
-		if dryRun {
-			request = request.DryRun(dryRunStr)
-		}
-		_, bdy, err = request.Execute()
-		defer func() {
-			if bdy != nil && bdy.Body != nil {
-				_ = bdy.Body.Close()
+			_, bdy, err := request.Execute()
+			return bdy, err
+		},
+		func(ctx context.Context, apiClient *sncloud.APIClient, name string, organization string, resource sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarInstance, dryRun bool) (*http.Response, error) {
+			request := apiClient.CloudStreamnativeIoV1alpha1Api.ReplaceCloudStreamnativeIoV1alpha1NamespacedPulsarInstance(ctx, name, organization).Body(resource)
+			if dryRun {
+				request = request.DryRun("All")
 			}
-		}()
-	}
-
-	if err != nil {
-		if bdy == nil || bdy.Body == nil {
-			return "", fmt.Errorf("failed to %s PulsarInstance: %v", verb, err)
-		}
-		body, innerErr := io.ReadAll(bdy.Body)
-		if innerErr != nil {
-			return "", fmt.Errorf("failed to read body: %v", innerErr)
-		}
-		return "", fmt.Errorf("failed to %s PulsarInstance: %v (%s)", verb, err, string(body))
-	}
-
-	if dryRun {
-		return fmt.Sprintf("PulsarInstance %q would be %s (dry run)", name, verb), nil
-	}
-	return fmt.Sprintf("PulsarInstance %q %s", name, verb), nil
+			_, bdy, err := request.Execute()
+			return bdy, err
+		},
+	)
 }
 
 // applyPulsarCluster applies PulsarCluster resource
 func applyPulsarCluster(ctx context.Context, apiClient *sncloud.APIClient, jsonContent string, organization string, dryRun bool) (string, error) {
-	var cluster sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarCluster
-	if err := json.Unmarshal([]byte(jsonContent), &cluster); err != nil {
-		return "", fmt.Errorf("failed to unmarshal JSON to PulsarCluster: %v", err)
-	}
-
-	// Ensure namespace is set correctly
-	if cluster.Metadata == nil {
-		cluster.Metadata = &sncloud.V1ObjectMeta{}
-	}
-	if cluster.Metadata.Namespace == nil || *cluster.Metadata.Namespace == "" {
-		ns := organization
-		cluster.Metadata.Namespace = &ns
-	}
-
-	name := ""
-	if cluster.Metadata.Name != nil {
-		name = *cluster.Metadata.Name
-	}
-	// Check if resource already exists
-	exists := false
-	var existingResourceVersion *string
-
-	if name != "" {
-		// Try to get existing resource
-		existingCluster, bdy, err := apiClient.CloudStreamnativeIoV1alpha1Api.ReadCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(ctx, name, organization).Execute()
-		defer func() {
-			if bdy != nil && bdy.Body != nil {
-				_ = bdy.Body.Close()
+	return applyV1ObjectMetaSNCloudResource(
+		ctx,
+		apiClient,
+		jsonContent,
+		organization,
+		dryRun,
+		"PulsarCluster",
+		func(resource *sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarCluster) *sncloud.V1ObjectMeta {
+			if resource.Metadata == nil {
+				resource.Metadata = &sncloud.V1ObjectMeta{}
 			}
-		}()
-		if err == nil {
-			exists = true
-			if existingCluster.Metadata != nil && existingCluster.Metadata.ResourceVersion != nil {
-				existingResourceVersion = existingCluster.Metadata.ResourceVersion
+			return resource.Metadata
+		},
+		func(ctx context.Context, apiClient *sncloud.APIClient, name string, organization string) (*string, *http.Response, error) {
+			existingCluster, bdy, err := apiClient.CloudStreamnativeIoV1alpha1Api.ReadCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(ctx, name, organization).Execute()
+			if err != nil {
+				return nil, bdy, err
 			}
-		}
-	}
-
-	var verb string
-
-	// Convert dryRun bool to string parameter required by API
-	dryRunStr := "All"
-
-	// Create or update based on whether resource exists
-	var bdy *http.Response
-	var err error
-	if exists {
-		verb = "updated"
-		// Make sure resourceVersion is set to support updates
-		if existingResourceVersion != nil {
-			if cluster.Metadata.ResourceVersion == nil {
-				cluster.Metadata.ResourceVersion = existingResourceVersion
+			if existingCluster.Metadata == nil {
+				return nil, bdy, nil
 			}
-		}
-
-		// Use Replace method to update resource
-		request := apiClient.CloudStreamnativeIoV1alpha1Api.ReplaceCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(
-			ctx, name, organization).Body(cluster)
-		if dryRun {
-			request = request.DryRun(dryRunStr)
-		}
-
-		_, bdy, err = request.Execute()
-		defer func() {
-			if bdy != nil && bdy.Body != nil {
-				_ = bdy.Body.Close()
+			return existingCluster.Metadata.ResourceVersion, bdy, nil
+		},
+		func(ctx context.Context, apiClient *sncloud.APIClient, organization string, resource sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarCluster, dryRun bool) (*http.Response, error) {
+			request := apiClient.CloudStreamnativeIoV1alpha1Api.CreateCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(ctx, organization).Body(resource)
+			if dryRun {
+				request = request.DryRun("All")
 			}
-		}()
-	} else {
-		verb = "created"
-		// Create new resource
-		request := apiClient.CloudStreamnativeIoV1alpha1Api.CreateCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(
-			ctx, organization).Body(cluster)
-		if dryRun {
-			request = request.DryRun(dryRunStr)
-		}
-		_, bdy, err = request.Execute()
-		defer func() {
-			if bdy != nil && bdy.Body != nil {
-				_ = bdy.Body.Close()
+			_, bdy, err := request.Execute()
+			return bdy, err
+		},
+		func(ctx context.Context, apiClient *sncloud.APIClient, name string, organization string, resource sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarCluster, dryRun bool) (*http.Response, error) {
+			request := apiClient.CloudStreamnativeIoV1alpha1Api.ReplaceCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(ctx, name, organization).Body(resource)
+			if dryRun {
+				request = request.DryRun("All")
 			}
-		}()
-	}
-
-	if err != nil {
-		if bdy == nil || bdy.Body == nil {
-			return "", fmt.Errorf("failed to %s PulsarCluster: %v", verb, err)
-		}
-		body, innerErr := io.ReadAll(bdy.Body)
-		if innerErr != nil {
-			return "", fmt.Errorf("failed to read body: %v", innerErr)
-		}
-		return "", fmt.Errorf("failed to %s PulsarCluster: %v (%s)", verb, err, string(body))
-	}
-
-	if dryRun {
-		return fmt.Sprintf("PulsarCluster %q would be %s (dry run)", name, verb), nil
-	}
-	return fmt.Sprintf("PulsarCluster %q %s", name, verb), nil
+			_, bdy, err := request.Execute()
+			return bdy, err
+		},
+	)
 }
 
 func applyKafkaCluster(ctx context.Context, apiClient *sncloud.APIClient, jsonContent string, organization string, dryRun bool) (string, error) {
-	var cluster sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1KafkaCluster
-	if err := json.Unmarshal([]byte(jsonContent), &cluster); err != nil {
-		return "", fmt.Errorf("failed to unmarshal JSON to KafkaCluster: %v", err)
-	}
-
-	if cluster.Metadata == nil {
-		cluster.Metadata = &sncloud.V1ObjectMeta{}
-	}
-	if cluster.Metadata.Namespace == nil || *cluster.Metadata.Namespace == "" {
-		ns := organization
-		cluster.Metadata.Namespace = &ns
-	}
-
-	name := ""
-	if cluster.Metadata.Name != nil {
-		name = *cluster.Metadata.Name
-	}
-
-	exists := false
-	var existingResourceVersion *string
-	if name != "" {
-		existingCluster, bdy, err := apiClient.CloudStreamnativeIoV1alpha1Api.ReadCloudStreamnativeIoV1alpha1NamespacedKafkaCluster(ctx, name, organization).Execute()
-		defer func() {
-			if bdy != nil && bdy.Body != nil {
-				_ = bdy.Body.Close()
+	return applyV1ObjectMetaSNCloudResource(
+		ctx,
+		apiClient,
+		jsonContent,
+		organization,
+		dryRun,
+		"KafkaCluster",
+		func(resource *sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1KafkaCluster) *sncloud.V1ObjectMeta {
+			if resource.Metadata == nil {
+				resource.Metadata = &sncloud.V1ObjectMeta{}
 			}
-		}()
-		if err == nil {
-			exists = true
-			if existingCluster.Metadata != nil && existingCluster.Metadata.ResourceVersion != nil {
-				existingResourceVersion = existingCluster.Metadata.ResourceVersion
+			return resource.Metadata
+		},
+		func(ctx context.Context, apiClient *sncloud.APIClient, name string, organization string) (*string, *http.Response, error) {
+			existingCluster, bdy, err := apiClient.CloudStreamnativeIoV1alpha1Api.ReadCloudStreamnativeIoV1alpha1NamespacedKafkaCluster(ctx, name, organization).Execute()
+			if err != nil {
+				return nil, bdy, err
 			}
-		}
-	}
-
-	var verb string
-	if exists {
-		verb = "updated"
-		if existingResourceVersion != nil && cluster.Metadata.ResourceVersion == nil {
-			cluster.Metadata.ResourceVersion = existingResourceVersion
-		}
-
-		request := apiClient.CloudStreamnativeIoV1alpha1Api.ReplaceCloudStreamnativeIoV1alpha1NamespacedKafkaCluster(
-			ctx, name, organization).Body(cluster)
-		if dryRun {
-			request = request.DryRun("All")
-		}
-		_, bdy, err := request.Execute()
-		defer func() {
-			if bdy != nil && bdy.Body != nil {
-				_ = bdy.Body.Close()
+			if existingCluster.Metadata == nil {
+				return nil, bdy, nil
 			}
-		}()
-		if err != nil {
-			if bdy == nil || bdy.Body == nil {
-				return "", fmt.Errorf("failed to %s KafkaCluster: %v", verb, err)
+			return existingCluster.Metadata.ResourceVersion, bdy, nil
+		},
+		func(ctx context.Context, apiClient *sncloud.APIClient, organization string, resource sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1KafkaCluster, dryRun bool) (*http.Response, error) {
+			request := apiClient.CloudStreamnativeIoV1alpha1Api.CreateCloudStreamnativeIoV1alpha1NamespacedKafkaCluster(ctx, organization).Body(resource)
+			if dryRun {
+				request = request.DryRun("All")
 			}
-			body, innerErr := io.ReadAll(bdy.Body)
-			if innerErr != nil {
-				return "", fmt.Errorf("failed to read body: %v", innerErr)
+			_, bdy, err := request.Execute()
+			return bdy, err
+		},
+		func(ctx context.Context, apiClient *sncloud.APIClient, name string, organization string, resource sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1KafkaCluster, dryRun bool) (*http.Response, error) {
+			request := apiClient.CloudStreamnativeIoV1alpha1Api.ReplaceCloudStreamnativeIoV1alpha1NamespacedKafkaCluster(ctx, name, organization).Body(resource)
+			if dryRun {
+				request = request.DryRun("All")
 			}
-			return "", fmt.Errorf("failed to %s KafkaCluster: %v (%s)", verb, err, string(body))
-		}
-	} else {
-		verb = "created"
-
-		request := apiClient.CloudStreamnativeIoV1alpha1Api.CreateCloudStreamnativeIoV1alpha1NamespacedKafkaCluster(
-			ctx, organization).Body(cluster)
-		if dryRun {
-			request = request.DryRun("All")
-		}
-		_, bdy, err := request.Execute()
-		defer func() {
-			if bdy != nil && bdy.Body != nil {
-				_ = bdy.Body.Close()
-			}
-		}()
-		if err != nil {
-			if bdy == nil || bdy.Body == nil {
-				return "", fmt.Errorf("failed to %s KafkaCluster: %v", verb, err)
-			}
-			body, innerErr := io.ReadAll(bdy.Body)
-			if innerErr != nil {
-				return "", fmt.Errorf("failed to read body: %v", innerErr)
-			}
-			return "", fmt.Errorf("failed to %s KafkaCluster: %v (%s)", verb, err, string(body))
-		}
-	}
-
-	if dryRun {
-		return fmt.Sprintf("KafkaCluster %q would be %s (dry run)", name, verb), nil
-	}
-	return fmt.Sprintf("KafkaCluster %q %s", name, verb), nil
+			_, bdy, err := request.Execute()
+			return bdy, err
+		},
+	)
 }
 
 // HandleSNCloudResourcesDelete handles the StreamNative Cloud resource delete tool.

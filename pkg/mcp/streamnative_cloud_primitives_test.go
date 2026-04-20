@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -21,16 +22,65 @@ func (f roundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) {
 	return f(req)
 }
 
-func newTestSNCloudAPIClient(t *testing.T, transport http.RoundTripper) *sncloud.APIClient {
+func newTestSNCloudAPIClient(t *testing.T, baseURL string, transport http.RoundTripper) *sncloud.APIClient {
 	t.Helper()
+
+	if baseURL == "" {
+		baseURL = "http://sncloud.test"
+	}
 
 	cfg := sncloud.NewConfiguration()
 	cfg.HTTPClient = &http.Client{Transport: transport}
 	cfg.Servers = sncloud.ServerConfigurations{
-		{URL: "http://sncloud.test"},
+		{URL: baseURL},
 	}
 
 	return sncloud.NewAPIClient(cfg)
+}
+
+type sncloudApplyFunc func(context.Context, *sncloud.APIClient, string, string, bool) (string, error)
+
+type sncloudApplyCase struct {
+	kind   string
+	plural string
+	apply  sncloudApplyFunc
+}
+
+func sncloudApplyCases() []sncloudApplyCase {
+	return []sncloudApplyCase{
+		{
+			kind:   "Instance",
+			plural: "instances",
+			apply:  applyInstance,
+		},
+		{
+			kind:   "PulsarInstance",
+			plural: "pulsarinstances",
+			apply:  applyPulsarInstance,
+		},
+		{
+			kind:   "PulsarCluster",
+			plural: "pulsarclusters",
+			apply:  applyPulsarCluster,
+		},
+		{
+			kind:   "KafkaCluster",
+			plural: "kafkaclusters",
+			apply:  applyKafkaCluster,
+		},
+	}
+}
+
+func (tc sncloudApplyCase) manifest(name string) string {
+	return fmt.Sprintf(`{"apiVersion":"cloud.streamnative.io/v1alpha1","kind":"%s","metadata":{"name":"%s"}}`, tc.kind, name)
+}
+
+func (tc sncloudApplyCase) collectionPath(organization string) string {
+	return fmt.Sprintf("/apis/cloud.streamnative.io/v1alpha1/namespaces/%s/%s", organization, tc.plural)
+}
+
+func (tc sncloudApplyCase) resourcePath(organization string, name string) string {
+	return fmt.Sprintf("%s/%s", tc.collectionPath(organization), name)
 }
 
 func TestSNCloudToolConstructors(t *testing.T) {
@@ -381,63 +431,210 @@ func TestHandleSNCloudResourcesApplySupportsKafkaClusterDryRunCreate(t *testing.
 	}
 }
 
-func TestApplyPulsarInstanceHandlesNilResponseError(t *testing.T) {
+func TestApplyResourcesCreateSetsNamespace(t *testing.T) {
 	t.Parallel()
 
-	requestCount := 0
-	apiClient := newTestSNCloudAPIClient(t, roundTripFunc(func(_ *http.Request) (*http.Response, error) {
-		requestCount++
-		return nil, errors.New("upstream transport failure")
-	}))
+	for _, tc := range sncloudApplyCases() {
+		t.Run(tc.kind, func(t *testing.T) {
+			t.Parallel()
 
-	_, err := applyPulsarInstance(
-		context.Background(),
-		apiClient,
-		`{"apiVersion":"cloud.streamnative.io/v1alpha1","kind":"PulsarInstance","metadata":{"name":"pi-nil-response"}}`,
-		"session-org",
-		false,
-	)
-	if err == nil {
-		t.Fatal("expected nil-response transport error")
-	}
-	if !strings.Contains(err.Error(), "failed to created PulsarInstance:") {
-		t.Fatalf("expected wrapped PulsarInstance error prefix, got %v", err)
-	}
-	if !strings.Contains(err.Error(), "upstream transport failure") {
-		t.Fatalf("expected wrapped PulsarInstance error, got %v", err)
-	}
-	if requestCount != 2 {
-		t.Fatalf("expected 2 upstream requests, got %d", requestCount)
+			resourceName := strings.ToLower(tc.kind) + "-create"
+			var (
+				postBody  map[string]any
+				postQuery string
+			)
+
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				switch {
+				case r.Method == http.MethodGet && r.URL.Path == tc.resourcePath("session-org", resourceName):
+					http.NotFound(w, r)
+				case r.Method == http.MethodPost && r.URL.Path == tc.collectionPath("session-org"):
+					postQuery = r.URL.RawQuery
+					defer func() { _ = r.Body.Close() }()
+					if err := json.NewDecoder(r.Body).Decode(&postBody); err != nil {
+						t.Fatalf("failed to decode POST body: %v", err)
+					}
+					w.Header().Set("Content-Type", "application/json")
+					w.WriteHeader(http.StatusCreated)
+					_, _ = w.Write([]byte(`{"metadata":{"name":"` + resourceName + `"}}`))
+				default:
+					t.Fatalf("unexpected request: %s %s", r.Method, r.URL.String())
+				}
+			}))
+			defer server.Close()
+
+			apiClient := newTestSNCloudAPIClient(t, server.URL, server.Client().Transport)
+
+			result, err := tc.apply(context.Background(), apiClient, tc.manifest(resourceName), "session-org", false)
+			if err != nil {
+				t.Fatalf("expected no apply error, got %v", err)
+			}
+			if result != fmt.Sprintf(`%s %q created`, tc.kind, resourceName) {
+				t.Fatalf("unexpected apply result %q", result)
+			}
+			if postQuery != "" {
+				t.Fatalf("expected create without dryRun query, got %q", postQuery)
+			}
+
+			metadata, ok := postBody["metadata"].(map[string]any)
+			if !ok {
+				t.Fatalf("expected metadata map in create body, got %+v", postBody["metadata"])
+			}
+			if got := metadata["namespace"]; got != "session-org" {
+				t.Fatalf("expected session organization namespace, got %#v", got)
+			}
+		})
 	}
 }
 
-func TestApplyPulsarClusterHandlesNilResponseError(t *testing.T) {
+func TestApplyResourcesUpdatePropagatesResourceVersion(t *testing.T) {
 	t.Parallel()
 
-	requestCount := 0
-	apiClient := newTestSNCloudAPIClient(t, roundTripFunc(func(_ *http.Request) (*http.Response, error) {
-		requestCount++
-		return nil, errors.New("upstream transport failure")
-	}))
+	for _, tc := range sncloudApplyCases() {
+		t.Run(tc.kind, func(t *testing.T) {
+			t.Parallel()
 
-	_, err := applyPulsarCluster(
-		context.Background(),
-		apiClient,
-		`{"apiVersion":"cloud.streamnative.io/v1alpha1","kind":"PulsarCluster","metadata":{"name":"pc-nil-response"}}`,
-		"session-org",
-		false,
-	)
-	if err == nil {
-		t.Fatal("expected nil-response transport error")
+			resourceName := strings.ToLower(tc.kind) + "-update"
+			var (
+				putBody  map[string]any
+				putQuery string
+			)
+
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				switch {
+				case r.Method == http.MethodGet && r.URL.Path == tc.resourcePath("session-org", resourceName):
+					w.Header().Set("Content-Type", "application/json")
+					_, _ = w.Write([]byte(`{"metadata":{"name":"` + resourceName + `","resourceVersion":"7"}}`))
+				case r.Method == http.MethodPut && r.URL.Path == tc.resourcePath("session-org", resourceName):
+					putQuery = r.URL.RawQuery
+					defer func() { _ = r.Body.Close() }()
+					if err := json.NewDecoder(r.Body).Decode(&putBody); err != nil {
+						t.Fatalf("failed to decode PUT body: %v", err)
+					}
+					w.Header().Set("Content-Type", "application/json")
+					_, _ = w.Write([]byte(`{"metadata":{"name":"` + resourceName + `","resourceVersion":"8"}}`))
+				default:
+					t.Fatalf("unexpected request: %s %s", r.Method, r.URL.String())
+				}
+			}))
+			defer server.Close()
+
+			apiClient := newTestSNCloudAPIClient(t, server.URL, server.Client().Transport)
+
+			result, err := tc.apply(context.Background(), apiClient, tc.manifest(resourceName), "session-org", false)
+			if err != nil {
+				t.Fatalf("expected no apply error, got %v", err)
+			}
+			if result != fmt.Sprintf(`%s %q updated`, tc.kind, resourceName) {
+				t.Fatalf("unexpected apply result %q", result)
+			}
+			if putQuery != "" {
+				t.Fatalf("expected update without dryRun query, got %q", putQuery)
+			}
+
+			metadata, ok := putBody["metadata"].(map[string]any)
+			if !ok {
+				t.Fatalf("expected metadata map in update body, got %+v", putBody["metadata"])
+			}
+			if got := metadata["resourceVersion"]; got != "7" {
+				t.Fatalf("expected propagated resourceVersion 7, got %#v", got)
+			}
+			if got := metadata["namespace"]; got != "session-org" {
+				t.Fatalf("expected session organization namespace, got %#v", got)
+			}
+		})
 	}
-	if !strings.Contains(err.Error(), "failed to created PulsarCluster:") {
-		t.Fatalf("expected wrapped PulsarCluster error prefix, got %v", err)
+}
+
+func TestApplyResourcesDryRunCreateAddsQuery(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range sncloudApplyCases() {
+		t.Run(tc.kind, func(t *testing.T) {
+			t.Parallel()
+
+			resourceName := strings.ToLower(tc.kind) + "-dry-run"
+			var (
+				postBody  map[string]any
+				postQuery string
+			)
+
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				switch {
+				case r.Method == http.MethodGet && r.URL.Path == tc.resourcePath("session-org", resourceName):
+					http.NotFound(w, r)
+				case r.Method == http.MethodPost && r.URL.Path == tc.collectionPath("session-org"):
+					postQuery = r.URL.RawQuery
+					defer func() { _ = r.Body.Close() }()
+					if err := json.NewDecoder(r.Body).Decode(&postBody); err != nil {
+						t.Fatalf("failed to decode POST body: %v", err)
+					}
+					w.Header().Set("Content-Type", "application/json")
+					w.WriteHeader(http.StatusCreated)
+					_, _ = w.Write([]byte(`{"metadata":{"name":"` + resourceName + `"}}`))
+				default:
+					t.Fatalf("unexpected request: %s %s", r.Method, r.URL.String())
+				}
+			}))
+			defer server.Close()
+
+			apiClient := newTestSNCloudAPIClient(t, server.URL, server.Client().Transport)
+
+			result, err := tc.apply(context.Background(), apiClient, tc.manifest(resourceName), "session-org", true)
+			if err != nil {
+				t.Fatalf("expected no apply error, got %v", err)
+			}
+			if result != fmt.Sprintf(`%s %q would be created (dry run)`, tc.kind, resourceName) {
+				t.Fatalf("unexpected apply result %q", result)
+			}
+			if !strings.Contains(postQuery, "dryRun=All") {
+				t.Fatalf("expected dryRun query parameter, got %q", postQuery)
+			}
+
+			metadata, ok := postBody["metadata"].(map[string]any)
+			if !ok {
+				t.Fatalf("expected metadata map in create body, got %+v", postBody["metadata"])
+			}
+			if got := metadata["namespace"]; got != "session-org" {
+				t.Fatalf("expected session organization namespace, got %#v", got)
+			}
+		})
 	}
-	if !strings.Contains(err.Error(), "upstream transport failure") {
-		t.Fatalf("expected wrapped PulsarCluster error, got %v", err)
-	}
-	if requestCount != 2 {
-		t.Fatalf("expected 2 upstream requests, got %d", requestCount)
+}
+
+func TestApplyResourcesHandleNilResponseError(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range sncloudApplyCases() {
+		t.Run(tc.kind, func(t *testing.T) {
+			t.Parallel()
+
+			requestCount := 0
+			apiClient := newTestSNCloudAPIClient(t, "", roundTripFunc(func(_ *http.Request) (*http.Response, error) {
+				requestCount++
+				return nil, errors.New("upstream transport failure")
+			}))
+
+			_, err := tc.apply(
+				context.Background(),
+				apiClient,
+				tc.manifest(strings.ToLower(tc.kind)+"-nil-response"),
+				"session-org",
+				false,
+			)
+			if err == nil {
+				t.Fatal("expected nil-response transport error")
+			}
+			if !strings.Contains(err.Error(), fmt.Sprintf("failed to created %s:", tc.kind)) {
+				t.Fatalf("expected wrapped %s error prefix, got %v", tc.kind, err)
+			}
+			if !strings.Contains(err.Error(), "upstream transport failure") {
+				t.Fatalf("expected wrapped %s error, got %v", tc.kind, err)
+			}
+			if requestCount != 2 {
+				t.Fatalf("expected 2 upstream requests, got %d", requestCount)
+			}
+		})
 	}
 }
 
