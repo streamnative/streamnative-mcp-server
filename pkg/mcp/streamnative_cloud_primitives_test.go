@@ -3,6 +3,7 @@ package mcp
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -11,7 +12,26 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/config"
+	sncloud "github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserver"
 )
+
+type roundTripFunc func(*http.Request) (*http.Response, error)
+
+func (f roundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) {
+	return f(req)
+}
+
+func newTestSNCloudAPIClient(t *testing.T, transport http.RoundTripper) *sncloud.APIClient {
+	t.Helper()
+
+	cfg := sncloud.NewConfiguration()
+	cfg.HTTPClient = &http.Client{Transport: transport}
+	cfg.Servers = sncloud.ServerConfigurations{
+		{URL: "http://sncloud.test"},
+	}
+
+	return sncloud.NewAPIClient(cfg)
+}
 
 func TestSNCloudToolConstructors(t *testing.T) {
 	t.Parallel()
@@ -358,6 +378,66 @@ func TestHandleSNCloudResourcesApplySupportsKafkaClusterDryRunCreate(t *testing.
 	}
 	if got := metadata["namespace"]; got != "session-org" {
 		t.Fatalf("expected session organization namespace, got %#v", got)
+	}
+}
+
+func TestApplyPulsarInstanceHandlesNilResponseError(t *testing.T) {
+	t.Parallel()
+
+	requestCount := 0
+	apiClient := newTestSNCloudAPIClient(t, roundTripFunc(func(req *http.Request) (*http.Response, error) {
+		requestCount++
+		return nil, errors.New("upstream transport failure")
+	}))
+
+	_, err := applyPulsarInstance(
+		context.Background(),
+		apiClient,
+		`{"apiVersion":"cloud.streamnative.io/v1alpha1","kind":"PulsarInstance","metadata":{"name":"pi-nil-response"}}`,
+		"session-org",
+		false,
+	)
+	if err == nil {
+		t.Fatal("expected nil-response transport error")
+	}
+	if !strings.Contains(err.Error(), "failed to created PulsarInstance:") {
+		t.Fatalf("expected wrapped PulsarInstance error prefix, got %v", err)
+	}
+	if !strings.Contains(err.Error(), "upstream transport failure") {
+		t.Fatalf("expected wrapped PulsarInstance error, got %v", err)
+	}
+	if requestCount != 2 {
+		t.Fatalf("expected 2 upstream requests, got %d", requestCount)
+	}
+}
+
+func TestApplyPulsarClusterHandlesNilResponseError(t *testing.T) {
+	t.Parallel()
+
+	requestCount := 0
+	apiClient := newTestSNCloudAPIClient(t, roundTripFunc(func(req *http.Request) (*http.Response, error) {
+		requestCount++
+		return nil, errors.New("upstream transport failure")
+	}))
+
+	_, err := applyPulsarCluster(
+		context.Background(),
+		apiClient,
+		`{"apiVersion":"cloud.streamnative.io/v1alpha1","kind":"PulsarCluster","metadata":{"name":"pc-nil-response"}}`,
+		"session-org",
+		false,
+	)
+	if err == nil {
+		t.Fatal("expected nil-response transport error")
+	}
+	if !strings.Contains(err.Error(), "failed to created PulsarCluster:") {
+		t.Fatalf("expected wrapped PulsarCluster error prefix, got %v", err)
+	}
+	if !strings.Contains(err.Error(), "upstream transport failure") {
+		t.Fatalf("expected wrapped PulsarCluster error, got %v", err)
+	}
+	if requestCount != 2 {
+		t.Fatalf("expected 2 upstream requests, got %d", requestCount)
 	}
 }
 
