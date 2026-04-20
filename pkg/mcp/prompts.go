@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"slices"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -187,32 +188,33 @@ func HandleReadSNCloudCluster(ctx context.Context, request mcp.GetPromptRequest)
 		return nil, fmt.Errorf("failed to get name: %v", err)
 	}
 
-	clusters, clustersBody, err := apiClient.CloudStreamnativeIoV1alpha1Api.ListCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(ctx, session.Ctx.Organization).Execute()
-	if err != nil {
-		return nil, fmt.Errorf("failed to list pulsar clusters: %v", err)
-	}
-	defer func() { _ = clustersBody.Body.Close() }()
+	cluster, clusterBody, err := apiClient.CloudStreamnativeIoV1alpha1Api.ReadCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(ctx, name, session.Ctx.Organization).Execute()
+	defer func() {
+		if clusterBody != nil && clusterBody.Body != nil {
+			_ = clusterBody.Body.Close()
+		}
+	}()
+
 	var (
-		cluster     sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarCluster
 		clusterJSON []byte
 	)
-	for _, c := range clusters.Items {
-		if *c.Metadata.Name == name {
-			cluster = c
-			break
-		}
-	}
 
-	if cluster.Metadata != nil {
+	if err == nil {
+		if cluster.Metadata == nil {
+			return nil, fmt.Errorf("failed to find cluster: %s", name)
+		}
 		if len(cluster.Metadata.ManagedFields) > 0 {
 			cluster.Metadata.ManagedFields = nil
 		}
-
 		clusterJSON, err = json.Marshal(cluster)
 		if err != nil {
 			return nil, fmt.Errorf("failed to marshal pulsar cluster: %v", err)
 		}
 	} else {
+		if clusterBody == nil || clusterBody.StatusCode != http.StatusNotFound {
+			return nil, fmt.Errorf("failed to read pulsar cluster: %v", err)
+		}
+
 		kafkaCluster, bdy, err := apiClient.CloudStreamnativeIoV1alpha1Api.ReadCloudStreamnativeIoV1alpha1NamespacedKafkaCluster(ctx, name, session.Ctx.Organization).Execute()
 		defer func() {
 			if bdy != nil && bdy.Body != nil {
@@ -220,6 +222,9 @@ func HandleReadSNCloudCluster(ctx context.Context, request mcp.GetPromptRequest)
 			}
 		}()
 		if err != nil {
+			if bdy != nil && bdy.StatusCode == http.StatusNotFound {
+				return nil, fmt.Errorf("failed to find cluster: %s", name)
+			}
 			return nil, fmt.Errorf("failed to read kafka cluster: %v", err)
 		}
 
