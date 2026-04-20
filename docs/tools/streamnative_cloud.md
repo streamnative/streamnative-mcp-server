@@ -1,11 +1,11 @@
 #### sncloud_context_available_clusters
 
-Display the clusters available in the current StreamNative Cloud session. This information helps you select the appropriate cluster before binding the session to cluster-specific tools.
+Display the context-bindable Pulsar clusters available in the current StreamNative Cloud session. This information helps you select the appropriate cluster before binding the session to cluster-specific tools.
 
 - **sncloud_context_available_clusters**
   - No parameters required
 
-You can use `sncloud_context_use_cluster` to bind the current session to a specific cluster. You will need to ask for user confirmation of the target cluster if there are multiple clusters available. 
+You can use `sncloud_context_use_cluster` to bind the current session to a specific Pulsar cluster. You will need to ask for user confirmation of the target cluster if there are multiple clusters available. 
 
 ---
 

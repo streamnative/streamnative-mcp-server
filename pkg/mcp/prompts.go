@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"net/http"
 	"slices"
+	"strings"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
@@ -63,6 +64,20 @@ var (
 	AvailableProviders = []string{"azure", "aws", "gcloud"}
 )
 
+const (
+	sncloudClusterTypePulsar = "PulsarCluster"
+	sncloudClusterTypeKafka  = "KafkaCluster"
+)
+
+type sncloudClusterListEntry struct {
+	ClusterType  string
+	InstanceName string
+	ClusterName  string
+	DisplayName  string
+	Status       string
+	EngineType   string
+}
+
 // RegisterPrompts registers prompt handlers on the server.
 func RegisterPrompts(s *server.MCPServer) {
 	s.AddPrompt(NewListSNCloudClustersPrompt(), HandleListSNCloudClusters)
@@ -76,16 +91,144 @@ func RegisterPrompts(s *server.MCPServer) {
 // NewListSNCloudClustersPrompt creates the reusable StreamNative Cloud cluster list prompt definition.
 func NewListSNCloudClustersPrompt() mcp.Prompt {
 	return mcp.NewPrompt("list-sncloud-clusters",
-		mcp.WithPromptDescription("List clusters available in the current StreamNative Cloud session."),
+		mcp.WithPromptDescription("List StreamNative Cloud clusters available in the current session, including the cluster type required by `read-sncloud-cluster`."),
 	)
 }
 
 // NewReadSNCloudClusterPrompt creates the reusable StreamNative Cloud cluster read prompt definition.
 func NewReadSNCloudClusterPrompt() mcp.Prompt {
 	return mcp.NewPrompt("read-sncloud-cluster",
-		mcp.WithPromptDescription("Read details for a StreamNative Cloud cluster."),
+		mcp.WithPromptDescription("Read details for a StreamNative Cloud cluster of a specific type."),
 		mcp.WithArgument("name", mcp.RequiredArgument(), mcp.ArgumentDescription("The name of the cluster")),
+		mcp.WithArgument("type", mcp.RequiredArgument(), mcp.ArgumentDescription("The cluster type. Supported values: PulsarCluster, KafkaCluster.")),
 	)
+}
+
+func getSNCloudAPIClientAndOrganization(ctx context.Context) (*sncloud.APIClient, string, error) {
+	session := context2.GetSNCloudSession(ctx)
+	if session == nil {
+		return nil, "", fmt.Errorf("failed to get StreamNative Cloud session")
+	}
+
+	apiClient, err := session.GetAPIClient()
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to get API client: %v", err)
+	}
+
+	return apiClient, session.Ctx.Organization, nil
+}
+
+func listSNCloudPulsarClusterEntries(ctx context.Context, apiClient *sncloud.APIClient, organization string) ([]sncloudClusterListEntry, error) {
+	clusters, clustersBody, err := apiClient.CloudStreamnativeIoV1alpha1Api.ListCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(ctx, organization).Execute()
+	if err != nil {
+		return nil, fmt.Errorf("failed to list pulsar clusters: %v", err)
+	}
+	defer func() { _ = clustersBody.Body.Close() }()
+
+	entries := make([]sncloudClusterListEntry, 0, len(clusters.Items))
+	for _, cluster := range clusters.Items {
+		displayName := cluster.Spec.DisplayName
+		if displayName == nil || *displayName == "" {
+			displayName = cluster.Metadata.Name
+		}
+
+		status := "Not Ready"
+		if common.IsClusterAvailable(cluster) {
+			status = "Ready"
+		}
+
+		clusterName := ""
+		if cluster.Metadata != nil && cluster.Metadata.Name != nil {
+			clusterName = *cluster.Metadata.Name
+		}
+
+		entries = append(entries, sncloudClusterListEntry{
+			ClusterType:  sncloudClusterTypePulsar,
+			InstanceName: cluster.Spec.InstanceName,
+			ClusterName:  clusterName,
+			DisplayName:  ptr.Deref(displayName, clusterName),
+			Status:       status,
+			EngineType:   common.GetEngineType(cluster),
+		})
+	}
+
+	return entries, nil
+}
+
+func listSNCloudKafkaClusterEntries(ctx context.Context, apiClient *sncloud.APIClient, organization string) ([]sncloudClusterListEntry, error) {
+	clusters, clustersBody, err := apiClient.CloudStreamnativeIoV1alpha1Api.ListCloudStreamnativeIoV1alpha1NamespacedKafkaCluster(ctx, organization).Execute()
+	if err != nil {
+		return nil, fmt.Errorf("failed to list kafka clusters: %v", err)
+	}
+	defer func() { _ = clustersBody.Body.Close() }()
+
+	entries := make([]sncloudClusterListEntry, 0, len(clusters.Items))
+	for _, cluster := range clusters.Items {
+		displayName := cluster.Spec.DisplayName
+		clusterName := ""
+		if cluster.Metadata != nil && cluster.Metadata.Name != nil {
+			clusterName = *cluster.Metadata.Name
+		}
+		if displayName == nil || *displayName == "" {
+			displayName = cluster.Metadata.Name
+		}
+
+		entries = append(entries, sncloudClusterListEntry{
+			ClusterType:  sncloudClusterTypeKafka,
+			InstanceName: cluster.Spec.InstanceName,
+			ClusterName:  clusterName,
+			DisplayName:  ptr.Deref(displayName, clusterName),
+			Status:       sncloudClusterReadinessStatus(cluster.Status),
+		})
+	}
+
+	return entries, nil
+}
+
+func sncloudClusterReadinessStatus(status *sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1KafkaClusterStatus) string {
+	if status == nil {
+		return "Not Ready"
+	}
+	for _, condition := range status.Conditions {
+		if condition.Type == "Ready" && condition.Status == "True" {
+			return "Ready"
+		}
+	}
+	return "Not Ready"
+}
+
+func buildSNCloudClusterPromptMessages(summary string, entries []sncloudClusterListEntry) []mcp.PromptMessage {
+	messages := make([]mcp.PromptMessage, 0, len(entries)+1)
+	messages = append(messages, mcp.PromptMessage{
+		Content: mcp.TextContent{
+			Type: "text",
+			Text: summary,
+		},
+		Role: mcp.RoleUser,
+	})
+
+	for _, entry := range entries {
+		lines := []string{
+			fmt.Sprintf("Instance Name: %s", entry.InstanceName),
+			fmt.Sprintf("Cluster Name: %s", entry.ClusterName),
+			fmt.Sprintf("Cluster Type: %s", entry.ClusterType),
+			fmt.Sprintf("Cluster Display Name: %s", entry.DisplayName),
+			fmt.Sprintf("Cluster Status: %s", entry.Status),
+		}
+		if entry.EngineType != "" {
+			lines = append(lines, fmt.Sprintf("Cluster Engine Type: %s", entry.EngineType))
+		}
+
+		messages = append(messages, mcp.PromptMessage{
+			Content: mcp.TextContent{
+				Type: "text",
+				Text: strings.Join(lines, "\n"),
+			},
+			Role: mcp.RoleUser,
+		})
+	}
+
+	return messages
 }
 
 // NewBuildSNCloudServerlessClusterPrompt creates the reusable serverless cluster build prompt definition.
@@ -100,87 +243,122 @@ func NewBuildSNCloudServerlessClusterPrompt() mcp.Prompt {
 
 // HandleListSNCloudClusters handles listing StreamNative Cloud clusters.
 func HandleListSNCloudClusters(ctx context.Context, _ mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
-	// Get API client from session
-	session := context2.GetSNCloudSession(ctx)
-	if session == nil {
-		return nil, fmt.Errorf("failed to get StreamNative Cloud session")
-	}
-
-	apiClient, err := session.GetAPIClient()
+	apiClient, organization, err := getSNCloudAPIClientAndOrganization(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get API client: %v", err)
+		return nil, err
 	}
 
-	clusters, clustersBody, err := apiClient.CloudStreamnativeIoV1alpha1Api.ListCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(ctx, session.Ctx.Organization).Execute()
+	pulsarEntries, err := listSNCloudPulsarClusterEntries(ctx, apiClient, organization)
 	if err != nil {
-		return nil, fmt.Errorf("failed to list pulsar clusters: %v", err)
+		return nil, err
 	}
-	defer func() { _ = clustersBody.Body.Close() }()
 
-	var messages = make(
-		[]mcp.PromptMessage,
-		len(clusters.Items)+1,
+	kafkaEntries, err := listSNCloudKafkaClusterEntries(ctx, apiClient, organization)
+	if err != nil {
+		return nil, err
+	}
+
+	entries := append(pulsarEntries, kafkaEntries...)
+	messages := buildSNCloudClusterPromptMessages(
+		fmt.Sprintf(
+			"There are %d StreamNative Cloud clusters in organization %s (%d PulsarCluster, %d KafkaCluster):",
+			len(entries),
+			organization,
+			len(pulsarEntries),
+			len(kafkaEntries),
+		),
+		entries,
 	)
 
-	messages[0] = mcp.PromptMessage{
-		Content: mcp.TextContent{
-			Type: "text",
-			Text: fmt.Sprintf(
-				"There are %d Pulsar clusters in the StreamNative Cloud from organization %s:",
-				len(clusters.Items),
-				session.Ctx.Organization,
-			),
-		},
-		Role: mcp.RoleUser,
-	}
-
-	for i, cluster := range clusters.Items {
-		instanceName := cluster.Spec.InstanceName
-		displayName := cluster.Spec.DisplayName
-		if displayName == nil || *displayName == "" {
-			displayName = cluster.Metadata.Name
-		}
-
-		status := "Not Ready"
-		if common.IsClusterAvailable(cluster) {
-			status = "Ready"
-		}
-
-		engineType := common.GetEngineType(cluster)
-
-		messages[i+1] = mcp.PromptMessage{
-			Content: mcp.TextContent{
-				Type: "text",
-				Text: fmt.Sprintf(
-					"Instance Name: %s\nCluster Name: %s\nCluster Display Name: %s\nCluster Status: %s\nCluster Engine Type: %s",
-					instanceName,
-					*cluster.Metadata.Name,
-					*displayName,
-					status,
-					engineType,
-				),
-			},
-			Role: mcp.RoleUser,
-		}
-	}
-
 	return &mcp.GetPromptResult{
-		Description: fmt.Sprintf("Clusters from StreamNative Cloud organization %s. Use `sncloud_context_use_cluster` to bind the current session to a cluster before running cluster-specific tools.", session.Ctx.Organization),
+		Description: fmt.Sprintf("Clusters from StreamNative Cloud organization %s. Use `read-sncloud-cluster` with both `name` and `type` to inspect one cluster. Use `sncloud_context_use_cluster` only with Pulsar clusters before running cluster-specific tools.", organization),
 		Messages:    messages,
 	}, nil
 }
 
-// HandleReadSNCloudCluster handles reading a StreamNative Cloud cluster.
-func HandleReadSNCloudCluster(ctx context.Context, request mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
-	// Get API client from session
-	session := context2.GetSNCloudSession(ctx)
-	if session == nil {
-		return nil, fmt.Errorf("failed to get StreamNative Cloud session")
+func buildSNCloudContextClusterPromptResult(ctx context.Context) (*mcp.GetPromptResult, error) {
+	apiClient, organization, err := getSNCloudAPIClientAndOrganization(ctx)
+	if err != nil {
+		return nil, err
 	}
 
-	apiClient, err := session.GetAPIClient()
+	entries, err := listSNCloudPulsarClusterEntries(ctx, apiClient, organization)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get API client: %v", err)
+		return nil, err
+	}
+
+	return &mcp.GetPromptResult{
+		Description: fmt.Sprintf("Context-bindable Pulsar clusters from StreamNative Cloud organization %s. Use `sncloud_context_use_cluster` with the selected instance and cluster name.", organization),
+		Messages: buildSNCloudClusterPromptMessages(
+			fmt.Sprintf(
+				"There are %d context-bindable Pulsar clusters in organization %s:",
+				len(entries),
+				organization,
+			),
+			entries,
+		),
+	}, nil
+}
+
+func readSNCloudPulsarCluster(ctx context.Context, apiClient *sncloud.APIClient, name, organization string) ([]byte, error) {
+	cluster, clusterBody, err := apiClient.CloudStreamnativeIoV1alpha1Api.ReadCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(ctx, name, organization).Execute()
+	defer func() {
+		if clusterBody != nil && clusterBody.Body != nil {
+			_ = clusterBody.Body.Close()
+		}
+	}()
+	if err != nil {
+		if clusterBody != nil && clusterBody.StatusCode == http.StatusNotFound {
+			return nil, fmt.Errorf("failed to find cluster: %s", name)
+		}
+		return nil, fmt.Errorf("failed to read pulsar cluster: %v", err)
+	}
+	if cluster.Metadata == nil {
+		return nil, fmt.Errorf("failed to find cluster: %s", name)
+	}
+	if len(cluster.Metadata.ManagedFields) > 0 {
+		cluster.Metadata.ManagedFields = nil
+	}
+
+	clusterJSON, err := json.Marshal(cluster)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal pulsar cluster: %v", err)
+	}
+	return clusterJSON, nil
+}
+
+func readSNCloudKafkaCluster(ctx context.Context, apiClient *sncloud.APIClient, name, organization string) ([]byte, error) {
+	cluster, clusterBody, err := apiClient.CloudStreamnativeIoV1alpha1Api.ReadCloudStreamnativeIoV1alpha1NamespacedKafkaCluster(ctx, name, organization).Execute()
+	defer func() {
+		if clusterBody != nil && clusterBody.Body != nil {
+			_ = clusterBody.Body.Close()
+		}
+	}()
+	if err != nil {
+		if clusterBody != nil && clusterBody.StatusCode == http.StatusNotFound {
+			return nil, fmt.Errorf("failed to find cluster: %s", name)
+		}
+		return nil, fmt.Errorf("failed to read kafka cluster: %v", err)
+	}
+	if cluster.Metadata == nil {
+		return nil, fmt.Errorf("failed to find cluster: %s", name)
+	}
+	if len(cluster.Metadata.ManagedFields) > 0 {
+		cluster.Metadata.ManagedFields = nil
+	}
+
+	clusterJSON, err := json.Marshal(cluster)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal kafka cluster: %v", err)
+	}
+	return clusterJSON, nil
+}
+
+// HandleReadSNCloudCluster handles reading a StreamNative Cloud cluster.
+func HandleReadSNCloudCluster(ctx context.Context, request mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
+	apiClient, organization, err := getSNCloudAPIClientAndOrganization(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	name, err := common.RequiredParam[string](common.ConvertToMapInterface(request.Params.Arguments), "name")
@@ -188,56 +366,22 @@ func HandleReadSNCloudCluster(ctx context.Context, request mcp.GetPromptRequest)
 		return nil, fmt.Errorf("failed to get name: %v", err)
 	}
 
-	cluster, clusterBody, err := apiClient.CloudStreamnativeIoV1alpha1Api.ReadCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(ctx, name, session.Ctx.Organization).Execute()
-	defer func() {
-		if clusterBody != nil && clusterBody.Body != nil {
-			_ = clusterBody.Body.Close()
-		}
-	}()
+	clusterType, err := common.RequiredParam[string](common.ConvertToMapInterface(request.Params.Arguments), "type")
+	if err != nil {
+		return nil, fmt.Errorf("failed to get type: %v", err)
+	}
 
-	var (
-		clusterJSON []byte
-	)
-
-	if err == nil {
-		if cluster.Metadata == nil {
-			return nil, fmt.Errorf("failed to find cluster: %s", name)
-		}
-		if len(cluster.Metadata.ManagedFields) > 0 {
-			cluster.Metadata.ManagedFields = nil
-		}
-		clusterJSON, err = json.Marshal(cluster)
-		if err != nil {
-			return nil, fmt.Errorf("failed to marshal pulsar cluster: %v", err)
-		}
-	} else {
-		if clusterBody == nil || clusterBody.StatusCode != http.StatusNotFound {
-			return nil, fmt.Errorf("failed to read pulsar cluster: %v", err)
-		}
-
-		kafkaCluster, bdy, err := apiClient.CloudStreamnativeIoV1alpha1Api.ReadCloudStreamnativeIoV1alpha1NamespacedKafkaCluster(ctx, name, session.Ctx.Organization).Execute()
-		defer func() {
-			if bdy != nil && bdy.Body != nil {
-				_ = bdy.Body.Close()
-			}
-		}()
-		if err != nil {
-			if bdy != nil && bdy.StatusCode == http.StatusNotFound {
-				return nil, fmt.Errorf("failed to find cluster: %s", name)
-			}
-			return nil, fmt.Errorf("failed to read kafka cluster: %v", err)
-		}
-
-		if kafkaCluster.Metadata == nil {
-			return nil, fmt.Errorf("failed to find cluster: %s", name)
-		}
-		if len(kafkaCluster.Metadata.ManagedFields) > 0 {
-			kafkaCluster.Metadata.ManagedFields = nil
-		}
-		clusterJSON, err = json.Marshal(kafkaCluster)
-		if err != nil {
-			return nil, fmt.Errorf("failed to marshal kafka cluster: %v", err)
-		}
+	var clusterJSON []byte
+	switch clusterType {
+	case sncloudClusterTypePulsar:
+		clusterJSON, err = readSNCloudPulsarCluster(ctx, apiClient, name, organization)
+	case sncloudClusterTypeKafka:
+		clusterJSON, err = readSNCloudKafkaCluster(ctx, apiClient, name, organization)
+	default:
+		return nil, fmt.Errorf("failed to get type: unsupported cluster type %q", clusterType)
+	}
+	if err != nil {
+		return nil, err
 	}
 
 	var messages = make(
@@ -254,7 +398,7 @@ func HandleReadSNCloudCluster(ctx context.Context, request mcp.GetPromptRequest)
 	}
 
 	return &mcp.GetPromptResult{
-		Description: fmt.Sprintf("Detailed information for StreamNative Cloud cluster %s. Use `sncloud_context_use_cluster` to bind the current session to this cluster before running cluster-specific tools.", name),
+		Description: fmt.Sprintf("Detailed information for StreamNative Cloud %s %s.", clusterType, name),
 		Messages:    messages,
 	}, nil
 }

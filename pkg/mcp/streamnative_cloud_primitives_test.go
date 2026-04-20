@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -102,6 +103,28 @@ func TestSNCloudToolConstructors(t *testing.T) {
 	}
 }
 
+func TestSNCloudApplyResourceMetadataTypesAreAligned(t *testing.T) {
+	t.Parallel()
+
+	resourceTypes := map[string]any{
+		"Instance":       sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance{},
+		"PulsarInstance": sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarInstance{},
+		"PulsarCluster":  sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarCluster{},
+		"KafkaCluster":   sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1KafkaCluster{},
+	}
+
+	wantMetadataType := reflect.TypeOf((*sncloud.V1ObjectMeta)(nil))
+	for kind, resource := range resourceTypes {
+		field, ok := reflect.TypeOf(resource).FieldByName("Metadata")
+		if !ok {
+			t.Fatalf("%s is missing Metadata field", kind)
+		}
+		if field.Type != wantMetadataType {
+			t.Fatalf("%s metadata type = %v, want %v", kind, field.Type, wantMetadataType)
+		}
+	}
+}
+
 func TestSNCloudPromptConstructors(t *testing.T) {
 	t.Parallel()
 
@@ -117,7 +140,13 @@ func TestSNCloudPromptConstructors(t *testing.T) {
 	if readPrompt.Name != "read-sncloud-cluster" {
 		t.Fatalf("expected read prompt name read-sncloud-cluster, got %q", readPrompt.Name)
 	}
-	if len(readPrompt.Arguments) != 1 || readPrompt.Arguments[0].Name != "name" || !readPrompt.Arguments[0].Required {
+	if len(readPrompt.Arguments) != 2 {
+		t.Fatalf("expected read prompt to have 2 arguments, got %d", len(readPrompt.Arguments))
+	}
+	if readPrompt.Arguments[0].Name != "name" || !readPrompt.Arguments[0].Required {
+		t.Fatalf("unexpected read prompt arguments: %+v", readPrompt.Arguments)
+	}
+	if readPrompt.Arguments[1].Name != "type" || !readPrompt.Arguments[1].Required {
 		t.Fatalf("unexpected read prompt arguments: %+v", readPrompt.Arguments)
 	}
 
@@ -734,17 +763,189 @@ func TestHandleSNCloudResourcesDeleteSupportsInstance(t *testing.T) {
 	}
 }
 
-func TestHandleReadSNCloudClusterFallsBackToKafkaCluster(t *testing.T) {
+func TestHandleListSNCloudClustersIncludesClusterTypes(t *testing.T) {
 	t.Parallel()
 
-	var pulsarReadRequests, kafkaReadRequests int
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/apis/cloud.streamnative.io/v1alpha1/namespaces/session-org/pulsarclusters":
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"items":[{"metadata":{"name":"pc-test","annotations":{"cloud.streamnative.io/engine":"ursa"}},"spec":{"instanceName":"inst-p","displayName":"Pulsar Display"},"status":{"broker":{"readyReplicas":1},"conditions":[{"type":"Ready","status":"True"}]}}]}`))
+		case "/apis/cloud.streamnative.io/v1alpha1/namespaces/session-org/kafkaclusters":
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"items":[{"metadata":{"name":"kc-test"},"spec":{"instanceName":"inst-k","displayName":"Kafka Display","location":"use1"},"status":{"conditions":[{"type":"Ready","status":"True"}]}}]}`))
+		default:
+			t.Fatalf("unexpected path %s", r.URL.Path)
+		}
+	}))
+	defer server.Close()
+
+	session, err := config.NewSNCloudSession(config.SNCloudContext{
+		JWTToken:     "token",
+		APIURL:       server.URL,
+		LogAPIURL:    server.URL,
+		Organization: "session-org",
+	})
+	if err != nil {
+		t.Fatalf("failed to create session: %v", err)
+	}
+
+	ctx := context.Background()
+	ctx = WithSNCloudSession(ctx, session)
+
+	result, err := HandleListSNCloudClusters(ctx, mcp.GetPromptRequest{})
+	if err != nil {
+		t.Fatalf("expected no handler error, got %v", err)
+	}
+	if len(result.Messages) != 3 {
+		t.Fatalf("expected three prompt messages, got %d", len(result.Messages))
+	}
+
+	summary, ok := result.Messages[0].Content.(mcp.TextContent)
+	if !ok {
+		t.Fatalf("expected text content summary, got %T", result.Messages[0].Content)
+	}
+	if !strings.Contains(summary.Text, "1 PulsarCluster, 1 KafkaCluster") {
+		t.Fatalf("expected typed cluster summary, got %q", summary.Text)
+	}
+
+	pulsarText, ok := result.Messages[1].Content.(mcp.TextContent)
+	if !ok {
+		t.Fatalf("expected text content for pulsar cluster, got %T", result.Messages[1].Content)
+	}
+	if !strings.Contains(pulsarText.Text, "Cluster Type: PulsarCluster") || !strings.Contains(pulsarText.Text, "Cluster Engine Type: ursa") {
+		t.Fatalf("expected pulsar cluster details, got %q", pulsarText.Text)
+	}
+
+	kafkaText, ok := result.Messages[2].Content.(mcp.TextContent)
+	if !ok {
+		t.Fatalf("expected text content for kafka cluster, got %T", result.Messages[2].Content)
+	}
+	if !strings.Contains(kafkaText.Text, "Cluster Type: KafkaCluster") {
+		t.Fatalf("expected kafka cluster details, got %q", kafkaText.Text)
+	}
+}
+
+func TestBuildSNCloudContextClusterPromptResultUsesPulsarClustersOnly(t *testing.T) {
+	t.Parallel()
+
+	var kafkaListRequests int
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/apis/cloud.streamnative.io/v1alpha1/namespaces/session-org/pulsarclusters":
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"items":[{"metadata":{"name":"pc-test"},"spec":{"instanceName":"inst-p","displayName":"Pulsar Display"},"status":{"broker":{"readyReplicas":1},"conditions":[{"type":"Ready","status":"True"}]}}]}`))
+		case "/apis/cloud.streamnative.io/v1alpha1/namespaces/session-org/kafkaclusters":
+			kafkaListRequests++
+			t.Fatalf("unexpected kafka cluster list request")
+		default:
+			t.Fatalf("unexpected path %s", r.URL.Path)
+		}
+	}))
+	defer server.Close()
+
+	session, err := config.NewSNCloudSession(config.SNCloudContext{
+		JWTToken:     "token",
+		APIURL:       server.URL,
+		LogAPIURL:    server.URL,
+		Organization: "session-org",
+	})
+	if err != nil {
+		t.Fatalf("failed to create session: %v", err)
+	}
+
+	ctx := context.Background()
+	ctx = WithSNCloudSession(ctx, session)
+
+	result, err := buildSNCloudContextClusterPromptResult(ctx)
+	if err != nil {
+		t.Fatalf("expected no handler error, got %v", err)
+	}
+	if kafkaListRequests != 0 {
+		t.Fatalf("expected no kafka list requests, got %d", kafkaListRequests)
+	}
+	if len(result.Messages) != 2 {
+		t.Fatalf("expected two prompt messages, got %d", len(result.Messages))
+	}
+
+	text, ok := result.Messages[1].Content.(mcp.TextContent)
+	if !ok {
+		t.Fatalf("expected text content, got %T", result.Messages[1].Content)
+	}
+	if strings.Contains(text.Text, "KafkaCluster") {
+		t.Fatalf("expected pulsar-only context list, got %q", text.Text)
+	}
+}
+
+func TestHandleReadSNCloudClusterReadsPulsarClusterByType(t *testing.T) {
+	t.Parallel()
+
+	var kafkaReadRequests int
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/apis/cloud.streamnative.io/v1alpha1/namespaces/session-org/pulsarclusters/pc-test":
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"apiVersion":"cloud.streamnative.io/v1alpha1","kind":"PulsarCluster","metadata":{"name":"pc-test","managedFields":[{"manager":"controller"}]},"spec":{"instanceName":"inst-1"}}`))
+		case "/apis/cloud.streamnative.io/v1alpha1/namespaces/session-org/kafkaclusters/pc-test":
+			kafkaReadRequests++
+			t.Fatalf("unexpected kafka read for typed pulsar request")
+		default:
+			t.Fatalf("unexpected path %s", r.URL.Path)
+		}
+	}))
+	defer server.Close()
+
+	session, err := config.NewSNCloudSession(config.SNCloudContext{
+		JWTToken:     "token",
+		APIURL:       server.URL,
+		LogAPIURL:    server.URL,
+		Organization: "session-org",
+	})
+	if err != nil {
+		t.Fatalf("failed to create session: %v", err)
+	}
+
+	ctx := context.Background()
+	ctx = WithSNCloudSession(ctx, session)
+
+	result, err := HandleReadSNCloudCluster(ctx, mcp.GetPromptRequest{
+		Params: mcp.GetPromptParams{
+			Arguments: map[string]string{
+				"name": "pc-test",
+				"type": "PulsarCluster",
+			},
+		},
+	})
+	if err != nil {
+		t.Fatalf("expected no handler error, got %v", err)
+	}
+	if kafkaReadRequests != 0 {
+		t.Fatalf("expected no kafka reads, got %d", kafkaReadRequests)
+	}
+
+	text, ok := result.Messages[0].Content.(mcp.TextContent)
+	if !ok {
+		t.Fatalf("expected text content, got %T", result.Messages[0].Content)
+	}
+	if !strings.Contains(text.Text, `"kind":"PulsarCluster"`) {
+		t.Fatalf("expected PulsarCluster payload, got %q", text.Text)
+	}
+	if strings.Contains(text.Text, "managedFields") {
+		t.Fatalf("expected managedFields to be removed, got %q", text.Text)
+	}
+}
+
+func TestHandleReadSNCloudClusterReadsKafkaClusterByType(t *testing.T) {
+	t.Parallel()
+
+	var pulsarReadRequests int
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case "/apis/cloud.streamnative.io/v1alpha1/namespaces/session-org/pulsarclusters/kc-test":
 			pulsarReadRequests++
-			http.Error(w, `{"message":"not found"}`, http.StatusNotFound)
+			t.Fatalf("unexpected pulsar read for typed kafka request")
 		case "/apis/cloud.streamnative.io/v1alpha1/namespaces/session-org/kafkaclusters/kc-test":
-			kafkaReadRequests++
 			w.Header().Set("Content-Type", "application/json")
 			_, _ = w.Write([]byte(`{"apiVersion":"cloud.streamnative.io/v1alpha1","kind":"KafkaCluster","metadata":{"name":"kc-test","managedFields":[{"manager":"controller"}]},"spec":{"instanceName":"inst-1"}}`))
 		default:
@@ -768,14 +969,17 @@ func TestHandleReadSNCloudClusterFallsBackToKafkaCluster(t *testing.T) {
 
 	result, err := HandleReadSNCloudCluster(ctx, mcp.GetPromptRequest{
 		Params: mcp.GetPromptParams{
-			Arguments: map[string]string{"name": "kc-test"},
+			Arguments: map[string]string{
+				"name": "kc-test",
+				"type": "KafkaCluster",
+			},
 		},
 	})
 	if err != nil {
 		t.Fatalf("expected no handler error, got %v", err)
 	}
-	if len(result.Messages) != 1 {
-		t.Fatalf("expected one prompt message, got %d", len(result.Messages))
+	if pulsarReadRequests != 0 {
+		t.Fatalf("expected no pulsar reads, got %d", pulsarReadRequests)
 	}
 
 	text, ok := result.Messages[0].Content.(mcp.TextContent)
@@ -788,15 +992,9 @@ func TestHandleReadSNCloudClusterFallsBackToKafkaCluster(t *testing.T) {
 	if strings.Contains(text.Text, "managedFields") {
 		t.Fatalf("expected managedFields to be removed, got %q", text.Text)
 	}
-	if pulsarReadRequests != 1 {
-		t.Fatalf("expected one pulsar read request, got %d", pulsarReadRequests)
-	}
-	if kafkaReadRequests != 1 {
-		t.Fatalf("expected one kafka read request, got %d", kafkaReadRequests)
-	}
 }
 
-func TestHandleReadSNCloudClusterDoesNotFallbackOnPulsarReadError(t *testing.T) {
+func TestHandleReadSNCloudClusterReturnsPulsarReadErrorByType(t *testing.T) {
 	t.Parallel()
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -804,7 +1002,7 @@ func TestHandleReadSNCloudClusterDoesNotFallbackOnPulsarReadError(t *testing.T) 
 		case "/apis/cloud.streamnative.io/v1alpha1/namespaces/session-org/pulsarclusters/pc-test":
 			http.Error(w, `{"message":"upstream error"}`, http.StatusInternalServerError)
 		case "/apis/cloud.streamnative.io/v1alpha1/namespaces/session-org/kafkaclusters/pc-test":
-			t.Fatalf("unexpected kafka fallback for pulsar read error")
+			t.Fatalf("unexpected kafka read for typed pulsar request")
 		default:
 			t.Fatalf("unexpected path %s", r.URL.Path)
 		}
@@ -826,7 +1024,10 @@ func TestHandleReadSNCloudClusterDoesNotFallbackOnPulsarReadError(t *testing.T) 
 
 	_, err = HandleReadSNCloudCluster(ctx, mcp.GetPromptRequest{
 		Params: mcp.GetPromptParams{
-			Arguments: map[string]string{"name": "pc-test"},
+			Arguments: map[string]string{
+				"name": "pc-test",
+				"type": "PulsarCluster",
+			},
 		},
 	})
 	if err == nil {
@@ -837,14 +1038,15 @@ func TestHandleReadSNCloudClusterDoesNotFallbackOnPulsarReadError(t *testing.T) 
 	}
 }
 
-func TestHandleReadSNCloudClusterReturnsNotFoundWhenClusterDoesNotExist(t *testing.T) {
+func TestHandleReadSNCloudClusterReturnsNotFoundWhenTypedClusterDoesNotExist(t *testing.T) {
 	t.Parallel()
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-		case "/apis/cloud.streamnative.io/v1alpha1/namespaces/session-org/pulsarclusters/missing",
-			"/apis/cloud.streamnative.io/v1alpha1/namespaces/session-org/kafkaclusters/missing":
+		case "/apis/cloud.streamnative.io/v1alpha1/namespaces/session-org/kafkaclusters/missing":
 			http.Error(w, `{"message":"not found"}`, http.StatusNotFound)
+		case "/apis/cloud.streamnative.io/v1alpha1/namespaces/session-org/pulsarclusters/missing":
+			t.Fatalf("unexpected pulsar read for typed kafka request")
 		default:
 			t.Fatalf("unexpected path %s", r.URL.Path)
 		}
@@ -866,7 +1068,10 @@ func TestHandleReadSNCloudClusterReturnsNotFoundWhenClusterDoesNotExist(t *testi
 
 	_, err = HandleReadSNCloudCluster(ctx, mcp.GetPromptRequest{
 		Params: mcp.GetPromptParams{
-			Arguments: map[string]string{"name": "missing"},
+			Arguments: map[string]string{
+				"name": "missing",
+				"type": "KafkaCluster",
+			},
 		},
 	})
 	if err == nil {
@@ -874,5 +1079,42 @@ func TestHandleReadSNCloudClusterReturnsNotFoundWhenClusterDoesNotExist(t *testi
 	}
 	if err.Error() != "failed to find cluster: missing" {
 		t.Fatalf("expected not found error, got %v", err)
+	}
+}
+
+func TestHandleReadSNCloudClusterRejectsUnsupportedClusterType(t *testing.T) {
+	t.Parallel()
+
+	server := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, r *http.Request) {
+		t.Fatalf("unexpected request %s", r.URL.Path)
+	}))
+	defer server.Close()
+
+	session, err := config.NewSNCloudSession(config.SNCloudContext{
+		JWTToken:     "token",
+		APIURL:       server.URL,
+		LogAPIURL:    server.URL,
+		Organization: "session-org",
+	})
+	if err != nil {
+		t.Fatalf("failed to create session: %v", err)
+	}
+
+	ctx := context.Background()
+	ctx = WithSNCloudSession(ctx, session)
+
+	_, err = HandleReadSNCloudCluster(ctx, mcp.GetPromptRequest{
+		Params: mcp.GetPromptParams{
+			Arguments: map[string]string{
+				"name": "mystery",
+				"type": "FlinkCluster",
+			},
+		},
+	})
+	if err == nil {
+		t.Fatal("expected handler error")
+	}
+	if !strings.Contains(err.Error(), `unsupported cluster type "FlinkCluster"`) {
+		t.Fatalf("expected unsupported cluster type error, got %v", err)
 	}
 }

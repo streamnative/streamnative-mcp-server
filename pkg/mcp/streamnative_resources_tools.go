@@ -308,38 +308,20 @@ func formatSNCloudApplyError(kind string, verb string, bdy *http.Response, err e
 }
 
 func applyInstance(ctx context.Context, apiClient *sncloud.APIClient, jsonContent string, organization string, dryRun bool) (string, error) {
-	return applyTypedSNCloudResource(ctx, apiClient, jsonContent, organization, dryRun, sncloudResourceApplyAdapter[sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance]{
-		kind: "Instance",
-		ensureMetadata: func(resource *sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance) {
+	return applyV1ObjectMetaSNCloudResource(
+		ctx,
+		apiClient,
+		jsonContent,
+		organization,
+		dryRun,
+		"Instance",
+		func(resource *sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance) *sncloud.V1ObjectMeta {
 			if resource.Metadata == nil {
-				resource.Metadata = &sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1InstanceMetadata{}
+				resource.Metadata = &sncloud.V1ObjectMeta{}
 			}
+			return resource.Metadata
 		},
-		getName: func(resource *sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance) *string {
-			if resource.Metadata == nil {
-				return nil
-			}
-			return resource.Metadata.Name
-		},
-		getNamespace: func(resource *sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance) *string {
-			if resource.Metadata == nil {
-				return nil
-			}
-			return resource.Metadata.Namespace
-		},
-		setNamespace: func(resource *sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance, namespace string) {
-			resource.Metadata.Namespace = &namespace
-		},
-		getResourceVersion: func(resource *sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance) *string {
-			if resource.Metadata == nil {
-				return nil
-			}
-			return resource.Metadata.ResourceVersion
-		},
-		setResourceVersion: func(resource *sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance, resourceVersion *string) {
-			resource.Metadata.ResourceVersion = resourceVersion
-		},
-		readExistingResourceVersion: func(ctx context.Context, apiClient *sncloud.APIClient, name string, organization string) (*string, *http.Response, error) {
+		func(ctx context.Context, apiClient *sncloud.APIClient, name string, organization string) (*string, *http.Response, error) {
 			existingInstance, bdy, err := apiClient.CloudStreamnativeIoV1alpha1Api.ReadCloudStreamnativeIoV1alpha1NamespacedInstance(ctx, name, organization).Execute()
 			if err != nil {
 				return nil, bdy, err
@@ -349,7 +331,7 @@ func applyInstance(ctx context.Context, apiClient *sncloud.APIClient, jsonConten
 			}
 			return existingInstance.Metadata.ResourceVersion, bdy, nil
 		},
-		create: func(ctx context.Context, apiClient *sncloud.APIClient, organization string, resource sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance, dryRun bool) (*http.Response, error) {
+		func(ctx context.Context, apiClient *sncloud.APIClient, organization string, resource sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance, dryRun bool) (*http.Response, error) {
 			request := apiClient.CloudStreamnativeIoV1alpha1Api.CreateCloudStreamnativeIoV1alpha1NamespacedInstance(ctx, organization).Body(resource)
 			if dryRun {
 				request = request.DryRun("All")
@@ -357,7 +339,7 @@ func applyInstance(ctx context.Context, apiClient *sncloud.APIClient, jsonConten
 			_, bdy, err := request.Execute()
 			return bdy, err
 		},
-		replace: func(ctx context.Context, apiClient *sncloud.APIClient, name string, organization string, resource sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance, dryRun bool) (*http.Response, error) {
+		func(ctx context.Context, apiClient *sncloud.APIClient, name string, organization string, resource sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Instance, dryRun bool) (*http.Response, error) {
 			request := apiClient.CloudStreamnativeIoV1alpha1Api.ReplaceCloudStreamnativeIoV1alpha1NamespacedInstance(ctx, name, organization).Body(resource)
 			if dryRun {
 				request = request.DryRun("All")
@@ -365,7 +347,7 @@ func applyInstance(ctx context.Context, apiClient *sncloud.APIClient, jsonConten
 			_, bdy, err := request.Execute()
 			return bdy, err
 		},
-	})
+	)
 }
 
 // applyPulsarInstance applies PulsarInstance resource
