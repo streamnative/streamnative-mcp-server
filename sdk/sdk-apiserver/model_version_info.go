@@ -16,15 +16,15 @@ import (
 
 // VersionInfo Info contains versioning information. how we'll want to distribute that information.
 type VersionInfo struct {
-	BuildDate    string `json:"buildDate"`
-	Compiler     string `json:"compiler"`
-	GitCommit    string `json:"gitCommit"`
+	BuildDate string `json:"buildDate"`
+	Compiler string `json:"compiler"`
+	GitCommit string `json:"gitCommit"`
 	GitTreeState string `json:"gitTreeState"`
-	GitVersion   string `json:"gitVersion"`
-	GoVersion    string `json:"goVersion"`
-	Major        string `json:"major"`
-	Minor        string `json:"minor"`
-	Platform     string `json:"platform"`
+	GitVersion string `json:"gitVersion"`
+	GoVersion string `json:"goVersion"`
+	Major string `json:"major"`
+	Minor string `json:"minor"`
+	Platform string `json:"platform"`
 }
 
 // NewVersionInfo instantiates a new VersionInfo object
@@ -336,3 +336,5 @@ func (v *NullableVersionInfo) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

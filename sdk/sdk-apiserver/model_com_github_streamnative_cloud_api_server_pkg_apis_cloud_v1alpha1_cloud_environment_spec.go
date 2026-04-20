@@ -17,10 +17,10 @@ import (
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1CloudEnvironmentSpec CloudEnvironmentSpec defines the desired state of CloudEnvironment
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1CloudEnvironmentSpec struct {
 	// CloudConnectionName references to the CloudConnection object
-	CloudConnectionName *string                                                         `json:"cloudConnectionName,omitempty"`
-	DefaultGateway      *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Gateway `json:"defaultGateway,omitempty"`
-	Dns                 *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1DNS     `json:"dns,omitempty"`
-	Network             *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Network `json:"network,omitempty"`
+	CloudConnectionName *string `json:"cloudConnectionName,omitempty"`
+	DefaultGateway *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Gateway `json:"defaultGateway,omitempty"`
+	Dns *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1DNS `json:"dns,omitempty"`
+	Network *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Network `json:"network,omitempty"`
 	// Region defines in which region will resources be deployed
 	Region *string `json:"region,omitempty"`
 	// Zone defines in which availability zone will resources be deployed If specified, the cloud environment will be zonal. Default to unspecified and regional cloud environment
@@ -294,3 +294,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1CloudEnv
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

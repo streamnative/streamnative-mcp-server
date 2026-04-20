@@ -16,8 +16,8 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpRestoreStrategy VvpRestoreStrategy defines the restore strategy of the deployment
 type ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpRestoreStrategy struct {
-	AllowNonRestoredState *bool   `json:"allowNonRestoredState,omitempty"`
-	Kind                  *string `json:"kind,omitempty"`
+	AllowNonRestoredState *bool `json:"allowNonRestoredState,omitempty"`
+	Kind *string `json:"kind,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpRestoreStrategy instantiates a new ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpRestoreStrategy object
@@ -147,3 +147,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpRes
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

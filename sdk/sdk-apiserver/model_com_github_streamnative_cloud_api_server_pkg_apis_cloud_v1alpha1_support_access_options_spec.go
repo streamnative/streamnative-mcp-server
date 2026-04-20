@@ -17,7 +17,7 @@ import (
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1SupportAccessOptionsSpec struct for ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1SupportAccessOptionsSpec
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1SupportAccessOptionsSpec struct {
 	// A role chain that is provided by name through the CLI to designate which access chain to take when accessing a poolmember.
-	Chains    []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Chain          `json:"chains,omitempty"`
+	Chains []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Chain `json:"chains,omitempty"`
 	RoleChain []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RoleDefinition `json:"roleChain,omitempty"`
 }
 
@@ -148,3 +148,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1SupportA
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

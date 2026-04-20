@@ -19,8 +19,8 @@ type ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionStatus
 	// Conditions is an array of current observed conditions.
 	Conditions []V1Condition `json:"conditions,omitempty"`
 	// the status of the subscription is designed to support billing agents, so it provides product and subscription items.
-	Items              []ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionStatusSubscriptionItem `json:"items,omitempty"`
-	PendingSetupIntent *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntentReference                `json:"pendingSetupIntent,omitempty"`
+	Items []ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionStatusSubscriptionItem `json:"items,omitempty"`
+	PendingSetupIntent *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SetupIntentReference `json:"pendingSetupIntent,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionStatus instantiates a new ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionStatus object
@@ -185,3 +185,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscr
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

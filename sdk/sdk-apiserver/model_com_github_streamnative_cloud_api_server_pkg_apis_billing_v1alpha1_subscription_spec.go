@@ -20,21 +20,21 @@ type ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionSpec s
 	// AnchorDate is a timestamp representing the first billing cycle end date. It is represented by seconds from the epoch on the Stripe side.
 	AnchorDate *time.Time `json:"anchorDate,omitempty"`
 	// CloudType will validate resources like the consumption unit product are restricted to the correct cloud provider
-	CloudType   *string `json:"cloudType,omitempty"`
+	CloudType *string `json:"cloudType,omitempty"`
 	Description *string `json:"description,omitempty"`
 	// EndDate is a timestamp representing the date when the subscription will be ended. It is represented in RFC3339 form and is in UTC.
 	EndDate *time.Time `json:"endDate,omitempty"`
 	// Ending balance for a subscription, this value is asynchrnously updated by billing-reporter and directly pulled from stripe's invoice object [1].  Negative at this value means that there are outstanding discount credits left for the customer.  Nil implies that billing reporter hasn't run since creation and yet to set the value. [1] https://docs.stripe.com/api/invoices/object#invoice_object-ending_balance
 	EndingBalanceCents *int64 `json:"endingBalanceCents,omitempty"`
 	// One-time items.
-	Once               []ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionItem     `json:"once,omitempty"`
+	Once []ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionItem `json:"once,omitempty"`
 	ParentSubscription *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionReference `json:"parentSubscription,omitempty"`
 	// Recurring items.
 	Recurring []ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionItem `json:"recurring,omitempty"`
 	// StartDate is a timestamp representing the start date of the subscription. It is represented in RFC3339 form and is in UTC.
-	StartDate *time.Time                                                                       `json:"startDate,omitempty"`
-	Stripe    *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1StripeSubscriptionSpec `json:"stripe,omitempty"`
-	Suger     *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SugerSubscriptionSpec  `json:"suger,omitempty"`
+	StartDate *time.Time `json:"startDate,omitempty"`
+	Stripe *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1StripeSubscriptionSpec `json:"stripe,omitempty"`
+	Suger *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SugerSubscriptionSpec `json:"suger,omitempty"`
 	// The type of the subscription. Validate values: stripe, suger Default to stripe.
 	Type *string `json:"type,omitempty"`
 }
@@ -516,3 +516,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscr
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

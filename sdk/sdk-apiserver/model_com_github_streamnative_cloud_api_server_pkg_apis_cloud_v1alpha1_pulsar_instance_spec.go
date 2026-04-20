@@ -20,7 +20,7 @@ type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarInstanceSpec s
 	// AvailabilityMode decides whether pods of the same type in pulsar should be in one zone or multiple zones
 	AvailabilityMode string `json:"availabilityMode"`
 	// Plan is the subscription plan, will create a stripe subscription if not empty deprecated: 1.16
-	Plan    *string                                                         `json:"plan,omitempty"`
+	Plan *string `json:"plan,omitempty"`
 	PoolRef *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PoolRef `json:"poolRef,omitempty"`
 	// Type defines the instance specialization type: - standard: a standard deployment of Pulsar, BookKeeper, and ZooKeeper. - dedicated: a dedicated deployment of classic engine or ursa engine. - serverless: a serverless deployment of Pulsar, shared BookKeeper, and shared oxia. - byoc: bring your own cloud.
 	Type *string `json:"type,omitempty"`
@@ -251,3 +251,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarIn
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

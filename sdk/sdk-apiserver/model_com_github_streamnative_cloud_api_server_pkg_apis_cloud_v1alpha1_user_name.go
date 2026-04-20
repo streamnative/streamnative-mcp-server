@@ -17,7 +17,7 @@ import (
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1UserName struct for ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1UserName
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1UserName struct {
 	First string `json:"first"`
-	Last  string `json:"last"`
+	Last string `json:"last"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1UserName instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1UserName object
@@ -133,3 +133,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1UserName
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

@@ -16,10 +16,10 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RoleBindingSpec RoleBindingSpec defines the desired state of RoleBinding
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RoleBindingSpec struct {
-	Cel            *string                                                                `json:"cel,omitempty"`
+	Cel *string `json:"cel,omitempty"`
 	ConditionGroup *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1ConditionGroup `json:"conditionGroup,omitempty"`
-	RoleRef        ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RoleRef         `json:"roleRef"`
-	Subjects       []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Subject       `json:"subjects"`
+	RoleRef ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RoleRef `json:"roleRef"`
+	Subjects []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Subject `json:"subjects"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RoleBindingSpec instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RoleBindingSpec object
@@ -205,3 +205,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RoleBind
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

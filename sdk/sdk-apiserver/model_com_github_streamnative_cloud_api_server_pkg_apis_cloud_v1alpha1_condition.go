@@ -19,12 +19,12 @@ import (
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition struct {
 	// Time is a wrapper around time.Time which supports correct marshaling to YAML and JSON.  Wrappers are provided for many of the factory methods that the time package offers.
 	LastTransitionTime *time.Time `json:"lastTransitionTime,omitempty"`
-	Message            *string    `json:"message,omitempty"`
+	Message *string `json:"message,omitempty"`
 	// observedGeneration represents the .metadata.generation that the condition was set based upon. For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date with respect to the current state of the instance.
-	ObservedGeneration *int64  `json:"observedGeneration,omitempty"`
-	Reason             *string `json:"reason,omitempty"`
-	Status             string  `json:"status"`
-	Type               string  `json:"type"`
+	ObservedGeneration *int64 `json:"observedGeneration,omitempty"`
+	Reason *string `json:"reason,omitempty"`
+	Status string `json:"status"`
+	Type string `json:"type"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition object
@@ -43,6 +43,10 @@ func NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition(status 
 // but it doesn't guarantee that properties required by API are set
 func NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1ConditionWithDefaults() *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition {
 	this := ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition{}
+	var status string = ""
+	this.Status = status
+	var type_ string = ""
+	this.Type = type_
 	return &this
 }
 
@@ -280,3 +284,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Conditio
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

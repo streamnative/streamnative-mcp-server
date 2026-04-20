@@ -16,16 +16,16 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1PodTemplateSpec struct for ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1PodTemplateSpec
 type ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1PodTemplateSpec struct {
-	Affinity              *V1Affinity                                                               `json:"affinity,omitempty"`
-	Containers            []ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Container      `json:"containers,omitempty"`
-	ImagePullSecrets      []V1LocalObjectReference                                                  `json:"imagePullSecrets,omitempty"`
-	InitContainers        []ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Container      `json:"initContainers,omitempty"`
-	NodeSelector          *map[string]string                                                        `json:"nodeSelector,omitempty"`
-	SecurityContext       *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1SecurityContext `json:"securityContext,omitempty"`
-	ServiceAccountName    *string                                                                   `json:"serviceAccountName,omitempty"`
-	ShareProcessNamespace *bool                                                                     `json:"shareProcessNamespace,omitempty"`
-	Tolerations           []V1Toleration                                                            `json:"tolerations,omitempty"`
-	Volumes               []ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Volume         `json:"volumes,omitempty"`
+	Affinity *V1Affinity `json:"affinity,omitempty"`
+	Containers []ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Container `json:"containers,omitempty"`
+	ImagePullSecrets []V1LocalObjectReference `json:"imagePullSecrets,omitempty"`
+	InitContainers []ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Container `json:"initContainers,omitempty"`
+	NodeSelector *map[string]string `json:"nodeSelector,omitempty"`
+	SecurityContext *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1SecurityContext `json:"securityContext,omitempty"`
+	ServiceAccountName *string `json:"serviceAccountName,omitempty"`
+	ShareProcessNamespace *bool `json:"shareProcessNamespace,omitempty"`
+	Tolerations []V1Toleration `json:"tolerations,omitempty"`
+	Volumes []ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Volume `json:"volumes,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1PodTemplateSpec instantiates a new ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1PodTemplateSpec object
@@ -435,3 +435,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1PodTem
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

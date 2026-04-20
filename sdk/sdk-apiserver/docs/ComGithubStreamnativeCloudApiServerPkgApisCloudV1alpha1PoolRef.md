@@ -4,8 +4,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Name** | **string** |  | 
-**Namespace** | **string** |  | 
+**Name** | **string** |  | [default to ""]
+**Namespace** | **string** |  | [default to ""]
 
 ## Methods
 

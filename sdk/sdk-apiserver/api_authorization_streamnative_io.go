@@ -18,11 +18,12 @@ import (
 	"net/url"
 )
 
+
 // AuthorizationStreamnativeIoApiService AuthorizationStreamnativeIoApi service
 type AuthorizationStreamnativeIoApiService service
 
 type ApiGetAuthorizationStreamnativeIoAPIGroupRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *AuthorizationStreamnativeIoApiService
 }
 
@@ -35,25 +36,24 @@ GetAuthorizationStreamnativeIoAPIGroup Method for GetAuthorizationStreamnativeIo
 
 get information of a group
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiGetAuthorizationStreamnativeIoAPIGroupRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiGetAuthorizationStreamnativeIoAPIGroupRequest
 */
 func (a *AuthorizationStreamnativeIoApiService) GetAuthorizationStreamnativeIoAPIGroup(ctx context.Context) ApiGetAuthorizationStreamnativeIoAPIGroupRequest {
 	return ApiGetAuthorizationStreamnativeIoAPIGroupRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1APIGroup
+//  @return V1APIGroup
 func (a *AuthorizationStreamnativeIoApiService) GetAuthorizationStreamnativeIoAPIGroupExecute(r ApiGetAuthorizationStreamnativeIoAPIGroupRequest) (*V1APIGroup, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1APIGroup
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1APIGroup
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AuthorizationStreamnativeIoApiService.GetAuthorizationStreamnativeIoAPIGroup")

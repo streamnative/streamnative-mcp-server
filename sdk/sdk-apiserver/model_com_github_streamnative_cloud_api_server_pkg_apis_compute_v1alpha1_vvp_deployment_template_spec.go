@@ -16,8 +16,8 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentTemplateSpec VvpDeploymentTemplateSpec defines the desired state of VvpDeployment
 type ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentTemplateSpec struct {
-	Spec         ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentDetails `json:"spec"`
-	UserMetadata ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1UserMetadata         `json:"userMetadata"`
+	Spec ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentDetails `json:"spec"`
+	UserMetadata ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1UserMetadata `json:"userMetadata"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentTemplateSpec instantiates a new ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentTemplateSpec object
@@ -133,3 +133,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDep
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

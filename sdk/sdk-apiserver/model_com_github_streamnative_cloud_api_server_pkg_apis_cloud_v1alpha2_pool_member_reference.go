@@ -16,7 +16,7 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2PoolMemberReference PoolMemberReference is a reference to a pool member with a given name.
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2PoolMemberReference struct {
-	Name      string `json:"name"`
+	Name string `json:"name"`
 	Namespace string `json:"namespace"`
 }
 
@@ -133,3 +133,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2PoolMemb
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

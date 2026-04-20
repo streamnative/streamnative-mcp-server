@@ -18,7 +18,7 @@ import (
 type ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClockStatus struct {
 	// Conditions is an array of current observed conditions.
 	Conditions []V1Condition `json:"conditions,omitempty"`
-	StripeID   *string       `json:"stripeID,omitempty"`
+	StripeID *string `json:"stripeID,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClockStatus instantiates a new ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestClockStatus object
@@ -148,3 +148,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1TestCl
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

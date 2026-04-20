@@ -17,8 +17,8 @@ import (
 // ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1CustomerPortalRequestSpec CustomerPortalRequestSpec represents the details of the request.
 type ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1CustomerPortalRequestSpec struct {
 	// The default URL to redirect customers to when they click on the portal’s link to return to your website.
-	ReturnURL *string                                                                                   `json:"returnURL,omitempty"`
-	Stripe    *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1StripeCustomerPortalRequestSpec `json:"stripe,omitempty"`
+	ReturnURL *string `json:"returnURL,omitempty"`
+	Stripe *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1StripeCustomerPortalRequestSpec `json:"stripe,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1CustomerPortalRequestSpec instantiates a new ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1CustomerPortalRequestSpec object
@@ -148,3 +148,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Custom
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

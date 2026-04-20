@@ -22,7 +22,7 @@ type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1GCloudPoolMemberSpec
 	ClusterName *string `json:"clusterName,omitempty"`
 	// Deprecated
 	InitialNodeCount *int32 `json:"initialNodeCount,omitempty"`
-	Location         string `json:"location"`
+	Location string `json:"location"`
 	// Deprecated
 	MachineType *string `json:"machineType,omitempty"`
 	// Deprecated
@@ -326,3 +326,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1GCloudPo
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

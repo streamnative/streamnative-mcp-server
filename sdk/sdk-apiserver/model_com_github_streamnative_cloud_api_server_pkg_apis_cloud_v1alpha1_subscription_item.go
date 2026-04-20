@@ -16,10 +16,10 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1SubscriptionItem struct for ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1SubscriptionItem
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1SubscriptionItem struct {
-	NickName       string `json:"nickName"`
-	PriceId        string `json:"priceId"`
+	NickName string `json:"nickName"`
+	PriceId string `json:"priceId"`
 	SubscriptionId string `json:"subscriptionId"`
-	Type           string `json:"type"`
+	Type string `json:"type"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1SubscriptionItem instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1SubscriptionItem object
@@ -191,3 +191,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Subscrip
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

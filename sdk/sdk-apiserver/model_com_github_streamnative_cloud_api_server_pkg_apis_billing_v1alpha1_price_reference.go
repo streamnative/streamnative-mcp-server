@@ -17,7 +17,7 @@ import (
 // ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PriceReference PriceReference references a price within a Product object.
 type ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PriceReference struct {
 	// Key is the price key within the product specification.
-	Key     *string                                                                    `json:"key,omitempty"`
+	Key *string `json:"key,omitempty"`
 	Product *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1ProductReference `json:"product,omitempty"`
 }
 
@@ -148,3 +148,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PriceR
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

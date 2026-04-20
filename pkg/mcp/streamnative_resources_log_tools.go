@@ -40,9 +40,14 @@ func StreamNativeAddLogTools(s *server.MCPServer, _ bool, features []string) {
 		return
 	}
 
-	logTool := mcp.NewTool("sncloud_logs",
+	s.AddTool(NewSNCloudLogsTool(), HandleSNCloudLogs)
+}
+
+// NewSNCloudLogsTool creates the reusable StreamNative Cloud logs tool definition.
+func NewSNCloudLogsTool() mcp.Tool {
+	return mcp.NewTool("sncloud_logs",
 		mcp.WithDescription("Display the logs of resources in StreamNative Cloud, including pulsar functions, pulsar source connectors, pulsar sink connectors, and kafka connect connectors logs running along with PulsarInstance and PulsarCluster."+
-			"This tool is used to help you debug the issues of resources in StreamNative Cloud. You can use `sncloud_context_use_cluster` to change the context to a specific cluster first, then use this tool to get the logs of resources in the cluster. This tool is suggested to be used with 'pulsar_admin_functions', 'pulsar_admin_sinks', 'pulsar_admin_sources', and 'kafka_admin_connect'"),
+			"This tool is used to help you debug issues in the cluster currently bound to the session. This tool is suggested to be used with 'pulsar_admin_functions', 'pulsar_admin_sinks', 'pulsar_admin_sources', and 'kafka_admin_connect'."),
 		mcp.WithString("component", mcp.Required(),
 			mcp.Description("The component to get logs from, including "+strings.Join(FunctionConnectorList, ", ")),
 			mcp.Enum(FunctionConnectorList...),
@@ -77,7 +82,6 @@ func StreamNativeAddLogTools(s *server.MCPServer, _ bool, features []string) {
 			mcp.DefaultBool(false),
 		),
 	)
-	s.AddTool(logTool, handleStreamNativeResourcesLog)
 }
 
 // LogOptions captures parameters for StreamNative log queries.
@@ -112,7 +116,8 @@ type LogContent struct {
 	Record   int64  `json:"record"`
 }
 
-func handleStreamNativeResourcesLog(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+// HandleSNCloudLogs handles StreamNative Cloud log queries for the cluster bound to the current session.
+func HandleSNCloudLogs(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	// Get log client from session
 	session := context2.GetSNCloudSession(ctx)
 	if session == nil {

@@ -17,8 +17,8 @@ import (
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1MaintenanceWindow struct for ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1MaintenanceWindow
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1MaintenanceWindow struct {
 	// Recurrence define the maintenance execution cycle, 0~6, to express Monday to Sunday
-	Recurrence string                                                        `json:"recurrence"`
-	Window     ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Window `json:"window"`
+	Recurrence string `json:"recurrence"`
+	Window ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Window `json:"window"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1MaintenanceWindow instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1MaintenanceWindow object
@@ -134,3 +134,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Maintena
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

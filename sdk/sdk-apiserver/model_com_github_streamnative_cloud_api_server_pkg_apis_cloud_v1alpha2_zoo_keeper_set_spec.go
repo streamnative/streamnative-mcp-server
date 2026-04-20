@@ -21,13 +21,13 @@ type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetSpec str
 	// Image name is the name of the image to deploy.
 	Image *string `json:"image,omitempty"`
 	// Image pull policy, one of Always, Never, IfNotPresent, default to Always.
-	ImagePullPolicy *string                                                                     `json:"imagePullPolicy,omitempty"`
-	PoolMemberRef   *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2PoolMemberReference `json:"poolMemberRef,omitempty"`
+	ImagePullPolicy *string `json:"imagePullPolicy,omitempty"`
+	PoolMemberRef *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2PoolMemberReference `json:"poolMemberRef,omitempty"`
 	// Replicas is the desired number of ZooKeeper servers. If unspecified, defaults to 1.
-	Replicas     *int32                                                                        `json:"replicas,omitempty"`
+	Replicas *int32 `json:"replicas,omitempty"`
 	ResourceSpec *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperResourceSpec `json:"resourceSpec,omitempty"`
-	Resources    *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2DefaultNodeResource   `json:"resources,omitempty"`
-	Sharing      *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2SharingConfig         `json:"sharing,omitempty"`
+	Resources *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2DefaultNodeResource `json:"resources,omitempty"`
+	Sharing *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2SharingConfig `json:"sharing,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetSpec instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetSpec object
@@ -367,3 +367,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeepe
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

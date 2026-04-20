@@ -18,7 +18,7 @@ import (
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1APIKeyStatus APIKeyStatus defines the observed state of ServiceAccount
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1APIKeyStatus struct {
 	// Conditions is an array of current observed service account conditions.
-	Conditions     []V1Condition                                                          `json:"conditions,omitempty"`
+	Conditions []V1Condition `json:"conditions,omitempty"`
 	EncryptedToken *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1EncryptedToken `json:"encryptedToken,omitempty"`
 	// ExpiresAt is a timestamp of when the key expires
 	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
@@ -334,3 +334,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1APIKeySt
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

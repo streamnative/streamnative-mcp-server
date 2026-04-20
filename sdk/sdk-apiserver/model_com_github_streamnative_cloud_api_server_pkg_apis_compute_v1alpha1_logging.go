@@ -16,9 +16,9 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Logging Logging defines the logging configuration for the Flink deployment.
 type ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Logging struct {
-	Log4j2ConfigurationTemplate *string            `json:"log4j2ConfigurationTemplate,omitempty"`
-	Log4jLoggers                *map[string]string `json:"log4jLoggers,omitempty"`
-	LoggingProfile              *string            `json:"loggingProfile,omitempty"`
+	Log4j2ConfigurationTemplate *string `json:"log4j2ConfigurationTemplate,omitempty"`
+	Log4jLoggers *map[string]string `json:"log4jLoggers,omitempty"`
+	LoggingProfile *string `json:"loggingProfile,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Logging instantiates a new ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Logging object
@@ -183,3 +183,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Loggin
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

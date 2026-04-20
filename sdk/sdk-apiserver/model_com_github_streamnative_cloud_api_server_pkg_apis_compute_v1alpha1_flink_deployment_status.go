@@ -17,7 +17,7 @@ import (
 // ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeploymentStatus FlinkDeploymentStatus defines the observed state of FlinkDeployment
 type ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeploymentStatus struct {
 	// Conditions is an array of current observed conditions.
-	Conditions       []ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Condition          `json:"conditions,omitempty"`
+	Conditions []ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1Condition `json:"conditions,omitempty"`
 	DeploymentStatus *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentStatus `json:"deploymentStatus,omitempty"`
 	// observedGeneration represents the .metadata.generation that the condition was set based upon. For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date with respect to the current state of the instance.
 	ObservedGeneration *int64 `json:"observedGeneration,omitempty"`
@@ -185,3 +185,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkD
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

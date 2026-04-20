@@ -17,7 +17,7 @@ import (
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1CloudConnectionStatus CloudConnectionStatus defines the observed state of CloudConnection
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1CloudConnectionStatus struct {
 	AvailableLocations []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1RegionInfo `json:"availableLocations,omitempty"`
-	AwsPolicyVersion   *string                                                             `json:"awsPolicyVersion,omitempty"`
+	AwsPolicyVersion *string `json:"awsPolicyVersion,omitempty"`
 	// Conditions is an array of current observed conditions.
 	Conditions []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Condition `json:"conditions,omitempty"`
 }
@@ -184,3 +184,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1CloudCon
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

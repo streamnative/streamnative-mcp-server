@@ -19,14 +19,14 @@ type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetSpec st
 	// AvailabilityMode decides whether servers should be in one zone or multiple zones If unspecified, defaults to zonal.
 	AvailabilityMode *string `json:"availabilityMode,omitempty"`
 	// Image name is the name of the image to deploy.
-	Image         *string                                                                     `json:"image,omitempty"`
+	Image *string `json:"image,omitempty"`
 	PoolMemberRef *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2PoolMemberReference `json:"poolMemberRef,omitempty"`
 	// Replicas is the desired number of BookKeeper servers. If unspecified, defaults to 3.
-	Replicas        *int32                                                                         `json:"replicas,omitempty"`
-	ResourceSpec    *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperResourceSpec `json:"resourceSpec,omitempty"`
-	Resources       *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookkeeperNodeResource `json:"resources,omitempty"`
-	Sharing         *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2SharingConfig          `json:"sharing,omitempty"`
-	ZooKeeperSetRef ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetReference   `json:"zooKeeperSetRef"`
+	Replicas *int32 `json:"replicas,omitempty"`
+	ResourceSpec *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperResourceSpec `json:"resourceSpec,omitempty"`
+	Resources *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookkeeperNodeResource `json:"resources,omitempty"`
+	Sharing *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2SharingConfig `json:"sharing,omitempty"`
+	ZooKeeperSetRef ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2ZooKeeperSetReference `json:"zooKeeperSetRef"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetSpec instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeeperSetSpec object
@@ -359,3 +359,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha2BookKeep
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

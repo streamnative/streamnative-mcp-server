@@ -17,7 +17,7 @@ import (
 // ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1ProductPrice ProductPrice specifies a price for a product.
 type ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1ProductPrice struct {
 	// Key is the price key.
-	Key    *string                                                                   `json:"key,omitempty"`
+	Key *string `json:"key,omitempty"`
 	Stripe *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1StripePriceSpec `json:"stripe,omitempty"`
 }
 
@@ -148,3 +148,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Produc
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

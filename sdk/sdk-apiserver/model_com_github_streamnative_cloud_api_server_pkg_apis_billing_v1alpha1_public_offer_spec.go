@@ -21,7 +21,7 @@ type ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOfferSpec st
 	Once []ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1OfferItem `json:"once,omitempty"`
 	// Recurring items, each with an attached price.
 	Recurring []ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1OfferItem `json:"recurring,omitempty"`
-	Stripe    map[string]interface{}                                               `json:"stripe,omitempty"`
+	Stripe map[string]interface{} `json:"stripe,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOfferSpec instantiates a new ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PublicOfferSpec object
@@ -221,3 +221,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Public
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

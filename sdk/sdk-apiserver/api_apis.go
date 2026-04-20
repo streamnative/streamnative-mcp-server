@@ -18,11 +18,12 @@ import (
 	"net/url"
 )
 
+
 // ApisApiService ApisApi service
 type ApisApiService service
 
 type ApiGetAPIVersionsRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *ApisApiService
 }
 
@@ -35,25 +36,24 @@ GetAPIVersions Method for GetAPIVersions
 
 get available API versions
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiGetAPIVersionsRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiGetAPIVersionsRequest
 */
 func (a *ApisApiService) GetAPIVersions(ctx context.Context) ApiGetAPIVersionsRequest {
 	return ApiGetAPIVersionsRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return V1APIGroupList
+//  @return V1APIGroupList
 func (a *ApisApiService) GetAPIVersionsExecute(r ApiGetAPIVersionsRequest) (*V1APIGroupList, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *V1APIGroupList
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *V1APIGroupList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ApisApiService.GetAPIVersions")

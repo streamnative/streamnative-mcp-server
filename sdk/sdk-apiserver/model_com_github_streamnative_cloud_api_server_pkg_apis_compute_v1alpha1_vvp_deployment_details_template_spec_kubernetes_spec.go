@@ -16,8 +16,8 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentDetailsTemplateSpecKubernetesSpec VvpDeploymentDetailsTemplateSpecKubernetesSpec defines the desired state of VvpDeploymentDetails
 type ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentDetailsTemplateSpecKubernetesSpec struct {
-	JobManagerPodTemplate  *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1PodTemplate `json:"jobManagerPodTemplate,omitempty"`
-	Labels                 *map[string]string                                                    `json:"labels,omitempty"`
+	JobManagerPodTemplate *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1PodTemplate `json:"jobManagerPodTemplate,omitempty"`
+	Labels *map[string]string `json:"labels,omitempty"`
 	TaskManagerPodTemplate *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1PodTemplate `json:"taskManagerPodTemplate,omitempty"`
 }
 
@@ -183,3 +183,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDep
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

@@ -19,7 +19,7 @@ type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarServiceEndpoin
 	DnsName string `json:"dnsName"`
 	// Gateway is the name of the PulsarGateway to use for the endpoint, will be empty if endpointAccess is not configured.
 	Gateway *string `json:"gateway,omitempty"`
-	Type    *string `json:"type,omitempty"`
+	Type *string `json:"type,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarServiceEndpoint instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarServiceEndpoint object
@@ -177,3 +177,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarSe
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

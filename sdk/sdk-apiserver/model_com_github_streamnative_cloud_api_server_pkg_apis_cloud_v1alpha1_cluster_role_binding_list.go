@@ -17,10 +17,10 @@ import (
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1ClusterRoleBindingList struct for ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1ClusterRoleBindingList
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1ClusterRoleBindingList struct {
 	// APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
-	ApiVersion *string                                                                     `json:"apiVersion,omitempty"`
-	Items      []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1ClusterRoleBinding `json:"items"`
+	ApiVersion *string `json:"apiVersion,omitempty"`
+	Items []ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1ClusterRoleBinding `json:"items"`
 	// Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
-	Kind     *string     `json:"kind,omitempty"`
+	Kind *string `json:"kind,omitempty"`
 	Metadata *V1ListMeta `json:"metadata,omitempty"`
 }
 
@@ -214,3 +214,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1ClusterR
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

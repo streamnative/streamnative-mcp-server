@@ -21,9 +21,9 @@ type ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1ProductSpec struct
 	// Name is the product name.
 	Name *string `json:"name,omitempty"`
 	// Prices associated with the product.
-	Prices []ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1ProductPrice     `json:"prices,omitempty"`
+	Prices []ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1ProductPrice `json:"prices,omitempty"`
 	Stripe *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1StripeProductSpec `json:"stripe,omitempty"`
-	Suger  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SugerProductSpec  `json:"suger,omitempty"`
+	Suger *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SugerProductSpec `json:"suger,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1ProductSpec instantiates a new ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1ProductSpec object
@@ -258,3 +258,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Produc
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

@@ -17,7 +17,7 @@ import (
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarInstanceAuth PulsarInstanceAuth defines auth section of PulsarInstance
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarInstanceAuth struct {
 	// ApiKey configuration
-	Apikey map[string]interface{}                                               `json:"apikey,omitempty"`
+	Apikey map[string]interface{} `json:"apikey,omitempty"`
 	Oauth2 *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1OAuth2Config `json:"oauth2,omitempty"`
 }
 
@@ -148,3 +148,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarIn
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

@@ -19,10 +19,10 @@ type ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent stru
 	// APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
 	ApiVersion *string `json:"apiVersion,omitempty"`
 	// Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
-	Kind     *string                                                                       `json:"kind,omitempty"`
-	Metadata *V1ObjectMeta                                                                 `json:"metadata,omitempty"`
-	Spec     *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntentSpec   `json:"spec,omitempty"`
-	Status   *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntentStatus `json:"status,omitempty"`
+	Kind *string `json:"kind,omitempty"`
+	Metadata *V1ObjectMeta `json:"metadata,omitempty"`
+	Spec *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntentSpec `json:"spec,omitempty"`
+	Status *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntentStatus `json:"status,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent instantiates a new ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1PaymentIntent object
@@ -257,3 +257,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Paymen
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

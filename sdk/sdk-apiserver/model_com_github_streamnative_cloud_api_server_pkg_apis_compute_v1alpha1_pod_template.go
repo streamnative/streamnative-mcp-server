@@ -16,8 +16,8 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1PodTemplate PodTemplate defines the common pod configuration for Pods, including when used in StatefulSets.
 type ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1PodTemplate struct {
-	Metadata *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1ObjectMeta      `json:"metadata,omitempty"`
-	Spec     *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1PodTemplateSpec `json:"spec,omitempty"`
+	Metadata *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1ObjectMeta `json:"metadata,omitempty"`
+	Spec *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1PodTemplateSpec `json:"spec,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1PodTemplate instantiates a new ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1PodTemplate object
@@ -147,3 +147,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1PodTem
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

@@ -16,9 +16,9 @@ import (
 
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Domain struct for ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Domain
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Domain struct {
-	Name string                                                            `json:"name"`
-	Tls  *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1DomainTLS `json:"tls,omitempty"`
-	Type *string                                                           `json:"type,omitempty"`
+	Name string `json:"name"`
+	Tls *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1DomainTLS `json:"tls,omitempty"`
+	Type *string `json:"type,omitempty"`
 }
 
 // NewComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Domain instantiates a new ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Domain object
@@ -176,3 +176,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Domain) 
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

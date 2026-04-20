@@ -19,8 +19,8 @@ type ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1SubscriptionItem s
 	// Key is the item key within the subscription.
 	Key *string `json:"key,omitempty"`
 	// Metadata is an unstructured key value map stored with an item.
-	Metadata *map[string]string                                                         `json:"metadata,omitempty"`
-	Product  *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1ProductReference `json:"product,omitempty"`
+	Metadata *map[string]string `json:"metadata,omitempty"`
+	Product *ComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1ProductReference `json:"product,omitempty"`
 	// Quantity for this item.
 	Quantity *string `json:"quantity,omitempty"`
 }
@@ -222,3 +222,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisBillingV1alpha1Subscr
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

@@ -20,10 +20,10 @@ type ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkDeploymentSpe
 	// CommunityDeploymentTemplate defines the desired state of CommunityDeployment
 	CommunityTemplate map[string]interface{} `json:"communityTemplate,omitempty"`
 	// DefaultPulsarCluster is the default pulsar cluster to use. If not provided, the controller will use the first pulsar cluster from the workspace.
-	DefaultPulsarCluster *string                                                                         `json:"defaultPulsarCluster,omitempty"`
-	Labels               *map[string]string                                                              `json:"labels,omitempty"`
-	PoolMemberRef        *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1PoolMemberReference   `json:"poolMemberRef,omitempty"`
-	Template             *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentTemplate `json:"template,omitempty"`
+	DefaultPulsarCluster *string `json:"defaultPulsarCluster,omitempty"`
+	Labels *map[string]string `json:"labels,omitempty"`
+	PoolMemberRef *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1PoolMemberReference `json:"poolMemberRef,omitempty"`
+	Template *ComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1VvpDeploymentTemplate `json:"template,omitempty"`
 	// WorkspaceName is the reference to the workspace, and is required
 	WorkspaceName string `json:"workspaceName"`
 }
@@ -323,3 +323,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisComputeV1alpha1FlinkD
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

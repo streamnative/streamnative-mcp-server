@@ -17,7 +17,7 @@ import (
 // ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Gateway Gateway defines the access of pulsar cluster endpoint
 type ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Gateway struct {
 	// Access is the access type of the pulsar gateway, available values are public or private. It is immutable, with the default value public.
-	Access         *string                                                                `json:"access,omitempty"`
+	Access *string `json:"access,omitempty"`
 	PrivateService *ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PrivateService `json:"privateService,omitempty"`
 }
 
@@ -148,3 +148,5 @@ func (v *NullableComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1Gateway)
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+
