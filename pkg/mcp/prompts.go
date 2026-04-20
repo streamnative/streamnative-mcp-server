@@ -258,7 +258,9 @@ func HandleListSNCloudClusters(ctx context.Context, _ mcp.GetPromptRequest) (*mc
 		return nil, err
 	}
 
-	entries := append(pulsarEntries, kafkaEntries...)
+	entries := make([]sncloudClusterListEntry, 0, len(pulsarEntries)+len(kafkaEntries))
+	entries = append(entries, pulsarEntries...)
+	entries = append(entries, kafkaEntries...)
 	messages := buildSNCloudClusterPromptMessages(
 		fmt.Sprintf(
 			"There are %d StreamNative Cloud clusters in organization %s (%d PulsarCluster, %d KafkaCluster):",
