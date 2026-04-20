@@ -56,7 +56,7 @@ func RegisterContextTools(s *server.MCPServer, features []string, skipContextToo
 
 	// Add available-contexts tool
 	availableContextsTool := mcp.NewTool("sncloud_context_available_clusters",
-		mcp.WithDescription("Display the available pulsar clusters for the current organization on StreamNative Cloud. You can use `sncloud_context_use_cluster` to change the context to a specific cluster. You will need to ask for the USER to confirm the target context cluster if there are multiple clusters."),
+		mcp.WithDescription("Display the available StreamNative Cloud clusters for the current organization. You can use `sncloud_context_use_cluster` to change the context to a specific cluster. You will need to ask for the USER to confirm the target context cluster if there are multiple clusters."),
 	)
 	s.AddTool(availableContextsTool, handleAvailableContexts)
 }
@@ -115,7 +115,7 @@ func handleSetContext(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 func handleAvailableContexts(ctx context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	promptResponse, err := HandleListSNCloudClusters(ctx, mcp.GetPromptRequest{})
 	if err != nil || promptResponse == nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to list pulsar clusters: %v", err)), nil
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to list StreamNative Cloud clusters: %v", err)), nil
 	}
 
 	response := ""
