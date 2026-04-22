@@ -826,6 +826,51 @@ func TestHandleListSNCloudClustersIncludesClusterTypes(t *testing.T) {
 	}
 }
 
+func TestListSNCloudClusterEntriesIncludesPulsarAndKafkaClusters(t *testing.T) {
+	t.Parallel()
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/apis/cloud.streamnative.io/v1alpha1/namespaces/session-org/pulsarclusters":
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"items":[{"metadata":{"name":"pc-test","annotations":{"cloud.streamnative.io/engine":"ursa"}},"spec":{"instanceName":"inst-p","displayName":"Pulsar Display"},"status":{"broker":{"readyReplicas":1},"conditions":[{"type":"Ready","status":"True"}]}}]}`))
+		case "/apis/cloud.streamnative.io/v1alpha1/namespaces/session-org/kafkaclusters":
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"items":[{"metadata":{"name":"kc-test"},"spec":{"instanceName":"inst-k","displayName":"Kafka Display","location":"use1"},"status":{"conditions":[{"type":"Ready","status":"True"}]}}]}`))
+		default:
+			t.Fatalf("unexpected path %s", r.URL.Path)
+		}
+	}))
+	defer server.Close()
+
+	session, err := config.NewSNCloudSession(config.SNCloudContext{
+		JWTToken:     "token",
+		APIURL:       server.URL,
+		LogAPIURL:    server.URL,
+		Organization: "session-org",
+	})
+	if err != nil {
+		t.Fatalf("failed to create session: %v", err)
+	}
+
+	ctx := context.Background()
+	ctx = WithSNCloudSession(ctx, session)
+
+	entries, organization, err := ListSNCloudClusterEntries(ctx)
+	if err != nil {
+		t.Fatalf("expected no list error, got %v", err)
+	}
+	if organization != "session-org" {
+		t.Fatalf("expected organization session-org, got %q", organization)
+	}
+	if len(entries) != 2 {
+		t.Fatalf("expected two cluster entries, got %#v", entries)
+	}
+	if entries[0].ClusterType != "PulsarCluster" || entries[1].ClusterType != "KafkaCluster" {
+		t.Fatalf("expected typed pulsar and kafka entries, got %#v", entries)
+	}
+}
+
 func TestBuildSNCloudContextClusterPromptResultUsesPulsarClustersOnly(t *testing.T) {
 	t.Parallel()
 
