@@ -22,6 +22,7 @@ import (
 	"net/url"
 	"slices"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/admin"
@@ -55,8 +56,15 @@ const (
 	pulsarFailureDomainTemplateURI       = "pulsar://admin/v2/clusters/{cluster}/failureDomains/{domain}"
 	pulsarNSIsolationPoliciesTemplateURI = "pulsar://admin/v2/clusters/{cluster}/namespaceIsolationPolicies"
 	pulsarNSIsolationPolicyTemplateURI   = "pulsar://admin/v2/clusters/{cluster}/namespaceIsolationPolicies/{policy}"
+	pulsarTopicMetadataTemplateURI       = "pulsar://admin/v2/{domain}/{tenant}/{namespace}/{topic}/metadata"
+	pulsarTopicStatsTemplateURI          = "pulsar://admin/v2/{domain}/{tenant}/{namespace}/{topic}/stats"
+	pulsarTopicPartitionMetadataURI      = "pulsar://admin/v2/{domain}/{tenant}/{namespace}/{topic}/partitions"
+	pulsarTopicPolicyTemplateURI         = "pulsar://admin/v2/{domain}/{tenant}/{namespace}/{topic}/policies/{policy}"
+	pulsarTopicSchemaTemplateURI         = "pulsar://admin/v2/{domain}/{tenant}/{namespace}/{topic}/schema"
+	pulsarTopicSchemaVersionTemplateURI  = "pulsar://admin/v2/{domain}/{tenant}/{namespace}/{topic}/schema/{version}"
 	pulsarResourceJSONMIMEType           = "application/json"
 	pulsarResourceSummaryStringLimit     = 50
+	pulsarResourceRedactedValue          = "<redacted>"
 )
 
 type pulsarResourceKind string
@@ -80,16 +88,25 @@ const (
 	pulsarResourceKindFailureDomain        pulsarResourceKind = "failureDomain"
 	pulsarResourceKindNSIsolationPolicies  pulsarResourceKind = "namespaceIsolationPolicies"
 	pulsarResourceKindNSIsolationPolicy    pulsarResourceKind = "namespaceIsolationPolicy"
+	pulsarResourceKindTopicMetadata        pulsarResourceKind = "topicMetadata"
+	pulsarResourceKindTopicStats           pulsarResourceKind = "topicStats"
+	pulsarResourceKindTopicPartitions      pulsarResourceKind = "topicPartitions"
+	pulsarResourceKindTopicPolicy          pulsarResourceKind = "topicPolicy"
+	pulsarResourceKindTopicSchema          pulsarResourceKind = "topicSchema"
+	pulsarResourceKindTopicSchemaVersion   pulsarResourceKind = "topicSchemaVersion"
 )
 
 type pulsarResourceURI struct {
-	kind      pulsarResourceKind
-	tenant    string
-	namespace string
-	cluster   string
-	domain    string
-	policy    string
-	bundle    string
+	kind        pulsarResourceKind
+	tenant      string
+	namespace   string
+	topic       string
+	topicDomain string
+	cluster     string
+	domain      string
+	policy      string
+	bundle      string
+	version     int64
 }
 
 type pulsarResourceCatalog struct {
@@ -324,6 +341,80 @@ type pulsarNamespaceIsolationPolicy struct {
 	Data utils.NamespaceIsolationData `json:"data"`
 }
 
+type pulsarTopicMetadataResource struct {
+	Kind            string            `json:"kind"`
+	URI             string            `json:"uri"`
+	Topic           string            `json:"topic"`
+	Domain          string            `json:"domain"`
+	Tenant          string            `json:"tenant"`
+	Namespace       string            `json:"namespace"`
+	Name            string            `json:"name"`
+	PartitionIndex  int               `json:"partitionIndex"`
+	Properties      map[string]string `json:"properties,omitempty"`
+	PropertiesCount int               `json:"propertiesCount"`
+}
+
+type pulsarTopicPartitionMetadataResource struct {
+	Kind        string                         `json:"kind"`
+	URI         string                         `json:"uri"`
+	Topic       string                         `json:"topic"`
+	Metadata    utils.PartitionedTopicMetadata `json:"metadata"`
+	Partitioned bool                           `json:"partitioned"`
+}
+
+type pulsarTopicStatsResource struct {
+	Kind                string                  `json:"kind"`
+	URI                 string                  `json:"uri"`
+	Topic               string                  `json:"topic"`
+	Partitioned         bool                    `json:"partitioned"`
+	PartitionCount      int                     `json:"partitionCount"`
+	PartitionStatsCount int                     `json:"partitionStatsCount,omitempty"`
+	Stats               pulsarTopicStatsSummary `json:"stats"`
+}
+
+type pulsarTopicStatsSummary struct {
+	BacklogSize          int64   `json:"backlogSize,omitempty"`
+	MsgCounterIn         int64   `json:"msgInCounter,omitempty"`
+	MsgCounterOut        int64   `json:"msgOutCounter,omitempty"`
+	MsgRateIn            float64 `json:"msgRateIn"`
+	MsgRateOut           float64 `json:"msgRateOut"`
+	MsgThroughputIn      float64 `json:"msgThroughputIn"`
+	MsgThroughputOut     float64 `json:"msgThroughputOut"`
+	AverageMsgSize       float64 `json:"averageMsgSize"`
+	StorageSize          int64   `json:"storageSize"`
+	PublisherCount       int     `json:"publisherCount"`
+	SubscriptionCount    int     `json:"subscriptionCount"`
+	ReplicationCount     int     `json:"replicationCount"`
+	DeduplicationStatus  string  `json:"deduplicationStatus,omitempty"`
+	TopicCreationTime    int64   `json:"topicCreationTimeStamp,omitempty"`
+	LastPublishTimestamp int64   `json:"lastPublishTimestamp,omitempty"`
+}
+
+type pulsarTopicPolicyResource struct {
+	Kind   string `json:"kind"`
+	URI    string `json:"uri"`
+	Topic  string `json:"topic"`
+	Policy string `json:"policy"`
+	Value  any    `json:"value"`
+}
+
+type pulsarTopicSchemaResource struct {
+	Kind    string                   `json:"kind"`
+	URI     string                   `json:"uri"`
+	Topic   string                   `json:"topic"`
+	Version int64                    `json:"version"`
+	Schema  pulsarTopicSchemaSummary `json:"schema"`
+}
+
+type pulsarTopicSchemaSummary struct {
+	Name            string            `json:"name"`
+	Type            string            `json:"type"`
+	Schema          string            `json:"schema"`
+	Properties      map[string]string `json:"properties,omitempty"`
+	PropertiesCount int               `json:"propertiesCount"`
+	Timestamp       int64             `json:"timestamp,omitempty"`
+}
+
 // PulsarAddResources registers the read-only Pulsar MCP resource surface.
 func PulsarAddResources(s *server.MCPServer, features []string) {
 	resourceRegistrations, templateRegistrations := buildPulsarResourceRegistrations(features)
@@ -482,13 +573,65 @@ func buildPulsarResourceRegistrations(features []string) ([]server.ServerResourc
 	}
 
 	if pulsarResourceFeatureEnabled(features, FeaturePulsarAdminTopics) {
+		templates = append(templates,
+			server.ServerResourceTemplate{
+				Template: mcp.NewResourceTemplate(pulsarTopicsResourceTemplateURI, "Pulsar Topics by Namespace",
+					mcp.WithTemplateDescription("List topics for a Pulsar namespace."),
+					mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
+				),
+				Handler: handlePulsarTopicsResource,
+			},
+			server.ServerResourceTemplate{
+				Template: mcp.NewResourceTemplate(pulsarTopicMetadataTemplateURI, "Pulsar Topic Metadata",
+					mcp.WithTemplateDescription("Get parsed topic identity and sanitized topic properties."),
+					mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
+				),
+				Handler: handlePulsarTopicMetadataResource,
+			},
+			server.ServerResourceTemplate{
+				Template: mcp.NewResourceTemplate(pulsarTopicStatsTemplateURI, "Pulsar Topic Stats Summary",
+					mcp.WithTemplateDescription("Get a bounded topic statistics summary without publisher or consumer details."),
+					mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
+				),
+				Handler: handlePulsarTopicStatsResource,
+			},
+			server.ServerResourceTemplate{
+				Template: mcp.NewResourceTemplate(pulsarTopicPartitionMetadataURI, "Pulsar Topic Partition Metadata",
+					mcp.WithTemplateDescription("Get partition metadata for a Pulsar topic."),
+					mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
+				),
+				Handler: handlePulsarTopicPartitionMetadataResource,
+			},
+		)
+	}
+
+	if pulsarResourceFeatureEnabled(features, FeaturePulsarAdminTopicPolicy) {
 		templates = append(templates, server.ServerResourceTemplate{
-			Template: mcp.NewResourceTemplate(pulsarTopicsResourceTemplateURI, "Pulsar Topics by Namespace",
-				mcp.WithTemplateDescription("List topics for a Pulsar namespace."),
+			Template: mcp.NewResourceTemplate(pulsarTopicPolicyTemplateURI, "Pulsar Topic Policy",
+				mcp.WithTemplateDescription("Get a read-only topic policy value for a Pulsar topic."),
 				mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
 			),
-			Handler: handlePulsarTopicsResource,
+			Handler: handlePulsarTopicPolicyResource,
 		})
+	}
+
+	if pulsarResourceFeatureEnabled(features, FeaturePulsarAdminSchemas) {
+		templates = append(templates,
+			server.ServerResourceTemplate{
+				Template: mcp.NewResourceTemplate(pulsarTopicSchemaTemplateURI, "Pulsar Topic Latest Schema",
+					mcp.WithTemplateDescription("Get the latest schema and version for a Pulsar topic."),
+					mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
+				),
+				Handler: handlePulsarTopicSchemaResource,
+			},
+			server.ServerResourceTemplate{
+				Template: mcp.NewResourceTemplate(pulsarTopicSchemaVersionTemplateURI, "Pulsar Topic Schema Version",
+					mcp.WithTemplateDescription("Get a specific schema version for a Pulsar topic."),
+					mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
+				),
+				Handler: handlePulsarTopicSchemaVersionResource,
+			},
+		)
 	}
 
 	if pulsarResourceFeatureEnabled(features, FeaturePulsarAdminResourceQuotas) {
@@ -1076,6 +1219,254 @@ func handlePulsarNamespaceIsolationPolicyResource(ctx context.Context, request m
 	})
 }
 
+func handlePulsarTopicMetadataResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindTopicMetadata {
+		return nil, fmt.Errorf("unsupported Pulsar topic metadata resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminClient(session)
+	if err != nil {
+		return nil, err
+	}
+	topicName, err := buildPulsarResourceTopicName(parsed)
+	if err != nil {
+		return nil, err
+	}
+
+	properties, err := adminClient.Topics().GetProperties(*topicName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get properties for topic %q: %w", topicName.String(), err)
+	}
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarTopicMetadataResource{
+		Kind:            string(parsed.kind),
+		URI:             request.Params.URI,
+		Topic:           topicName.String(),
+		Domain:          parsed.topicDomain,
+		Tenant:          parsed.tenant,
+		Namespace:       parsed.namespace,
+		Name:            parsed.topic,
+		PartitionIndex:  topicName.GetPartitionIndex(),
+		Properties:      sanitizePulsarResourceStringMap(properties, pulsarResourceSummaryStringLimit),
+		PropertiesCount: len(properties),
+	})
+}
+
+func handlePulsarTopicStatsResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindTopicStats {
+		return nil, fmt.Errorf("unsupported Pulsar topic stats resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminClient(session)
+	if err != nil {
+		return nil, err
+	}
+	topicName, err := buildPulsarResourceTopicName(parsed)
+	if err != nil {
+		return nil, err
+	}
+
+	metadata, err := adminClient.Topics().GetMetadata(*topicName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get partition metadata for topic %q: %w", topicName.String(), err)
+	}
+
+	resource := pulsarTopicStatsResource{
+		Kind:           string(parsed.kind),
+		URI:            request.Params.URI,
+		Topic:          topicName.String(),
+		Partitioned:    metadata.Partitions > 0,
+		PartitionCount: metadata.Partitions,
+	}
+
+	statsOptions := utils.GetStatsOptions{
+		ExcludePublishers: true,
+		ExcludeConsumers:  true,
+	}
+	if metadata.Partitions > 0 {
+		stats, err := adminClient.Topics().GetPartitionedStatsWithOption(*topicName, false, statsOptions)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get partitioned stats for topic %q: %w", topicName.String(), err)
+		}
+		resource.PartitionStatsCount = len(stats.Partitions)
+		resource.Stats = summarizePulsarPartitionedTopicStats(stats)
+	} else {
+		stats, err := adminClient.Topics().GetStatsWithOption(*topicName, statsOptions)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get stats for topic %q: %w", topicName.String(), err)
+		}
+		resource.Stats = summarizePulsarTopicStats(stats)
+	}
+
+	return newPulsarJSONResourceContents(request.Params.URI, resource)
+}
+
+func handlePulsarTopicPartitionMetadataResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindTopicPartitions {
+		return nil, fmt.Errorf("unsupported Pulsar topic partition metadata resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminClient(session)
+	if err != nil {
+		return nil, err
+	}
+	topicName, err := buildPulsarResourceTopicName(parsed)
+	if err != nil {
+		return nil, err
+	}
+
+	metadata, err := adminClient.Topics().GetMetadata(*topicName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get partition metadata for topic %q: %w", topicName.String(), err)
+	}
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarTopicPartitionMetadataResource{
+		Kind:        string(parsed.kind),
+		URI:         request.Params.URI,
+		Topic:       topicName.String(),
+		Metadata:    metadata,
+		Partitioned: metadata.Partitions > 0,
+	})
+}
+
+func handlePulsarTopicPolicyResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindTopicPolicy {
+		return nil, fmt.Errorf("unsupported Pulsar topic policy resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminClient(session)
+	if err != nil {
+		return nil, err
+	}
+	topicName, err := buildPulsarResourceTopicName(parsed)
+	if err != nil {
+		return nil, err
+	}
+
+	value, err := readPulsarTopicPolicyValue(adminClient, *topicName, parsed.policy)
+	if err != nil {
+		return nil, err
+	}
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarTopicPolicyResource{
+		Kind:   string(parsed.kind),
+		URI:    request.Params.URI,
+		Topic:  topicName.String(),
+		Policy: parsed.policy,
+		Value:  value,
+	})
+}
+
+func handlePulsarTopicSchemaResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindTopicSchema {
+		return nil, fmt.Errorf("unsupported Pulsar topic schema resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminClient(session)
+	if err != nil {
+		return nil, err
+	}
+	topicName, err := buildPulsarResourceTopicName(parsed)
+	if err != nil {
+		return nil, err
+	}
+
+	schemaInfo, err := adminClient.Schemas().GetSchemaInfoWithVersion(topicName.String())
+	if err != nil {
+		return nil, fmt.Errorf("failed to get latest schema for topic %q: %w", topicName.String(), err)
+	}
+	if schemaInfo == nil || schemaInfo.SchemaInfo == nil {
+		return nil, fmt.Errorf("latest schema for topic %q is empty", topicName.String())
+	}
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarTopicSchemaResource{
+		Kind:    string(parsed.kind),
+		URI:     request.Params.URI,
+		Topic:   topicName.String(),
+		Version: schemaInfo.Version,
+		Schema:  summarizePulsarTopicSchema(schemaInfo.SchemaInfo),
+	})
+}
+
+func handlePulsarTopicSchemaVersionResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindTopicSchemaVersion {
+		return nil, fmt.Errorf("unsupported Pulsar topic schema version resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminClient(session)
+	if err != nil {
+		return nil, err
+	}
+	topicName, err := buildPulsarResourceTopicName(parsed)
+	if err != nil {
+		return nil, err
+	}
+
+	schemaInfo, err := adminClient.Schemas().GetSchemaInfoByVersion(topicName.String(), parsed.version)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get schema version %d for topic %q: %w", parsed.version, topicName.String(), err)
+	}
+	if schemaInfo == nil {
+		return nil, fmt.Errorf("schema version %d for topic %q is empty", parsed.version, topicName.String())
+	}
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarTopicSchemaResource{
+		Kind:    string(parsed.kind),
+		URI:     request.Params.URI,
+		Topic:   topicName.String(),
+		Version: parsed.version,
+		Schema:  summarizePulsarTopicSchema(schemaInfo),
+	})
+}
+
 func requirePulsarResourceSession(ctx context.Context) (*pulsarsession.Session, error) {
 	session := context2.GetPulsarSession(ctx)
 	if session == nil {
@@ -1258,6 +1649,169 @@ func summarizePulsarNamespaceIsolationPolicy(
 		SecondaryBrokersCount:  len(policy.Secondary),
 		AutoFailoverPolicyType: string(policy.AutoFailoverPolicy.PolicyType),
 	}
+}
+
+func summarizePulsarTopicStats(stats utils.TopicStats) pulsarTopicStatsSummary {
+	return pulsarTopicStatsSummary{
+		BacklogSize:          stats.BacklogSize,
+		MsgCounterIn:         stats.MsgCounterIn,
+		MsgCounterOut:        stats.MsgCounterOut,
+		MsgRateIn:            stats.MsgRateIn,
+		MsgRateOut:           stats.MsgRateOut,
+		MsgThroughputIn:      stats.MsgThroughputIn,
+		MsgThroughputOut:     stats.MsgThroughputOut,
+		AverageMsgSize:       stats.AverageMsgSize,
+		StorageSize:          stats.StorageSize,
+		PublisherCount:       len(stats.Publishers),
+		SubscriptionCount:    len(stats.Subscriptions),
+		ReplicationCount:     len(stats.Replication),
+		DeduplicationStatus:  stats.DeDuplicationStatus,
+		TopicCreationTime:    stats.TopicCreationTimeStamp,
+		LastPublishTimestamp: stats.LastPublishTimestamp,
+	}
+}
+
+func summarizePulsarPartitionedTopicStats(stats utils.PartitionedTopicStats) pulsarTopicStatsSummary {
+	return pulsarTopicStatsSummary{
+		MsgRateIn:            stats.MsgRateIn,
+		MsgRateOut:           stats.MsgRateOut,
+		MsgThroughputIn:      stats.MsgThroughputIn,
+		MsgThroughputOut:     stats.MsgThroughputOut,
+		AverageMsgSize:       stats.AverageMsgSize,
+		StorageSize:          stats.StorageSize,
+		PublisherCount:       len(stats.Publishers),
+		SubscriptionCount:    len(stats.Subscriptions),
+		ReplicationCount:     len(stats.Replication),
+		DeduplicationStatus:  stats.DeDuplicationStatus,
+		TopicCreationTime:    stats.TopicCreationTimeStamp,
+		LastPublishTimestamp: stats.LastPublishTimestamp,
+	}
+}
+
+func summarizePulsarTopicSchema(schemaInfo *utils.SchemaInfo) pulsarTopicSchemaSummary {
+	if schemaInfo == nil {
+		return pulsarTopicSchemaSummary{}
+	}
+	return pulsarTopicSchemaSummary{
+		Name:            schemaInfo.Name,
+		Type:            schemaInfo.Type,
+		Schema:          string(schemaInfo.Schema),
+		Properties:      sanitizePulsarResourceStringMap(schemaInfo.Properties, pulsarResourceSummaryStringLimit),
+		PropertiesCount: len(schemaInfo.Properties),
+		Timestamp:       schemaInfo.Timestamp,
+	}
+}
+
+func readPulsarTopicPolicyValue(adminClient cmdutils.Client, topicName utils.TopicName, policy string) (any, error) {
+	switch policy {
+	case "retention":
+		value, err := adminClient.Topics().GetRetention(topicName, false)
+		return value, wrapPulsarTopicPolicyReadError(topicName, policy, err)
+	case "message-ttl":
+		value, err := adminClient.Topics().GetMessageTTL(topicName)
+		return value, wrapPulsarTopicPolicyReadError(topicName, policy, err)
+	case "max-producers":
+		value, err := adminClient.Topics().GetMaxProducers(topicName)
+		return value, wrapPulsarTopicPolicyReadError(topicName, policy, err)
+	case "max-consumers":
+		value, err := adminClient.Topics().GetMaxConsumers(topicName)
+		return value, wrapPulsarTopicPolicyReadError(topicName, policy, err)
+	case "max-unacked-messages-per-consumer":
+		value, err := adminClient.Topics().GetMaxUnackMessagesPerConsumer(topicName)
+		return value, wrapPulsarTopicPolicyReadError(topicName, policy, err)
+	case "max-unacked-messages-per-subscription":
+		value, err := adminClient.Topics().GetMaxUnackMessagesPerSubscription(topicName)
+		return value, wrapPulsarTopicPolicyReadError(topicName, policy, err)
+	case "persistence":
+		value, err := adminClient.Topics().GetPersistence(topicName)
+		return value, wrapPulsarTopicPolicyReadError(topicName, policy, err)
+	case "delayed-delivery":
+		value, err := adminClient.Topics().GetDelayedDelivery(topicName)
+		return value, wrapPulsarTopicPolicyReadError(topicName, policy, err)
+	case "dispatch-rate":
+		value, err := adminClient.Topics().GetDispatchRate(topicName)
+		return value, wrapPulsarTopicPolicyReadError(topicName, policy, err)
+	case "subscription-dispatch-rate":
+		value, err := adminClient.Topics().GetSubscriptionDispatchRate(topicName)
+		return value, wrapPulsarTopicPolicyReadError(topicName, policy, err)
+	case "deduplication":
+		value, err := adminClient.Topics().GetDeduplicationStatus(topicName)
+		return value, wrapPulsarTopicPolicyReadError(topicName, policy, err)
+	case "backlog-quotas":
+		value, err := adminClient.Topics().GetBacklogQuotaMap(topicName, false)
+		return value, wrapPulsarTopicPolicyReadError(topicName, policy, err)
+	case "compaction-threshold":
+		value, err := adminClient.Topics().GetCompactionThreshold(topicName, false)
+		return value, wrapPulsarTopicPolicyReadError(topicName, policy, err)
+	case "publish-rate":
+		value, err := adminClient.Topics().GetPublishRate(topicName)
+		return value, wrapPulsarTopicPolicyReadError(topicName, policy, err)
+	case "inactive-topic-policies":
+		value, err := adminClient.Topics().GetInactiveTopicPolicies(topicName, false)
+		return value, wrapPulsarTopicPolicyReadError(topicName, policy, err)
+	default:
+		return nil, fmt.Errorf("unsupported Pulsar topic policy %q", policy)
+	}
+}
+
+func wrapPulsarTopicPolicyReadError(topicName utils.TopicName, policy string, err error) error {
+	if err == nil {
+		return nil
+	}
+	return fmt.Errorf("failed to get topic policy %q for topic %q: %w", policy, topicName.String(), err)
+}
+
+func buildPulsarResourceTopicName(parsed pulsarResourceURI) (*utils.TopicName, error) {
+	topicName := fmt.Sprintf("%s://%s/%s/%s", parsed.topicDomain, parsed.tenant, parsed.namespace, parsed.topic)
+	return utils.GetTopicName(topicName)
+}
+
+func sanitizePulsarResourceStringMap(values map[string]string, limit int) map[string]string {
+	if len(values) == 0 || limit <= 0 {
+		return nil
+	}
+
+	keys := make([]string, 0, len(values))
+	for key := range values {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	if len(keys) > limit {
+		keys = keys[:limit]
+	}
+
+	sanitized := make(map[string]string, len(keys))
+	for _, key := range keys {
+		if isSensitivePulsarResourceKey(key) {
+			sanitized[key] = pulsarResourceRedactedValue
+			continue
+		}
+		sanitized[key] = values[key]
+	}
+	return sanitized
+}
+
+func isSensitivePulsarResourceKey(key string) bool {
+	normalized := strings.NewReplacer("-", "", "_", "", ".", "").Replace(strings.ToLower(key))
+	sensitiveFragments := []string{
+		"token",
+		"secret",
+		"password",
+		"passwd",
+		"credential",
+		"privatekey",
+		"clientkey",
+		"tlskey",
+		"authparams",
+		"authenticationparameters",
+		"keyfile",
+	}
+	for _, fragment := range sensitiveFragments {
+		if strings.Contains(normalized, fragment) {
+			return true
+		}
+	}
+	return false
 }
 
 func sortedLimitedStrings(values map[string]struct{}, limit int) []string {
@@ -1550,8 +2104,106 @@ func parsePulsarAdminResourceURI(rawURI, path string) (pulsarResourceURI, error)
 			cluster: cluster,
 			policy:  policy,
 		}, nil
+	case len(parts) >= 6 && parts[0] == "v2" && isPulsarResourceTopicDomain(parts[1]):
+		return parsePulsarTopicAdminResourceURI(rawURI, parts)
 	default:
 		return pulsarResourceURI{}, fmt.Errorf("unsupported Pulsar admin resource URI %q", rawURI)
+	}
+}
+
+func parsePulsarTopicAdminResourceURI(rawURI string, parts []string) (pulsarResourceURI, error) {
+	topicDomain := parts[1]
+	tenant := parts[2]
+	namespace := parts[3]
+	topic := parts[4]
+	if err := validatePulsarResourcePathSegment("domain", topicDomain); err != nil {
+		return pulsarResourceURI{}, err
+	}
+	if err := validatePulsarResourcePathSegment("tenant", tenant); err != nil {
+		return pulsarResourceURI{}, err
+	}
+	if err := validatePulsarResourcePathSegment("namespace", namespace); err != nil {
+		return pulsarResourceURI{}, err
+	}
+	if err := validatePulsarResourcePathSegment("topic", topic); err != nil {
+		return pulsarResourceURI{}, err
+	}
+
+	base := pulsarResourceURI{
+		tenant:      tenant,
+		namespace:   namespace,
+		topic:       topic,
+		topicDomain: topicDomain,
+	}
+	if _, err := buildPulsarResourceTopicName(base); err != nil {
+		return pulsarResourceURI{}, fmt.Errorf("invalid Pulsar topic resource URI %q: %w", rawURI, err)
+	}
+
+	switch {
+	case len(parts) == 6 && parts[5] == "metadata":
+		base.kind = pulsarResourceKindTopicMetadata
+		return base, nil
+	case len(parts) == 6 && parts[5] == "stats":
+		base.kind = pulsarResourceKindTopicStats
+		return base, nil
+	case len(parts) == 6 && parts[5] == "partitions":
+		base.kind = pulsarResourceKindTopicPartitions
+		return base, nil
+	case len(parts) == 7 && parts[5] == "policies":
+		policy := parts[6]
+		if err := validatePulsarResourcePathSegment("policy", policy); err != nil {
+			return pulsarResourceURI{}, err
+		}
+		if !isSupportedPulsarTopicPolicy(policy) {
+			return pulsarResourceURI{}, fmt.Errorf("unsupported Pulsar topic policy %q in resource URI %q", policy, rawURI)
+		}
+		base.kind = pulsarResourceKindTopicPolicy
+		base.policy = policy
+		return base, nil
+	case len(parts) == 6 && parts[5] == "schema":
+		base.kind = pulsarResourceKindTopicSchema
+		return base, nil
+	case len(parts) == 7 && parts[5] == "schema":
+		versionSegment := parts[6]
+		if err := validatePulsarResourcePathSegment("version", versionSegment); err != nil {
+			return pulsarResourceURI{}, err
+		}
+		version, err := strconv.ParseInt(versionSegment, 10, 64)
+		if err != nil || version < 0 {
+			return pulsarResourceURI{}, fmt.Errorf("invalid Pulsar schema version %q in resource URI %q", versionSegment, rawURI)
+		}
+		base.kind = pulsarResourceKindTopicSchemaVersion
+		base.version = version
+		return base, nil
+	default:
+		return pulsarResourceURI{}, fmt.Errorf("unsupported Pulsar topic admin resource URI %q", rawURI)
+	}
+}
+
+func isPulsarResourceTopicDomain(value string) bool {
+	return value == "persistent" || value == "non-persistent"
+}
+
+func isSupportedPulsarTopicPolicy(policy string) bool {
+	switch policy {
+	case "retention",
+		"message-ttl",
+		"max-producers",
+		"max-consumers",
+		"max-unacked-messages-per-consumer",
+		"max-unacked-messages-per-subscription",
+		"persistence",
+		"delayed-delivery",
+		"dispatch-rate",
+		"subscription-dispatch-rate",
+		"deduplication",
+		"backlog-quotas",
+		"compaction-threshold",
+		"publish-rate",
+		"inactive-topic-policies":
+		return true
+	default:
+		return false
 	}
 }
 

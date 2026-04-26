@@ -77,6 +77,12 @@ func TestPulsarAddResourcesFeatureGate(t *testing.T) {
 			pulsarNamespacesResourceTemplateURI,
 			pulsarNamespaceResourceTemplateURI,
 			pulsarTopicsResourceTemplateURI,
+			pulsarTopicMetadataTemplateURI,
+			pulsarTopicStatsTemplateURI,
+			pulsarTopicPartitionMetadataURI,
+			pulsarTopicPolicyTemplateURI,
+			pulsarTopicSchemaTemplateURI,
+			pulsarTopicSchemaVersionTemplateURI,
 			pulsarResourceQuotaTemplateURI,
 			pulsarClusterResourceTemplateURI,
 			pulsarBrokersResourceTemplateURI,
@@ -143,6 +149,40 @@ func TestPulsarAddResourcesFeatureGate(t *testing.T) {
 			pulsarTenantResourceTemplateURI,
 			pulsarNamespaceResourceTemplateURI,
 			pulsarResourceQuotaTemplateURI,
+		}, templateURIs)
+	})
+
+	t.Run("topic schema feature gates register selected resource families", func(t *testing.T) {
+		s := server.NewMCPServer("test", "0.0.1", server.WithResourceCapabilities(true, true))
+		PulsarAddResources(s, []string{
+			string(FeaturePulsarAdminTopics),
+			string(FeaturePulsarAdminTopicPolicy),
+			string(FeaturePulsarAdminSchemas),
+		})
+
+		resources := listPulsarTestResources(t, s)
+		resourceURIs := make([]string, 0, len(resources))
+		for _, resource := range resources {
+			resourceURIs = append(resourceURIs, resource.URI)
+		}
+		assert.ElementsMatch(t, []string{
+			pulsarResourceContextURI,
+			pulsarResourceCatalogURI,
+		}, resourceURIs)
+
+		templates := listPulsarTestResourceTemplates(t, s)
+		templateURIs := make([]string, 0, len(templates))
+		for _, template := range templates {
+			templateURIs = append(templateURIs, template.URITemplate.Raw())
+		}
+		assert.ElementsMatch(t, []string{
+			pulsarTopicsResourceTemplateURI,
+			pulsarTopicMetadataTemplateURI,
+			pulsarTopicStatsTemplateURI,
+			pulsarTopicPartitionMetadataURI,
+			pulsarTopicPolicyTemplateURI,
+			pulsarTopicSchemaTemplateURI,
+			pulsarTopicSchemaVersionTemplateURI,
 		}, templateURIs)
 	})
 }
@@ -358,6 +398,159 @@ func TestPulsarTenantNamespaceResourceFamilyRead(t *testing.T) {
 	assert.False(t, quotaPayload.Quota.Dynamic)
 }
 
+func TestPulsarTopicSchemaResourceFamilyRead(t *testing.T) {
+	t.Parallel()
+
+	adminServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "unexpected method", http.StatusMethodNotAllowed)
+			return
+		}
+
+		switch r.URL.Path {
+		case "/admin/v2/persistent/public/default/events/properties":
+			writePulsarTestJSON(w, `{
+				"owner": "team-a",
+				"token": "secret-token"
+			}`)
+		case "/admin/v2/persistent/public/default/events/partitions":
+			writePulsarTestJSON(w, `{"partitions": 2}`)
+		case "/admin/v2/persistent/public/default/events/partitioned-stats":
+			if r.URL.Query().Get("perPartition") != "false" ||
+				r.URL.Query().Get("excludePublishers") != "true" ||
+				r.URL.Query().Get("excludeConsumers") != "true" {
+				http.Error(w, "unexpected stats query "+r.URL.RawQuery, http.StatusBadRequest)
+				return
+			}
+			writePulsarTestJSON(w, `{
+				"msgRateIn": 12.5,
+				"msgRateOut": 4.5,
+				"msgThroughputIn": 1024,
+				"msgThroughputOut": 512,
+				"averageMsgSize": 128,
+				"storageSize": 4096,
+				"publishers": [{"producerName": "hidden-producer"}],
+				"subscriptions": {
+					"sub-a": {"msgBacklog": 5}
+				},
+				"replication": {
+					"use": {"connected": true}
+				},
+				"deduplicationStatus": "Enabled",
+				"metadata": {"partitions": 2},
+				"partitions": {
+					"persistent://public/default/events-partition-0": {
+						"msgRateIn": 1
+					}
+				},
+				"topicCreationTimeStamp": 11,
+				"lastPublishTimestamp": 22
+			}`)
+		case "/admin/v2/persistent/public/default/events/retention":
+			if r.URL.Query().Get("applied") != "false" {
+				http.Error(w, "unexpected retention query "+r.URL.RawQuery, http.StatusBadRequest)
+				return
+			}
+			writePulsarTestJSON(w, `{
+				"retentionTimeInMinutes": 60,
+				"retentionSizeInMB": 1024
+			}`)
+		case "/admin/v2/schemas/public/default/events/schema":
+			writePulsarTestJSON(w, `{
+				"version": 8,
+				"type": "JSON",
+				"timestamp": 12345,
+				"data": "{\"type\":\"record\",\"name\":\"Event\",\"fields\":[]}",
+				"properties": {
+					"owner": "team-a",
+					"password": "secret-password"
+				}
+			}`)
+		case "/admin/v2/schemas/public/default/events/schema/7":
+			writePulsarTestJSON(w, `{
+				"version": 7,
+				"type": "STRING",
+				"timestamp": 12340,
+				"data": "string-schema",
+				"properties": {
+					"owner": "team-b"
+				}
+			}`)
+		default:
+			http.Error(w, "unexpected path "+r.URL.Path, http.StatusNotFound)
+		}
+	}))
+	defer adminServer.Close()
+
+	cfg := &cmdutils.ClusterConfig{WebServiceURL: adminServer.URL}
+	ctx := WithPulsarSession(context.Background(), &pulsarsession.Session{
+		Ctx:             pulsarsession.PulsarContext{WebServiceURL: adminServer.URL},
+		PulsarCtlConfig: cfg,
+		AdminClient:     cfg.Client(pulsaradminconfig.V2),
+	})
+
+	s := server.NewMCPServer("test", "0.0.1", server.WithResourceCapabilities(true, true))
+	PulsarAddResources(s, []string{string(FeatureAllPulsar)})
+
+	metadataContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v2/persistent/public/default/events/metadata")
+	assert.NotContains(t, metadataContent.Text, "secret-token")
+	var metadataPayload pulsarTopicMetadataResource
+	require.NoError(t, json.Unmarshal([]byte(metadataContent.Text), &metadataPayload))
+	assert.Equal(t, "topicMetadata", metadataPayload.Kind)
+	assert.Equal(t, "persistent://public/default/events", metadataPayload.Topic)
+	assert.Equal(t, "persistent", metadataPayload.Domain)
+	assert.Equal(t, "events", metadataPayload.Name)
+	assert.Equal(t, 2, metadataPayload.PropertiesCount)
+	assert.Equal(t, "team-a", metadataPayload.Properties["owner"])
+	assert.Equal(t, pulsarResourceRedactedValue, metadataPayload.Properties["token"])
+
+	partitionsContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v2/persistent/public/default/events/partitions")
+	var partitionsPayload pulsarTopicPartitionMetadataResource
+	require.NoError(t, json.Unmarshal([]byte(partitionsContent.Text), &partitionsPayload))
+	assert.True(t, partitionsPayload.Partitioned)
+	assert.Equal(t, 2, partitionsPayload.Metadata.Partitions)
+
+	statsContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v2/persistent/public/default/events/stats")
+	assert.NotContains(t, statsContent.Text, "hidden-producer")
+	var statsPayload pulsarTopicStatsResource
+	require.NoError(t, json.Unmarshal([]byte(statsContent.Text), &statsPayload))
+	assert.True(t, statsPayload.Partitioned)
+	assert.Equal(t, 2, statsPayload.PartitionCount)
+	assert.Equal(t, 1, statsPayload.PartitionStatsCount)
+	assert.Equal(t, 12.5, statsPayload.Stats.MsgRateIn)
+	assert.Equal(t, 1, statsPayload.Stats.PublisherCount)
+	assert.Equal(t, 1, statsPayload.Stats.SubscriptionCount)
+
+	policyContent := readPulsarTestResource(
+		t,
+		ctx,
+		s,
+		"pulsar://admin/v2/persistent/public/default/events/policies/retention",
+	)
+	var policyPayload pulsarTopicPolicyResource
+	require.NoError(t, json.Unmarshal([]byte(policyContent.Text), &policyPayload))
+	assert.Equal(t, "retention", policyPayload.Policy)
+	policyValue, ok := policyPayload.Value.(map[string]any)
+	require.True(t, ok)
+	assert.Equal(t, float64(60), policyValue["retentionTimeInMinutes"])
+
+	latestSchemaContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v2/persistent/public/default/events/schema")
+	assert.NotContains(t, latestSchemaContent.Text, "secret-password")
+	var latestSchemaPayload pulsarTopicSchemaResource
+	require.NoError(t, json.Unmarshal([]byte(latestSchemaContent.Text), &latestSchemaPayload))
+	assert.Equal(t, int64(8), latestSchemaPayload.Version)
+	assert.Equal(t, "JSON", latestSchemaPayload.Schema.Type)
+	assert.Contains(t, latestSchemaPayload.Schema.Schema, `"name":"Event"`)
+	assert.Equal(t, pulsarResourceRedactedValue, latestSchemaPayload.Schema.Properties["password"])
+
+	versionSchemaContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v2/persistent/public/default/events/schema/7")
+	var versionSchemaPayload pulsarTopicSchemaResource
+	require.NoError(t, json.Unmarshal([]byte(versionSchemaContent.Text), &versionSchemaPayload))
+	assert.Equal(t, int64(7), versionSchemaPayload.Version)
+	assert.Equal(t, "STRING", versionSchemaPayload.Schema.Type)
+	assert.Equal(t, "string-schema", versionSchemaPayload.Schema.Schema)
+}
+
 func TestPulsarClusterResourceFamilyRead(t *testing.T) {
 	t.Parallel()
 
@@ -549,6 +742,11 @@ func TestParsePulsarResourceURIRejectsMalformedOrUnsupportedURI(t *testing.T) {
 		"pulsar://admin/v2/resource-quotas/public/default",
 		"pulsar://admin/v2/broker-stats/topics",
 		"pulsar://admin/v2/brokers",
+		"pulsar://admin/v2/persistent/public/default/events",
+		"pulsar://admin/v2/invalid/public/default/events/stats",
+		"pulsar://admin/v2/persistent/public/default/events/policies/unsupported",
+		"pulsar://admin/v2/persistent/public/default/events/schema/not-a-number",
+		"pulsar://admin/v2/persistent/public/default/events/schema/-1",
 	}
 
 	for _, rawURI := range tests {
