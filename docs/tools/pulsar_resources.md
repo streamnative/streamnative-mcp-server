@@ -1,6 +1,14 @@
 # Pulsar Resources
 
-The Pulsar resource surface exposes read-only MCP resources for lightweight cluster context and representative large collections.
+The Pulsar resource surface exposes read-only MCP resources for lightweight cluster context, discovery, and bounded admin summaries. It is separate from Pulsar tools: tools are command-oriented operations, while resources only read current state and return JSON snapshots.
+
+## Registration and discovery
+
+Pulsar resources are registered next to the existing Pulsar tool wiring and use the same Pulsar admin feature gates as the matching tool families. No Pulsar resources are registered for unrelated features or for `pulsar-client` alone.
+
+`pulsar://context` and `pulsar://resources` are registered only when at least one Pulsar admin resource family is enabled. `pulsar://resources` returns the catalog of resource URIs and URI templates actually registered for the active feature set.
+
+All resource reads except `pulsar://resources` require a Pulsar session in the request context. Missing sessions return a clear error instead of falling back to environment state.
 
 ## Static resources
 
@@ -56,10 +64,33 @@ All static resources return `application/json`.
 - `pulsar://admin/v2/clusters/{cluster}/namespaceIsolationPolicies`: lists namespace isolation policies for a cluster.
 - `pulsar://admin/v2/clusters/{cluster}/namespaceIsolationPolicies/{policy}`: gets a namespace isolation policy.
 
-Template reads return `application/json` and require a Pulsar session in the request context. Topic templates accept `domain` values of `persistent` or `non-persistent`; `topic` is the local topic name path segment. Subscription cursor resources are persistent-only because they are backed by topic internal stats. Workload and package templates use Pulsar admin v3 APIs; functions worker resources use the current Pulsar admin v2 worker endpoints.
+Template reads return `application/json`. Topic templates accept `domain` values of `persistent` or `non-persistent`; `topic` is the local topic name path segment. Subscription cursor resources are persistent-only because they are backed by topic internal stats. Workload and package templates use Pulsar admin v3 APIs; functions worker resources use the current Pulsar admin v2 worker endpoints.
 
-The resource list is feature-gated. Tenant and namespace resources require the matching Pulsar admin feature such as `pulsar-admin-tenants`, `pulsar-admin-namespaces`, `pulsar-admin-namespace-policy`, `pulsar-admin-topics`, or `pulsar-admin-resource-quotas`. Topic metadata, stats, and partition metadata resources require `pulsar-admin-topics`; topic policy resources require `pulsar-admin-topic-policy`; schema resources require `pulsar-admin-schemas`; subscription resources require `pulsar-admin-subscriptions`. Workload resources require the matching feature such as `pulsar-admin-functions`, `pulsar-admin-sources`, `pulsar-admin-sinks`, `pulsar-admin-packages`, or `pulsar-admin-functions-worker`. Cluster resources require the matching Pulsar admin feature such as `pulsar-admin-clusters`, `pulsar-admin-brokers`, `pulsar-admin-broker-stats`, `pulsar-admin-brokers-status`, or `pulsar-admin-ns-isolation-policy`. All resources are also enabled by one of `pulsar-admin`, `all-pulsar`, or `all`.
+## Feature gates
+
+The following feature gates register Pulsar resources. Each listed family is also enabled by `pulsar-admin`, `all-pulsar`, or `all`.
+
+| Feature gate | Resource surface |
+|--------------|------------------|
+| `pulsar-admin-tenants` | tenant collection and tenant configuration resources |
+| `pulsar-admin-namespaces` | namespace collection by tenant |
+| `pulsar-admin-namespace-policy` | namespace policy resource |
+| `pulsar-admin-topics` | namespace topic collection, topic metadata, topic stats summary, and partition metadata resources |
+| `pulsar-admin-topic-policy` | read-only topic policy resource |
+| `pulsar-admin-schemas` | latest schema and schema version resources |
+| `pulsar-admin-subscriptions` | subscription collection, bounded subscription stats, backlog summary, and persistent cursor summary resources |
+| `pulsar-admin-resource-quotas` | default resource quota and namespace bundle resource quota resources |
+| `pulsar-admin-brokers-status` | broker or proxy status resource |
+| `pulsar-admin-clusters` | cluster collection, cluster configuration, failure-domain collection, and failure-domain resources |
+| `pulsar-admin-brokers` | broker collection by cluster |
+| `pulsar-admin-broker-stats` | broker stats summary resource |
+| `pulsar-admin-ns-isolation-policy` | namespace isolation policy collection and policy resources |
+| `pulsar-admin-functions` | function collection, metadata, status, and stats resources |
+| `pulsar-admin-sources` | source collection, metadata, and status resources |
+| `pulsar-admin-sinks` | sink collection, metadata, and status resources |
+| `pulsar-admin-packages` | package collection, package version collection, and package metadata resources |
+| `pulsar-admin-functions-worker` | functions worker cluster, leader, assignments, function stats, and metrics resources |
 
 ## Safety
 
-Resource handlers are read-only. They do not consume messages, commit cursors, clear backlog, unload topics, split bundles, delete resources, start workloads, or stop workloads. They also do not return tokens, auth params, key files, TLS private keys, or secret values.
+Resource handlers are read-only regardless of whether write-capable Pulsar tools are enabled. They do not consume messages, commit cursors, clear backlog, unload topics, split bundles, delete resources, start workloads, or stop workloads. They also do not return tokens, auth params, key files, TLS private keys, or secret values.

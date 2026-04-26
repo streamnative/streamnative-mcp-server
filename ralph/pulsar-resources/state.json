@@ -2,31 +2,34 @@
   "version": 1,
   "loop_name": "pulsar-resources",
   "created_at": "2026-04-26",
-  "updated_at": "2026-04-26T15:37:18Z",
-  "current_iteration": 6,
+  "updated_at": "2026-04-26T15:41:23Z",
+  "current_iteration": 7,
   "completed_items": [
     "protocol-foundation",
     "cluster-resources",
     "tenant-namespace-resources",
     "topic-schema-resources",
     "subscription-resources",
-    "workload-resources"
+    "workload-resources",
+    "docs-and-final-verification"
   ],
   "blocked_items": [],
   "last_result": {
-    "iteration": 6,
-    "item_id": "workload-resources",
-    "lane": "family",
+    "iteration": 7,
+    "item_id": "docs-and-final-verification",
+    "lane": "docs",
     "status": "implemented",
-    "summary": "Added read-only Pulsar MCP resources for functions, sources, sinks, packages, and functions worker state, with URI validation, feature-gated registration, bounded JSON summaries, secret redaction, focused handler tests, and docs updates.",
+    "summary": "Updated Pulsar resource documentation in README and docs/tools to reflect the implemented read-only resource surface, feature gates, URI/template discovery, session requirements, and safety constraints.",
     "tests_run": [
-      "go test ./pkg/mcp/...",
-      "git diff --check"
+      "git diff --check",
+      "go test -race ./...",
+      "make build"
     ],
     "runner_verification": [
-      "go test ./pkg/mcp/..."
+      "go test -race ./...",
+      "make build"
     ],
-    "completed_at": "2026-04-26T15:37:18Z"
+    "completed_at": "2026-04-26T15:41:23Z"
   },
   "lane_history": [
     {
@@ -119,6 +122,23 @@
         "go test ./pkg/mcp/..."
       ],
       "completed_at": "2026-04-26T15:37:18Z"
+    },
+    {
+      "iteration": 7,
+      "item_id": "docs-and-final-verification",
+      "lane": "docs",
+      "status": "implemented",
+      "summary": "Updated Pulsar resource documentation in README and docs/tools to reflect the implemented read-only resource surface, feature gates, URI/template discovery, session requirements, and safety constraints.",
+      "tests_run": [
+        "git diff --check",
+        "go test -race ./...",
+        "make build"
+      ],
+      "runner_verification": [
+        "go test -race ./...",
+        "make build"
+      ],
+      "completed_at": "2026-04-26T15:41:23Z"
     }
   ]
 }
