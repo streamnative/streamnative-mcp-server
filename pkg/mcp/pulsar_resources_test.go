@@ -83,6 +83,10 @@ func TestPulsarAddResourcesFeatureGate(t *testing.T) {
 			pulsarTopicPolicyTemplateURI,
 			pulsarTopicSchemaTemplateURI,
 			pulsarTopicSchemaVersionTemplateURI,
+			pulsarSubscriptionsTemplateURI,
+			pulsarSubscriptionStatsTemplateURI,
+			pulsarSubscriptionBacklogTemplateURI,
+			pulsarSubscriptionCursorTemplateURI,
 			pulsarResourceQuotaTemplateURI,
 			pulsarClusterResourceTemplateURI,
 			pulsarBrokersResourceTemplateURI,
@@ -183,6 +187,33 @@ func TestPulsarAddResourcesFeatureGate(t *testing.T) {
 			pulsarTopicPolicyTemplateURI,
 			pulsarTopicSchemaTemplateURI,
 			pulsarTopicSchemaVersionTemplateURI,
+		}, templateURIs)
+	})
+
+	t.Run("subscription feature registers subscription resource family only", func(t *testing.T) {
+		s := server.NewMCPServer("test", "0.0.1", server.WithResourceCapabilities(true, true))
+		PulsarAddResources(s, []string{string(FeaturePulsarAdminSubscriptions)})
+
+		resources := listPulsarTestResources(t, s)
+		resourceURIs := make([]string, 0, len(resources))
+		for _, resource := range resources {
+			resourceURIs = append(resourceURIs, resource.URI)
+		}
+		assert.ElementsMatch(t, []string{
+			pulsarResourceContextURI,
+			pulsarResourceCatalogURI,
+		}, resourceURIs)
+
+		templates := listPulsarTestResourceTemplates(t, s)
+		templateURIs := make([]string, 0, len(templates))
+		for _, template := range templates {
+			templateURIs = append(templateURIs, template.URITemplate.Raw())
+		}
+		assert.ElementsMatch(t, []string{
+			pulsarSubscriptionsTemplateURI,
+			pulsarSubscriptionStatsTemplateURI,
+			pulsarSubscriptionBacklogTemplateURI,
+			pulsarSubscriptionCursorTemplateURI,
 		}, templateURIs)
 	})
 }
@@ -551,6 +582,175 @@ func TestPulsarTopicSchemaResourceFamilyRead(t *testing.T) {
 	assert.Equal(t, "string-schema", versionSchemaPayload.Schema.Schema)
 }
 
+func TestPulsarSubscriptionResourceFamilyRead(t *testing.T) {
+	t.Parallel()
+
+	adminServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "unexpected method", http.StatusMethodNotAllowed)
+			return
+		}
+
+		switch r.URL.Path {
+		case "/admin/v2/persistent/public/default/events/subscriptions":
+			writePulsarTestJSON(w, `["sub-a","sub-b"]`)
+		case "/admin/v2/persistent/public/default/events/partitions":
+			writePulsarTestJSON(w, `{"partitions": 0}`)
+		case "/admin/v2/persistent/public/default/events/stats":
+			if r.URL.Query().Get("excludePublishers") != "true" ||
+				r.URL.Query().Get("excludeConsumers") != "true" {
+				http.Error(w, "unexpected stats query "+r.URL.RawQuery, http.StatusBadRequest)
+				return
+			}
+			if r.URL.Query().Get("subscriptionBacklogSize") == "true" &&
+				r.URL.Query().Get("getEarliestTimeInBacklog") != "true" {
+				http.Error(w, "unexpected backlog query "+r.URL.RawQuery, http.StatusBadRequest)
+				return
+			}
+			writePulsarTestJSON(w, `{
+				"subscriptions": {
+					"sub-a": {
+						"type": "Shared",
+						"isDurable": true,
+						"isReplicated": false,
+						"blockedSubscriptionOnUnackedMsgs": true,
+						"msgRateOut": 7.5,
+						"msgThroughputOut": 2048,
+						"msgRateRedeliver": 1.5,
+						"msgRateExpired": 0.5,
+						"msgBacklog": 42,
+						"msgBacklogNoDelayed": 40,
+						"msgDelayed": 2,
+						"unackedMessages": 3,
+						"bytesOutCounter": 1000,
+						"msgOutCounter": 10,
+						"messageAckRate": 6.5,
+						"chunkedMessageRate": 0.25,
+						"backlogSize": 4096,
+						"earliestMsgPublishTimeInBacklog": 12345,
+						"totalMsgExpired": 4,
+						"lastExpireTimestamp": 55,
+						"lastConsumedFlowTimestamp": 66,
+						"lastConsumedTimestamp": 77,
+						"lastAckedTimestamp": 88,
+						"lastMarkDeleteAdvancedTimestamp": 99,
+						"allowOutOfOrderDelivery": true,
+						"nonContiguousDeletedMessagesRanges": 2,
+						"nonContiguousDeletedMessagesRangesSerializedSize": 16,
+						"delayedMessageIndexSizeInBytes": 128,
+						"subscriptionProperties": {
+							"owner": "team-a",
+							"token": "secret-token"
+						},
+						"filterProcessedMsgCount": 11,
+						"filterAcceptedMsgCount": 12,
+						"filterRejectedMsgCount": 13,
+						"filterRescheduledMsgCount": 14,
+						"consumers": [{
+							"consumerName": "hidden-consumer",
+							"metadata": {"password": "secret-password"}
+						}]
+					}
+				}
+			}`)
+		case "/admin/v2/persistent/public/default/events/internalStats":
+			writePulsarTestJSON(w, `{
+				"cursors": {
+					"sub-a": {
+						"markDeletePosition": "1:2",
+						"readPosition": "1:3",
+						"waitingReadOp": false,
+						"pendingReadOps": 1,
+						"messagesConsumedCounter": 10,
+						"cursorLedger": 9,
+						"cursorLedgerLastEntry": 8,
+						"lastLedgerWitchTimestamp": "2026-04-26T00:00:00Z",
+						"state": "Open",
+						"numberOfEntriesSinceFirstNotAckedMessage": 7,
+						"totalNonContiguousDeletedMessagesRange": 2,
+						"individuallyDeletedMessages": "hidden-large-range",
+						"properties": {
+							"safe": 1,
+							"token": 2
+						}
+					}
+				}
+			}`)
+		default:
+			http.Error(w, "unexpected path "+r.URL.Path, http.StatusNotFound)
+		}
+	}))
+	defer adminServer.Close()
+
+	cfg := &cmdutils.ClusterConfig{WebServiceURL: adminServer.URL}
+	ctx := WithPulsarSession(context.Background(), &pulsarsession.Session{
+		Ctx:             pulsarsession.PulsarContext{WebServiceURL: adminServer.URL},
+		PulsarCtlConfig: cfg,
+		AdminClient:     cfg.Client(pulsaradminconfig.V2),
+	})
+
+	s := server.NewMCPServer("test", "0.0.1", server.WithResourceCapabilities(true, true))
+	PulsarAddResources(s, []string{string(FeatureAllPulsar)})
+
+	subscriptionsContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v2/persistent/public/default/events/subscriptions")
+	var subscriptionsPayload pulsarSubscriptionCollectionResource
+	require.NoError(t, json.Unmarshal([]byte(subscriptionsContent.Text), &subscriptionsPayload))
+	assert.Equal(t, "subscriptions", subscriptionsPayload.Kind)
+	assert.Equal(t, "persistent://public/default/events", subscriptionsPayload.Topic)
+	assert.ElementsMatch(t, []string{"sub-a", "sub-b"}, subscriptionsPayload.Subscriptions)
+	assert.Equal(t, 2, subscriptionsPayload.Count)
+
+	statsContent := readPulsarTestResource(
+		t,
+		ctx,
+		s,
+		"pulsar://admin/v2/persistent/public/default/events/subscriptions/sub-a/stats",
+	)
+	assert.NotContains(t, statsContent.Text, "hidden-consumer")
+	assert.NotContains(t, statsContent.Text, "secret-password")
+	assert.NotContains(t, statsContent.Text, "secret-token")
+	var statsPayload pulsarSubscriptionStatsResource
+	require.NoError(t, json.Unmarshal([]byte(statsContent.Text), &statsPayload))
+	assert.Equal(t, "subscriptionStats", statsPayload.Kind)
+	assert.Equal(t, "sub-a", statsPayload.Subscription)
+	assert.False(t, statsPayload.Partitioned)
+	assert.Equal(t, "Shared", statsPayload.Stats.Type)
+	assert.True(t, statsPayload.Stats.Durable)
+	assert.True(t, statsPayload.Stats.BlockedOnUnackedMessages)
+	assert.Equal(t, int64(42), statsPayload.Stats.MsgBacklog)
+	assert.Equal(t, "team-a", statsPayload.Stats.SubscriptionProperties["owner"])
+	assert.Equal(t, pulsarResourceRedactedValue, statsPayload.Stats.SubscriptionProperties["token"])
+
+	backlogContent := readPulsarTestResource(
+		t,
+		ctx,
+		s,
+		"pulsar://admin/v2/persistent/public/default/events/subscriptions/sub-a/backlog",
+	)
+	var backlogPayload pulsarSubscriptionBacklogResource
+	require.NoError(t, json.Unmarshal([]byte(backlogContent.Text), &backlogPayload))
+	assert.Equal(t, "subscriptionBacklog", backlogPayload.Kind)
+	assert.Equal(t, int64(42), backlogPayload.Backlog.MsgBacklog)
+	assert.Equal(t, int64(4096), backlogPayload.Backlog.BacklogSize)
+	assert.Equal(t, int64(12345), backlogPayload.Backlog.EarliestMsgPublishTimeInBacklog)
+
+	cursorContent := readPulsarTestResource(
+		t,
+		ctx,
+		s,
+		"pulsar://admin/v2/persistent/public/default/events/subscriptions/sub-a/cursor",
+	)
+	assert.NotContains(t, cursorContent.Text, "hidden-large-range")
+	var cursorPayload pulsarSubscriptionCursorResource
+	require.NoError(t, json.Unmarshal([]byte(cursorContent.Text), &cursorPayload))
+	assert.Equal(t, "subscriptionCursor", cursorPayload.Kind)
+	assert.Equal(t, "1:2", cursorPayload.Cursor.MarkDeletePosition)
+	assert.Equal(t, "1:3", cursorPayload.Cursor.ReadPosition)
+	assert.Equal(t, int64(10), cursorPayload.Cursor.MessagesConsumedCounter)
+	assert.Equal(t, map[string]int64{"safe": 1}, cursorPayload.Cursor.Properties)
+	assert.Equal(t, 2, cursorPayload.Cursor.PropertiesCount)
+}
+
 func TestPulsarClusterResourceFamilyRead(t *testing.T) {
 	t.Parallel()
 
@@ -747,6 +947,10 @@ func TestParsePulsarResourceURIRejectsMalformedOrUnsupportedURI(t *testing.T) {
 		"pulsar://admin/v2/persistent/public/default/events/policies/unsupported",
 		"pulsar://admin/v2/persistent/public/default/events/schema/not-a-number",
 		"pulsar://admin/v2/persistent/public/default/events/schema/-1",
+		"pulsar://admin/v2/persistent/public/default/events/subscriptions/sub-a",
+		"pulsar://admin/v2/persistent/public/default/events/subscriptions//stats",
+		"pulsar://admin/v2/persistent/public/default/events/subscriptions/sub-a/unsupported",
+		"pulsar://admin/v2/non-persistent/public/default/events/subscriptions/sub-a/cursor",
 	}
 
 	for _, rawURI := range tests {

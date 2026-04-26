@@ -27,6 +27,10 @@ All static resources return `application/json`.
 - `pulsar://admin/v2/{domain}/{tenant}/{namespace}/{topic}/policies/{policy}`: gets one read-only topic policy value. Supported policies are `retention`, `message-ttl`, `max-producers`, `max-consumers`, `max-unacked-messages-per-consumer`, `max-unacked-messages-per-subscription`, `persistence`, `delayed-delivery`, `dispatch-rate`, `subscription-dispatch-rate`, `deduplication`, `backlog-quotas`, `compaction-threshold`, `publish-rate`, and `inactive-topic-policies`.
 - `pulsar://admin/v2/{domain}/{tenant}/{namespace}/{topic}/schema`: gets the latest topic schema and version.
 - `pulsar://admin/v2/{domain}/{tenant}/{namespace}/{topic}/schema/{version}`: gets a specific topic schema version.
+- `pulsar://admin/v2/{domain}/{tenant}/{namespace}/{topic}/subscriptions`: lists subscriptions for a topic.
+- `pulsar://admin/v2/{domain}/{tenant}/{namespace}/{topic}/subscriptions/{subscription}/stats`: gets bounded subscription statistics without consumer details.
+- `pulsar://admin/v2/{domain}/{tenant}/{namespace}/{topic}/subscriptions/{subscription}/backlog`: gets subscription backlog counters without changing cursor state.
+- `pulsar://admin/v2/persistent/{tenant}/{namespace}/{topic}/subscriptions/{subscription}/cursor`: gets persistent topic cursor positions for a subscription.
 - `pulsar://admin/v2/clusters/{cluster}`: sanitized configuration for a cluster.
 - `pulsar://admin/v2/brokers/{cluster}`: lists active brokers for a cluster.
 - `pulsar://admin/v2/clusters/{cluster}/failureDomains`: lists failure domains for a cluster.
@@ -34,9 +38,9 @@ All static resources return `application/json`.
 - `pulsar://admin/v2/clusters/{cluster}/namespaceIsolationPolicies`: lists namespace isolation policies for a cluster.
 - `pulsar://admin/v2/clusters/{cluster}/namespaceIsolationPolicies/{policy}`: gets a namespace isolation policy.
 
-Template reads return `application/json` and require a Pulsar session in the request context. Topic templates accept `domain` values of `persistent` or `non-persistent`; `topic` is the local topic name path segment.
+Template reads return `application/json` and require a Pulsar session in the request context. Topic templates accept `domain` values of `persistent` or `non-persistent`; `topic` is the local topic name path segment. Subscription cursor resources are persistent-only because they are backed by topic internal stats.
 
-The resource list is feature-gated. Tenant and namespace resources require the matching Pulsar admin feature such as `pulsar-admin-tenants`, `pulsar-admin-namespaces`, `pulsar-admin-namespace-policy`, `pulsar-admin-topics`, or `pulsar-admin-resource-quotas`. Topic metadata, stats, and partition metadata resources require `pulsar-admin-topics`; topic policy resources require `pulsar-admin-topic-policy`; schema resources require `pulsar-admin-schemas`. Cluster resources require the matching Pulsar admin feature such as `pulsar-admin-clusters`, `pulsar-admin-brokers`, `pulsar-admin-broker-stats`, `pulsar-admin-brokers-status`, or `pulsar-admin-ns-isolation-policy`. All resources are also enabled by one of `pulsar-admin`, `all-pulsar`, or `all`.
+The resource list is feature-gated. Tenant and namespace resources require the matching Pulsar admin feature such as `pulsar-admin-tenants`, `pulsar-admin-namespaces`, `pulsar-admin-namespace-policy`, `pulsar-admin-topics`, or `pulsar-admin-resource-quotas`. Topic metadata, stats, and partition metadata resources require `pulsar-admin-topics`; topic policy resources require `pulsar-admin-topic-policy`; schema resources require `pulsar-admin-schemas`; subscription resources require `pulsar-admin-subscriptions`. Cluster resources require the matching Pulsar admin feature such as `pulsar-admin-clusters`, `pulsar-admin-brokers`, `pulsar-admin-broker-stats`, `pulsar-admin-brokers-status`, or `pulsar-admin-ns-isolation-policy`. All resources are also enabled by one of `pulsar-admin`, `all-pulsar`, or `all`.
 
 ## Safety
 

@@ -62,6 +62,10 @@ const (
 	pulsarTopicPolicyTemplateURI         = "pulsar://admin/v2/{domain}/{tenant}/{namespace}/{topic}/policies/{policy}"
 	pulsarTopicSchemaTemplateURI         = "pulsar://admin/v2/{domain}/{tenant}/{namespace}/{topic}/schema"
 	pulsarTopicSchemaVersionTemplateURI  = "pulsar://admin/v2/{domain}/{tenant}/{namespace}/{topic}/schema/{version}"
+	pulsarSubscriptionsTemplateURI       = "pulsar://admin/v2/{domain}/{tenant}/{namespace}/{topic}/subscriptions"
+	pulsarSubscriptionStatsTemplateURI   = "pulsar://admin/v2/{domain}/{tenant}/{namespace}/{topic}/subscriptions/{subscription}/stats"
+	pulsarSubscriptionBacklogTemplateURI = "pulsar://admin/v2/{domain}/{tenant}/{namespace}/{topic}/subscriptions/{subscription}/backlog"
+	pulsarSubscriptionCursorTemplateURI  = "pulsar://admin/v2/persistent/{tenant}/{namespace}/{topic}/subscriptions/{subscription}/cursor"
 	pulsarResourceJSONMIMEType           = "application/json"
 	pulsarResourceSummaryStringLimit     = 50
 	pulsarResourceRedactedValue          = "<redacted>"
@@ -94,19 +98,24 @@ const (
 	pulsarResourceKindTopicPolicy          pulsarResourceKind = "topicPolicy"
 	pulsarResourceKindTopicSchema          pulsarResourceKind = "topicSchema"
 	pulsarResourceKindTopicSchemaVersion   pulsarResourceKind = "topicSchemaVersion"
+	pulsarResourceKindSubscriptions        pulsarResourceKind = "subscriptions"
+	pulsarResourceKindSubscriptionStats    pulsarResourceKind = "subscriptionStats"
+	pulsarResourceKindSubscriptionBacklog  pulsarResourceKind = "subscriptionBacklog"
+	pulsarResourceKindSubscriptionCursor   pulsarResourceKind = "subscriptionCursor"
 )
 
 type pulsarResourceURI struct {
-	kind        pulsarResourceKind
-	tenant      string
-	namespace   string
-	topic       string
-	topicDomain string
-	cluster     string
-	domain      string
-	policy      string
-	bundle      string
-	version     int64
+	kind         pulsarResourceKind
+	tenant       string
+	namespace    string
+	topic        string
+	topicDomain  string
+	cluster      string
+	domain       string
+	policy       string
+	bundle       string
+	subscription string
+	version      int64
 }
 
 type pulsarResourceCatalog struct {
@@ -415,6 +424,106 @@ type pulsarTopicSchemaSummary struct {
 	Timestamp       int64             `json:"timestamp,omitempty"`
 }
 
+type pulsarSubscriptionCollectionResource struct {
+	Kind          string   `json:"kind"`
+	URI           string   `json:"uri"`
+	Topic         string   `json:"topic"`
+	Domain        string   `json:"domain"`
+	Tenant        string   `json:"tenant"`
+	Namespace     string   `json:"namespace"`
+	Subscriptions []string `json:"subscriptions"`
+	Count         int      `json:"count"`
+}
+
+type pulsarSubscriptionStatsResource struct {
+	Kind         string                         `json:"kind"`
+	URI          string                         `json:"uri"`
+	Topic        string                         `json:"topic"`
+	Subscription string                         `json:"subscription"`
+	Partitioned  bool                           `json:"partitioned"`
+	Stats        pulsarSubscriptionStatsSummary `json:"stats"`
+}
+
+type pulsarSubscriptionStatsSummary struct {
+	Type                                      string            `json:"type,omitempty"`
+	Durable                                   bool              `json:"durable"`
+	Replicated                                bool              `json:"replicated"`
+	BlockedOnUnackedMessages                  bool              `json:"blockedOnUnackedMessages"`
+	MsgRateOut                                float64           `json:"msgRateOut"`
+	MsgThroughputOut                          float64           `json:"msgThroughputOut"`
+	MsgRateRedeliver                          float64           `json:"msgRateRedeliver"`
+	MsgRateExpired                            float64           `json:"msgRateExpired"`
+	MsgBacklog                                int64             `json:"msgBacklog"`
+	MsgBacklogNoDelayed                       int64             `json:"msgBacklogNoDelayed"`
+	MsgDelayed                                int64             `json:"msgDelayed"`
+	UnackedMessages                           int64             `json:"unackedMessages"`
+	BytesOutCounter                           int64             `json:"bytesOutCounter"`
+	MsgOutCounter                             int64             `json:"msgOutCounter"`
+	MessageAckRate                            float64           `json:"messageAckRate"`
+	ChunkedMessageRate                        float64           `json:"chunkedMessageRate"`
+	BacklogSize                               int64             `json:"backlogSize"`
+	EarliestMsgPublishTimeInBacklog           int64             `json:"earliestMsgPublishTimeInBacklog,omitempty"`
+	TotalMsgExpired                           int64             `json:"totalMsgExpired"`
+	LastExpireTimestamp                       int64             `json:"lastExpireTimestamp,omitempty"`
+	LastConsumedFlowTimestamp                 int64             `json:"lastConsumedFlowTimestamp,omitempty"`
+	LastConsumedTimestamp                     int64             `json:"lastConsumedTimestamp,omitempty"`
+	LastAckedTimestamp                        int64             `json:"lastAckedTimestamp,omitempty"`
+	LastMarkDeleteAdvancedTimestamp           int64             `json:"lastMarkDeleteAdvancedTimestamp,omitempty"`
+	AllowOutOfOrderDelivery                   bool              `json:"allowOutOfOrderDelivery"`
+	NonContiguousDeletedMessagesRanges        int               `json:"nonContiguousDeletedMessagesRanges"`
+	NonContiguousDeletedMessagesRangesSrzSize int               `json:"nonContiguousDeletedMessagesRangesSerializedSize"`
+	DelayedMessageIndexSizeInBytes            int64             `json:"delayedMessageIndexSizeInBytes"`
+	FilterProcessedMsgCount                   int64             `json:"filterProcessedMsgCount"`
+	FilterAcceptedMsgCount                    int64             `json:"filterAcceptedMsgCount"`
+	FilterRejectedMsgCount                    int64             `json:"filterRejectedMsgCount"`
+	FilterRescheduledMsgCount                 int64             `json:"filterRescheduledMsgCount"`
+	SubscriptionProperties                    map[string]string `json:"subscriptionProperties,omitempty"`
+	SubscriptionPropertiesCount               int               `json:"subscriptionPropertiesCount"`
+}
+
+type pulsarSubscriptionBacklogResource struct {
+	Kind         string                           `json:"kind"`
+	URI          string                           `json:"uri"`
+	Topic        string                           `json:"topic"`
+	Subscription string                           `json:"subscription"`
+	Partitioned  bool                             `json:"partitioned"`
+	Backlog      pulsarSubscriptionBacklogSummary `json:"backlog"`
+}
+
+type pulsarSubscriptionBacklogSummary struct {
+	MsgBacklog                      int64 `json:"msgBacklog"`
+	MsgBacklogNoDelayed             int64 `json:"msgBacklogNoDelayed"`
+	BacklogSize                     int64 `json:"backlogSize"`
+	MsgDelayed                      int64 `json:"msgDelayed"`
+	UnackedMessages                 int64 `json:"unackedMessages"`
+	EarliestMsgPublishTimeInBacklog int64 `json:"earliestMsgPublishTimeInBacklog,omitempty"`
+	DelayedMessageIndexSizeInBytes  int64 `json:"delayedMessageIndexSizeInBytes"`
+}
+
+type pulsarSubscriptionCursorResource struct {
+	Kind         string                          `json:"kind"`
+	URI          string                          `json:"uri"`
+	Topic        string                          `json:"topic"`
+	Subscription string                          `json:"subscription"`
+	Cursor       pulsarSubscriptionCursorSummary `json:"cursor"`
+}
+
+type pulsarSubscriptionCursorSummary struct {
+	MarkDeletePosition                       string           `json:"markDeletePosition,omitempty"`
+	ReadPosition                             string           `json:"readPosition,omitempty"`
+	WaitingReadOp                            bool             `json:"waitingReadOp"`
+	PendingReadOps                           int              `json:"pendingReadOps"`
+	MessagesConsumedCounter                  int64            `json:"messagesConsumedCounter"`
+	CursorLedger                             int64            `json:"cursorLedger"`
+	CursorLedgerLastEntry                    int64            `json:"cursorLedgerLastEntry"`
+	LastLedgerSwitchTimestamp                string           `json:"lastLedgerSwitchTimestamp,omitempty"`
+	State                                    string           `json:"state,omitempty"`
+	NumberOfEntriesSinceFirstNotAckedMessage int64            `json:"numberOfEntriesSinceFirstNotAckedMessage"`
+	TotalNonContiguousDeletedMessagesRange   int              `json:"totalNonContiguousDeletedMessagesRange"`
+	Properties                               map[string]int64 `json:"properties,omitempty"`
+	PropertiesCount                          int              `json:"propertiesCount"`
+}
+
 // PulsarAddResources registers the read-only Pulsar MCP resource surface.
 func PulsarAddResources(s *server.MCPServer, features []string) {
 	resourceRegistrations, templateRegistrations := buildPulsarResourceRegistrations(features)
@@ -630,6 +739,39 @@ func buildPulsarResourceRegistrations(features []string) ([]server.ServerResourc
 					mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
 				),
 				Handler: handlePulsarTopicSchemaVersionResource,
+			},
+		)
+	}
+
+	if pulsarResourceFeatureEnabled(features, FeaturePulsarAdminSubscriptions) {
+		templates = append(templates,
+			server.ServerResourceTemplate{
+				Template: mcp.NewResourceTemplate(pulsarSubscriptionsTemplateURI, "Pulsar Topic Subscriptions",
+					mcp.WithTemplateDescription("List subscriptions for a Pulsar topic."),
+					mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
+				),
+				Handler: handlePulsarSubscriptionsResource,
+			},
+			server.ServerResourceTemplate{
+				Template: mcp.NewResourceTemplate(pulsarSubscriptionStatsTemplateURI, "Pulsar Subscription Stats Summary",
+					mcp.WithTemplateDescription("Get bounded statistics for one Pulsar subscription without consumer details."),
+					mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
+				),
+				Handler: handlePulsarSubscriptionStatsResource,
+			},
+			server.ServerResourceTemplate{
+				Template: mcp.NewResourceTemplate(pulsarSubscriptionBacklogTemplateURI, "Pulsar Subscription Backlog Summary",
+					mcp.WithTemplateDescription("Get backlog counters for one Pulsar subscription without changing cursor state."),
+					mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
+				),
+				Handler: handlePulsarSubscriptionBacklogResource,
+			},
+			server.ServerResourceTemplate{
+				Template: mcp.NewResourceTemplate(pulsarSubscriptionCursorTemplateURI, "Pulsar Subscription Cursor Summary",
+					mcp.WithTemplateDescription("Get persistent topic cursor positions for one Pulsar subscription."),
+					mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
+				),
+				Handler: handlePulsarSubscriptionCursorResource,
 			},
 		)
 	}
@@ -1467,6 +1609,167 @@ func handlePulsarTopicSchemaVersionResource(ctx context.Context, request mcp.Rea
 	})
 }
 
+func handlePulsarSubscriptionsResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindSubscriptions {
+		return nil, fmt.Errorf("unsupported Pulsar subscriptions resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminClient(session)
+	if err != nil {
+		return nil, err
+	}
+	topicName, err := buildPulsarResourceTopicName(parsed)
+	if err != nil {
+		return nil, err
+	}
+
+	subscriptions, err := adminClient.Subscriptions().List(*topicName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list subscriptions for topic %q: %w", topicName.String(), err)
+	}
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarSubscriptionCollectionResource{
+		Kind:          string(parsed.kind),
+		URI:           request.Params.URI,
+		Topic:         topicName.String(),
+		Domain:        parsed.topicDomain,
+		Tenant:        parsed.tenant,
+		Namespace:     parsed.namespace,
+		Subscriptions: subscriptions,
+		Count:         len(subscriptions),
+	})
+}
+
+func handlePulsarSubscriptionStatsResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindSubscriptionStats {
+		return nil, fmt.Errorf("unsupported Pulsar subscription stats resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminClient(session)
+	if err != nil {
+		return nil, err
+	}
+	topicName, err := buildPulsarResourceTopicName(parsed)
+	if err != nil {
+		return nil, err
+	}
+
+	stats, partitioned, err := readPulsarSubscriptionStats(adminClient, *topicName, parsed.subscription, utils.GetStatsOptions{
+		ExcludePublishers: true,
+		ExcludeConsumers:  true,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarSubscriptionStatsResource{
+		Kind:         string(parsed.kind),
+		URI:          request.Params.URI,
+		Topic:        topicName.String(),
+		Subscription: parsed.subscription,
+		Partitioned:  partitioned,
+		Stats:        summarizePulsarSubscriptionStats(stats),
+	})
+}
+
+func handlePulsarSubscriptionBacklogResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindSubscriptionBacklog {
+		return nil, fmt.Errorf("unsupported Pulsar subscription backlog resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminClient(session)
+	if err != nil {
+		return nil, err
+	}
+	topicName, err := buildPulsarResourceTopicName(parsed)
+	if err != nil {
+		return nil, err
+	}
+
+	stats, partitioned, err := readPulsarSubscriptionStats(adminClient, *topicName, parsed.subscription, utils.GetStatsOptions{
+		SubscriptionBacklogSize:  true,
+		GetEarliestTimeInBacklog: true,
+		ExcludePublishers:        true,
+		ExcludeConsumers:         true,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarSubscriptionBacklogResource{
+		Kind:         string(parsed.kind),
+		URI:          request.Params.URI,
+		Topic:        topicName.String(),
+		Subscription: parsed.subscription,
+		Partitioned:  partitioned,
+		Backlog:      summarizePulsarSubscriptionBacklog(stats),
+	})
+}
+
+func handlePulsarSubscriptionCursorResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindSubscriptionCursor {
+		return nil, fmt.Errorf("unsupported Pulsar subscription cursor resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminClient(session)
+	if err != nil {
+		return nil, err
+	}
+	topicName, err := buildPulsarResourceTopicName(parsed)
+	if err != nil {
+		return nil, err
+	}
+
+	internalStats, err := adminClient.Topics().GetInternalStats(*topicName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get internal stats for topic %q: %w", topicName.String(), err)
+	}
+	cursor, ok := internalStats.Cursors[parsed.subscription]
+	if !ok {
+		return nil, fmt.Errorf("subscription %q was not found in cursor stats for topic %q", parsed.subscription, topicName.String())
+	}
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarSubscriptionCursorResource{
+		Kind:         string(parsed.kind),
+		URI:          request.Params.URI,
+		Topic:        topicName.String(),
+		Subscription: parsed.subscription,
+		Cursor:       summarizePulsarSubscriptionCursor(cursor),
+	})
+}
+
 func requirePulsarResourceSession(ctx context.Context) (*pulsarsession.Session, error) {
 	session := context2.GetPulsarSession(ctx)
 	if session == nil {
@@ -1688,6 +1991,112 @@ func summarizePulsarPartitionedTopicStats(stats utils.PartitionedTopicStats) pul
 	}
 }
 
+func readPulsarSubscriptionStats(
+	adminClient cmdutils.Client,
+	topicName utils.TopicName,
+	subscription string,
+	options utils.GetStatsOptions,
+) (utils.SubscriptionStats, bool, error) {
+	metadata, err := adminClient.Topics().GetMetadata(topicName)
+	if err != nil {
+		return utils.SubscriptionStats{}, false, fmt.Errorf("failed to get partition metadata for topic %q: %w", topicName.String(), err)
+	}
+
+	var subscriptions map[string]utils.SubscriptionStats
+	partitioned := metadata.Partitions > 0
+	if partitioned {
+		stats, err := adminClient.Topics().GetPartitionedStatsWithOption(topicName, false, options)
+		if err != nil {
+			return utils.SubscriptionStats{}, false, fmt.Errorf("failed to get partitioned stats for topic %q: %w", topicName.String(), err)
+		}
+		subscriptions = stats.Subscriptions
+	} else {
+		stats, err := adminClient.Topics().GetStatsWithOption(topicName, options)
+		if err != nil {
+			return utils.SubscriptionStats{}, false, fmt.Errorf("failed to get stats for topic %q: %w", topicName.String(), err)
+		}
+		subscriptions = stats.Subscriptions
+	}
+
+	stats, ok := subscriptions[subscription]
+	if !ok {
+		return utils.SubscriptionStats{}, partitioned, fmt.Errorf("subscription %q was not found in stats for topic %q", subscription, topicName.String())
+	}
+	return stats, partitioned, nil
+}
+
+func summarizePulsarSubscriptionStats(stats utils.SubscriptionStats) pulsarSubscriptionStatsSummary {
+	return pulsarSubscriptionStatsSummary{
+		Type:                               stats.SubType,
+		Durable:                            stats.IsDurable,
+		Replicated:                         stats.IsReplicated,
+		BlockedOnUnackedMessages:           stats.BlockedSubscriptionOnUnackedMsgs,
+		MsgRateOut:                         stats.MsgRateOut,
+		MsgThroughputOut:                   stats.MsgThroughputOut,
+		MsgRateRedeliver:                   stats.MsgRateRedeliver,
+		MsgRateExpired:                     stats.MsgRateExpired,
+		MsgBacklog:                         stats.MsgBacklog,
+		MsgBacklogNoDelayed:                stats.MsgBacklogNoDelayed,
+		MsgDelayed:                         stats.MsgDelayed,
+		UnackedMessages:                    stats.UnAckedMessages,
+		BytesOutCounter:                    stats.BytesOutCounter,
+		MsgOutCounter:                      stats.MsgOutCounter,
+		MessageAckRate:                     stats.MessageAckRate,
+		ChunkedMessageRate:                 stats.ChunkedMessageRate,
+		BacklogSize:                        stats.BacklogSize,
+		EarliestMsgPublishTimeInBacklog:    stats.EarliestMsgPublishTimeInBacklog,
+		TotalMsgExpired:                    stats.TotalMsgExpired,
+		LastExpireTimestamp:                stats.LastExpireTimestamp,
+		LastConsumedFlowTimestamp:          stats.LastConsumedFlowTimestamp,
+		LastConsumedTimestamp:              stats.LastConsumedTimestamp,
+		LastAckedTimestamp:                 stats.LastAckedTimestamp,
+		LastMarkDeleteAdvancedTimestamp:    stats.LastMarkDeleteAdvancedTimestamp,
+		AllowOutOfOrderDelivery:            stats.AllowOutOfOrderDelivery,
+		NonContiguousDeletedMessagesRanges: stats.NonContiguousDeletedMessagesRanges,
+		NonContiguousDeletedMessagesRangesSrzSize: stats.NonContiguousDeletedMessagesRangesSrzSize,
+		DelayedMessageIndexSizeInBytes:            stats.DelayedMessageIndexSizeInBytes,
+		FilterProcessedMsgCount:                   stats.FilterProcessedMsgCount,
+		FilterAcceptedMsgCount:                    stats.FilterAcceptedMsgCount,
+		FilterRejectedMsgCount:                    stats.FilterRejectedMsgCount,
+		FilterRescheduledMsgCount:                 stats.FilterRescheduledMsgCount,
+		SubscriptionProperties: sanitizePulsarResourceStringMap(
+			stats.SubscriptionProperties,
+			pulsarResourceSummaryStringLimit,
+		),
+		SubscriptionPropertiesCount: len(stats.SubscriptionProperties),
+	}
+}
+
+func summarizePulsarSubscriptionBacklog(stats utils.SubscriptionStats) pulsarSubscriptionBacklogSummary {
+	return pulsarSubscriptionBacklogSummary{
+		MsgBacklog:                      stats.MsgBacklog,
+		MsgBacklogNoDelayed:             stats.MsgBacklogNoDelayed,
+		BacklogSize:                     stats.BacklogSize,
+		MsgDelayed:                      stats.MsgDelayed,
+		UnackedMessages:                 stats.UnAckedMessages,
+		EarliestMsgPublishTimeInBacklog: stats.EarliestMsgPublishTimeInBacklog,
+		DelayedMessageIndexSizeInBytes:  stats.DelayedMessageIndexSizeInBytes,
+	}
+}
+
+func summarizePulsarSubscriptionCursor(stats utils.CursorStats) pulsarSubscriptionCursorSummary {
+	return pulsarSubscriptionCursorSummary{
+		MarkDeletePosition:                       stats.MarkDeletePosition,
+		ReadPosition:                             stats.ReadPosition,
+		WaitingReadOp:                            stats.WaitingReadOp,
+		PendingReadOps:                           stats.PendingReadOps,
+		MessagesConsumedCounter:                  stats.MessagesConsumedCounter,
+		CursorLedger:                             stats.CursorLedger,
+		CursorLedgerLastEntry:                    stats.CursorLedgerLastEntry,
+		LastLedgerSwitchTimestamp:                stats.LastLedgerWitchTimestamp,
+		State:                                    stats.State,
+		NumberOfEntriesSinceFirstNotAckedMessage: stats.NumberOfEntriesSinceFirstNotAckedMessage,
+		TotalNonContiguousDeletedMessagesRange:   stats.TotalNonContiguousDeletedMessagesRange,
+		Properties:                               sanitizePulsarResourceInt64Map(stats.Properties, pulsarResourceSummaryStringLimit),
+		PropertiesCount:                          len(stats.Properties),
+	}
+}
+
 func summarizePulsarTopicSchema(schemaInfo *utils.SchemaInfo) pulsarTopicSchemaSummary {
 	if schemaInfo == nil {
 		return pulsarTopicSchemaSummary{}
@@ -1787,6 +2196,33 @@ func sanitizePulsarResourceStringMap(values map[string]string, limit int) map[st
 			continue
 		}
 		sanitized[key] = values[key]
+	}
+	return sanitized
+}
+
+func sanitizePulsarResourceInt64Map(values map[string]int64, limit int) map[string]int64 {
+	if len(values) == 0 || limit <= 0 {
+		return nil
+	}
+
+	keys := make([]string, 0, len(values))
+	for key := range values {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	if len(keys) > limit {
+		keys = keys[:limit]
+	}
+
+	sanitized := make(map[string]int64, len(keys))
+	for _, key := range keys {
+		if isSensitivePulsarResourceKey(key) {
+			continue
+		}
+		sanitized[key] = values[key]
+	}
+	if len(sanitized) == 0 {
+		return nil
 	}
 	return sanitized
 }
@@ -2175,6 +2611,31 @@ func parsePulsarTopicAdminResourceURI(rawURI string, parts []string) (pulsarReso
 		base.kind = pulsarResourceKindTopicSchemaVersion
 		base.version = version
 		return base, nil
+	case len(parts) == 6 && parts[5] == "subscriptions":
+		base.kind = pulsarResourceKindSubscriptions
+		return base, nil
+	case len(parts) == 8 && parts[5] == "subscriptions":
+		subscription := parts[6]
+		if err := validatePulsarResourcePathSegment("subscription", subscription); err != nil {
+			return pulsarResourceURI{}, err
+		}
+		base.subscription = subscription
+		switch parts[7] {
+		case "stats":
+			base.kind = pulsarResourceKindSubscriptionStats
+			return base, nil
+		case "backlog":
+			base.kind = pulsarResourceKindSubscriptionBacklog
+			return base, nil
+		case "cursor":
+			if topicDomain != "persistent" {
+				return pulsarResourceURI{}, fmt.Errorf("Pulsar subscription cursor resource URI %q only supports persistent topics", rawURI)
+			}
+			base.kind = pulsarResourceKindSubscriptionCursor
+			return base, nil
+		default:
+			return pulsarResourceURI{}, fmt.Errorf("unsupported Pulsar subscription resource URI %q", rawURI)
+		}
 	default:
 		return pulsarResourceURI{}, fmt.Errorf("unsupported Pulsar topic admin resource URI %q", rawURI)
 	}
