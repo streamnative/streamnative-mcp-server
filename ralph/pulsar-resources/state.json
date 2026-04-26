@@ -2,10 +2,44 @@
   "version": 1,
   "loop_name": "pulsar-resources",
   "created_at": "2026-04-26",
-  "updated_at": "2026-04-26",
-  "current_iteration": 0,
-  "completed_items": [],
+  "updated_at": "2026-04-26T14:26:24Z",
+  "current_iteration": 1,
+  "completed_items": [
+    "protocol-foundation"
+  ],
   "blocked_items": [],
-  "last_result": null,
-  "lane_history": []
+  "last_result": {
+    "iteration": 1,
+    "item_id": "protocol-foundation",
+    "lane": "protocol",
+    "status": "implemented",
+    "summary": "Added the Pulsar MCP resource framework with pulsar://context and pulsar://resources static resources, namespace/topic collection templates, URI parsing, feature-gated registration, read handlers, tests, and docs.",
+    "tests_run": [
+      "go test ./pkg/mcp/... ./pkg/cmd/mcp/...",
+      "go test -race ./pkg/mcp/... ./pkg/cmd/mcp/...",
+      "git diff --check"
+    ],
+    "runner_verification": [
+      "go test ./pkg/mcp/... ./pkg/cmd/mcp/..."
+    ],
+    "completed_at": "2026-04-26T14:26:24Z"
+  },
+  "lane_history": [
+    {
+      "iteration": 1,
+      "item_id": "protocol-foundation",
+      "lane": "protocol",
+      "status": "implemented",
+      "summary": "Added the Pulsar MCP resource framework with pulsar://context and pulsar://resources static resources, namespace/topic collection templates, URI parsing, feature-gated registration, read handlers, tests, and docs.",
+      "tests_run": [
+        "go test ./pkg/mcp/... ./pkg/cmd/mcp/...",
+        "go test -race ./pkg/mcp/... ./pkg/cmd/mcp/...",
+        "git diff --check"
+      ],
+      "runner_verification": [
+        "go test ./pkg/mcp/... ./pkg/cmd/mcp/..."
+      ],
+      "completed_at": "2026-04-26T14:26:24Z"
+    }
+  ]
 }
