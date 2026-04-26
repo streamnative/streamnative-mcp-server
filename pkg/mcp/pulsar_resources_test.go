@@ -64,6 +64,11 @@ func TestPulsarAddResourcesFeatureGate(t *testing.T) {
 			pulsarClusterStatusResourceURI,
 			pulsarClustersResourceURI,
 			pulsarBrokerStatsSummaryResourceURI,
+			pulsarWorkerClusterResourceURI,
+			pulsarWorkerLeaderResourceURI,
+			pulsarWorkerAssignmentsResourceURI,
+			pulsarWorkerFunctionStatsResourceURI,
+			pulsarWorkerMetricsResourceURI,
 		}, resourceURIs)
 
 		templates := listPulsarTestResourceTemplates(t, s)
@@ -87,6 +92,19 @@ func TestPulsarAddResourcesFeatureGate(t *testing.T) {
 			pulsarSubscriptionStatsTemplateURI,
 			pulsarSubscriptionBacklogTemplateURI,
 			pulsarSubscriptionCursorTemplateURI,
+			pulsarFunctionsTemplateURI,
+			pulsarFunctionMetadataTemplateURI,
+			pulsarFunctionStatusTemplateURI,
+			pulsarFunctionStatsTemplateURI,
+			pulsarSourcesTemplateURI,
+			pulsarSourceMetadataTemplateURI,
+			pulsarSourceStatusTemplateURI,
+			pulsarSinksTemplateURI,
+			pulsarSinkMetadataTemplateURI,
+			pulsarSinkStatusTemplateURI,
+			pulsarPackagesTemplateURI,
+			pulsarPackageVersionsTemplateURI,
+			pulsarPackageMetadataTemplateURI,
 			pulsarResourceQuotaTemplateURI,
 			pulsarClusterResourceTemplateURI,
 			pulsarBrokersResourceTemplateURI,
@@ -214,6 +232,53 @@ func TestPulsarAddResourcesFeatureGate(t *testing.T) {
 			pulsarSubscriptionStatsTemplateURI,
 			pulsarSubscriptionBacklogTemplateURI,
 			pulsarSubscriptionCursorTemplateURI,
+		}, templateURIs)
+	})
+
+	t.Run("workload feature gates register selected resource families", func(t *testing.T) {
+		s := server.NewMCPServer("test", "0.0.1", server.WithResourceCapabilities(true, true))
+		PulsarAddResources(s, []string{
+			string(FeaturePulsarAdminFunctions),
+			string(FeaturePulsarAdminSources),
+			string(FeaturePulsarAdminSinks),
+			string(FeaturePulsarAdminPackages),
+			string(FeaturePulsarAdminFunctionsWorker),
+		})
+
+		resources := listPulsarTestResources(t, s)
+		resourceURIs := make([]string, 0, len(resources))
+		for _, resource := range resources {
+			resourceURIs = append(resourceURIs, resource.URI)
+		}
+		assert.ElementsMatch(t, []string{
+			pulsarResourceContextURI,
+			pulsarResourceCatalogURI,
+			pulsarWorkerClusterResourceURI,
+			pulsarWorkerLeaderResourceURI,
+			pulsarWorkerAssignmentsResourceURI,
+			pulsarWorkerFunctionStatsResourceURI,
+			pulsarWorkerMetricsResourceURI,
+		}, resourceURIs)
+
+		templates := listPulsarTestResourceTemplates(t, s)
+		templateURIs := make([]string, 0, len(templates))
+		for _, template := range templates {
+			templateURIs = append(templateURIs, template.URITemplate.Raw())
+		}
+		assert.ElementsMatch(t, []string{
+			pulsarFunctionsTemplateURI,
+			pulsarFunctionMetadataTemplateURI,
+			pulsarFunctionStatusTemplateURI,
+			pulsarFunctionStatsTemplateURI,
+			pulsarSourcesTemplateURI,
+			pulsarSourceMetadataTemplateURI,
+			pulsarSourceStatusTemplateURI,
+			pulsarSinksTemplateURI,
+			pulsarSinkMetadataTemplateURI,
+			pulsarSinkStatusTemplateURI,
+			pulsarPackagesTemplateURI,
+			pulsarPackageVersionsTemplateURI,
+			pulsarPackageMetadataTemplateURI,
 		}, templateURIs)
 	})
 }
@@ -751,6 +816,440 @@ func TestPulsarSubscriptionResourceFamilyRead(t *testing.T) {
 	assert.Equal(t, 2, cursorPayload.Cursor.PropertiesCount)
 }
 
+func TestPulsarWorkloadResourceFamilyRead(t *testing.T) {
+	t.Parallel()
+
+	adminServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "unexpected method", http.StatusMethodNotAllowed)
+			return
+		}
+
+		switch r.URL.EscapedPath() {
+		case "/admin/v3/functions/public/default":
+			writePulsarTestJSON(w, `["fn-a","fn-b"]`)
+		case "/admin/v3/functions/public/default/fn-a":
+			writePulsarTestJSON(w, `{
+				"tenant": "public",
+				"namespace": "default",
+				"name": "fn-a",
+				"className": "org.example.Function",
+				"runtime": "JAVA",
+				"jar": "file:///tmp/fn.jar",
+				"parallelism": 2,
+				"inputs": ["persistent://public/default/in"],
+				"output": "persistent://public/default/out",
+				"userConfig": {
+					"owner": "team-a",
+					"password": "secret-function-password"
+				},
+				"secrets": {
+					"db": {"path": "hidden-secret"}
+				}
+			}`)
+		case "/admin/v3/functions/public/default/fn-a/status":
+			writePulsarTestJSON(w, `{
+				"numInstances": 1,
+				"numRunning": 1,
+				"instances": [{
+					"instanceId": 0,
+					"status": {
+						"running": true,
+						"error": "secret status detail",
+						"numRestarts": 1,
+						"numReceived": 10,
+						"numSuccessfullyProcessed": 9,
+						"numUserExceptions": 1,
+						"latestUserExceptions": [{
+							"exceptionString": "hidden-user-exception",
+							"timestampMs": 11
+						}],
+						"numSystemExceptions": 2,
+						"latestSystemExceptions": [{
+							"exceptionString": "hidden-system-exception",
+							"timestampMs": 12
+						}],
+						"averageLatency": 3.5,
+						"lastInvocationTime": 12345,
+						"workerId": "worker-a"
+					}
+				}]
+			}`)
+		case "/admin/v3/functions/public/default/fn-a/stats":
+			writePulsarTestJSON(w, `{
+				"receivedTotal": 10,
+				"processedSuccessfullyTotal": 9,
+				"systemExceptionsTotal": 2,
+				"userExceptionsTotal": 1,
+				"avgProcessLatency": 3.5,
+				"lastInvocation": 12345,
+				"oneMin": {
+					"receivedTotal": 1,
+					"processedSuccessfullyTotal": 1,
+					"systemExceptionsTotal": 0,
+					"userExceptionsTotal": 0,
+					"avgProcessLatency": 2.5
+				},
+				"instances": [{
+					"instanceId": 0,
+					"metrics": {
+						"receivedTotal": 10,
+						"processedSuccessfullyTotal": 9,
+						"systemExceptionsTotal": 2,
+						"userExceptionsTotal": 1,
+						"avgProcessLatency": 3.5,
+						"lastInvocation": 12345,
+						"userMetrics": {
+							"custom_metric": 7.5
+						}
+					}
+				}]
+			}`)
+		case "/admin/v3/sources/public/default":
+			writePulsarTestJSON(w, `["source-a"]`)
+		case "/admin/v3/sources/public/default/source-a":
+			writePulsarTestJSON(w, `{
+				"tenant": "public",
+				"namespace": "default",
+				"name": "source-a",
+				"className": "org.example.Source",
+				"archive": "file:///tmp/source.nar",
+				"topicName": "persistent://public/default/input",
+				"parallelism": 1,
+				"configs": {
+					"owner": "team-a",
+					"password": "secret-source-password"
+				},
+				"secrets": {
+					"api": {"path": "hidden-source-secret"}
+				}
+			}`)
+		case "/admin/v3/sources/public/default/source-a/status":
+			writePulsarTestJSON(w, `{
+				"numInstances": 1,
+				"numRunning": 1,
+				"instances": [{
+					"instanceId": 0,
+					"status": {
+						"running": true,
+						"error": "secret source status detail",
+						"numRestarts": 1,
+						"numReceivedFromSource": 10,
+						"numWritten": 9,
+						"numSystemExceptions": 2,
+						"latestSystemExceptions": [{
+							"exceptionString": "hidden-source-system-exception",
+							"timestampMs": 12
+						}],
+						"numSourceExceptions": 3,
+						"latestSourceExceptions": [{
+							"exceptionString": "hidden-source-exception",
+							"timestampMs": 13
+						}],
+						"lastReceivedTime": 12345,
+						"workerId": "worker-a"
+					}
+				}]
+			}`)
+		case "/admin/v3/sinks/public/default":
+			writePulsarTestJSON(w, `["sink-a"]`)
+		case "/admin/v3/sinks/public/default/sink-a":
+			writePulsarTestJSON(w, `{
+				"tenant": "public",
+				"namespace": "default",
+				"name": "sink-a",
+				"className": "org.example.Sink",
+				"sinkType": "jdbc",
+				"archive": "file:///tmp/sink.nar",
+				"parallelism": 1,
+				"inputs": ["persistent://public/default/input"],
+				"configs": {
+					"owner": "team-a",
+					"password": "secret-sink-password"
+				},
+				"secrets": {
+					"api": {"path": "hidden-sink-secret"}
+				}
+			}`)
+		case "/admin/v3/sinks/public/default/sink-a/status":
+			writePulsarTestJSON(w, `{
+				"numInstances": 1,
+				"numRunning": 1,
+				"instances": [{
+					"instanceId": 0,
+					"status": {
+						"running": true,
+						"error": "secret sink status detail",
+						"numRestarts": 1,
+						"numReadFromPulsar": 10,
+						"numWrittenToSink": 9,
+						"numSystemExceptions": 2,
+						"latestSystemExceptions": [{
+							"exceptionString": "hidden-sink-system-exception",
+							"timestampMs": 12
+						}],
+						"numSinkExceptions": 3,
+						"latestSinkExceptions": [{
+							"exceptionString": "hidden-sink-exception",
+							"timestampMs": 13
+						}],
+						"lastReceivedTime": 12345,
+						"workerId": "worker-a"
+					}
+				}]
+			}`)
+		case "/admin/v3/packages/function/public%2Fdefault", "/admin/v3/packages/function/public/default":
+			writePulsarTestJSON(w, `["function://public/default/pkg-a@v1"]`)
+		case "/admin/v3/packages/function/public/default/pkg-a":
+			writePulsarTestJSON(w, `["v1","v2"]`)
+		case "/admin/v3/packages/function/public/default/pkg-a/v1/metadata":
+			writePulsarTestJSON(w, `{
+				"description": "package description",
+				"contact": "team-a@example.com",
+				"createTime": 1,
+				"modificationTime": 2,
+				"properties": {
+					"owner": "team-a",
+					"token": "secret-package-token"
+				}
+			}`)
+		case "/admin/v2/worker/cluster":
+			writePulsarTestJSON(w, `[{
+				"workerId": "worker-a",
+				"workerHostname": "worker-a.example",
+				"port": 8080
+			}]`)
+		case "/admin/v2/worker/cluster/leader":
+			writePulsarTestJSON(w, `{
+				"workerId": "worker-a",
+				"workerHostname": "worker-a.example",
+				"port": 8080
+			}`)
+		case "/admin/v2/worker/assignments":
+			writePulsarTestJSON(w, `{
+				"worker-a": ["public/default/fn-a-0"]
+			}`)
+		case "/admin/v2/worker-stats/functionsmetrics":
+			writePulsarTestJSON(w, `[{
+				"name": "public/default/fn-a/0",
+				"metrics": {
+					"receivedTotal": 10,
+					"processedSuccessfullyTotal": 9,
+					"systemExceptionsTotal": 2,
+					"userExceptionsTotal": 1,
+					"avgProcessLatency": 3.5,
+					"lastInvocation": 12345,
+					"userMetrics": {
+						"custom_metric": 7.5
+					}
+				}
+			}]`)
+		case "/admin/v2/worker-stats/metrics":
+			writePulsarTestJSON(w, `[{
+				"metrics": {
+					"jvm_memory_used": 1024
+				},
+				"dimensions": {
+					"worker": "worker-a",
+					"token": "secret-worker-token"
+				}
+			}]`)
+		default:
+			http.Error(w, "unexpected path "+r.URL.EscapedPath(), http.StatusNotFound)
+		}
+	}))
+	defer adminServer.Close()
+
+	cfg := &cmdutils.ClusterConfig{WebServiceURL: adminServer.URL}
+	ctx := WithPulsarSession(context.Background(), &pulsarsession.Session{
+		Ctx:             pulsarsession.PulsarContext{WebServiceURL: adminServer.URL},
+		PulsarCtlConfig: cfg,
+		AdminClient:     cfg.Client(pulsaradminconfig.V2),
+		AdminV3Client:   cfg.Client(pulsaradminconfig.V3),
+	})
+
+	s := server.NewMCPServer("test", "0.0.1", server.WithResourceCapabilities(true, true))
+	PulsarAddResources(s, []string{string(FeatureAllPulsar)})
+
+	functionsContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v3/functions/public/default")
+	var functionsPayload pulsarWorkloadCollectionResource
+	require.NoError(t, json.Unmarshal([]byte(functionsContent.Text), &functionsPayload))
+	assert.Equal(t, "function", functionsPayload.Type)
+	assert.ElementsMatch(t, []string{"fn-a", "fn-b"}, functionsPayload.Names)
+	assert.Equal(t, 2, functionsPayload.Count)
+
+	functionMetadataContent := readPulsarTestResource(
+		t,
+		ctx,
+		s,
+		"pulsar://admin/v3/functions/public/default/fn-a/metadata",
+	)
+	assert.NotContains(t, functionMetadataContent.Text, "secret-function-password")
+	assert.NotContains(t, functionMetadataContent.Text, "hidden-secret")
+	assert.NotContains(t, functionMetadataContent.Text, "/tmp/fn.jar")
+	var functionMetadataPayload pulsarFunctionMetadataResource
+	require.NoError(t, json.Unmarshal([]byte(functionMetadataContent.Text), &functionMetadataPayload))
+	assert.Equal(t, "fn-a", functionMetadataPayload.Name)
+	assert.Equal(t, "jar", functionMetadataPayload.Config.PackageLocationType)
+	assert.Equal(t, pulsarResourceRedactedValue, functionMetadataPayload.Config.UserConfig["password"])
+	assert.Equal(t, 1, functionMetadataPayload.Config.SecretsCount)
+
+	functionStatusContent := readPulsarTestResource(
+		t,
+		ctx,
+		s,
+		"pulsar://admin/v3/functions/public/default/fn-a/status",
+	)
+	assert.NotContains(t, functionStatusContent.Text, "secret status detail")
+	assert.NotContains(t, functionStatusContent.Text, "hidden-user-exception")
+	var functionStatusPayload pulsarFunctionStatusResource
+	require.NoError(t, json.Unmarshal([]byte(functionStatusContent.Text), &functionStatusPayload))
+	assert.Equal(t, 1, functionStatusPayload.Status.NumRunning)
+	require.Len(t, functionStatusPayload.Status.Instances, 1)
+	assert.True(t, functionStatusPayload.Status.Instances[0].ErrorPresent)
+	assert.Equal(t, 1, functionStatusPayload.Status.Instances[0].LatestUserExceptionsCount)
+
+	functionStatsContent := readPulsarTestResource(
+		t,
+		ctx,
+		s,
+		"pulsar://admin/v3/functions/public/default/fn-a/stats",
+	)
+	var functionStatsPayload pulsarFunctionStatsResource
+	require.NoError(t, json.Unmarshal([]byte(functionStatsContent.Text), &functionStatsPayload))
+	assert.Equal(t, int64(10), functionStatsPayload.Stats.ReceivedTotal)
+	require.Len(t, functionStatsPayload.Stats.Instances, 1)
+	assert.Equal(t, []string{"custom_metric"}, functionStatsPayload.Stats.Instances[0].UserMetricNames)
+
+	sourcesContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v3/sources/public/default")
+	var sourcesPayload pulsarWorkloadCollectionResource
+	require.NoError(t, json.Unmarshal([]byte(sourcesContent.Text), &sourcesPayload))
+	assert.Equal(t, "source", sourcesPayload.Type)
+	assert.Equal(t, []string{"source-a"}, sourcesPayload.Names)
+
+	sourceMetadataContent := readPulsarTestResource(
+		t,
+		ctx,
+		s,
+		"pulsar://admin/v3/sources/public/default/source-a/metadata",
+	)
+	assert.NotContains(t, sourceMetadataContent.Text, "secret-source-password")
+	assert.NotContains(t, sourceMetadataContent.Text, "hidden-source-secret")
+	assert.NotContains(t, sourceMetadataContent.Text, "/tmp/source.nar")
+	var sourceMetadataPayload pulsarSourceMetadataResource
+	require.NoError(t, json.Unmarshal([]byte(sourceMetadataContent.Text), &sourceMetadataPayload))
+	assert.Equal(t, pulsarResourceRedactedValue, sourceMetadataPayload.Config.Configs["password"])
+	assert.Equal(t, 1, sourceMetadataPayload.Config.SecretsCount)
+
+	sourceStatusContent := readPulsarTestResource(
+		t,
+		ctx,
+		s,
+		"pulsar://admin/v3/sources/public/default/source-a/status",
+	)
+	assert.NotContains(t, sourceStatusContent.Text, "secret source status detail")
+	assert.NotContains(t, sourceStatusContent.Text, "hidden-source-exception")
+	var sourceStatusPayload pulsarSourceStatusResource
+	require.NoError(t, json.Unmarshal([]byte(sourceStatusContent.Text), &sourceStatusPayload))
+	require.Len(t, sourceStatusPayload.Status.Instances, 1)
+	assert.Equal(t, int64(10), sourceStatusPayload.Status.Instances[0].NumReceivedFromSource)
+	assert.True(t, sourceStatusPayload.Status.Instances[0].ErrorPresent)
+
+	sinksContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v3/sinks/public/default")
+	var sinksPayload pulsarWorkloadCollectionResource
+	require.NoError(t, json.Unmarshal([]byte(sinksContent.Text), &sinksPayload))
+	assert.Equal(t, "sink", sinksPayload.Type)
+	assert.Equal(t, []string{"sink-a"}, sinksPayload.Names)
+
+	sinkMetadataContent := readPulsarTestResource(
+		t,
+		ctx,
+		s,
+		"pulsar://admin/v3/sinks/public/default/sink-a/metadata",
+	)
+	assert.NotContains(t, sinkMetadataContent.Text, "secret-sink-password")
+	assert.NotContains(t, sinkMetadataContent.Text, "hidden-sink-secret")
+	assert.NotContains(t, sinkMetadataContent.Text, "/tmp/sink.nar")
+	var sinkMetadataPayload pulsarSinkMetadataResource
+	require.NoError(t, json.Unmarshal([]byte(sinkMetadataContent.Text), &sinkMetadataPayload))
+	assert.Equal(t, pulsarResourceRedactedValue, sinkMetadataPayload.Config.Configs["password"])
+	assert.Equal(t, 1, sinkMetadataPayload.Config.SecretsCount)
+
+	sinkStatusContent := readPulsarTestResource(
+		t,
+		ctx,
+		s,
+		"pulsar://admin/v3/sinks/public/default/sink-a/status",
+	)
+	assert.NotContains(t, sinkStatusContent.Text, "secret sink status detail")
+	assert.NotContains(t, sinkStatusContent.Text, "hidden-sink-exception")
+	var sinkStatusPayload pulsarSinkStatusResource
+	require.NoError(t, json.Unmarshal([]byte(sinkStatusContent.Text), &sinkStatusPayload))
+	require.Len(t, sinkStatusPayload.Status.Instances, 1)
+	assert.Equal(t, int64(10), sinkStatusPayload.Status.Instances[0].NumReadFromPulsar)
+	assert.True(t, sinkStatusPayload.Status.Instances[0].ErrorPresent)
+
+	packagesContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v3/packages/function/public/default")
+	var packagesPayload pulsarPackageCollectionResource
+	require.NoError(t, json.Unmarshal([]byte(packagesContent.Text), &packagesPayload))
+	assert.Equal(t, "function", packagesPayload.PackageType)
+	assert.Equal(t, 1, packagesPayload.Count)
+
+	versionsContent := readPulsarTestResource(
+		t,
+		ctx,
+		s,
+		"pulsar://admin/v3/packages/function/public/default/pkg-a/versions",
+	)
+	var versionsPayload pulsarPackageVersionsResource
+	require.NoError(t, json.Unmarshal([]byte(versionsContent.Text), &versionsPayload))
+	assert.ElementsMatch(t, []string{"v1", "v2"}, versionsPayload.Versions)
+
+	metadataContent := readPulsarTestResource(
+		t,
+		ctx,
+		s,
+		"pulsar://admin/v3/packages/function/public/default/pkg-a/v1/metadata",
+	)
+	assert.NotContains(t, metadataContent.Text, "secret-package-token")
+	var metadataPayload pulsarPackageMetadataResource
+	require.NoError(t, json.Unmarshal([]byte(metadataContent.Text), &metadataPayload))
+	assert.Equal(t, "package description", metadataPayload.Metadata.Description)
+	assert.Equal(t, pulsarResourceRedactedValue, metadataPayload.Metadata.Properties["token"])
+
+	workerClusterContent := readPulsarTestResource(t, ctx, s, pulsarWorkerClusterResourceURI)
+	var workerClusterPayload pulsarWorkerClusterResource
+	require.NoError(t, json.Unmarshal([]byte(workerClusterContent.Text), &workerClusterPayload))
+	assert.Equal(t, 1, workerClusterPayload.Count)
+
+	workerLeaderContent := readPulsarTestResource(t, ctx, s, pulsarWorkerLeaderResourceURI)
+	var workerLeaderPayload pulsarWorkerLeaderResource
+	require.NoError(t, json.Unmarshal([]byte(workerLeaderContent.Text), &workerLeaderPayload))
+	require.NotNil(t, workerLeaderPayload.Leader)
+	assert.Equal(t, "worker-a", workerLeaderPayload.Leader.WorkerID)
+
+	assignmentsContent := readPulsarTestResource(t, ctx, s, pulsarWorkerAssignmentsResourceURI)
+	var assignmentsPayload pulsarWorkerAssignmentsResource
+	require.NoError(t, json.Unmarshal([]byte(assignmentsContent.Text), &assignmentsPayload))
+	assert.Equal(t, 1, assignmentsPayload.AssignmentCount)
+	require.Len(t, assignmentsPayload.Workers, 1)
+	assert.Equal(t, []string{"public/default/fn-a-0"}, assignmentsPayload.Workers[0].Assignments)
+
+	workerStatsContent := readPulsarTestResource(t, ctx, s, pulsarWorkerFunctionStatsResourceURI)
+	var workerStatsPayload pulsarWorkerFunctionStatsResource
+	require.NoError(t, json.Unmarshal([]byte(workerStatsContent.Text), &workerStatsPayload))
+	assert.Equal(t, 1, workerStatsPayload.Count)
+	require.Len(t, workerStatsPayload.Functions, 1)
+	assert.Equal(t, "public/default/fn-a/0", workerStatsPayload.Functions[0].Name)
+
+	workerMetricsContent := readPulsarTestResource(t, ctx, s, pulsarWorkerMetricsResourceURI)
+	assert.NotContains(t, workerMetricsContent.Text, "secret-worker-token")
+	var workerMetricsPayload pulsarWorkerMetricsResource
+	require.NoError(t, json.Unmarshal([]byte(workerMetricsContent.Text), &workerMetricsPayload))
+	assert.Equal(t, 1, workerMetricsPayload.MonitoringMetrics.Count)
+	assert.ElementsMatch(t, []string{"jvm_memory_used"}, workerMetricsPayload.MonitoringMetrics.MetricNames)
+}
+
 func TestPulsarClusterResourceFamilyRead(t *testing.T) {
 	t.Parallel()
 
@@ -951,6 +1450,15 @@ func TestParsePulsarResourceURIRejectsMalformedOrUnsupportedURI(t *testing.T) {
 		"pulsar://admin/v2/persistent/public/default/events/subscriptions//stats",
 		"pulsar://admin/v2/persistent/public/default/events/subscriptions/sub-a/unsupported",
 		"pulsar://admin/v2/non-persistent/public/default/events/subscriptions/sub-a/cursor",
+		"pulsar://admin/v3/functions/public/default/fn-a",
+		"pulsar://admin/v3/functions/public/default/fn-a/unsupported",
+		"pulsar://admin/v3/sources/public/default/source-a/stats",
+		"pulsar://admin/v3/sinks/public/default/sink-a/stats",
+		"pulsar://admin/v3/packages/unsupported/public/default",
+		"pulsar://admin/v3/packages/function/public/default/pkg-a",
+		"pulsar://admin/v3/packages/function/public/default/pkg-a/v1",
+		"pulsar://admin/v2/worker/cluster/leader/extra",
+		"pulsar://admin/v2/worker-stats/unsupported",
 	}
 
 	for _, rawURI := range tests {

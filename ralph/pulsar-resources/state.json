@@ -2,22 +2,23 @@
   "version": 1,
   "loop_name": "pulsar-resources",
   "created_at": "2026-04-26",
-  "updated_at": "2026-04-26T15:11:15Z",
-  "current_iteration": 5,
+  "updated_at": "2026-04-26T15:37:18Z",
+  "current_iteration": 6,
   "completed_items": [
     "protocol-foundation",
     "cluster-resources",
     "tenant-namespace-resources",
     "topic-schema-resources",
-    "subscription-resources"
+    "subscription-resources",
+    "workload-resources"
   ],
   "blocked_items": [],
   "last_result": {
-    "iteration": 5,
-    "item_id": "subscription-resources",
+    "iteration": 6,
+    "item_id": "workload-resources",
     "lane": "family",
     "status": "implemented",
-    "summary": "Added feature-gated read-only Pulsar subscription resource templates for listing subscriptions, bounded subscription stats, backlog summaries, and persistent cursor summaries, with URI validation, secret redaction, focused tests, and docs updates.",
+    "summary": "Added read-only Pulsar MCP resources for functions, sources, sinks, packages, and functions worker state, with URI validation, feature-gated registration, bounded JSON summaries, secret redaction, focused handler tests, and docs updates.",
     "tests_run": [
       "go test ./pkg/mcp/...",
       "git diff --check"
@@ -25,7 +26,7 @@
     "runner_verification": [
       "go test ./pkg/mcp/..."
     ],
-    "completed_at": "2026-04-26T15:11:15Z"
+    "completed_at": "2026-04-26T15:37:18Z"
   },
   "lane_history": [
     {
@@ -103,6 +104,21 @@
         "go test ./pkg/mcp/..."
       ],
       "completed_at": "2026-04-26T15:11:15Z"
+    },
+    {
+      "iteration": 6,
+      "item_id": "workload-resources",
+      "lane": "family",
+      "status": "implemented",
+      "summary": "Added read-only Pulsar MCP resources for functions, sources, sinks, packages, and functions worker state, with URI validation, feature-gated registration, bounded JSON summaries, secret redaction, focused handler tests, and docs updates.",
+      "tests_run": [
+        "go test ./pkg/mcp/...",
+        "git diff --check"
+      ],
+      "runner_verification": [
+        "go test ./pkg/mcp/..."
+      ],
+      "completed_at": "2026-04-26T15:37:18Z"
     }
   ]
 }

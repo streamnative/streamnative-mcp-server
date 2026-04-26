@@ -66,6 +66,24 @@ const (
 	pulsarSubscriptionStatsTemplateURI   = "pulsar://admin/v2/{domain}/{tenant}/{namespace}/{topic}/subscriptions/{subscription}/stats"
 	pulsarSubscriptionBacklogTemplateURI = "pulsar://admin/v2/{domain}/{tenant}/{namespace}/{topic}/subscriptions/{subscription}/backlog"
 	pulsarSubscriptionCursorTemplateURI  = "pulsar://admin/v2/persistent/{tenant}/{namespace}/{topic}/subscriptions/{subscription}/cursor"
+	pulsarFunctionsTemplateURI           = "pulsar://admin/v3/functions/{tenant}/{namespace}"
+	pulsarFunctionMetadataTemplateURI    = "pulsar://admin/v3/functions/{tenant}/{namespace}/{function}/metadata"
+	pulsarFunctionStatusTemplateURI      = "pulsar://admin/v3/functions/{tenant}/{namespace}/{function}/status"
+	pulsarFunctionStatsTemplateURI       = "pulsar://admin/v3/functions/{tenant}/{namespace}/{function}/stats"
+	pulsarSourcesTemplateURI             = "pulsar://admin/v3/sources/{tenant}/{namespace}"
+	pulsarSourceMetadataTemplateURI      = "pulsar://admin/v3/sources/{tenant}/{namespace}/{source}/metadata"
+	pulsarSourceStatusTemplateURI        = "pulsar://admin/v3/sources/{tenant}/{namespace}/{source}/status"
+	pulsarSinksTemplateURI               = "pulsar://admin/v3/sinks/{tenant}/{namespace}"
+	pulsarSinkMetadataTemplateURI        = "pulsar://admin/v3/sinks/{tenant}/{namespace}/{sink}/metadata"
+	pulsarSinkStatusTemplateURI          = "pulsar://admin/v3/sinks/{tenant}/{namespace}/{sink}/status"
+	pulsarPackagesTemplateURI            = "pulsar://admin/v3/packages/{type}/{tenant}/{namespace}"
+	pulsarPackageVersionsTemplateURI     = "pulsar://admin/v3/packages/{type}/{tenant}/{namespace}/{package}/versions"
+	pulsarPackageMetadataTemplateURI     = "pulsar://admin/v3/packages/{type}/{tenant}/{namespace}/{package}/{version}/metadata"
+	pulsarWorkerClusterResourceURI       = "pulsar://admin/v2/worker/cluster"
+	pulsarWorkerLeaderResourceURI        = "pulsar://admin/v2/worker/cluster/leader"
+	pulsarWorkerAssignmentsResourceURI   = "pulsar://admin/v2/worker/assignments"
+	pulsarWorkerFunctionStatsResourceURI = "pulsar://admin/v2/worker-stats/functionsmetrics"
+	pulsarWorkerMetricsResourceURI       = "pulsar://admin/v2/worker-stats/metrics"
 	pulsarResourceJSONMIMEType           = "application/json"
 	pulsarResourceSummaryStringLimit     = 50
 	pulsarResourceRedactedValue          = "<redacted>"
@@ -102,6 +120,24 @@ const (
 	pulsarResourceKindSubscriptionStats    pulsarResourceKind = "subscriptionStats"
 	pulsarResourceKindSubscriptionBacklog  pulsarResourceKind = "subscriptionBacklog"
 	pulsarResourceKindSubscriptionCursor   pulsarResourceKind = "subscriptionCursor"
+	pulsarResourceKindFunctions            pulsarResourceKind = "functions"
+	pulsarResourceKindFunctionMetadata     pulsarResourceKind = "functionMetadata"
+	pulsarResourceKindFunctionStatus       pulsarResourceKind = "functionStatus"
+	pulsarResourceKindFunctionStats        pulsarResourceKind = "functionStats"
+	pulsarResourceKindSources              pulsarResourceKind = "sources"
+	pulsarResourceKindSourceMetadata       pulsarResourceKind = "sourceMetadata"
+	pulsarResourceKindSourceStatus         pulsarResourceKind = "sourceStatus"
+	pulsarResourceKindSinks                pulsarResourceKind = "sinks"
+	pulsarResourceKindSinkMetadata         pulsarResourceKind = "sinkMetadata"
+	pulsarResourceKindSinkStatus           pulsarResourceKind = "sinkStatus"
+	pulsarResourceKindPackages             pulsarResourceKind = "packages"
+	pulsarResourceKindPackageVersions      pulsarResourceKind = "packageVersions"
+	pulsarResourceKindPackageMetadata      pulsarResourceKind = "packageMetadata"
+	pulsarResourceKindWorkerCluster        pulsarResourceKind = "workerCluster"
+	pulsarResourceKindWorkerLeader         pulsarResourceKind = "workerLeader"
+	pulsarResourceKindWorkerAssignments    pulsarResourceKind = "workerAssignments"
+	pulsarResourceKindWorkerFunctionStats  pulsarResourceKind = "workerFunctionStats"
+	pulsarResourceKindWorkerMetrics        pulsarResourceKind = "workerMetrics"
 )
 
 type pulsarResourceURI struct {
@@ -115,6 +151,10 @@ type pulsarResourceURI struct {
 	policy       string
 	bundle       string
 	subscription string
+	workload     string
+	packageType  string
+	packageName  string
+	versionName  string
 	version      int64
 }
 
@@ -524,6 +564,409 @@ type pulsarSubscriptionCursorSummary struct {
 	PropertiesCount                          int              `json:"propertiesCount"`
 }
 
+type pulsarWorkloadCollectionResource struct {
+	Kind      string   `json:"kind"`
+	URI       string   `json:"uri"`
+	Type      string   `json:"type"`
+	Tenant    string   `json:"tenant"`
+	Namespace string   `json:"namespace"`
+	Names     []string `json:"names"`
+	Count     int      `json:"count"`
+	Limit     int      `json:"limit"`
+	Limited   bool     `json:"limited"`
+}
+
+type pulsarFunctionMetadataResource struct {
+	Kind      string                      `json:"kind"`
+	URI       string                      `json:"uri"`
+	Tenant    string                      `json:"tenant"`
+	Namespace string                      `json:"namespace"`
+	Name      string                      `json:"name"`
+	Config    pulsarFunctionConfigSummary `json:"config"`
+}
+
+type pulsarFunctionConfigSummary struct {
+	Tenant                             string                   `json:"tenant,omitempty"`
+	Namespace                          string                   `json:"namespace,omitempty"`
+	Name                               string                   `json:"name,omitempty"`
+	ClassName                          string                   `json:"className,omitempty"`
+	Runtime                            string                   `json:"runtime,omitempty"`
+	FunctionTypeConfigured             bool                     `json:"functionTypeConfigured"`
+	PackageLocationConfigured          bool                     `json:"packageLocationConfigured"`
+	PackageLocationType                string                   `json:"packageLocationType,omitempty"`
+	Parallelism                        int                      `json:"parallelism,omitempty"`
+	Inputs                             []string                 `json:"inputs,omitempty"`
+	InputsCount                        int                      `json:"inputsCount"`
+	InputSpecsCount                    int                      `json:"inputSpecsCount"`
+	TopicsPattern                      string                   `json:"topicsPattern,omitempty"`
+	Output                             string                   `json:"output,omitempty"`
+	LogTopic                           string                   `json:"logTopic,omitempty"`
+	ProcessingGuarantees               string                   `json:"processingGuarantees,omitempty"`
+	Resources                          *utils.Resources         `json:"resources,omitempty"`
+	UserConfig                         map[string]any           `json:"userConfig,omitempty"`
+	UserConfigCount                    int                      `json:"userConfigCount"`
+	SecretsCount                       int                      `json:"secretsCount"`
+	ProducerConfigConfigured           bool                     `json:"producerConfigConfigured"`
+	CustomSchemaOutputsCount           int                      `json:"customSchemaOutputsCount"`
+	CustomSerdeInputsCount             int                      `json:"customSerdeInputsCount"`
+	CustomSchemaInputsCount            int                      `json:"customSchemaInputsCount"`
+	CustomRuntimeOptionsConfigured     bool                     `json:"customRuntimeOptionsConfigured"`
+	DeadLetterTopic                    string                   `json:"deadLetterTopic,omitempty"`
+	SubscriptionName                   string                   `json:"subscriptionName,omitempty"`
+	SubscriptionPosition               string                   `json:"subscriptionPosition,omitempty"`
+	TimeoutMs                          *int64                   `json:"timeoutMs,omitempty"`
+	MaxMessageRetries                  *int                     `json:"maxMessageRetries,omitempty"`
+	CleanupSubscription                bool                     `json:"cleanupSubscription"`
+	RetainOrdering                     bool                     `json:"retainOrdering"`
+	RetainKeyOrdering                  bool                     `json:"retainKeyOrdering"`
+	AutoAck                            bool                     `json:"autoAck"`
+	ForwardSourceMessageProperty       bool                     `json:"forwardSourceMessageProperty"`
+	ExposePulsarAdminClientEnabled     bool                     `json:"exposePulsarAdminClientEnabled"`
+	SkipToLatest                       bool                     `json:"skipToLatest"`
+	MaxPendingAsyncRequests            int                      `json:"maxPendingAsyncRequests,omitempty"`
+	WindowConfigConfigured             bool                     `json:"windowConfigConfigured"`
+	InputTypeClassName                 string                   `json:"inputTypeClassName,omitempty"`
+	OutputTypeClassName                string                   `json:"outputTypeClassName,omitempty"`
+	OutputSchemaType                   string                   `json:"outputSchemaType,omitempty"`
+	OutputSerdeClassName               string                   `json:"outputSerdeClassName,omitempty"`
+	CustomSchemaOutputs                map[string]string        `json:"customSchemaOutputs,omitempty"`
+	SanitizedCustomSchemaOutputsCount  int                      `json:"sanitizedCustomSchemaOutputsCount"`
+	SanitizedCustomSerdeInputs         map[string]string        `json:"customSerdeInputs,omitempty"`
+	SanitizedCustomSerdeInputsCount    int                      `json:"sanitizedCustomSerdeInputsCount"`
+	SanitizedCustomSchemaInputs        map[string]string        `json:"customSchemaInputs,omitempty"`
+	SanitizedCustomSchemaInputsCount   int                      `json:"sanitizedCustomSchemaInputsCount"`
+	SanitizedInputSpecsSchemaSummaries []pulsarInputSpecSummary `json:"inputSpecs,omitempty"`
+}
+
+type pulsarInputSpecSummary struct {
+	Topic                   string            `json:"topic"`
+	SchemaType              string            `json:"schemaType,omitempty"`
+	SerdeClassName          string            `json:"serdeClassName,omitempty"`
+	RegexPattern            bool              `json:"regexPattern"`
+	ReceiverQueueSize       int               `json:"receiverQueueSize,omitempty"`
+	SchemaProperties        map[string]string `json:"schemaProperties,omitempty"`
+	SchemaPropertiesCount   int               `json:"schemaPropertiesCount"`
+	ConsumerProperties      map[string]string `json:"consumerProperties,omitempty"`
+	ConsumerPropertiesCount int               `json:"consumerPropertiesCount"`
+	CryptoConfigConfigured  bool              `json:"cryptoConfigConfigured"`
+	PoolMessages            bool              `json:"poolMessages"`
+}
+
+type pulsarSourceMetadataResource struct {
+	Kind      string                    `json:"kind"`
+	URI       string                    `json:"uri"`
+	Tenant    string                    `json:"tenant"`
+	Namespace string                    `json:"namespace"`
+	Name      string                    `json:"name"`
+	Config    pulsarSourceConfigSummary `json:"config"`
+}
+
+type pulsarSourceConfigSummary struct {
+	Tenant                         string           `json:"tenant,omitempty"`
+	Namespace                      string           `json:"namespace,omitempty"`
+	Name                           string           `json:"name,omitempty"`
+	ClassName                      string           `json:"className,omitempty"`
+	TopicName                      string           `json:"topicName,omitempty"`
+	SerdeClassName                 string           `json:"serdeClassName,omitempty"`
+	SchemaType                     string           `json:"schemaType,omitempty"`
+	Parallelism                    int              `json:"parallelism,omitempty"`
+	ProcessingGuarantees           string           `json:"processingGuarantees,omitempty"`
+	Resources                      *utils.Resources `json:"resources,omitempty"`
+	ArchiveConfigured              bool             `json:"archiveConfigured"`
+	ProducerConfigConfigured       bool             `json:"producerConfigConfigured"`
+	RuntimeFlagsConfigured         bool             `json:"runtimeFlagsConfigured"`
+	CustomRuntimeOptionsConfigured bool             `json:"customRuntimeOptionsConfigured"`
+	BatchSourceConfigConfigured    bool             `json:"batchSourceConfigConfigured"`
+	BatchBuilder                   string           `json:"batchBuilder,omitempty"`
+	Configs                        map[string]any   `json:"configs,omitempty"`
+	ConfigsCount                   int              `json:"configsCount"`
+	SecretsCount                   int              `json:"secretsCount"`
+}
+
+type pulsarSinkMetadataResource struct {
+	Kind      string                  `json:"kind"`
+	URI       string                  `json:"uri"`
+	Tenant    string                  `json:"tenant"`
+	Namespace string                  `json:"namespace"`
+	Name      string                  `json:"name"`
+	Config    pulsarSinkConfigSummary `json:"config"`
+}
+
+type pulsarSinkConfigSummary struct {
+	Tenant                         string           `json:"tenant,omitempty"`
+	Namespace                      string           `json:"namespace,omitempty"`
+	Name                           string           `json:"name,omitempty"`
+	ClassName                      string           `json:"className,omitempty"`
+	SinkType                       string           `json:"sinkType,omitempty"`
+	Parallelism                    int              `json:"parallelism,omitempty"`
+	Inputs                         []string         `json:"inputs,omitempty"`
+	InputsCount                    int              `json:"inputsCount"`
+	InputSpecsCount                int              `json:"inputSpecsCount"`
+	TopicsPattern                  string           `json:"topicsPattern,omitempty"`
+	ProcessingGuarantees           string           `json:"processingGuarantees,omitempty"`
+	SourceSubscriptionName         string           `json:"sourceSubscriptionName,omitempty"`
+	SourceSubscriptionPosition     string           `json:"sourceSubscriptionPosition,omitempty"`
+	Resources                      *utils.Resources `json:"resources,omitempty"`
+	TimeoutMs                      *int64           `json:"timeoutMs,omitempty"`
+	ArchiveConfigured              bool             `json:"archiveConfigured"`
+	RuntimeFlagsConfigured         bool             `json:"runtimeFlagsConfigured"`
+	CustomRuntimeOptionsConfigured bool             `json:"customRuntimeOptionsConfigured"`
+	CleanupSubscription            bool             `json:"cleanupSubscription"`
+	RetainOrdering                 bool             `json:"retainOrdering"`
+	RetainKeyOrdering              bool             `json:"retainKeyOrdering"`
+	AutoAck                        bool             `json:"autoAck"`
+	TopicToSerdeClassNameCount     int              `json:"topicToSerdeClassNameCount"`
+	TopicToSchemaTypeCount         int              `json:"topicToSchemaTypeCount"`
+	TopicToSchemaPropertiesCount   int              `json:"topicToSchemaPropertiesCount"`
+	Configs                        map[string]any   `json:"configs,omitempty"`
+	ConfigsCount                   int              `json:"configsCount"`
+	SecretsCount                   int              `json:"secretsCount"`
+	MaxMessageRetries              int              `json:"maxMessageRetries,omitempty"`
+	DeadLetterTopic                string           `json:"deadLetterTopic,omitempty"`
+	NegativeAckRedeliveryDelayMs   int64            `json:"negativeAckRedeliveryDelayMs,omitempty"`
+	TransformFunctionConfigured    bool             `json:"transformFunctionConfigured"`
+}
+
+type pulsarFunctionStatusResource struct {
+	Kind      string                      `json:"kind"`
+	URI       string                      `json:"uri"`
+	Tenant    string                      `json:"tenant"`
+	Namespace string                      `json:"namespace"`
+	Name      string                      `json:"name"`
+	Status    pulsarFunctionStatusSummary `json:"status"`
+}
+
+type pulsarFunctionStatusSummary struct {
+	NumInstances int                                   `json:"numInstances"`
+	NumRunning   int                                   `json:"numRunning"`
+	Instances    []pulsarFunctionInstanceStatusSummary `json:"instances,omitempty"`
+	Limit        int                                   `json:"limit"`
+	Limited      bool                                  `json:"limited"`
+}
+
+type pulsarFunctionInstanceStatusSummary struct {
+	InstanceID                  int     `json:"instanceId"`
+	Running                     bool    `json:"running"`
+	ErrorPresent                bool    `json:"errorPresent"`
+	NumRestarts                 int64   `json:"numRestarts"`
+	NumReceived                 int64   `json:"numReceived"`
+	NumSuccessfullyProcessed    int64   `json:"numSuccessfullyProcessed"`
+	NumUserExceptions           int64   `json:"numUserExceptions"`
+	LatestUserExceptionsCount   int     `json:"latestUserExceptionsCount"`
+	NumSystemExceptions         int64   `json:"numSystemExceptions"`
+	LatestSystemExceptionsCount int     `json:"latestSystemExceptionsCount"`
+	AverageLatency              float64 `json:"averageLatency"`
+	LastInvocationTime          int64   `json:"lastInvocationTime,omitempty"`
+	WorkerID                    string  `json:"workerId,omitempty"`
+}
+
+type pulsarFunctionStatsResource struct {
+	Kind      string                     `json:"kind"`
+	URI       string                     `json:"uri"`
+	Tenant    string                     `json:"tenant"`
+	Namespace string                     `json:"namespace"`
+	Name      string                     `json:"name"`
+	Stats     pulsarFunctionStatsSummary `json:"stats"`
+}
+
+type pulsarFunctionStatsSummary struct {
+	ReceivedTotal              int64                                `json:"receivedTotal"`
+	ProcessedSuccessfullyTotal int64                                `json:"processedSuccessfullyTotal"`
+	SystemExceptionsTotal      int64                                `json:"systemExceptionsTotal"`
+	UserExceptionsTotal        int64                                `json:"userExceptionsTotal"`
+	AvgProcessLatency          float64                              `json:"avgProcessLatency"`
+	LastInvocation             int64                                `json:"lastInvocation,omitempty"`
+	OneMin                     pulsarFunctionStatsDataSummary       `json:"oneMin"`
+	InstanceCount              int                                  `json:"instanceCount"`
+	Instances                  []pulsarFunctionInstanceStatsSummary `json:"instances,omitempty"`
+	Limit                      int                                  `json:"limit"`
+	Limited                    bool                                 `json:"limited"`
+}
+
+type pulsarFunctionStatsDataSummary struct {
+	ReceivedTotal              int64   `json:"receivedTotal"`
+	ProcessedSuccessfullyTotal int64   `json:"processedSuccessfullyTotal"`
+	SystemExceptionsTotal      int64   `json:"systemExceptionsTotal"`
+	UserExceptionsTotal        int64   `json:"userExceptionsTotal"`
+	AvgProcessLatency          float64 `json:"avgProcessLatency"`
+}
+
+type pulsarFunctionInstanceStatsSummary struct {
+	InstanceID                 int64                          `json:"instanceId"`
+	ReceivedTotal              int64                          `json:"receivedTotal"`
+	ProcessedSuccessfullyTotal int64                          `json:"processedSuccessfullyTotal"`
+	SystemExceptionsTotal      int64                          `json:"systemExceptionsTotal"`
+	UserExceptionsTotal        int64                          `json:"userExceptionsTotal"`
+	AvgProcessLatency          float64                        `json:"avgProcessLatency"`
+	LastInvocation             int64                          `json:"lastInvocation,omitempty"`
+	OneMin                     pulsarFunctionStatsDataSummary `json:"oneMin"`
+	UserMetricNames            []string                       `json:"userMetricNames,omitempty"`
+	UserMetricCount            int                            `json:"userMetricCount"`
+}
+
+type pulsarSourceStatusResource struct {
+	Kind      string                    `json:"kind"`
+	URI       string                    `json:"uri"`
+	Tenant    string                    `json:"tenant"`
+	Namespace string                    `json:"namespace"`
+	Name      string                    `json:"name"`
+	Status    pulsarSourceStatusSummary `json:"status"`
+}
+
+type pulsarSourceStatusSummary struct {
+	NumInstances int                                 `json:"numInstances"`
+	NumRunning   int                                 `json:"numRunning"`
+	Instances    []pulsarSourceInstanceStatusSummary `json:"instances,omitempty"`
+	Limit        int                                 `json:"limit"`
+	Limited      bool                                `json:"limited"`
+}
+
+type pulsarSourceInstanceStatusSummary struct {
+	InstanceID                  int    `json:"instanceId"`
+	Running                     bool   `json:"running"`
+	ErrorPresent                bool   `json:"errorPresent"`
+	NumRestarts                 int64  `json:"numRestarts"`
+	NumReceivedFromSource       int64  `json:"numReceivedFromSource"`
+	NumWritten                  int64  `json:"numWritten"`
+	NumSystemExceptions         int64  `json:"numSystemExceptions"`
+	LatestSystemExceptionsCount int    `json:"latestSystemExceptionsCount"`
+	NumSourceExceptions         int64  `json:"numSourceExceptions"`
+	LatestSourceExceptionsCount int    `json:"latestSourceExceptionsCount"`
+	LastReceivedTime            int64  `json:"lastReceivedTime,omitempty"`
+	WorkerID                    string `json:"workerId,omitempty"`
+}
+
+type pulsarSinkStatusResource struct {
+	Kind      string                  `json:"kind"`
+	URI       string                  `json:"uri"`
+	Tenant    string                  `json:"tenant"`
+	Namespace string                  `json:"namespace"`
+	Name      string                  `json:"name"`
+	Status    pulsarSinkStatusSummary `json:"status"`
+}
+
+type pulsarSinkStatusSummary struct {
+	NumInstances int                               `json:"numInstances"`
+	NumRunning   int                               `json:"numRunning"`
+	Instances    []pulsarSinkInstanceStatusSummary `json:"instances,omitempty"`
+	Limit        int                               `json:"limit"`
+	Limited      bool                              `json:"limited"`
+}
+
+type pulsarSinkInstanceStatusSummary struct {
+	InstanceID                  int    `json:"instanceId"`
+	Running                     bool   `json:"running"`
+	ErrorPresent                bool   `json:"errorPresent"`
+	NumRestarts                 int64  `json:"numRestarts"`
+	NumReadFromPulsar           int64  `json:"numReadFromPulsar"`
+	NumWrittenToSink            int64  `json:"numWrittenToSink"`
+	NumSystemExceptions         int64  `json:"numSystemExceptions"`
+	LatestSystemExceptionsCount int    `json:"latestSystemExceptionsCount"`
+	NumSinkExceptions           int64  `json:"numSinkExceptions"`
+	LatestSinkExceptionsCount   int    `json:"latestSinkExceptionsCount"`
+	LastReceivedTime            int64  `json:"lastReceivedTime,omitempty"`
+	WorkerID                    string `json:"workerId,omitempty"`
+}
+
+type pulsarPackageCollectionResource struct {
+	Kind        string   `json:"kind"`
+	URI         string   `json:"uri"`
+	PackageType string   `json:"packageType"`
+	Tenant      string   `json:"tenant"`
+	Namespace   string   `json:"namespace"`
+	Packages    []string `json:"packages"`
+	Count       int      `json:"count"`
+	Limit       int      `json:"limit"`
+	Limited     bool     `json:"limited"`
+}
+
+type pulsarPackageVersionsResource struct {
+	Kind        string   `json:"kind"`
+	URI         string   `json:"uri"`
+	PackageType string   `json:"packageType"`
+	Tenant      string   `json:"tenant"`
+	Namespace   string   `json:"namespace"`
+	Package     string   `json:"package"`
+	PackageURL  string   `json:"packageUrl"`
+	Versions    []string `json:"versions"`
+	Count       int      `json:"count"`
+	Limit       int      `json:"limit"`
+	Limited     bool     `json:"limited"`
+}
+
+type pulsarPackageMetadataResource struct {
+	Kind        string                       `json:"kind"`
+	URI         string                       `json:"uri"`
+	PackageType string                       `json:"packageType"`
+	Tenant      string                       `json:"tenant"`
+	Namespace   string                       `json:"namespace"`
+	Package     string                       `json:"package"`
+	Version     string                       `json:"version"`
+	PackageURL  string                       `json:"packageUrl"`
+	Metadata    pulsarPackageMetadataSummary `json:"metadata"`
+}
+
+type pulsarPackageMetadataSummary struct {
+	Description      string            `json:"description,omitempty"`
+	Contact          string            `json:"contact,omitempty"`
+	CreateTime       int64             `json:"createTime,omitempty"`
+	ModificationTime int64             `json:"modificationTime,omitempty"`
+	Properties       map[string]string `json:"properties,omitempty"`
+	PropertiesCount  int               `json:"propertiesCount"`
+}
+
+type pulsarWorkerClusterResource struct {
+	Kind    string              `json:"kind"`
+	URI     string              `json:"uri"`
+	Workers []*utils.WorkerInfo `json:"workers"`
+	Count   int                 `json:"count"`
+	Limit   int                 `json:"limit"`
+	Limited bool                `json:"limited"`
+}
+
+type pulsarWorkerLeaderResource struct {
+	Kind   string            `json:"kind"`
+	URI    string            `json:"uri"`
+	Leader *utils.WorkerInfo `json:"leader,omitempty"`
+}
+
+type pulsarWorkerAssignmentsResource struct {
+	Kind            string                          `json:"kind"`
+	URI             string                          `json:"uri"`
+	Workers         []pulsarWorkerAssignmentSummary `json:"workers"`
+	WorkerCount     int                             `json:"workerCount"`
+	AssignmentCount int                             `json:"assignmentCount"`
+	Limit           int                             `json:"limit"`
+	Limited         bool                            `json:"limited"`
+}
+
+type pulsarWorkerAssignmentSummary struct {
+	WorkerID         string   `json:"workerId"`
+	Assignments      []string `json:"assignments,omitempty"`
+	AssignmentsCount int      `json:"assignmentsCount"`
+	Limited          bool     `json:"limited"`
+}
+
+type pulsarWorkerFunctionStatsResource struct {
+	Kind      string                                     `json:"kind"`
+	URI       string                                     `json:"uri"`
+	Functions []pulsarWorkerFunctionInstanceStatsSummary `json:"functions"`
+	Count     int                                        `json:"count"`
+	Limit     int                                        `json:"limit"`
+	Limited   bool                                       `json:"limited"`
+}
+
+type pulsarWorkerFunctionInstanceStatsSummary struct {
+	Name    string                             `json:"name"`
+	Metrics pulsarFunctionInstanceStatsSummary `json:"metrics"`
+}
+
+type pulsarWorkerMetricsResource struct {
+	Kind              string                         `json:"kind"`
+	URI               string                         `json:"uri"`
+	MonitoringMetrics pulsarMonitoringMetricsSummary `json:"monitoringMetrics"`
+}
+
 // PulsarAddResources registers the read-only Pulsar MCP resource surface.
 func PulsarAddResources(s *server.MCPServer, features []string) {
 	resourceRegistrations, templateRegistrations := buildPulsarResourceRegistrations(features)
@@ -772,6 +1215,157 @@ func buildPulsarResourceRegistrations(features []string) ([]server.ServerResourc
 					mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
 				),
 				Handler: handlePulsarSubscriptionCursorResource,
+			},
+		)
+	}
+
+	if pulsarResourceFeatureEnabled(features, FeaturePulsarAdminFunctions) {
+		templates = append(templates,
+			server.ServerResourceTemplate{
+				Template: mcp.NewResourceTemplate(pulsarFunctionsTemplateURI, "Pulsar Functions by Namespace",
+					mcp.WithTemplateDescription("List Pulsar Functions for a tenant and namespace."),
+					mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
+				),
+				Handler: handlePulsarFunctionsResource,
+			},
+			server.ServerResourceTemplate{
+				Template: mcp.NewResourceTemplate(pulsarFunctionMetadataTemplateURI, "Pulsar Function Metadata",
+					mcp.WithTemplateDescription("Get sanitized metadata for a Pulsar Function."),
+					mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
+				),
+				Handler: handlePulsarFunctionMetadataResource,
+			},
+			server.ServerResourceTemplate{
+				Template: mcp.NewResourceTemplate(pulsarFunctionStatusTemplateURI, "Pulsar Function Status",
+					mcp.WithTemplateDescription("Get bounded runtime status for a Pulsar Function."),
+					mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
+				),
+				Handler: handlePulsarFunctionStatusResource,
+			},
+			server.ServerResourceTemplate{
+				Template: mcp.NewResourceTemplate(pulsarFunctionStatsTemplateURI, "Pulsar Function Stats",
+					mcp.WithTemplateDescription("Get bounded statistics for a Pulsar Function."),
+					mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
+				),
+				Handler: handlePulsarFunctionStatsResource,
+			},
+		)
+	}
+
+	if pulsarResourceFeatureEnabled(features, FeaturePulsarAdminSources) {
+		templates = append(templates,
+			server.ServerResourceTemplate{
+				Template: mcp.NewResourceTemplate(pulsarSourcesTemplateURI, "Pulsar Sources by Namespace",
+					mcp.WithTemplateDescription("List Pulsar Sources for a tenant and namespace."),
+					mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
+				),
+				Handler: handlePulsarSourcesResource,
+			},
+			server.ServerResourceTemplate{
+				Template: mcp.NewResourceTemplate(pulsarSourceMetadataTemplateURI, "Pulsar Source Metadata",
+					mcp.WithTemplateDescription("Get sanitized metadata for a Pulsar Source."),
+					mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
+				),
+				Handler: handlePulsarSourceMetadataResource,
+			},
+			server.ServerResourceTemplate{
+				Template: mcp.NewResourceTemplate(pulsarSourceStatusTemplateURI, "Pulsar Source Status",
+					mcp.WithTemplateDescription("Get bounded runtime status for a Pulsar Source."),
+					mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
+				),
+				Handler: handlePulsarSourceStatusResource,
+			},
+		)
+	}
+
+	if pulsarResourceFeatureEnabled(features, FeaturePulsarAdminSinks) {
+		templates = append(templates,
+			server.ServerResourceTemplate{
+				Template: mcp.NewResourceTemplate(pulsarSinksTemplateURI, "Pulsar Sinks by Namespace",
+					mcp.WithTemplateDescription("List Pulsar Sinks for a tenant and namespace."),
+					mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
+				),
+				Handler: handlePulsarSinksResource,
+			},
+			server.ServerResourceTemplate{
+				Template: mcp.NewResourceTemplate(pulsarSinkMetadataTemplateURI, "Pulsar Sink Metadata",
+					mcp.WithTemplateDescription("Get sanitized metadata for a Pulsar Sink."),
+					mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
+				),
+				Handler: handlePulsarSinkMetadataResource,
+			},
+			server.ServerResourceTemplate{
+				Template: mcp.NewResourceTemplate(pulsarSinkStatusTemplateURI, "Pulsar Sink Status",
+					mcp.WithTemplateDescription("Get bounded runtime status for a Pulsar Sink."),
+					mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
+				),
+				Handler: handlePulsarSinkStatusResource,
+			},
+		)
+	}
+
+	if pulsarResourceFeatureEnabled(features, FeaturePulsarAdminPackages) {
+		templates = append(templates,
+			server.ServerResourceTemplate{
+				Template: mcp.NewResourceTemplate(pulsarPackagesTemplateURI, "Pulsar Packages by Namespace",
+					mcp.WithTemplateDescription("List Pulsar packages by type, tenant, and namespace."),
+					mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
+				),
+				Handler: handlePulsarPackagesResource,
+			},
+			server.ServerResourceTemplate{
+				Template: mcp.NewResourceTemplate(pulsarPackageVersionsTemplateURI, "Pulsar Package Versions",
+					mcp.WithTemplateDescription("List versions for a Pulsar package."),
+					mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
+				),
+				Handler: handlePulsarPackageVersionsResource,
+			},
+			server.ServerResourceTemplate{
+				Template: mcp.NewResourceTemplate(pulsarPackageMetadataTemplateURI, "Pulsar Package Metadata",
+					mcp.WithTemplateDescription("Get sanitized metadata for one Pulsar package version."),
+					mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
+				),
+				Handler: handlePulsarPackageMetadataResource,
+			},
+		)
+	}
+
+	if pulsarResourceFeatureEnabled(features, FeaturePulsarAdminFunctionsWorker) {
+		resources = append(resources,
+			server.ServerResource{
+				Resource: mcp.NewResource(pulsarWorkerClusterResourceURI, "Pulsar Functions Worker Cluster",
+					mcp.WithResourceDescription("Bounded summary of Pulsar Functions workers in the current cluster."),
+					mcp.WithMIMEType(pulsarResourceJSONMIMEType),
+				),
+				Handler: handlePulsarWorkerClusterResource,
+			},
+			server.ServerResource{
+				Resource: mcp.NewResource(pulsarWorkerLeaderResourceURI, "Pulsar Functions Worker Leader",
+					mcp.WithResourceDescription("Current Pulsar Functions worker leader."),
+					mcp.WithMIMEType(pulsarResourceJSONMIMEType),
+				),
+				Handler: handlePulsarWorkerLeaderResource,
+			},
+			server.ServerResource{
+				Resource: mcp.NewResource(pulsarWorkerAssignmentsResourceURI, "Pulsar Functions Worker Assignments",
+					mcp.WithResourceDescription("Bounded summary of Pulsar Functions worker assignments."),
+					mcp.WithMIMEType(pulsarResourceJSONMIMEType),
+				),
+				Handler: handlePulsarWorkerAssignmentsResource,
+			},
+			server.ServerResource{
+				Resource: mcp.NewResource(pulsarWorkerFunctionStatsResourceURI, "Pulsar Functions Worker Function Stats",
+					mcp.WithResourceDescription("Bounded function instance stats reported by the Pulsar Functions worker."),
+					mcp.WithMIMEType(pulsarResourceJSONMIMEType),
+				),
+				Handler: handlePulsarWorkerFunctionStatsResource,
+			},
+			server.ServerResource{
+				Resource: mcp.NewResource(pulsarWorkerMetricsResourceURI, "Pulsar Functions Worker Metrics",
+					mcp.WithResourceDescription("Bounded summary of Pulsar Functions worker monitoring metrics."),
+					mcp.WithMIMEType(pulsarResourceJSONMIMEType),
+				),
+				Handler: handlePulsarWorkerMetricsResource,
 			},
 		)
 	}
@@ -1770,6 +2364,651 @@ func handlePulsarSubscriptionCursorResource(ctx context.Context, request mcp.Rea
 	})
 }
 
+func handlePulsarFunctionsResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindFunctions {
+		return nil, fmt.Errorf("unsupported Pulsar functions resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminV3Client(session)
+	if err != nil {
+		return nil, err
+	}
+
+	functions, err := adminClient.Functions().GetFunctions(parsed.tenant, parsed.namespace)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list functions for namespace %q/%q: %w", parsed.tenant, parsed.namespace, err)
+	}
+	names, limited := limitStringSlice(functions, pulsarResourceSummaryStringLimit)
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarWorkloadCollectionResource{
+		Kind:      string(parsed.kind),
+		URI:       request.Params.URI,
+		Type:      "function",
+		Tenant:    parsed.tenant,
+		Namespace: parsed.namespace,
+		Names:     names,
+		Count:     len(functions),
+		Limit:     pulsarResourceSummaryStringLimit,
+		Limited:   limited,
+	})
+}
+
+func handlePulsarFunctionMetadataResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindFunctionMetadata {
+		return nil, fmt.Errorf("unsupported Pulsar function metadata resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminV3Client(session)
+	if err != nil {
+		return nil, err
+	}
+
+	config, err := adminClient.Functions().GetFunction(parsed.tenant, parsed.namespace, parsed.workload)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"failed to get function %q in namespace %q/%q: %w",
+			parsed.workload,
+			parsed.tenant,
+			parsed.namespace,
+			err,
+		)
+	}
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarFunctionMetadataResource{
+		Kind:      string(parsed.kind),
+		URI:       request.Params.URI,
+		Tenant:    parsed.tenant,
+		Namespace: parsed.namespace,
+		Name:      parsed.workload,
+		Config:    summarizePulsarFunctionConfig(config),
+	})
+}
+
+func handlePulsarFunctionStatusResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindFunctionStatus {
+		return nil, fmt.Errorf("unsupported Pulsar function status resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminV3Client(session)
+	if err != nil {
+		return nil, err
+	}
+
+	status, err := adminClient.Functions().GetFunctionStatus(parsed.tenant, parsed.namespace, parsed.workload)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"failed to get status for function %q in namespace %q/%q: %w",
+			parsed.workload,
+			parsed.tenant,
+			parsed.namespace,
+			err,
+		)
+	}
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarFunctionStatusResource{
+		Kind:      string(parsed.kind),
+		URI:       request.Params.URI,
+		Tenant:    parsed.tenant,
+		Namespace: parsed.namespace,
+		Name:      parsed.workload,
+		Status:    summarizePulsarFunctionStatus(status),
+	})
+}
+
+func handlePulsarFunctionStatsResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindFunctionStats {
+		return nil, fmt.Errorf("unsupported Pulsar function stats resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminV3Client(session)
+	if err != nil {
+		return nil, err
+	}
+
+	stats, err := adminClient.Functions().GetFunctionStats(parsed.tenant, parsed.namespace, parsed.workload)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"failed to get stats for function %q in namespace %q/%q: %w",
+			parsed.workload,
+			parsed.tenant,
+			parsed.namespace,
+			err,
+		)
+	}
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarFunctionStatsResource{
+		Kind:      string(parsed.kind),
+		URI:       request.Params.URI,
+		Tenant:    parsed.tenant,
+		Namespace: parsed.namespace,
+		Name:      parsed.workload,
+		Stats:     summarizePulsarFunctionStats(stats),
+	})
+}
+
+func handlePulsarSourcesResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindSources {
+		return nil, fmt.Errorf("unsupported Pulsar sources resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminV3Client(session)
+	if err != nil {
+		return nil, err
+	}
+
+	sources, err := adminClient.Sources().ListSources(parsed.tenant, parsed.namespace)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list sources for namespace %q/%q: %w", parsed.tenant, parsed.namespace, err)
+	}
+	names, limited := limitStringSlice(sources, pulsarResourceSummaryStringLimit)
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarWorkloadCollectionResource{
+		Kind:      string(parsed.kind),
+		URI:       request.Params.URI,
+		Type:      "source",
+		Tenant:    parsed.tenant,
+		Namespace: parsed.namespace,
+		Names:     names,
+		Count:     len(sources),
+		Limit:     pulsarResourceSummaryStringLimit,
+		Limited:   limited,
+	})
+}
+
+func handlePulsarSourceMetadataResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindSourceMetadata {
+		return nil, fmt.Errorf("unsupported Pulsar source metadata resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminV3Client(session)
+	if err != nil {
+		return nil, err
+	}
+
+	config, err := adminClient.Sources().GetSource(parsed.tenant, parsed.namespace, parsed.workload)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"failed to get source %q in namespace %q/%q: %w",
+			parsed.workload,
+			parsed.tenant,
+			parsed.namespace,
+			err,
+		)
+	}
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarSourceMetadataResource{
+		Kind:      string(parsed.kind),
+		URI:       request.Params.URI,
+		Tenant:    parsed.tenant,
+		Namespace: parsed.namespace,
+		Name:      parsed.workload,
+		Config:    summarizePulsarSourceConfig(config),
+	})
+}
+
+func handlePulsarSourceStatusResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindSourceStatus {
+		return nil, fmt.Errorf("unsupported Pulsar source status resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminV3Client(session)
+	if err != nil {
+		return nil, err
+	}
+
+	status, err := adminClient.Sources().GetSourceStatus(parsed.tenant, parsed.namespace, parsed.workload)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"failed to get status for source %q in namespace %q/%q: %w",
+			parsed.workload,
+			parsed.tenant,
+			parsed.namespace,
+			err,
+		)
+	}
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarSourceStatusResource{
+		Kind:      string(parsed.kind),
+		URI:       request.Params.URI,
+		Tenant:    parsed.tenant,
+		Namespace: parsed.namespace,
+		Name:      parsed.workload,
+		Status:    summarizePulsarSourceStatus(status),
+	})
+}
+
+func handlePulsarSinksResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindSinks {
+		return nil, fmt.Errorf("unsupported Pulsar sinks resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminV3Client(session)
+	if err != nil {
+		return nil, err
+	}
+
+	sinks, err := adminClient.Sinks().ListSinks(parsed.tenant, parsed.namespace)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list sinks for namespace %q/%q: %w", parsed.tenant, parsed.namespace, err)
+	}
+	names, limited := limitStringSlice(sinks, pulsarResourceSummaryStringLimit)
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarWorkloadCollectionResource{
+		Kind:      string(parsed.kind),
+		URI:       request.Params.URI,
+		Type:      "sink",
+		Tenant:    parsed.tenant,
+		Namespace: parsed.namespace,
+		Names:     names,
+		Count:     len(sinks),
+		Limit:     pulsarResourceSummaryStringLimit,
+		Limited:   limited,
+	})
+}
+
+func handlePulsarSinkMetadataResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindSinkMetadata {
+		return nil, fmt.Errorf("unsupported Pulsar sink metadata resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminV3Client(session)
+	if err != nil {
+		return nil, err
+	}
+
+	config, err := adminClient.Sinks().GetSink(parsed.tenant, parsed.namespace, parsed.workload)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"failed to get sink %q in namespace %q/%q: %w",
+			parsed.workload,
+			parsed.tenant,
+			parsed.namespace,
+			err,
+		)
+	}
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarSinkMetadataResource{
+		Kind:      string(parsed.kind),
+		URI:       request.Params.URI,
+		Tenant:    parsed.tenant,
+		Namespace: parsed.namespace,
+		Name:      parsed.workload,
+		Config:    summarizePulsarSinkConfig(config),
+	})
+}
+
+func handlePulsarSinkStatusResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindSinkStatus {
+		return nil, fmt.Errorf("unsupported Pulsar sink status resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminV3Client(session)
+	if err != nil {
+		return nil, err
+	}
+
+	status, err := adminClient.Sinks().GetSinkStatus(parsed.tenant, parsed.namespace, parsed.workload)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"failed to get status for sink %q in namespace %q/%q: %w",
+			parsed.workload,
+			parsed.tenant,
+			parsed.namespace,
+			err,
+		)
+	}
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarSinkStatusResource{
+		Kind:      string(parsed.kind),
+		URI:       request.Params.URI,
+		Tenant:    parsed.tenant,
+		Namespace: parsed.namespace,
+		Name:      parsed.workload,
+		Status:    summarizePulsarSinkStatus(status),
+	})
+}
+
+func handlePulsarPackagesResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindPackages {
+		return nil, fmt.Errorf("unsupported Pulsar packages resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminV3Client(session)
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName := parsed.tenant + "/" + parsed.namespace
+	packages, err := adminClient.Packages().List(parsed.packageType, namespaceName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list %s packages for namespace %q: %w", parsed.packageType, namespaceName, err)
+	}
+	names, limited := limitStringSlice(packages, pulsarResourceSummaryStringLimit)
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarPackageCollectionResource{
+		Kind:        string(parsed.kind),
+		URI:         request.Params.URI,
+		PackageType: parsed.packageType,
+		Tenant:      parsed.tenant,
+		Namespace:   parsed.namespace,
+		Packages:    names,
+		Count:       len(packages),
+		Limit:       pulsarResourceSummaryStringLimit,
+		Limited:     limited,
+	})
+}
+
+func handlePulsarPackageVersionsResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindPackageVersions {
+		return nil, fmt.Errorf("unsupported Pulsar package versions resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminV3Client(session)
+	if err != nil {
+		return nil, err
+	}
+
+	packageURL := buildPulsarPackageURL(parsed, "")
+	versions, err := adminClient.Packages().ListVersions(packageURL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list versions for package %q: %w", packageURL, err)
+	}
+	names, limited := limitStringSlice(versions, pulsarResourceSummaryStringLimit)
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarPackageVersionsResource{
+		Kind:        string(parsed.kind),
+		URI:         request.Params.URI,
+		PackageType: parsed.packageType,
+		Tenant:      parsed.tenant,
+		Namespace:   parsed.namespace,
+		Package:     parsed.packageName,
+		PackageURL:  packageURL,
+		Versions:    names,
+		Count:       len(versions),
+		Limit:       pulsarResourceSummaryStringLimit,
+		Limited:     limited,
+	})
+}
+
+func handlePulsarPackageMetadataResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindPackageMetadata {
+		return nil, fmt.Errorf("unsupported Pulsar package metadata resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminV3Client(session)
+	if err != nil {
+		return nil, err
+	}
+
+	packageURL := buildPulsarPackageURL(parsed, parsed.versionName)
+	metadata, err := adminClient.Packages().GetMetadata(packageURL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get metadata for package %q: %w", packageURL, err)
+	}
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarPackageMetadataResource{
+		Kind:        string(parsed.kind),
+		URI:         request.Params.URI,
+		PackageType: parsed.packageType,
+		Tenant:      parsed.tenant,
+		Namespace:   parsed.namespace,
+		Package:     parsed.packageName,
+		Version:     parsed.versionName,
+		PackageURL:  packageURL,
+		Metadata:    summarizePulsarPackageMetadata(metadata),
+	})
+}
+
+func handlePulsarWorkerClusterResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindWorkerCluster {
+		return nil, fmt.Errorf("unsupported Pulsar worker cluster resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminClient(session)
+	if err != nil {
+		return nil, err
+	}
+
+	workers, err := adminClient.FunctionsWorker().GetCluster()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get functions worker cluster: %w", err)
+	}
+	limitedWorkers, limited := limitWorkerInfoSlice(workers, pulsarResourceSummaryStringLimit)
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarWorkerClusterResource{
+		Kind:    string(parsed.kind),
+		URI:     request.Params.URI,
+		Workers: limitedWorkers,
+		Count:   len(workers),
+		Limit:   pulsarResourceSummaryStringLimit,
+		Limited: limited,
+	})
+}
+
+func handlePulsarWorkerLeaderResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindWorkerLeader {
+		return nil, fmt.Errorf("unsupported Pulsar worker leader resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminClient(session)
+	if err != nil {
+		return nil, err
+	}
+
+	leader, err := adminClient.FunctionsWorker().GetClusterLeader()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get functions worker leader: %w", err)
+	}
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarWorkerLeaderResource{
+		Kind:   string(parsed.kind),
+		URI:    request.Params.URI,
+		Leader: leader,
+	})
+}
+
+func handlePulsarWorkerAssignmentsResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindWorkerAssignments {
+		return nil, fmt.Errorf("unsupported Pulsar worker assignments resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminClient(session)
+	if err != nil {
+		return nil, err
+	}
+
+	assignments, err := adminClient.FunctionsWorker().GetAssignments()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get functions worker assignments: %w", err)
+	}
+
+	return newPulsarJSONResourceContents(request.Params.URI, summarizePulsarWorkerAssignments(request.Params.URI, parsed.kind, assignments))
+}
+
+func handlePulsarWorkerFunctionStatsResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindWorkerFunctionStats {
+		return nil, fmt.Errorf("unsupported Pulsar worker function stats resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminClient(session)
+	if err != nil {
+		return nil, err
+	}
+
+	stats, err := adminClient.FunctionsWorker().GetFunctionsStats()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get functions worker stats: %w", err)
+	}
+
+	return newPulsarJSONResourceContents(request.Params.URI, summarizePulsarWorkerFunctionStats(request.Params.URI, parsed.kind, stats))
+}
+
+func handlePulsarWorkerMetricsResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindWorkerMetrics {
+		return nil, fmt.Errorf("unsupported Pulsar worker metrics resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminClient(session)
+	if err != nil {
+		return nil, err
+	}
+
+	metrics, err := adminClient.FunctionsWorker().GetMetrics()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get functions worker metrics: %w", err)
+	}
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarWorkerMetricsResource{
+		Kind:              string(parsed.kind),
+		URI:               request.Params.URI,
+		MonitoringMetrics: summarizePulsarPointerMonitoringMetrics(metrics),
+	})
+}
+
 func requirePulsarResourceSession(ctx context.Context) (*pulsarsession.Session, error) {
 	session := context2.GetPulsarSession(ctx)
 	if session == nil {
@@ -1788,6 +3027,20 @@ func getPulsarResourceAdminClient(session *pulsarsession.Session) (cmdutils.Clie
 	}
 	if adminClient == nil {
 		return nil, fmt.Errorf("Pulsar admin client not found in session")
+	}
+	return adminClient, nil
+}
+
+func getPulsarResourceAdminV3Client(session *pulsarsession.Session) (cmdutils.Client, error) {
+	if _, err := session.GetPulsarCtlConfig(); err != nil {
+		return nil, fmt.Errorf("failed to get Pulsar admin configuration: %w", err)
+	}
+	adminClient, err := session.GetAdminV3Client()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get Pulsar admin v3 client: %w", err)
+	}
+	if adminClient == nil {
+		return nil, fmt.Errorf("Pulsar admin v3 client not found in session")
 	}
 	return adminClient, nil
 }
@@ -2097,6 +3350,460 @@ func summarizePulsarSubscriptionCursor(stats utils.CursorStats) pulsarSubscripti
 	}
 }
 
+func summarizePulsarFunctionConfig(config utils.FunctionConfig) pulsarFunctionConfigSummary {
+	inputs, _ := limitStringSlice(config.Inputs, pulsarResourceSummaryStringLimit)
+	locationType := pulsarFunctionPackageLocationType(config)
+	return pulsarFunctionConfigSummary{
+		Tenant:                             config.Tenant,
+		Namespace:                          config.Namespace,
+		Name:                               config.Name,
+		ClassName:                          config.ClassName,
+		Runtime:                            config.Runtime,
+		FunctionTypeConfigured:             config.FunctionType != nil && strings.TrimSpace(*config.FunctionType) != "",
+		PackageLocationConfigured:          locationType != "",
+		PackageLocationType:                locationType,
+		Parallelism:                        config.Parallelism,
+		Inputs:                             inputs,
+		InputsCount:                        len(config.Inputs),
+		InputSpecsCount:                    len(config.InputSpecs),
+		TopicsPattern:                      stringPointerValue(config.TopicsPattern),
+		Output:                             config.Output,
+		LogTopic:                           config.LogTopic,
+		ProcessingGuarantees:               config.ProcessingGuarantees,
+		Resources:                          config.Resources,
+		UserConfig:                         sanitizePulsarResourceAnyMap(config.UserConfig, pulsarResourceSummaryStringLimit),
+		UserConfigCount:                    len(config.UserConfig),
+		SecretsCount:                       len(config.Secrets),
+		ProducerConfigConfigured:           config.ProducerConfig != nil,
+		CustomSchemaOutputsCount:           len(config.CustomSchemaOutputs),
+		CustomSerdeInputsCount:             len(config.CustomSerdeInputs),
+		CustomSchemaInputsCount:            len(config.CustomSchemaInputs),
+		CustomRuntimeOptionsConfigured:     config.CustomRuntimeOptions != "",
+		DeadLetterTopic:                    config.DeadLetterTopic,
+		SubscriptionName:                   config.SubName,
+		SubscriptionPosition:               config.SubscriptionPosition,
+		TimeoutMs:                          config.TimeoutMs,
+		MaxMessageRetries:                  config.MaxMessageRetries,
+		CleanupSubscription:                config.CleanupSubscription,
+		RetainOrdering:                     config.RetainOrdering,
+		RetainKeyOrdering:                  config.RetainKeyOrdering,
+		AutoAck:                            config.AutoAck,
+		ForwardSourceMessageProperty:       config.ForwardSourceMessageProperty,
+		ExposePulsarAdminClientEnabled:     config.ExposePulsarAdminClientEnabled,
+		SkipToLatest:                       config.SkipToLatest,
+		MaxPendingAsyncRequests:            config.MaxPendingAsyncRequests,
+		WindowConfigConfigured:             config.WindowConfig != nil,
+		InputTypeClassName:                 config.InputTypeClassName,
+		OutputTypeClassName:                config.OutputTypeClassName,
+		OutputSchemaType:                   config.OutputSchemaType,
+		OutputSerdeClassName:               config.OutputSerdeClassName,
+		CustomSchemaOutputs:                sanitizePulsarResourceStringMap(config.CustomSchemaOutputs, pulsarResourceSummaryStringLimit),
+		SanitizedCustomSchemaOutputsCount:  len(config.CustomSchemaOutputs),
+		SanitizedCustomSerdeInputs:         sanitizePulsarResourceStringMap(config.CustomSerdeInputs, pulsarResourceSummaryStringLimit),
+		SanitizedCustomSerdeInputsCount:    len(config.CustomSerdeInputs),
+		SanitizedCustomSchemaInputs:        sanitizePulsarResourceStringMap(config.CustomSchemaInputs, pulsarResourceSummaryStringLimit),
+		SanitizedCustomSchemaInputsCount:   len(config.CustomSchemaInputs),
+		SanitizedInputSpecsSchemaSummaries: summarizePulsarInputSpecs(config.InputSpecs, pulsarResourceSummaryStringLimit),
+	}
+}
+
+func pulsarFunctionPackageLocationType(config utils.FunctionConfig) string {
+	switch {
+	case config.Jar != nil && strings.TrimSpace(*config.Jar) != "":
+		return "jar"
+	case config.Py != nil && strings.TrimSpace(*config.Py) != "":
+		return "py"
+	case config.Go != nil && strings.TrimSpace(*config.Go) != "":
+		return "go"
+	case config.FunctionType != nil && strings.TrimSpace(*config.FunctionType) != "":
+		return "builtin"
+	default:
+		return ""
+	}
+}
+
+func summarizePulsarInputSpecs(inputSpecs map[string]utils.ConsumerConfig, limit int) []pulsarInputSpecSummary {
+	if len(inputSpecs) == 0 || limit <= 0 {
+		return nil
+	}
+	topics := make([]string, 0, len(inputSpecs))
+	for topic := range inputSpecs {
+		topics = append(topics, topic)
+	}
+	sort.Strings(topics)
+	if len(topics) > limit {
+		topics = topics[:limit]
+	}
+	summaries := make([]pulsarInputSpecSummary, 0, len(topics))
+	for _, topic := range topics {
+		config := inputSpecs[topic]
+		summaries = append(summaries, pulsarInputSpecSummary{
+			Topic:                   topic,
+			SchemaType:              config.SchemaType,
+			SerdeClassName:          config.SerdeClassName,
+			RegexPattern:            config.RegexPattern,
+			ReceiverQueueSize:       config.ReceiverQueueSize,
+			SchemaProperties:        sanitizePulsarResourceStringMap(config.SchemaProperties, pulsarResourceSummaryStringLimit),
+			SchemaPropertiesCount:   len(config.SchemaProperties),
+			ConsumerProperties:      sanitizePulsarResourceStringMap(config.ConsumerProperties, pulsarResourceSummaryStringLimit),
+			ConsumerPropertiesCount: len(config.ConsumerProperties),
+			CryptoConfigConfigured:  config.CryptoConfig != nil,
+			PoolMessages:            config.PoolMessages,
+		})
+	}
+	return summaries
+}
+
+func summarizePulsarSourceConfig(config utils.SourceConfig) pulsarSourceConfigSummary {
+	return pulsarSourceConfigSummary{
+		Tenant:                         config.Tenant,
+		Namespace:                      config.Namespace,
+		Name:                           config.Name,
+		ClassName:                      config.ClassName,
+		TopicName:                      config.TopicName,
+		SerdeClassName:                 config.SerdeClassName,
+		SchemaType:                     config.SchemaType,
+		Parallelism:                    config.Parallelism,
+		ProcessingGuarantees:           config.ProcessingGuarantees,
+		Resources:                      config.Resources,
+		ArchiveConfigured:              config.Archive != "",
+		ProducerConfigConfigured:       config.ProducerConfig != nil,
+		RuntimeFlagsConfigured:         config.RuntimeFlags != "",
+		CustomRuntimeOptionsConfigured: config.CustomRuntimeOptions != "",
+		BatchSourceConfigConfigured:    config.BatchSourceConfig != nil,
+		BatchBuilder:                   config.BatchBuilder,
+		Configs:                        sanitizePulsarResourceAnyMap(config.Configs, pulsarResourceSummaryStringLimit),
+		ConfigsCount:                   len(config.Configs),
+		SecretsCount:                   len(config.Secrets),
+	}
+}
+
+func summarizePulsarSinkConfig(config utils.SinkConfig) pulsarSinkConfigSummary {
+	inputs, _ := limitStringSlice(config.Inputs, pulsarResourceSummaryStringLimit)
+	return pulsarSinkConfigSummary{
+		Tenant:                         config.Tenant,
+		Namespace:                      config.Namespace,
+		Name:                           config.Name,
+		ClassName:                      config.ClassName,
+		SinkType:                       config.SinkType,
+		Parallelism:                    config.Parallelism,
+		Inputs:                         inputs,
+		InputsCount:                    len(config.Inputs),
+		InputSpecsCount:                len(config.InputSpecs),
+		TopicsPattern:                  stringPointerValue(config.TopicsPattern),
+		ProcessingGuarantees:           config.ProcessingGuarantees,
+		SourceSubscriptionName:         config.SourceSubscriptionName,
+		SourceSubscriptionPosition:     config.SourceSubscriptionPosition,
+		Resources:                      config.Resources,
+		TimeoutMs:                      config.TimeoutMs,
+		ArchiveConfigured:              config.Archive != "",
+		RuntimeFlagsConfigured:         config.RuntimeFlags != "",
+		CustomRuntimeOptionsConfigured: config.CustomRuntimeOptions != "",
+		CleanupSubscription:            config.CleanupSubscription,
+		RetainOrdering:                 config.RetainOrdering,
+		RetainKeyOrdering:              config.RetainKeyOrdering,
+		AutoAck:                        config.AutoAck,
+		TopicToSerdeClassNameCount:     len(config.TopicToSerdeClassName),
+		TopicToSchemaTypeCount:         len(config.TopicToSchemaType),
+		TopicToSchemaPropertiesCount:   len(config.TopicToSchemaProperties),
+		Configs:                        sanitizePulsarResourceAnyMap(config.Configs, pulsarResourceSummaryStringLimit),
+		ConfigsCount:                   len(config.Configs),
+		SecretsCount:                   len(config.Secrets),
+		MaxMessageRetries:              config.MaxMessageRetries,
+		DeadLetterTopic:                config.DeadLetterTopic,
+		NegativeAckRedeliveryDelayMs:   config.NegativeAckRedeliveryDelayMs,
+		TransformFunctionConfigured: config.TransformFunction != "" ||
+			config.TransformFunctionClassName != "" ||
+			config.TransformFunctionConfig != "",
+	}
+}
+
+func summarizePulsarFunctionStatus(status utils.FunctionStatus) pulsarFunctionStatusSummary {
+	instances := status.Instances
+	limited := false
+	if len(instances) > pulsarResourceSummaryStringLimit {
+		instances = instances[:pulsarResourceSummaryStringLimit]
+		limited = true
+	}
+	summaries := make([]pulsarFunctionInstanceStatusSummary, 0, len(instances))
+	for _, instance := range instances {
+		summaries = append(summaries, summarizePulsarFunctionInstanceStatus(instance.InstanceID, instance.Status))
+	}
+	return pulsarFunctionStatusSummary{
+		NumInstances: status.NumInstances,
+		NumRunning:   status.NumRunning,
+		Instances:    summaries,
+		Limit:        pulsarResourceSummaryStringLimit,
+		Limited:      limited,
+	}
+}
+
+func summarizePulsarFunctionInstanceStatus(instanceID int, status utils.FunctionInstanceStatusData) pulsarFunctionInstanceStatusSummary {
+	return pulsarFunctionInstanceStatusSummary{
+		InstanceID:                  instanceID,
+		Running:                     status.Running,
+		ErrorPresent:                status.Err != "",
+		NumRestarts:                 status.NumRestarts,
+		NumReceived:                 status.NumReceived,
+		NumSuccessfullyProcessed:    status.NumSuccessfullyProcessed,
+		NumUserExceptions:           status.NumUserExceptions,
+		LatestUserExceptionsCount:   len(status.LatestUserExceptions),
+		NumSystemExceptions:         status.NumSystemExceptions,
+		LatestSystemExceptionsCount: len(status.LatestSystemExceptions),
+		AverageLatency:              status.AverageLatency,
+		LastInvocationTime:          status.LastInvocationTime,
+		WorkerID:                    status.WorkerID,
+	}
+}
+
+func summarizePulsarFunctionStats(stats utils.FunctionStats) pulsarFunctionStatsSummary {
+	instances := stats.Instances
+	limited := false
+	if len(instances) > pulsarResourceSummaryStringLimit {
+		instances = instances[:pulsarResourceSummaryStringLimit]
+		limited = true
+	}
+	summaries := make([]pulsarFunctionInstanceStatsSummary, 0, len(instances))
+	for _, instance := range instances {
+		summaries = append(summaries, summarizePulsarFunctionInstanceStats(instance))
+	}
+	return pulsarFunctionStatsSummary{
+		ReceivedTotal:              stats.ReceivedTotal,
+		ProcessedSuccessfullyTotal: stats.ProcessedSuccessfullyTotal,
+		SystemExceptionsTotal:      stats.SystemExceptionsTotal,
+		UserExceptionsTotal:        stats.UserExceptionsTotal,
+		AvgProcessLatency:          stats.AvgProcessLatency,
+		LastInvocation:             stats.LastInvocation,
+		OneMin:                     summarizePulsarFunctionStatsData(stats.OneMin),
+		InstanceCount:              len(stats.Instances),
+		Instances:                  summaries,
+		Limit:                      pulsarResourceSummaryStringLimit,
+		Limited:                    limited,
+	}
+}
+
+func summarizePulsarFunctionInstanceStats(stats utils.FunctionInstanceStats) pulsarFunctionInstanceStatsSummary {
+	metricNames := make(map[string]struct{}, len(stats.Metrics.UserMetrics))
+	for name := range stats.Metrics.UserMetrics {
+		metricNames[name] = struct{}{}
+	}
+	return pulsarFunctionInstanceStatsSummary{
+		InstanceID:                 stats.InstanceID,
+		ReceivedTotal:              stats.Metrics.ReceivedTotal,
+		ProcessedSuccessfullyTotal: stats.Metrics.ProcessedSuccessfullyTotal,
+		SystemExceptionsTotal:      stats.Metrics.SystemExceptionsTotal,
+		UserExceptionsTotal:        stats.Metrics.UserExceptionsTotal,
+		AvgProcessLatency:          stats.Metrics.AvgProcessLatency,
+		LastInvocation:             stats.Metrics.LastInvocation,
+		OneMin:                     summarizePulsarFunctionStatsData(stats.Metrics.OneMin),
+		UserMetricNames:            sortedLimitedStrings(metricNames, pulsarResourceSummaryStringLimit),
+		UserMetricCount:            len(stats.Metrics.UserMetrics),
+	}
+}
+
+func summarizePulsarFunctionStatsData(stats utils.FunctionInstanceStatsDataBase) pulsarFunctionStatsDataSummary {
+	return pulsarFunctionStatsDataSummary{
+		ReceivedTotal:              stats.ReceivedTotal,
+		ProcessedSuccessfullyTotal: stats.ProcessedSuccessfullyTotal,
+		SystemExceptionsTotal:      stats.SystemExceptionsTotal,
+		UserExceptionsTotal:        stats.UserExceptionsTotal,
+		AvgProcessLatency:          stats.AvgProcessLatency,
+	}
+}
+
+func summarizePulsarSourceStatus(status utils.SourceStatus) pulsarSourceStatusSummary {
+	instances := status.Instances
+	limited := false
+	if len(instances) > pulsarResourceSummaryStringLimit {
+		instances = instances[:pulsarResourceSummaryStringLimit]
+		limited = true
+	}
+	summaries := make([]pulsarSourceInstanceStatusSummary, 0, len(instances))
+	for _, instance := range instances {
+		if instance == nil {
+			continue
+		}
+		summaries = append(summaries, summarizePulsarSourceInstanceStatus(instance.InstanceID, instance.Status))
+	}
+	return pulsarSourceStatusSummary{
+		NumInstances: status.NumInstances,
+		NumRunning:   status.NumRunning,
+		Instances:    summaries,
+		Limit:        pulsarResourceSummaryStringLimit,
+		Limited:      limited,
+	}
+}
+
+func summarizePulsarSourceInstanceStatus(instanceID int, status utils.SourceInstanceStatusData) pulsarSourceInstanceStatusSummary {
+	return pulsarSourceInstanceStatusSummary{
+		InstanceID:                  instanceID,
+		Running:                     status.Running,
+		ErrorPresent:                status.Err != "",
+		NumRestarts:                 status.NumRestarts,
+		NumReceivedFromSource:       status.NumReceivedFromSource,
+		NumWritten:                  status.NumWritten,
+		NumSystemExceptions:         status.NumSystemExceptions,
+		LatestSystemExceptionsCount: len(status.LatestSystemExceptions),
+		NumSourceExceptions:         status.NumSourceExceptions,
+		LatestSourceExceptionsCount: len(status.LatestSourceExceptions),
+		LastReceivedTime:            status.LastReceivedTime,
+		WorkerID:                    status.WorkerID,
+	}
+}
+
+func summarizePulsarSinkStatus(status utils.SinkStatus) pulsarSinkStatusSummary {
+	instances := status.Instances
+	limited := false
+	if len(instances) > pulsarResourceSummaryStringLimit {
+		instances = instances[:pulsarResourceSummaryStringLimit]
+		limited = true
+	}
+	summaries := make([]pulsarSinkInstanceStatusSummary, 0, len(instances))
+	for _, instance := range instances {
+		if instance == nil {
+			continue
+		}
+		summaries = append(summaries, summarizePulsarSinkInstanceStatus(instance.InstanceID, instance.Status))
+	}
+	return pulsarSinkStatusSummary{
+		NumInstances: status.NumInstances,
+		NumRunning:   status.NumRunning,
+		Instances:    summaries,
+		Limit:        pulsarResourceSummaryStringLimit,
+		Limited:      limited,
+	}
+}
+
+func summarizePulsarSinkInstanceStatus(instanceID int, status utils.SinkInstanceStatusData) pulsarSinkInstanceStatusSummary {
+	return pulsarSinkInstanceStatusSummary{
+		InstanceID:                  instanceID,
+		Running:                     status.Running,
+		ErrorPresent:                status.Err != "",
+		NumRestarts:                 status.NumRestarts,
+		NumReadFromPulsar:           status.NumReadFromPulsar,
+		NumWrittenToSink:            status.NumWrittenToSink,
+		NumSystemExceptions:         status.NumSystemExceptions,
+		LatestSystemExceptionsCount: len(status.LatestSystemExceptions),
+		NumSinkExceptions:           status.NumSinkExceptions,
+		LatestSinkExceptionsCount:   len(status.LatestSinkExceptions),
+		LastReceivedTime:            status.LastReceivedTime,
+		WorkerID:                    status.WorkerID,
+	}
+}
+
+func summarizePulsarPackageMetadata(metadata utils.PackageMetadata) pulsarPackageMetadataSummary {
+	return pulsarPackageMetadataSummary{
+		Description:      metadata.Description,
+		Contact:          metadata.Contact,
+		CreateTime:       metadata.CreateTime,
+		ModificationTime: metadata.ModificationTime,
+		Properties:       sanitizePulsarResourceStringMap(metadata.Properties, pulsarResourceSummaryStringLimit),
+		PropertiesCount:  len(metadata.Properties),
+	}
+}
+
+func summarizePulsarWorkerAssignments(
+	uri string,
+	kind pulsarResourceKind,
+	assignments map[string][]string,
+) pulsarWorkerAssignmentsResource {
+	workerIDs := make([]string, 0, len(assignments))
+	for workerID := range assignments {
+		workerIDs = append(workerIDs, workerID)
+	}
+	sort.Strings(workerIDs)
+	limited := false
+	if len(workerIDs) > pulsarResourceSummaryStringLimit {
+		workerIDs = workerIDs[:pulsarResourceSummaryStringLimit]
+		limited = true
+	}
+
+	summaries := make([]pulsarWorkerAssignmentSummary, 0, len(workerIDs))
+	totalAssignments := 0
+	for _, values := range assignments {
+		totalAssignments += len(values)
+	}
+	for _, workerID := range workerIDs {
+		values := append([]string(nil), assignments[workerID]...)
+		sort.Strings(values)
+		limitedValues, valuesLimited := limitStringSlice(values, pulsarResourceSummaryStringLimit)
+		if valuesLimited {
+			limited = true
+		}
+		summaries = append(summaries, pulsarWorkerAssignmentSummary{
+			WorkerID:         workerID,
+			Assignments:      limitedValues,
+			AssignmentsCount: len(assignments[workerID]),
+			Limited:          valuesLimited,
+		})
+	}
+
+	return pulsarWorkerAssignmentsResource{
+		Kind:            string(kind),
+		URI:             uri,
+		Workers:         summaries,
+		WorkerCount:     len(assignments),
+		AssignmentCount: totalAssignments,
+		Limit:           pulsarResourceSummaryStringLimit,
+		Limited:         limited,
+	}
+}
+
+func summarizePulsarWorkerFunctionStats(
+	uri string,
+	kind pulsarResourceKind,
+	stats []*utils.WorkerFunctionInstanceStats,
+) pulsarWorkerFunctionStatsResource {
+	values := append([]*utils.WorkerFunctionInstanceStats(nil), stats...)
+	sort.Slice(values, func(i, j int) bool {
+		if values[i] == nil {
+			return false
+		}
+		if values[j] == nil {
+			return true
+		}
+		return values[i].Name < values[j].Name
+	})
+	limited := false
+	if len(values) > pulsarResourceSummaryStringLimit {
+		values = values[:pulsarResourceSummaryStringLimit]
+		limited = true
+	}
+
+	summaries := make([]pulsarWorkerFunctionInstanceStatsSummary, 0, len(values))
+	for _, value := range values {
+		if value == nil {
+			continue
+		}
+		summaries = append(summaries, pulsarWorkerFunctionInstanceStatsSummary{
+			Name: value.Name,
+			Metrics: summarizePulsarFunctionInstanceStats(utils.FunctionInstanceStats{
+				InstanceID: 0,
+				Metrics:    value.Metrics,
+			}),
+		})
+	}
+	return pulsarWorkerFunctionStatsResource{
+		Kind:      string(kind),
+		URI:       uri,
+		Functions: summaries,
+		Count:     len(stats),
+		Limit:     pulsarResourceSummaryStringLimit,
+		Limited:   limited,
+	}
+}
+
+func summarizePulsarPointerMonitoringMetrics(metrics []*utils.Metrics) pulsarMonitoringMetricsSummary {
+	values := make([]utils.Metrics, 0, len(metrics))
+	for _, metric := range metrics {
+		if metric == nil {
+			continue
+		}
+		values = append(values, *metric)
+	}
+	return summarizePulsarMonitoringMetrics(values)
+}
+
 func summarizePulsarTopicSchema(schemaInfo *utils.SchemaInfo) pulsarTopicSchemaSummary {
 	if schemaInfo == nil {
 		return pulsarTopicSchemaSummary{}
@@ -2175,6 +3882,27 @@ func buildPulsarResourceTopicName(parsed pulsarResourceURI) (*utils.TopicName, e
 	return utils.GetTopicName(topicName)
 }
 
+func buildPulsarPackageURL(parsed pulsarResourceURI, version string) string {
+	packageURL := fmt.Sprintf(
+		"%s://%s/%s/%s",
+		parsed.packageType,
+		parsed.tenant,
+		parsed.namespace,
+		parsed.packageName,
+	)
+	if version != "" {
+		packageURL += "@" + version
+	}
+	return packageURL
+}
+
+func stringPointerValue(value *string) string {
+	if value == nil {
+		return ""
+	}
+	return *value
+}
+
 func sanitizePulsarResourceStringMap(values map[string]string, limit int) map[string]string {
 	if len(values) == 0 || limit <= 0 {
 		return nil
@@ -2198,6 +3926,59 @@ func sanitizePulsarResourceStringMap(values map[string]string, limit int) map[st
 		sanitized[key] = values[key]
 	}
 	return sanitized
+}
+
+func sanitizePulsarResourceAnyMap(values map[string]any, limit int) map[string]any {
+	if len(values) == 0 || limit <= 0 {
+		return nil
+	}
+
+	keys := make([]string, 0, len(values))
+	for key := range values {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	if len(keys) > limit {
+		keys = keys[:limit]
+	}
+
+	sanitized := make(map[string]any, len(keys))
+	for _, key := range keys {
+		if isSensitivePulsarResourceKey(key) {
+			sanitized[key] = pulsarResourceRedactedValue
+			continue
+		}
+		sanitized[key] = sanitizePulsarResourceAnyValue(values[key], 2)
+	}
+	return sanitized
+}
+
+func sanitizePulsarResourceAnyValue(value any, depth int) any {
+	if depth <= 0 {
+		return value
+	}
+
+	switch typed := value.(type) {
+	case map[string]any:
+		return sanitizePulsarResourceAnyMap(typed, pulsarResourceSummaryStringLimit)
+	case map[string]string:
+		return sanitizePulsarResourceStringMap(typed, pulsarResourceSummaryStringLimit)
+	case []any:
+		values := typed
+		if len(values) > pulsarResourceSummaryStringLimit {
+			values = values[:pulsarResourceSummaryStringLimit]
+		}
+		sanitized := make([]any, 0, len(values))
+		for _, item := range values {
+			sanitized = append(sanitized, sanitizePulsarResourceAnyValue(item, depth-1))
+		}
+		return sanitized
+	case []string:
+		values, _ := limitStringSlice(typed, pulsarResourceSummaryStringLimit)
+		return values
+	default:
+		return value
+	}
 }
 
 func sanitizePulsarResourceInt64Map(values map[string]int64, limit int) map[string]int64 {
@@ -2263,6 +4044,28 @@ func sortedLimitedStrings(values map[string]struct{}, limit int) []string {
 		return result[:limit]
 	}
 	return result
+}
+
+func limitStringSlice(values []string, limit int) ([]string, bool) {
+	if len(values) == 0 || limit <= 0 {
+		return nil, false
+	}
+	limited := len(values) > limit
+	if limited {
+		return append([]string(nil), values[:limit]...), true
+	}
+	return append([]string(nil), values...), false
+}
+
+func limitWorkerInfoSlice(values []*utils.WorkerInfo, limit int) ([]*utils.WorkerInfo, bool) {
+	if len(values) == 0 || limit <= 0 {
+		return nil, false
+	}
+	limited := len(values) > limit
+	if limited {
+		return append([]*utils.WorkerInfo(nil), values[:limit]...), true
+	}
+	return append([]*utils.WorkerInfo(nil), values...), false
 }
 
 func buildPulsarContextResource(uri string, session *pulsarsession.Session) (pulsarContextResource, error) {
@@ -2494,6 +4297,16 @@ func parsePulsarAdminResourceURI(rawURI, path string) (pulsarResourceURI, error)
 		}, nil
 	case len(parts) == 3 && parts[0] == "v2" && parts[1] == "broker-stats" && parts[2] == "summary":
 		return pulsarResourceURI{kind: pulsarResourceKindBrokerStatsSummary}, nil
+	case len(parts) == 3 && parts[0] == "v2" && parts[1] == "worker" && parts[2] == "cluster":
+		return pulsarResourceURI{kind: pulsarResourceKindWorkerCluster}, nil
+	case len(parts) == 4 && parts[0] == "v2" && parts[1] == "worker" && parts[2] == "cluster" && parts[3] == "leader":
+		return pulsarResourceURI{kind: pulsarResourceKindWorkerLeader}, nil
+	case len(parts) == 3 && parts[0] == "v2" && parts[1] == "worker" && parts[2] == "assignments":
+		return pulsarResourceURI{kind: pulsarResourceKindWorkerAssignments}, nil
+	case len(parts) == 3 && parts[0] == "v2" && parts[1] == "worker-stats" && parts[2] == "functionsmetrics":
+		return pulsarResourceURI{kind: pulsarResourceKindWorkerFunctionStats}, nil
+	case len(parts) == 3 && parts[0] == "v2" && parts[1] == "worker-stats" && parts[2] == "metrics":
+		return pulsarResourceURI{kind: pulsarResourceKindWorkerMetrics}, nil
 	case len(parts) == 4 && parts[0] == "v2" && parts[1] == "clusters" && parts[3] == "failureDomains":
 		cluster := parts[2]
 		if err := validatePulsarResourcePathSegment("cluster", cluster); err != nil {
@@ -2540,10 +4353,136 @@ func parsePulsarAdminResourceURI(rawURI, path string) (pulsarResourceURI, error)
 			cluster: cluster,
 			policy:  policy,
 		}, nil
+	case len(parts) >= 4 && parts[0] == "v3" && isPulsarWorkloadResourceType(parts[1]):
+		return parsePulsarWorkloadAdminResourceURI(rawURI, parts)
+	case len(parts) >= 5 && parts[0] == "v3" && parts[1] == "packages":
+		return parsePulsarPackageAdminResourceURI(rawURI, parts)
 	case len(parts) >= 6 && parts[0] == "v2" && isPulsarResourceTopicDomain(parts[1]):
 		return parsePulsarTopicAdminResourceURI(rawURI, parts)
 	default:
 		return pulsarResourceURI{}, fmt.Errorf("unsupported Pulsar admin resource URI %q", rawURI)
+	}
+}
+
+func parsePulsarWorkloadAdminResourceURI(rawURI string, parts []string) (pulsarResourceURI, error) {
+	resourceType := parts[1]
+	tenant := parts[2]
+	namespace := parts[3]
+	if err := validatePulsarResourcePathSegment("tenant", tenant); err != nil {
+		return pulsarResourceURI{}, err
+	}
+	if err := validatePulsarResourcePathSegment("namespace", namespace); err != nil {
+		return pulsarResourceURI{}, err
+	}
+
+	base := pulsarResourceURI{
+		tenant:    tenant,
+		namespace: namespace,
+	}
+	if len(parts) == 4 {
+		switch resourceType {
+		case "functions":
+			base.kind = pulsarResourceKindFunctions
+		case "sources":
+			base.kind = pulsarResourceKindSources
+		case "sinks":
+			base.kind = pulsarResourceKindSinks
+		}
+		return base, nil
+	}
+	if len(parts) != 6 {
+		return pulsarResourceURI{}, fmt.Errorf("unsupported Pulsar workload resource URI %q", rawURI)
+	}
+
+	workload := parts[4]
+	suffix := parts[5]
+	if err := validatePulsarResourcePathSegment("workload", workload); err != nil {
+		return pulsarResourceURI{}, err
+	}
+	base.workload = workload
+
+	switch resourceType {
+	case "functions":
+		switch suffix {
+		case "metadata":
+			base.kind = pulsarResourceKindFunctionMetadata
+		case "status":
+			base.kind = pulsarResourceKindFunctionStatus
+		case "stats":
+			base.kind = pulsarResourceKindFunctionStats
+		default:
+			return pulsarResourceURI{}, fmt.Errorf("unsupported Pulsar function resource URI %q", rawURI)
+		}
+	case "sources":
+		switch suffix {
+		case "metadata":
+			base.kind = pulsarResourceKindSourceMetadata
+		case "status":
+			base.kind = pulsarResourceKindSourceStatus
+		default:
+			return pulsarResourceURI{}, fmt.Errorf("unsupported Pulsar source resource URI %q", rawURI)
+		}
+	case "sinks":
+		switch suffix {
+		case "metadata":
+			base.kind = pulsarResourceKindSinkMetadata
+		case "status":
+			base.kind = pulsarResourceKindSinkStatus
+		default:
+			return pulsarResourceURI{}, fmt.Errorf("unsupported Pulsar sink resource URI %q", rawURI)
+		}
+	default:
+		return pulsarResourceURI{}, fmt.Errorf("unsupported Pulsar workload resource URI %q", rawURI)
+	}
+	return base, nil
+}
+
+func parsePulsarPackageAdminResourceURI(rawURI string, parts []string) (pulsarResourceURI, error) {
+	packageType := parts[2]
+	tenant := parts[3]
+	namespace := parts[4]
+	if err := validatePulsarPackageType(packageType); err != nil {
+		return pulsarResourceURI{}, err
+	}
+	if err := validatePulsarResourcePathSegment("tenant", tenant); err != nil {
+		return pulsarResourceURI{}, err
+	}
+	if err := validatePulsarResourcePathSegment("namespace", namespace); err != nil {
+		return pulsarResourceURI{}, err
+	}
+
+	base := pulsarResourceURI{
+		packageType: packageType,
+		tenant:      tenant,
+		namespace:   namespace,
+	}
+	switch {
+	case len(parts) == 5:
+		base.kind = pulsarResourceKindPackages
+		return base, nil
+	case len(parts) == 7 && parts[6] == "versions":
+		packageName := parts[5]
+		if err := validatePulsarResourcePathSegment("package", packageName); err != nil {
+			return pulsarResourceURI{}, err
+		}
+		base.kind = pulsarResourceKindPackageVersions
+		base.packageName = packageName
+		return base, nil
+	case len(parts) == 8 && parts[7] == "metadata":
+		packageName := parts[5]
+		version := parts[6]
+		if err := validatePulsarResourcePathSegment("package", packageName); err != nil {
+			return pulsarResourceURI{}, err
+		}
+		if err := validatePulsarResourcePathSegment("version", version); err != nil {
+			return pulsarResourceURI{}, err
+		}
+		base.kind = pulsarResourceKindPackageMetadata
+		base.packageName = packageName
+		base.versionName = version
+		return base, nil
+	default:
+		return pulsarResourceURI{}, fmt.Errorf("unsupported Pulsar package resource URI %q", rawURI)
 	}
 }
 
@@ -2643,6 +4582,22 @@ func parsePulsarTopicAdminResourceURI(rawURI string, parts []string) (pulsarReso
 
 func isPulsarResourceTopicDomain(value string) bool {
 	return value == "persistent" || value == "non-persistent"
+}
+
+func isPulsarWorkloadResourceType(value string) bool {
+	return value == "functions" || value == "sources" || value == "sinks"
+}
+
+func validatePulsarPackageType(value string) error {
+	if err := validatePulsarResourcePathSegment("package type", value); err != nil {
+		return err
+	}
+	switch value {
+	case "function", "source", "sink":
+		return nil
+	default:
+		return fmt.Errorf("unsupported Pulsar package type %q", value)
+	}
 }
 
 func isSupportedPulsarTopicPolicy(policy string) bool {

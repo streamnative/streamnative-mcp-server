@@ -11,6 +11,11 @@ The Pulsar resource surface exposes read-only MCP resources for lightweight clus
 - `pulsar://admin/v2/status`: broker or proxy status for the current Pulsar admin endpoint.
 - `pulsar://admin/v2/clusters`: cluster names known to the current Pulsar admin endpoint.
 - `pulsar://admin/v2/broker-stats/summary`: bounded summary of broker monitoring metrics and load report.
+- `pulsar://admin/v2/worker/cluster`: bounded summary of Pulsar Functions workers.
+- `pulsar://admin/v2/worker/cluster/leader`: current Pulsar Functions worker leader.
+- `pulsar://admin/v2/worker/assignments`: bounded summary of Pulsar Functions worker assignments.
+- `pulsar://admin/v2/worker-stats/functionsmetrics`: bounded function instance stats reported by the Pulsar Functions worker.
+- `pulsar://admin/v2/worker-stats/metrics`: bounded summary of Pulsar Functions worker monitoring metrics.
 
 All static resources return `application/json`.
 
@@ -31,6 +36,19 @@ All static resources return `application/json`.
 - `pulsar://admin/v2/{domain}/{tenant}/{namespace}/{topic}/subscriptions/{subscription}/stats`: gets bounded subscription statistics without consumer details.
 - `pulsar://admin/v2/{domain}/{tenant}/{namespace}/{topic}/subscriptions/{subscription}/backlog`: gets subscription backlog counters without changing cursor state.
 - `pulsar://admin/v2/persistent/{tenant}/{namespace}/{topic}/subscriptions/{subscription}/cursor`: gets persistent topic cursor positions for a subscription.
+- `pulsar://admin/v3/functions/{tenant}/{namespace}`: lists Pulsar Functions for a namespace, bounded to the first 50 names.
+- `pulsar://admin/v3/functions/{tenant}/{namespace}/{function}/metadata`: gets sanitized Pulsar Function metadata.
+- `pulsar://admin/v3/functions/{tenant}/{namespace}/{function}/status`: gets bounded Pulsar Function runtime status without exception detail strings.
+- `pulsar://admin/v3/functions/{tenant}/{namespace}/{function}/stats`: gets bounded Pulsar Function statistics and user metric names.
+- `pulsar://admin/v3/sources/{tenant}/{namespace}`: lists Pulsar Sources for a namespace, bounded to the first 50 names.
+- `pulsar://admin/v3/sources/{tenant}/{namespace}/{source}/metadata`: gets sanitized Pulsar Source metadata.
+- `pulsar://admin/v3/sources/{tenant}/{namespace}/{source}/status`: gets bounded Pulsar Source runtime status without exception detail strings.
+- `pulsar://admin/v3/sinks/{tenant}/{namespace}`: lists Pulsar Sinks for a namespace, bounded to the first 50 names.
+- `pulsar://admin/v3/sinks/{tenant}/{namespace}/{sink}/metadata`: gets sanitized Pulsar Sink metadata.
+- `pulsar://admin/v3/sinks/{tenant}/{namespace}/{sink}/status`: gets bounded Pulsar Sink runtime status without exception detail strings.
+- `pulsar://admin/v3/packages/{type}/{tenant}/{namespace}`: lists packages by type and namespace, bounded to the first 50 names. Supported package types are `function`, `source`, and `sink`.
+- `pulsar://admin/v3/packages/{type}/{tenant}/{namespace}/{package}/versions`: lists package versions, bounded to the first 50 names.
+- `pulsar://admin/v3/packages/{type}/{tenant}/{namespace}/{package}/{version}/metadata`: gets sanitized metadata for one package version.
 - `pulsar://admin/v2/clusters/{cluster}`: sanitized configuration for a cluster.
 - `pulsar://admin/v2/brokers/{cluster}`: lists active brokers for a cluster.
 - `pulsar://admin/v2/clusters/{cluster}/failureDomains`: lists failure domains for a cluster.
@@ -38,9 +56,9 @@ All static resources return `application/json`.
 - `pulsar://admin/v2/clusters/{cluster}/namespaceIsolationPolicies`: lists namespace isolation policies for a cluster.
 - `pulsar://admin/v2/clusters/{cluster}/namespaceIsolationPolicies/{policy}`: gets a namespace isolation policy.
 
-Template reads return `application/json` and require a Pulsar session in the request context. Topic templates accept `domain` values of `persistent` or `non-persistent`; `topic` is the local topic name path segment. Subscription cursor resources are persistent-only because they are backed by topic internal stats.
+Template reads return `application/json` and require a Pulsar session in the request context. Topic templates accept `domain` values of `persistent` or `non-persistent`; `topic` is the local topic name path segment. Subscription cursor resources are persistent-only because they are backed by topic internal stats. Workload and package templates use Pulsar admin v3 APIs; functions worker resources use the current Pulsar admin v2 worker endpoints.
 
-The resource list is feature-gated. Tenant and namespace resources require the matching Pulsar admin feature such as `pulsar-admin-tenants`, `pulsar-admin-namespaces`, `pulsar-admin-namespace-policy`, `pulsar-admin-topics`, or `pulsar-admin-resource-quotas`. Topic metadata, stats, and partition metadata resources require `pulsar-admin-topics`; topic policy resources require `pulsar-admin-topic-policy`; schema resources require `pulsar-admin-schemas`; subscription resources require `pulsar-admin-subscriptions`. Cluster resources require the matching Pulsar admin feature such as `pulsar-admin-clusters`, `pulsar-admin-brokers`, `pulsar-admin-broker-stats`, `pulsar-admin-brokers-status`, or `pulsar-admin-ns-isolation-policy`. All resources are also enabled by one of `pulsar-admin`, `all-pulsar`, or `all`.
+The resource list is feature-gated. Tenant and namespace resources require the matching Pulsar admin feature such as `pulsar-admin-tenants`, `pulsar-admin-namespaces`, `pulsar-admin-namespace-policy`, `pulsar-admin-topics`, or `pulsar-admin-resource-quotas`. Topic metadata, stats, and partition metadata resources require `pulsar-admin-topics`; topic policy resources require `pulsar-admin-topic-policy`; schema resources require `pulsar-admin-schemas`; subscription resources require `pulsar-admin-subscriptions`. Workload resources require the matching feature such as `pulsar-admin-functions`, `pulsar-admin-sources`, `pulsar-admin-sinks`, `pulsar-admin-packages`, or `pulsar-admin-functions-worker`. Cluster resources require the matching Pulsar admin feature such as `pulsar-admin-clusters`, `pulsar-admin-brokers`, `pulsar-admin-broker-stats`, `pulsar-admin-brokers-status`, or `pulsar-admin-ns-isolation-policy`. All resources are also enabled by one of `pulsar-admin`, `all-pulsar`, or `all`.
 
 ## Safety
 
