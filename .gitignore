@@ -13,3 +13,7 @@ agents/
 .serena/
 .envrc
 scripts/update-sdk-apiserver.sh
+
+# Python
+__pycache__/
+*.pyc

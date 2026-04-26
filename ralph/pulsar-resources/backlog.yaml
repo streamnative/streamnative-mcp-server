@@ -1,0 +1,59 @@
+version: 1
+updated_at: "2026-04-26"
+items:
+  - id: protocol-foundation
+    lane: protocol
+    title: Register Pulsar resource framework
+    status: pending
+    priority: 10
+    paths: [pkg/mcp, pkg/cmd/mcp, docs/tools]
+    focused_tests: [go test ./pkg/mcp/... ./pkg/cmd/mcp/...]
+    acceptance: Add a Pulsar resource registration entrypoint, static top-level resources, resource templates, feature-gate checks, and tests for list/template/read registration.
+  - id: cluster-resources
+    lane: family
+    title: Add cluster, broker, and topology resources
+    status: pending
+    priority: 20
+    paths: [pkg/mcp, pkg/mcp/builders/pulsar, docs/tools]
+    focused_tests: [go test ./pkg/mcp/...]
+    acceptance: Expose read-only cluster status, brokers, broker stats summary, failure domains, and namespace isolation policy resources.
+  - id: tenant-namespace-resources
+    lane: family
+    title: Add tenant and namespace resources
+    status: pending
+    priority: 30
+    paths: [pkg/mcp, pkg/mcp/builders/pulsar, docs/tools]
+    focused_tests: [go test ./pkg/mcp/...]
+    acceptance: Expose tenants, tenant config, namespaces, namespace topics, namespace policies, and resource quota resources.
+  - id: topic-schema-resources
+    lane: family
+    title: Add topic metadata and schema resources
+    status: pending
+    priority: 40
+    paths: [pkg/mcp, pkg/mcp/builders/pulsar, docs/tools]
+    focused_tests: [go test ./pkg/mcp/...]
+    acceptance: Expose topic metadata, stats, partition metadata, topic policy, latest schema, and schema version resources.
+  - id: subscription-resources
+    lane: family
+    title: Add subscription resources
+    status: pending
+    priority: 50
+    paths: [pkg/mcp, pkg/mcp/builders/pulsar, docs/tools]
+    focused_tests: [go test ./pkg/mcp/...]
+    acceptance: Expose subscription list, subscription stats, backlog, and cursor summaries without consuming messages or changing cursor state.
+  - id: workload-resources
+    lane: family
+    title: Add functions, sources, sinks, packages, and worker resources
+    status: pending
+    priority: 60
+    paths: [pkg/mcp, pkg/mcp/builders/pulsar, docs/tools]
+    focused_tests: [go test ./pkg/mcp/...]
+    acceptance: Expose read-only metadata, status, and stats resources for functions, sources, sinks, packages, and functions worker state.
+  - id: docs-and-final-verification
+    lane: docs
+    title: Document Pulsar resources and run final verification
+    status: pending
+    priority: 70
+    paths: [README.md, docs/tools, pkg/mcp]
+    focused_tests: [go test -race ./..., make build]
+    acceptance: Document URI templates, safety boundaries, feature gates, and verify the full repository test/build workflow.
