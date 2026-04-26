@@ -39,8 +39,13 @@ import (
 const (
 	pulsarResourceContextURI             = "pulsar://context"
 	pulsarResourceCatalogURI             = "pulsar://resources"
+	pulsarTenantsResourceURI             = "pulsar://admin/v2/tenants"
+	pulsarTenantResourceTemplateURI      = "pulsar://admin/v2/tenants/{tenant}"
 	pulsarNamespacesResourceTemplateURI  = "pulsar://admin/v2/tenants/{tenant}/namespaces"
+	pulsarNamespaceResourceTemplateURI   = "pulsar://admin/v2/namespaces/{tenant}/{namespace}"
 	pulsarTopicsResourceTemplateURI      = "pulsar://admin/v2/namespaces/{tenant}/{namespace}/topics"
+	pulsarDefaultResourceQuotaURI        = "pulsar://admin/v2/resource-quotas"
+	pulsarResourceQuotaTemplateURI       = "pulsar://admin/v2/resource-quotas/{tenant}/{namespace}/{bundle}"
 	pulsarClusterStatusResourceURI       = "pulsar://admin/v2/status"
 	pulsarClustersResourceURI            = "pulsar://admin/v2/clusters"
 	pulsarBrokerStatsSummaryResourceURI  = "pulsar://admin/v2/broker-stats/summary"
@@ -57,19 +62,24 @@ const (
 type pulsarResourceKind string
 
 const (
-	pulsarResourceKindContext             pulsarResourceKind = "context"
-	pulsarResourceKindCatalog             pulsarResourceKind = "catalog"
-	pulsarResourceKindNamespaces          pulsarResourceKind = "namespaces"
-	pulsarResourceKindTopics              pulsarResourceKind = "topics"
-	pulsarResourceKindStatus              pulsarResourceKind = "status"
-	pulsarResourceKindClusters            pulsarResourceKind = "clusters"
-	pulsarResourceKindCluster             pulsarResourceKind = "cluster"
-	pulsarResourceKindBrokers             pulsarResourceKind = "brokers"
-	pulsarResourceKindBrokerStatsSummary  pulsarResourceKind = "brokerStatsSummary"
-	pulsarResourceKindFailureDomains      pulsarResourceKind = "failureDomains"
-	pulsarResourceKindFailureDomain       pulsarResourceKind = "failureDomain"
-	pulsarResourceKindNSIsolationPolicies pulsarResourceKind = "namespaceIsolationPolicies"
-	pulsarResourceKindNSIsolationPolicy   pulsarResourceKind = "namespaceIsolationPolicy"
+	pulsarResourceKindContext              pulsarResourceKind = "context"
+	pulsarResourceKindCatalog              pulsarResourceKind = "catalog"
+	pulsarResourceKindTenants              pulsarResourceKind = "tenants"
+	pulsarResourceKindTenant               pulsarResourceKind = "tenant"
+	pulsarResourceKindNamespaces           pulsarResourceKind = "namespaces"
+	pulsarResourceKindNamespace            pulsarResourceKind = "namespace"
+	pulsarResourceKindTopics               pulsarResourceKind = "topics"
+	pulsarResourceKindDefaultResourceQuota pulsarResourceKind = "defaultResourceQuota"
+	pulsarResourceKindResourceQuota        pulsarResourceKind = "resourceQuota"
+	pulsarResourceKindStatus               pulsarResourceKind = "status"
+	pulsarResourceKindClusters             pulsarResourceKind = "clusters"
+	pulsarResourceKindCluster              pulsarResourceKind = "cluster"
+	pulsarResourceKindBrokers              pulsarResourceKind = "brokers"
+	pulsarResourceKindBrokerStatsSummary   pulsarResourceKind = "brokerStatsSummary"
+	pulsarResourceKindFailureDomains       pulsarResourceKind = "failureDomains"
+	pulsarResourceKindFailureDomain        pulsarResourceKind = "failureDomain"
+	pulsarResourceKindNSIsolationPolicies  pulsarResourceKind = "namespaceIsolationPolicies"
+	pulsarResourceKindNSIsolationPolicy    pulsarResourceKind = "namespaceIsolationPolicy"
 )
 
 type pulsarResourceURI struct {
@@ -79,6 +89,7 @@ type pulsarResourceURI struct {
 	cluster   string
 	domain    string
 	policy    string
+	bundle    string
 }
 
 type pulsarResourceCatalog struct {
@@ -126,12 +137,34 @@ type pulsarTLSSummary struct {
 	ClientKeyFileConfigured    bool `json:"clientKeyFileConfigured"`
 }
 
+type pulsarTenantCollectionResource struct {
+	Kind    string   `json:"kind"`
+	URI     string   `json:"uri"`
+	Tenants []string `json:"tenants"`
+	Count   int      `json:"count"`
+}
+
+type pulsarTenantResource struct {
+	Kind   string           `json:"kind"`
+	URI    string           `json:"uri"`
+	Tenant string           `json:"tenant"`
+	Data   utils.TenantData `json:"data"`
+}
+
 type pulsarNamespaceCollectionResource struct {
 	Kind       string   `json:"kind"`
 	URI        string   `json:"uri"`
 	Tenant     string   `json:"tenant"`
 	Namespaces []string `json:"namespaces"`
 	Count      int      `json:"count"`
+}
+
+type pulsarNamespaceResource struct {
+	Kind      string          `json:"kind"`
+	URI       string          `json:"uri"`
+	Tenant    string          `json:"tenant"`
+	Namespace string          `json:"namespace"`
+	Policies  *utils.Policies `json:"policies"`
 }
 
 type pulsarTopicCollectionResource struct {
@@ -141,6 +174,16 @@ type pulsarTopicCollectionResource struct {
 	Namespace string   `json:"namespace"`
 	Topics    []string `json:"topics"`
 	Count     int      `json:"count"`
+}
+
+type pulsarResourceQuotaResource struct {
+	Kind      string               `json:"kind"`
+	URI       string               `json:"uri"`
+	Scope     string               `json:"scope"`
+	Tenant    string               `json:"tenant,omitempty"`
+	Namespace string               `json:"namespace,omitempty"`
+	Bundle    string               `json:"bundle,omitempty"`
+	Quota     *utils.ResourceQuota `json:"quota"`
 }
 
 type pulsarClusterStatusResource struct {
@@ -401,6 +444,23 @@ func buildPulsarResourceRegistrations(features []string) ([]server.ServerResourc
 		)
 	}
 
+	if pulsarResourceFeatureEnabled(features, FeaturePulsarAdminTenants) {
+		resources = append(resources, server.ServerResource{
+			Resource: mcp.NewResource(pulsarTenantsResourceURI, "Pulsar Tenants",
+				mcp.WithResourceDescription("List tenants known to the current Pulsar admin endpoint."),
+				mcp.WithMIMEType(pulsarResourceJSONMIMEType),
+			),
+			Handler: handlePulsarTenantsResource,
+		})
+		templates = append(templates, server.ServerResourceTemplate{
+			Template: mcp.NewResourceTemplate(pulsarTenantResourceTemplateURI, "Pulsar Tenant",
+				mcp.WithTemplateDescription("Get configuration for a Pulsar tenant."),
+				mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
+			),
+			Handler: handlePulsarTenantResource,
+		})
+	}
+
 	if pulsarResourceFeatureEnabled(features, FeaturePulsarAdminNamespaces) {
 		templates = append(templates, server.ServerResourceTemplate{
 			Template: mcp.NewResourceTemplate(pulsarNamespacesResourceTemplateURI, "Pulsar Namespaces by Tenant",
@@ -411,6 +471,16 @@ func buildPulsarResourceRegistrations(features []string) ([]server.ServerResourc
 		})
 	}
 
+	if pulsarResourceFeatureEnabled(features, FeaturePulsarAdminNamespacePolicy) {
+		templates = append(templates, server.ServerResourceTemplate{
+			Template: mcp.NewResourceTemplate(pulsarNamespaceResourceTemplateURI, "Pulsar Namespace Policies",
+				mcp.WithTemplateDescription("Get policies for a Pulsar namespace."),
+				mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
+			),
+			Handler: handlePulsarNamespaceResource,
+		})
+	}
+
 	if pulsarResourceFeatureEnabled(features, FeaturePulsarAdminTopics) {
 		templates = append(templates, server.ServerResourceTemplate{
 			Template: mcp.NewResourceTemplate(pulsarTopicsResourceTemplateURI, "Pulsar Topics by Namespace",
@@ -418,6 +488,23 @@ func buildPulsarResourceRegistrations(features []string) ([]server.ServerResourc
 				mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
 			),
 			Handler: handlePulsarTopicsResource,
+		})
+	}
+
+	if pulsarResourceFeatureEnabled(features, FeaturePulsarAdminResourceQuotas) {
+		resources = append(resources, server.ServerResource{
+			Resource: mcp.NewResource(pulsarDefaultResourceQuotaURI, "Pulsar Default Resource Quota",
+				mcp.WithResourceDescription("Get the default resource quota for new namespace bundles."),
+				mcp.WithMIMEType(pulsarResourceJSONMIMEType),
+			),
+			Handler: handlePulsarDefaultResourceQuotaResource,
+		})
+		templates = append(templates, server.ServerResourceTemplate{
+			Template: mcp.NewResourceTemplate(pulsarResourceQuotaTemplateURI, "Pulsar Namespace Bundle Resource Quota",
+				mcp.WithTemplateDescription("Get the resource quota for a Pulsar namespace bundle."),
+				mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
+			),
+			Handler: handlePulsarResourceQuotaResource,
 		})
 	}
 
@@ -469,6 +556,68 @@ func handlePulsarCatalogResource(_ context.Context, request mcp.ReadResourceRequ
 	return newPulsarJSONResourceContents(request.Params.URI, catalog)
 }
 
+func handlePulsarTenantsResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindTenants {
+		return nil, fmt.Errorf("unsupported Pulsar tenants resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminClient(session)
+	if err != nil {
+		return nil, err
+	}
+
+	tenants, err := adminClient.Tenants().List()
+	if err != nil {
+		return nil, fmt.Errorf("failed to list tenants: %w", err)
+	}
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarTenantCollectionResource{
+		Kind:    string(parsed.kind),
+		URI:     request.Params.URI,
+		Tenants: tenants,
+		Count:   len(tenants),
+	})
+}
+
+func handlePulsarTenantResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindTenant {
+		return nil, fmt.Errorf("unsupported Pulsar tenant resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminClient(session)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantData, err := adminClient.Tenants().Get(parsed.tenant)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get tenant %q: %w", parsed.tenant, err)
+	}
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarTenantResource{
+		Kind:   string(parsed.kind),
+		URI:    request.Params.URI,
+		Tenant: parsed.tenant,
+		Data:   tenantData,
+	})
+}
+
 func handlePulsarNamespacesResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
 	parsed, err := parsePulsarResourceURI(request.Params.URI)
 	if err != nil {
@@ -498,6 +647,39 @@ func handlePulsarNamespacesResource(ctx context.Context, request mcp.ReadResourc
 		Tenant:     parsed.tenant,
 		Namespaces: namespaces,
 		Count:      len(namespaces),
+	})
+}
+
+func handlePulsarNamespaceResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindNamespace {
+		return nil, fmt.Errorf("unsupported Pulsar namespace resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminClient(session)
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName := parsed.tenant + "/" + parsed.namespace
+	policies, err := adminClient.Namespaces().GetPolicies(namespaceName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get policies for namespace %q: %w", namespaceName, err)
+	}
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarNamespaceResource{
+		Kind:      string(parsed.kind),
+		URI:       request.Params.URI,
+		Tenant:    parsed.tenant,
+		Namespace: parsed.namespace,
+		Policies:  policies,
 	})
 }
 
@@ -532,6 +714,77 @@ func handlePulsarTopicsResource(ctx context.Context, request mcp.ReadResourceReq
 		Namespace: parsed.namespace,
 		Topics:    topics,
 		Count:     len(topics),
+	})
+}
+
+func handlePulsarDefaultResourceQuotaResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindDefaultResourceQuota {
+		return nil, fmt.Errorf("unsupported Pulsar default resource quota URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminClient(session)
+	if err != nil {
+		return nil, err
+	}
+
+	quota, err := adminClient.ResourceQuotas().GetDefaultResourceQuota()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get default resource quota: %w", err)
+	}
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarResourceQuotaResource{
+		Kind:  string(parsed.kind),
+		URI:   request.Params.URI,
+		Scope: "default",
+		Quota: quota,
+	})
+}
+
+func handlePulsarResourceQuotaResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindResourceQuota {
+		return nil, fmt.Errorf("unsupported Pulsar resource quota URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminClient(session)
+	if err != nil {
+		return nil, err
+	}
+
+	namespaceName := parsed.tenant + "/" + parsed.namespace
+	quota, err := adminClient.ResourceQuotas().GetNamespaceBundleResourceQuota(namespaceName, parsed.bundle)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"failed to get resource quota for namespace %q bundle %q: %w",
+			namespaceName,
+			parsed.bundle,
+			err,
+		)
+	}
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarResourceQuotaResource{
+		Kind:      string(parsed.kind),
+		URI:       request.Params.URI,
+		Scope:     "namespaceBundle",
+		Tenant:    parsed.tenant,
+		Namespace: parsed.namespace,
+		Bundle:    parsed.bundle,
+		Quota:     quota,
 	})
 }
 
@@ -1158,6 +1411,75 @@ func parsePulsarResourceURI(rawURI string) (pulsarResourceURI, error) {
 func parsePulsarAdminResourceURI(rawURI, path string) (pulsarResourceURI, error) {
 	parts := splitPulsarResourcePath(path)
 	switch {
+	case len(parts) == 2 && parts[0] == "v2" && parts[1] == "tenants":
+		return pulsarResourceURI{kind: pulsarResourceKindTenants}, nil
+	case len(parts) == 3 && parts[0] == "v2" && parts[1] == "tenants":
+		tenant := parts[2]
+		if err := validatePulsarResourcePathSegment("tenant", tenant); err != nil {
+			return pulsarResourceURI{}, err
+		}
+		return pulsarResourceURI{
+			kind:   pulsarResourceKindTenant,
+			tenant: tenant,
+		}, nil
+	case len(parts) == 4 && parts[0] == "v2" && parts[1] == "tenants" && parts[3] == "namespaces":
+		tenant := parts[2]
+		if err := validatePulsarResourcePathSegment("tenant", tenant); err != nil {
+			return pulsarResourceURI{}, err
+		}
+		return pulsarResourceURI{
+			kind:   pulsarResourceKindNamespaces,
+			tenant: tenant,
+		}, nil
+	case len(parts) == 4 && parts[0] == "v2" && parts[1] == "namespaces":
+		tenant := parts[2]
+		namespace := parts[3]
+		if err := validatePulsarResourcePathSegment("tenant", tenant); err != nil {
+			return pulsarResourceURI{}, err
+		}
+		if err := validatePulsarResourcePathSegment("namespace", namespace); err != nil {
+			return pulsarResourceURI{}, err
+		}
+		return pulsarResourceURI{
+			kind:      pulsarResourceKindNamespace,
+			tenant:    tenant,
+			namespace: namespace,
+		}, nil
+	case len(parts) == 5 && parts[0] == "v2" && parts[1] == "namespaces" && parts[4] == "topics":
+		tenant := parts[2]
+		namespace := parts[3]
+		if err := validatePulsarResourcePathSegment("tenant", tenant); err != nil {
+			return pulsarResourceURI{}, err
+		}
+		if err := validatePulsarResourcePathSegment("namespace", namespace); err != nil {
+			return pulsarResourceURI{}, err
+		}
+		return pulsarResourceURI{
+			kind:      pulsarResourceKindTopics,
+			tenant:    tenant,
+			namespace: namespace,
+		}, nil
+	case len(parts) == 2 && parts[0] == "v2" && parts[1] == "resource-quotas":
+		return pulsarResourceURI{kind: pulsarResourceKindDefaultResourceQuota}, nil
+	case len(parts) == 5 && parts[0] == "v2" && parts[1] == "resource-quotas":
+		tenant := parts[2]
+		namespace := parts[3]
+		bundle := parts[4]
+		if err := validatePulsarResourcePathSegment("tenant", tenant); err != nil {
+			return pulsarResourceURI{}, err
+		}
+		if err := validatePulsarResourcePathSegment("namespace", namespace); err != nil {
+			return pulsarResourceURI{}, err
+		}
+		if err := validatePulsarResourcePathSegment("bundle", bundle); err != nil {
+			return pulsarResourceURI{}, err
+		}
+		return pulsarResourceURI{
+			kind:      pulsarResourceKindResourceQuota,
+			tenant:    tenant,
+			namespace: namespace,
+			bundle:    bundle,
+		}, nil
 	case len(parts) == 2 && parts[0] == "v2" && parts[1] == "status":
 		return pulsarResourceURI{kind: pulsarResourceKindStatus}, nil
 	case len(parts) == 2 && parts[0] == "v2" && parts[1] == "clusters":
@@ -1227,29 +1549,6 @@ func parsePulsarAdminResourceURI(rawURI, path string) (pulsarResourceURI, error)
 			kind:    pulsarResourceKindNSIsolationPolicy,
 			cluster: cluster,
 			policy:  policy,
-		}, nil
-	case len(parts) == 4 && parts[0] == "v2" && parts[1] == "tenants" && parts[3] == "namespaces":
-		tenant := parts[2]
-		if err := validatePulsarResourcePathSegment("tenant", tenant); err != nil {
-			return pulsarResourceURI{}, err
-		}
-		return pulsarResourceURI{
-			kind:   pulsarResourceKindNamespaces,
-			tenant: tenant,
-		}, nil
-	case len(parts) == 5 && parts[0] == "v2" && parts[1] == "namespaces" && parts[4] == "topics":
-		tenant := parts[2]
-		namespace := parts[3]
-		if err := validatePulsarResourcePathSegment("tenant", tenant); err != nil {
-			return pulsarResourceURI{}, err
-		}
-		if err := validatePulsarResourcePathSegment("namespace", namespace); err != nil {
-			return pulsarResourceURI{}, err
-		}
-		return pulsarResourceURI{
-			kind:      pulsarResourceKindTopics,
-			tenant:    tenant,
-			namespace: namespace,
 		}, nil
 	default:
 		return pulsarResourceURI{}, fmt.Errorf("unsupported Pulsar admin resource URI %q", rawURI)

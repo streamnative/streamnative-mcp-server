@@ -59,6 +59,8 @@ func TestPulsarAddResourcesFeatureGate(t *testing.T) {
 		assert.ElementsMatch(t, []string{
 			pulsarResourceContextURI,
 			pulsarResourceCatalogURI,
+			pulsarTenantsResourceURI,
+			pulsarDefaultResourceQuotaURI,
 			pulsarClusterStatusResourceURI,
 			pulsarClustersResourceURI,
 			pulsarBrokerStatsSummaryResourceURI,
@@ -71,8 +73,11 @@ func TestPulsarAddResourcesFeatureGate(t *testing.T) {
 			assert.Equal(t, pulsarResourceJSONMIMEType, template.MIMEType)
 		}
 		assert.ElementsMatch(t, []string{
+			pulsarTenantResourceTemplateURI,
 			pulsarNamespacesResourceTemplateURI,
+			pulsarNamespaceResourceTemplateURI,
 			pulsarTopicsResourceTemplateURI,
+			pulsarResourceQuotaTemplateURI,
 			pulsarClusterResourceTemplateURI,
 			pulsarBrokersResourceTemplateURI,
 			pulsarFailureDomainsTemplateURI,
@@ -106,6 +111,38 @@ func TestPulsarAddResourcesFeatureGate(t *testing.T) {
 			pulsarClusterResourceTemplateURI,
 			pulsarFailureDomainsTemplateURI,
 			pulsarFailureDomainTemplateURI,
+		}, templateURIs)
+	})
+
+	t.Run("tenant namespace feature gates register selected resource families", func(t *testing.T) {
+		s := server.NewMCPServer("test", "0.0.1", server.WithResourceCapabilities(true, true))
+		PulsarAddResources(s, []string{
+			string(FeaturePulsarAdminTenants),
+			string(FeaturePulsarAdminNamespacePolicy),
+			string(FeaturePulsarAdminResourceQuotas),
+		})
+
+		resources := listPulsarTestResources(t, s)
+		resourceURIs := make([]string, 0, len(resources))
+		for _, resource := range resources {
+			resourceURIs = append(resourceURIs, resource.URI)
+		}
+		assert.ElementsMatch(t, []string{
+			pulsarResourceContextURI,
+			pulsarResourceCatalogURI,
+			pulsarTenantsResourceURI,
+			pulsarDefaultResourceQuotaURI,
+		}, resourceURIs)
+
+		templates := listPulsarTestResourceTemplates(t, s)
+		templateURIs := make([]string, 0, len(templates))
+		for _, template := range templates {
+			templateURIs = append(templateURIs, template.URITemplate.Raw())
+		}
+		assert.ElementsMatch(t, []string{
+			pulsarTenantResourceTemplateURI,
+			pulsarNamespaceResourceTemplateURI,
+			pulsarResourceQuotaTemplateURI,
 		}, templateURIs)
 	})
 }
@@ -199,6 +236,126 @@ func TestPulsarNamespaceTemplateRead(t *testing.T) {
 	assert.ElementsMatch(t, []string{"public/default", "public/functions"}, payload.Namespaces)
 	assert.Equal(t, 2, payload.Count)
 	assert.Equal(t, "/admin/v2/namespaces/public", <-requestedPath)
+}
+
+func TestPulsarTenantNamespaceResourceFamilyRead(t *testing.T) {
+	t.Parallel()
+
+	adminServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "unexpected method", http.StatusMethodNotAllowed)
+			return
+		}
+
+		switch r.URL.Path {
+		case "/admin/v2/tenants":
+			writePulsarTestJSON(w, `["public","system"]`)
+		case "/admin/v2/tenants/public":
+			writePulsarTestJSON(w, `{
+				"adminRoles": ["tenant-admin"],
+				"allowedClusters": ["use"]
+			}`)
+		case "/admin/v2/namespaces/public":
+			writePulsarTestJSON(w, `["public/default","public/functions"]`)
+		case "/admin/v2/namespaces/public/default":
+			writePulsarTestJSON(w, `{
+				"replication_clusters": ["use"],
+				"message_ttl_in_seconds": 60,
+				"schema_validation_enforced": true
+			}`)
+		case "/admin/v2/namespaces/public/default/topics":
+			writePulsarTestJSON(w, `["persistent://public/default/events"]`)
+		case "/admin/v2/resource-quotas":
+			writePulsarTestJSON(w, `{
+				"msgRateIn": 100,
+				"msgRateOut": 200,
+				"bandwidthIn": 1024,
+				"bandwidthOut": 2048,
+				"memory": 4096,
+				"dynamic": true
+			}`)
+		case "/admin/v2/resource-quotas/public/default/0x00000000_0xffffffff":
+			writePulsarTestJSON(w, `{
+				"msgRateIn": 10,
+				"msgRateOut": 20,
+				"bandwidthIn": 128,
+				"bandwidthOut": 256,
+				"memory": 512,
+				"dynamic": false
+			}`)
+		default:
+			http.Error(w, "unexpected path "+r.URL.Path, http.StatusNotFound)
+		}
+	}))
+	defer adminServer.Close()
+
+	cfg := &cmdutils.ClusterConfig{WebServiceURL: adminServer.URL}
+	ctx := WithPulsarSession(context.Background(), &pulsarsession.Session{
+		Ctx:             pulsarsession.PulsarContext{WebServiceURL: adminServer.URL},
+		PulsarCtlConfig: cfg,
+		AdminClient:     cfg.Client(pulsaradminconfig.V2),
+	})
+
+	s := server.NewMCPServer("test", "0.0.1", server.WithResourceCapabilities(true, true))
+	PulsarAddResources(s, []string{string(FeatureAllPulsar)})
+
+	tenantsContent := readPulsarTestResource(t, ctx, s, pulsarTenantsResourceURI)
+	var tenantsPayload pulsarTenantCollectionResource
+	require.NoError(t, json.Unmarshal([]byte(tenantsContent.Text), &tenantsPayload))
+	assert.ElementsMatch(t, []string{"public", "system"}, tenantsPayload.Tenants)
+	assert.Equal(t, 2, tenantsPayload.Count)
+
+	tenantContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v2/tenants/public")
+	var tenantPayload pulsarTenantResource
+	require.NoError(t, json.Unmarshal([]byte(tenantContent.Text), &tenantPayload))
+	assert.Equal(t, "public", tenantPayload.Tenant)
+	assert.Equal(t, []string{"tenant-admin"}, tenantPayload.Data.AdminRoles)
+	assert.Equal(t, []string{"use"}, tenantPayload.Data.AllowedClusters)
+
+	namespacesContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v2/tenants/public/namespaces")
+	var namespacesPayload pulsarNamespaceCollectionResource
+	require.NoError(t, json.Unmarshal([]byte(namespacesContent.Text), &namespacesPayload))
+	assert.ElementsMatch(t, []string{"public/default", "public/functions"}, namespacesPayload.Namespaces)
+	assert.Equal(t, 2, namespacesPayload.Count)
+
+	namespaceContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v2/namespaces/public/default")
+	var namespacePayload pulsarNamespaceResource
+	require.NoError(t, json.Unmarshal([]byte(namespaceContent.Text), &namespacePayload))
+	require.NotNil(t, namespacePayload.Policies)
+	assert.Equal(t, []string{"use"}, namespacePayload.Policies.ReplicationClusters)
+	require.NotNil(t, namespacePayload.Policies.MessageTTLInSeconds)
+	assert.Equal(t, 60, *namespacePayload.Policies.MessageTTLInSeconds)
+	assert.True(t, namespacePayload.Policies.SchemaValidationEnforced)
+
+	topicsContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v2/namespaces/public/default/topics")
+	var topicsPayload pulsarTopicCollectionResource
+	require.NoError(t, json.Unmarshal([]byte(topicsContent.Text), &topicsPayload))
+	assert.Equal(t, []string{"persistent://public/default/events"}, topicsPayload.Topics)
+	assert.Equal(t, 1, topicsPayload.Count)
+
+	defaultQuotaContent := readPulsarTestResource(t, ctx, s, pulsarDefaultResourceQuotaURI)
+	var defaultQuotaPayload pulsarResourceQuotaResource
+	require.NoError(t, json.Unmarshal([]byte(defaultQuotaContent.Text), &defaultQuotaPayload))
+	assert.Equal(t, "default", defaultQuotaPayload.Scope)
+	require.NotNil(t, defaultQuotaPayload.Quota)
+	assert.Equal(t, 100.0, defaultQuotaPayload.Quota.MsgRateIn)
+	assert.True(t, defaultQuotaPayload.Quota.Dynamic)
+
+	quotaContent := readPulsarTestResource(
+		t,
+		ctx,
+		s,
+		"pulsar://admin/v2/resource-quotas/public/default/0x00000000_0xffffffff",
+	)
+	var quotaPayload pulsarResourceQuotaResource
+	require.NoError(t, json.Unmarshal([]byte(quotaContent.Text), &quotaPayload))
+	assert.Equal(t, "namespaceBundle", quotaPayload.Scope)
+	assert.Equal(t, "public", quotaPayload.Tenant)
+	assert.Equal(t, "default", quotaPayload.Namespace)
+	assert.Equal(t, "0x00000000_0xffffffff", quotaPayload.Bundle)
+	require.NotNil(t, quotaPayload.Quota)
+	assert.Equal(t, 10.0, quotaPayload.Quota.MsgRateIn)
+	assert.False(t, quotaPayload.Quota.Dynamic)
 }
 
 func TestPulsarClusterResourceFamilyRead(t *testing.T) {
@@ -386,8 +543,10 @@ func TestParsePulsarResourceURIRejectsMalformedOrUnsupportedURI(t *testing.T) {
 		"pulsar://context/extra",
 		"pulsar://resources?token=secret",
 		"pulsar://admin/v3/tenants/public/namespaces",
-		"pulsar://admin/v2/tenants/public",
-		"pulsar://admin/v2/namespaces/public/topics",
+		"pulsar://admin/v2/tenants/public/namespaces/extra",
+		"pulsar://admin/v2/namespaces/public/default/topics/extra",
+		"pulsar://admin/v2/resource-quotas/default/extra",
+		"pulsar://admin/v2/resource-quotas/public/default",
 		"pulsar://admin/v2/broker-stats/topics",
 		"pulsar://admin/v2/brokers",
 	}
