@@ -18,10 +18,17 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"net/url"
 	"slices"
+	"sort"
 	"strings"
 
+	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/admin"
+	pulsaradminauth "github.com/apache/pulsar-client-go/pulsaradmin/pkg/admin/auth"
+	pulsaradminconfig "github.com/apache/pulsar-client-go/pulsaradmin/pkg/admin/config"
+	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/rest"
+	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
@@ -30,26 +37,48 @@ import (
 )
 
 const (
-	pulsarResourceContextURI            = "pulsar://context"
-	pulsarResourceCatalogURI            = "pulsar://resources"
-	pulsarNamespacesResourceTemplateURI = "pulsar://admin/v2/tenants/{tenant}/namespaces"
-	pulsarTopicsResourceTemplateURI     = "pulsar://admin/v2/namespaces/{tenant}/{namespace}/topics"
-	pulsarResourceJSONMIMEType          = "application/json"
+	pulsarResourceContextURI             = "pulsar://context"
+	pulsarResourceCatalogURI             = "pulsar://resources"
+	pulsarNamespacesResourceTemplateURI  = "pulsar://admin/v2/tenants/{tenant}/namespaces"
+	pulsarTopicsResourceTemplateURI      = "pulsar://admin/v2/namespaces/{tenant}/{namespace}/topics"
+	pulsarClusterStatusResourceURI       = "pulsar://admin/v2/status"
+	pulsarClustersResourceURI            = "pulsar://admin/v2/clusters"
+	pulsarBrokerStatsSummaryResourceURI  = "pulsar://admin/v2/broker-stats/summary"
+	pulsarClusterResourceTemplateURI     = "pulsar://admin/v2/clusters/{cluster}"
+	pulsarBrokersResourceTemplateURI     = "pulsar://admin/v2/brokers/{cluster}"
+	pulsarFailureDomainsTemplateURI      = "pulsar://admin/v2/clusters/{cluster}/failureDomains"
+	pulsarFailureDomainTemplateURI       = "pulsar://admin/v2/clusters/{cluster}/failureDomains/{domain}"
+	pulsarNSIsolationPoliciesTemplateURI = "pulsar://admin/v2/clusters/{cluster}/namespaceIsolationPolicies"
+	pulsarNSIsolationPolicyTemplateURI   = "pulsar://admin/v2/clusters/{cluster}/namespaceIsolationPolicies/{policy}"
+	pulsarResourceJSONMIMEType           = "application/json"
+	pulsarResourceSummaryStringLimit     = 50
 )
 
 type pulsarResourceKind string
 
 const (
-	pulsarResourceKindContext    pulsarResourceKind = "context"
-	pulsarResourceKindCatalog    pulsarResourceKind = "catalog"
-	pulsarResourceKindNamespaces pulsarResourceKind = "namespaces"
-	pulsarResourceKindTopics     pulsarResourceKind = "topics"
+	pulsarResourceKindContext             pulsarResourceKind = "context"
+	pulsarResourceKindCatalog             pulsarResourceKind = "catalog"
+	pulsarResourceKindNamespaces          pulsarResourceKind = "namespaces"
+	pulsarResourceKindTopics              pulsarResourceKind = "topics"
+	pulsarResourceKindStatus              pulsarResourceKind = "status"
+	pulsarResourceKindClusters            pulsarResourceKind = "clusters"
+	pulsarResourceKindCluster             pulsarResourceKind = "cluster"
+	pulsarResourceKindBrokers             pulsarResourceKind = "brokers"
+	pulsarResourceKindBrokerStatsSummary  pulsarResourceKind = "brokerStatsSummary"
+	pulsarResourceKindFailureDomains      pulsarResourceKind = "failureDomains"
+	pulsarResourceKindFailureDomain       pulsarResourceKind = "failureDomain"
+	pulsarResourceKindNSIsolationPolicies pulsarResourceKind = "namespaceIsolationPolicies"
+	pulsarResourceKindNSIsolationPolicy   pulsarResourceKind = "namespaceIsolationPolicy"
 )
 
 type pulsarResourceURI struct {
 	kind      pulsarResourceKind
 	tenant    string
 	namespace string
+	cluster   string
+	domain    string
+	policy    string
 }
 
 type pulsarResourceCatalog struct {
@@ -114,13 +143,153 @@ type pulsarTopicCollectionResource struct {
 	Count     int      `json:"count"`
 }
 
+type pulsarClusterStatusResource struct {
+	Kind   string `json:"kind"`
+	URI    string `json:"uri"`
+	Status string `json:"status"`
+}
+
+type pulsarClusterCollectionResource struct {
+	Kind     string   `json:"kind"`
+	URI      string   `json:"uri"`
+	Clusters []string `json:"clusters"`
+	Count    int      `json:"count"`
+}
+
+type pulsarClusterResource struct {
+	Kind    string                   `json:"kind"`
+	URI     string                   `json:"uri"`
+	Cluster string                   `json:"cluster"`
+	Data    pulsarClusterDataSummary `json:"data"`
+}
+
+type pulsarClusterDataSummary struct {
+	Name                                 string   `json:"name"`
+	ServiceURL                           string   `json:"serviceUrl,omitempty"`
+	ServiceURLTLS                        string   `json:"serviceUrlTls,omitempty"`
+	BrokerServiceURL                     string   `json:"brokerServiceUrl,omitempty"`
+	BrokerServiceURLTLS                  string   `json:"brokerServiceUrlTls,omitempty"`
+	PeerClusterNames                     []string `json:"peerClusterNames,omitempty"`
+	AuthenticationPlugin                 string   `json:"authenticationPlugin,omitempty"`
+	AuthenticationParametersConfigured   bool     `json:"authenticationParametersConfigured"`
+	BrokerClientTrustCertsFileConfigured bool     `json:"brokerClientTrustCertsFileConfigured"`
+	BrokerClientTLSEnabled               bool     `json:"brokerClientTlsEnabled"`
+}
+
+type pulsarBrokerCollectionResource struct {
+	Kind    string   `json:"kind"`
+	URI     string   `json:"uri"`
+	Cluster string   `json:"cluster"`
+	Brokers []string `json:"brokers"`
+	Count   int      `json:"count"`
+}
+
+type pulsarBrokerStatsSummaryResource struct {
+	Kind              string                         `json:"kind"`
+	URI               string                         `json:"uri"`
+	MonitoringMetrics pulsarMonitoringMetricsSummary `json:"monitoringMetrics"`
+	LoadReport        pulsarBrokerLoadReportSummary  `json:"loadReport"`
+}
+
+type pulsarMonitoringMetricsSummary struct {
+	Count         int      `json:"count"`
+	MetricNames   []string `json:"metricNames,omitempty"`
+	DimensionKeys []string `json:"dimensionKeys,omitempty"`
+}
+
+type pulsarBrokerLoadReportSummary struct {
+	Available                  bool                       `json:"available"`
+	WebServiceURL              string                     `json:"webServiceUrl,omitempty"`
+	WebServiceURLTLS           string                     `json:"webServiceUrlTls,omitempty"`
+	PulsarServiceURL           string                     `json:"pulsarServiceUrl,omitempty"`
+	PulsarServiceURLTLS        string                     `json:"pulsarServiceUrlTls,omitempty"`
+	PersistentTopicsEnabled    bool                       `json:"persistentTopicsEnabled"`
+	NonPersistentTopicsEnabled bool                       `json:"nonPersistentTopicsEnabled"`
+	CPU                        pulsarResourceUsageSummary `json:"cpu"`
+	Memory                     pulsarResourceUsageSummary `json:"memory"`
+	DirectMemory               pulsarResourceUsageSummary `json:"directMemory"`
+	BandwidthIn                pulsarResourceUsageSummary `json:"bandwidthIn"`
+	BandwidthOut               pulsarResourceUsageSummary `json:"bandwidthOut"`
+	MsgThroughputIn            float64                    `json:"msgThroughputIn"`
+	MsgThroughputOut           float64                    `json:"msgThroughputOut"`
+	MsgRateIn                  float64                    `json:"msgRateIn"`
+	MsgRateOut                 float64                    `json:"msgRateOut"`
+	LastUpdate                 int64                      `json:"lastUpdate,omitempty"`
+	NumTopics                  int                        `json:"numTopics"`
+	NumBundles                 int                        `json:"numBundles"`
+	NumConsumers               int                        `json:"numConsumers"`
+	NumProducers               int                        `json:"numProducers"`
+	BundleCount                int                        `json:"bundleCount"`
+	LastBundleGainsCount       int                        `json:"lastBundleGainsCount"`
+	LastBundleLossesCount      int                        `json:"lastBundleLossesCount"`
+	BrokerVersionString        string                     `json:"brokerVersionString,omitempty"`
+	LoadReportType             string                     `json:"loadReportType,omitempty"`
+	ProtocolCount              int                        `json:"protocolCount"`
+}
+
+type pulsarResourceUsageSummary struct {
+	Usage        float64 `json:"usage"`
+	Limit        float64 `json:"limit"`
+	PercentUsage float32 `json:"percentUsage"`
+}
+
+type pulsarFailureDomainCollectionResource struct {
+	Kind           string                       `json:"kind"`
+	URI            string                       `json:"uri"`
+	Cluster        string                       `json:"cluster"`
+	FailureDomains []pulsarFailureDomainSummary `json:"failureDomains"`
+	Count          int                          `json:"count"`
+}
+
+type pulsarFailureDomainResource struct {
+	Kind          string                     `json:"kind"`
+	URI           string                     `json:"uri"`
+	Cluster       string                     `json:"cluster"`
+	FailureDomain pulsarFailureDomainSummary `json:"failureDomain"`
+}
+
+type pulsarFailureDomainSummary struct {
+	Name    string   `json:"name"`
+	Brokers []string `json:"brokers"`
+}
+
+type pulsarNamespaceIsolationPolicyCollectionResource struct {
+	Kind     string                                  `json:"kind"`
+	URI      string                                  `json:"uri"`
+	Cluster  string                                  `json:"cluster"`
+	Policies []pulsarNamespaceIsolationPolicySummary `json:"policies"`
+	Count    int                                     `json:"count"`
+}
+
+type pulsarNamespaceIsolationPolicyResource struct {
+	Kind    string                         `json:"kind"`
+	URI     string                         `json:"uri"`
+	Cluster string                         `json:"cluster"`
+	Policy  pulsarNamespaceIsolationPolicy `json:"policy"`
+}
+
+type pulsarNamespaceIsolationPolicySummary struct {
+	Name                   string `json:"name"`
+	NamespacesCount        int    `json:"namespacesCount"`
+	PrimaryBrokersCount    int    `json:"primaryBrokersCount"`
+	SecondaryBrokersCount  int    `json:"secondaryBrokersCount"`
+	AutoFailoverPolicyType string `json:"autoFailoverPolicyType,omitempty"`
+}
+
+type pulsarNamespaceIsolationPolicy struct {
+	Name string                       `json:"name"`
+	Data utils.NamespaceIsolationData `json:"data"`
+}
+
 // PulsarAddResources registers the read-only Pulsar MCP resource surface.
 func PulsarAddResources(s *server.MCPServer, features []string) {
-	if !pulsarResourcesEnabled(features) {
+	resourceRegistrations, templateRegistrations := buildPulsarResourceRegistrations(features)
+	if len(resourceRegistrations) == 0 && len(templateRegistrations) == 0 {
 		return
 	}
 
-	s.AddResources(
+	catalog := buildPulsarResourceCatalog(resourceRegistrations, templateRegistrations)
+	baseResources := []server.ServerResource{
 		server.ServerResource{
 			Resource: mcp.NewResource(pulsarResourceContextURI, "Pulsar Context",
 				mcp.WithResourceDescription("Current Pulsar session connection metadata with authentication material redacted."),
@@ -133,36 +302,134 @@ func PulsarAddResources(s *server.MCPServer, features []string) {
 				mcp.WithResourceDescription("Stable catalog of Pulsar MCP resource URIs and URI templates."),
 				mcp.WithMIMEType(pulsarResourceJSONMIMEType),
 			),
-			Handler: handlePulsarCatalogResource,
+			Handler: func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+				return handlePulsarCatalogResource(ctx, request, catalog)
+			},
 		},
-	)
+	}
 
-	s.AddResourceTemplates(
-		server.ServerResourceTemplate{
+	allResources := append(baseResources, resourceRegistrations...)
+	s.AddResources(allResources...)
+	if len(templateRegistrations) > 0 {
+		s.AddResourceTemplates(templateRegistrations...)
+	}
+}
+
+func buildPulsarResourceRegistrations(features []string) ([]server.ServerResource, []server.ServerResourceTemplate) {
+	var resources []server.ServerResource
+	var templates []server.ServerResourceTemplate
+
+	if pulsarResourceFeatureEnabled(features, FeaturePulsarAdminBrokersStatus) {
+		resources = append(resources, server.ServerResource{
+			Resource: mcp.NewResource(pulsarClusterStatusResourceURI, "Pulsar Cluster Status",
+				mcp.WithResourceDescription("Read the Pulsar broker or proxy status endpoint for the current session."),
+				mcp.WithMIMEType(pulsarResourceJSONMIMEType),
+			),
+			Handler: handlePulsarClusterStatusResource,
+		})
+	}
+
+	if pulsarResourceFeatureEnabled(features, FeaturePulsarAdminClusters) {
+		resources = append(resources, server.ServerResource{
+			Resource: mcp.NewResource(pulsarClustersResourceURI, "Pulsar Clusters",
+				mcp.WithResourceDescription("List Pulsar clusters known to the current admin endpoint."),
+				mcp.WithMIMEType(pulsarResourceJSONMIMEType),
+			),
+			Handler: handlePulsarClustersResource,
+		})
+		templates = append(templates,
+			server.ServerResourceTemplate{
+				Template: mcp.NewResourceTemplate(pulsarClusterResourceTemplateURI, "Pulsar Cluster",
+					mcp.WithTemplateDescription("Get sanitized configuration for a Pulsar cluster."),
+					mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
+				),
+				Handler: handlePulsarClusterResource,
+			},
+			server.ServerResourceTemplate{
+				Template: mcp.NewResourceTemplate(pulsarFailureDomainsTemplateURI, "Pulsar Failure Domains",
+					mcp.WithTemplateDescription("List failure domains for a Pulsar cluster."),
+					mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
+				),
+				Handler: handlePulsarFailureDomainsResource,
+			},
+			server.ServerResourceTemplate{
+				Template: mcp.NewResourceTemplate(pulsarFailureDomainTemplateURI, "Pulsar Failure Domain",
+					mcp.WithTemplateDescription("Get a failure domain for a Pulsar cluster."),
+					mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
+				),
+				Handler: handlePulsarFailureDomainResource,
+			},
+		)
+	}
+
+	if pulsarResourceFeatureEnabled(features, FeaturePulsarAdminBrokers) {
+		templates = append(templates, server.ServerResourceTemplate{
+			Template: mcp.NewResourceTemplate(pulsarBrokersResourceTemplateURI, "Pulsar Brokers by Cluster",
+				mcp.WithTemplateDescription("List active brokers for a Pulsar cluster."),
+				mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
+			),
+			Handler: handlePulsarBrokersResource,
+		})
+	}
+
+	if pulsarResourceFeatureEnabled(features, FeaturePulsarAdminBrokerStats) {
+		resources = append(resources, server.ServerResource{
+			Resource: mcp.NewResource(pulsarBrokerStatsSummaryResourceURI, "Pulsar Broker Stats Summary",
+				mcp.WithResourceDescription("Bounded summary of broker monitoring metrics and load report for the current session."),
+				mcp.WithMIMEType(pulsarResourceJSONMIMEType),
+			),
+			Handler: handlePulsarBrokerStatsSummaryResource,
+		})
+	}
+
+	if pulsarResourceFeatureEnabled(features, FeaturePulsarAdminNsIsolationPolicy) {
+		templates = append(templates,
+			server.ServerResourceTemplate{
+				Template: mcp.NewResourceTemplate(pulsarNSIsolationPoliciesTemplateURI, "Pulsar Namespace Isolation Policies",
+					mcp.WithTemplateDescription("List namespace isolation policies for a Pulsar cluster."),
+					mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
+				),
+				Handler: handlePulsarNamespaceIsolationPoliciesResource,
+			},
+			server.ServerResourceTemplate{
+				Template: mcp.NewResourceTemplate(pulsarNSIsolationPolicyTemplateURI, "Pulsar Namespace Isolation Policy",
+					mcp.WithTemplateDescription("Get a namespace isolation policy for a Pulsar cluster."),
+					mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
+				),
+				Handler: handlePulsarNamespaceIsolationPolicyResource,
+			},
+		)
+	}
+
+	if pulsarResourceFeatureEnabled(features, FeaturePulsarAdminNamespaces) {
+		templates = append(templates, server.ServerResourceTemplate{
 			Template: mcp.NewResourceTemplate(pulsarNamespacesResourceTemplateURI, "Pulsar Namespaces by Tenant",
 				mcp.WithTemplateDescription("List namespaces for a Pulsar tenant."),
 				mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
 			),
 			Handler: handlePulsarNamespacesResource,
-		},
-		server.ServerResourceTemplate{
+		})
+	}
+
+	if pulsarResourceFeatureEnabled(features, FeaturePulsarAdminTopics) {
+		templates = append(templates, server.ServerResourceTemplate{
 			Template: mcp.NewResourceTemplate(pulsarTopicsResourceTemplateURI, "Pulsar Topics by Namespace",
 				mcp.WithTemplateDescription("List topics for a Pulsar namespace."),
 				mcp.WithTemplateMIMEType(pulsarResourceJSONMIMEType),
 			),
 			Handler: handlePulsarTopicsResource,
-		},
-	)
+		})
+	}
+
+	return resources, templates
 }
 
-func pulsarResourcesEnabled(features []string) bool {
-	requiredFeatures := []Feature{
+func pulsarResourceFeatureEnabled(features []string, resourceFeatures ...Feature) bool {
+	requiredFeatures := append([]Feature{
 		FeatureAll,
 		FeatureAllPulsar,
 		FeaturePulsarAdmin,
-		FeaturePulsarAdminNamespaces,
-		FeaturePulsarAdminTopics,
-	}
+	}, resourceFeatures...)
 	for _, feature := range requiredFeatures {
 		if slices.Contains(features, string(feature)) {
 			return true
@@ -191,7 +458,7 @@ func handlePulsarContextResource(ctx context.Context, request mcp.ReadResourceRe
 	return newPulsarJSONResourceContents(request.Params.URI, resource)
 }
 
-func handlePulsarCatalogResource(_ context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+func handlePulsarCatalogResource(_ context.Context, request mcp.ReadResourceRequest, catalog pulsarResourceCatalog) ([]mcp.ResourceContents, error) {
 	parsed, err := parsePulsarResourceURI(request.Params.URI)
 	if err != nil {
 		return nil, err
@@ -199,7 +466,7 @@ func handlePulsarCatalogResource(_ context.Context, request mcp.ReadResourceRequ
 	if parsed.kind != pulsarResourceKindCatalog {
 		return nil, fmt.Errorf("unsupported Pulsar resource catalog URI %q", request.Params.URI)
 	}
-	return newPulsarJSONResourceContents(request.Params.URI, buildPulsarResourceCatalog())
+	return newPulsarJSONResourceContents(request.Params.URI, catalog)
 }
 
 func handlePulsarNamespacesResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
@@ -268,6 +535,294 @@ func handlePulsarTopicsResource(ctx context.Context, request mcp.ReadResourceReq
 	})
 }
 
+func handlePulsarClusterStatusResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindStatus {
+		return nil, fmt.Errorf("unsupported Pulsar status resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	status, err := getPulsarClusterStatus(session)
+	if err != nil {
+		return nil, err
+	}
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarClusterStatusResource{
+		Kind:   string(parsed.kind),
+		URI:    request.Params.URI,
+		Status: status,
+	})
+}
+
+func handlePulsarClustersResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindClusters {
+		return nil, fmt.Errorf("unsupported Pulsar clusters resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminClient(session)
+	if err != nil {
+		return nil, err
+	}
+
+	clusters, err := adminClient.Clusters().List()
+	if err != nil {
+		return nil, fmt.Errorf("failed to list clusters: %w", err)
+	}
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarClusterCollectionResource{
+		Kind:     string(parsed.kind),
+		URI:      request.Params.URI,
+		Clusters: clusters,
+		Count:    len(clusters),
+	})
+}
+
+func handlePulsarClusterResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindCluster {
+		return nil, fmt.Errorf("unsupported Pulsar cluster resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminClient(session)
+	if err != nil {
+		return nil, err
+	}
+
+	clusterData, err := adminClient.Clusters().Get(parsed.cluster)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get cluster %q: %w", parsed.cluster, err)
+	}
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarClusterResource{
+		Kind:    string(parsed.kind),
+		URI:     request.Params.URI,
+		Cluster: parsed.cluster,
+		Data:    sanitizePulsarClusterData(parsed.cluster, clusterData),
+	})
+}
+
+func handlePulsarBrokersResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindBrokers {
+		return nil, fmt.Errorf("unsupported Pulsar brokers resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminClient(session)
+	if err != nil {
+		return nil, err
+	}
+
+	brokers, err := adminClient.Brokers().GetActiveBrokers(parsed.cluster)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list brokers for cluster %q: %w", parsed.cluster, err)
+	}
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarBrokerCollectionResource{
+		Kind:    string(parsed.kind),
+		URI:     request.Params.URI,
+		Cluster: parsed.cluster,
+		Brokers: brokers,
+		Count:   len(brokers),
+	})
+}
+
+func handlePulsarBrokerStatsSummaryResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindBrokerStatsSummary {
+		return nil, fmt.Errorf("unsupported Pulsar broker stats summary resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminClient(session)
+	if err != nil {
+		return nil, err
+	}
+
+	metrics, err := adminClient.BrokerStats().GetMetrics()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get broker monitoring metrics: %w", err)
+	}
+	loadReport, err := adminClient.BrokerStats().GetLoadReport()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get broker load report: %w", err)
+	}
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarBrokerStatsSummaryResource{
+		Kind:              string(parsed.kind),
+		URI:               request.Params.URI,
+		MonitoringMetrics: summarizePulsarMonitoringMetrics(metrics),
+		LoadReport:        summarizePulsarBrokerLoadReport(loadReport),
+	})
+}
+
+func handlePulsarFailureDomainsResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindFailureDomains {
+		return nil, fmt.Errorf("unsupported Pulsar failure domains resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminClient(session)
+	if err != nil {
+		return nil, err
+	}
+
+	failureDomains, err := adminClient.Clusters().ListFailureDomains(parsed.cluster)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list failure domains for cluster %q: %w", parsed.cluster, err)
+	}
+	summaries := summarizePulsarFailureDomains(failureDomains)
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarFailureDomainCollectionResource{
+		Kind:           string(parsed.kind),
+		URI:            request.Params.URI,
+		Cluster:        parsed.cluster,
+		FailureDomains: summaries,
+		Count:          len(summaries),
+	})
+}
+
+func handlePulsarFailureDomainResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindFailureDomain {
+		return nil, fmt.Errorf("unsupported Pulsar failure domain resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminClient(session)
+	if err != nil {
+		return nil, err
+	}
+
+	failureDomain, err := adminClient.Clusters().GetFailureDomain(parsed.cluster, parsed.domain)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get failure domain %q for cluster %q: %w", parsed.domain, parsed.cluster, err)
+	}
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarFailureDomainResource{
+		Kind:          string(parsed.kind),
+		URI:           request.Params.URI,
+		Cluster:       parsed.cluster,
+		FailureDomain: summarizePulsarFailureDomain(parsed.domain, failureDomain),
+	})
+}
+
+func handlePulsarNamespaceIsolationPoliciesResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindNSIsolationPolicies {
+		return nil, fmt.Errorf("unsupported Pulsar namespace isolation policies resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminClient(session)
+	if err != nil {
+		return nil, err
+	}
+
+	policies, err := adminClient.NsIsolationPolicy().GetNamespaceIsolationPolicies(parsed.cluster)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list namespace isolation policies for cluster %q: %w", parsed.cluster, err)
+	}
+	summaries := summarizePulsarNamespaceIsolationPolicies(policies)
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarNamespaceIsolationPolicyCollectionResource{
+		Kind:     string(parsed.kind),
+		URI:      request.Params.URI,
+		Cluster:  parsed.cluster,
+		Policies: summaries,
+		Count:    len(summaries),
+	})
+}
+
+func handlePulsarNamespaceIsolationPolicyResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	if err != nil {
+		return nil, err
+	}
+	if parsed.kind != pulsarResourceKindNSIsolationPolicy {
+		return nil, fmt.Errorf("unsupported Pulsar namespace isolation policy resource URI %q", request.Params.URI)
+	}
+
+	session, err := requirePulsarResourceSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+	adminClient, err := getPulsarResourceAdminClient(session)
+	if err != nil {
+		return nil, err
+	}
+
+	policy, err := adminClient.NsIsolationPolicy().GetNamespaceIsolationPolicy(parsed.cluster, parsed.policy)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get namespace isolation policy %q for cluster %q: %w", parsed.policy, parsed.cluster, err)
+	}
+	if policy == nil {
+		return nil, fmt.Errorf("namespace isolation policy %q for cluster %q is empty", parsed.policy, parsed.cluster)
+	}
+
+	return newPulsarJSONResourceContents(request.Params.URI, pulsarNamespaceIsolationPolicyResource{
+		Kind:    string(parsed.kind),
+		URI:     request.Params.URI,
+		Cluster: parsed.cluster,
+		Policy: pulsarNamespaceIsolationPolicy{
+			Name: parsed.policy,
+			Data: *policy,
+		},
+	})
+}
+
 func requirePulsarResourceSession(ctx context.Context) (*pulsarsession.Session, error) {
 	session := context2.GetPulsarSession(ctx)
 	if session == nil {
@@ -288,6 +843,183 @@ func getPulsarResourceAdminClient(session *pulsarsession.Session) (cmdutils.Clie
 		return nil, fmt.Errorf("Pulsar admin client not found in session")
 	}
 	return adminClient, nil
+}
+
+func getPulsarClusterStatus(session *pulsarsession.Session) (string, error) {
+	cfg, err := session.GetPulsarCtlConfig()
+	if err != nil {
+		return "", fmt.Errorf("failed to get Pulsar admin configuration: %w", err)
+	}
+
+	authProvider, err := pulsaradminauth.GetAuthProvider((*pulsaradminconfig.Config)(cfg))
+	if err != nil {
+		return "", fmt.Errorf("failed to build status auth provider: %w", err)
+	}
+
+	statusClient := &rest.Client{
+		ServiceURL:  cfg.WebServiceURL,
+		VersionInfo: admin.ReleaseVersion,
+		HTTPClient: &http.Client{
+			Timeout:   admin.DefaultHTTPTimeOutDuration,
+			Transport: authProvider,
+		},
+	}
+	data, err := statusClient.GetWithQueryParams("/status.html", nil, nil, false)
+	if err != nil {
+		return "", fmt.Errorf("failed to check Pulsar status: %w", err)
+	}
+
+	status := strings.TrimSpace(string(data))
+	if status == "" {
+		status = string(data)
+	}
+	return status, nil
+}
+
+func sanitizePulsarClusterData(clusterName string, data utils.ClusterData) pulsarClusterDataSummary {
+	name := data.Name
+	if name == "" {
+		name = clusterName
+	}
+	return pulsarClusterDataSummary{
+		Name:                                 name,
+		ServiceURL:                           data.ServiceURL,
+		ServiceURLTLS:                        data.ServiceURLTls,
+		BrokerServiceURL:                     data.BrokerServiceURL,
+		BrokerServiceURLTLS:                  data.BrokerServiceURLTls,
+		PeerClusterNames:                     data.PeerClusterNames,
+		AuthenticationPlugin:                 data.AuthenticationPlugin,
+		AuthenticationParametersConfigured:   data.AuthenticationParameters != "",
+		BrokerClientTrustCertsFileConfigured: data.BrokerClientTrustCertsFilePath != "",
+		BrokerClientTLSEnabled:               data.BrokerClientTLSEnabled,
+	}
+}
+
+func summarizePulsarMonitoringMetrics(metrics []utils.Metrics) pulsarMonitoringMetricsSummary {
+	metricNames := make(map[string]struct{})
+	dimensionKeys := make(map[string]struct{})
+	for _, metric := range metrics {
+		for name := range metric.Metrics {
+			metricNames[name] = struct{}{}
+		}
+		for name := range metric.Dimensions {
+			dimensionKeys[name] = struct{}{}
+		}
+	}
+
+	return pulsarMonitoringMetricsSummary{
+		Count:         len(metrics),
+		MetricNames:   sortedLimitedStrings(metricNames, pulsarResourceSummaryStringLimit),
+		DimensionKeys: sortedLimitedStrings(dimensionKeys, pulsarResourceSummaryStringLimit),
+	}
+}
+
+func summarizePulsarBrokerLoadReport(loadReport *utils.LocalBrokerData) pulsarBrokerLoadReportSummary {
+	if loadReport == nil {
+		return pulsarBrokerLoadReportSummary{Available: false}
+	}
+	return pulsarBrokerLoadReportSummary{
+		Available:                  true,
+		WebServiceURL:              loadReport.WebServiceURL,
+		WebServiceURLTLS:           loadReport.WebServiceURLTLS,
+		PulsarServiceURL:           loadReport.PulsarServiceURL,
+		PulsarServiceURLTLS:        loadReport.PulsarServiceURLTLS,
+		PersistentTopicsEnabled:    loadReport.PersistentTopicsEnabled,
+		NonPersistentTopicsEnabled: loadReport.NonPersistentTopicsEnabled,
+		CPU:                        summarizePulsarResourceUsage(loadReport.CPU),
+		Memory:                     summarizePulsarResourceUsage(loadReport.Memory),
+		DirectMemory:               summarizePulsarResourceUsage(loadReport.DirectMemory),
+		BandwidthIn:                summarizePulsarResourceUsage(loadReport.BandwidthIn),
+		BandwidthOut:               summarizePulsarResourceUsage(loadReport.BandwidthOut),
+		MsgThroughputIn:            loadReport.MsgThroughputIn,
+		MsgThroughputOut:           loadReport.MsgThroughputOut,
+		MsgRateIn:                  loadReport.MsgRateIn,
+		MsgRateOut:                 loadReport.MsgRateOut,
+		LastUpdate:                 loadReport.LastUpdate,
+		NumTopics:                  loadReport.NumTopics,
+		NumBundles:                 loadReport.NumBundles,
+		NumConsumers:               loadReport.NumConsumers,
+		NumProducers:               loadReport.NumProducers,
+		BundleCount:                len(loadReport.Bundles),
+		LastBundleGainsCount:       len(loadReport.LastBundleGains),
+		LastBundleLossesCount:      len(loadReport.LastBundleLosses),
+		BrokerVersionString:        loadReport.BrokerVersionString,
+		LoadReportType:             loadReport.LoadReportType,
+		ProtocolCount:              len(loadReport.Protocols),
+	}
+}
+
+func summarizePulsarResourceUsage(usage utils.ResourceUsage) pulsarResourceUsageSummary {
+	return pulsarResourceUsageSummary{
+		Usage:        usage.Usage,
+		Limit:        usage.Limit,
+		PercentUsage: usage.PercentUsage(),
+	}
+}
+
+func summarizePulsarFailureDomains(failureDomains utils.FailureDomainMap) []pulsarFailureDomainSummary {
+	names := make([]string, 0, len(failureDomains))
+	for name := range failureDomains {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+
+	summaries := make([]pulsarFailureDomainSummary, 0, len(names))
+	for _, name := range names {
+		summaries = append(summaries, summarizePulsarFailureDomain(name, failureDomains[name]))
+	}
+	return summaries
+}
+
+func summarizePulsarFailureDomain(name string, failureDomain utils.FailureDomainData) pulsarFailureDomainSummary {
+	return pulsarFailureDomainSummary{
+		Name:    name,
+		Brokers: failureDomain.BrokerList,
+	}
+}
+
+func summarizePulsarNamespaceIsolationPolicies(
+	policies map[string]utils.NamespaceIsolationData,
+) []pulsarNamespaceIsolationPolicySummary {
+	names := make([]string, 0, len(policies))
+	for name := range policies {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+
+	summaries := make([]pulsarNamespaceIsolationPolicySummary, 0, len(names))
+	for _, name := range names {
+		summaries = append(summaries, summarizePulsarNamespaceIsolationPolicy(name, policies[name]))
+	}
+	return summaries
+}
+
+func summarizePulsarNamespaceIsolationPolicy(
+	name string,
+	policy utils.NamespaceIsolationData,
+) pulsarNamespaceIsolationPolicySummary {
+	return pulsarNamespaceIsolationPolicySummary{
+		Name:                   name,
+		NamespacesCount:        len(policy.Namespaces),
+		PrimaryBrokersCount:    len(policy.Primary),
+		SecondaryBrokersCount:  len(policy.Secondary),
+		AutoFailoverPolicyType: string(policy.AutoFailoverPolicy.PolicyType),
+	}
+}
+
+func sortedLimitedStrings(values map[string]struct{}, limit int) []string {
+	if len(values) == 0 || limit <= 0 {
+		return nil
+	}
+	result := make([]string, 0, len(values))
+	for value := range values {
+		result = append(result, value)
+	}
+	sort.Strings(result)
+	if len(result) > limit {
+		return result[:limit]
+	}
+	return result
 }
 
 func buildPulsarContextResource(uri string, session *pulsarsession.Session) (pulsarContextResource, error) {
@@ -343,8 +1075,11 @@ func summarizePulsarAuthentication(ctx pulsarsession.PulsarContext) pulsarAuthen
 	}
 }
 
-func buildPulsarResourceCatalog() pulsarResourceCatalog {
-	return pulsarResourceCatalog{
+func buildPulsarResourceCatalog(
+	resources []server.ServerResource,
+	templates []server.ServerResourceTemplate,
+) pulsarResourceCatalog {
+	catalog := pulsarResourceCatalog{
 		Version: 1,
 		Scheme:  "pulsar",
 		Resources: []pulsarCatalogResource{
@@ -361,24 +1096,30 @@ func buildPulsarResourceCatalog() pulsarResourceCatalog {
 				MIMEType:    pulsarResourceJSONMIMEType,
 			},
 		},
-		Templates: []pulsarCatalogTemplate{
-			{
-				URITemplate: pulsarNamespacesResourceTemplateURI,
-				Name:        "Pulsar Namespaces by Tenant",
-				Description: "List namespaces for a Pulsar tenant.",
-				MIMEType:    pulsarResourceJSONMIMEType,
-			},
-			{
-				URITemplate: pulsarTopicsResourceTemplateURI,
-				Name:        "Pulsar Topics by Namespace",
-				Description: "List topics for a Pulsar namespace.",
-				MIMEType:    pulsarResourceJSONMIMEType,
-			},
-		},
+		Templates: []pulsarCatalogTemplate{},
 		Notes: []string{
 			"Resource handlers are read-only and do not return tokens, auth params, key files, TLS private keys, or secret values.",
 		},
 	}
+
+	for _, resource := range resources {
+		catalog.Resources = append(catalog.Resources, pulsarCatalogResource{
+			URI:         resource.Resource.URI,
+			Name:        resource.Resource.Name,
+			Description: resource.Resource.Description,
+			MIMEType:    resource.Resource.MIMEType,
+		})
+	}
+	for _, template := range templates {
+		catalog.Templates = append(catalog.Templates, pulsarCatalogTemplate{
+			URITemplate: template.Template.URITemplate.Raw(),
+			Name:        template.Template.Name,
+			Description: template.Template.Description,
+			MIMEType:    template.Template.MIMEType,
+		})
+	}
+
+	return catalog
 }
 
 func parsePulsarResourceURI(rawURI string) (pulsarResourceURI, error) {
@@ -417,6 +1158,76 @@ func parsePulsarResourceURI(rawURI string) (pulsarResourceURI, error) {
 func parsePulsarAdminResourceURI(rawURI, path string) (pulsarResourceURI, error) {
 	parts := splitPulsarResourcePath(path)
 	switch {
+	case len(parts) == 2 && parts[0] == "v2" && parts[1] == "status":
+		return pulsarResourceURI{kind: pulsarResourceKindStatus}, nil
+	case len(parts) == 2 && parts[0] == "v2" && parts[1] == "clusters":
+		return pulsarResourceURI{kind: pulsarResourceKindClusters}, nil
+	case len(parts) == 3 && parts[0] == "v2" && parts[1] == "clusters":
+		cluster := parts[2]
+		if err := validatePulsarResourcePathSegment("cluster", cluster); err != nil {
+			return pulsarResourceURI{}, err
+		}
+		return pulsarResourceURI{
+			kind:    pulsarResourceKindCluster,
+			cluster: cluster,
+		}, nil
+	case len(parts) == 3 && parts[0] == "v2" && parts[1] == "brokers":
+		cluster := parts[2]
+		if err := validatePulsarResourcePathSegment("cluster", cluster); err != nil {
+			return pulsarResourceURI{}, err
+		}
+		return pulsarResourceURI{
+			kind:    pulsarResourceKindBrokers,
+			cluster: cluster,
+		}, nil
+	case len(parts) == 3 && parts[0] == "v2" && parts[1] == "broker-stats" && parts[2] == "summary":
+		return pulsarResourceURI{kind: pulsarResourceKindBrokerStatsSummary}, nil
+	case len(parts) == 4 && parts[0] == "v2" && parts[1] == "clusters" && parts[3] == "failureDomains":
+		cluster := parts[2]
+		if err := validatePulsarResourcePathSegment("cluster", cluster); err != nil {
+			return pulsarResourceURI{}, err
+		}
+		return pulsarResourceURI{
+			kind:    pulsarResourceKindFailureDomains,
+			cluster: cluster,
+		}, nil
+	case len(parts) == 5 && parts[0] == "v2" && parts[1] == "clusters" && parts[3] == "failureDomains":
+		cluster := parts[2]
+		domain := parts[4]
+		if err := validatePulsarResourcePathSegment("cluster", cluster); err != nil {
+			return pulsarResourceURI{}, err
+		}
+		if err := validatePulsarResourcePathSegment("domain", domain); err != nil {
+			return pulsarResourceURI{}, err
+		}
+		return pulsarResourceURI{
+			kind:    pulsarResourceKindFailureDomain,
+			cluster: cluster,
+			domain:  domain,
+		}, nil
+	case len(parts) == 4 && parts[0] == "v2" && parts[1] == "clusters" && parts[3] == "namespaceIsolationPolicies":
+		cluster := parts[2]
+		if err := validatePulsarResourcePathSegment("cluster", cluster); err != nil {
+			return pulsarResourceURI{}, err
+		}
+		return pulsarResourceURI{
+			kind:    pulsarResourceKindNSIsolationPolicies,
+			cluster: cluster,
+		}, nil
+	case len(parts) == 5 && parts[0] == "v2" && parts[1] == "clusters" && parts[3] == "namespaceIsolationPolicies":
+		cluster := parts[2]
+		policy := parts[4]
+		if err := validatePulsarResourcePathSegment("cluster", cluster); err != nil {
+			return pulsarResourceURI{}, err
+		}
+		if err := validatePulsarResourcePathSegment("policy", policy); err != nil {
+			return pulsarResourceURI{}, err
+		}
+		return pulsarResourceURI{
+			kind:    pulsarResourceKindNSIsolationPolicy,
+			cluster: cluster,
+			policy:  policy,
+		}, nil
 	case len(parts) == 4 && parts[0] == "v2" && parts[1] == "tenants" && parts[3] == "namespaces":
 		tenant := parts[2]
 		if err := validatePulsarResourcePathSegment("tenant", tenant); err != nil {

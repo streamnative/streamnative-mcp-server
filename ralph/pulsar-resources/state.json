@@ -2,27 +2,27 @@
   "version": 1,
   "loop_name": "pulsar-resources",
   "created_at": "2026-04-26",
-  "updated_at": "2026-04-26T14:26:24Z",
-  "current_iteration": 1,
+  "updated_at": "2026-04-26T14:42:08Z",
+  "current_iteration": 2,
   "completed_items": [
-    "protocol-foundation"
+    "protocol-foundation",
+    "cluster-resources"
   ],
   "blocked_items": [],
   "last_result": {
-    "iteration": 1,
-    "item_id": "protocol-foundation",
-    "lane": "protocol",
+    "iteration": 2,
+    "item_id": "cluster-resources",
+    "lane": "family",
     "status": "implemented",
-    "summary": "Added the Pulsar MCP resource framework with pulsar://context and pulsar://resources static resources, namespace/topic collection templates, URI parsing, feature-gated registration, read handlers, tests, and docs.",
+    "summary": "Extended the existing Pulsar MCP resource framework with cluster, broker, broker stats summary, failure-domain, and namespace-isolation resources/templates, added focused handler and URI parsing tests, and updated resource docs.",
     "tests_run": [
-      "go test ./pkg/mcp/... ./pkg/cmd/mcp/...",
-      "go test -race ./pkg/mcp/... ./pkg/cmd/mcp/...",
+      "go test ./pkg/mcp/...",
       "git diff --check"
     ],
     "runner_verification": [
-      "go test ./pkg/mcp/... ./pkg/cmd/mcp/..."
+      "go test ./pkg/mcp/..."
     ],
-    "completed_at": "2026-04-26T14:26:24Z"
+    "completed_at": "2026-04-26T14:42:08Z"
   },
   "lane_history": [
     {
@@ -40,6 +40,21 @@
         "go test ./pkg/mcp/... ./pkg/cmd/mcp/..."
       ],
       "completed_at": "2026-04-26T14:26:24Z"
+    },
+    {
+      "iteration": 2,
+      "item_id": "cluster-resources",
+      "lane": "family",
+      "status": "implemented",
+      "summary": "Extended the existing Pulsar MCP resource framework with cluster, broker, broker stats summary, failure-domain, and namespace-isolation resources/templates, added focused handler and URI parsing tests, and updated resource docs.",
+      "tests_run": [
+        "go test ./pkg/mcp/...",
+        "git diff --check"
+      ],
+      "runner_verification": [
+        "go test ./pkg/mcp/..."
+      ],
+      "completed_at": "2026-04-26T14:42:08Z"
     }
   ]
 }

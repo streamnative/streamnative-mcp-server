@@ -56,7 +56,13 @@ func TestPulsarAddResourcesFeatureGate(t *testing.T) {
 			resourceURIs = append(resourceURIs, resource.URI)
 			assert.Equal(t, pulsarResourceJSONMIMEType, resource.MIMEType)
 		}
-		assert.ElementsMatch(t, []string{pulsarResourceContextURI, pulsarResourceCatalogURI}, resourceURIs)
+		assert.ElementsMatch(t, []string{
+			pulsarResourceContextURI,
+			pulsarResourceCatalogURI,
+			pulsarClusterStatusResourceURI,
+			pulsarClustersResourceURI,
+			pulsarBrokerStatsSummaryResourceURI,
+		}, resourceURIs)
 
 		templates := listPulsarTestResourceTemplates(t, s)
 		templateURIs := make([]string, 0, len(templates))
@@ -64,7 +70,43 @@ func TestPulsarAddResourcesFeatureGate(t *testing.T) {
 			templateURIs = append(templateURIs, template.URITemplate.Raw())
 			assert.Equal(t, pulsarResourceJSONMIMEType, template.MIMEType)
 		}
-		assert.ElementsMatch(t, []string{pulsarNamespacesResourceTemplateURI, pulsarTopicsResourceTemplateURI}, templateURIs)
+		assert.ElementsMatch(t, []string{
+			pulsarNamespacesResourceTemplateURI,
+			pulsarTopicsResourceTemplateURI,
+			pulsarClusterResourceTemplateURI,
+			pulsarBrokersResourceTemplateURI,
+			pulsarFailureDomainsTemplateURI,
+			pulsarFailureDomainTemplateURI,
+			pulsarNSIsolationPoliciesTemplateURI,
+			pulsarNSIsolationPolicyTemplateURI,
+		}, templateURIs)
+	})
+
+	t.Run("cluster feature registers cluster resource family only", func(t *testing.T) {
+		s := server.NewMCPServer("test", "0.0.1", server.WithResourceCapabilities(true, true))
+		PulsarAddResources(s, []string{string(FeaturePulsarAdminClusters)})
+
+		resources := listPulsarTestResources(t, s)
+		resourceURIs := make([]string, 0, len(resources))
+		for _, resource := range resources {
+			resourceURIs = append(resourceURIs, resource.URI)
+		}
+		assert.ElementsMatch(t, []string{
+			pulsarResourceContextURI,
+			pulsarResourceCatalogURI,
+			pulsarClustersResourceURI,
+		}, resourceURIs)
+
+		templates := listPulsarTestResourceTemplates(t, s)
+		templateURIs := make([]string, 0, len(templates))
+		for _, template := range templates {
+			templateURIs = append(templateURIs, template.URITemplate.Raw())
+		}
+		assert.ElementsMatch(t, []string{
+			pulsarClusterResourceTemplateURI,
+			pulsarFailureDomainsTemplateURI,
+			pulsarFailureDomainTemplateURI,
+		}, templateURIs)
 	})
 }
 
@@ -159,6 +201,181 @@ func TestPulsarNamespaceTemplateRead(t *testing.T) {
 	assert.Equal(t, "/admin/v2/namespaces/public", <-requestedPath)
 }
 
+func TestPulsarClusterResourceFamilyRead(t *testing.T) {
+	t.Parallel()
+
+	adminServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "unexpected method", http.StatusMethodNotAllowed)
+			return
+		}
+
+		switch r.URL.Path {
+		case "/status.html":
+			w.Header().Set("Content-Type", "text/plain")
+			_, _ = w.Write([]byte("OK\n"))
+		case "/admin/v2/clusters":
+			writePulsarTestJSON(w, `["use"]`)
+		case "/admin/v2/clusters/use":
+			writePulsarTestJSON(w, `{
+				"serviceUrl": "http://admin.example",
+				"serviceUrlTls": "https://admin.example",
+				"brokerServiceUrl": "pulsar://broker.example:6650",
+				"brokerServiceUrlTls": "pulsar+ssl://broker.example:6651",
+				"peerClusterNames": ["peer-a"],
+				"authenticationPlugin": "org.example.SecretAuth",
+				"authenticationParameters": "secret-auth-params",
+				"brokerClientTrustCertsFilePath": "/tmp/ca.pem",
+				"brokerClientTlsEnabled": true
+			}`)
+		case "/admin/v2/brokers/use":
+			writePulsarTestJSON(w, `["broker-a:8080","broker-b:8080"]`)
+		case "/admin/v2/broker-stats/metrics":
+			writePulsarTestJSON(w, `[{
+				"metrics": {
+					"brk_msg_rate_in": 12.5,
+					"brk_msg_rate_out": 7.5
+				},
+				"dimensions": {
+					"cluster": "use",
+					"broker": "broker-a"
+				}
+			}]`)
+		case "/admin/v2/broker-stats/load-report":
+			writePulsarTestJSON(w, `{
+				"webServiceUrl": "http://broker-a:8080",
+				"pulsarServiceUrl": "pulsar://broker-a:6650",
+				"persistentTopicsEnabled": true,
+				"nonPersistentTopicsEnabled": true,
+				"cpu": {"usage": 1, "limit": 4},
+				"memory": {"usage": 256, "limit": 1024},
+				"msgRateIn": 10,
+				"msgRateOut": 8,
+				"numTopics": 2,
+				"numBundles": 1,
+				"numConsumers": 3,
+				"numProducers": 4,
+				"bundles": ["bundle-a", "bundle-b"],
+				"lastBundleGains": ["bundle-a"],
+				"lastBundleLosses": ["bundle-z"],
+				"brokerVersionString": "4.1.0",
+				"loadReportType": "LocalBrokerData",
+				"protocols": {"kafka": "9092"}
+			}`)
+		case "/admin/v2/clusters/use/failureDomains":
+			writePulsarTestJSON(w, `{
+				"zone-a": {"brokers": ["broker-a:8080"]}
+			}`)
+		case "/admin/v2/clusters/use/failureDomains/zone-a":
+			writePulsarTestJSON(w, `{"brokers": ["broker-a:8080"]}`)
+		case "/admin/v2/clusters/use/namespaceIsolationPolicies":
+			writePulsarTestJSON(w, `{
+				"policy-a": {
+					"namespaces": ["public/.*"],
+					"primary": ["broker-a.*"],
+					"secondary": ["broker-b.*"],
+					"auto_failover_policy": {
+						"policy_type": "min_available",
+						"parameters": {
+							"min_limit": "1",
+							"usage_threshold": "80"
+						}
+					}
+				}
+			}`)
+		case "/admin/v2/clusters/use/namespaceIsolationPolicies/policy-a":
+			writePulsarTestJSON(w, `{
+				"namespaces": ["public/.*"],
+				"primary": ["broker-a.*"],
+				"secondary": ["broker-b.*"],
+				"auto_failover_policy": {
+					"policy_type": "min_available",
+					"parameters": {
+						"min_limit": "1",
+						"usage_threshold": "80"
+					}
+				}
+			}`)
+		default:
+			http.Error(w, "unexpected path "+r.URL.Path, http.StatusNotFound)
+		}
+	}))
+	defer adminServer.Close()
+
+	cfg := &cmdutils.ClusterConfig{WebServiceURL: adminServer.URL}
+	ctx := WithPulsarSession(context.Background(), &pulsarsession.Session{
+		Ctx:             pulsarsession.PulsarContext{WebServiceURL: adminServer.URL},
+		PulsarCtlConfig: cfg,
+		AdminClient:     cfg.Client(pulsaradminconfig.V2),
+	})
+
+	s := server.NewMCPServer("test", "0.0.1", server.WithResourceCapabilities(true, true))
+	PulsarAddResources(s, []string{string(FeatureAllPulsar)})
+
+	statusContent := readPulsarTestResource(t, ctx, s, pulsarClusterStatusResourceURI)
+	var statusPayload pulsarClusterStatusResource
+	require.NoError(t, json.Unmarshal([]byte(statusContent.Text), &statusPayload))
+	assert.Equal(t, "OK", statusPayload.Status)
+
+	clustersContent := readPulsarTestResource(t, ctx, s, pulsarClustersResourceURI)
+	var clustersPayload pulsarClusterCollectionResource
+	require.NoError(t, json.Unmarshal([]byte(clustersContent.Text), &clustersPayload))
+	assert.Equal(t, []string{"use"}, clustersPayload.Clusters)
+	assert.Equal(t, 1, clustersPayload.Count)
+
+	clusterContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v2/clusters/use")
+	assert.NotContains(t, clusterContent.Text, "secret-auth-params")
+	assert.NotContains(t, clusterContent.Text, "/tmp/ca.pem")
+	var clusterPayload pulsarClusterResource
+	require.NoError(t, json.Unmarshal([]byte(clusterContent.Text), &clusterPayload))
+	assert.Equal(t, "use", clusterPayload.Data.Name)
+	assert.True(t, clusterPayload.Data.AuthenticationParametersConfigured)
+	assert.True(t, clusterPayload.Data.BrokerClientTrustCertsFileConfigured)
+	assert.True(t, clusterPayload.Data.BrokerClientTLSEnabled)
+
+	brokersContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v2/brokers/use")
+	var brokersPayload pulsarBrokerCollectionResource
+	require.NoError(t, json.Unmarshal([]byte(brokersContent.Text), &brokersPayload))
+	assert.ElementsMatch(t, []string{"broker-a:8080", "broker-b:8080"}, brokersPayload.Brokers)
+	assert.Equal(t, 2, brokersPayload.Count)
+
+	statsContent := readPulsarTestResource(t, ctx, s, pulsarBrokerStatsSummaryResourceURI)
+	var statsPayload pulsarBrokerStatsSummaryResource
+	require.NoError(t, json.Unmarshal([]byte(statsContent.Text), &statsPayload))
+	assert.Equal(t, 1, statsPayload.MonitoringMetrics.Count)
+	assert.ElementsMatch(t, []string{"brk_msg_rate_in", "brk_msg_rate_out"}, statsPayload.MonitoringMetrics.MetricNames)
+	assert.ElementsMatch(t, []string{"broker", "cluster"}, statsPayload.MonitoringMetrics.DimensionKeys)
+	assert.True(t, statsPayload.LoadReport.Available)
+	assert.Equal(t, 2, statsPayload.LoadReport.BundleCount)
+	assert.Equal(t, 1, statsPayload.LoadReport.ProtocolCount)
+
+	failureDomainsContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v2/clusters/use/failureDomains")
+	var failureDomainsPayload pulsarFailureDomainCollectionResource
+	require.NoError(t, json.Unmarshal([]byte(failureDomainsContent.Text), &failureDomainsPayload))
+	require.Len(t, failureDomainsPayload.FailureDomains, 1)
+	assert.Equal(t, "zone-a", failureDomainsPayload.FailureDomains[0].Name)
+	assert.Equal(t, []string{"broker-a:8080"}, failureDomainsPayload.FailureDomains[0].Brokers)
+
+	failureDomainContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v2/clusters/use/failureDomains/zone-a")
+	var failureDomainPayload pulsarFailureDomainResource
+	require.NoError(t, json.Unmarshal([]byte(failureDomainContent.Text), &failureDomainPayload))
+	assert.Equal(t, "zone-a", failureDomainPayload.FailureDomain.Name)
+
+	policiesContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v2/clusters/use/namespaceIsolationPolicies")
+	var policiesPayload pulsarNamespaceIsolationPolicyCollectionResource
+	require.NoError(t, json.Unmarshal([]byte(policiesContent.Text), &policiesPayload))
+	require.Len(t, policiesPayload.Policies, 1)
+	assert.Equal(t, "policy-a", policiesPayload.Policies[0].Name)
+	assert.Equal(t, 1, policiesPayload.Policies[0].NamespacesCount)
+	assert.Equal(t, "min_available", policiesPayload.Policies[0].AutoFailoverPolicyType)
+
+	policyContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v2/clusters/use/namespaceIsolationPolicies/policy-a")
+	var policyPayload pulsarNamespaceIsolationPolicyResource
+	require.NoError(t, json.Unmarshal([]byte(policyContent.Text), &policyPayload))
+	assert.Equal(t, "policy-a", policyPayload.Policy.Name)
+	assert.Equal(t, []string{"public/.*"}, policyPayload.Policy.Data.Namespaces)
+}
+
 func TestParsePulsarResourceURIRejectsMalformedOrUnsupportedURI(t *testing.T) {
 	t.Parallel()
 
@@ -171,6 +388,8 @@ func TestParsePulsarResourceURIRejectsMalformedOrUnsupportedURI(t *testing.T) {
 		"pulsar://admin/v3/tenants/public/namespaces",
 		"pulsar://admin/v2/tenants/public",
 		"pulsar://admin/v2/namespaces/public/topics",
+		"pulsar://admin/v2/broker-stats/topics",
+		"pulsar://admin/v2/brokers",
 	}
 
 	for _, rawURI := range tests {
@@ -234,4 +453,9 @@ func readPulsarTestResource(t *testing.T, ctx context.Context, s *server.MCPServ
 	content, ok := result.Contents[0].(mcp.TextResourceContents)
 	require.True(t, ok, "expected TextResourceContents, got %T", result.Contents[0])
 	return content
+}
+
+func writePulsarTestJSON(w http.ResponseWriter, body string) {
+	w.Header().Set("Content-Type", "application/json")
+	_, _ = w.Write([]byte(body))
 }
