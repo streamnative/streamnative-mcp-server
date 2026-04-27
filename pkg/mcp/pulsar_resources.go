@@ -3629,7 +3629,7 @@ func handlePulsarCatalogServerRequest(
 	}
 
 	if errResp, ok := message.(mcp.JSONRPCError); ok {
-		return mcp.JSONRPCResponse{}, fmt.Errorf("Pulsar catalog request failed: %s", errResp.Error.Message)
+		return mcp.JSONRPCResponse{}, fmt.Errorf("pulsar catalog request failed: %s", errResp.Error.Message)
 	}
 
 	return mcp.JSONRPCResponse{}, fmt.Errorf("unexpected Pulsar catalog response type %T", message)
