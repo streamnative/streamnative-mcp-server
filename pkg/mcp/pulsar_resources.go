@@ -18,17 +18,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"net/url"
 	"slices"
 	"sort"
 	"strconv"
 	"strings"
 
-	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/admin"
-	pulsaradminauth "github.com/apache/pulsar-client-go/pulsaradmin/pkg/admin/auth"
-	pulsaradminconfig "github.com/apache/pulsar-client-go/pulsaradmin/pkg/admin/config"
-	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/rest"
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/utils"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
@@ -2442,23 +2437,9 @@ func getPulsarResourceAdminV3Client(session *pulsarsession.Session) (cmdutils.Cl
 }
 
 func getPulsarClusterStatus(session *pulsarsession.Session) (string, error) {
-	cfg, err := session.GetPulsarCtlConfig()
+	statusClient, err := session.GetAdminStatusClient()
 	if err != nil {
-		return "", fmt.Errorf("failed to get Pulsar admin configuration: %w", err)
-	}
-
-	authProvider, err := pulsaradminauth.GetAuthProvider((*pulsaradminconfig.Config)(cfg))
-	if err != nil {
-		return "", fmt.Errorf("failed to build status auth provider: %w", err)
-	}
-
-	statusClient := &rest.Client{
-		ServiceURL:  cfg.WebServiceURL,
-		VersionInfo: admin.ReleaseVersion,
-		HTTPClient: &http.Client{
-			Timeout:   admin.DefaultHTTPTimeOutDuration,
-			Transport: authProvider,
-		},
+		return "", fmt.Errorf("failed to get Pulsar status client: %w", err)
 	}
 	data, err := statusClient.GetWithQueryParams("/status.html", nil, nil, false)
 	if err != nil {

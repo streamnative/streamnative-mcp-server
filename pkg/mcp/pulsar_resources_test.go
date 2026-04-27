@@ -21,6 +21,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync/atomic"
 	"testing"
 
 	pulsaradminconfig "github.com/apache/pulsar-client-go/pulsaradmin/pkg/admin/config"
@@ -1273,6 +1274,7 @@ func TestPulsarWorkloadResourceFamilyRead(t *testing.T) {
 func TestPulsarClusterResourceFamilyRead(t *testing.T) {
 	t.Parallel()
 
+	var statusRequests atomic.Int32
 	adminServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			http.Error(w, "unexpected method", http.StatusMethodNotAllowed)
@@ -1281,6 +1283,7 @@ func TestPulsarClusterResourceFamilyRead(t *testing.T) {
 
 		switch r.URL.Path {
 		case "/status.html":
+			statusRequests.Add(1)
 			w.Header().Set("Content-Type", "text/plain")
 			_, _ = w.Write([]byte("OK\n"))
 		case "/admin/v2/clusters":
@@ -1385,6 +1388,12 @@ func TestPulsarClusterResourceFamilyRead(t *testing.T) {
 	var statusPayload pulsarClusterStatusResource
 	require.NoError(t, json.Unmarshal([]byte(statusContent.Text), &statusPayload))
 	assert.Equal(t, "OK", statusPayload.Status)
+
+	secondStatusContent := readPulsarTestResource(ctx, t, s, pulsarClusterStatusResourceURI)
+	var secondStatusPayload pulsarClusterStatusResource
+	require.NoError(t, json.Unmarshal([]byte(secondStatusContent.Text), &secondStatusPayload))
+	assert.Equal(t, "OK", secondStatusPayload.Status)
+	assert.Equal(t, int32(2), statusRequests.Load())
 
 	clustersContent := readPulsarTestResource(ctx, t, s, pulsarClustersResourceURI)
 	var clustersPayload pulsarClusterCollectionResource
