@@ -48,3 +48,57 @@ func TestSessionGetPulsarCtlConfigReturnsCopy(t *testing.T) {
 
 	require.Equal(t, "http://pulsar.example.com:8080", session.PulsarCtlConfig.WebServiceURL)
 }
+
+func TestSessionGetAdminStatusClientRequiresWebServiceURL(t *testing.T) {
+	session := &Session{}
+
+	_, err := session.GetAdminStatusClient()
+	require.EqualError(t, err, "err: ContextNotSetErr: Please set the cluster context first")
+
+	session.PulsarCtlConfig = &cmdutils.ClusterConfig{}
+
+	_, err = session.GetAdminStatusClient()
+	require.EqualError(t, err, "err: ContextNotSetErr: Please set the cluster context first")
+}
+
+func TestSessionGetAdminStatusClientReturnsCachedClient(t *testing.T) {
+	session := &Session{
+		PulsarCtlConfig: &cmdutils.ClusterConfig{
+			WebServiceURL: "http://pulsar.example.com:8080",
+		},
+	}
+
+	firstClient, err := session.GetAdminStatusClient()
+	require.NoError(t, err)
+	require.Equal(t, "http://pulsar.example.com:8080", firstClient.ServiceURL)
+
+	secondClient, err := session.GetAdminStatusClient()
+	require.NoError(t, err)
+	require.Same(t, firstClient, secondClient)
+}
+
+func TestSessionSetPulsarContextResetsAdminStatusClient(t *testing.T) {
+	session := &Session{
+		PulsarCtlConfig: &cmdutils.ClusterConfig{
+			WebServiceURL: "http://pulsar.example.com:8080",
+		},
+	}
+
+	firstClient, err := session.GetAdminStatusClient()
+	require.NoError(t, err)
+
+	err = session.SetPulsarContext(PulsarContext{
+		ServiceURL:    "pulsar://localhost:6650",
+		WebServiceURL: "http://pulsar-next.example.com:8080",
+	})
+	require.NoError(t, err)
+	if session.Client != nil {
+		defer session.Client.Close()
+	}
+	require.Nil(t, session.adminStatusREST)
+
+	secondClient, err := session.GetAdminStatusClient()
+	require.NoError(t, err)
+	require.NotSame(t, firstClient, secondClient)
+	require.Equal(t, "http://pulsar-next.example.com:8080", secondClient.ServiceURL)
+}

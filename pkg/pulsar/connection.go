@@ -17,11 +17,15 @@ package pulsar
 
 import (
 	"fmt"
+	"net/http"
 	"sync"
 	"time"
 
 	"github.com/apache/pulsar-client-go/pulsar"
+	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/admin"
+	pulsaradminauth "github.com/apache/pulsar-client-go/pulsaradmin/pkg/admin/auth"
 	pulsaradminconfig "github.com/apache/pulsar-client-go/pulsaradmin/pkg/admin/config"
+	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/rest"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 )
 
@@ -53,6 +57,7 @@ type Session struct {
 	ClientOptions   pulsar.ClientOptions
 	PulsarCtlConfig *cmdutils.ClusterConfig
 	mutex           sync.RWMutex
+	adminStatusREST *rest.Client
 }
 
 // NewSession creates a new Pulsar session with the given context
@@ -74,6 +79,7 @@ func (s *Session) SetPulsarContext(ctx PulsarContext) error {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	s.Ctx = ctx
+	s.adminStatusREST = nil
 	pc := &s.Ctx
 	var err error
 	// Configure pulsarctl with the token
@@ -197,6 +203,35 @@ func (s *Session) GetPulsarCtlConfig() (*cmdutils.ClusterConfig, error) {
 
 	cfg := *s.PulsarCtlConfig
 	return &cfg, nil
+}
+
+// GetAdminStatusClient returns a cached REST client for the Pulsar status endpoint.
+func (s *Session) GetAdminStatusClient() (*rest.Client, error) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	if s.PulsarCtlConfig == nil || s.PulsarCtlConfig.WebServiceURL == "" {
+		return nil, fmt.Errorf("err: ContextNotSetErr: Please set the cluster context first")
+	}
+	if s.adminStatusREST != nil {
+		return s.adminStatusREST, nil
+	}
+
+	cfg := *s.PulsarCtlConfig
+	authProvider, err := pulsaradminauth.GetAuthProvider((*pulsaradminconfig.Config)(&cfg))
+	if err != nil {
+		return nil, fmt.Errorf("failed to build status auth provider: %w", err)
+	}
+
+	s.adminStatusREST = &rest.Client{
+		ServiceURL:  cfg.WebServiceURL,
+		VersionInfo: admin.ReleaseVersion,
+		HTTPClient: &http.Client{
+			Timeout:   admin.DefaultHTTPTimeOutDuration,
+			Transport: authProvider,
+		},
+	}
+	return s.adminStatusREST, nil
 }
 
 // GetPulsarClient returns the Pulsar data client.

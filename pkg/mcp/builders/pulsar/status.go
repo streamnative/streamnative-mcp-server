@@ -17,13 +17,8 @@ package pulsar
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"strings"
 
-	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/admin"
-	pulsaradminauth "github.com/apache/pulsar-client-go/pulsaradmin/pkg/admin/auth"
-	pulsaradminconfig "github.com/apache/pulsar-client-go/pulsaradmin/pkg/admin/config"
-	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/rest"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
@@ -90,23 +85,9 @@ func (b *PulsarAdminStatusToolBuilder) buildStatusHandler() func(context.Context
 			return mcp.NewToolResultError("Pulsar session not found in context"), nil
 		}
 
-		cfg, err := session.GetPulsarCtlConfig()
+		statusClient, err := session.GetAdminStatusClient()
 		if err != nil {
-			return b.handleError("get Pulsar configuration", err), nil
-		}
-
-		authProvider, err := pulsaradminauth.GetAuthProvider((*pulsaradminconfig.Config)(cfg))
-		if err != nil {
-			return b.handleError("build status auth provider", err), nil
-		}
-
-		statusClient := &rest.Client{
-			ServiceURL:  cfg.WebServiceURL,
-			VersionInfo: admin.ReleaseVersion,
-			HTTPClient: &http.Client{
-				Timeout:   admin.DefaultHTTPTimeOutDuration,
-				Transport: authProvider,
-			},
+			return b.handleError("get Pulsar status client", err), nil
 		}
 
 		data, err := statusClient.GetWithQueryParams("/status.html", nil, nil, false)
@@ -114,12 +95,7 @@ func (b *PulsarAdminStatusToolBuilder) buildStatusHandler() func(context.Context
 			return b.handleError("check Pulsar status", err), nil
 		}
 
-		status := strings.TrimSpace(string(data))
-		if status == "" {
-			status = string(data)
-		}
-
-		return mcp.NewToolResultText(status), nil
+		return mcp.NewToolResultText(strings.TrimSpace(string(data))), nil
 	}
 }
 

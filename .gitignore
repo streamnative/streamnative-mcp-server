@@ -13,3 +13,8 @@ agents/
 .serena/
 .envrc
 scripts/update-sdk-apiserver.sh
+
+# Local RALPH authoring loop artifacts
+ralph/
+scripts/ralph*
+scripts/__pycache__/ralph*.pyc

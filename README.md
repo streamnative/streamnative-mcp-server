@@ -23,6 +23,7 @@ The server currently negotiates MCP protocol versions `2025-11-25`, `2025-06-18`
   - Pulsar Admin operations (topics, namespaces, tenants, schemas, etc.)
   - Pulsar Client operations (producers, consumers)
   - Functions, Sources, and Sinks management
+  - Read-only MCP resources for context, catalog, and bounded admin summaries
 - **Multiple Connection Options**:
   - Connect to StreamNative Cloud with service account authentication
   - Connect directly to external Apache Kafka clusters
@@ -258,8 +259,8 @@ The StreamNative MCP Server allows you to enable or disable specific groups of f
 
 | Feature                   | Description                                      | Docs |
 |--------------------------|--------------------------------------------------|------|
-| `all-pulsar`  | Enables all Pulsar admin and client tools, without Apache Kafka and StreamNative Cloud tools                                    | |
-| `pulsar-admin`                 | Pulsar administrative operations (all admin tools)|  |
+| `all-pulsar`  | Enables all Pulsar admin and client tools, without Apache Kafka and StreamNative Cloud tools                                    | [pulsar_resources.md](docs/tools/pulsar_resources.md) |
+| `pulsar-admin`                 | Pulsar administrative operations (all admin tools)| [pulsar_resources.md](docs/tools/pulsar_resources.md) |
 | `pulsar-client`                | Pulsar client operations (produce/consume)        | [pulsar_client_consume.md](docs/tools/pulsar_client_consume.md), [pulsar_client_produce.md](docs/tools/pulsar_client_produce.md) |
 | `pulsar-admin-brokers`         | Manage Pulsar brokers                            | [pulsar_admin_brokers.md](docs/tools/pulsar_admin_brokers.md) |
 | `pulsar-admin-brokers-status`  | Check Pulsar broker or proxy status              | [pulsar_admin_status.md](docs/tools/pulsar_admin_status.md) |
@@ -279,6 +280,8 @@ The StreamNative MCP Server allows you to enable or disable specific groups of f
 | `pulsar-admin-functions`       | Manage Pulsar Functions                           | [pulsar_admin_functions.md](docs/tools/pulsar_admin_functions.md) |
 | `pulsar-admin-sources`         | Manage Pulsar Sources                           | [pulsar_admin_sources.md](docs/tools/pulsar_admin_sources.md) |
 | `pulsar-admin-topic-policy`    | Configure Pulsar topic policies                   | [pulsar_admin_topic_policy.md](docs/tools/pulsar_admin_topic_policy.md) |
+
+Pulsar admin feature gates also register read-only MCP resources for the matching admin surface. These resources use `pulsar://...` URIs, return JSON snapshots, and stay separate from write-capable tools; see [pulsar_resources.md](docs/tools/pulsar_resources.md) for the supported URI templates and safety boundaries.
 
 ---
 
