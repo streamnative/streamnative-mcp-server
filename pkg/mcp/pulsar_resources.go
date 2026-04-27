@@ -28,7 +28,7 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
-	context2 "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
+	mcpcontext "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 	pulsarsession "github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
@@ -2402,7 +2402,7 @@ func handlePulsarWorkerMetricsResource(ctx context.Context, request mcp.ReadReso
 }
 
 func requirePulsarResourceSession(ctx context.Context) (*pulsarsession.Session, error) {
-	session := context2.GetPulsarSession(ctx)
+	session := mcpcontext.GetPulsarSession(ctx)
 	if session == nil {
 		return nil, fmt.Errorf("pulsar session not found in context")
 	}
