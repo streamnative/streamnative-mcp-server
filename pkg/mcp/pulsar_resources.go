@@ -1406,1608 +1406,1002 @@ func pulsarResourceFeatureEnabled(features []string, resourceFeatures ...Feature
 	return false
 }
 
-func handlePulsarContextResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+type pulsarResourceReadFunc func(*pulsarsession.Session, pulsarResourceURI) (any, error)
+
+type pulsarAdminResourceReadFunc func(cmdutils.Client, pulsarResourceURI) (any, error)
+
+func parsePulsarResourceRequest(request mcp.ReadResourceRequest, want pulsarResourceKind) (pulsarResourceURI, error) {
 	parsed, err := parsePulsarResourceURI(request.Params.URI)
 	if err != nil {
-		return nil, err
+		return pulsarResourceURI{}, err
 	}
-	if parsed.kind != pulsarResourceKindContext {
-		return nil, fmt.Errorf("unsupported Pulsar context resource URI %q", request.Params.URI)
+	if parsed.kind != want {
+		return pulsarResourceURI{}, fmt.Errorf(
+			"unsupported Pulsar resource URI %q: got kind %q, want kind %q",
+			request.Params.URI,
+			parsed.kind,
+			want,
+		)
+	}
+	return parsed, nil
+}
+
+func handlePulsarResource(ctx context.Context, request mcp.ReadResourceRequest, want pulsarResourceKind, fn pulsarResourceReadFunc) ([]mcp.ResourceContents, error) {
+	parsed, err := parsePulsarResourceRequest(request, want)
+	if err != nil {
+		return nil, err
 	}
 	session, err := requirePulsarResourceSession(ctx)
 	if err != nil {
 		return nil, err
 	}
-
-	resource, err := buildPulsarContextResource(request.Params.URI, session)
+	value, err := fn(session, parsed)
 	if err != nil {
 		return nil, err
 	}
-	return newPulsarJSONResourceContents(request.Params.URI, resource)
+	return newPulsarJSONResourceContents(request.Params.URI, value)
+}
+
+func handlePulsarAdminResource(ctx context.Context, request mcp.ReadResourceRequest, want pulsarResourceKind, fn pulsarAdminResourceReadFunc) ([]mcp.ResourceContents, error) {
+	return handlePulsarResource(ctx, request, want, func(session *pulsarsession.Session, parsed pulsarResourceURI) (any, error) {
+		adminClient, err := getPulsarResourceAdminClient(session)
+		if err != nil {
+			return nil, err
+		}
+		return fn(adminClient, parsed)
+	})
+}
+
+func handlePulsarAdminV3Resource(ctx context.Context, request mcp.ReadResourceRequest, want pulsarResourceKind, fn pulsarAdminResourceReadFunc) ([]mcp.ResourceContents, error) {
+	return handlePulsarResource(ctx, request, want, func(session *pulsarsession.Session, parsed pulsarResourceURI) (any, error) {
+		adminClient, err := getPulsarResourceAdminV3Client(session)
+		if err != nil {
+			return nil, err
+		}
+		return fn(adminClient, parsed)
+	})
+}
+
+func handlePulsarContextResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+	return handlePulsarResource(ctx, request, pulsarResourceKindContext, func(session *pulsarsession.Session, _ pulsarResourceURI) (any, error) {
+		return buildPulsarContextResource(request.Params.URI, session)
+	})
 }
 
 func handlePulsarCatalogResource(_ context.Context, request mcp.ReadResourceRequest, catalog pulsarResourceCatalog) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
+	_, err := parsePulsarResourceRequest(request, pulsarResourceKindCatalog)
 	if err != nil {
 		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindCatalog {
-		return nil, fmt.Errorf("unsupported Pulsar resource catalog URI %q", request.Params.URI)
 	}
 	return newPulsarJSONResourceContents(request.Params.URI, catalog)
 }
 
 func handlePulsarTenantsResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindTenants {
-		return nil, fmt.Errorf("unsupported Pulsar tenants resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminResource(ctx, request, pulsarResourceKindTenants, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		tenants, err := adminClient.Tenants().List()
+		if err != nil {
+			return nil, fmt.Errorf("failed to list tenants: %w", err)
+		}
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminClient(session)
-	if err != nil {
-		return nil, err
-	}
-
-	tenants, err := adminClient.Tenants().List()
-	if err != nil {
-		return nil, fmt.Errorf("failed to list tenants: %w", err)
-	}
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarTenantCollectionResource{
-		Kind:    string(parsed.kind),
-		URI:     request.Params.URI,
-		Tenants: tenants,
-		Count:   len(tenants),
+		return pulsarTenantCollectionResource{
+			Kind:    string(parsed.kind),
+			URI:     request.Params.URI,
+			Tenants: tenants,
+			Count:   len(tenants),
+		}, nil
 	})
 }
 
 func handlePulsarTenantResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindTenant {
-		return nil, fmt.Errorf("unsupported Pulsar tenant resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminResource(ctx, request, pulsarResourceKindTenant, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		tenantData, err := adminClient.Tenants().Get(parsed.tenant)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get tenant %q: %w", parsed.tenant, err)
+		}
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminClient(session)
-	if err != nil {
-		return nil, err
-	}
-
-	tenantData, err := adminClient.Tenants().Get(parsed.tenant)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get tenant %q: %w", parsed.tenant, err)
-	}
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarTenantResource{
-		Kind:   string(parsed.kind),
-		URI:    request.Params.URI,
-		Tenant: parsed.tenant,
-		Data:   tenantData,
+		return pulsarTenantResource{
+			Kind:   string(parsed.kind),
+			URI:    request.Params.URI,
+			Tenant: parsed.tenant,
+			Data:   tenantData,
+		}, nil
 	})
 }
 
 func handlePulsarNamespacesResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindNamespaces {
-		return nil, fmt.Errorf("unsupported Pulsar namespaces resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminResource(ctx, request, pulsarResourceKindNamespaces, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		namespaces, err := adminClient.Namespaces().GetNamespaces(parsed.tenant)
+		if err != nil {
+			return nil, fmt.Errorf("failed to list namespaces for tenant %q: %w", parsed.tenant, err)
+		}
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminClient(session)
-	if err != nil {
-		return nil, err
-	}
-
-	namespaces, err := adminClient.Namespaces().GetNamespaces(parsed.tenant)
-	if err != nil {
-		return nil, fmt.Errorf("failed to list namespaces for tenant %q: %w", parsed.tenant, err)
-	}
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarNamespaceCollectionResource{
-		Kind:       string(parsed.kind),
-		URI:        request.Params.URI,
-		Tenant:     parsed.tenant,
-		Namespaces: namespaces,
-		Count:      len(namespaces),
+		return pulsarNamespaceCollectionResource{
+			Kind:       string(parsed.kind),
+			URI:        request.Params.URI,
+			Tenant:     parsed.tenant,
+			Namespaces: namespaces,
+			Count:      len(namespaces),
+		}, nil
 	})
 }
 
 func handlePulsarNamespaceResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindNamespace {
-		return nil, fmt.Errorf("unsupported Pulsar namespace resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminResource(ctx, request, pulsarResourceKindNamespace, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		namespaceName := parsed.tenant + "/" + parsed.namespace
+		policies, err := adminClient.Namespaces().GetPolicies(namespaceName)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get policies for namespace %q: %w", namespaceName, err)
+		}
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminClient(session)
-	if err != nil {
-		return nil, err
-	}
-
-	namespaceName := parsed.tenant + "/" + parsed.namespace
-	policies, err := adminClient.Namespaces().GetPolicies(namespaceName)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get policies for namespace %q: %w", namespaceName, err)
-	}
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarNamespaceResource{
-		Kind:      string(parsed.kind),
-		URI:       request.Params.URI,
-		Tenant:    parsed.tenant,
-		Namespace: parsed.namespace,
-		Policies:  policies,
+		return pulsarNamespaceResource{
+			Kind:      string(parsed.kind),
+			URI:       request.Params.URI,
+			Tenant:    parsed.tenant,
+			Namespace: parsed.namespace,
+			Policies:  policies,
+		}, nil
 	})
 }
 
 func handlePulsarTopicsResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindTopics {
-		return nil, fmt.Errorf("unsupported Pulsar topics resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminResource(ctx, request, pulsarResourceKindTopics, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		namespaceName := parsed.tenant + "/" + parsed.namespace
+		topics, err := adminClient.Namespaces().GetTopics(namespaceName)
+		if err != nil {
+			return nil, fmt.Errorf("failed to list topics for namespace %q: %w", namespaceName, err)
+		}
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminClient(session)
-	if err != nil {
-		return nil, err
-	}
-
-	namespaceName := parsed.tenant + "/" + parsed.namespace
-	topics, err := adminClient.Namespaces().GetTopics(namespaceName)
-	if err != nil {
-		return nil, fmt.Errorf("failed to list topics for namespace %q: %w", namespaceName, err)
-	}
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarTopicCollectionResource{
-		Kind:      string(parsed.kind),
-		URI:       request.Params.URI,
-		Tenant:    parsed.tenant,
-		Namespace: parsed.namespace,
-		Topics:    topics,
-		Count:     len(topics),
+		return pulsarTopicCollectionResource{
+			Kind:      string(parsed.kind),
+			URI:       request.Params.URI,
+			Tenant:    parsed.tenant,
+			Namespace: parsed.namespace,
+			Topics:    topics,
+			Count:     len(topics),
+		}, nil
 	})
 }
 
 func handlePulsarDefaultResourceQuotaResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindDefaultResourceQuota {
-		return nil, fmt.Errorf("unsupported Pulsar default resource quota URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminResource(ctx, request, pulsarResourceKindDefaultResourceQuota, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		quota, err := adminClient.ResourceQuotas().GetDefaultResourceQuota()
+		if err != nil {
+			return nil, fmt.Errorf("failed to get default resource quota: %w", err)
+		}
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminClient(session)
-	if err != nil {
-		return nil, err
-	}
-
-	quota, err := adminClient.ResourceQuotas().GetDefaultResourceQuota()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get default resource quota: %w", err)
-	}
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarResourceQuotaResource{
-		Kind:  string(parsed.kind),
-		URI:   request.Params.URI,
-		Scope: "default",
-		Quota: quota,
+		return pulsarResourceQuotaResource{
+			Kind:  string(parsed.kind),
+			URI:   request.Params.URI,
+			Scope: "default",
+			Quota: quota,
+		}, nil
 	})
 }
 
 func handlePulsarResourceQuotaResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindResourceQuota {
-		return nil, fmt.Errorf("unsupported Pulsar resource quota URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminResource(ctx, request, pulsarResourceKindResourceQuota, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		namespaceName := parsed.tenant + "/" + parsed.namespace
+		quota, err := adminClient.ResourceQuotas().GetNamespaceBundleResourceQuota(namespaceName, parsed.bundle)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"failed to get resource quota for namespace %q bundle %q: %w",
+				namespaceName,
+				parsed.bundle,
+				err,
+			)
+		}
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminClient(session)
-	if err != nil {
-		return nil, err
-	}
-
-	namespaceName := parsed.tenant + "/" + parsed.namespace
-	quota, err := adminClient.ResourceQuotas().GetNamespaceBundleResourceQuota(namespaceName, parsed.bundle)
-	if err != nil {
-		return nil, fmt.Errorf(
-			"failed to get resource quota for namespace %q bundle %q: %w",
-			namespaceName,
-			parsed.bundle,
-			err,
-		)
-	}
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarResourceQuotaResource{
-		Kind:      string(parsed.kind),
-		URI:       request.Params.URI,
-		Scope:     "namespaceBundle",
-		Tenant:    parsed.tenant,
-		Namespace: parsed.namespace,
-		Bundle:    parsed.bundle,
-		Quota:     quota,
+		return pulsarResourceQuotaResource{
+			Kind:      string(parsed.kind),
+			URI:       request.Params.URI,
+			Scope:     "namespaceBundle",
+			Tenant:    parsed.tenant,
+			Namespace: parsed.namespace,
+			Bundle:    parsed.bundle,
+			Quota:     quota,
+		}, nil
 	})
 }
 
 func handlePulsarClusterStatusResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindStatus {
-		return nil, fmt.Errorf("unsupported Pulsar status resource URI %q", request.Params.URI)
-	}
+	return handlePulsarResource(ctx, request, pulsarResourceKindStatus, func(session *pulsarsession.Session, parsed pulsarResourceURI) (any, error) {
+		status, err := getPulsarClusterStatus(session)
+		if err != nil {
+			return nil, err
+		}
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	status, err := getPulsarClusterStatus(session)
-	if err != nil {
-		return nil, err
-	}
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarClusterStatusResource{
-		Kind:   string(parsed.kind),
-		URI:    request.Params.URI,
-		Status: status,
+		return pulsarClusterStatusResource{
+			Kind:   string(parsed.kind),
+			URI:    request.Params.URI,
+			Status: status,
+		}, nil
 	})
 }
 
 func handlePulsarClustersResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindClusters {
-		return nil, fmt.Errorf("unsupported Pulsar clusters resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminResource(ctx, request, pulsarResourceKindClusters, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		clusters, err := adminClient.Clusters().List()
+		if err != nil {
+			return nil, fmt.Errorf("failed to list clusters: %w", err)
+		}
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminClient(session)
-	if err != nil {
-		return nil, err
-	}
-
-	clusters, err := adminClient.Clusters().List()
-	if err != nil {
-		return nil, fmt.Errorf("failed to list clusters: %w", err)
-	}
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarClusterCollectionResource{
-		Kind:     string(parsed.kind),
-		URI:      request.Params.URI,
-		Clusters: clusters,
-		Count:    len(clusters),
+		return pulsarClusterCollectionResource{
+			Kind:     string(parsed.kind),
+			URI:      request.Params.URI,
+			Clusters: clusters,
+			Count:    len(clusters),
+		}, nil
 	})
 }
 
 func handlePulsarClusterResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindCluster {
-		return nil, fmt.Errorf("unsupported Pulsar cluster resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminResource(ctx, request, pulsarResourceKindCluster, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		clusterData, err := adminClient.Clusters().Get(parsed.cluster)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get cluster %q: %w", parsed.cluster, err)
+		}
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminClient(session)
-	if err != nil {
-		return nil, err
-	}
-
-	clusterData, err := adminClient.Clusters().Get(parsed.cluster)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get cluster %q: %w", parsed.cluster, err)
-	}
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarClusterResource{
-		Kind:    string(parsed.kind),
-		URI:     request.Params.URI,
-		Cluster: parsed.cluster,
-		Data:    sanitizePulsarClusterData(parsed.cluster, clusterData),
+		return pulsarClusterResource{
+			Kind:    string(parsed.kind),
+			URI:     request.Params.URI,
+			Cluster: parsed.cluster,
+			Data:    sanitizePulsarClusterData(parsed.cluster, clusterData),
+		}, nil
 	})
 }
 
 func handlePulsarBrokersResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindBrokers {
-		return nil, fmt.Errorf("unsupported Pulsar brokers resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminResource(ctx, request, pulsarResourceKindBrokers, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		brokers, err := adminClient.Brokers().GetActiveBrokers(parsed.cluster)
+		if err != nil {
+			return nil, fmt.Errorf("failed to list brokers for cluster %q: %w", parsed.cluster, err)
+		}
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminClient(session)
-	if err != nil {
-		return nil, err
-	}
-
-	brokers, err := adminClient.Brokers().GetActiveBrokers(parsed.cluster)
-	if err != nil {
-		return nil, fmt.Errorf("failed to list brokers for cluster %q: %w", parsed.cluster, err)
-	}
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarBrokerCollectionResource{
-		Kind:    string(parsed.kind),
-		URI:     request.Params.URI,
-		Cluster: parsed.cluster,
-		Brokers: brokers,
-		Count:   len(brokers),
+		return pulsarBrokerCollectionResource{
+			Kind:    string(parsed.kind),
+			URI:     request.Params.URI,
+			Cluster: parsed.cluster,
+			Brokers: brokers,
+			Count:   len(brokers),
+		}, nil
 	})
 }
 
 func handlePulsarBrokerStatsSummaryResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindBrokerStatsSummary {
-		return nil, fmt.Errorf("unsupported Pulsar broker stats summary resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminResource(ctx, request, pulsarResourceKindBrokerStatsSummary, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		metrics, err := adminClient.BrokerStats().GetMetrics()
+		if err != nil {
+			return nil, fmt.Errorf("failed to get broker monitoring metrics: %w", err)
+		}
+		loadReport, err := adminClient.BrokerStats().GetLoadReport()
+		if err != nil {
+			return nil, fmt.Errorf("failed to get broker load report: %w", err)
+		}
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminClient(session)
-	if err != nil {
-		return nil, err
-	}
-
-	metrics, err := adminClient.BrokerStats().GetMetrics()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get broker monitoring metrics: %w", err)
-	}
-	loadReport, err := adminClient.BrokerStats().GetLoadReport()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get broker load report: %w", err)
-	}
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarBrokerStatsSummaryResource{
-		Kind:              string(parsed.kind),
-		URI:               request.Params.URI,
-		MonitoringMetrics: summarizePulsarMonitoringMetrics(metrics),
-		LoadReport:        summarizePulsarBrokerLoadReport(loadReport),
+		return pulsarBrokerStatsSummaryResource{
+			Kind:              string(parsed.kind),
+			URI:               request.Params.URI,
+			MonitoringMetrics: summarizePulsarMonitoringMetrics(metrics),
+			LoadReport:        summarizePulsarBrokerLoadReport(loadReport),
+		}, nil
 	})
 }
 
 func handlePulsarFailureDomainsResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindFailureDomains {
-		return nil, fmt.Errorf("unsupported Pulsar failure domains resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminResource(ctx, request, pulsarResourceKindFailureDomains, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		failureDomains, err := adminClient.Clusters().ListFailureDomains(parsed.cluster)
+		if err != nil {
+			return nil, fmt.Errorf("failed to list failure domains for cluster %q: %w", parsed.cluster, err)
+		}
+		summaries := summarizePulsarFailureDomains(failureDomains)
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminClient(session)
-	if err != nil {
-		return nil, err
-	}
-
-	failureDomains, err := adminClient.Clusters().ListFailureDomains(parsed.cluster)
-	if err != nil {
-		return nil, fmt.Errorf("failed to list failure domains for cluster %q: %w", parsed.cluster, err)
-	}
-	summaries := summarizePulsarFailureDomains(failureDomains)
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarFailureDomainCollectionResource{
-		Kind:           string(parsed.kind),
-		URI:            request.Params.URI,
-		Cluster:        parsed.cluster,
-		FailureDomains: summaries,
-		Count:          len(summaries),
+		return pulsarFailureDomainCollectionResource{
+			Kind:           string(parsed.kind),
+			URI:            request.Params.URI,
+			Cluster:        parsed.cluster,
+			FailureDomains: summaries,
+			Count:          len(summaries),
+		}, nil
 	})
 }
 
 func handlePulsarFailureDomainResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindFailureDomain {
-		return nil, fmt.Errorf("unsupported Pulsar failure domain resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminResource(ctx, request, pulsarResourceKindFailureDomain, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		failureDomain, err := adminClient.Clusters().GetFailureDomain(parsed.cluster, parsed.domain)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get failure domain %q for cluster %q: %w", parsed.domain, parsed.cluster, err)
+		}
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminClient(session)
-	if err != nil {
-		return nil, err
-	}
-
-	failureDomain, err := adminClient.Clusters().GetFailureDomain(parsed.cluster, parsed.domain)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get failure domain %q for cluster %q: %w", parsed.domain, parsed.cluster, err)
-	}
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarFailureDomainResource{
-		Kind:          string(parsed.kind),
-		URI:           request.Params.URI,
-		Cluster:       parsed.cluster,
-		FailureDomain: summarizePulsarFailureDomain(parsed.domain, failureDomain),
+		return pulsarFailureDomainResource{
+			Kind:          string(parsed.kind),
+			URI:           request.Params.URI,
+			Cluster:       parsed.cluster,
+			FailureDomain: summarizePulsarFailureDomain(parsed.domain, failureDomain),
+		}, nil
 	})
 }
 
 func handlePulsarNamespaceIsolationPoliciesResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindNSIsolationPolicies {
-		return nil, fmt.Errorf("unsupported Pulsar namespace isolation policies resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminResource(ctx, request, pulsarResourceKindNSIsolationPolicies, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		policies, err := adminClient.NsIsolationPolicy().GetNamespaceIsolationPolicies(parsed.cluster)
+		if err != nil {
+			return nil, fmt.Errorf("failed to list namespace isolation policies for cluster %q: %w", parsed.cluster, err)
+		}
+		summaries := summarizePulsarNamespaceIsolationPolicies(policies)
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminClient(session)
-	if err != nil {
-		return nil, err
-	}
-
-	policies, err := adminClient.NsIsolationPolicy().GetNamespaceIsolationPolicies(parsed.cluster)
-	if err != nil {
-		return nil, fmt.Errorf("failed to list namespace isolation policies for cluster %q: %w", parsed.cluster, err)
-	}
-	summaries := summarizePulsarNamespaceIsolationPolicies(policies)
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarNamespaceIsolationPolicyCollectionResource{
-		Kind:     string(parsed.kind),
-		URI:      request.Params.URI,
-		Cluster:  parsed.cluster,
-		Policies: summaries,
-		Count:    len(summaries),
+		return pulsarNamespaceIsolationPolicyCollectionResource{
+			Kind:     string(parsed.kind),
+			URI:      request.Params.URI,
+			Cluster:  parsed.cluster,
+			Policies: summaries,
+			Count:    len(summaries),
+		}, nil
 	})
 }
 
 func handlePulsarNamespaceIsolationPolicyResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindNSIsolationPolicy {
-		return nil, fmt.Errorf("unsupported Pulsar namespace isolation policy resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminResource(ctx, request, pulsarResourceKindNSIsolationPolicy, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		policy, err := adminClient.NsIsolationPolicy().GetNamespaceIsolationPolicy(parsed.cluster, parsed.policy)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get namespace isolation policy %q for cluster %q: %w", parsed.policy, parsed.cluster, err)
+		}
+		if policy == nil {
+			return nil, fmt.Errorf("namespace isolation policy %q for cluster %q is empty", parsed.policy, parsed.cluster)
+		}
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminClient(session)
-	if err != nil {
-		return nil, err
-	}
-
-	policy, err := adminClient.NsIsolationPolicy().GetNamespaceIsolationPolicy(parsed.cluster, parsed.policy)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get namespace isolation policy %q for cluster %q: %w", parsed.policy, parsed.cluster, err)
-	}
-	if policy == nil {
-		return nil, fmt.Errorf("namespace isolation policy %q for cluster %q is empty", parsed.policy, parsed.cluster)
-	}
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarNamespaceIsolationPolicyResource{
-		Kind:    string(parsed.kind),
-		URI:     request.Params.URI,
-		Cluster: parsed.cluster,
-		Policy: pulsarNamespaceIsolationPolicy{
-			Name: parsed.policy,
-			Data: *policy,
-		},
+		return pulsarNamespaceIsolationPolicyResource{
+			Kind:    string(parsed.kind),
+			URI:     request.Params.URI,
+			Cluster: parsed.cluster,
+			Policy: pulsarNamespaceIsolationPolicy{
+				Name: parsed.policy,
+				Data: *policy,
+			},
+		}, nil
 	})
 }
 
 func handlePulsarTopicMetadataResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindTopicMetadata {
-		return nil, fmt.Errorf("unsupported Pulsar topic metadata resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminResource(ctx, request, pulsarResourceKindTopicMetadata, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		topicName, err := buildPulsarResourceTopicName(parsed)
+		if err != nil {
+			return nil, err
+		}
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminClient(session)
-	if err != nil {
-		return nil, err
-	}
-	topicName, err := buildPulsarResourceTopicName(parsed)
-	if err != nil {
-		return nil, err
-	}
+		properties, err := adminClient.Topics().GetProperties(*topicName)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get properties for topic %q: %w", topicName.String(), err)
+		}
 
-	properties, err := adminClient.Topics().GetProperties(*topicName)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get properties for topic %q: %w", topicName.String(), err)
-	}
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarTopicMetadataResource{
-		Kind:            string(parsed.kind),
-		URI:             request.Params.URI,
-		Topic:           topicName.String(),
-		Domain:          parsed.topicDomain,
-		Tenant:          parsed.tenant,
-		Namespace:       parsed.namespace,
-		Name:            parsed.topic,
-		PartitionIndex:  topicName.GetPartitionIndex(),
-		Properties:      sanitizePulsarResourceStringMap(properties, pulsarResourceSummaryStringLimit),
-		PropertiesCount: len(properties),
+		return pulsarTopicMetadataResource{
+			Kind:            string(parsed.kind),
+			URI:             request.Params.URI,
+			Topic:           topicName.String(),
+			Domain:          parsed.topicDomain,
+			Tenant:          parsed.tenant,
+			Namespace:       parsed.namespace,
+			Name:            parsed.topic,
+			PartitionIndex:  topicName.GetPartitionIndex(),
+			Properties:      sanitizePulsarResourceStringMap(properties, pulsarResourceSummaryStringLimit),
+			PropertiesCount: len(properties),
+		}, nil
 	})
 }
 
 func handlePulsarTopicStatsResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindTopicStats {
-		return nil, fmt.Errorf("unsupported Pulsar topic stats resource URI %q", request.Params.URI)
-	}
-
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminClient(session)
-	if err != nil {
-		return nil, err
-	}
-	topicName, err := buildPulsarResourceTopicName(parsed)
-	if err != nil {
-		return nil, err
-	}
-
-	metadata, err := adminClient.Topics().GetMetadata(*topicName)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get partition metadata for topic %q: %w", topicName.String(), err)
-	}
-
-	resource := pulsarTopicStatsResource{
-		Kind:           string(parsed.kind),
-		URI:            request.Params.URI,
-		Topic:          topicName.String(),
-		Partitioned:    metadata.Partitions > 0,
-		PartitionCount: metadata.Partitions,
-	}
-
-	statsOptions := utils.GetStatsOptions{
-		ExcludePublishers: true,
-		ExcludeConsumers:  true,
-	}
-	if metadata.Partitions > 0 {
-		stats, err := adminClient.Topics().GetPartitionedStatsWithOption(*topicName, false, statsOptions)
+	return handlePulsarAdminResource(ctx, request, pulsarResourceKindTopicStats, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		topicName, err := buildPulsarResourceTopicName(parsed)
 		if err != nil {
-			return nil, fmt.Errorf("failed to get partitioned stats for topic %q: %w", topicName.String(), err)
+			return nil, err
 		}
-		resource.PartitionStatsCount = len(stats.Partitions)
-		resource.Stats = summarizePulsarPartitionedTopicStats(stats)
-	} else {
-		stats, err := adminClient.Topics().GetStatsWithOption(*topicName, statsOptions)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get stats for topic %q: %w", topicName.String(), err)
-		}
-		resource.Stats = summarizePulsarTopicStats(stats)
-	}
 
-	return newPulsarJSONResourceContents(request.Params.URI, resource)
+		metadata, err := adminClient.Topics().GetMetadata(*topicName)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get partition metadata for topic %q: %w", topicName.String(), err)
+		}
+
+		resource := pulsarTopicStatsResource{
+			Kind:           string(parsed.kind),
+			URI:            request.Params.URI,
+			Topic:          topicName.String(),
+			Partitioned:    metadata.Partitions > 0,
+			PartitionCount: metadata.Partitions,
+		}
+
+		statsOptions := utils.GetStatsOptions{
+			ExcludePublishers: true,
+			ExcludeConsumers:  true,
+		}
+		if metadata.Partitions > 0 {
+			stats, err := adminClient.Topics().GetPartitionedStatsWithOption(*topicName, false, statsOptions)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get partitioned stats for topic %q: %w", topicName.String(), err)
+			}
+			resource.PartitionStatsCount = len(stats.Partitions)
+			resource.Stats = summarizePulsarPartitionedTopicStats(stats)
+		} else {
+			stats, err := adminClient.Topics().GetStatsWithOption(*topicName, statsOptions)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get stats for topic %q: %w", topicName.String(), err)
+			}
+			resource.Stats = summarizePulsarTopicStats(stats)
+		}
+
+		return resource, nil
+	})
 }
 
 func handlePulsarTopicPartitionMetadataResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindTopicPartitions {
-		return nil, fmt.Errorf("unsupported Pulsar topic partition metadata resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminResource(ctx, request, pulsarResourceKindTopicPartitions, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		topicName, err := buildPulsarResourceTopicName(parsed)
+		if err != nil {
+			return nil, err
+		}
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminClient(session)
-	if err != nil {
-		return nil, err
-	}
-	topicName, err := buildPulsarResourceTopicName(parsed)
-	if err != nil {
-		return nil, err
-	}
+		metadata, err := adminClient.Topics().GetMetadata(*topicName)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get partition metadata for topic %q: %w", topicName.String(), err)
+		}
 
-	metadata, err := adminClient.Topics().GetMetadata(*topicName)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get partition metadata for topic %q: %w", topicName.String(), err)
-	}
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarTopicPartitionMetadataResource{
-		Kind:        string(parsed.kind),
-		URI:         request.Params.URI,
-		Topic:       topicName.String(),
-		Metadata:    metadata,
-		Partitioned: metadata.Partitions > 0,
+		return pulsarTopicPartitionMetadataResource{
+			Kind:        string(parsed.kind),
+			URI:         request.Params.URI,
+			Topic:       topicName.String(),
+			Metadata:    metadata,
+			Partitioned: metadata.Partitions > 0,
+		}, nil
 	})
 }
 
 func handlePulsarTopicPolicyResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindTopicPolicy {
-		return nil, fmt.Errorf("unsupported Pulsar topic policy resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminResource(ctx, request, pulsarResourceKindTopicPolicy, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		topicName, err := buildPulsarResourceTopicName(parsed)
+		if err != nil {
+			return nil, err
+		}
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminClient(session)
-	if err != nil {
-		return nil, err
-	}
-	topicName, err := buildPulsarResourceTopicName(parsed)
-	if err != nil {
-		return nil, err
-	}
+		value, err := readPulsarTopicPolicyValue(adminClient, *topicName, parsed.policy)
+		if err != nil {
+			return nil, err
+		}
 
-	value, err := readPulsarTopicPolicyValue(adminClient, *topicName, parsed.policy)
-	if err != nil {
-		return nil, err
-	}
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarTopicPolicyResource{
-		Kind:   string(parsed.kind),
-		URI:    request.Params.URI,
-		Topic:  topicName.String(),
-		Policy: parsed.policy,
-		Value:  value,
+		return pulsarTopicPolicyResource{
+			Kind:   string(parsed.kind),
+			URI:    request.Params.URI,
+			Topic:  topicName.String(),
+			Policy: parsed.policy,
+			Value:  value,
+		}, nil
 	})
 }
 
 func handlePulsarTopicSchemaResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindTopicSchema {
-		return nil, fmt.Errorf("unsupported Pulsar topic schema resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminResource(ctx, request, pulsarResourceKindTopicSchema, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		topicName, err := buildPulsarResourceTopicName(parsed)
+		if err != nil {
+			return nil, err
+		}
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminClient(session)
-	if err != nil {
-		return nil, err
-	}
-	topicName, err := buildPulsarResourceTopicName(parsed)
-	if err != nil {
-		return nil, err
-	}
+		schemaInfo, err := adminClient.Schemas().GetSchemaInfoWithVersion(topicName.String())
+		if err != nil {
+			return nil, fmt.Errorf("failed to get latest schema for topic %q: %w", topicName.String(), err)
+		}
+		if schemaInfo == nil || schemaInfo.SchemaInfo == nil {
+			return nil, fmt.Errorf("latest schema for topic %q is empty", topicName.String())
+		}
 
-	schemaInfo, err := adminClient.Schemas().GetSchemaInfoWithVersion(topicName.String())
-	if err != nil {
-		return nil, fmt.Errorf("failed to get latest schema for topic %q: %w", topicName.String(), err)
-	}
-	if schemaInfo == nil || schemaInfo.SchemaInfo == nil {
-		return nil, fmt.Errorf("latest schema for topic %q is empty", topicName.String())
-	}
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarTopicSchemaResource{
-		Kind:    string(parsed.kind),
-		URI:     request.Params.URI,
-		Topic:   topicName.String(),
-		Version: schemaInfo.Version,
-		Schema:  summarizePulsarTopicSchema(schemaInfo.SchemaInfo),
+		return pulsarTopicSchemaResource{
+			Kind:    string(parsed.kind),
+			URI:     request.Params.URI,
+			Topic:   topicName.String(),
+			Version: schemaInfo.Version,
+			Schema:  summarizePulsarTopicSchema(schemaInfo.SchemaInfo),
+		}, nil
 	})
 }
 
 func handlePulsarTopicSchemaVersionResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindTopicSchemaVersion {
-		return nil, fmt.Errorf("unsupported Pulsar topic schema version resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminResource(ctx, request, pulsarResourceKindTopicSchemaVersion, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		topicName, err := buildPulsarResourceTopicName(parsed)
+		if err != nil {
+			return nil, err
+		}
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminClient(session)
-	if err != nil {
-		return nil, err
-	}
-	topicName, err := buildPulsarResourceTopicName(parsed)
-	if err != nil {
-		return nil, err
-	}
+		schemaInfo, err := adminClient.Schemas().GetSchemaInfoByVersion(topicName.String(), parsed.version)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get schema version %d for topic %q: %w", parsed.version, topicName.String(), err)
+		}
+		if schemaInfo == nil {
+			return nil, fmt.Errorf("schema version %d for topic %q is empty", parsed.version, topicName.String())
+		}
 
-	schemaInfo, err := adminClient.Schemas().GetSchemaInfoByVersion(topicName.String(), parsed.version)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get schema version %d for topic %q: %w", parsed.version, topicName.String(), err)
-	}
-	if schemaInfo == nil {
-		return nil, fmt.Errorf("schema version %d for topic %q is empty", parsed.version, topicName.String())
-	}
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarTopicSchemaResource{
-		Kind:    string(parsed.kind),
-		URI:     request.Params.URI,
-		Topic:   topicName.String(),
-		Version: parsed.version,
-		Schema:  summarizePulsarTopicSchema(schemaInfo),
+		return pulsarTopicSchemaResource{
+			Kind:    string(parsed.kind),
+			URI:     request.Params.URI,
+			Topic:   topicName.String(),
+			Version: parsed.version,
+			Schema:  summarizePulsarTopicSchema(schemaInfo),
+		}, nil
 	})
 }
 
 func handlePulsarSubscriptionsResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindSubscriptions {
-		return nil, fmt.Errorf("unsupported Pulsar subscriptions resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminResource(ctx, request, pulsarResourceKindSubscriptions, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		topicName, err := buildPulsarResourceTopicName(parsed)
+		if err != nil {
+			return nil, err
+		}
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminClient(session)
-	if err != nil {
-		return nil, err
-	}
-	topicName, err := buildPulsarResourceTopicName(parsed)
-	if err != nil {
-		return nil, err
-	}
+		subscriptions, err := adminClient.Subscriptions().List(*topicName)
+		if err != nil {
+			return nil, fmt.Errorf("failed to list subscriptions for topic %q: %w", topicName.String(), err)
+		}
 
-	subscriptions, err := adminClient.Subscriptions().List(*topicName)
-	if err != nil {
-		return nil, fmt.Errorf("failed to list subscriptions for topic %q: %w", topicName.String(), err)
-	}
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarSubscriptionCollectionResource{
-		Kind:          string(parsed.kind),
-		URI:           request.Params.URI,
-		Topic:         topicName.String(),
-		Domain:        parsed.topicDomain,
-		Tenant:        parsed.tenant,
-		Namespace:     parsed.namespace,
-		Subscriptions: subscriptions,
-		Count:         len(subscriptions),
+		return pulsarSubscriptionCollectionResource{
+			Kind:          string(parsed.kind),
+			URI:           request.Params.URI,
+			Topic:         topicName.String(),
+			Domain:        parsed.topicDomain,
+			Tenant:        parsed.tenant,
+			Namespace:     parsed.namespace,
+			Subscriptions: subscriptions,
+			Count:         len(subscriptions),
+		}, nil
 	})
 }
 
 func handlePulsarSubscriptionStatsResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindSubscriptionStats {
-		return nil, fmt.Errorf("unsupported Pulsar subscription stats resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminResource(ctx, request, pulsarResourceKindSubscriptionStats, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		topicName, err := buildPulsarResourceTopicName(parsed)
+		if err != nil {
+			return nil, err
+		}
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminClient(session)
-	if err != nil {
-		return nil, err
-	}
-	topicName, err := buildPulsarResourceTopicName(parsed)
-	if err != nil {
-		return nil, err
-	}
+		stats, partitioned, err := readPulsarSubscriptionStats(adminClient, *topicName, parsed.subscription, utils.GetStatsOptions{
+			ExcludePublishers: true,
+			ExcludeConsumers:  true,
+		})
+		if err != nil {
+			return nil, err
+		}
 
-	stats, partitioned, err := readPulsarSubscriptionStats(adminClient, *topicName, parsed.subscription, utils.GetStatsOptions{
-		ExcludePublishers: true,
-		ExcludeConsumers:  true,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarSubscriptionStatsResource{
-		Kind:         string(parsed.kind),
-		URI:          request.Params.URI,
-		Topic:        topicName.String(),
-		Subscription: parsed.subscription,
-		Partitioned:  partitioned,
-		Stats:        summarizePulsarSubscriptionStats(stats),
+		return pulsarSubscriptionStatsResource{
+			Kind:         string(parsed.kind),
+			URI:          request.Params.URI,
+			Topic:        topicName.String(),
+			Subscription: parsed.subscription,
+			Partitioned:  partitioned,
+			Stats:        summarizePulsarSubscriptionStats(stats),
+		}, nil
 	})
 }
 
 func handlePulsarSubscriptionBacklogResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindSubscriptionBacklog {
-		return nil, fmt.Errorf("unsupported Pulsar subscription backlog resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminResource(ctx, request, pulsarResourceKindSubscriptionBacklog, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		topicName, err := buildPulsarResourceTopicName(parsed)
+		if err != nil {
+			return nil, err
+		}
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminClient(session)
-	if err != nil {
-		return nil, err
-	}
-	topicName, err := buildPulsarResourceTopicName(parsed)
-	if err != nil {
-		return nil, err
-	}
+		stats, partitioned, err := readPulsarSubscriptionStats(adminClient, *topicName, parsed.subscription, utils.GetStatsOptions{
+			SubscriptionBacklogSize:  true,
+			GetEarliestTimeInBacklog: true,
+			ExcludePublishers:        true,
+			ExcludeConsumers:         true,
+		})
+		if err != nil {
+			return nil, err
+		}
 
-	stats, partitioned, err := readPulsarSubscriptionStats(adminClient, *topicName, parsed.subscription, utils.GetStatsOptions{
-		SubscriptionBacklogSize:  true,
-		GetEarliestTimeInBacklog: true,
-		ExcludePublishers:        true,
-		ExcludeConsumers:         true,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarSubscriptionBacklogResource{
-		Kind:         string(parsed.kind),
-		URI:          request.Params.URI,
-		Topic:        topicName.String(),
-		Subscription: parsed.subscription,
-		Partitioned:  partitioned,
-		Backlog:      summarizePulsarSubscriptionBacklog(stats),
+		return pulsarSubscriptionBacklogResource{
+			Kind:         string(parsed.kind),
+			URI:          request.Params.URI,
+			Topic:        topicName.String(),
+			Subscription: parsed.subscription,
+			Partitioned:  partitioned,
+			Backlog:      summarizePulsarSubscriptionBacklog(stats),
+		}, nil
 	})
 }
 
 func handlePulsarSubscriptionCursorResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindSubscriptionCursor {
-		return nil, fmt.Errorf("unsupported Pulsar subscription cursor resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminResource(ctx, request, pulsarResourceKindSubscriptionCursor, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		topicName, err := buildPulsarResourceTopicName(parsed)
+		if err != nil {
+			return nil, err
+		}
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminClient(session)
-	if err != nil {
-		return nil, err
-	}
-	topicName, err := buildPulsarResourceTopicName(parsed)
-	if err != nil {
-		return nil, err
-	}
+		internalStats, err := adminClient.Topics().GetInternalStats(*topicName)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get internal stats for topic %q: %w", topicName.String(), err)
+		}
+		cursor, ok := internalStats.Cursors[parsed.subscription]
+		if !ok {
+			return nil, fmt.Errorf("subscription %q was not found in cursor stats for topic %q", parsed.subscription, topicName.String())
+		}
 
-	internalStats, err := adminClient.Topics().GetInternalStats(*topicName)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get internal stats for topic %q: %w", topicName.String(), err)
-	}
-	cursor, ok := internalStats.Cursors[parsed.subscription]
-	if !ok {
-		return nil, fmt.Errorf("subscription %q was not found in cursor stats for topic %q", parsed.subscription, topicName.String())
-	}
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarSubscriptionCursorResource{
-		Kind:         string(parsed.kind),
-		URI:          request.Params.URI,
-		Topic:        topicName.String(),
-		Subscription: parsed.subscription,
-		Cursor:       summarizePulsarSubscriptionCursor(cursor),
+		return pulsarSubscriptionCursorResource{
+			Kind:         string(parsed.kind),
+			URI:          request.Params.URI,
+			Topic:        topicName.String(),
+			Subscription: parsed.subscription,
+			Cursor:       summarizePulsarSubscriptionCursor(cursor),
+		}, nil
 	})
 }
 
 func handlePulsarFunctionsResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindFunctions {
-		return nil, fmt.Errorf("unsupported Pulsar functions resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminV3Resource(ctx, request, pulsarResourceKindFunctions, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		functions, err := adminClient.Functions().GetFunctions(parsed.tenant, parsed.namespace)
+		if err != nil {
+			return nil, fmt.Errorf("failed to list functions for namespace %q/%q: %w", parsed.tenant, parsed.namespace, err)
+		}
+		names, limited := limitStringSlice(functions, pulsarResourceSummaryStringLimit)
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminV3Client(session)
-	if err != nil {
-		return nil, err
-	}
-
-	functions, err := adminClient.Functions().GetFunctions(parsed.tenant, parsed.namespace)
-	if err != nil {
-		return nil, fmt.Errorf("failed to list functions for namespace %q/%q: %w", parsed.tenant, parsed.namespace, err)
-	}
-	names, limited := limitStringSlice(functions, pulsarResourceSummaryStringLimit)
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarWorkloadCollectionResource{
-		Kind:      string(parsed.kind),
-		URI:       request.Params.URI,
-		Type:      "function",
-		Tenant:    parsed.tenant,
-		Namespace: parsed.namespace,
-		Names:     names,
-		Count:     len(functions),
-		Limit:     pulsarResourceSummaryStringLimit,
-		Limited:   limited,
+		return pulsarWorkloadCollectionResource{
+			Kind:      string(parsed.kind),
+			URI:       request.Params.URI,
+			Type:      "function",
+			Tenant:    parsed.tenant,
+			Namespace: parsed.namespace,
+			Names:     names,
+			Count:     len(functions),
+			Limit:     pulsarResourceSummaryStringLimit,
+			Limited:   limited,
+		}, nil
 	})
 }
 
 func handlePulsarFunctionMetadataResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindFunctionMetadata {
-		return nil, fmt.Errorf("unsupported Pulsar function metadata resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminV3Resource(ctx, request, pulsarResourceKindFunctionMetadata, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		config, err := adminClient.Functions().GetFunction(parsed.tenant, parsed.namespace, parsed.workload)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"failed to get function %q in namespace %q/%q: %w",
+				parsed.workload,
+				parsed.tenant,
+				parsed.namespace,
+				err,
+			)
+		}
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminV3Client(session)
-	if err != nil {
-		return nil, err
-	}
-
-	config, err := adminClient.Functions().GetFunction(parsed.tenant, parsed.namespace, parsed.workload)
-	if err != nil {
-		return nil, fmt.Errorf(
-			"failed to get function %q in namespace %q/%q: %w",
-			parsed.workload,
-			parsed.tenant,
-			parsed.namespace,
-			err,
-		)
-	}
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarFunctionMetadataResource{
-		Kind:      string(parsed.kind),
-		URI:       request.Params.URI,
-		Tenant:    parsed.tenant,
-		Namespace: parsed.namespace,
-		Name:      parsed.workload,
-		Config:    summarizePulsarFunctionConfig(config),
+		return pulsarFunctionMetadataResource{
+			Kind:      string(parsed.kind),
+			URI:       request.Params.URI,
+			Tenant:    parsed.tenant,
+			Namespace: parsed.namespace,
+			Name:      parsed.workload,
+			Config:    summarizePulsarFunctionConfig(config),
+		}, nil
 	})
 }
 
 func handlePulsarFunctionStatusResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindFunctionStatus {
-		return nil, fmt.Errorf("unsupported Pulsar function status resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminV3Resource(ctx, request, pulsarResourceKindFunctionStatus, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		status, err := adminClient.Functions().GetFunctionStatus(parsed.tenant, parsed.namespace, parsed.workload)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"failed to get status for function %q in namespace %q/%q: %w",
+				parsed.workload,
+				parsed.tenant,
+				parsed.namespace,
+				err,
+			)
+		}
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminV3Client(session)
-	if err != nil {
-		return nil, err
-	}
-
-	status, err := adminClient.Functions().GetFunctionStatus(parsed.tenant, parsed.namespace, parsed.workload)
-	if err != nil {
-		return nil, fmt.Errorf(
-			"failed to get status for function %q in namespace %q/%q: %w",
-			parsed.workload,
-			parsed.tenant,
-			parsed.namespace,
-			err,
-		)
-	}
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarFunctionStatusResource{
-		Kind:      string(parsed.kind),
-		URI:       request.Params.URI,
-		Tenant:    parsed.tenant,
-		Namespace: parsed.namespace,
-		Name:      parsed.workload,
-		Status:    summarizePulsarFunctionStatus(status),
+		return pulsarFunctionStatusResource{
+			Kind:      string(parsed.kind),
+			URI:       request.Params.URI,
+			Tenant:    parsed.tenant,
+			Namespace: parsed.namespace,
+			Name:      parsed.workload,
+			Status:    summarizePulsarFunctionStatus(status),
+		}, nil
 	})
 }
 
 func handlePulsarFunctionStatsResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindFunctionStats {
-		return nil, fmt.Errorf("unsupported Pulsar function stats resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminV3Resource(ctx, request, pulsarResourceKindFunctionStats, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		stats, err := adminClient.Functions().GetFunctionStats(parsed.tenant, parsed.namespace, parsed.workload)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"failed to get stats for function %q in namespace %q/%q: %w",
+				parsed.workload,
+				parsed.tenant,
+				parsed.namespace,
+				err,
+			)
+		}
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminV3Client(session)
-	if err != nil {
-		return nil, err
-	}
-
-	stats, err := adminClient.Functions().GetFunctionStats(parsed.tenant, parsed.namespace, parsed.workload)
-	if err != nil {
-		return nil, fmt.Errorf(
-			"failed to get stats for function %q in namespace %q/%q: %w",
-			parsed.workload,
-			parsed.tenant,
-			parsed.namespace,
-			err,
-		)
-	}
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarFunctionStatsResource{
-		Kind:      string(parsed.kind),
-		URI:       request.Params.URI,
-		Tenant:    parsed.tenant,
-		Namespace: parsed.namespace,
-		Name:      parsed.workload,
-		Stats:     summarizePulsarFunctionStats(stats),
+		return pulsarFunctionStatsResource{
+			Kind:      string(parsed.kind),
+			URI:       request.Params.URI,
+			Tenant:    parsed.tenant,
+			Namespace: parsed.namespace,
+			Name:      parsed.workload,
+			Stats:     summarizePulsarFunctionStats(stats),
+		}, nil
 	})
 }
 
 func handlePulsarSourcesResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindSources {
-		return nil, fmt.Errorf("unsupported Pulsar sources resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminV3Resource(ctx, request, pulsarResourceKindSources, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		sources, err := adminClient.Sources().ListSources(parsed.tenant, parsed.namespace)
+		if err != nil {
+			return nil, fmt.Errorf("failed to list sources for namespace %q/%q: %w", parsed.tenant, parsed.namespace, err)
+		}
+		names, limited := limitStringSlice(sources, pulsarResourceSummaryStringLimit)
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminV3Client(session)
-	if err != nil {
-		return nil, err
-	}
-
-	sources, err := adminClient.Sources().ListSources(parsed.tenant, parsed.namespace)
-	if err != nil {
-		return nil, fmt.Errorf("failed to list sources for namespace %q/%q: %w", parsed.tenant, parsed.namespace, err)
-	}
-	names, limited := limitStringSlice(sources, pulsarResourceSummaryStringLimit)
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarWorkloadCollectionResource{
-		Kind:      string(parsed.kind),
-		URI:       request.Params.URI,
-		Type:      "source",
-		Tenant:    parsed.tenant,
-		Namespace: parsed.namespace,
-		Names:     names,
-		Count:     len(sources),
-		Limit:     pulsarResourceSummaryStringLimit,
-		Limited:   limited,
+		return pulsarWorkloadCollectionResource{
+			Kind:      string(parsed.kind),
+			URI:       request.Params.URI,
+			Type:      "source",
+			Tenant:    parsed.tenant,
+			Namespace: parsed.namespace,
+			Names:     names,
+			Count:     len(sources),
+			Limit:     pulsarResourceSummaryStringLimit,
+			Limited:   limited,
+		}, nil
 	})
 }
 
 func handlePulsarSourceMetadataResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindSourceMetadata {
-		return nil, fmt.Errorf("unsupported Pulsar source metadata resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminV3Resource(ctx, request, pulsarResourceKindSourceMetadata, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		config, err := adminClient.Sources().GetSource(parsed.tenant, parsed.namespace, parsed.workload)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"failed to get source %q in namespace %q/%q: %w",
+				parsed.workload,
+				parsed.tenant,
+				parsed.namespace,
+				err,
+			)
+		}
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminV3Client(session)
-	if err != nil {
-		return nil, err
-	}
-
-	config, err := adminClient.Sources().GetSource(parsed.tenant, parsed.namespace, parsed.workload)
-	if err != nil {
-		return nil, fmt.Errorf(
-			"failed to get source %q in namespace %q/%q: %w",
-			parsed.workload,
-			parsed.tenant,
-			parsed.namespace,
-			err,
-		)
-	}
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarSourceMetadataResource{
-		Kind:      string(parsed.kind),
-		URI:       request.Params.URI,
-		Tenant:    parsed.tenant,
-		Namespace: parsed.namespace,
-		Name:      parsed.workload,
-		Config:    summarizePulsarSourceConfig(config),
+		return pulsarSourceMetadataResource{
+			Kind:      string(parsed.kind),
+			URI:       request.Params.URI,
+			Tenant:    parsed.tenant,
+			Namespace: parsed.namespace,
+			Name:      parsed.workload,
+			Config:    summarizePulsarSourceConfig(config),
+		}, nil
 	})
 }
 
 func handlePulsarSourceStatusResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindSourceStatus {
-		return nil, fmt.Errorf("unsupported Pulsar source status resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminV3Resource(ctx, request, pulsarResourceKindSourceStatus, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		status, err := adminClient.Sources().GetSourceStatus(parsed.tenant, parsed.namespace, parsed.workload)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"failed to get status for source %q in namespace %q/%q: %w",
+				parsed.workload,
+				parsed.tenant,
+				parsed.namespace,
+				err,
+			)
+		}
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminV3Client(session)
-	if err != nil {
-		return nil, err
-	}
-
-	status, err := adminClient.Sources().GetSourceStatus(parsed.tenant, parsed.namespace, parsed.workload)
-	if err != nil {
-		return nil, fmt.Errorf(
-			"failed to get status for source %q in namespace %q/%q: %w",
-			parsed.workload,
-			parsed.tenant,
-			parsed.namespace,
-			err,
-		)
-	}
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarSourceStatusResource{
-		Kind:      string(parsed.kind),
-		URI:       request.Params.URI,
-		Tenant:    parsed.tenant,
-		Namespace: parsed.namespace,
-		Name:      parsed.workload,
-		Status:    summarizePulsarSourceStatus(status),
+		return pulsarSourceStatusResource{
+			Kind:      string(parsed.kind),
+			URI:       request.Params.URI,
+			Tenant:    parsed.tenant,
+			Namespace: parsed.namespace,
+			Name:      parsed.workload,
+			Status:    summarizePulsarSourceStatus(status),
+		}, nil
 	})
 }
 
 func handlePulsarSinksResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindSinks {
-		return nil, fmt.Errorf("unsupported Pulsar sinks resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminV3Resource(ctx, request, pulsarResourceKindSinks, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		sinks, err := adminClient.Sinks().ListSinks(parsed.tenant, parsed.namespace)
+		if err != nil {
+			return nil, fmt.Errorf("failed to list sinks for namespace %q/%q: %w", parsed.tenant, parsed.namespace, err)
+		}
+		names, limited := limitStringSlice(sinks, pulsarResourceSummaryStringLimit)
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminV3Client(session)
-	if err != nil {
-		return nil, err
-	}
-
-	sinks, err := adminClient.Sinks().ListSinks(parsed.tenant, parsed.namespace)
-	if err != nil {
-		return nil, fmt.Errorf("failed to list sinks for namespace %q/%q: %w", parsed.tenant, parsed.namespace, err)
-	}
-	names, limited := limitStringSlice(sinks, pulsarResourceSummaryStringLimit)
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarWorkloadCollectionResource{
-		Kind:      string(parsed.kind),
-		URI:       request.Params.URI,
-		Type:      "sink",
-		Tenant:    parsed.tenant,
-		Namespace: parsed.namespace,
-		Names:     names,
-		Count:     len(sinks),
-		Limit:     pulsarResourceSummaryStringLimit,
-		Limited:   limited,
+		return pulsarWorkloadCollectionResource{
+			Kind:      string(parsed.kind),
+			URI:       request.Params.URI,
+			Type:      "sink",
+			Tenant:    parsed.tenant,
+			Namespace: parsed.namespace,
+			Names:     names,
+			Count:     len(sinks),
+			Limit:     pulsarResourceSummaryStringLimit,
+			Limited:   limited,
+		}, nil
 	})
 }
 
 func handlePulsarSinkMetadataResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindSinkMetadata {
-		return nil, fmt.Errorf("unsupported Pulsar sink metadata resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminV3Resource(ctx, request, pulsarResourceKindSinkMetadata, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		config, err := adminClient.Sinks().GetSink(parsed.tenant, parsed.namespace, parsed.workload)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"failed to get sink %q in namespace %q/%q: %w",
+				parsed.workload,
+				parsed.tenant,
+				parsed.namespace,
+				err,
+			)
+		}
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminV3Client(session)
-	if err != nil {
-		return nil, err
-	}
-
-	config, err := adminClient.Sinks().GetSink(parsed.tenant, parsed.namespace, parsed.workload)
-	if err != nil {
-		return nil, fmt.Errorf(
-			"failed to get sink %q in namespace %q/%q: %w",
-			parsed.workload,
-			parsed.tenant,
-			parsed.namespace,
-			err,
-		)
-	}
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarSinkMetadataResource{
-		Kind:      string(parsed.kind),
-		URI:       request.Params.URI,
-		Tenant:    parsed.tenant,
-		Namespace: parsed.namespace,
-		Name:      parsed.workload,
-		Config:    summarizePulsarSinkConfig(config),
+		return pulsarSinkMetadataResource{
+			Kind:      string(parsed.kind),
+			URI:       request.Params.URI,
+			Tenant:    parsed.tenant,
+			Namespace: parsed.namespace,
+			Name:      parsed.workload,
+			Config:    summarizePulsarSinkConfig(config),
+		}, nil
 	})
 }
 
 func handlePulsarSinkStatusResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindSinkStatus {
-		return nil, fmt.Errorf("unsupported Pulsar sink status resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminV3Resource(ctx, request, pulsarResourceKindSinkStatus, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		status, err := adminClient.Sinks().GetSinkStatus(parsed.tenant, parsed.namespace, parsed.workload)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"failed to get status for sink %q in namespace %q/%q: %w",
+				parsed.workload,
+				parsed.tenant,
+				parsed.namespace,
+				err,
+			)
+		}
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminV3Client(session)
-	if err != nil {
-		return nil, err
-	}
-
-	status, err := adminClient.Sinks().GetSinkStatus(parsed.tenant, parsed.namespace, parsed.workload)
-	if err != nil {
-		return nil, fmt.Errorf(
-			"failed to get status for sink %q in namespace %q/%q: %w",
-			parsed.workload,
-			parsed.tenant,
-			parsed.namespace,
-			err,
-		)
-	}
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarSinkStatusResource{
-		Kind:      string(parsed.kind),
-		URI:       request.Params.URI,
-		Tenant:    parsed.tenant,
-		Namespace: parsed.namespace,
-		Name:      parsed.workload,
-		Status:    summarizePulsarSinkStatus(status),
+		return pulsarSinkStatusResource{
+			Kind:      string(parsed.kind),
+			URI:       request.Params.URI,
+			Tenant:    parsed.tenant,
+			Namespace: parsed.namespace,
+			Name:      parsed.workload,
+			Status:    summarizePulsarSinkStatus(status),
+		}, nil
 	})
 }
 
 func handlePulsarPackagesResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindPackages {
-		return nil, fmt.Errorf("unsupported Pulsar packages resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminV3Resource(ctx, request, pulsarResourceKindPackages, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		namespaceName := parsed.tenant + "/" + parsed.namespace
+		packages, err := adminClient.Packages().List(parsed.packageType, namespaceName)
+		if err != nil {
+			return nil, fmt.Errorf("failed to list %s packages for namespace %q: %w", parsed.packageType, namespaceName, err)
+		}
+		names, limited := limitStringSlice(packages, pulsarResourceSummaryStringLimit)
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminV3Client(session)
-	if err != nil {
-		return nil, err
-	}
-
-	namespaceName := parsed.tenant + "/" + parsed.namespace
-	packages, err := adminClient.Packages().List(parsed.packageType, namespaceName)
-	if err != nil {
-		return nil, fmt.Errorf("failed to list %s packages for namespace %q: %w", parsed.packageType, namespaceName, err)
-	}
-	names, limited := limitStringSlice(packages, pulsarResourceSummaryStringLimit)
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarPackageCollectionResource{
-		Kind:        string(parsed.kind),
-		URI:         request.Params.URI,
-		PackageType: parsed.packageType,
-		Tenant:      parsed.tenant,
-		Namespace:   parsed.namespace,
-		Packages:    names,
-		Count:       len(packages),
-		Limit:       pulsarResourceSummaryStringLimit,
-		Limited:     limited,
+		return pulsarPackageCollectionResource{
+			Kind:        string(parsed.kind),
+			URI:         request.Params.URI,
+			PackageType: parsed.packageType,
+			Tenant:      parsed.tenant,
+			Namespace:   parsed.namespace,
+			Packages:    names,
+			Count:       len(packages),
+			Limit:       pulsarResourceSummaryStringLimit,
+			Limited:     limited,
+		}, nil
 	})
 }
 
 func handlePulsarPackageVersionsResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindPackageVersions {
-		return nil, fmt.Errorf("unsupported Pulsar package versions resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminV3Resource(ctx, request, pulsarResourceKindPackageVersions, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		packageURL := buildPulsarPackageURL(parsed, "")
+		versions, err := adminClient.Packages().ListVersions(packageURL)
+		if err != nil {
+			return nil, fmt.Errorf("failed to list versions for package %q: %w", packageURL, err)
+		}
+		names, limited := limitStringSlice(versions, pulsarResourceSummaryStringLimit)
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminV3Client(session)
-	if err != nil {
-		return nil, err
-	}
-
-	packageURL := buildPulsarPackageURL(parsed, "")
-	versions, err := adminClient.Packages().ListVersions(packageURL)
-	if err != nil {
-		return nil, fmt.Errorf("failed to list versions for package %q: %w", packageURL, err)
-	}
-	names, limited := limitStringSlice(versions, pulsarResourceSummaryStringLimit)
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarPackageVersionsResource{
-		Kind:        string(parsed.kind),
-		URI:         request.Params.URI,
-		PackageType: parsed.packageType,
-		Tenant:      parsed.tenant,
-		Namespace:   parsed.namespace,
-		Package:     parsed.packageName,
-		PackageURL:  packageURL,
-		Versions:    names,
-		Count:       len(versions),
-		Limit:       pulsarResourceSummaryStringLimit,
-		Limited:     limited,
+		return pulsarPackageVersionsResource{
+			Kind:        string(parsed.kind),
+			URI:         request.Params.URI,
+			PackageType: parsed.packageType,
+			Tenant:      parsed.tenant,
+			Namespace:   parsed.namespace,
+			Package:     parsed.packageName,
+			PackageURL:  packageURL,
+			Versions:    names,
+			Count:       len(versions),
+			Limit:       pulsarResourceSummaryStringLimit,
+			Limited:     limited,
+		}, nil
 	})
 }
 
 func handlePulsarPackageMetadataResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindPackageMetadata {
-		return nil, fmt.Errorf("unsupported Pulsar package metadata resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminV3Resource(ctx, request, pulsarResourceKindPackageMetadata, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		packageURL := buildPulsarPackageURL(parsed, parsed.versionName)
+		metadata, err := adminClient.Packages().GetMetadata(packageURL)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get metadata for package %q: %w", packageURL, err)
+		}
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminV3Client(session)
-	if err != nil {
-		return nil, err
-	}
-
-	packageURL := buildPulsarPackageURL(parsed, parsed.versionName)
-	metadata, err := adminClient.Packages().GetMetadata(packageURL)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get metadata for package %q: %w", packageURL, err)
-	}
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarPackageMetadataResource{
-		Kind:        string(parsed.kind),
-		URI:         request.Params.URI,
-		PackageType: parsed.packageType,
-		Tenant:      parsed.tenant,
-		Namespace:   parsed.namespace,
-		Package:     parsed.packageName,
-		Version:     parsed.versionName,
-		PackageURL:  packageURL,
-		Metadata:    summarizePulsarPackageMetadata(metadata),
+		return pulsarPackageMetadataResource{
+			Kind:        string(parsed.kind),
+			URI:         request.Params.URI,
+			PackageType: parsed.packageType,
+			Tenant:      parsed.tenant,
+			Namespace:   parsed.namespace,
+			Package:     parsed.packageName,
+			Version:     parsed.versionName,
+			PackageURL:  packageURL,
+			Metadata:    summarizePulsarPackageMetadata(metadata),
+		}, nil
 	})
 }
 
 func handlePulsarWorkerClusterResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindWorkerCluster {
-		return nil, fmt.Errorf("unsupported Pulsar worker cluster resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminResource(ctx, request, pulsarResourceKindWorkerCluster, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		workers, err := adminClient.FunctionsWorker().GetCluster()
+		if err != nil {
+			return nil, fmt.Errorf("failed to get functions worker cluster: %w", err)
+		}
+		limitedWorkers, limited := limitWorkerInfoSlice(workers, pulsarResourceSummaryStringLimit)
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminClient(session)
-	if err != nil {
-		return nil, err
-	}
-
-	workers, err := adminClient.FunctionsWorker().GetCluster()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get functions worker cluster: %w", err)
-	}
-	limitedWorkers, limited := limitWorkerInfoSlice(workers, pulsarResourceSummaryStringLimit)
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarWorkerClusterResource{
-		Kind:    string(parsed.kind),
-		URI:     request.Params.URI,
-		Workers: limitedWorkers,
-		Count:   len(workers),
-		Limit:   pulsarResourceSummaryStringLimit,
-		Limited: limited,
+		return pulsarWorkerClusterResource{
+			Kind:    string(parsed.kind),
+			URI:     request.Params.URI,
+			Workers: limitedWorkers,
+			Count:   len(workers),
+			Limit:   pulsarResourceSummaryStringLimit,
+			Limited: limited,
+		}, nil
 	})
 }
 
 func handlePulsarWorkerLeaderResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindWorkerLeader {
-		return nil, fmt.Errorf("unsupported Pulsar worker leader resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminResource(ctx, request, pulsarResourceKindWorkerLeader, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		leader, err := adminClient.FunctionsWorker().GetClusterLeader()
+		if err != nil {
+			return nil, fmt.Errorf("failed to get functions worker leader: %w", err)
+		}
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminClient(session)
-	if err != nil {
-		return nil, err
-	}
-
-	leader, err := adminClient.FunctionsWorker().GetClusterLeader()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get functions worker leader: %w", err)
-	}
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarWorkerLeaderResource{
-		Kind:   string(parsed.kind),
-		URI:    request.Params.URI,
-		Leader: leader,
+		return pulsarWorkerLeaderResource{
+			Kind:   string(parsed.kind),
+			URI:    request.Params.URI,
+			Leader: leader,
+		}, nil
 	})
 }
 
 func handlePulsarWorkerAssignmentsResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindWorkerAssignments {
-		return nil, fmt.Errorf("unsupported Pulsar worker assignments resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminResource(ctx, request, pulsarResourceKindWorkerAssignments, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		assignments, err := adminClient.FunctionsWorker().GetAssignments()
+		if err != nil {
+			return nil, fmt.Errorf("failed to get functions worker assignments: %w", err)
+		}
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminClient(session)
-	if err != nil {
-		return nil, err
-	}
-
-	assignments, err := adminClient.FunctionsWorker().GetAssignments()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get functions worker assignments: %w", err)
-	}
-
-	return newPulsarJSONResourceContents(request.Params.URI, summarizePulsarWorkerAssignments(request.Params.URI, parsed.kind, assignments))
+		return summarizePulsarWorkerAssignments(request.Params.URI, parsed.kind, assignments), nil
+	})
 }
 
 func handlePulsarWorkerFunctionStatsResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindWorkerFunctionStats {
-		return nil, fmt.Errorf("unsupported Pulsar worker function stats resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminResource(ctx, request, pulsarResourceKindWorkerFunctionStats, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		stats, err := adminClient.FunctionsWorker().GetFunctionsStats()
+		if err != nil {
+			return nil, fmt.Errorf("failed to get functions worker stats: %w", err)
+		}
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminClient(session)
-	if err != nil {
-		return nil, err
-	}
-
-	stats, err := adminClient.FunctionsWorker().GetFunctionsStats()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get functions worker stats: %w", err)
-	}
-
-	return newPulsarJSONResourceContents(request.Params.URI, summarizePulsarWorkerFunctionStats(request.Params.URI, parsed.kind, stats))
+		return summarizePulsarWorkerFunctionStats(request.Params.URI, parsed.kind, stats), nil
+	})
 }
 
 func handlePulsarWorkerMetricsResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
-	parsed, err := parsePulsarResourceURI(request.Params.URI)
-	if err != nil {
-		return nil, err
-	}
-	if parsed.kind != pulsarResourceKindWorkerMetrics {
-		return nil, fmt.Errorf("unsupported Pulsar worker metrics resource URI %q", request.Params.URI)
-	}
+	return handlePulsarAdminResource(ctx, request, pulsarResourceKindWorkerMetrics, func(adminClient cmdutils.Client, parsed pulsarResourceURI) (any, error) {
+		metrics, err := adminClient.FunctionsWorker().GetMetrics()
+		if err != nil {
+			return nil, fmt.Errorf("failed to get functions worker metrics: %w", err)
+		}
 
-	session, err := requirePulsarResourceSession(ctx)
-	if err != nil {
-		return nil, err
-	}
-	adminClient, err := getPulsarResourceAdminClient(session)
-	if err != nil {
-		return nil, err
-	}
-
-	metrics, err := adminClient.FunctionsWorker().GetMetrics()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get functions worker metrics: %w", err)
-	}
-
-	return newPulsarJSONResourceContents(request.Params.URI, pulsarWorkerMetricsResource{
-		Kind:              string(parsed.kind),
-		URI:               request.Params.URI,
-		MonitoringMetrics: summarizePulsarPointerMonitoringMetrics(metrics),
+		return pulsarWorkerMetricsResource{
+			Kind:              string(parsed.kind),
+			URI:               request.Params.URI,
+			MonitoringMetrics: summarizePulsarPointerMonitoringMetrics(metrics),
+		}, nil
 	})
 }
 

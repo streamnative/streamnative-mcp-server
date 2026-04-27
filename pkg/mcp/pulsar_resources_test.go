@@ -336,6 +336,26 @@ func TestPulsarResourceReadMissingSession(t *testing.T) {
 	assert.Contains(t, errResponse.Error.Message, "pulsar session not found in context")
 }
 
+func TestHandlePulsarResourceRejectsWrongKindBeforeSession(t *testing.T) {
+	t.Parallel()
+
+	called := false
+	_, err := handlePulsarResource(
+		context.Background(),
+		mcp.ReadResourceRequest{Params: mcp.ReadResourceParams{URI: pulsarResourceCatalogURI}},
+		pulsarResourceKindContext,
+		func(*pulsarsession.Session, pulsarResourceURI) (any, error) {
+			called = true
+			return nil, nil
+		},
+	)
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "unsupported Pulsar resource URI")
+	assert.NotContains(t, err.Error(), "pulsar session not found in context")
+	assert.False(t, called)
+}
+
 func TestPulsarNamespaceTemplateRead(t *testing.T) {
 	t.Parallel()
 
