@@ -81,6 +81,7 @@ const (
 	pulsarWorkerMetricsResourceURI       = "pulsar://admin/v2/worker-stats/metrics"
 	pulsarResourceJSONMIMEType           = "application/json"
 	pulsarResourceSummaryStringLimit     = 50
+	pulsarResourceSanitizeDepthLimit     = 6
 	pulsarResourceRedactedValue          = "<redacted>"
 )
 
@@ -3302,7 +3303,14 @@ func sanitizePulsarResourceStringMap(values map[string]string, limit int) map[st
 }
 
 func sanitizePulsarResourceAnyMap(values map[string]any, limit int) map[string]any {
+	return sanitizePulsarResourceAnyMapWithDepth(values, limit, pulsarResourceSanitizeDepthLimit)
+}
+
+func sanitizePulsarResourceAnyMapWithDepth(values map[string]any, limit int, depth int) map[string]any {
 	if len(values) == 0 || limit <= 0 {
+		return nil
+	}
+	if depth <= 0 {
 		return nil
 	}
 
@@ -3321,22 +3329,27 @@ func sanitizePulsarResourceAnyMap(values map[string]any, limit int) map[string]a
 			sanitized[key] = pulsarResourceRedactedValue
 			continue
 		}
-		sanitized[key] = sanitizePulsarResourceAnyValue(values[key], 2)
+		sanitized[key] = sanitizePulsarResourceAnyValue(values[key], depth-1)
 	}
 	return sanitized
 }
 
 func sanitizePulsarResourceAnyValue(value any, depth int) any {
-	if depth <= 0 {
-		return value
-	}
-
 	switch typed := value.(type) {
 	case map[string]any:
-		return sanitizePulsarResourceAnyMap(typed, pulsarResourceSummaryStringLimit)
+		if depth <= 0 {
+			return pulsarResourceRedactedValue
+		}
+		return sanitizePulsarResourceAnyMapWithDepth(typed, pulsarResourceSummaryStringLimit, depth)
 	case map[string]string:
+		if depth <= 0 {
+			return pulsarResourceRedactedValue
+		}
 		return sanitizePulsarResourceStringMap(typed, pulsarResourceSummaryStringLimit)
 	case []any:
+		if depth <= 0 {
+			return pulsarResourceRedactedValue
+		}
 		values := typed
 		if len(values) > pulsarResourceSummaryStringLimit {
 			values = values[:pulsarResourceSummaryStringLimit]
@@ -3347,6 +3360,9 @@ func sanitizePulsarResourceAnyValue(value any, depth int) any {
 		}
 		return sanitized
 	case []string:
+		if depth <= 0 {
+			return pulsarResourceRedactedValue
+		}
 		values, _ := limitStringSlice(typed, pulsarResourceSummaryStringLimit)
 		return values
 	default:

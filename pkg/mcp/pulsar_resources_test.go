@@ -284,6 +284,89 @@ func TestPulsarAddResourcesFeatureGate(t *testing.T) {
 	})
 }
 
+func TestSanitizePulsarResourceAnyMapRedactsNestedValues(t *testing.T) {
+	t.Parallel()
+
+	longSlice := make([]any, pulsarResourceSummaryStringLimit+1)
+	for i := range longSlice {
+		longSlice[i] = map[string]any{"index": i}
+	}
+	tooDeep := map[string]any{"password": "secret-over-budget"}
+	for i := 0; i <= pulsarResourceSanitizeDepthLimit; i++ {
+		tooDeep = map[string]any{fmt.Sprintf("level-%02d", i): tooDeep}
+	}
+
+	values := map[string]any{
+		"owner": "team-a",
+		"nested": map[string]any{
+			"database": map[string]any{
+				"connection": map[string]any{
+					"password": "secret-nested-password",
+					"safe":     "visible",
+				},
+				"token": "secret-nested-token",
+			},
+		},
+		"items": []any{
+			map[string]any{
+				"password": "secret-array-password",
+				"safe":     "array-visible",
+			},
+			map[string]any{
+				"metadata": map[string]any{
+					"privateKey": "secret-array-private-key",
+				},
+			},
+		},
+		"stringMap": map[string]string{
+			"clientKey": "secret-client-key",
+			"owner":     "team-a",
+		},
+		"longSlice": longSlice,
+		"tooDeep":   tooDeep,
+	}
+
+	sanitized := sanitizePulsarResourceAnyMap(values, pulsarResourceSummaryStringLimit)
+	payload, err := json.Marshal(sanitized)
+	require.NoError(t, err)
+	assert.NotContains(t, string(payload), "secret-nested-password")
+	assert.NotContains(t, string(payload), "secret-nested-token")
+	assert.NotContains(t, string(payload), "secret-array-password")
+	assert.NotContains(t, string(payload), "secret-array-private-key")
+	assert.NotContains(t, string(payload), "secret-client-key")
+	assert.NotContains(t, string(payload), "secret-over-budget")
+
+	nested := sanitized["nested"].(map[string]any)
+	database := nested["database"].(map[string]any)
+	connection := database["connection"].(map[string]any)
+	assert.Equal(t, pulsarResourceRedactedValue, connection["password"])
+	assert.Equal(t, "visible", connection["safe"])
+	assert.Equal(t, pulsarResourceRedactedValue, database["token"])
+
+	items := sanitized["items"].([]any)
+	firstItem := items[0].(map[string]any)
+	assert.Equal(t, pulsarResourceRedactedValue, firstItem["password"])
+	assert.Equal(t, "array-visible", firstItem["safe"])
+	secondItem := items[1].(map[string]any)
+	metadata := secondItem["metadata"].(map[string]any)
+	assert.Equal(t, pulsarResourceRedactedValue, metadata["privateKey"])
+
+	stringMap := sanitized["stringMap"].(map[string]string)
+	assert.Equal(t, pulsarResourceRedactedValue, stringMap["clientKey"])
+	assert.Equal(t, "team-a", stringMap["owner"])
+
+	limitedSlice := sanitized["longSlice"].([]any)
+	assert.Len(t, limitedSlice, pulsarResourceSummaryStringLimit)
+
+	limitedMap := make(map[string]any, pulsarResourceSummaryStringLimit+1)
+	for i := 0; i <= pulsarResourceSummaryStringLimit; i++ {
+		limitedMap[fmt.Sprintf("key-%02d", i)] = i
+	}
+	sanitizedLimitedMap := sanitizePulsarResourceAnyMap(limitedMap, pulsarResourceSummaryStringLimit)
+	assert.Len(t, sanitizedLimitedMap, pulsarResourceSummaryStringLimit)
+	assert.NotContains(t, sanitizedLimitedMap, fmt.Sprintf("key-%02d", pulsarResourceSummaryStringLimit))
+}
+
 func TestPulsarContextResourceReadRedactsSecrets(t *testing.T) {
 	t.Parallel()
 
