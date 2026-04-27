@@ -69,6 +69,33 @@ func TestNewPulsarResourceRegistrations(t *testing.T) {
 		assert.NotContains(t, pulsarTestCatalogTemplateURIs(catalog), pulsarTopicsResourceTemplateURI)
 		assert.NotContains(t, pulsarTestCatalogTemplateURIs(catalog), pulsarResourceQuotaTemplateURI)
 	})
+
+	t.Run("catalog follows actually registered subset", func(t *testing.T) {
+		registrations := NewPulsarResourceRegistrations([]string{string(FeatureAllPulsar)})
+		s := server.NewMCPServer("test", "0.0.1", server.WithResourceCapabilities(true, true))
+
+		s.AddResources(
+			pulsarTestFindRegistrationResource(t, registrations.Resources, pulsarResourceContextURI),
+			pulsarTestFindRegistrationResource(t, registrations.Resources, pulsarResourceCatalogURI),
+			pulsarTestFindRegistrationResource(t, registrations.Resources, pulsarClustersResourceURI),
+		)
+		s.AddResourceTemplates(
+			pulsarTestFindRegistrationTemplate(t, registrations.Templates, pulsarClusterResourceTemplateURI),
+		)
+
+		content := readPulsarTestResource(context.Background(), t, s, pulsarResourceCatalogURI)
+		var catalog pulsarResourceCatalog
+		require.NoError(t, json.Unmarshal([]byte(content.Text), &catalog))
+
+		assert.ElementsMatch(t, []string{
+			pulsarResourceContextURI,
+			pulsarResourceCatalogURI,
+			pulsarClustersResourceURI,
+		}, pulsarTestCatalogResourceURIs(catalog))
+		assert.ElementsMatch(t, []string{
+			pulsarClusterResourceTemplateURI,
+		}, pulsarTestCatalogTemplateURIs(catalog))
+	})
 }
 
 func TestPulsarAddResourcesMatchesNewPulsarResourceRegistrations(t *testing.T) {
@@ -108,6 +135,54 @@ func TestPulsarAddResourcesMatchesNewPulsarResourceRegistrations(t *testing.T) {
 			assert.ElementsMatch(t, pulsarTestRegistrationTemplateURIs(registrations.Templates), pulsarTestResourceTemplateURIs(templates))
 		})
 	}
+}
+
+func TestNewPulsarResourceRegistrationsHandlersUseRequestContextSession(t *testing.T) {
+	t.Parallel()
+
+	adminServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/admin/v2/tenants":
+			writePulsarTestJSON(w, `["public","system"]`)
+		case "/admin/v2/namespaces/public":
+			writePulsarTestJSON(w, `["public/default","public/functions"]`)
+		default:
+			http.Error(w, "unexpected path "+r.URL.Path, http.StatusNotFound)
+		}
+	}))
+	defer adminServer.Close()
+
+	cfg := &cmdutils.ClusterConfig{WebServiceURL: adminServer.URL}
+	ctx := WithPulsarSession(context.Background(), &pulsarsession.Session{
+		Ctx:             pulsarsession.PulsarContext{WebServiceURL: adminServer.URL},
+		PulsarCtlConfig: cfg,
+		AdminClient:     cfg.Client(pulsaradminconfig.V2),
+	})
+
+	registrations := NewPulsarResourceRegistrations([]string{
+		string(FeaturePulsarAdminTenants),
+		string(FeaturePulsarAdminNamespaces),
+	})
+
+	tenantsResource := pulsarTestFindRegistrationResource(t, registrations.Resources, pulsarTenantsResourceURI)
+	tenantsContent := readPulsarTestRegistration(ctx, t, tenantsResource.Handler, pulsarTenantsResourceURI)
+	var tenantsPayload pulsarTenantCollectionResource
+	require.NoError(t, json.Unmarshal([]byte(tenantsContent.Text), &tenantsPayload))
+	assert.ElementsMatch(t, []string{"public", "system"}, tenantsPayload.Tenants)
+	assert.Equal(t, 2, tenantsPayload.Count)
+
+	namespacesTemplate := pulsarTestFindRegistrationTemplate(t, registrations.Templates, pulsarNamespacesResourceTemplateURI)
+	namespacesContent := readPulsarTestRegistration(
+		ctx,
+		t,
+		namespacesTemplate.Handler,
+		"pulsar://admin/v2/tenants/public/namespaces",
+	)
+	var namespacesPayload pulsarNamespaceCollectionResource
+	require.NoError(t, json.Unmarshal([]byte(namespacesContent.Text), &namespacesPayload))
+	assert.Equal(t, "public", namespacesPayload.Tenant)
+	assert.ElementsMatch(t, []string{"public/default", "public/functions"}, namespacesPayload.Namespaces)
+	assert.Equal(t, 2, namespacesPayload.Count)
 }
 
 func TestPulsarAddResourcesFeatureGate(t *testing.T) {
@@ -1762,6 +1837,36 @@ func pulsarTestRegistrationTemplateURIs(templates []server.ServerResourceTemplat
 	return uris
 }
 
+func pulsarTestFindRegistrationResource(t *testing.T, resources []server.ServerResource, uri string) server.ServerResource {
+	t.Helper()
+
+	for _, resource := range resources {
+		if resource.Resource.URI == uri {
+			return resource
+		}
+	}
+
+	require.FailNow(t, "missing Pulsar resource registration", "uri=%s", uri)
+	return server.ServerResource{}
+}
+
+func pulsarTestFindRegistrationTemplate(
+	t *testing.T,
+	templates []server.ServerResourceTemplate,
+	uriTemplate string,
+) server.ServerResourceTemplate {
+	t.Helper()
+
+	for _, template := range templates {
+		if template.Template.URITemplate.Raw() == uriTemplate {
+			return template
+		}
+	}
+
+	require.FailNow(t, "missing Pulsar resource template registration", "uriTemplate=%s", uriTemplate)
+	return server.ServerResourceTemplate{}
+}
+
 func pulsarTestResourceURIs(resources []mcp.Resource) []string {
 	uris := make([]string, 0, len(resources))
 	for _, resource := range resources {
@@ -1803,6 +1908,26 @@ func readPulsarTestCatalogFromRegistrations(t *testing.T, registrations PulsarRe
 
 	require.FailNow(t, "missing Pulsar resource catalog registration")
 	return pulsarResourceCatalog{}
+}
+
+func readPulsarTestRegistration(
+	ctx context.Context,
+	t *testing.T,
+	handler func(context.Context, mcp.ReadResourceRequest) ([]mcp.ResourceContents, error),
+	uri string,
+) mcp.TextResourceContents {
+	t.Helper()
+
+	contents, err := handler(
+		ctx,
+		mcp.ReadResourceRequest{Params: mcp.ReadResourceParams{URI: uri}},
+	)
+	require.NoError(t, err)
+	require.Len(t, contents, 1)
+
+	content, ok := contents[0].(mcp.TextResourceContents)
+	require.True(t, ok, "expected TextResourceContents, got %T", contents[0])
+	return content
 }
 
 func pulsarTestCatalogResourceURIs(catalog pulsarResourceCatalog) []string {

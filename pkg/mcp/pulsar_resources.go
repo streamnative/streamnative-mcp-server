@@ -28,7 +28,6 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
-	mcpcontext "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 	pulsarsession "github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
@@ -1484,10 +1483,17 @@ func handlePulsarContextResource(ctx context.Context, request mcp.ReadResourceRe
 	})
 }
 
-func handlePulsarCatalogResource(_ context.Context, request mcp.ReadResourceRequest, catalog pulsarResourceCatalog) ([]mcp.ResourceContents, error) {
+func handlePulsarCatalogResource(ctx context.Context, request mcp.ReadResourceRequest, catalog pulsarResourceCatalog) ([]mcp.ResourceContents, error) {
 	_, err := parsePulsarResourceRequest(request, pulsarResourceKindCatalog)
 	if err != nil {
 		return nil, err
+	}
+	runtimeCatalog, found, err := buildPulsarRegisteredResourceCatalogFromServerContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if found {
+		return newPulsarJSONResourceContents(request.Params.URI, runtimeCatalog)
 	}
 	return newPulsarJSONResourceContents(request.Params.URI, catalog)
 }
@@ -2422,7 +2428,7 @@ func handlePulsarWorkerMetricsResource(ctx context.Context, request mcp.ReadReso
 }
 
 func requirePulsarResourceSession(ctx context.Context) (*pulsarsession.Session, error) {
-	session := mcpcontext.GetPulsarSession(ctx)
+	session := GetPulsarSession(ctx)
 	if session == nil {
 		return nil, fmt.Errorf("pulsar session not found in context")
 	}
@@ -3530,32 +3536,157 @@ func summarizePulsarAuthentication(ctx pulsarsession.PulsarContext) pulsarAuthen
 	}
 }
 
+func buildPulsarRegisteredResourceCatalogFromServerContext(ctx context.Context) (pulsarResourceCatalog, bool, error) {
+	upstream := server.ServerFromContext(ctx)
+	if upstream == nil {
+		return pulsarResourceCatalog{}, false, nil
+	}
+
+	resources, err := listPulsarRegisteredResources(ctx, upstream)
+	if err != nil {
+		return pulsarResourceCatalog{}, false, err
+	}
+	templates, err := listPulsarRegisteredResourceTemplates(ctx, upstream)
+	if err != nil {
+		return pulsarResourceCatalog{}, false, err
+	}
+
+	return buildPulsarCatalogFromRegisteredEntries(resources, templates), true, nil
+}
+
+func listPulsarRegisteredResources(ctx context.Context, upstream *server.MCPServer) ([]mcp.Resource, error) {
+	response, err := handlePulsarCatalogServerRequest(
+		ctx,
+		upstream,
+		map[string]any{
+			"jsonrpc": mcp.JSONRPC_VERSION,
+			"id":      "pulsar-resource-catalog-list",
+			"method":  "resources/list",
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	result, ok := response.Result.(mcp.ListResourcesResult)
+	if !ok {
+		return nil, fmt.Errorf("unexpected resources/list result type %T", response.Result)
+	}
+
+	resources := make([]mcp.Resource, 0, len(result.Resources))
+	for _, resource := range result.Resources {
+		if !isPulsarCatalogURI(resource.URI) {
+			continue
+		}
+		resources = append(resources, resource)
+	}
+	return resources, nil
+}
+
+func listPulsarRegisteredResourceTemplates(ctx context.Context, upstream *server.MCPServer) ([]mcp.ResourceTemplate, error) {
+	response, err := handlePulsarCatalogServerRequest(
+		ctx,
+		upstream,
+		map[string]any{
+			"jsonrpc": mcp.JSONRPC_VERSION,
+			"id":      "pulsar-resource-catalog-templates",
+			"method":  "resources/templates/list",
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	result, ok := response.Result.(mcp.ListResourceTemplatesResult)
+	if !ok {
+		return nil, fmt.Errorf("unexpected resources/templates/list result type %T", response.Result)
+	}
+
+	templates := make([]mcp.ResourceTemplate, 0, len(result.ResourceTemplates))
+	for _, template := range result.ResourceTemplates {
+		if template.URITemplate == nil || !isPulsarCatalogURI(template.URITemplate.Raw()) {
+			continue
+		}
+		templates = append(templates, template)
+	}
+	return templates, nil
+}
+
+func handlePulsarCatalogServerRequest(
+	ctx context.Context,
+	upstream *server.MCPServer,
+	request map[string]any,
+) (mcp.JSONRPCResponse, error) {
+	payload, err := json.Marshal(request)
+	if err != nil {
+		return mcp.JSONRPCResponse{}, fmt.Errorf("failed to marshal Pulsar catalog request: %w", err)
+	}
+
+	message := upstream.HandleMessage(ctx, payload)
+	resp, ok := message.(mcp.JSONRPCResponse)
+	if ok {
+		return resp, nil
+	}
+
+	if errResp, ok := message.(mcp.JSONRPCError); ok {
+		return mcp.JSONRPCResponse{}, fmt.Errorf("Pulsar catalog request failed: %s", errResp.Error.Message)
+	}
+
+	return mcp.JSONRPCResponse{}, fmt.Errorf("unexpected Pulsar catalog response type %T", message)
+}
+
+func isPulsarCatalogURI(uri string) bool {
+	return strings.HasPrefix(uri, "pulsar://")
+}
+
+func buildPulsarCatalogFromRegisteredEntries(
+	resources []mcp.Resource,
+	templates []mcp.ResourceTemplate,
+) pulsarResourceCatalog {
+	catalog := newPulsarResourceCatalog()
+
+	for _, resource := range resources {
+		catalog.Resources = append(catalog.Resources, pulsarCatalogResource{
+			URI:         resource.URI,
+			Name:        resource.Name,
+			Description: resource.Description,
+			MIMEType:    resource.MIMEType,
+		})
+	}
+	for _, template := range templates {
+		if template.URITemplate == nil {
+			continue
+		}
+		catalog.Templates = append(catalog.Templates, pulsarCatalogTemplate{
+			URITemplate: template.URITemplate.Raw(),
+			Name:        template.Name,
+			Description: template.Description,
+			MIMEType:    template.MIMEType,
+		})
+	}
+
+	return catalog
+}
+
 func buildPulsarResourceCatalog(
 	resources []server.ServerResource,
 	templates []server.ServerResourceTemplate,
 ) pulsarResourceCatalog {
-	catalog := pulsarResourceCatalog{
-		Version: 1,
-		Scheme:  "pulsar",
-		Resources: []pulsarCatalogResource{
-			{
-				URI:         pulsarResourceContextURI,
-				Name:        "Pulsar Context",
-				Description: "Current Pulsar session connection metadata with authentication material redacted.",
-				MIMEType:    pulsarResourceJSONMIMEType,
-			},
-			{
-				URI:         pulsarResourceCatalogURI,
-				Name:        "Pulsar Resource Catalog",
-				Description: "Stable catalog of Pulsar MCP resource URIs and URI templates.",
-				MIMEType:    pulsarResourceJSONMIMEType,
-			},
+	catalog := newPulsarResourceCatalog()
+	catalog.Resources = append(catalog.Resources,
+		pulsarCatalogResource{
+			URI:         pulsarResourceContextURI,
+			Name:        "Pulsar Context",
+			Description: "Current Pulsar session connection metadata with authentication material redacted.",
+			MIMEType:    pulsarResourceJSONMIMEType,
 		},
-		Templates: []pulsarCatalogTemplate{},
-		Notes: []string{
-			"Resource handlers are read-only and do not return tokens, auth params, key files, TLS private keys, or secret values.",
+		pulsarCatalogResource{
+			URI:         pulsarResourceCatalogURI,
+			Name:        "Pulsar Resource Catalog",
+			Description: "Stable catalog of Pulsar MCP resource URIs and URI templates.",
+			MIMEType:    pulsarResourceJSONMIMEType,
 		},
-	}
+	)
 
 	for _, resource := range resources {
 		catalog.Resources = append(catalog.Resources, pulsarCatalogResource{
@@ -3575,6 +3706,18 @@ func buildPulsarResourceCatalog(
 	}
 
 	return catalog
+}
+
+func newPulsarResourceCatalog() pulsarResourceCatalog {
+	return pulsarResourceCatalog{
+		Version:   1,
+		Scheme:    "pulsar",
+		Resources: []pulsarCatalogResource{},
+		Templates: []pulsarCatalogTemplate{},
+		Notes: []string{
+			"Resource handlers are read-only and do not return tokens, auth params, key files, TLS private keys, or secret values.",
+		},
+	}
 }
 
 func parsePulsarResourceURI(rawURI string) (pulsarResourceURI, error) {
