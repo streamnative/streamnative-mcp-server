@@ -304,7 +304,7 @@ func TestPulsarContextResourceReadRedactsSecrets(t *testing.T) {
 		},
 	})
 
-	content := readPulsarTestResource(t, ctx, s, pulsarResourceContextURI)
+	content := readPulsarTestResource(ctx, t, s, pulsarResourceContextURI)
 	assert.Equal(t, pulsarResourceContextURI, content.URI)
 	assert.Equal(t, pulsarResourceJSONMIMEType, content.MIMEType)
 	assert.Contains(t, content.Text, "https://admin.example")
@@ -333,7 +333,7 @@ func TestPulsarResourceReadMissingSession(t *testing.T) {
 	errResponse, ok := response.(mcp.JSONRPCError)
 	require.True(t, ok, "expected JSONRPCError, got %T", response)
 	assert.Equal(t, mcp.INTERNAL_ERROR, errResponse.Error.Code)
-	assert.Contains(t, errResponse.Error.Message, "Pulsar session not found in context")
+	assert.Contains(t, errResponse.Error.Message, "pulsar session not found in context")
 }
 
 func TestPulsarNamespaceTemplateRead(t *testing.T) {
@@ -361,7 +361,7 @@ func TestPulsarNamespaceTemplateRead(t *testing.T) {
 	s := server.NewMCPServer("test", "0.0.1", server.WithResourceCapabilities(true, true))
 	PulsarAddResources(s, []string{string(FeatureAllPulsar)})
 
-	content := readPulsarTestResource(t, ctx, s, "pulsar://admin/v2/tenants/public/namespaces")
+	content := readPulsarTestResource(ctx, t, s, "pulsar://admin/v2/tenants/public/namespaces")
 	assert.Equal(t, "pulsar://admin/v2/tenants/public/namespaces", content.URI)
 	assert.Equal(t, pulsarResourceJSONMIMEType, content.MIMEType)
 
@@ -435,26 +435,26 @@ func TestPulsarTenantNamespaceResourceFamilyRead(t *testing.T) {
 	s := server.NewMCPServer("test", "0.0.1", server.WithResourceCapabilities(true, true))
 	PulsarAddResources(s, []string{string(FeatureAllPulsar)})
 
-	tenantsContent := readPulsarTestResource(t, ctx, s, pulsarTenantsResourceURI)
+	tenantsContent := readPulsarTestResource(ctx, t, s, pulsarTenantsResourceURI)
 	var tenantsPayload pulsarTenantCollectionResource
 	require.NoError(t, json.Unmarshal([]byte(tenantsContent.Text), &tenantsPayload))
 	assert.ElementsMatch(t, []string{"public", "system"}, tenantsPayload.Tenants)
 	assert.Equal(t, 2, tenantsPayload.Count)
 
-	tenantContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v2/tenants/public")
+	tenantContent := readPulsarTestResource(ctx, t, s, "pulsar://admin/v2/tenants/public")
 	var tenantPayload pulsarTenantResource
 	require.NoError(t, json.Unmarshal([]byte(tenantContent.Text), &tenantPayload))
 	assert.Equal(t, "public", tenantPayload.Tenant)
 	assert.Equal(t, []string{"tenant-admin"}, tenantPayload.Data.AdminRoles)
 	assert.Equal(t, []string{"use"}, tenantPayload.Data.AllowedClusters)
 
-	namespacesContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v2/tenants/public/namespaces")
+	namespacesContent := readPulsarTestResource(ctx, t, s, "pulsar://admin/v2/tenants/public/namespaces")
 	var namespacesPayload pulsarNamespaceCollectionResource
 	require.NoError(t, json.Unmarshal([]byte(namespacesContent.Text), &namespacesPayload))
 	assert.ElementsMatch(t, []string{"public/default", "public/functions"}, namespacesPayload.Namespaces)
 	assert.Equal(t, 2, namespacesPayload.Count)
 
-	namespaceContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v2/namespaces/public/default")
+	namespaceContent := readPulsarTestResource(ctx, t, s, "pulsar://admin/v2/namespaces/public/default")
 	var namespacePayload pulsarNamespaceResource
 	require.NoError(t, json.Unmarshal([]byte(namespaceContent.Text), &namespacePayload))
 	require.NotNil(t, namespacePayload.Policies)
@@ -463,13 +463,13 @@ func TestPulsarTenantNamespaceResourceFamilyRead(t *testing.T) {
 	assert.Equal(t, 60, *namespacePayload.Policies.MessageTTLInSeconds)
 	assert.True(t, namespacePayload.Policies.SchemaValidationEnforced)
 
-	topicsContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v2/namespaces/public/default/topics")
+	topicsContent := readPulsarTestResource(ctx, t, s, "pulsar://admin/v2/namespaces/public/default/topics")
 	var topicsPayload pulsarTopicCollectionResource
 	require.NoError(t, json.Unmarshal([]byte(topicsContent.Text), &topicsPayload))
 	assert.Equal(t, []string{"persistent://public/default/events"}, topicsPayload.Topics)
 	assert.Equal(t, 1, topicsPayload.Count)
 
-	defaultQuotaContent := readPulsarTestResource(t, ctx, s, pulsarDefaultResourceQuotaURI)
+	defaultQuotaContent := readPulsarTestResource(ctx, t, s, pulsarDefaultResourceQuotaURI)
 	var defaultQuotaPayload pulsarResourceQuotaResource
 	require.NoError(t, json.Unmarshal([]byte(defaultQuotaContent.Text), &defaultQuotaPayload))
 	assert.Equal(t, "default", defaultQuotaPayload.Scope)
@@ -478,8 +478,8 @@ func TestPulsarTenantNamespaceResourceFamilyRead(t *testing.T) {
 	assert.True(t, defaultQuotaPayload.Quota.Dynamic)
 
 	quotaContent := readPulsarTestResource(
-		t,
 		ctx,
+		t,
 		s,
 		"pulsar://admin/v2/resource-quotas/public/default/0x00000000_0xffffffff",
 	)
@@ -588,7 +588,7 @@ func TestPulsarTopicSchemaResourceFamilyRead(t *testing.T) {
 	s := server.NewMCPServer("test", "0.0.1", server.WithResourceCapabilities(true, true))
 	PulsarAddResources(s, []string{string(FeatureAllPulsar)})
 
-	metadataContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v2/persistent/public/default/events/metadata")
+	metadataContent := readPulsarTestResource(ctx, t, s, "pulsar://admin/v2/persistent/public/default/events/metadata")
 	assert.NotContains(t, metadataContent.Text, "secret-token")
 	var metadataPayload pulsarTopicMetadataResource
 	require.NoError(t, json.Unmarshal([]byte(metadataContent.Text), &metadataPayload))
@@ -600,13 +600,13 @@ func TestPulsarTopicSchemaResourceFamilyRead(t *testing.T) {
 	assert.Equal(t, "team-a", metadataPayload.Properties["owner"])
 	assert.Equal(t, pulsarResourceRedactedValue, metadataPayload.Properties["token"])
 
-	partitionsContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v2/persistent/public/default/events/partitions")
+	partitionsContent := readPulsarTestResource(ctx, t, s, "pulsar://admin/v2/persistent/public/default/events/partitions")
 	var partitionsPayload pulsarTopicPartitionMetadataResource
 	require.NoError(t, json.Unmarshal([]byte(partitionsContent.Text), &partitionsPayload))
 	assert.True(t, partitionsPayload.Partitioned)
 	assert.Equal(t, 2, partitionsPayload.Metadata.Partitions)
 
-	statsContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v2/persistent/public/default/events/stats")
+	statsContent := readPulsarTestResource(ctx, t, s, "pulsar://admin/v2/persistent/public/default/events/stats")
 	assert.NotContains(t, statsContent.Text, "hidden-producer")
 	var statsPayload pulsarTopicStatsResource
 	require.NoError(t, json.Unmarshal([]byte(statsContent.Text), &statsPayload))
@@ -618,8 +618,8 @@ func TestPulsarTopicSchemaResourceFamilyRead(t *testing.T) {
 	assert.Equal(t, 1, statsPayload.Stats.SubscriptionCount)
 
 	policyContent := readPulsarTestResource(
-		t,
 		ctx,
+		t,
 		s,
 		"pulsar://admin/v2/persistent/public/default/events/policies/retention",
 	)
@@ -630,7 +630,7 @@ func TestPulsarTopicSchemaResourceFamilyRead(t *testing.T) {
 	require.True(t, ok)
 	assert.Equal(t, float64(60), policyValue["retentionTimeInMinutes"])
 
-	latestSchemaContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v2/persistent/public/default/events/schema")
+	latestSchemaContent := readPulsarTestResource(ctx, t, s, "pulsar://admin/v2/persistent/public/default/events/schema")
 	assert.NotContains(t, latestSchemaContent.Text, "secret-password")
 	var latestSchemaPayload pulsarTopicSchemaResource
 	require.NoError(t, json.Unmarshal([]byte(latestSchemaContent.Text), &latestSchemaPayload))
@@ -639,7 +639,7 @@ func TestPulsarTopicSchemaResourceFamilyRead(t *testing.T) {
 	assert.Contains(t, latestSchemaPayload.Schema.Schema, `"name":"Event"`)
 	assert.Equal(t, pulsarResourceRedactedValue, latestSchemaPayload.Schema.Properties["password"])
 
-	versionSchemaContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v2/persistent/public/default/events/schema/7")
+	versionSchemaContent := readPulsarTestResource(ctx, t, s, "pulsar://admin/v2/persistent/public/default/events/schema/7")
 	var versionSchemaPayload pulsarTopicSchemaResource
 	require.NoError(t, json.Unmarshal([]byte(versionSchemaContent.Text), &versionSchemaPayload))
 	assert.Equal(t, int64(7), versionSchemaPayload.Version)
@@ -757,7 +757,7 @@ func TestPulsarSubscriptionResourceFamilyRead(t *testing.T) {
 	s := server.NewMCPServer("test", "0.0.1", server.WithResourceCapabilities(true, true))
 	PulsarAddResources(s, []string{string(FeatureAllPulsar)})
 
-	subscriptionsContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v2/persistent/public/default/events/subscriptions")
+	subscriptionsContent := readPulsarTestResource(ctx, t, s, "pulsar://admin/v2/persistent/public/default/events/subscriptions")
 	var subscriptionsPayload pulsarSubscriptionCollectionResource
 	require.NoError(t, json.Unmarshal([]byte(subscriptionsContent.Text), &subscriptionsPayload))
 	assert.Equal(t, "subscriptions", subscriptionsPayload.Kind)
@@ -766,8 +766,8 @@ func TestPulsarSubscriptionResourceFamilyRead(t *testing.T) {
 	assert.Equal(t, 2, subscriptionsPayload.Count)
 
 	statsContent := readPulsarTestResource(
-		t,
 		ctx,
+		t,
 		s,
 		"pulsar://admin/v2/persistent/public/default/events/subscriptions/sub-a/stats",
 	)
@@ -787,8 +787,8 @@ func TestPulsarSubscriptionResourceFamilyRead(t *testing.T) {
 	assert.Equal(t, pulsarResourceRedactedValue, statsPayload.Stats.SubscriptionProperties["token"])
 
 	backlogContent := readPulsarTestResource(
-		t,
 		ctx,
+		t,
 		s,
 		"pulsar://admin/v2/persistent/public/default/events/subscriptions/sub-a/backlog",
 	)
@@ -800,8 +800,8 @@ func TestPulsarSubscriptionResourceFamilyRead(t *testing.T) {
 	assert.Equal(t, int64(12345), backlogPayload.Backlog.EarliestMsgPublishTimeInBacklog)
 
 	cursorContent := readPulsarTestResource(
-		t,
 		ctx,
+		t,
 		s,
 		"pulsar://admin/v2/persistent/public/default/events/subscriptions/sub-a/cursor",
 	)
@@ -1071,7 +1071,7 @@ func TestPulsarWorkloadResourceFamilyRead(t *testing.T) {
 	s := server.NewMCPServer("test", "0.0.1", server.WithResourceCapabilities(true, true))
 	PulsarAddResources(s, []string{string(FeatureAllPulsar)})
 
-	functionsContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v3/functions/public/default")
+	functionsContent := readPulsarTestResource(ctx, t, s, "pulsar://admin/v3/functions/public/default")
 	var functionsPayload pulsarWorkloadCollectionResource
 	require.NoError(t, json.Unmarshal([]byte(functionsContent.Text), &functionsPayload))
 	assert.Equal(t, "function", functionsPayload.Type)
@@ -1079,8 +1079,8 @@ func TestPulsarWorkloadResourceFamilyRead(t *testing.T) {
 	assert.Equal(t, 2, functionsPayload.Count)
 
 	functionMetadataContent := readPulsarTestResource(
-		t,
 		ctx,
+		t,
 		s,
 		"pulsar://admin/v3/functions/public/default/fn-a/metadata",
 	)
@@ -1095,8 +1095,8 @@ func TestPulsarWorkloadResourceFamilyRead(t *testing.T) {
 	assert.Equal(t, 1, functionMetadataPayload.Config.SecretsCount)
 
 	functionStatusContent := readPulsarTestResource(
-		t,
 		ctx,
+		t,
 		s,
 		"pulsar://admin/v3/functions/public/default/fn-a/status",
 	)
@@ -1110,8 +1110,8 @@ func TestPulsarWorkloadResourceFamilyRead(t *testing.T) {
 	assert.Equal(t, 1, functionStatusPayload.Status.Instances[0].LatestUserExceptionsCount)
 
 	functionStatsContent := readPulsarTestResource(
-		t,
 		ctx,
+		t,
 		s,
 		"pulsar://admin/v3/functions/public/default/fn-a/stats",
 	)
@@ -1121,15 +1121,15 @@ func TestPulsarWorkloadResourceFamilyRead(t *testing.T) {
 	require.Len(t, functionStatsPayload.Stats.Instances, 1)
 	assert.Equal(t, []string{"custom_metric"}, functionStatsPayload.Stats.Instances[0].UserMetricNames)
 
-	sourcesContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v3/sources/public/default")
+	sourcesContent := readPulsarTestResource(ctx, t, s, "pulsar://admin/v3/sources/public/default")
 	var sourcesPayload pulsarWorkloadCollectionResource
 	require.NoError(t, json.Unmarshal([]byte(sourcesContent.Text), &sourcesPayload))
 	assert.Equal(t, "source", sourcesPayload.Type)
 	assert.Equal(t, []string{"source-a"}, sourcesPayload.Names)
 
 	sourceMetadataContent := readPulsarTestResource(
-		t,
 		ctx,
+		t,
 		s,
 		"pulsar://admin/v3/sources/public/default/source-a/metadata",
 	)
@@ -1142,8 +1142,8 @@ func TestPulsarWorkloadResourceFamilyRead(t *testing.T) {
 	assert.Equal(t, 1, sourceMetadataPayload.Config.SecretsCount)
 
 	sourceStatusContent := readPulsarTestResource(
-		t,
 		ctx,
+		t,
 		s,
 		"pulsar://admin/v3/sources/public/default/source-a/status",
 	)
@@ -1155,15 +1155,15 @@ func TestPulsarWorkloadResourceFamilyRead(t *testing.T) {
 	assert.Equal(t, int64(10), sourceStatusPayload.Status.Instances[0].NumReceivedFromSource)
 	assert.True(t, sourceStatusPayload.Status.Instances[0].ErrorPresent)
 
-	sinksContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v3/sinks/public/default")
+	sinksContent := readPulsarTestResource(ctx, t, s, "pulsar://admin/v3/sinks/public/default")
 	var sinksPayload pulsarWorkloadCollectionResource
 	require.NoError(t, json.Unmarshal([]byte(sinksContent.Text), &sinksPayload))
 	assert.Equal(t, "sink", sinksPayload.Type)
 	assert.Equal(t, []string{"sink-a"}, sinksPayload.Names)
 
 	sinkMetadataContent := readPulsarTestResource(
-		t,
 		ctx,
+		t,
 		s,
 		"pulsar://admin/v3/sinks/public/default/sink-a/metadata",
 	)
@@ -1176,8 +1176,8 @@ func TestPulsarWorkloadResourceFamilyRead(t *testing.T) {
 	assert.Equal(t, 1, sinkMetadataPayload.Config.SecretsCount)
 
 	sinkStatusContent := readPulsarTestResource(
-		t,
 		ctx,
+		t,
 		s,
 		"pulsar://admin/v3/sinks/public/default/sink-a/status",
 	)
@@ -1189,15 +1189,15 @@ func TestPulsarWorkloadResourceFamilyRead(t *testing.T) {
 	assert.Equal(t, int64(10), sinkStatusPayload.Status.Instances[0].NumReadFromPulsar)
 	assert.True(t, sinkStatusPayload.Status.Instances[0].ErrorPresent)
 
-	packagesContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v3/packages/function/public/default")
+	packagesContent := readPulsarTestResource(ctx, t, s, "pulsar://admin/v3/packages/function/public/default")
 	var packagesPayload pulsarPackageCollectionResource
 	require.NoError(t, json.Unmarshal([]byte(packagesContent.Text), &packagesPayload))
 	assert.Equal(t, "function", packagesPayload.PackageType)
 	assert.Equal(t, 1, packagesPayload.Count)
 
 	versionsContent := readPulsarTestResource(
-		t,
 		ctx,
+		t,
 		s,
 		"pulsar://admin/v3/packages/function/public/default/pkg-a/versions",
 	)
@@ -1206,8 +1206,8 @@ func TestPulsarWorkloadResourceFamilyRead(t *testing.T) {
 	assert.ElementsMatch(t, []string{"v1", "v2"}, versionsPayload.Versions)
 
 	metadataContent := readPulsarTestResource(
-		t,
 		ctx,
+		t,
 		s,
 		"pulsar://admin/v3/packages/function/public/default/pkg-a/v1/metadata",
 	)
@@ -1217,32 +1217,32 @@ func TestPulsarWorkloadResourceFamilyRead(t *testing.T) {
 	assert.Equal(t, "package description", metadataPayload.Metadata.Description)
 	assert.Equal(t, pulsarResourceRedactedValue, metadataPayload.Metadata.Properties["token"])
 
-	workerClusterContent := readPulsarTestResource(t, ctx, s, pulsarWorkerClusterResourceURI)
+	workerClusterContent := readPulsarTestResource(ctx, t, s, pulsarWorkerClusterResourceURI)
 	var workerClusterPayload pulsarWorkerClusterResource
 	require.NoError(t, json.Unmarshal([]byte(workerClusterContent.Text), &workerClusterPayload))
 	assert.Equal(t, 1, workerClusterPayload.Count)
 
-	workerLeaderContent := readPulsarTestResource(t, ctx, s, pulsarWorkerLeaderResourceURI)
+	workerLeaderContent := readPulsarTestResource(ctx, t, s, pulsarWorkerLeaderResourceURI)
 	var workerLeaderPayload pulsarWorkerLeaderResource
 	require.NoError(t, json.Unmarshal([]byte(workerLeaderContent.Text), &workerLeaderPayload))
 	require.NotNil(t, workerLeaderPayload.Leader)
 	assert.Equal(t, "worker-a", workerLeaderPayload.Leader.WorkerID)
 
-	assignmentsContent := readPulsarTestResource(t, ctx, s, pulsarWorkerAssignmentsResourceURI)
+	assignmentsContent := readPulsarTestResource(ctx, t, s, pulsarWorkerAssignmentsResourceURI)
 	var assignmentsPayload pulsarWorkerAssignmentsResource
 	require.NoError(t, json.Unmarshal([]byte(assignmentsContent.Text), &assignmentsPayload))
 	assert.Equal(t, 1, assignmentsPayload.AssignmentCount)
 	require.Len(t, assignmentsPayload.Workers, 1)
 	assert.Equal(t, []string{"public/default/fn-a-0"}, assignmentsPayload.Workers[0].Assignments)
 
-	workerStatsContent := readPulsarTestResource(t, ctx, s, pulsarWorkerFunctionStatsResourceURI)
+	workerStatsContent := readPulsarTestResource(ctx, t, s, pulsarWorkerFunctionStatsResourceURI)
 	var workerStatsPayload pulsarWorkerFunctionStatsResource
 	require.NoError(t, json.Unmarshal([]byte(workerStatsContent.Text), &workerStatsPayload))
 	assert.Equal(t, 1, workerStatsPayload.Count)
 	require.Len(t, workerStatsPayload.Functions, 1)
 	assert.Equal(t, "public/default/fn-a/0", workerStatsPayload.Functions[0].Name)
 
-	workerMetricsContent := readPulsarTestResource(t, ctx, s, pulsarWorkerMetricsResourceURI)
+	workerMetricsContent := readPulsarTestResource(ctx, t, s, pulsarWorkerMetricsResourceURI)
 	assert.NotContains(t, workerMetricsContent.Text, "secret-worker-token")
 	var workerMetricsPayload pulsarWorkerMetricsResource
 	require.NoError(t, json.Unmarshal([]byte(workerMetricsContent.Text), &workerMetricsPayload))
@@ -1361,18 +1361,18 @@ func TestPulsarClusterResourceFamilyRead(t *testing.T) {
 	s := server.NewMCPServer("test", "0.0.1", server.WithResourceCapabilities(true, true))
 	PulsarAddResources(s, []string{string(FeatureAllPulsar)})
 
-	statusContent := readPulsarTestResource(t, ctx, s, pulsarClusterStatusResourceURI)
+	statusContent := readPulsarTestResource(ctx, t, s, pulsarClusterStatusResourceURI)
 	var statusPayload pulsarClusterStatusResource
 	require.NoError(t, json.Unmarshal([]byte(statusContent.Text), &statusPayload))
 	assert.Equal(t, "OK", statusPayload.Status)
 
-	clustersContent := readPulsarTestResource(t, ctx, s, pulsarClustersResourceURI)
+	clustersContent := readPulsarTestResource(ctx, t, s, pulsarClustersResourceURI)
 	var clustersPayload pulsarClusterCollectionResource
 	require.NoError(t, json.Unmarshal([]byte(clustersContent.Text), &clustersPayload))
 	assert.Equal(t, []string{"use"}, clustersPayload.Clusters)
 	assert.Equal(t, 1, clustersPayload.Count)
 
-	clusterContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v2/clusters/use")
+	clusterContent := readPulsarTestResource(ctx, t, s, "pulsar://admin/v2/clusters/use")
 	assert.NotContains(t, clusterContent.Text, "secret-auth-params")
 	assert.NotContains(t, clusterContent.Text, "/tmp/ca.pem")
 	var clusterPayload pulsarClusterResource
@@ -1382,13 +1382,13 @@ func TestPulsarClusterResourceFamilyRead(t *testing.T) {
 	assert.True(t, clusterPayload.Data.BrokerClientTrustCertsFileConfigured)
 	assert.True(t, clusterPayload.Data.BrokerClientTLSEnabled)
 
-	brokersContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v2/brokers/use")
+	brokersContent := readPulsarTestResource(ctx, t, s, "pulsar://admin/v2/brokers/use")
 	var brokersPayload pulsarBrokerCollectionResource
 	require.NoError(t, json.Unmarshal([]byte(brokersContent.Text), &brokersPayload))
 	assert.ElementsMatch(t, []string{"broker-a:8080", "broker-b:8080"}, brokersPayload.Brokers)
 	assert.Equal(t, 2, brokersPayload.Count)
 
-	statsContent := readPulsarTestResource(t, ctx, s, pulsarBrokerStatsSummaryResourceURI)
+	statsContent := readPulsarTestResource(ctx, t, s, pulsarBrokerStatsSummaryResourceURI)
 	var statsPayload pulsarBrokerStatsSummaryResource
 	require.NoError(t, json.Unmarshal([]byte(statsContent.Text), &statsPayload))
 	assert.Equal(t, 1, statsPayload.MonitoringMetrics.Count)
@@ -1398,19 +1398,19 @@ func TestPulsarClusterResourceFamilyRead(t *testing.T) {
 	assert.Equal(t, 2, statsPayload.LoadReport.BundleCount)
 	assert.Equal(t, 1, statsPayload.LoadReport.ProtocolCount)
 
-	failureDomainsContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v2/clusters/use/failureDomains")
+	failureDomainsContent := readPulsarTestResource(ctx, t, s, "pulsar://admin/v2/clusters/use/failureDomains")
 	var failureDomainsPayload pulsarFailureDomainCollectionResource
 	require.NoError(t, json.Unmarshal([]byte(failureDomainsContent.Text), &failureDomainsPayload))
 	require.Len(t, failureDomainsPayload.FailureDomains, 1)
 	assert.Equal(t, "zone-a", failureDomainsPayload.FailureDomains[0].Name)
 	assert.Equal(t, []string{"broker-a:8080"}, failureDomainsPayload.FailureDomains[0].Brokers)
 
-	failureDomainContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v2/clusters/use/failureDomains/zone-a")
+	failureDomainContent := readPulsarTestResource(ctx, t, s, "pulsar://admin/v2/clusters/use/failureDomains/zone-a")
 	var failureDomainPayload pulsarFailureDomainResource
 	require.NoError(t, json.Unmarshal([]byte(failureDomainContent.Text), &failureDomainPayload))
 	assert.Equal(t, "zone-a", failureDomainPayload.FailureDomain.Name)
 
-	policiesContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v2/clusters/use/namespaceIsolationPolicies")
+	policiesContent := readPulsarTestResource(ctx, t, s, "pulsar://admin/v2/clusters/use/namespaceIsolationPolicies")
 	var policiesPayload pulsarNamespaceIsolationPolicyCollectionResource
 	require.NoError(t, json.Unmarshal([]byte(policiesContent.Text), &policiesPayload))
 	require.Len(t, policiesPayload.Policies, 1)
@@ -1418,7 +1418,7 @@ func TestPulsarClusterResourceFamilyRead(t *testing.T) {
 	assert.Equal(t, 1, policiesPayload.Policies[0].NamespacesCount)
 	assert.Equal(t, "min_available", policiesPayload.Policies[0].AutoFailoverPolicyType)
 
-	policyContent := readPulsarTestResource(t, ctx, s, "pulsar://admin/v2/clusters/use/namespaceIsolationPolicies/policy-a")
+	policyContent := readPulsarTestResource(ctx, t, s, "pulsar://admin/v2/clusters/use/namespaceIsolationPolicies/policy-a")
 	var policyPayload pulsarNamespaceIsolationPolicyResource
 	require.NoError(t, json.Unmarshal([]byte(policyContent.Text), &policyPayload))
 	assert.Equal(t, "policy-a", policyPayload.Policy.Name)
@@ -1501,7 +1501,7 @@ func listPulsarTestResourceTemplates(t *testing.T, s *server.MCPServer) []mcp.Re
 	return result.ResourceTemplates
 }
 
-func readPulsarTestResource(t *testing.T, ctx context.Context, s *server.MCPServer, uri string) mcp.TextResourceContents {
+func readPulsarTestResource(ctx context.Context, t *testing.T, s *server.MCPServer, uri string) mcp.TextResourceContents {
 	t.Helper()
 
 	request := fmt.Sprintf(`{

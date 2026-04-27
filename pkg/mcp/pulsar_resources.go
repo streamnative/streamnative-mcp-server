@@ -976,14 +976,14 @@ func PulsarAddResources(s *server.MCPServer, features []string) {
 
 	catalog := buildPulsarResourceCatalog(resourceRegistrations, templateRegistrations)
 	baseResources := []server.ServerResource{
-		server.ServerResource{
+		{
 			Resource: mcp.NewResource(pulsarResourceContextURI, "Pulsar Context",
 				mcp.WithResourceDescription("Current Pulsar session connection metadata with authentication material redacted."),
 				mcp.WithMIMEType(pulsarResourceJSONMIMEType),
 			),
 			Handler: handlePulsarContextResource,
 		},
-		server.ServerResource{
+		{
 			Resource: mcp.NewResource(pulsarResourceCatalogURI, "Pulsar Resource Catalog",
 				mcp.WithResourceDescription("Stable catalog of Pulsar MCP resource URIs and URI templates."),
 				mcp.WithMIMEType(pulsarResourceJSONMIMEType),
@@ -994,7 +994,9 @@ func PulsarAddResources(s *server.MCPServer, features []string) {
 		},
 	}
 
-	allResources := append(baseResources, resourceRegistrations...)
+	allResources := make([]server.ServerResource, 0, len(baseResources)+len(resourceRegistrations))
+	allResources = append(allResources, baseResources...)
+	allResources = append(allResources, resourceRegistrations...)
 	s.AddResources(allResources...)
 	if len(templateRegistrations) > 0 {
 		s.AddResourceTemplates(templateRegistrations...)
@@ -3012,7 +3014,7 @@ func handlePulsarWorkerMetricsResource(ctx context.Context, request mcp.ReadReso
 func requirePulsarResourceSession(ctx context.Context) (*pulsarsession.Session, error) {
 	session := context2.GetPulsarSession(ctx)
 	if session == nil {
-		return nil, fmt.Errorf("Pulsar session not found in context")
+		return nil, fmt.Errorf("pulsar session not found in context")
 	}
 	return session, nil
 }
@@ -3026,7 +3028,7 @@ func getPulsarResourceAdminClient(session *pulsarsession.Session) (cmdutils.Clie
 		return nil, fmt.Errorf("failed to get Pulsar admin client: %w", err)
 	}
 	if adminClient == nil {
-		return nil, fmt.Errorf("Pulsar admin client not found in session")
+		return nil, fmt.Errorf("pulsar admin client not found in session")
 	}
 	return adminClient, nil
 }
@@ -3040,7 +3042,7 @@ func getPulsarResourceAdminV3Client(session *pulsarsession.Session) (cmdutils.Cl
 		return nil, fmt.Errorf("failed to get Pulsar admin v3 client: %w", err)
 	}
 	if adminClient == nil {
-		return nil, fmt.Errorf("Pulsar admin v3 client not found in session")
+		return nil, fmt.Errorf("pulsar admin v3 client not found in session")
 	}
 	return adminClient, nil
 }
@@ -4081,7 +4083,7 @@ func buildPulsarContextResource(uri string, session *pulsarsession.Session) (pul
 		}
 	}
 	if ctx.ServiceURL == "" && ctx.WebServiceURL == "" {
-		return pulsarContextResource{}, fmt.Errorf("Pulsar session is not configured")
+		return pulsarContextResource{}, fmt.Errorf("pulsar session is not configured")
 	}
 
 	return pulsarContextResource{
@@ -4177,10 +4179,10 @@ func parsePulsarResourceURI(rawURI string) (pulsarResourceURI, error) {
 		return pulsarResourceURI{}, fmt.Errorf("unsupported Pulsar resource URI scheme %q", parsed.Scheme)
 	}
 	if parsed.User != nil {
-		return pulsarResourceURI{}, fmt.Errorf("Pulsar resource URI %q must not include user info", rawURI)
+		return pulsarResourceURI{}, fmt.Errorf("pulsar resource URI %q must not include user info", rawURI)
 	}
 	if parsed.RawQuery != "" || parsed.Fragment != "" {
-		return pulsarResourceURI{}, fmt.Errorf("Pulsar resource URI %q must not include query or fragment", rawURI)
+		return pulsarResourceURI{}, fmt.Errorf("pulsar resource URI %q must not include query or fragment", rawURI)
 	}
 
 	switch parsed.Host {
@@ -4568,7 +4570,7 @@ func parsePulsarTopicAdminResourceURI(rawURI string, parts []string) (pulsarReso
 			return base, nil
 		case "cursor":
 			if topicDomain != "persistent" {
-				return pulsarResourceURI{}, fmt.Errorf("Pulsar subscription cursor resource URI %q only supports persistent topics", rawURI)
+				return pulsarResourceURI{}, fmt.Errorf("pulsar subscription cursor resource URI %q only supports persistent topics", rawURI)
 			}
 			base.kind = pulsarResourceKindSubscriptionCursor
 			return base, nil
@@ -4633,10 +4635,10 @@ func splitPulsarResourcePath(path string) []string {
 
 func validatePulsarResourcePathSegment(name, value string) error {
 	if strings.TrimSpace(value) == "" {
-		return fmt.Errorf("Pulsar resource URI %s segment must not be empty", name)
+		return fmt.Errorf("pulsar resource URI %s segment must not be empty", name)
 	}
 	if strings.Contains(value, "/") {
-		return fmt.Errorf("Pulsar resource URI %s segment must not contain path separators", name)
+		return fmt.Errorf("pulsar resource URI %s segment must not contain path separators", name)
 	}
 	return nil
 }
