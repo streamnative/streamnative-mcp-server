@@ -2446,11 +2446,7 @@ func getPulsarClusterStatus(session *pulsarsession.Session) (string, error) {
 		return "", fmt.Errorf("failed to check Pulsar status: %w", err)
 	}
 
-	status := strings.TrimSpace(string(data))
-	if status == "" {
-		status = string(data)
-	}
-	return status, nil
+	return strings.TrimSpace(string(data)), nil
 }
 
 func sanitizePulsarClusterData(clusterName string, data utils.ClusterData) pulsarClusterDataSummary {

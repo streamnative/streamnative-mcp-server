@@ -95,12 +95,7 @@ func (b *PulsarAdminStatusToolBuilder) buildStatusHandler() func(context.Context
 			return b.handleError("check Pulsar status", err), nil
 		}
 
-		status := strings.TrimSpace(string(data))
-		if status == "" {
-			status = string(data)
-		}
-
-		return mcp.NewToolResultText(status), nil
+		return mcp.NewToolResultText(strings.TrimSpace(string(data))), nil
 	}
 }
 
