@@ -33,6 +33,83 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestNewPulsarResourceRegistrations(t *testing.T) {
+	t.Parallel()
+
+	t.Run("disabled for unrelated features", func(t *testing.T) {
+		registrations := NewPulsarResourceRegistrations([]string{string(FeatureKafkaAdmin)})
+
+		assert.Empty(t, registrations.Resources)
+		assert.Empty(t, registrations.Templates)
+	})
+
+	t.Run("enabled for all-pulsar", func(t *testing.T) {
+		registrations := NewPulsarResourceRegistrations([]string{string(FeatureAllPulsar)})
+
+		assert.ElementsMatch(t, allPulsarTestResourceURIs(), pulsarTestRegistrationResourceURIs(registrations.Resources))
+		assert.ElementsMatch(t, allPulsarTestResourceTemplateURIs(), pulsarTestRegistrationTemplateURIs(registrations.Templates))
+	})
+
+	t.Run("catalog contains enabled surface only", func(t *testing.T) {
+		registrations := NewPulsarResourceRegistrations([]string{string(FeaturePulsarAdminClusters)})
+		catalog := readPulsarTestCatalogFromRegistrations(t, registrations)
+
+		assert.ElementsMatch(t, []string{
+			pulsarResourceContextURI,
+			pulsarResourceCatalogURI,
+			pulsarClustersResourceURI,
+		}, pulsarTestCatalogResourceURIs(catalog))
+		assert.ElementsMatch(t, []string{
+			pulsarClusterResourceTemplateURI,
+			pulsarFailureDomainsTemplateURI,
+			pulsarFailureDomainTemplateURI,
+		}, pulsarTestCatalogTemplateURIs(catalog))
+		assert.NotContains(t, pulsarTestCatalogResourceURIs(catalog), pulsarTenantsResourceURI)
+		assert.NotContains(t, pulsarTestCatalogResourceURIs(catalog), pulsarDefaultResourceQuotaURI)
+		assert.NotContains(t, pulsarTestCatalogTemplateURIs(catalog), pulsarTopicsResourceTemplateURI)
+		assert.NotContains(t, pulsarTestCatalogTemplateURIs(catalog), pulsarResourceQuotaTemplateURI)
+	})
+}
+
+func TestPulsarAddResourcesMatchesNewPulsarResourceRegistrations(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		features []string
+	}{
+		{
+			name:     "all pulsar",
+			features: []string{string(FeatureAllPulsar)},
+		},
+		{
+			name: "selected pulsar resource families",
+			features: []string{
+				string(FeaturePulsarAdminTenants),
+				string(FeaturePulsarAdminTopics),
+				string(FeaturePulsarAdminSchemas),
+				string(FeaturePulsarAdminResourceQuotas),
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			registrations := NewPulsarResourceRegistrations(tt.features)
+			s := server.NewMCPServer("test", "0.0.1", server.WithResourceCapabilities(true, true))
+			PulsarAddResources(s, tt.features)
+
+			resources := listPulsarTestResources(t, s)
+			templates := listPulsarTestResourceTemplates(t, s)
+
+			assert.Len(t, resources, len(registrations.Resources))
+			assert.Len(t, templates, len(registrations.Templates))
+			assert.ElementsMatch(t, pulsarTestRegistrationResourceURIs(registrations.Resources), pulsarTestResourceURIs(resources))
+			assert.ElementsMatch(t, pulsarTestRegistrationTemplateURIs(registrations.Templates), pulsarTestResourceTemplateURIs(templates))
+		})
+	}
+}
+
 func TestPulsarAddResourcesFeatureGate(t *testing.T) {
 	t.Parallel()
 
@@ -1611,6 +1688,137 @@ func listPulsarTestResourceTemplates(t *testing.T, s *server.MCPServer) []mcp.Re
 	result, ok := resp.Result.(mcp.ListResourceTemplatesResult)
 	require.True(t, ok, "expected ListResourceTemplatesResult, got %T", resp.Result)
 	return result.ResourceTemplates
+}
+
+func allPulsarTestResourceURIs() []string {
+	return []string{
+		pulsarResourceContextURI,
+		pulsarResourceCatalogURI,
+		pulsarTenantsResourceURI,
+		pulsarDefaultResourceQuotaURI,
+		pulsarClusterStatusResourceURI,
+		pulsarClustersResourceURI,
+		pulsarBrokerStatsSummaryResourceURI,
+		pulsarWorkerClusterResourceURI,
+		pulsarWorkerLeaderResourceURI,
+		pulsarWorkerAssignmentsResourceURI,
+		pulsarWorkerFunctionStatsResourceURI,
+		pulsarWorkerMetricsResourceURI,
+	}
+}
+
+func allPulsarTestResourceTemplateURIs() []string {
+	return []string{
+		pulsarTenantResourceTemplateURI,
+		pulsarNamespacesResourceTemplateURI,
+		pulsarNamespaceResourceTemplateURI,
+		pulsarTopicsResourceTemplateURI,
+		pulsarTopicMetadataTemplateURI,
+		pulsarTopicStatsTemplateURI,
+		pulsarTopicPartitionMetadataURI,
+		pulsarTopicPolicyTemplateURI,
+		pulsarTopicSchemaTemplateURI,
+		pulsarTopicSchemaVersionTemplateURI,
+		pulsarSubscriptionsTemplateURI,
+		pulsarSubscriptionStatsTemplateURI,
+		pulsarSubscriptionBacklogTemplateURI,
+		pulsarSubscriptionCursorTemplateURI,
+		pulsarFunctionsTemplateURI,
+		pulsarFunctionMetadataTemplateURI,
+		pulsarFunctionStatusTemplateURI,
+		pulsarFunctionStatsTemplateURI,
+		pulsarSourcesTemplateURI,
+		pulsarSourceMetadataTemplateURI,
+		pulsarSourceStatusTemplateURI,
+		pulsarSinksTemplateURI,
+		pulsarSinkMetadataTemplateURI,
+		pulsarSinkStatusTemplateURI,
+		pulsarPackagesTemplateURI,
+		pulsarPackageVersionsTemplateURI,
+		pulsarPackageMetadataTemplateURI,
+		pulsarResourceQuotaTemplateURI,
+		pulsarClusterResourceTemplateURI,
+		pulsarBrokersResourceTemplateURI,
+		pulsarFailureDomainsTemplateURI,
+		pulsarFailureDomainTemplateURI,
+		pulsarNSIsolationPoliciesTemplateURI,
+		pulsarNSIsolationPolicyTemplateURI,
+	}
+}
+
+func pulsarTestRegistrationResourceURIs(resources []server.ServerResource) []string {
+	uris := make([]string, 0, len(resources))
+	for _, resource := range resources {
+		uris = append(uris, resource.Resource.URI)
+	}
+	return uris
+}
+
+func pulsarTestRegistrationTemplateURIs(templates []server.ServerResourceTemplate) []string {
+	uris := make([]string, 0, len(templates))
+	for _, template := range templates {
+		uris = append(uris, template.Template.URITemplate.Raw())
+	}
+	return uris
+}
+
+func pulsarTestResourceURIs(resources []mcp.Resource) []string {
+	uris := make([]string, 0, len(resources))
+	for _, resource := range resources {
+		uris = append(uris, resource.URI)
+	}
+	return uris
+}
+
+func pulsarTestResourceTemplateURIs(templates []mcp.ResourceTemplate) []string {
+	uris := make([]string, 0, len(templates))
+	for _, template := range templates {
+		uris = append(uris, template.URITemplate.Raw())
+	}
+	return uris
+}
+
+func readPulsarTestCatalogFromRegistrations(t *testing.T, registrations PulsarResourceRegistrations) pulsarResourceCatalog {
+	t.Helper()
+
+	for _, resource := range registrations.Resources {
+		if resource.Resource.URI != pulsarResourceCatalogURI {
+			continue
+		}
+
+		contents, err := resource.Handler(
+			context.Background(),
+			mcp.ReadResourceRequest{Params: mcp.ReadResourceParams{URI: pulsarResourceCatalogURI}},
+		)
+		require.NoError(t, err)
+		require.Len(t, contents, 1)
+
+		content, ok := contents[0].(mcp.TextResourceContents)
+		require.True(t, ok, "expected TextResourceContents, got %T", contents[0])
+
+		var catalog pulsarResourceCatalog
+		require.NoError(t, json.Unmarshal([]byte(content.Text), &catalog))
+		return catalog
+	}
+
+	require.FailNow(t, "missing Pulsar resource catalog registration")
+	return pulsarResourceCatalog{}
+}
+
+func pulsarTestCatalogResourceURIs(catalog pulsarResourceCatalog) []string {
+	uris := make([]string, 0, len(catalog.Resources))
+	for _, resource := range catalog.Resources {
+		uris = append(uris, resource.URI)
+	}
+	return uris
+}
+
+func pulsarTestCatalogTemplateURIs(catalog pulsarResourceCatalog) []string {
+	uris := make([]string, 0, len(catalog.Templates))
+	for _, template := range catalog.Templates {
+		uris = append(uris, template.URITemplate)
+	}
+	return uris
 }
 
 func readPulsarTestResource(ctx context.Context, t *testing.T, s *server.MCPServer, uri string) mcp.TextResourceContents {

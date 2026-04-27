@@ -963,11 +963,17 @@ type pulsarWorkerMetricsResource struct {
 	MonitoringMetrics pulsarMonitoringMetricsSummary `json:"monitoringMetrics"`
 }
 
-// PulsarAddResources registers the read-only Pulsar MCP resource surface.
-func PulsarAddResources(s *server.MCPServer, features []string) {
+// PulsarResourceRegistrations contains read-only Pulsar MCP resources and resource templates.
+type PulsarResourceRegistrations struct {
+	Resources []server.ServerResource
+	Templates []server.ServerResourceTemplate
+}
+
+// NewPulsarResourceRegistrations builds the read-only Pulsar MCP resource registrations for the enabled features.
+func NewPulsarResourceRegistrations(features []string) PulsarResourceRegistrations {
 	resourceRegistrations, templateRegistrations := buildPulsarResourceRegistrations(features)
 	if len(resourceRegistrations) == 0 && len(templateRegistrations) == 0 {
-		return
+		return PulsarResourceRegistrations{}
 	}
 
 	catalog := buildPulsarResourceCatalog(resourceRegistrations, templateRegistrations)
@@ -993,9 +999,23 @@ func PulsarAddResources(s *server.MCPServer, features []string) {
 	allResources := make([]server.ServerResource, 0, len(baseResources)+len(resourceRegistrations))
 	allResources = append(allResources, baseResources...)
 	allResources = append(allResources, resourceRegistrations...)
-	s.AddResources(allResources...)
-	if len(templateRegistrations) > 0 {
-		s.AddResourceTemplates(templateRegistrations...)
+
+	return PulsarResourceRegistrations{
+		Resources: allResources,
+		Templates: templateRegistrations,
+	}
+}
+
+// PulsarAddResources registers the read-only Pulsar MCP resource surface.
+func PulsarAddResources(s *server.MCPServer, features []string) {
+	registrations := NewPulsarResourceRegistrations(features)
+	if len(registrations.Resources) == 0 && len(registrations.Templates) == 0 {
+		return
+	}
+
+	s.AddResources(registrations.Resources...)
+	if len(registrations.Templates) > 0 {
+		s.AddResourceTemplates(registrations.Templates...)
 	}
 }
 
