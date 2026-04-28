@@ -17,20 +17,23 @@ package pulsar
 import (
 	"testing"
 
+	pulsarclient "github.com/apache/pulsar-client-go/pulsar"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/stretchr/testify/require"
 )
+
+const contextNotSetErr = "err: ContextNotSetErr: Please set the cluster context first"
 
 func TestSessionGetPulsarCtlConfigRequiresWebServiceURL(t *testing.T) {
 	session := &Session{}
 
 	_, err := session.GetPulsarCtlConfig()
-	require.EqualError(t, err, "err: ContextNotSetErr: Please set the cluster context first")
+	require.EqualError(t, err, contextNotSetErr)
 
 	session.PulsarCtlConfig = &cmdutils.ClusterConfig{}
 
 	_, err = session.GetPulsarCtlConfig()
-	require.EqualError(t, err, "err: ContextNotSetErr: Please set the cluster context first")
+	require.EqualError(t, err, contextNotSetErr)
 }
 
 func TestSessionGetPulsarCtlConfigReturnsCopy(t *testing.T) {
@@ -53,12 +56,12 @@ func TestSessionGetAdminStatusClientRequiresWebServiceURL(t *testing.T) {
 	session := &Session{}
 
 	_, err := session.GetAdminStatusClient()
-	require.EqualError(t, err, "err: ContextNotSetErr: Please set the cluster context first")
+	require.EqualError(t, err, contextNotSetErr)
 
 	session.PulsarCtlConfig = &cmdutils.ClusterConfig{}
 
 	_, err = session.GetAdminStatusClient()
-	require.EqualError(t, err, "err: ContextNotSetErr: Please set the cluster context first")
+	require.EqualError(t, err, contextNotSetErr)
 }
 
 func TestSessionGetAdminStatusClientReturnsCachedClient(t *testing.T) {
@@ -75,6 +78,54 @@ func TestSessionGetAdminStatusClientReturnsCachedClient(t *testing.T) {
 	secondClient, err := session.GetAdminStatusClient()
 	require.NoError(t, err)
 	require.Same(t, firstClient, secondClient)
+}
+
+func TestSessionGetAdminClientsRequireWebServiceURL(t *testing.T) {
+	session := &Session{}
+
+	_, err := session.GetAdminClient()
+	require.EqualError(t, err, contextNotSetErr)
+
+	_, err = session.GetAdminV3Client()
+	require.EqualError(t, err, contextNotSetErr)
+
+	session.PulsarCtlConfig = &cmdutils.ClusterConfig{}
+
+	_, err = session.GetAdminClient()
+	require.EqualError(t, err, contextNotSetErr)
+
+	_, err = session.GetAdminV3Client()
+	require.EqualError(t, err, contextNotSetErr)
+}
+
+func TestSessionResetPulsarContextClearsContextAndClients(t *testing.T) {
+	session := &Session{
+		Ctx: PulsarContext{
+			ServiceURL:    "pulsar://pulsar.example.com:6650",
+			WebServiceURL: "http://pulsar.example.com:8080",
+			Token:         "token",
+		},
+		PulsarCtlConfig: &cmdutils.ClusterConfig{
+			WebServiceURL: "http://pulsar.example.com:8080",
+		},
+		ClientOptions: pulsarclient.ClientOptions{URL: "pulsar://pulsar.example.com:6650"},
+	}
+
+	session.ResetPulsarContext()
+
+	require.Equal(t, PulsarContext{}, session.Ctx)
+	require.Nil(t, session.Client)
+	require.Nil(t, session.AdminClient)
+	require.Nil(t, session.AdminV3Client)
+	require.Equal(t, pulsarclient.ClientOptions{}, session.ClientOptions)
+	require.Nil(t, session.PulsarCtlConfig)
+	require.Nil(t, session.adminStatusREST)
+
+	_, err := session.GetAdminClient()
+	require.EqualError(t, err, contextNotSetErr)
+
+	_, err = session.GetPulsarClient()
+	require.EqualError(t, err, contextNotSetErr)
 }
 
 func TestSessionSetPulsarContextResetsAdminStatusClient(t *testing.T) {

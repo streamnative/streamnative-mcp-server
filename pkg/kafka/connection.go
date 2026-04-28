@@ -149,6 +149,9 @@ func saslOpt(config *SASLConfig, opts []kgo.Opt) ([]kgo.Opt, error) {
 
 // SetKafkaContext initializes Kafka clients using the provided context.
 func (s *Session) SetKafkaContext(ctx KafkaContext) error {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
 	s.Ctx = ctx
 	kc := &s.Ctx
 	var err error
@@ -209,10 +212,31 @@ func (s *Session) SetKafkaContext(ctx KafkaContext) error {
 	return nil
 }
 
+// ResetKafkaContext clears the current Kafka context and closes the data client.
+func (s *Session) ResetKafkaContext() {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	if s.Client != nil {
+		s.Client.Close()
+	}
+
+	s.Ctx = KafkaContext{}
+	s.Client = nil
+	s.AdminClient = nil
+	s.SchemaRegistryClient = nil
+	s.ConnectClient = nil
+	s.Options = nil
+}
+
 // GetClient returns a Kafka client with optional overrides.
 func (s *Session) GetClient(opts ...kgo.Opt) (*kgo.Client, error) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
+
+	if s.Ctx.BootstrapServers == "" {
+		return nil, fmt.Errorf("err: ContextNotSetErr: Please set the cluster context first")
+	}
 
 	if len(opts) > 0 {
 		//nolint:gocritic
@@ -240,6 +264,10 @@ func (s *Session) GetAdminClient() (*kadm.Client, error) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
+	if s.Ctx.BootstrapServers == "" {
+		return nil, fmt.Errorf("err: ContextNotSetErr: Please set the cluster context first")
+	}
+
 	if s.AdminClient == nil {
 		if s.Client == nil {
 			var err error
@@ -256,12 +284,15 @@ func (s *Session) GetAdminClient() (*kadm.Client, error) {
 
 // GetSchemaRegistryClient returns the schema registry client.
 func (s *Session) GetSchemaRegistryClient() (*sr.Client, error) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	if s.Ctx.BootstrapServers == "" {
+		return nil, fmt.Errorf("err: ContextNotSetErr: Please set the cluster context first")
+	}
 	if s.Ctx.SchemaRegistryURL == "" {
 		return nil, fmt.Errorf("schema registry not enabled on the current context")
 	}
-
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
 
 	if s.SchemaRegistryClient == nil {
 		SrOpts := []sr.ClientOpt{}
@@ -285,12 +316,15 @@ func (s *Session) GetSchemaRegistryClient() (*sr.Client, error) {
 
 // GetConnectClient returns the Kafka Connect client.
 func (s *Session) GetConnectClient() (Connect, error) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	if s.Ctx.BootstrapServers == "" {
+		return nil, fmt.Errorf("err: ContextNotSetErr: Please set the cluster context first")
+	}
 	if s.Ctx.ConnectURL == "" {
 		return nil, fmt.Errorf("kafka connect not enabled on the current context")
 	}
-
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
 
 	if s.ConnectClient == nil {
 		var err error

@@ -123,7 +123,8 @@ func HandleSNCloudLogs(ctx context.Context, request mcp.CallToolRequest) (*mcp.C
 	if session == nil {
 		return nil, fmt.Errorf("failed to get StreamNative Cloud session")
 	}
-	instance, cluster, organization := session.Ctx.PulsarInstance, session.Ctx.PulsarCluster, session.Ctx.Organization
+	instance, cluster := session.GetPulsarClusterContext()
+	organization := session.Ctx.Organization
 	if instance == "" || cluster == "" || organization == "" {
 		return mcp.NewToolResultError("No context is set, please use `sncloud_context_use_cluster` to set the context first."), nil
 	}

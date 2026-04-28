@@ -192,9 +192,35 @@ func SetContext(ctx context.Context, options *config.Options, instanceName, clus
 		return fmt.Errorf("failed to change kafka context: %v", err)
 	}
 
+	session.SetPulsarClusterContext(instanceName, clusterName)
+
 	// TODO: check if need to set log client
 	// if issuer != nil && options.AuthOptions.Store != nil {
 	// }
+
+	return nil
+}
+
+// ResetContext clears StreamNative Cloud cluster bindings and protocol sessions.
+func ResetContext(ctx context.Context) error {
+	session := context2.GetSNCloudSession(ctx)
+	if session == nil {
+		return fmt.Errorf("failed to get StreamNative Cloud session")
+	}
+
+	psession := context2.GetPulsarSession(ctx)
+	if psession == nil {
+		return fmt.Errorf("failed to get pulsar session")
+	}
+
+	ksession := context2.GetKafkaSession(ctx)
+	if ksession == nil {
+		return fmt.Errorf("failed to get kafka session")
+	}
+
+	psession.ResetPulsarContext()
+	ksession.ResetKafkaContext()
+	session.ResetPulsarClusterContext()
 
 	return nil
 }

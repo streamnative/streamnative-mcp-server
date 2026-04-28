@@ -155,6 +155,28 @@ func NewSNCloudSessionFromOptions(options *Options) (*Session, error) {
 	return session, nil
 }
 
+// SetPulsarClusterContext updates the StreamNative Cloud cluster binding for the session.
+func (s *Session) SetPulsarClusterContext(instance, cluster string) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	s.Ctx.PulsarInstance = instance
+	s.Ctx.PulsarCluster = cluster
+}
+
+// ResetPulsarClusterContext clears the StreamNative Cloud cluster binding for the session.
+func (s *Session) ResetPulsarClusterContext() {
+	s.SetPulsarClusterContext("", "")
+}
+
+// GetPulsarClusterContext returns the current StreamNative Cloud cluster binding.
+func (s *Session) GetPulsarClusterContext() (string, string) {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	return s.Ctx.PulsarInstance, s.Ctx.PulsarCluster
+}
+
 // initializeTokenRefresher initializes the token refresher for the session
 func (s *Session) initializeTokenRefresher() error {
 	s.mutex.Lock()

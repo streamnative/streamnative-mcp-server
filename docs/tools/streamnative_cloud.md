@@ -21,6 +21,15 @@ If you encounter `ContextNotSetErr`, use `sncloud_context_available_clusters` to
 
 ---
 
+#### sncloud_context_reset
+
+Reset the current StreamNative Cloud cluster context. After reset, the session has no bound Pulsar or Kafka cluster connection, and cluster-specific tools will return `ContextNotSetErr` until `sncloud_context_use_cluster` is used again.
+
+- **sncloud_context_reset**
+  - No parameters required
+
+---
+
 #### sncloud_context_whoami
 
 Display the currently logged-in service account. Returns the name of the authenticated service account and the organization.

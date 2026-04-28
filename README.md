@@ -97,7 +97,7 @@ If you want to access to your StreamNative Cloud, you will need to have followin
 bin/snmcp stdio --organization my-org --key-file /path/to/key-file.json
 
 # Start MCP server with StreamNative Cloud authentication and pre-configured context
-# When --pulsar-instance and --pulsar-cluster are provided, context management tools are disabled
+# When --pulsar-instance and --pulsar-cluster are provided, context mutation tools are disabled
 bin/snmcp stdio --organization my-org --key-file /path/to/key-file.json --pulsar-instance my-instance --pulsar-cluster my-cluster
 
 # Start MCP server with external Kafka
@@ -118,7 +118,7 @@ docker run -i --rm -e SNMCP_ORGANIZATION=my-org -e SNMCP_KEY_FILE=/key.json -v /
 bin/snmcp sse --http-addr :9090 --http-path /mcp --organization my-org --key-file /path/to/key-file.json
 
 # Start MCP server with SSE and pre-configured StreamNative Cloud context
-# When --pulsar-instance and --pulsar-cluster are provided, context management tools are disabled
+# When --pulsar-instance and --pulsar-cluster are provided, context mutation tools are disabled
 bin/snmcp sse --http-addr :9090 --http-path /mcp --organization my-org --key-file /path/to/key-file.json --pulsar-instance my-instance --pulsar-cluster my-cluster
 
 # Start MCP server with SSE and external Kafka
@@ -292,7 +292,7 @@ Pulsar admin feature gates also register read-only MCP resources for the matchin
 | `streamnative-cloud`| Manage StreamNative Cloud context and check resource logs         | [streamnative_cloud.md](docs/tools/streamnative_cloud.md) |
 | `functions-as-tools`     | Dynamically exposes deployed Pulsar Functions as invokable MCP tools, with automatic input/output schema handling. | [functions_as_tools.md](docs/tools/functions_as_tools.md)  |
 
-> **Note:** When using `--pulsar-instance` and `--pulsar-cluster` flags together, context management tools (`sncloud_context_use_cluster`) are automatically disabled since the context is pre-configured.
+> **Note:** When using `--pulsar-instance` and `--pulsar-cluster` flags together, context mutation tools (`sncloud_context_use_cluster`, `sncloud_context_reset`) are automatically disabled since the context is pre-configured.
 
 You can combine these features as needed using the `--features` flag. For example, to enable only Pulsar client features:
 ```bash
