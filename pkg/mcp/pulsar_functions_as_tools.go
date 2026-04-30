@@ -73,7 +73,8 @@ func (s *Server) PulsarFunctionManagedMcpTools(readOnly bool, features []string,
 		// For example: stop the manager, send alerts, implement backoff strategies
 	}
 
-	if s.SNCloudSession.Ctx.Organization == "" || s.SNCloudSession.Ctx.PulsarInstance == "" || s.SNCloudSession.Ctx.PulsarCluster == "" {
+	instance, cluster := s.SNCloudSession.GetPulsarClusterContext()
+	if s.SNCloudSession.Ctx.Organization == "" || instance == "" || cluster == "" {
 		log.Printf("Skipping Pulsar Functions as MCP Tools because both organization, pulsar instance and pulsar cluster are not set")
 		return
 	}

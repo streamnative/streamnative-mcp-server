@@ -170,12 +170,30 @@ func (s *Session) SetPulsarContext(ctx PulsarContext) error {
 	return nil
 }
 
+// ResetPulsarContext clears the current Pulsar context and closes the data client.
+func (s *Session) ResetPulsarContext() {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	if s.Client != nil {
+		s.Client.Close()
+	}
+
+	s.Ctx = PulsarContext{}
+	s.Client = nil
+	s.AdminClient = nil
+	s.AdminV3Client = nil
+	s.ClientOptions = pulsar.ClientOptions{}
+	s.PulsarCtlConfig = nil
+	s.adminStatusREST = nil
+}
+
 // GetAdminClient returns the Pulsar admin v2 client.
 func (s *Session) GetAdminClient() (cmdutils.Client, error) {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 
-	if s.PulsarCtlConfig.WebServiceURL == "" {
+	if s.PulsarCtlConfig == nil || s.PulsarCtlConfig.WebServiceURL == "" {
 		return nil, fmt.Errorf("err: ContextNotSetErr: Please set the cluster context first")
 	}
 	return s.AdminClient, nil
@@ -186,7 +204,7 @@ func (s *Session) GetAdminV3Client() (cmdutils.Client, error) {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 
-	if s.PulsarCtlConfig.WebServiceURL == "" {
+	if s.PulsarCtlConfig == nil || s.PulsarCtlConfig.WebServiceURL == "" {
 		return nil, fmt.Errorf("err: ContextNotSetErr: Please set the cluster context first")
 	}
 	return s.AdminV3Client, nil

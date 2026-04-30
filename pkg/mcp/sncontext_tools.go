@@ -49,9 +49,13 @@ func RegisterContextTools(s *server.MCPServer, features []string, skipContextToo
 			mcp.Description("The name of the pulsar cluster to use"),
 		),
 	)
-	// Skip registering context tools if context is already provided
+	resetContextTool := mcp.NewTool("sncloud_context_reset",
+		mcp.WithDescription("Reset the current StreamNative Cloud cluster context. After reset, the session has no bound Pulsar or Kafka cluster connection; use `sncloud_context_use_cluster` before calling cluster-specific tools again."),
+	)
+	// Skip registering context mutation tools if context is already provided
 	if !skipContextTools {
 		s.AddTool(setContextTool, handleSetContext)
+		s.AddTool(resetContextTool, handleResetContext)
 	}
 
 	// Add available-contexts tool
@@ -110,6 +114,15 @@ func handleSetContext(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 	}
 
 	return mcp.NewToolResultText("StreamNative Cloud context set successfully"), nil
+}
+
+// handleResetContext handles the reset-context tool request
+func handleResetContext(ctx context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	if err := ResetContext(ctx); err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to reset context: %v", err)), nil
+	}
+
+	return mcp.NewToolResultText("StreamNative Cloud context reset successfully"), nil
 }
 
 func handleAvailableContexts(ctx context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {

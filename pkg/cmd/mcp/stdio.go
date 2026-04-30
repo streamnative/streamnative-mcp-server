@@ -30,6 +30,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/log"
+	mcpctx "github.com/streamnative/streamnative-mcp-server/pkg/mcp"
 )
 
 // NewCmdMcpStdioServer builds the stdio server command.
@@ -67,6 +68,15 @@ func runStdioServer(configOpts *ServerOptions) error {
 	mcpServer, err := newMcpServer(ctx, configOpts, logger)
 	if err != nil {
 		return fmt.Errorf("failed to create MCP server: %w", err)
+	}
+
+	ctx = mcpctx.WithSNCloudSession(ctx, mcpServer.SNCloudSession)
+	ctx = mcpctx.WithPulsarSession(ctx, mcpServer.PulsarSession)
+	ctx = mcpctx.WithKafkaSession(ctx, mcpServer.KafkaSession)
+	if configOpts.KeyFile != "" && configOpts.PulsarInstance != "" && configOpts.PulsarCluster != "" {
+		if err := mcpctx.SetContext(ctx, configOpts.Options, configOpts.PulsarInstance, configOpts.PulsarCluster); err != nil {
+			return fmt.Errorf("failed to set StreamNative Cloud context: %w", err)
+		}
 	}
 
 	stdioServer := server.NewStdioServer(mcpServer.MCPServer)
