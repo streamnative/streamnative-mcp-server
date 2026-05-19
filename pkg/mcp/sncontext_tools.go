@@ -50,11 +50,11 @@ func RegisterContextTools(s *server.MCPServer, features []string, readOnly bool,
 		mcp.WithString("clusterName", mcp.Required(),
 			mcp.Description("The name of the pulsar cluster to use"),
 		),
-		toolannotations.Destructive("Use StreamNative Cloud Cluster Context"),
+		toolannotations.LocalSessionMutation("Use StreamNative Cloud Cluster Context"),
 	)
 	resetContextTool := mcp.NewTool("sncloud_context_reset",
 		mcp.WithDescription("Reset the current StreamNative Cloud cluster context. After reset, the session has no bound Pulsar or Kafka cluster connection; use `sncloud_context_use_cluster` before calling cluster-specific tools again."),
-		toolannotations.Destructive("Reset StreamNative Cloud Cluster Context"),
+		toolannotations.LocalSessionMutation("Reset StreamNative Cloud Cluster Context"),
 	)
 	// Skip registering context mutation tools when context is already provided or the server is read-only.
 	if !skipContextTools && !readOnly {

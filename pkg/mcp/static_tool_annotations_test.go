@@ -28,18 +28,16 @@ func TestStreamNativeStaticToolAnnotations(t *testing.T) {
 		tool        mcpgotypes.Tool
 		readOnly    bool
 		destructive bool
+		idempotent  bool
+		openWorld   bool
 	}{
-		{name: "sncloud_logs", tool: NewSNCloudLogsTool(), readOnly: true},
-		{name: "sncloud_resources_apply", tool: NewSNCloudResourcesApplyTool(), destructive: true},
-		{name: "sncloud_resources_delete", tool: NewSNCloudResourcesDeleteTool(), destructive: true},
+		{name: "sncloud_logs", tool: NewSNCloudLogsTool(), readOnly: true, idempotent: true, openWorld: true},
+		{name: "sncloud_resources_apply", tool: NewSNCloudResourcesApplyTool(), destructive: true, openWorld: true},
+		{name: "sncloud_resources_delete", tool: NewSNCloudResourcesDeleteTool(), destructive: true, openWorld: true},
 	}
 
 	for _, tt := range tools {
-		require.NotEmpty(t, tt.tool.Annotations.Title, tt.name)
-		require.NotNil(t, tt.tool.Annotations.ReadOnlyHint, tt.name)
-		require.NotNil(t, tt.tool.Annotations.DestructiveHint, tt.name)
-		require.Equal(t, tt.readOnly, *tt.tool.Annotations.ReadOnlyHint, tt.name)
-		require.Equal(t, tt.destructive, *tt.tool.Annotations.DestructiveHint, tt.name)
+		requireToolAnnotation(t, tt.name, tt.tool, tt.readOnly, tt.destructive, tt.idempotent, tt.openWorld)
 	}
 }
 
@@ -50,21 +48,32 @@ func TestStreamNativeContextToolAnnotations(t *testing.T) {
 	expectations := map[string]struct {
 		readOnly    bool
 		destructive bool
+		idempotent  bool
+		openWorld   bool
 	}{
-		"sncloud_context_whoami":             {readOnly: true},
-		"sncloud_context_available_clusters": {readOnly: true},
-		"sncloud_context_use_cluster":        {destructive: true},
-		"sncloud_context_reset":              {destructive: true},
+		"sncloud_context_whoami":             {readOnly: true, idempotent: true, openWorld: true},
+		"sncloud_context_available_clusters": {readOnly: true, idempotent: true, openWorld: true},
+		"sncloud_context_use_cluster":        {},
+		"sncloud_context_reset":              {},
 	}
 
 	for name, expected := range expectations {
 		serverTool := server.GetTool(name)
 		require.NotNil(t, serverTool, name)
 		tool := serverTool.Tool
-		require.NotEmpty(t, tool.Annotations.Title, name)
-		require.NotNil(t, tool.Annotations.ReadOnlyHint, name)
-		require.NotNil(t, tool.Annotations.DestructiveHint, name)
-		require.Equal(t, expected.readOnly, *tool.Annotations.ReadOnlyHint, name)
-		require.Equal(t, expected.destructive, *tool.Annotations.DestructiveHint, name)
+		requireToolAnnotation(t, name, tool, expected.readOnly, expected.destructive, expected.idempotent, expected.openWorld)
 	}
+}
+
+func requireToolAnnotation(t *testing.T, name string, tool mcpgotypes.Tool, readOnly, destructive, idempotent, openWorld bool) {
+	t.Helper()
+	require.NotEmpty(t, tool.Annotations.Title, name)
+	require.NotNil(t, tool.Annotations.ReadOnlyHint, name)
+	require.NotNil(t, tool.Annotations.DestructiveHint, name)
+	require.NotNil(t, tool.Annotations.IdempotentHint, name)
+	require.NotNil(t, tool.Annotations.OpenWorldHint, name)
+	require.Equal(t, readOnly, *tool.Annotations.ReadOnlyHint, name)
+	require.Equal(t, destructive, *tool.Annotations.DestructiveHint, name)
+	require.Equal(t, idempotent, *tool.Annotations.IdempotentHint, name)
+	require.Equal(t, openWorld, *tool.Annotations.OpenWorldHint, name)
 }

@@ -110,7 +110,7 @@ func (b *PulsarAdminSchemaToolBuilder) buildSchemaTool(mode toolMode) mcp.Tool {
 
 	operationEnum := pulsarSchemaOperationSpecs.NamesForMode(mode)
 	toolName := "pulsar_admin_schema_read"
-	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Schemas", "Manage Pulsar Schemas")
+	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Schemas", "Manage Pulsar Schemas", pulsarSchemaOperationSpecs)
 	if isToolModeWrite(mode) {
 		toolDesc = "Manage Apache Pulsar schemas for topics. " +
 			"This write tool uploads or deletes topic schemas."

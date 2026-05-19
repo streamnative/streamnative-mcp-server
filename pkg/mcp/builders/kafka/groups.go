@@ -104,7 +104,7 @@ func (b *KafkaGroupsToolBuilder) buildKafkaGroupsTool(mode toolMode) mcp.Tool {
 		"- offsets: Get offsets for a specific consumer group"
 	operationEnum := kafkaGroupOperationSpecs.NamesForMode(mode)
 	toolName := "kafka_admin_groups_read"
-	annotation := builders.ToolAnnotationForMode(mode, "Read Kafka Consumer Groups", "Manage Kafka Consumer Groups")
+	annotation := builders.ToolAnnotationForMode(mode, "Read Kafka Consumer Groups", "Manage Kafka Consumer Groups", kafkaGroupOperationSpecs)
 	if isToolModeWrite(mode) {
 		operationDesc = "Operation to perform. Available operations:\n" +
 			"- remove-members: Remove specific members from a Consumer Group to force rebalancing or troubleshoot issues\n" +

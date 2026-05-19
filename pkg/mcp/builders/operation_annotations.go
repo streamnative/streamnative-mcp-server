@@ -21,10 +21,36 @@ import (
 
 // ToolAnnotationForMode selects Claude connector safety annotations from the
 // operation mode so schemas, validation, and annotations share the same mode
-// vocabulary.
-func ToolAnnotationForMode(mode OperationMode, readTitle, writeTitle string) mcp.ToolOption {
-	if mode == OperationModeWrite {
-		return toolannotations.Destructive(writeTitle)
+// vocabulary. If operation metadata is supplied, write-tool destructive and
+// idempotent hints are derived from the write specs instead of from mode alone.
+func ToolAnnotationForMode(mode OperationMode, readTitle, writeTitle string, registries ...OperationRegistry) mcp.ToolOption {
+	if mode != OperationModeWrite {
+		return toolannotations.ExternalRead(readTitle)
 	}
-	return toolannotations.ReadOnly(readTitle)
+
+	destructive, idempotent := writeAnnotationHints(registries...)
+	return toolannotations.Mutating(writeTitle, destructive, idempotent)
+}
+
+func writeAnnotationHints(registries ...OperationRegistry) (destructive bool, idempotent bool) {
+	if len(registries) == 0 {
+		return true, false
+	}
+
+	foundWriteSpec := false
+	allIdempotent := true
+	for _, registry := range registries {
+		for _, spec := range registry.SpecsForMode(OperationModeWrite) {
+			foundWriteSpec = true
+			destructive = destructive || spec.Destructive
+			allIdempotent = allIdempotent && spec.Idempotent
+		}
+	}
+	if !foundWriteSpec {
+		return true, false
+	}
+
+	// A multi-operation tool is idempotent only when every exposed write
+	// operation is idempotent.
+	return destructive, allIdempotent
 }

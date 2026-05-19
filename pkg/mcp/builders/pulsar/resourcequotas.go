@@ -104,7 +104,7 @@ func (b *PulsarAdminResourceQuotasToolBuilder) buildResourceQuotasTool(mode tool
 
 	operationEnum := pulsarResourceQuotaOperationSpecs.NamesForMode(mode)
 	toolName := "pulsar_admin_resourcequota_read"
-	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Resource Quotas", "Manage Pulsar Resource Quotas")
+	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Resource Quotas", "Manage Pulsar Resource Quotas", pulsarResourceQuotaOperationSpecs)
 	if isToolModeWrite(mode) {
 		toolDesc = "Manage Apache Pulsar resource quotas for brokers, namespaces and bundles. " +
 			"This write tool sets or resets quota configuration."

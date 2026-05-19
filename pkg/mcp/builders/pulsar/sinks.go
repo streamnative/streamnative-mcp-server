@@ -114,7 +114,7 @@ func (b *PulsarAdminSinksToolBuilder) buildSinksTool(mode toolMode) mcp.Tool {
 
 	operationEnum := pulsarSinkOperationSpecs.NamesForMode(mode)
 	toolName := "pulsar_admin_sinks_read"
-	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Sinks", "Manage Pulsar Sinks")
+	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Sinks", "Manage Pulsar Sinks", pulsarSinkOperationSpecs)
 	if isToolModeWrite(mode) {
 		toolDesc = "Manage Apache Pulsar Sinks for data movement and integration. " +
 			"This write tool deploys, updates, deletes, starts, stops, or restarts sinks."

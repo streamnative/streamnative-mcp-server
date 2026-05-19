@@ -108,7 +108,7 @@ func (b *KafkaSchemaRegistryToolBuilder) buildKafkaSchemaRegistryTool(mode toolM
 		"- get: Get a subject's latest schema, a specific version, or compatibility level"
 	operationEnum := kafkaSchemaRegistryOperationSpecs.NamesForMode(mode)
 	toolName := "kafka_admin_sr_read"
-	annotation := builders.ToolAnnotationForMode(mode, "Read Kafka Schema Registry", "Manage Kafka Schema Registry")
+	annotation := builders.ToolAnnotationForMode(mode, "Read Kafka Schema Registry", "Manage Kafka Schema Registry", kafkaSchemaRegistryOperationSpecs)
 	if isToolModeWrite(mode) {
 		resourceDesc = "Resource to operate on. Available resources:\n" +
 			"- subject: A specific schema subject to register or delete\n" +

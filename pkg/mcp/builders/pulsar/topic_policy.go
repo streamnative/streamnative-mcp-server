@@ -185,7 +185,7 @@ func (b *PulsarAdminTopicPolicyToolBuilder) buildTopicPolicyTool(mode toolMode) 
 
 	operationEnum := readOnlyTopicPolicyOperations
 	toolName := "pulsar_admin_topic_policy_read"
-	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Topic Policies", "Manage Pulsar Topic Policies")
+	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Topic Policies", "Manage Pulsar Topic Policies", pulsarTopicPolicyOperationSpecs)
 	if isToolModeWrite(mode) {
 		toolDesc = "Manage Pulsar topic-level policies with operation names aligned to pulsarctl topic policy commands. " +
 			"This write tool sets or removes topic-level policies. Legacy underscore operation aliases from the older MCP implementation remain supported."

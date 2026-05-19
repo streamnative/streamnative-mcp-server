@@ -109,7 +109,7 @@ func (b *PulsarAdminNsIsolationPolicyToolBuilder) buildNsIsolationPolicyTool(mod
 
 	operationEnum := pulsarNsIsolationPolicyOperationSpecs.NamesForMode(mode)
 	toolName := "pulsar_admin_nsisolationpolicy_read"
-	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Namespace Isolation Policies", "Manage Pulsar Namespace Isolation Policies")
+	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Namespace Isolation Policies", "Manage Pulsar Namespace Isolation Policies", pulsarNsIsolationPolicyOperationSpecs)
 	if isToolModeWrite(mode) {
 		toolDesc = "Manage namespace isolation policies in a Pulsar cluster. " +
 			"This write tool creates, updates, or deletes namespace isolation policies."

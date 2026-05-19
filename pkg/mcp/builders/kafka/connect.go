@@ -113,7 +113,7 @@ func (b *KafkaConnectToolBuilder) buildKafkaConnectTool(mode toolMode) mcp.Tool 
 		"- get: Retrieve detailed information about a Kafka Connect cluster or specific connector."
 	operationEnum := kafkaConnectOperationSpecs.NamesForMode(mode)
 	toolName := "kafka_admin_connect_read"
-	annotation := builders.ToolAnnotationForMode(mode, "Read Kafka Connect", "Manage Kafka Connect")
+	annotation := builders.ToolAnnotationForMode(mode, "Read Kafka Connect", "Manage Kafka Connect", kafkaConnectOperationSpecs)
 	if isToolModeWrite(mode) {
 		resourceDesc = "Resource to operate on. Available resources:\n" +
 			"- connector: A single Kafka Connect connector instance that moves data between Kafka and external systems."

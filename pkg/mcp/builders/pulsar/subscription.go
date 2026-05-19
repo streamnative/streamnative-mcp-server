@@ -129,7 +129,7 @@ func (b *PulsarAdminSubscriptionToolBuilder) buildSubscriptionTool(mode toolMode
 
 	operationEnum := pulsarSubscriptionOperationSpecs.NamesForMode(mode)
 	toolName := "pulsar_admin_subscription_read"
-	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Subscriptions", "Manage Pulsar Subscriptions")
+	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Subscriptions", "Manage Pulsar Subscriptions", pulsarSubscriptionOperationSpecs)
 	if isToolModeWrite(mode) {
 		toolDesc = "Manage Apache Pulsar subscriptions on topics. " +
 			"This write tool creates or deletes subscriptions and changes subscription cursor positions."

@@ -4,6 +4,39 @@
 
 Prepare StreamNative MCP Server for Claude connector submission and review.
 
+## Current review follow-up: annotation helper granularity
+
+Reviewer feedback is valid: `toolannotations.ReadOnly` and `toolannotations.Destructive` currently call `mcp.WithToolAnnotation(...)`, replacing the whole annotation struct and dropping mcp-go defaults for `idempotentHint` and `openWorldHint`. The helper also collapses all side effects into `Destructive`, so local session mutations and reversible lifecycle operations look equivalent to delete/apply operations.
+
+Implementation status: implemented in current work.
+
+1. Replaced whole-annotation assignment helpers with composed field setters so unspecified hints keep mcp-go defaults unless explicitly changed.
+2. Exposed helper categories:
+   - `ReadOnly(title)` for non-mutating external reads: read-only true, destructive false, idempotent true, open-world true.
+   - `ExternalRead(title)` as explicit alias for external read tools when caller intent should be obvious.
+   - `LocalSessionMutation(title)` for session/context state changes: read-only false, destructive false, idempotent false by default, open-world false.
+   - `Mutating(title, destructive, idempotent)` for external writes/side effects: read-only false, caller-controlled destructive/idempotent, open-world true.
+3. Kept `Destructive(title)` as compatibility wrapper over `Mutating(title, true, false)` while migrating call sites to precise helpers.
+4. Updated context tools to use `LocalSessionMutation`; updated operation-mode helper to derive destructive/idempotent from `OperationSpec` where available instead of treating all writes as destructive.
+5. Extended annotation tests to assert `idempotentHint` and `openWorldHint` for static/context/builder tools, not only read/destructive.
+
+Risks:
+
+- Tool annotation surface changes are runtime-visible to MCP clients and Claude review.
+- Incorrect idempotency classification can mislead clients; delete/remove/reset may be idempotent only depending backend behavior.
+- Broad migration across all builders risks noisy diff; recommended first patch helper + high-signal call sites, then operation registry cleanup separately.
+
+Recommended validation:
+
+```bash
+go test -race ./pkg/mcp/... ./pkg/mcp/builders/... ./pkg/mcp/pftools/...
+go test -race ./...
+go fmt ./...
+go mod tidy
+golangci-lint run --timeout=3m
+make build
+```
+
 ## Current review follow-up: operation spec registry
 
 Reviewer feedback is valid: current branch split read/write tool names, but duplicated `toolMode` helpers and per-builder write-operation maps still create scatter-shot maintenance. Adding one operation can require enum updates, write map updates, handler switch updates, docs, and compliance-test classification. `validateModeOperation` also classifies any operation missing from the write map as read, so an unclassified future write can pass read-mode validation until the handler switch rejects or mishandles it.

@@ -103,7 +103,7 @@ func (b *KafkaTopicsToolBuilder) buildKafkaTopicsTool(mode toolMode) mcp.Tool {
 		"- metadata: Get metadata for a specific topic\n"
 	operationEnum := kafkaTopicOperationSpecs.NamesForMode(mode)
 	toolName := "kafka_admin_topics_read"
-	annotation := builders.ToolAnnotationForMode(mode, "Read Kafka Topics", "Manage Kafka Topics")
+	annotation := builders.ToolAnnotationForMode(mode, "Read Kafka Topics", "Manage Kafka Topics", kafkaTopicOperationSpecs)
 	if isToolModeWrite(mode) {
 		operationDesc = "Operation to perform. Available operations:\n" +
 			"- create: Create a new topic with specified partitions, replication factor, and optional configs\n" +

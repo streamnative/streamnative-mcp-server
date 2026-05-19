@@ -68,13 +68,23 @@ func (r OperationRegistry) Names() []string {
 	return names
 }
 
-// NamesForMode returns operation names for one mode in registry order.
-func (r OperationRegistry) NamesForMode(mode OperationMode) []string {
-	names := make([]string, 0, len(r))
+// SpecsForMode returns operation specs for one mode in registry order.
+func (r OperationRegistry) SpecsForMode(mode OperationMode) []OperationSpec {
+	specs := make([]OperationSpec, 0, len(r))
 	for _, spec := range r {
 		if spec.Mode == mode {
-			names = append(names, spec.Name)
+			specs = append(specs, spec)
 		}
+	}
+	return specs
+}
+
+// NamesForMode returns operation names for one mode in registry order.
+func (r OperationRegistry) NamesForMode(mode OperationMode) []string {
+	specs := r.SpecsForMode(mode)
+	names := make([]string, 0, len(specs))
+	for _, spec := range specs {
+		names = append(names, spec.Name)
 	}
 	return names
 }

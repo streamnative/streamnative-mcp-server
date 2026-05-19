@@ -37,8 +37,13 @@ func TestOperationRegistryModeEnumsAndValidation(t *testing.T) {
 }
 
 func TestToolAnnotationForMode(t *testing.T) {
-	read := ToolAnnotationForMode(OperationModeRead, "Read Things", "Manage Things")
-	write := ToolAnnotationForMode(OperationModeWrite, "Read Things", "Manage Things")
+	registry := OperationRegistry{
+		{Name: "list", Mode: OperationModeRead},
+		{Name: "update", Mode: OperationModeWrite, Destructive: false, Idempotent: true},
+	}
+
+	read := ToolAnnotationForMode(OperationModeRead, "Read Things", "Manage Things", registry)
+	write := ToolAnnotationForMode(OperationModeWrite, "Read Things", "Manage Things", registry)
 
 	readTool := mcp.NewTool("read", read)
 	writeTool := mcp.NewTool("write", write)
@@ -46,12 +51,20 @@ func TestToolAnnotationForMode(t *testing.T) {
 	require.Equal(t, "Read Things", readTool.Annotations.Title)
 	require.NotNil(t, readTool.Annotations.ReadOnlyHint)
 	require.NotNil(t, readTool.Annotations.DestructiveHint)
+	require.NotNil(t, readTool.Annotations.IdempotentHint)
+	require.NotNil(t, readTool.Annotations.OpenWorldHint)
 	require.True(t, *readTool.Annotations.ReadOnlyHint)
 	require.False(t, *readTool.Annotations.DestructiveHint)
+	require.True(t, *readTool.Annotations.IdempotentHint)
+	require.True(t, *readTool.Annotations.OpenWorldHint)
 
 	require.Equal(t, "Manage Things", writeTool.Annotations.Title)
 	require.NotNil(t, writeTool.Annotations.ReadOnlyHint)
 	require.NotNil(t, writeTool.Annotations.DestructiveHint)
+	require.NotNil(t, writeTool.Annotations.IdempotentHint)
+	require.NotNil(t, writeTool.Annotations.OpenWorldHint)
 	require.False(t, *writeTool.Annotations.ReadOnlyHint)
-	require.True(t, *writeTool.Annotations.DestructiveHint)
+	require.False(t, *writeTool.Annotations.DestructiveHint)
+	require.True(t, *writeTool.Annotations.IdempotentHint)
+	require.True(t, *writeTool.Annotations.OpenWorldHint)
 }

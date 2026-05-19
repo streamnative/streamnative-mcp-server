@@ -109,7 +109,7 @@ func (b *PulsarAdminPackagesToolBuilder) buildPackagesTool(mode toolMode) mcp.To
 
 	operationEnum := pulsarPackageOperationSpecs.NamesForMode(mode)
 	toolName := "pulsar_admin_package_read"
-	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Packages", "Manage Pulsar Packages")
+	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Packages", "Manage Pulsar Packages", pulsarPackageOperationSpecs)
 	if isToolModeWrite(mode) {
 		toolDesc = "Manage packages in Apache Pulsar. Support package schemes: `function://`, `source://`, `sink://`. " +
 			"This write tool updates metadata, deletes packages, or uploads package contents."

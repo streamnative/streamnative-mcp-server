@@ -46,6 +46,8 @@ func TestPulsarToolAnnotationCompliance(t *testing.T) {
 			require.NotEmpty(t, tool.Annotations.Title, tool.Name)
 			require.NotNil(t, tool.Annotations.ReadOnlyHint, tool.Name)
 			require.NotNil(t, tool.Annotations.DestructiveHint, tool.Name)
+			require.NotNil(t, tool.Annotations.IdempotentHint, tool.Name)
+			require.NotNil(t, tool.Annotations.OpenWorldHint, tool.Name)
 			require.LessOrEqual(t, len(tool.Name), 64, tool.Name)
 
 			isRead := strings.HasSuffix(tool.Name, "_read") || strings.HasPrefix(tool.Name, "pulsar_admin_namespace_policy_get") || tool.Name == "pulsar_admin_status" || tool.Name == "pulsar_admin_broker_stats" || tool.Name == "pulsar_admin_functions_worker"
@@ -53,10 +55,14 @@ func TestPulsarToolAnnotationCompliance(t *testing.T) {
 			if isRead {
 				require.True(t, *tool.Annotations.ReadOnlyHint, tool.Name)
 				require.False(t, *tool.Annotations.DestructiveHint, tool.Name)
+				require.True(t, *tool.Annotations.IdempotentHint, tool.Name)
+				require.True(t, *tool.Annotations.OpenWorldHint, tool.Name)
 			}
 			if isWrite {
 				require.False(t, *tool.Annotations.ReadOnlyHint, tool.Name)
 				require.True(t, *tool.Annotations.DestructiveHint, tool.Name)
+				require.False(t, *tool.Annotations.IdempotentHint, tool.Name)
+				require.True(t, *tool.Annotations.OpenWorldHint, tool.Name)
 			}
 			assertOperationEnumMode(t, tool.Name, tool.InputSchema.Properties["operation"])
 		}

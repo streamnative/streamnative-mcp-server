@@ -114,7 +114,7 @@ func (b *PulsarAdminSourcesToolBuilder) buildSourcesTool(mode toolMode) mcp.Tool
 
 	operationEnum := pulsarSourceOperationSpecs.NamesForMode(mode)
 	toolName := "pulsar_admin_sources_read"
-	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Sources", "Manage Pulsar Sources")
+	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Sources", "Manage Pulsar Sources", pulsarSourceOperationSpecs)
 	if isToolModeWrite(mode) {
 		toolDesc = "Manage Apache Pulsar Sources for data ingestion and integration. " +
 			"This write tool deploys, updates, deletes, starts, stops, or restarts sources."

@@ -115,7 +115,7 @@ func (b *PulsarAdminTenantToolBuilder) buildTenantTool(mode toolMode) mcp.Tool {
 
 	operationEnum := pulsarTenantOperationSpecs.NamesForMode(mode)
 	toolName := "pulsar_admin_tenant_read"
-	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Tenants", "Manage Pulsar Tenants")
+	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Tenants", "Manage Pulsar Tenants", pulsarTenantOperationSpecs)
 	if isToolModeWrite(mode) {
 		toolDesc = "Manage Apache Pulsar tenants. " +
 			"This write tool creates, updates, or deletes tenant configuration and may change cluster state."

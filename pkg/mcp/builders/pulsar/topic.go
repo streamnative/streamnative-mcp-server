@@ -147,7 +147,7 @@ func (b *PulsarAdminTopicToolBuilder) buildTopicTool(mode toolMode) mcp.Tool {
 
 	operationEnum := pulsarTopicOperationSpecs.NamesForMode(mode)
 	toolName := "pulsar_admin_topic_read"
-	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Topics", "Manage Pulsar Topics")
+	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Topics", "Manage Pulsar Topics", pulsarTopicOperationSpecs)
 	if isToolModeWrite(mode) {
 		toolDesc = "Manage Apache Pulsar topics. " +
 			"This write tool changes topic lifecycle, permissions, partitioning, compaction, or offload state. " +

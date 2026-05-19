@@ -104,7 +104,7 @@ func (b *PulsarAdminBrokersToolBuilder) buildPulsarAdminBrokersTool(mode toolMod
 		"- get: Retrieve resource information (used with health, config, namespaces)"
 	toolDesc := "Read Apache Pulsar broker resources. This tool lists active brokers, checks broker health, reads broker configurations, and views namespaces owned by a broker."
 	toolName := "pulsar_admin_brokers_read"
-	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Brokers", "Manage Pulsar Brokers")
+	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Brokers", "Manage Pulsar Brokers", pulsarBrokerOperationSpecs)
 	if isToolModeWrite(mode) {
 		resourceDesc = "Type of broker resource to access, available options:\n" +
 			"- config: Broker dynamic configuration values"

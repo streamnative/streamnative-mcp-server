@@ -44,6 +44,10 @@ func TestConvertFunctionToToolSetsDestructiveAnnotation(t *testing.T) {
 	require.NotEmpty(t, annotations.Title)
 	require.NotNil(t, annotations.ReadOnlyHint)
 	require.NotNil(t, annotations.DestructiveHint)
+	require.NotNil(t, annotations.IdempotentHint)
+	require.NotNil(t, annotations.OpenWorldHint)
 	require.False(t, *annotations.ReadOnlyHint)
 	require.True(t, *annotations.DestructiveHint)
+	require.False(t, *annotations.IdempotentHint)
+	require.True(t, *annotations.OpenWorldHint)
 }

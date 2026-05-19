@@ -109,7 +109,7 @@ func (b *PulsarAdminNamespaceToolBuilder) buildNamespaceTool(mode toolMode) mcp.
 
 	operationEnum := pulsarNamespaceOperationSpecs.NamesForMode(mode)
 	toolName := "pulsar_admin_namespace_read"
-	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Namespaces", "Manage Pulsar Namespaces")
+	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Namespaces", "Manage Pulsar Namespaces", pulsarNamespaceOperationSpecs)
 	if isToolModeWrite(mode) {
 		toolDesc = "Manage Apache Pulsar namespaces. " +
 			"This write tool creates, deletes, unloads, splits bundles, clears backlog, or unsubscribes namespace subscriptions."

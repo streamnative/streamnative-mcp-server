@@ -106,7 +106,7 @@ func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsTool(mode too
 
 	operationEnum := pulsarFunctionOperationSpecs.NamesForMode(mode)
 	toolName := "pulsar_admin_functions_read"
-	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Functions", "Manage Pulsar Functions")
+	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Functions", "Manage Pulsar Functions", pulsarFunctionOperationSpecs)
 	if isToolModeWrite(mode) {
 		toolDesc = "Manage Apache Pulsar Functions for stream processing. " +
 			"This write tool deploys, updates, deletes, starts, stops, restarts, stores state for, triggers, or uploads packages for functions."

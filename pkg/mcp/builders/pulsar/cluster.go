@@ -116,7 +116,7 @@ func (b *PulsarAdminClusterToolBuilder) buildClusterTool(mode toolMode) mcp.Tool
 
 	operationEnum := pulsarClusterOperationSpecs.NamesForMode(mode)
 	toolName := "pulsar_admin_cluster_read"
-	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Clusters", "Manage Pulsar Clusters")
+	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Clusters", "Manage Pulsar Clusters", pulsarClusterOperationSpecs)
 	if isToolModeWrite(mode) {
 		toolDesc = "Manage Apache Pulsar clusters.\n" +
 			"This write tool creates, updates, or deletes clusters and failure domains, and updates peer cluster settings."
