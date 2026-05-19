@@ -25,37 +25,21 @@ import (
 func TestStreamNativeStaticToolAnnotations(t *testing.T) {
 	tools := []struct {
 		name        string
+		tool        mcpgotypes.Tool
 		readOnly    bool
 		destructive bool
 	}{
-		{name: "sncloud_logs", readOnly: true},
-		{name: "sncloud_resources_apply", destructive: true},
-		{name: "sncloud_resources_delete", destructive: true},
-	}
-
-	definitions := map[string]struct {
-		readOnly    bool
-		destructive bool
-	}{
-		"sncloud_logs":             {readOnly: true},
-		"sncloud_resources_apply":  {destructive: true},
-		"sncloud_resources_delete": {destructive: true},
-	}
-
-	constructed := map[string]mcpgotypes.Tool{
-		"sncloud_logs":             NewSNCloudLogsTool(),
-		"sncloud_resources_apply":  NewSNCloudResourcesApplyTool(),
-		"sncloud_resources_delete": NewSNCloudResourcesDeleteTool(),
+		{name: "sncloud_logs", tool: NewSNCloudLogsTool(), readOnly: true},
+		{name: "sncloud_resources_apply", tool: NewSNCloudResourcesApplyTool(), destructive: true},
+		{name: "sncloud_resources_delete", tool: NewSNCloudResourcesDeleteTool(), destructive: true},
 	}
 
 	for _, tt := range tools {
-		tool := constructed[tt.name]
-		expected := definitions[tt.name]
-		require.NotEmpty(t, tool.Annotations.Title, tt.name)
-		require.NotNil(t, tool.Annotations.ReadOnlyHint, tt.name)
-		require.NotNil(t, tool.Annotations.DestructiveHint, tt.name)
-		require.Equal(t, expected.readOnly, *tool.Annotations.ReadOnlyHint, tt.name)
-		require.Equal(t, expected.destructive, *tool.Annotations.DestructiveHint, tt.name)
+		require.NotEmpty(t, tt.tool.Annotations.Title, tt.name)
+		require.NotNil(t, tt.tool.Annotations.ReadOnlyHint, tt.name)
+		require.NotNil(t, tt.tool.Annotations.DestructiveHint, tt.name)
+		require.Equal(t, tt.readOnly, *tt.tool.Annotations.ReadOnlyHint, tt.name)
+		require.Equal(t, tt.destructive, *tt.tool.Annotations.DestructiveHint, tt.name)
 	}
 }
 

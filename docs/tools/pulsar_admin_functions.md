@@ -1,6 +1,6 @@
 #### pulsar_admin_functions
 
-**Claude connector safety:** Actual MCP tools: `pulsar_admin_functions_read` (`list`, `get`, `status`, `stats`, `querystate`) and `pulsar_admin_functions_write` (`create`, `update`, `delete`, `download`, `start`, `stop`, `restart`, `putstate`, `trigger`, `upload`).
+**Claude connector safety:** Actual MCP tools: `pulsar_admin_functions_read` (`list`, `get`, `status`, `stats`, `querystate`, `download`) and `pulsar_admin_functions_write` (`create`, `update`, `delete`, `start`, `stop`, `restart`, `putstate`, `trigger`, `upload`).
 
 
 Manage Apache Pulsar Functions for stream processing. Pulsar Functions are lightweight compute processes that can consume messages from one or more Pulsar topics, apply user-defined processing logic, and produce results to another topic. Functions support Java, Python, and Go runtimes, enabling complex event processing, data transformations, filtering, and integration with external systems.
