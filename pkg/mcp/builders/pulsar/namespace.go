@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,7 +26,17 @@ import (
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 )
+
+var pulsarNamespaceWriteOperations = map[string]struct{}{
+	"create":        {},
+	"delete":        {},
+	"clear_backlog": {},
+	"unsubscribe":   {},
+	"unload":        {},
+	"split_bundle":  {},
+}
 
 // PulsarAdminNamespaceToolBuilder implements the ToolBuilder interface for Pulsar Admin Namespace tools
 // It provides functionality to build Pulsar namespace management tools
@@ -70,21 +80,25 @@ func (b *PulsarAdminNamespaceToolBuilder) BuildTools(_ context.Context, config b
 		return nil, err
 	}
 
-	// Build tools
-	tool := b.buildNamespaceTool()
-	handler := b.buildNamespaceHandler(config.ReadOnly)
-
-	return []server.ServerTool{
+	tools := []server.ServerTool{
 		{
-			Tool:    tool,
-			Handler: handler,
+			Tool:    b.buildNamespaceTool(toolModeRead),
+			Handler: b.buildNamespaceHandler(toolModeRead),
 		},
-	}, nil
+	}
+	if !config.ReadOnly {
+		tools = append(tools, server.ServerTool{
+			Tool:    b.buildNamespaceTool(toolModeWrite),
+			Handler: b.buildNamespaceHandler(toolModeWrite),
+		})
+	}
+
+	return tools, nil
 }
 
 // buildNamespaceTool builds the Pulsar Admin Namespace MCP tool definition
 // Migrated from the original tool definition logic
-func (b *PulsarAdminNamespaceToolBuilder) buildNamespaceTool() mcp.Tool {
+func (b *PulsarAdminNamespaceToolBuilder) buildNamespaceTool(mode toolMode) mcp.Tool {
 	toolDesc := "Manage Pulsar namespaces with various operations. " +
 		"This tool provides functionality to work with namespaces in Apache Pulsar, " +
 		"including listing, creating, deleting, and performing various operations on namespaces."
@@ -99,10 +113,20 @@ func (b *PulsarAdminNamespaceToolBuilder) buildNamespaceTool() mcp.Tool {
 		"- unload: Unload a namespace from the current serving broker\n" +
 		"- split_bundle: Split a namespace bundle"
 
-	return mcp.NewTool("pulsar_admin_namespace",
+	operationEnum := []string{"list", "get_topics"}
+	toolName := "pulsar_admin_namespace_read"
+	annotation := toolannotations.ReadOnly("Read Pulsar Namespaces")
+	if isToolModeWrite(mode) {
+		operationEnum = []string{"create", "delete", "clear_backlog", "unsubscribe", "unload", "split_bundle"}
+		toolName = "pulsar_admin_namespace_write"
+		annotation = toolannotations.Destructive("Manage Pulsar Namespaces")
+	}
+
+	return mcp.NewTool(toolName,
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("operation", mcp.Required(),
 			mcp.Description(operationDesc),
+			mcp.Enum(operationEnum...),
 		),
 		mcp.WithString("tenant",
 			mcp.Description("The tenant name. Required for 'list' operation."),
@@ -134,12 +158,13 @@ func (b *PulsarAdminNamespaceToolBuilder) buildNamespaceTool() mcp.Tool {
 		mcp.WithString("unload",
 			mcp.Description("Unload newly split bundles after splitting (true/false). Used with 'split_bundle' operation."),
 		),
+		annotation,
 	)
 }
 
 // buildNamespaceHandler builds the Pulsar Admin Namespace handler function
 // Migrated from the original handler logic
-func (b *PulsarAdminNamespaceToolBuilder) buildNamespaceHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminNamespaceToolBuilder) buildNamespaceHandler(mode toolMode) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get operation parameter
 		operation, err := request.RequireString("operation")
@@ -159,6 +184,10 @@ func (b *PulsarAdminNamespaceToolBuilder) buildNamespaceHandler(readOnly bool) f
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 		}
 
+		if !validateModeOperation(mode, operation, pulsarNamespaceWriteOperations) {
+			return mcp.NewToolResultError(fmt.Sprintf("Operation %q is not available in %s mode", operation, mode)), nil
+		}
+
 		// Route to appropriate handler based on operation
 		switch operation {
 		case "list":
@@ -166,11 +195,6 @@ func (b *PulsarAdminNamespaceToolBuilder) buildNamespaceHandler(readOnly bool) f
 		case "get_topics":
 			return b.handleNamespaceGetTopics(ctx, client, request)
 		case "create", "delete", "clear_backlog", "unsubscribe", "unload", "split_bundle":
-			// Check if write operations are allowed
-			if readOnly {
-				return mcp.NewToolResultError(fmt.Sprintf("Operation '%s' not allowed in read-only mode", operation)), nil
-			}
-
 			// Route to appropriate write operation handler
 			switch operation {
 			case "create":

@@ -1,5 +1,8 @@
 #### pulsar_admin_topic
 
+**Claude connector safety:** Actual MCP tools: `pulsar_admin_topic_read` (`list`, `get`, `get-permissions`, stats/lookup/status operations) and `pulsar_admin_topic_write` (permission grants/revokes and mutating topic lifecycle operations).
+
+
 Manage Apache Pulsar topics. Topics are the core messaging entities in Pulsar that store and transmit messages. Pulsar supports two types of topics: persistent (durable storage with guaranteed delivery) and non-persistent (in-memory with at-most-once delivery). Topics can be partitioned for parallel processing and higher throughput.
 
 - **topic**
@@ -56,4 +59,4 @@ Manage Apache Pulsar topics. Topics are the core messaging entities in Pulsar th
 
 - **topics**
   - **list**: List all topics in a namespace
-    - `namespace` (string, required): The namespace name (format: tenant/namespace) 
+    - `namespace` (string, required): The namespace name (format: tenant/namespace)

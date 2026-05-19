@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import (
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 )
 
 var readOnlyRestrictedTopicOperations = map[string]struct{}{
@@ -91,21 +92,25 @@ func (b *PulsarAdminTopicToolBuilder) BuildTools(_ context.Context, config build
 		return nil, err
 	}
 
-	// Build tools
-	tool := b.buildTopicTool()
-	handler := b.buildTopicHandler(config.ReadOnly)
-
-	return []server.ServerTool{
+	tools := []server.ServerTool{
 		{
-			Tool:    tool,
-			Handler: handler,
+			Tool:    b.buildTopicTool(toolModeRead),
+			Handler: b.buildTopicHandler(toolModeRead),
 		},
-	}, nil
+	}
+	if !config.ReadOnly {
+		tools = append(tools, server.ServerTool{
+			Tool:    b.buildTopicTool(toolModeWrite),
+			Handler: b.buildTopicHandler(toolModeWrite),
+		})
+	}
+
+	return tools, nil
 }
 
 // buildTopicTool builds the Pulsar Admin Topic MCP tool definition
 // Migrated from the original tool definition logic
-func (b *PulsarAdminTopicToolBuilder) buildTopicTool() mcp.Tool {
+func (b *PulsarAdminTopicToolBuilder) buildTopicTool(mode toolMode) mcp.Tool {
 	toolDesc := "Manage Apache Pulsar topics. " +
 		"Topics are the core messaging entities in Pulsar that store and transmit messages. " +
 		"Pulsar supports two types of topics: persistent (durable storage with guaranteed delivery) " +
@@ -144,13 +149,23 @@ func (b *PulsarAdminTopicToolBuilder) buildTopicTool() mcp.Tool {
 		"- offload: Offload data from a topic to long-term storage\n" +
 		"- offload-status: Check the status of data offloading for a topic"
 
-	return mcp.NewTool("pulsar_admin_topic",
+	operationEnum := []string{"list", "get", "get-permissions", "stats", "lookup", "internal-stats", "internal-info", "bundle-range", "last-message-id", "compact-status", "offload-status"}
+	toolName := "pulsar_admin_topic_read"
+	annotation := toolannotations.ReadOnly("Read Pulsar Topics")
+	if isToolModeWrite(mode) {
+		operationEnum = []string{"grant-permissions", "revoke-permissions", "create", "delete", "unload", "terminate", "compact", "update", "offload"}
+		toolName = "pulsar_admin_topic_write"
+		annotation = toolannotations.Destructive("Manage Pulsar Topics")
+	}
+
+	return mcp.NewTool(toolName,
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("resource", mcp.Required(),
 			mcp.Description(resourceDesc),
 		),
 		mcp.WithString("operation", mcp.Required(),
 			mcp.Description(operationDesc),
+			mcp.Enum(operationEnum...),
 		),
 		mcp.WithString("topic",
 			mcp.Description("The fully qualified topic name (format: [persistent|non-persistent]://tenant/namespace/topic). "+
@@ -214,12 +229,13 @@ func (b *PulsarAdminTopicToolBuilder) buildTopicTool() mcp.Tool {
 				},
 			),
 		),
+		annotation,
 	)
 }
 
 // buildTopicHandler builds the Pulsar Admin Topic handler function
 // Migrated from the original handler logic
-func (b *PulsarAdminTopicToolBuilder) buildTopicHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicToolBuilder) buildTopicHandler(mode toolMode) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get required parameters
 		resource, err := request.RequireString("resource")
@@ -236,9 +252,8 @@ func (b *PulsarAdminTopicToolBuilder) buildTopicHandler(readOnly bool) func(cont
 		resource = strings.ToLower(resource)
 		operation = normalizeTopicOperation(operation)
 
-		// Validate write operations in read-only mode
-		if readOnly && isReadOnlyRestrictedTopicOperation(operation) {
-			return mcp.NewToolResultError("Write operations are not allowed in read-only mode"), nil
+		if !validateModeOperation(mode, operation, readOnlyRestrictedTopicOperations) {
+			return mcp.NewToolResultError(fmt.Sprintf("Operation %q is not available in %s mode", operation, mode)), nil
 		}
 
 		// Get Pulsar session from context

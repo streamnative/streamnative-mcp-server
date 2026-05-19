@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import (
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 )
 
 // PulsarAdminFunctionsWorkerToolBuilder implements the ToolBuilder interface for Pulsar Admin Functions Worker tools
@@ -104,6 +105,7 @@ func (b *PulsarAdminFunctionsWorkerToolBuilder) buildFunctionsWorkerTool() mcp.T
 		mcp.WithString("resource", mcp.Required(),
 			mcp.Description(resourceDesc),
 		),
+		toolannotations.ReadOnly("Read Pulsar Functions Worker"),
 	)
 }
 

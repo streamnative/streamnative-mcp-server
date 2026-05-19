@@ -1,5 +1,8 @@
 #### pulsar_admin_nsisolationpolicy
 
+**Claude connector safety:** Actual MCP tools: `pulsar_admin_nsisolationpolicy_read` (`get`, `list`) and `pulsar_admin_nsisolationpolicy_write` (`set`, `delete`).
+
+
 Manage namespace isolation policies in a Pulsar cluster. Namespace isolation policies enable physical isolation of namespaces by controlling which brokers specific namespaces can use. This helps provide predictable performance and resource isolation, especially in multi-tenant environments.
 
 This tool provides operations across three resource types:
@@ -29,4 +32,4 @@ This tool provides operations across three resource types:
 
 - **brokers** (All brokers with isolation policies):
   - **list**: List all brokers with their isolation policies
-    - `cluster` (string, required): The cluster name 
+    - `cluster` (string, required): The cluster name

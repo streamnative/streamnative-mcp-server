@@ -1,5 +1,8 @@
 #### kafka-admin-topics
 
+**Claude connector safety:** Actual MCP tools: `kafka_admin_topics_read` (`list`, `get`, `metadata`) and `kafka_admin_topics_write` (`create`, `delete`).
+
+
 This tool provides access to various Kafka topic operations, including creation, deletion, listing, and configuration retrieval.
 
 - **topics**
@@ -15,4 +18,4 @@ This tool provides access to various Kafka topic operations, including creation,
     - `replication-factor` (number, optional): Replication factor. Default: 1
     - `configs` (array of string, optional): Topic configuration overrides as key-value strings, e.g. ["cleanup.policy=compact", "retention.ms=604800000"]
   - **delete**: Delete an existing topic
-    - `name` (string, required): The name of the Kafka topic 
+    - `name` (string, required): The name of the Kafka topic

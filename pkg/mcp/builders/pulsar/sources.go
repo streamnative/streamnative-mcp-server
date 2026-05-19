@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,8 +28,18 @@ import (
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 	"gopkg.in/yaml.v2"
 )
+
+var pulsarSourceWriteOperations = map[string]struct{}{
+	"create":  {},
+	"update":  {},
+	"delete":  {},
+	"start":   {},
+	"stop":    {},
+	"restart": {},
+}
 
 // PulsarAdminSourcesToolBuilder implements the ToolBuilder interface for Pulsar admin sources
 // /nolint:revive
@@ -71,20 +81,24 @@ func (b *PulsarAdminSourcesToolBuilder) BuildTools(_ context.Context, config bui
 		return nil, err
 	}
 
-	// Build tools
-	tool := b.buildSourcesTool()
-	handler := b.buildSourcesHandler(config.ReadOnly)
-
-	return []server.ServerTool{
+	tools := []server.ServerTool{
 		{
-			Tool:    tool,
-			Handler: handler,
+			Tool:    b.buildSourcesTool(toolModeRead),
+			Handler: b.buildSourcesHandler(toolModeRead),
 		},
-	}, nil
+	}
+	if !config.ReadOnly {
+		tools = append(tools, server.ServerTool{
+			Tool:    b.buildSourcesTool(toolModeWrite),
+			Handler: b.buildSourcesHandler(toolModeWrite),
+		})
+	}
+
+	return tools, nil
 }
 
 // buildSourcesTool builds the Pulsar admin sources MCP tool definition
-func (b *PulsarAdminSourcesToolBuilder) buildSourcesTool() mcp.Tool {
+func (b *PulsarAdminSourcesToolBuilder) buildSourcesTool(mode toolMode) mcp.Tool {
 	toolDesc := "Manage Apache Pulsar Sources for data ingestion and integration. " +
 		"Pulsar Sources are connectors that import data from external systems into Pulsar topics. " +
 		"Sources connect to external systems such as databases, messaging platforms, storage services, " +
@@ -107,10 +121,20 @@ func (b *PulsarAdminSourcesToolBuilder) buildSourcesTool() mcp.Tool {
 		"- restart: Restart a source\n" +
 		"- list-built-in: List all built-in source connectors available in the system"
 
-	return mcp.NewTool("pulsar_admin_sources",
+	operationEnum := []string{"list", "get", "status", "list-built-in"}
+	toolName := "pulsar_admin_sources_read"
+	annotation := toolannotations.ReadOnly("Read Pulsar Sources")
+	if isToolModeWrite(mode) {
+		operationEnum = []string{"create", "update", "delete", "start", "stop", "restart"}
+		toolName = "pulsar_admin_sources_write"
+		annotation = toolannotations.Destructive("Manage Pulsar Sources")
+	}
+
+	return mcp.NewTool(toolName,
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("operation", mcp.Required(),
-			mcp.Description(operationDesc)),
+			mcp.Description(operationDesc),
+			mcp.Enum(operationEnum...)),
 		mcp.WithString("tenant",
 			mcp.Description("The tenant name. Tenants are the primary organizational unit in Pulsar, "+
 				"providing multi-tenancy and resource isolation. Sources deployed within a tenant "+
@@ -199,11 +223,12 @@ func (b *PulsarAdminSourcesToolBuilder) buildSourcesTool() mcp.Tool {
 				"Example: {\"topic\": \"external-kafka-topic\", \"bootstrapServers\": \"kafka:9092\"}")),
 		mcp.WithBoolean("update-auth-data",
 			mcp.Description("Whether to update authentication data during source update. Optional for 'update' only.")),
+		annotation,
 	)
 }
 
 // buildSourcesHandler builds the Pulsar admin sources handler function
-func (b *PulsarAdminSourcesToolBuilder) buildSourcesHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminSourcesToolBuilder) buildSourcesHandler(mode toolMode) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Extract and validate operation parameter
 		operation, err := request.RequireString("operation")
@@ -221,14 +246,8 @@ func (b *PulsarAdminSourcesToolBuilder) buildSourcesHandler(readOnly bool) func(
 			return mcp.NewToolResultError(fmt.Sprintf("Invalid operation: '%s'. Supported operations: list, get, status, create, update, delete, start, stop, restart, list-built-in", operation)), nil
 		}
 
-		// Check write permissions for write operations
-		writeOperations := map[string]bool{
-			"create": true, "update": true, "delete": true, "start": true,
-			"stop": true, "restart": true,
-		}
-
-		if readOnly && writeOperations[operation] {
-			return mcp.NewToolResultError(fmt.Sprintf("Operation '%s' not allowed in read-only mode. Read-only mode restricts modifications to Pulsar Sources.", operation)), nil
+		if !validateModeOperation(mode, operation, pulsarSourceWriteOperations) {
+			return mcp.NewToolResultError(fmt.Sprintf("Operation %q is not available in %s mode", operation, mode)), nil
 		}
 
 		// Get Pulsar session from context

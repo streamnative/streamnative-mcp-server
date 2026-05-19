@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import (
 func TestBuildTopicToolIncludesPermissionOperations(t *testing.T) {
 	builder := NewPulsarAdminTopicToolBuilder()
 
-	tool := builder.buildTopicTool()
+	tool := builder.buildTopicTool(toolModeRead)
 
 	require.Contains(t, tool.InputSchema.Properties, "role")
 	require.Contains(t, tool.InputSchema.Properties, "actions")
@@ -67,7 +67,7 @@ func TestNormalizeTopicOperationSupportsLegacyAliases(t *testing.T) {
 
 func TestTopicGrantPermissionsBlockedInReadOnlyMode(t *testing.T) {
 	builder := NewPulsarAdminTopicToolBuilder()
-	handler := builder.buildTopicHandler(true)
+	handler := builder.buildTopicHandler(toolModeRead)
 
 	result, err := handler(context.Background(), mcp.CallToolRequest{
 		Params: mcp.CallToolParams{
@@ -86,7 +86,7 @@ func TestTopicGrantPermissionsBlockedInReadOnlyMode(t *testing.T) {
 
 	text, ok := result.Content[0].(mcp.TextContent)
 	require.True(t, ok)
-	require.Contains(t, text.Text, "read-only mode")
+	require.Contains(t, text.Text, "not available in read mode")
 }
 
 func TestWaitForTopicLongRunningStatusStopsOnContextCancellation(t *testing.T) {

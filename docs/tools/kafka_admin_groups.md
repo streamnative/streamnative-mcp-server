@@ -1,5 +1,8 @@
 #### kafka-admin-groups
 
+**Claude connector safety:** Actual MCP tools: `kafka_admin_groups_read` (`list`, `describe`, `offsets`) and `kafka_admin_groups_write` (`remove-members`, `delete-offset`, `set-offset`).
+
+
 This tool provides access to Kafka consumer group operations including listing, describing, and managing group membership.
 
 - **groups**
@@ -21,4 +24,4 @@ This tool provides access to Kafka consumer group operations including listing, 
     - `group` (string, required): The name of the Kafka Consumer Group
     - `topic` (string, required): The name of the Kafka topic
     - `partition` (number, required): The partition number
-    - `offset` (number, required): The offset value to set (use -1 for earliest, -2 for latest, or a specific value) 
+    - `offset` (number, required): The offset value to set (use -1 for earliest, -2 for latest, or a specific value)

@@ -1,0 +1,503 @@
+# Plan: Claude connector tool split + annotations
+
+## Goal
+
+Prepare StreamNative MCP Server for Claude connector submission and review.
+
+Hard requirements from Claude docs:
+
+- every MCP tool has non-empty `annotations.title`
+- every MCP tool has explicit applicable `annotations.readOnlyHint` or `annotations.destructiveHint`
+- read and write operations must be separate tools; no mixed `operation` catch-all that contains both safe and unsafe operations
+
+Source docs checked:
+
+- https://claude.com/docs/connectors/building/submission
+- https://claude.com/docs/connectors/building/review-criteria
+
+Reference implementation checked:
+
+- `/Users/rui/playground/sn/mcp-auth0-proxy/internal/hooks/org_session_tools.go`
+- Existing pattern there:
+  - separate tool names: e.g. `sncloud_byoc_read` and `sncloud_byoc_write`
+  - shared builder with mode enum: `controlPlaneToolModeRead` / `controlPlaneToolModeWrite`
+  - read tool operation enum: `list`, `get`
+  - write tool operation enum: `apply`, `delete`
+  - annotation set from mode:
+    - read: `readOnlyHint=true`, `destructiveHint=false`
+    - write: `readOnlyHint=false`, `destructiveHint=true`
+  - shared handler still validates operation against mode
+
+## Current findings
+
+Static `mcp.NewTool(...)` definitions found under `pkg/`: 36 tool definitions plus dynamic Pulsar Functions-as-Tools.
+
+Current gaps:
+
+- Most static tools have no explicit title.
+- Most static tools rely on `mcp-go` defaults (`readOnlyHint=false`, `destructiveHint=true`, `openWorldHint=true`), which marks read tools as destructive.
+- Only `sncloud_resources_apply` and `sncloud_resources_delete` currently set `WithToolAnnotation`; `apply` sets title only.
+- Dynamic Pulsar Functions-as-Tools in `pkg/mcp/pftools/manager.go` create tools without title/read-only/destructive annotations.
+- Many admin tools multiplex read and write operations through one `operation` parameter. Claude review criteria says mixed read/write catch-all tools can be rejected even if description documents safe/unsafe operations.
+
+## Proposed design
+
+### Design principle
+
+Follow `mcp-auth0-proxy` pattern:
+
+- split mixed tools into separate read and write tool names
+- keep shared internal implementation where practical
+- make operation enum mode-specific, so tool schema itself prevents mixed use
+- keep read-only runtime mode simple: register only read tools
+- in read-write runtime mode: register read tools and write tools as separate entries
+- do not expose legacy mixed tools in Claude-submitted surface
+
+### Naming convention
+
+For mixed tools, replace one tool with two tools:
+
+- `<old_name>_read`
+- `<old_name>_write`
+
+Examples:
+
+- `kafka_admin_topics` -> `kafka_admin_topics_read`, `kafka_admin_topics_write`
+- `pulsar_admin_topic` -> `pulsar_admin_topic_read`, `pulsar_admin_topic_write`
+- `pulsar_admin_namespace_policy` already has partial split; align names and annotations instead of forcing one exact pattern when current names are already narrow.
+
+Pure read tools can keep current names if no write side effects exist.
+Pure write/side-effect tools can keep current names if description and annotation are clear.
+
+Compatibility policy:
+
+- Recommended for Claude readiness: remove mixed legacy tool registration from default surface.
+- If backward compatibility is required, add opt-in legacy registration behind a feature/config flag and keep it disabled for connector submission.
+- Do not keep mixed legacy tools visible in submitted connector, even with destructive annotation.
+
+### Shared helper APIs
+
+Add a small helper package, likely `pkg/mcp/toolannotations`, to avoid duplicated pointer boilerplate and import cycles:
+
+- `ReadOnly(title string) mcp.ToolOption` -> title, `readOnlyHint=true`, `destructiveHint=false`
+- `Destructive(title string) mcp.ToolOption` -> title, `readOnlyHint=false`, `destructiveHint=true`
+- optional `NonDestructiveWrite(title string)` only if a tool changes local session state without modifying external service; use sparingly because Claude requirement names `destructiveHint` for modifying/deleting tools.
+
+Add builder-local mode types where useful:
+
+```go
+type toolMode string
+
+const (
+    toolModeRead  toolMode = "read"
+    toolModeWrite toolMode = "write"
+)
+```
+
+Build functions should accept mode:
+
+- `buildTool(mode toolMode)`
+- `buildHandler(mode toolMode, readOnly bool)`
+- `validateOperation(mode, operation)`
+- `isWriteOperation(operation)`
+
+## Split inventory
+
+### Kafka builders
+
+#### `kafka_admin_topics`
+
+Split:
+
+- `kafka_admin_topics_read`
+  - operations: `list`, `get`, `metadata`
+  - annotation: read-only
+- `kafka_admin_topics_write`
+  - operations: `create`, `delete`
+  - annotation: destructive
+
+Read-only runtime: register read only.
+Read-write runtime: register both.
+
+#### `kafka_admin_groups`
+
+Split:
+
+- `kafka_admin_groups_read`
+  - operations: `list`, `describe`, `offsets`
+  - annotation: read-only
+- `kafka_admin_groups_write`
+  - operations: `remove-members`, `delete-offset`, `set-offset`
+  - annotation: destructive
+
+#### `kafka_admin_sr`
+
+Split:
+
+- `kafka_admin_sr_read`
+  - operations: `list`, `get`, plus schema type/capability read operations
+  - annotation: read-only
+- `kafka_admin_sr_write`
+  - operations: `set`, `create`, `delete`
+  - annotation: destructive
+
+#### `kafka_admin_connect`
+
+Split:
+
+- `kafka_admin_connect_read`
+  - read operations: cluster info, connector list/get/status/config, connector plugins, transforms
+  - annotation: read-only
+- `kafka_admin_connect_write`
+  - write operations: `create`, `update`, `delete`, `restart`, `pause`, `resume`
+  - annotation: destructive
+
+#### `kafka_admin_partitions`
+
+Current tool appears write-only (`update`). Options:
+
+- keep `kafka_admin_partitions` as destructive write-only; or
+- rename to `kafka_admin_partitions_write` for consistency.
+
+Recommendation: rename to `kafka_admin_partitions_write` if no read operations exist, and update docs. If preserving name matters, keep current name but annotate destructive.
+
+#### `kafka_client_produce`
+
+Write/side-effect tool. Keep current name, annotate destructive.
+
+#### `kafka_client_consume`
+
+Ambiguous:
+
+- description says no offset commit unless `group` parameter is explicitly specified
+- with `group`, consumer group state may change
+
+Recommendation for review safety:
+
+- split into `kafka_client_consume_read` without `group` / no offset commit
+- optional `kafka_client_consume_group` or `kafka_client_consume_write` for group-based consumption that may affect offsets/state, annotated destructive
+
+If implementation never commits offsets, keep single read tool after code verification and adjust description/schema to remove side-effect ambiguity.
+
+### Pulsar builders
+
+#### `pulsar_admin_topic`
+
+Split:
+
+- `pulsar_admin_topic_read`
+  - operations: `list`, `get`, `get-permissions`, `stats`, `lookup`, `internal-stats`, `internal-info`, `bundle-range`, `last-message-id`, `compact-status`, `offload-status`
+  - annotation: read-only
+- `pulsar_admin_topic_write`
+  - operations: `grant-permissions`, `revoke-permissions`, `create`, `delete`, `unload`, `terminate`, `compact`, `update`, `offload`
+  - annotation: destructive
+
+#### `pulsar_admin_subscription`
+
+Split:
+
+- `pulsar_admin_subscription_read`
+  - operations: `list`, `peek`, `get-message-by-id`
+  - annotation: read-only
+- `pulsar_admin_subscription_write`
+  - operations: `create`, `delete`, `skip`, `expire`, `reset-cursor`
+  - annotation: destructive
+
+#### `pulsar_admin_namespace`
+
+Split:
+
+- `pulsar_admin_namespace_read`
+  - operations: `list`, `get_topics`
+  - annotation: read-only
+- `pulsar_admin_namespace_write`
+  - operations: `create`, `delete`, `clear_backlog`, `unsubscribe`, `unload`, `split_bundle`
+  - annotation: destructive
+
+#### `pulsar_admin_namespace_policy*`
+
+Already partly separated:
+
+- `pulsar_admin_namespace_policy_get` -> read-only
+- `pulsar_admin_namespace_policy_get_anti_affinity_namespaces` -> read-only
+- `pulsar_admin_namespace_policy_set` -> destructive
+- `pulsar_admin_namespace_policy_remove` -> destructive
+
+Keep split; add titles/annotations and ensure no tool mixes set/remove/get.
+
+#### `pulsar_admin_topic_policy`
+
+Likely mixed get/set/remove operations. Split:
+
+- `pulsar_admin_topic_policy_read`
+- `pulsar_admin_topic_policy_write`
+
+Use same operation partitioning as handler supports.
+
+#### `pulsar_admin_brokers`
+
+Split:
+
+- `pulsar_admin_brokers_read`
+  - list/get/health/config/namespaces/runtime/internal/all_dynamic reads
+  - annotation: read-only
+- `pulsar_admin_brokers_write`
+  - dynamic config update/delete or any mutable broker operation
+  - annotation: destructive
+
+#### `pulsar_admin_cluster`
+
+Split:
+
+- `pulsar_admin_cluster_read`
+  - `list`, `get`, read peer/failure-domain operations
+  - annotation: read-only
+- `pulsar_admin_cluster_write`
+  - `create`, `update`, `delete`, write peer/failure-domain operations
+  - annotation: destructive
+
+#### `pulsar_admin_functions`
+
+Split:
+
+- `pulsar_admin_functions_read`
+  - `list`, `get`, `status`, `stats`, `querystate`, `download`
+  - annotation: read-only
+- `pulsar_admin_functions_write`
+  - `create`, `update`, `delete`, `start`, `stop`, `restart`, `putstate`, `trigger`, `upload`
+  - annotation: destructive
+
+#### `pulsar_admin_sinks` / `pulsar_admin_sources`
+
+Split each:
+
+- `*_read`
+  - `list`, `get`, `status`, `list-built-in`
+  - annotation: read-only
+- `*_write`
+  - `create`, `update`, `delete`, `start`, `stop`, `restart`
+  - annotation: destructive
+
+#### `pulsar_admin_packages`
+
+Split:
+
+- `pulsar_admin_package_read`
+  - `list`, `get`, `download`
+  - annotation: read-only
+- `pulsar_admin_package_write`
+  - `update`, `delete`, `upload`
+  - annotation: destructive
+
+#### `pulsar_admin_schema`
+
+Split:
+
+- `pulsar_admin_schema_read`
+  - `get`
+  - annotation: read-only
+- `pulsar_admin_schema_write`
+  - `upload`, `delete`
+  - annotation: destructive
+
+#### `pulsar_admin_tenant`
+
+Split:
+
+- `pulsar_admin_tenant_read`
+  - `list`, `get`
+  - annotation: read-only
+- `pulsar_admin_tenant_write`
+  - `create`, `update`, `delete`
+  - annotation: destructive
+
+#### `pulsar_admin_nsisolationpolicy`
+
+Split:
+
+- `pulsar_admin_nsisolationpolicy_read`
+  - `get`, `list`, broker read operations
+  - annotation: read-only
+- `pulsar_admin_nsisolationpolicy_write`
+  - `set`, `delete`
+  - annotation: destructive
+
+#### `pulsar_admin_resourcequota`
+
+Split:
+
+- `pulsar_admin_resourcequota_read`
+  - `get`
+  - annotation: read-only
+- `pulsar_admin_resourcequota_write`
+  - `set`, `reset`
+  - annotation: destructive
+
+#### Pure read tools
+
+Keep current names, add read-only annotation:
+
+- `pulsar_admin_status`
+- `pulsar_admin_broker_stats`
+- `pulsar_admin_functions_worker`
+- any MCP resources/templates that are not tools stay out of tool annotation scope
+
+#### Pulsar client tools
+
+- `pulsar_client_produce`: keep current name, destructive annotation.
+- `pulsar_client_consume`: likely side-effectful because subscriptions/cursors can be created/advanced. Recommendation: annotate destructive unless implementation is changed to provide a non-mutating peek/read variant.
+
+Possible future split:
+
+- `pulsar_client_peek_read` for non-destructive peeking if supported by admin APIs
+- `pulsar_client_consume` remains destructive
+
+### StreamNative Cloud tools
+
+#### Existing resource tools
+
+Already split by action:
+
+- `sncloud_resources_apply`: destructive; include title and `destructiveHint=true`
+- `sncloud_resources_delete`: destructive; title already present, ensure readOnlyHint false too
+
+No read counterpart currently. If resource list/get is added, use `sncloud_resources_read` rather than adding list/get to apply/delete tools.
+
+#### Context tools
+
+- `sncloud_context_whoami`: read-only
+- `sncloud_context_available_clusters`: read-only
+- `sncloud_context_use_cluster`: session/context mutation; annotate destructive or non-read-only. For Claude safety, use destructive unless we explicitly add `NonDestructiveWrite` and verify review accepts it.
+- `sncloud_context_reset`: session/context mutation; annotate destructive or non-read-only. For Claude safety, use destructive.
+
+#### Logs
+
+- `sncloud_logs`: read-only
+
+### Dynamic Functions-as-Tools
+
+`pkg/mcp/pftools/manager.go` dynamic tools invoke deployed Pulsar Functions and can produce messages / trigger external effects.
+
+Plan:
+
+- keep dynamic tool name from function metadata
+- add human-readable title from function metadata/tool name
+- annotate `destructiveHint=true`
+- if read-only mode should not expose dynamic invocation tools, verify registration path and add test
+- do not mark dynamic function tools read-only unless function metadata explicitly supports safe read-only classification in future
+
+## Implementation phases
+
+### Phase 1: shared annotation + mode helpers
+
+- Add `pkg/mcp/toolannotations` helper.
+- Add local read/write mode helpers in builders with mixed operations.
+- Add reusable operation validation helpers where a builder already has operation maps.
+
+### Phase 2: split Kafka tools
+
+- Update Kafka builders to build mode-specific tools.
+- Read-only config returns only read tools.
+- Read-write config returns read + write tools, except pure write tools remain write-only.
+- Update wrapper tests/docs.
+
+### Phase 3: split Pulsar tools
+
+- Update Pulsar builders to build mode-specific tools.
+- Preserve existing read-only behavior by not registering write tools in read-only config.
+- Ensure mode-specific operation enums and validation errors.
+- Add/extend parity tests for operation coverage.
+
+### Phase 4: StreamNative Cloud/static tool annotations
+
+- Add annotations to context/log/resource tools.
+- Keep already split apply/delete tools.
+- Ensure no new mixed resource tool appears.
+
+### Phase 5: dynamic tools
+
+- Add annotations to Functions-as-Tools.
+- Validate read-only exposure behavior.
+
+### Phase 6: docs and compatibility
+
+Update runtime-visible docs:
+
+- `README.md` feature/tool examples if names change.
+- `docs/tools/*.md` matching renamed/split tools.
+- Any design notes under `agents/` if tool surface changes are architectural.
+
+Compatibility decision needed before implementation:
+
+- Preferred: breaking but review-safe tool surface; remove mixed tool names.
+- Alternative: temporary alias support hidden behind explicit opt-in flag, disabled by default and not used for Claude submission.
+
+## Tests / compliance guard
+
+Add focused tests:
+
+- For every builder under `pkg/mcp/builders/kafka` and `pkg/mcp/builders/pulsar`:
+  - no returned tool mixes read and write operations
+  - tool name length <= 64
+  - title non-empty
+  - read-only or destructive hint explicit
+  - read tools: `ReadOnlyHint=true`, `DestructiveHint=false`
+  - write tools: `DestructiveHint=true`, `ReadOnlyHint=false`
+  - read-only config returns no write tools
+- StreamNative Cloud/context/log/resource tools have valid annotations.
+- PFTools dynamic tool creation has valid annotation.
+- Operation validation rejects read operations on write tools and write operations on read tools.
+
+Optional static test:
+
+- Build all feature sets and assert no `operation` enum contains both read and write verbs in one tool.
+
+## Risks
+
+- Tool split is runtime-visible and likely breaking for clients/prompts that call old names.
+- Docs under `docs/tools/` can drift if not updated with split names.
+- Some operations are ambiguous (`consume`, `trigger`, cursor operations, context reset). Conservative destructive annotation may add confirmations but avoids unsafe auto-run.
+- Some current tools may have read-only-mode logic embedded in handlers; after split, registration and handler validation must both enforce mode to prevent write leakage.
+- `mcp-go` default annotations are unsafe for compliance because title empty and destructive default true.
+
+## Questions to confirm
+
+1. Can we remove legacy mixed tool names from default registration, accepting breaking tool-name changes for Claude readiness?
+2. Should we add an opt-in legacy compatibility flag, disabled by default, or avoid compatibility layer entirely?
+3. For consume tools, should we conservatively classify as destructive, or implement a true non-mutating read variant first?
+4. Should session-only context changes (`sncloud_context_use_cluster/reset`) be marked destructive for Claude safety?
+
+## Recommended validation
+
+Fast local:
+
+```bash
+go test ./pkg/mcp/... ./pkg/schema/...
+go test -race ./pkg/mcp/builders/...
+go fmt ./...
+go mod tidy
+```
+
+Full repo before PR:
+
+```bash
+go mod verify
+go mod download
+golangci-lint run --timeout=3m
+go test -race ./...
+make build
+make license-check
+```
+
+Connector-specific manual check:
+
+```bash
+bin/snmcp stdio --use-external-pulsar --pulsar-web-service-url http://localhost:8080
+# then inspect tools/list with MCP Inspector and verify every tool annotation and no mixed read/write operation enum
+```
+
+Chart/E2E only needed if chart, SSE auth, or e2e harness touched:
+
+```bash
+./scripts/e2e-test.sh all
+```

@@ -1,5 +1,8 @@
 #### pulsar_admin_tenant
 
+**Claude connector safety:** Actual MCP tools: `pulsar_admin_tenant_read` (`list`, `get`) and `pulsar_admin_tenant_write` (`create`, `update`, `delete`).
+
+
 Manage Pulsar tenants, which are the highest level administrative units.
 
 - **list**: List all tenants in the Pulsar instance
@@ -14,4 +17,4 @@ Manage Pulsar tenants, which are the highest level administrative units.
   - `admin_roles` (array, optional): List of roles with admin permissions
   - `allowed_clusters` (array, required): List of clusters tenant can access
 - **delete**: Delete a tenant
-  - `tenant` (string, required): The tenant name 
+  - `tenant` (string, required): The tenant name

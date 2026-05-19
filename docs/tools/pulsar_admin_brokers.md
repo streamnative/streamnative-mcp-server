@@ -1,14 +1,17 @@
 #### pulsar_admin_brokers
 
+**Claude connector safety:** Actual MCP tools: `pulsar_admin_brokers_read` (`list`, `get`) and `pulsar_admin_brokers_write` (`update`, `delete` broker dynamic configuration).
+
+
 Unified tool for managing Apache Pulsar broker resources.
 
 - **brokers**
   - **list**: List all active brokers in a cluster
     - `clusterName` (string, required): The cluster name
-    
+
 - **health**
   - **get**: Check the health status of a broker
-    
+
 - **config**
   - **get**: Get broker configuration
     - `configType` (string, required): Configuration type, available options:
@@ -21,7 +24,7 @@ Unified tool for managing Apache Pulsar broker resources.
     - `configValue` (string, required): Configuration parameter value
   - **delete**: Delete broker configuration
     - `configName` (string, required): Configuration parameter name
-    
+
 - **namespaces**
   - **get**: Get namespaces managed by a broker
-    - `brokerUrl` (string, required): Broker URL, e.g., '127.0.0.1:8080' 
+    - `brokerUrl` (string, required): Broker URL, e.g., '127.0.0.1:8080'

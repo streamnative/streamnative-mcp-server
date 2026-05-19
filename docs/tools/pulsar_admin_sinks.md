@@ -1,5 +1,8 @@
 #### pulsar_admin_sinks
 
+**Claude connector safety:** Actual MCP tools: `pulsar_admin_sinks_read` (`list`, `get`, `status`, `list-built-in`) and `pulsar_admin_sinks_write` (`create`, `update`, `delete`, `start`, `stop`, `restart`).
+
+
 Manage Apache Pulsar Sinks for data movement and integration. Pulsar Sinks are connectors that export data from Pulsar topics to external systems such as databases, storage services, messaging systems, and third-party applications. Sinks consume messages from one or more Pulsar topics, transform the data if needed, and write it to external systems in a format compatible with the target destination.
 
 This tool provides complete lifecycle management for sink connectors:
@@ -83,4 +86,4 @@ This tool provides complete lifecycle management for sink connectors:
 - **list-built-in**: List all built-in sink connectors available in the system
   - No parameters required
 
-Built-in sink connectors are available for common systems like Kafka, JDBC, Elasticsearch, and cloud storage. Sinks follow the tenant/namespace/name hierarchy for organization and access control, can scale through parallelism configuration, and support configurable subscription types. Sinks require proper permissions to access their input topics. 
+Built-in sink connectors are available for common systems like Kafka, JDBC, Elasticsearch, and cloud storage. Sinks follow the tenant/namespace/name hierarchy for organization and access control, can scale through parallelism configuration, and support configurable subscription types. Sinks require proper permissions to access their input topics.

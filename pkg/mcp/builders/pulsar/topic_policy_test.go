@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import (
 func TestBuildTopicPolicyToolIncludesPulsarctlParityOperations(t *testing.T) {
 	builder := NewPulsarAdminTopicPolicyToolBuilder()
 
-	tool := builder.buildTopicPolicyTool()
+	tool := builder.buildTopicPolicyTool(toolModeRead)
 	operationSchema, ok := tool.InputSchema.Properties["operation"].(map[string]any)
 	require.True(t, ok)
 
@@ -42,7 +42,7 @@ func TestBuildTopicPolicyToolIncludesPulsarctlParityOperations(t *testing.T) {
 func TestBuildTopicPolicyToolIncludesTopicPolicyParameters(t *testing.T) {
 	builder := NewPulsarAdminTopicPolicyToolBuilder()
 
-	tool := builder.buildTopicPolicyTool()
+	tool := builder.buildTopicPolicyTool(toolModeRead)
 
 	require.Contains(t, tool.InputSchema.Properties, "applied")
 	require.Contains(t, tool.InputSchema.Properties, "count")
@@ -76,7 +76,7 @@ func TestTopicPolicyWriteOperationsRespectReadOnly(t *testing.T) {
 
 func TestTopicPolicyHandlerBlocksWriteBeforeSessionLookup(t *testing.T) {
 	builder := NewPulsarAdminTopicPolicyToolBuilder()
-	handler := builder.buildTopicPolicyHandler(true)
+	handler := builder.buildTopicPolicyHandler(toolModeRead)
 
 	result, err := handler(context.Background(), mcp.CallToolRequest{
 		Params: mcp.CallToolParams{
@@ -93,7 +93,7 @@ func TestTopicPolicyHandlerBlocksWriteBeforeSessionLookup(t *testing.T) {
 
 	text, ok := result.Content[0].(mcp.TextContent)
 	require.True(t, ok)
-	require.Contains(t, text.Text, "read-only mode")
+	require.Contains(t, text.Text, "not available in read mode")
 }
 
 func TestBuildDelayedDeliveryDataUsesPulsarctlStyleArguments(t *testing.T) {

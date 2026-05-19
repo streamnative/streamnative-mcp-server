@@ -1,5 +1,8 @@
 #### pulsar_client_consume
 
+**Claude connector safety:** Safety annotation: `pulsar_client_consume` is destructive and is not registered in read-only mode because consuming can create or advance subscription cursors.
+
+
 Consume messages from a Pulsar topic. This tool allows you to consume messages from a specified Pulsar topic with various options to control the subscription behavior, message processing, and display format.
 
 - **pulsar_client_consume**
@@ -14,4 +17,4 @@ Consume messages from a Pulsar topic. This tool allows you to consume messages f
   - `num-messages` (number, optional): Number of messages to consume (0 for unlimited, default: 0)
   - `timeout` (number, optional): Timeout for consuming messages in seconds (default: 30)
   - `show-properties` (boolean, optional): Show message properties (default: false)
-  - `hide-payload` (boolean, optional): Hide message payload (default: false) 
+  - `hide-payload` (boolean, optional): Hide message payload (default: false)

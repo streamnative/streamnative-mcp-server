@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,7 +27,17 @@ import (
 	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 )
+
+var kafkaConnectWriteOperations = map[string]struct{}{
+	"create":  {},
+	"update":  {},
+	"delete":  {},
+	"restart": {},
+	"pause":   {},
+	"resume":  {},
+}
 
 // KafkaConnectToolBuilder implements the ToolBuilder interface for Kafka Connect
 // It provides functionality to build Kafka Connect administration tools
@@ -71,21 +81,25 @@ func (b *KafkaConnectToolBuilder) BuildTools(_ context.Context, config builders.
 		return nil, err
 	}
 
-	// Build tools
-	tool := b.buildKafkaConnectTool()
-	handler := b.buildKafkaConnectHandler(config.ReadOnly)
-
-	return []server.ServerTool{
+	tools := []server.ServerTool{
 		{
-			Tool:    tool,
-			Handler: handler,
+			Tool:    b.buildKafkaConnectTool(toolModeRead),
+			Handler: b.buildKafkaConnectHandler(toolModeRead),
 		},
-	}, nil
+	}
+	if !config.ReadOnly {
+		tools = append(tools, server.ServerTool{
+			Tool:    b.buildKafkaConnectTool(toolModeWrite),
+			Handler: b.buildKafkaConnectHandler(toolModeWrite),
+		})
+	}
+
+	return tools, nil
 }
 
 // buildKafkaConnectTool builds the Kafka Connect MCP tool definition
 // Migrated from the original tool definition logic
-func (b *KafkaConnectToolBuilder) buildKafkaConnectTool() mcp.Tool {
+func (b *KafkaConnectToolBuilder) buildKafkaConnectTool(mode toolMode) mcp.Tool {
 	resourceDesc := "Resource to operate on. Available resources:\n" +
 		"- kafka-connect-cluster: A single Kafka Connect cluster that manages connectors and tasks.\n" +
 		"- connector: A single Kafka Connect connector instance that moves data between Kafka and external systems.\n" +
@@ -94,13 +108,22 @@ func (b *KafkaConnectToolBuilder) buildKafkaConnectTool() mcp.Tool {
 
 	operationDesc := "Operation to perform. Available operations:\n" +
 		"- list: List all connectors or connector plugins in a cluster.\n" +
-		"- get: Retrieve detailed information about a Kafka Connect cluster or specific connector.\n" +
-		"- create: Create a new connector with specified configuration.\n" +
-		"- update: Modify an existing connector's configuration.\n" +
-		"- delete: Remove a connector from the Kafka Connect cluster.\n" +
-		"- restart: Restart a running connector (useful after failures or configuration changes).\n" +
-		"- pause: Temporarily stop a connector from processing data.\n" +
-		"- resume: Continue processing with a previously paused connector."
+		"- get: Retrieve detailed information about a Kafka Connect cluster or specific connector."
+	operationEnum := []string{"list", "get"}
+	toolName := "kafka_admin_connect_read"
+	annotation := toolannotations.ReadOnly("Read Kafka Connect")
+	if isToolModeWrite(mode) {
+		operationDesc = "Operation to perform. Available operations:\n" +
+			"- create: Create a new connector with specified configuration.\n" +
+			"- update: Modify an existing connector's configuration.\n" +
+			"- delete: Remove a connector from the Kafka Connect cluster.\n" +
+			"- restart: Restart a running connector (useful after failures or configuration changes).\n" +
+			"- pause: Temporarily stop a connector from processing data.\n" +
+			"- resume: Continue processing with a previously paused connector."
+		operationEnum = []string{"create", "update", "delete", "restart", "pause", "resume"}
+		toolName = "kafka_admin_connect_write"
+		annotation = toolannotations.Destructive("Manage Kafka Connect")
+	}
 
 	toolDesc := "Unified tool for managing Apache Kafka Connect.\n" +
 		"Kafka Connect is a framework for connecting Kafka with external systems such as databases, key-value stores, search indexes, and file systems. " +
@@ -170,13 +193,14 @@ func (b *KafkaConnectToolBuilder) buildKafkaConnectTool() mcp.Tool {
 		"    operation: \"get\"\n\n" +
 		"This tool requires appropriate Kafka Connect permissions."
 
-	return mcp.NewTool("kafka_admin_connect",
+	return mcp.NewTool(toolName,
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("resource", mcp.Required(),
 			mcp.Description(resourceDesc),
 		),
 		mcp.WithString("operation", mcp.Required(),
 			mcp.Description(operationDesc),
+			mcp.Enum(operationEnum...),
 		),
 		mcp.WithString("name",
 			mcp.Description("The name of the Kafka Connect connector to operate on. "+
@@ -194,12 +218,13 @@ func (b *KafkaConnectToolBuilder) buildKafkaConnectTool() mcp.Tool {
 				"- key.converter/value.converter: Data format converters\n"+
 				"- transforms: Optional transformations to apply to data\n"+
 				"Additional fields depend on the specific connector type being used.")),
+		annotation,
 	)
 }
 
 // buildKafkaConnectHandler builds the Kafka Connect handler function
 // Migrated from the original handler logic
-func (b *KafkaConnectToolBuilder) buildKafkaConnectHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *KafkaConnectToolBuilder) buildKafkaConnectHandler(mode toolMode) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get required parameters
 		resource, err := request.RequireString("resource")
@@ -216,9 +241,8 @@ func (b *KafkaConnectToolBuilder) buildKafkaConnectHandler(readOnly bool) func(c
 		resource = strings.ToLower(resource)
 		operation = strings.ToLower(operation)
 
-		// Validate write operations in read-only mode
-		if readOnly && (operation == "create" || operation == "update" || operation == "delete" || operation == "restart" || operation == "pause" || operation == "resume") {
-			return mcp.NewToolResultError("Write operations are not allowed in read-only mode"), nil
+		if !validateModeOperation(mode, operation, kafkaConnectWriteOperations) {
+			return mcp.NewToolResultError(fmt.Sprintf("Operation %q is not available in %s mode", operation, mode)), nil
 		}
 
 		// Get Kafka Connect client

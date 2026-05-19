@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import (
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 	"gopkg.in/yaml.v2"
 )
 
@@ -73,21 +74,25 @@ func (b *PulsarAdminFunctionsToolBuilder) BuildTools(_ context.Context, config b
 		return nil, err
 	}
 
-	// Build tools
-	tool := b.buildPulsarAdminFunctionsTool()
-	handler := b.buildPulsarAdminFunctionsHandler(config.ReadOnly)
-
-	return []server.ServerTool{
+	tools := []server.ServerTool{
 		{
-			Tool:    tool,
-			Handler: handler,
+			Tool:    b.buildPulsarAdminFunctionsTool(toolModeRead),
+			Handler: b.buildPulsarAdminFunctionsHandler(toolModeRead),
 		},
-	}, nil
+	}
+	if !config.ReadOnly {
+		tools = append(tools, server.ServerTool{
+			Tool:    b.buildPulsarAdminFunctionsTool(toolModeWrite),
+			Handler: b.buildPulsarAdminFunctionsHandler(toolModeWrite),
+		})
+	}
+
+	return tools, nil
 }
 
 // buildPulsarAdminFunctionsTool builds the Pulsar admin functions MCP tool definition
 // Migrated from the original tool definition logic
-func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsTool() mcp.Tool {
+func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsTool(mode toolMode) mcp.Tool {
 	toolDesc := "Manage Apache Pulsar Functions for stream processing. " +
 		"Pulsar Functions are lightweight compute processes that can consume messages from one or more Pulsar topics, " +
 		"apply user-defined processing logic, and produce results to another topic. " +
@@ -115,10 +120,20 @@ func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsTool() mcp.To
 		"- trigger: Manually trigger a function with a specific value\n" +
 		"- upload: Upload a local file into Pulsar function package storage"
 
-	return mcp.NewTool("pulsar_admin_functions",
+	operationEnum := []string{"list", "get", "status", "stats", "querystate", "download"}
+	toolName := "pulsar_admin_functions_read"
+	annotation := toolannotations.ReadOnly("Read Pulsar Functions")
+	if isToolModeWrite(mode) {
+		operationEnum = []string{"create", "update", "delete", "start", "stop", "restart", "putstate", "trigger", "upload"}
+		toolName = "pulsar_admin_functions_write"
+		annotation = toolannotations.Destructive("Manage Pulsar Functions")
+	}
+
+	return mcp.NewTool(toolName,
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("operation", mcp.Required(),
-			mcp.Description(operationDesc)),
+			mcp.Description(operationDesc),
+			mcp.Enum(operationEnum...)),
 		mcp.WithString("fqfn",
 			mcp.Description("The Fully Qualified Function Name in the form tenant/namespace/name. "+
 				"Mutually exclusive with tenant, namespace, and name parameters.")),
@@ -301,12 +316,13 @@ func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsTool() mcp.To
 				"The function processes this value just like a normal message.")),
 		mcp.WithString("triggerFile",
 			mcp.Description("Path to a file containing the trigger value. Required for 'trigger' operation unless triggerValue is set.")),
+		annotation,
 	)
 }
 
 // buildPulsarAdminFunctionsHandler builds the Pulsar admin functions handler function
 // Migrated from the original handler logic
-func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsHandler(mode toolMode) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get Pulsar session from context
 		session := mcpCtx.GetPulsarSession(ctx)
@@ -330,9 +346,8 @@ func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsHandler(readO
 			return b.handleError("validate operation", fmt.Errorf("invalid operation: '%s'. Supported operations: list, get, status, stats, querystate, create, update, delete, download, start, stop, restart, putstate, trigger, upload", operation)), nil
 		}
 
-		// Check write permissions for write operations
-		if readOnly && isReadOnlyRestrictedFunctionOperation(operation) {
-			return b.handleError("check permissions", fmt.Errorf("operation '%s' not allowed in read-only mode. Read-only mode restricts modifications and package transfer operations for Pulsar Functions", operation)), nil
+		if !validateModeOperation(mode, operation, readOnlyRestrictedFunctionOperations) {
+			return b.handleError("check permissions", fmt.Errorf("operation %q is not available in %s mode", operation, mode)), nil
 		}
 
 		var identity functionIdentity
@@ -798,7 +813,6 @@ var readOnlyRestrictedFunctionOperations = map[string]struct{}{
 	"create":   {},
 	"update":   {},
 	"delete":   {},
-	"download": {},
 	"start":    {},
 	"stop":     {},
 	"restart":  {},

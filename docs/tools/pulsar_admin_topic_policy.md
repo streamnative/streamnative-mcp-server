@@ -1,5 +1,8 @@
 #### pulsar_admin_topic_policy
 
+**Claude connector safety:** Actual MCP tools: `pulsar_admin_topic_policy_read` (get policy operations) and `pulsar_admin_topic_policy_write` (set/remove policy operations).
+
+
 Manage Pulsar topic-level policies with operation names aligned to `pulsarctl topics`.
 
 - **Core operations**

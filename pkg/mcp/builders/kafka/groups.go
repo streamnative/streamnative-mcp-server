@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,8 +24,15 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 	"github.com/twmb/franz-go/pkg/kadm"
 )
+
+var kafkaGroupWriteOperations = map[string]struct{}{
+	"remove-members": {},
+	"delete-offset":  {},
+	"set-offset":     {},
+}
 
 // KafkaGroupsToolBuilder implements the ToolBuilder interface for Kafka Consumer Groups
 // /nolint:revive
@@ -66,20 +73,24 @@ func (b *KafkaGroupsToolBuilder) BuildTools(_ context.Context, config builders.T
 		return nil, err
 	}
 
-	// Build tools
-	tool := b.buildKafkaGroupsTool()
-	handler := b.buildKafkaGroupsHandler(config.ReadOnly)
-
-	return []server.ServerTool{
+	tools := []server.ServerTool{
 		{
-			Tool:    tool,
-			Handler: handler,
+			Tool:    b.buildKafkaGroupsTool(toolModeRead),
+			Handler: b.buildKafkaGroupsHandler(toolModeRead),
 		},
-	}, nil
+	}
+	if !config.ReadOnly {
+		tools = append(tools, server.ServerTool{
+			Tool:    b.buildKafkaGroupsTool(toolModeWrite),
+			Handler: b.buildKafkaGroupsHandler(toolModeWrite),
+		})
+	}
+
+	return tools, nil
 }
 
 // buildKafkaGroupsTool builds the Kafka Groups MCP tool definition
-func (b *KafkaGroupsToolBuilder) buildKafkaGroupsTool() mcp.Tool {
+func (b *KafkaGroupsToolBuilder) buildKafkaGroupsTool(mode toolMode) mcp.Tool {
 	resourceDesc := "Resource to operate on. Available resources:\n" +
 		"- group: A single Kafka Consumer Group for operations on individual groups (describe, remove-members, set-offset, delete-offset)\n" +
 		"- groups: Collection of Kafka Consumer Groups for bulk operations (list)"
@@ -87,10 +98,19 @@ func (b *KafkaGroupsToolBuilder) buildKafkaGroupsTool() mcp.Tool {
 	operationDesc := "Operation to perform. Available operations:\n" +
 		"- list: List all Kafka Consumer Groups in the cluster\n" +
 		"- describe: Get detailed information about a specific Consumer Group, including members, offsets, and lag\n" +
-		"- remove-members: Remove specific members from a Consumer Group to force rebalancing or troubleshoot issues\n" +
-		"- offsets: Get offsets for a specific consumer group\n" +
-		"- delete-offset: Delete a specific offset for a consumer group of a topic\n" +
-		"- set-offset: Set a specific offset for a consumer group's topic-partition"
+		"- offsets: Get offsets for a specific consumer group"
+	operationEnum := []string{"list", "describe", "offsets"}
+	toolName := "kafka_admin_groups_read"
+	annotation := toolannotations.ReadOnly("Read Kafka Consumer Groups")
+	if isToolModeWrite(mode) {
+		operationDesc = "Operation to perform. Available operations:\n" +
+			"- remove-members: Remove specific members from a Consumer Group to force rebalancing or troubleshoot issues\n" +
+			"- delete-offset: Delete a specific offset for a consumer group of a topic\n" +
+			"- set-offset: Set a specific offset for a consumer group's topic-partition"
+		operationEnum = []string{"remove-members", "delete-offset", "set-offset"}
+		toolName = "kafka_admin_groups_write"
+		annotation = toolannotations.Destructive("Manage Kafka Consumer Groups")
+	}
 
 	toolDesc := "Unified tool for managing Apache Kafka Consumer Groups.\n" +
 		"This tool provides access to Kafka consumer group operations including listing, describing, and managing group membership.\n" +
@@ -130,13 +150,14 @@ func (b *KafkaGroupsToolBuilder) buildKafkaGroupsTool() mcp.Tool {
 		"   offset: 1000\n\n" +
 		"This tool requires Kafka super-user permissions."
 
-	return mcp.NewTool("kafka_admin_groups",
+	return mcp.NewTool(toolName,
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("resource", mcp.Required(),
 			mcp.Description(resourceDesc),
 		),
 		mcp.WithString("operation", mcp.Required(),
 			mcp.Description(operationDesc),
+			mcp.Enum(operationEnum...),
 		),
 		mcp.WithString("group",
 			mcp.Description("The name of the Kafka Consumer Group to operate on. "+
@@ -153,11 +174,12 @@ func (b *KafkaGroupsToolBuilder) buildKafkaGroupsTool() mcp.Tool {
 			mcp.Description("The partition number. Required for 'set-offset' operation.")),
 		mcp.WithNumber("offset",
 			mcp.Description("The offset value to set. Required for 'set-offset' operation.")),
+		annotation,
 	)
 }
 
 // buildKafkaGroupsHandler builds the Kafka Groups handler function
-func (b *KafkaGroupsToolBuilder) buildKafkaGroupsHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *KafkaGroupsToolBuilder) buildKafkaGroupsHandler(mode toolMode) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get required parameters
 		resource, err := request.RequireString("resource")
@@ -174,9 +196,8 @@ func (b *KafkaGroupsToolBuilder) buildKafkaGroupsHandler(readOnly bool) func(con
 		resource = strings.ToLower(resource)
 		operation = strings.ToLower(operation)
 
-		// Validate write operations in read-only mode
-		if readOnly && (operation == "remove-members" || operation == "delete-offset" || operation == "set-offset") {
-			return mcp.NewToolResultError("Write operations are not allowed in read-only mode"), nil
+		if !validateModeOperation(mode, operation, kafkaGroupWriteOperations) {
+			return mcp.NewToolResultError(fmt.Sprintf("Operation %q is not available in %s mode", operation, mode)), nil
 		}
 
 		// Get Kafka admin client

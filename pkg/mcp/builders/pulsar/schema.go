@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,7 +29,13 @@ import (
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 )
+
+var pulsarSchemaWriteOperations = map[string]struct{}{
+	"upload": {},
+	"delete": {},
+}
 
 // PulsarAdminSchemaToolBuilder implements the ToolBuilder interface for Pulsar Admin Schema tools
 // It provides functionality to build Pulsar schema management tools
@@ -73,21 +79,25 @@ func (b *PulsarAdminSchemaToolBuilder) BuildTools(_ context.Context, config buil
 		return nil, err
 	}
 
-	// Build tools
-	tool := b.buildSchemaTool()
-	handler := b.buildSchemaHandler(config.ReadOnly)
-
-	return []server.ServerTool{
+	tools := []server.ServerTool{
 		{
-			Tool:    tool,
-			Handler: handler,
+			Tool:    b.buildSchemaTool(toolModeRead),
+			Handler: b.buildSchemaHandler(toolModeRead),
 		},
-	}, nil
+	}
+	if !config.ReadOnly {
+		tools = append(tools, server.ServerTool{
+			Tool:    b.buildSchemaTool(toolModeWrite),
+			Handler: b.buildSchemaHandler(toolModeWrite),
+		})
+	}
+
+	return tools, nil
 }
 
 // buildSchemaTool builds the Pulsar Admin Schema MCP tool definition
 // Migrated from the original tool definition logic
-func (b *PulsarAdminSchemaToolBuilder) buildSchemaTool() mcp.Tool {
+func (b *PulsarAdminSchemaToolBuilder) buildSchemaTool(mode toolMode) mcp.Tool {
 	toolDesc := "Manage Apache Pulsar schemas for topics. " +
 		"Schemas in Pulsar define the structure of message data, enabling data validation, evolution, and interoperability. " +
 		"Pulsar supports multiple schema types including AVRO, JSON, PROTOBUF, etc., allowing strong typing of message content. " +
@@ -103,13 +113,23 @@ func (b *PulsarAdminSchemaToolBuilder) buildSchemaTool() mcp.Tool {
 		"- upload: Upload a new schema for a topic (requires namespace admin permissions)\n" +
 		"- delete: Delete the schema for a topic (requires namespace admin permissions)"
 
-	return mcp.NewTool("pulsar_admin_schema",
+	operationEnum := []string{"get"}
+	toolName := "pulsar_admin_schema_read"
+	annotation := toolannotations.ReadOnly("Read Pulsar Schemas")
+	if isToolModeWrite(mode) {
+		operationEnum = []string{"upload", "delete"}
+		toolName = "pulsar_admin_schema_write"
+		annotation = toolannotations.Destructive("Manage Pulsar Schemas")
+	}
+
+	return mcp.NewTool(toolName,
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("resource", mcp.Required(),
 			mcp.Description(resourceDesc),
 		),
 		mcp.WithString("operation", mcp.Required(),
 			mcp.Description(operationDesc),
+			mcp.Enum(operationEnum...),
 		),
 		mcp.WithString("topic", mcp.Required(),
 			mcp.Description("The fully qualified topic name in the format 'persistent://tenant/namespace/topic'. "+
@@ -126,12 +146,13 @@ func (b *PulsarAdminSchemaToolBuilder) buildSchemaTool() mcp.Tool {
 				"The file should contain a JSON object with 'type', 'schema', and optionally 'properties' fields. "+
 				"Supported schema types include: AVRO, JSON, PROTOBUF, PROTOBUF_NATIVE, KEY_VALUE, BYTES, STRING, INT8, INT16, INT32, INT64, FLOAT, DOUBLE, BOOLEAN, NONE."),
 		),
+		annotation,
 	)
 }
 
 // buildSchemaHandler builds the Pulsar Admin Schema handler function
 // Migrated from the original handler logic
-func (b *PulsarAdminSchemaToolBuilder) buildSchemaHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminSchemaToolBuilder) buildSchemaHandler(mode toolMode) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get required parameters
 		resource, err := request.RequireString("resource")
@@ -153,9 +174,8 @@ func (b *PulsarAdminSchemaToolBuilder) buildSchemaHandler(readOnly bool) func(co
 		resource = strings.ToLower(resource)
 		operation = strings.ToLower(operation)
 
-		// Validate write operations in read-only mode
-		if readOnly && (operation == "upload" || operation == "delete") {
-			return mcp.NewToolResultError("Write operations are not allowed in read-only mode"), nil
+		if !validateModeOperation(mode, operation, pulsarSchemaWriteOperations) {
+			return mcp.NewToolResultError(fmt.Sprintf("Operation %q is not available in %s mode", operation, mode)), nil
 		}
 
 		// Verify resource type

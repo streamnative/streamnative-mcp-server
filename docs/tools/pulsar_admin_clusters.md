@@ -1,5 +1,8 @@
 #### pulsar_admin_cluster
 
+**Claude connector safety:** Actual MCP tools: `pulsar_admin_cluster_read` (`list`, `get`) and `pulsar_admin_cluster_write` (`create`, `update`, `delete`).
+
+
 Unified tool for managing Apache Pulsar clusters.
 
 - **cluster**
@@ -18,14 +21,14 @@ Unified tool for managing Apache Pulsar clusters.
     - Same optional parameters as create
   - **delete**: Delete a cluster
     - `cluster_name` (string, required): The cluster name
-    
+
 - **peer_clusters**
   - **get**: Get list of peer clusters
     - `cluster_name` (string, required): The cluster name
   - **update**: Update peer clusters list
     - `cluster_name` (string, required): The cluster name
     - `peer_cluster_names` (array, required): List of peer cluster names
-    
+
 - **failure_domain**
   - **list**: List all failure domains in a cluster
     - `cluster_name` (string, required): The cluster name
@@ -42,4 +45,4 @@ Unified tool for managing Apache Pulsar clusters.
     - `brokers` (array, required): List of brokers in the domain
   - **delete**: Delete a failure domain
     - `cluster_name` (string, required): The cluster name
-    - `domain_name` (string, required): The failure domain name 
+    - `domain_name` (string, required): The failure domain name

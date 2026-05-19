@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/sirupsen/logrus"
 	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 	"github.com/streamnative/streamnative-mcp-server/pkg/schema"
 )
@@ -123,6 +124,10 @@ func NewPulsarFunctionManager(snServer *Server, readOnly bool, options *ManagerO
 
 // Start starts polling for functions
 func (m *PulsarFunctionManager) Start() {
+	if m.readOnly {
+		m.logger.Info("Skipping Pulsar Functions-as-Tools registration in read-only mode")
+		return
+	}
 	go m.pollFunctions()
 }
 
@@ -583,7 +588,10 @@ func (m *PulsarFunctionManager) convertFunctionToTool(fn *utils.FunctionConfig) 
 		return nil, errors.Join(ErrSchemaConversionFailed, err)
 	}
 
-	toolInputSchemaProperties = append(toolInputSchemaProperties, mcp.WithDescription(description))
+	toolInputSchemaProperties = append(toolInputSchemaProperties,
+		mcp.WithDescription(description),
+		toolannotations.Destructive(fmt.Sprintf("Invoke Pulsar Function %s", toolName)),
+	)
 
 	// Create the tool
 	tool := mcp.NewTool(toolName,

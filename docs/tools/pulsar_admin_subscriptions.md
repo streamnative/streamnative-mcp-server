@@ -1,5 +1,8 @@
 #### pulsar_admin_subscription
 
+**Claude connector safety:** Actual MCP tools: `pulsar_admin_subscription_read` (`list`, `peek`, `get-message-by-id`) and `pulsar_admin_subscription_write` (`create`, `delete`, `skip`, `expire`, `reset-cursor`).
+
+
 Manage Pulsar topic subscriptions, which represent consumer groups reading from topics.
 
 - **list**: List all subscriptions for a topic

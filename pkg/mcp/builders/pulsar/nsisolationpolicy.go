@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,7 +27,13 @@ import (
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 )
+
+var pulsarNsIsolationPolicyWriteOperations = map[string]struct{}{
+	"set":    {},
+	"delete": {},
+}
 
 // PulsarAdminNsIsolationPolicyToolBuilder implements the ToolBuilder interface for Pulsar admin namespace isolation policies
 // /nolint:revive
@@ -69,20 +75,24 @@ func (b *PulsarAdminNsIsolationPolicyToolBuilder) BuildTools(_ context.Context, 
 		return nil, err
 	}
 
-	// Build tools
-	tool := b.buildNsIsolationPolicyTool()
-	handler := b.buildNsIsolationPolicyHandler(config.ReadOnly)
-
-	return []server.ServerTool{
+	tools := []server.ServerTool{
 		{
-			Tool:    tool,
-			Handler: handler,
+			Tool:    b.buildNsIsolationPolicyTool(toolModeRead),
+			Handler: b.buildNsIsolationPolicyHandler(toolModeRead),
 		},
-	}, nil
+	}
+	if !config.ReadOnly {
+		tools = append(tools, server.ServerTool{
+			Tool:    b.buildNsIsolationPolicyTool(toolModeWrite),
+			Handler: b.buildNsIsolationPolicyHandler(toolModeWrite),
+		})
+	}
+
+	return tools, nil
 }
 
 // buildNsIsolationPolicyTool builds the Pulsar admin namespace isolation policy MCP tool definition
-func (b *PulsarAdminNsIsolationPolicyToolBuilder) buildNsIsolationPolicyTool() mcp.Tool {
+func (b *PulsarAdminNsIsolationPolicyToolBuilder) buildNsIsolationPolicyTool(mode toolMode) mcp.Tool {
 	toolDesc := "Manage namespace isolation policies in a Pulsar cluster. " +
 		"Allows viewing, creating, updating, and deleting namespace isolation policies. " +
 		"Some operations require super-user permissions."
@@ -98,13 +108,23 @@ func (b *PulsarAdminNsIsolationPolicyToolBuilder) buildNsIsolationPolicyTool() m
 		"- set: Create or update a resource (requires super-user permissions)\n" +
 		"- delete: Delete a resource (requires super-user permissions)"
 
-	return mcp.NewTool("pulsar_admin_nsisolationpolicy",
+	operationEnum := []string{"get", "list"}
+	toolName := "pulsar_admin_nsisolationpolicy_read"
+	annotation := toolannotations.ReadOnly("Read Pulsar Namespace Isolation Policies")
+	if isToolModeWrite(mode) {
+		operationEnum = []string{"set", "delete"}
+		toolName = "pulsar_admin_nsisolationpolicy_write"
+		annotation = toolannotations.Destructive("Manage Pulsar Namespace Isolation Policies")
+	}
+
+	return mcp.NewTool(toolName,
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("resource", mcp.Required(),
 			mcp.Description(resourceDesc),
 		),
 		mcp.WithString("operation", mcp.Required(),
 			mcp.Description(operationDesc),
+			mcp.Enum(operationEnum...),
 		),
 		mcp.WithString("cluster", mcp.Required(),
 			mcp.Description("Cluster name"),
@@ -146,11 +166,12 @@ func (b *PulsarAdminNsIsolationPolicyToolBuilder) buildNsIsolationPolicyTool() m
 		mcp.WithObject("autoFailoverPolicyParams",
 			mcp.Description("Auto failover policy parameters as an object (e.g., {'min_limit': '1', 'usage_threshold': '100'}). Optional for policy.set"),
 		),
+		annotation,
 	)
 }
 
 // buildNsIsolationPolicyHandler builds the Pulsar admin namespace isolation policy handler function
-func (b *PulsarAdminNsIsolationPolicyToolBuilder) buildNsIsolationPolicyHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminNsIsolationPolicyToolBuilder) buildNsIsolationPolicyHandler(mode toolMode) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get Pulsar session from context
 		session := mcpCtx.GetPulsarSession(ctx)
@@ -183,9 +204,8 @@ func (b *PulsarAdminNsIsolationPolicyToolBuilder) buildNsIsolationPolicyHandler(
 		resource = strings.ToLower(resource)
 		operation = strings.ToLower(operation)
 
-		// Validate write operations in read-only mode
-		if readOnly && (operation == "set" || operation == "delete") {
-			return mcp.NewToolResultError("Write operations are not allowed in read-only mode"), nil
+		if !validateModeOperation(mode, operation, pulsarNsIsolationPolicyWriteOperations) {
+			return mcp.NewToolResultError(fmt.Sprintf("Operation %q is not available in %s mode", operation, mode)), nil
 		}
 
 		// Dispatch based on resource type

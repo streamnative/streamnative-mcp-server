@@ -1,5 +1,8 @@
 #### kafka-admin-connect
 
+**Claude connector safety:** Actual MCP tools: `kafka_admin_connect_read` (`list`, `get`) and `kafka_admin_connect_write` (`create`, `update`, `delete`, `restart`, `pause`, `resume`).
+
+
 Kafka Connect is a framework for integrating Kafka with external systems. The following resources and operations are supported:
 
 - **kafka-connect-cluster**
@@ -31,4 +34,4 @@ Kafka Connect is a framework for integrating Kafka with external systems. The fo
 
 - **connector-plugins**
   - **list**: List all available connector plugins
-    - _Parameters_: None 
+    - _Parameters_: None

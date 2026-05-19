@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 )
 
 // PulsarClientProduceToolBuilder implements the ToolBuilder interface for Pulsar Client Producer tools
@@ -100,6 +101,7 @@ func (b *PulsarClientProduceToolBuilder) buildProduceTool() mcp.Tool {
 
 	return mcp.NewTool("pulsar_client_produce",
 		mcp.WithDescription(toolDesc),
+		toolannotations.Destructive("Produce Pulsar Messages"),
 		mcp.WithString("topic", mcp.Required(),
 			mcp.Description("The fully qualified topic name to produce to (format: [persistent|non-persistent]://tenant/namespace/topic). "+
 				"For partitioned topics, messages will be distributed across partitions based on the partitioning scheme. "+

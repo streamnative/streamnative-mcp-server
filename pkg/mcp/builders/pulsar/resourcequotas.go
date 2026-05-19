@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,7 +26,13 @@ import (
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 )
+
+var pulsarResourceQuotaWriteOperations = map[string]struct{}{
+	"set":   {},
+	"reset": {},
+}
 
 // PulsarAdminResourceQuotasToolBuilder implements the ToolBuilder interface for Pulsar admin resource quotas
 // /nolint:revive
@@ -68,20 +74,24 @@ func (b *PulsarAdminResourceQuotasToolBuilder) BuildTools(_ context.Context, con
 		return nil, err
 	}
 
-	// Build tools
-	tool := b.buildResourceQuotasTool()
-	handler := b.buildResourceQuotasHandler(config.ReadOnly)
-
-	return []server.ServerTool{
+	tools := []server.ServerTool{
 		{
-			Tool:    tool,
-			Handler: handler,
+			Tool:    b.buildResourceQuotasTool(toolModeRead),
+			Handler: b.buildResourceQuotasHandler(toolModeRead),
 		},
-	}, nil
+	}
+	if !config.ReadOnly {
+		tools = append(tools, server.ServerTool{
+			Tool:    b.buildResourceQuotasTool(toolModeWrite),
+			Handler: b.buildResourceQuotasHandler(toolModeWrite),
+		})
+	}
+
+	return tools, nil
 }
 
 // buildResourceQuotasTool builds the Pulsar admin resource quotas MCP tool definition
-func (b *PulsarAdminResourceQuotasToolBuilder) buildResourceQuotasTool() mcp.Tool {
+func (b *PulsarAdminResourceQuotasToolBuilder) buildResourceQuotasTool(mode toolMode) mcp.Tool {
 	toolDesc := "Manage Apache Pulsar resource quotas for brokers, namespaces and bundles. " +
 		"Resource quotas define limits for resource usage such as message rates, bandwidth, and memory. " +
 		"These quotas help prevent resource abuse and ensure fair resource allocation across the Pulsar cluster. " +
@@ -96,13 +106,23 @@ func (b *PulsarAdminResourceQuotasToolBuilder) buildResourceQuotasTool() mcp.Too
 		"- set: Set the resource quota for a specified namespace bundle or default quota (requires super-user permissions)\n" +
 		"- reset: Reset a namespace bundle's resource quota to default value (requires super-user permissions)"
 
-	return mcp.NewTool("pulsar_admin_resourcequota",
+	operationEnum := []string{"get"}
+	toolName := "pulsar_admin_resourcequota_read"
+	annotation := toolannotations.ReadOnly("Read Pulsar Resource Quotas")
+	if isToolModeWrite(mode) {
+		operationEnum = []string{"set", "reset"}
+		toolName = "pulsar_admin_resourcequota_write"
+		annotation = toolannotations.Destructive("Manage Pulsar Resource Quotas")
+	}
+
+	return mcp.NewTool(toolName,
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("resource", mcp.Required(),
 			mcp.Description(resourceDesc),
 		),
 		mcp.WithString("operation", mcp.Required(),
 			mcp.Description(operationDesc),
+			mcp.Enum(operationEnum...),
 		),
 		mcp.WithString("namespace",
 			mcp.Description("The namespace name in the format 'tenant/namespace'. "+
@@ -137,11 +157,12 @@ func (b *PulsarAdminResourceQuotasToolBuilder) buildResourceQuotasTool() mcp.Too
 			mcp.Description("Whether to allow quota to be dynamically re-calculated. Optional for 'set' operation. "+
 				"If true, the broker can dynamically adjust the quota based on the current usage patterns."),
 		),
+		annotation,
 	)
 }
 
 // buildResourceQuotasHandler builds the Pulsar admin resource quotas handler function
-func (b *PulsarAdminResourceQuotasToolBuilder) buildResourceQuotasHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminResourceQuotasToolBuilder) buildResourceQuotasHandler(mode toolMode) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get required parameters
 		resource, err := request.RequireString("resource")
@@ -158,9 +179,8 @@ func (b *PulsarAdminResourceQuotasToolBuilder) buildResourceQuotasHandler(readOn
 		resource = strings.ToLower(resource)
 		operation = strings.ToLower(operation)
 
-		// Validate write operations in read-only mode
-		if readOnly && (operation == "set" || operation == "reset") {
-			return mcp.NewToolResultError("Write operations are not allowed in read-only mode"), nil
+		if !validateModeOperation(mode, operation, pulsarResourceQuotaWriteOperations) {
+			return mcp.NewToolResultError(fmt.Sprintf("Operation %q is not available in %s mode", operation, mode)), nil
 		}
 
 		// Verify resource type

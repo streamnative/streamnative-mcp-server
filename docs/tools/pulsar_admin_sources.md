@@ -1,5 +1,8 @@
 #### pulsar_admin_sources
 
+**Claude connector safety:** Actual MCP tools: `pulsar_admin_sources_read` (`list`, `get`, `status`, `list-built-in`) and `pulsar_admin_sources_write` (`create`, `update`, `delete`, `start`, `stop`, `restart`).
+
+
 Manage Apache Pulsar Sources for data ingestion and integration. Pulsar Sources are connectors that import data from external systems into Pulsar topics. Sources connect to external systems such as databases, messaging platforms, storage services, and real-time data streams to pull data and publish it to Pulsar topics.
 
 This tool provides complete lifecycle management for source connectors:
@@ -72,4 +75,4 @@ This tool provides complete lifecycle management for source connectors:
 - **list-built-in**: List all built-in source connectors available in the system
   - No parameters required
 
-Built-in source connectors are available for common systems like Kafka, JDBC, AWS services, and more. Sources follow the tenant/namespace/name hierarchy for organization and access control, can scale through parallelism configuration, and support various processing guarantees. 
+Built-in source connectors are available for common systems like Kafka, JDBC, AWS services, and more. Sources follow the tenant/namespace/name hierarchy for organization and access control, can scale through parallelism configuration, and support various processing guarantees.

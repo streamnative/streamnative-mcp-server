@@ -9,4 +9,4 @@ Produce messages to a Kafka topic. This tool allows you to send single or multip
     - `key` (string, optional): The key for the message. Used for partition assignment and ordering.
     - `value` (string, required if 'messages' is not provided): The value/content of the message to send.
     - `headers` (array, optional): Message headers in the format of [{"key": "header-key", "value": "header-value"}].
-    - `sync` (boolean, optional): Whether to wait for server acknowledgment before returning. Default: true. 
+    - `sync` (boolean, optional): Whether to wait for server acknowledgment before returning. Default: true.

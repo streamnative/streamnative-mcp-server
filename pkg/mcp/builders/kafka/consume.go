@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 	"github.com/twmb/franz-go/pkg/kgo"
 	"github.com/twmb/franz-go/pkg/sr"
 )
@@ -62,6 +63,10 @@ func NewKafkaConsumeToolBuilder() *KafkaConsumeToolBuilder {
 // BuildTools builds the Kafka consume tool list
 // This is the core method implementing the ToolBuilder interface
 func (b *KafkaConsumeToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]server.ServerTool, error) {
+	if config.ReadOnly {
+		return nil, nil
+	}
+
 	// Check features - return empty list if no required features are present
 	if !b.HasAnyRequiredFeature(config.Features) {
 		return nil, nil
@@ -123,6 +128,7 @@ func (b *KafkaConsumeToolBuilder) buildKafkaConsumeTool() mcp.Tool {
 
 	return mcp.NewTool("kafka_client_consume",
 		mcp.WithDescription(toolDesc),
+		toolannotations.Destructive("Consume Kafka Messages"),
 		mcp.WithString("topic", mcp.Required(),
 			mcp.Description("The name of the Kafka topic to consume messages from. "+
 				"Must be an existing topic that the user has read permissions for. "+

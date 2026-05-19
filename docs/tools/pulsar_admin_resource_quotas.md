@@ -1,5 +1,8 @@
 #### pulsar_admin_resourcequota
 
+**Claude connector safety:** Actual MCP tools: `pulsar_admin_resourcequota_read` (`get`) and `pulsar_admin_resourcequota_write` (`set`, `reset`).
+
+
 Manage Apache Pulsar resource quotas for brokers, namespaces and bundles. Resource quotas define limits for resource usage such as message rates, bandwidth, and memory. These quotas help prevent resource abuse and ensure fair resource allocation across the Pulsar cluster.
 
 This tool provides operations on the following resource:
@@ -21,4 +24,4 @@ This tool provides operations on the following resource:
     - `dynamic` (boolean, optional): Whether to allow quota to be dynamically re-calculated
   - **reset**: Reset a namespace bundle's resource quota to default value
     - `namespace` (string, required): The namespace name in format 'tenant/namespace'
-    - `bundle` (string, required): The bundle range in format '{start-boundary}_{end-boundary}' 
+    - `bundle` (string, required): The bundle range in format '{start-boundary}_{end-boundary}'

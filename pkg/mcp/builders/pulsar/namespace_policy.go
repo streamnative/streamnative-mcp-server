@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import (
 	pulsarctlutils "github.com/streamnative/pulsarctl/pkg/ctl/utils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 )
 
 var supportedNamespaceSetPolicies = []string{
@@ -190,6 +191,7 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceGetPoliciesTool() 
 		mcp.WithString("namespace", mcp.Required(),
 			mcp.Description("The namespace name (tenant/namespace) to get policies for"),
 		),
+		toolannotations.ReadOnly("Get Pulsar Namespace Policies"),
 	)
 }
 
@@ -311,6 +313,7 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceSetPolicyTool() mc
 		mcp.WithNumber("subscribe-rate",
 			mcp.Description("Subscribe rate per consumer used by subscribe-rate"),
 		),
+		toolannotations.Destructive("Set Pulsar Namespace Policies"),
 	)
 }
 
@@ -336,6 +339,7 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceRemovePolicyTool()
 		mcp.WithString("type",
 			mcp.Description("Type of backlog quota to remove"),
 		),
+		toolannotations.Destructive("Remove Pulsar Namespace Policies"),
 	)
 }
 
@@ -353,6 +357,7 @@ func (b *PulsarAdminNamespacePolicyToolBuilder) buildNamespaceGetAntiAffinityNam
 		mcp.WithString("tenant",
 			mcp.Description("Tenant name used for authorization. Optional, but recommended when the caller administers multiple tenants."),
 		),
+		toolannotations.ReadOnly("Get Pulsar Namespace Anti-Affinity Namespaces"),
 	)
 }
 

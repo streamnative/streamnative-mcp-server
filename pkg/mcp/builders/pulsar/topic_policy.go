@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import (
 	ctlutil "github.com/streamnative/pulsarctl/pkg/ctl/utils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 )
 
 var readOnlyRestrictedTopicPolicyOperations = map[string]struct{}{
@@ -64,6 +65,60 @@ var readOnlyRestrictedTopicPolicyOperations = map[string]struct{}{
 	"remove-inactive-topic-policies":               {},
 	"set-subscription-types":                       {},
 	"remove-subscription-types":                    {},
+}
+
+var readOnlyTopicPolicyOperations = []string{
+	"get-retention",
+	"get-message-ttl",
+	"get-max-producers",
+	"get-max-consumers",
+	"get-max-unacked-messages-per-consumer",
+	"get-max-unacked-messages-per-subscription",
+	"get-persistence",
+	"get-delayed-delivery",
+	"get-dispatch-rate",
+	"get-subscription-dispatch-rate",
+	"get-deduplication",
+	"get-backlog-quotas",
+	"get-compaction-threshold",
+	"get-publish-rate",
+	"get-inactive-topic-policies",
+	"get-subscription-types",
+}
+
+var writeTopicPolicyOperations = []string{
+	"set-retention",
+	"remove-retention",
+	"set-message-ttl",
+	"remove-message-ttl",
+	"set-max-producers",
+	"remove-max-producers",
+	"set-max-consumers",
+	"remove-max-consumers",
+	"set-max-unacked-messages-per-consumer",
+	"remove-max-unacked-messages-per-consumer",
+	"set-max-unacked-messages-per-subscription",
+	"remove-max-unacked-messages-per-subscription",
+	"set-persistence",
+	"remove-persistence",
+	"set-delayed-delivery",
+	"remove-delayed-delivery",
+	"set-dispatch-rate",
+	"remove-dispatch-rate",
+	"set-subscription-dispatch-rate",
+	"remove-subscription-dispatch-rate",
+	"set-deduplication",
+	"remove-deduplication",
+	"set-backlog-quota",
+	"remove-backlog-quota",
+	"set-compaction-threshold",
+	"remove-compaction-threshold",
+	"set-publish-rate",
+	"remove-publish-rate",
+	"set-inactive-topic-policies",
+	"remove-inactive-topic-policies",
+	"set-subscription-types",
+	"remove-subscription-types",
 }
 
 var topicPolicyOperationAliases = map[string]string{
@@ -121,16 +176,24 @@ func (b *PulsarAdminTopicPolicyToolBuilder) BuildTools(_ context.Context, config
 		return nil, err
 	}
 
-	return []server.ServerTool{
+	tools := []server.ServerTool{
 		{
-			Tool:    b.buildTopicPolicyTool(),
-			Handler: b.buildTopicPolicyHandler(config.ReadOnly),
+			Tool:    b.buildTopicPolicyTool(toolModeRead),
+			Handler: b.buildTopicPolicyHandler(toolModeRead),
 		},
-	}, nil
+	}
+	if !config.ReadOnly {
+		tools = append(tools, server.ServerTool{
+			Tool:    b.buildTopicPolicyTool(toolModeWrite),
+			Handler: b.buildTopicPolicyHandler(toolModeWrite),
+		})
+	}
+
+	return tools, nil
 }
 
 // buildTopicPolicyTool builds the Pulsar Admin Topic Policy MCP tool definition
-func (b *PulsarAdminTopicPolicyToolBuilder) buildTopicPolicyTool() mcp.Tool {
+func (b *PulsarAdminTopicPolicyToolBuilder) buildTopicPolicyTool(mode toolMode) mcp.Tool {
 	toolDesc := "Manage Pulsar topic-level policies with operation names aligned to pulsarctl topic policy commands. " +
 		"This tool covers retention, message TTL, producer and consumer limits, persistence, delayed delivery, " +
 		"dispatch throttling, deduplication, backlog quotas, compaction thresholds, publish rates, inactive topic policies, " +
@@ -156,10 +219,20 @@ func (b *PulsarAdminTopicPolicyToolBuilder) buildTopicPolicyTool() mcp.Tool {
 		"- get-subscription-types / set-subscription-types / remove-subscription-types: additional MCP-only compatibility operations",
 	}, "\n")
 
-	return mcp.NewTool("pulsar_admin_topic_policy",
+	operationEnum := readOnlyTopicPolicyOperations
+	toolName := "pulsar_admin_topic_policy_read"
+	annotation := toolannotations.ReadOnly("Read Pulsar Topic Policies")
+	if isToolModeWrite(mode) {
+		operationEnum = writeTopicPolicyOperations
+		toolName = "pulsar_admin_topic_policy_write"
+		annotation = toolannotations.Destructive("Manage Pulsar Topic Policies")
+	}
+
+	return mcp.NewTool(toolName,
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("operation", mcp.Required(),
 			mcp.Description(operationDesc),
+			mcp.Enum(operationEnum...),
 		),
 		mcp.WithString("topic", mcp.Required(),
 			mcp.Description("Topic name in the format 'persistent://tenant/namespace/topic' or 'tenant/namespace/topic'."),
@@ -245,11 +318,12 @@ func (b *PulsarAdminTopicPolicyToolBuilder) buildTopicPolicyTool() mcp.Tool {
 				},
 			),
 		),
+		annotation,
 	)
 }
 
 // buildTopicPolicyHandler builds the Pulsar Admin Topic Policy handler function
-func (b *PulsarAdminTopicPolicyToolBuilder) buildTopicPolicyHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicPolicyToolBuilder) buildTopicPolicyHandler(mode toolMode) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		operation, err := request.RequireString("operation")
 		if err != nil {
@@ -262,8 +336,8 @@ func (b *PulsarAdminTopicPolicyToolBuilder) buildTopicPolicyHandler(readOnly boo
 			return mcp.NewToolResultError("Missing required parameter 'topic'"), nil
 		}
 
-		if readOnly && isReadOnlyRestrictedTopicPolicyOperation(operation) {
-			return mcp.NewToolResultError("Write operations not allowed in read-only mode"), nil
+		if !validateModeOperation(mode, operation, readOnlyRestrictedTopicPolicyOperations) {
+			return mcp.NewToolResultError(fmt.Sprintf("Operation %q is not available in %s mode", operation, mode)), nil
 		}
 
 		session := mcpCtx.GetPulsarSession(ctx)

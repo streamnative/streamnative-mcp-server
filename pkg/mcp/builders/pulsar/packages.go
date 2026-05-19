@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,7 +25,14 @@ import (
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 )
+
+var pulsarPackageWriteOperations = map[string]struct{}{
+	"update": {},
+	"delete": {},
+	"upload": {},
+}
 
 // PulsarAdminPackagesToolBuilder implements the ToolBuilder interface for Pulsar admin packages
 // /nolint:revive
@@ -67,20 +74,24 @@ func (b *PulsarAdminPackagesToolBuilder) BuildTools(_ context.Context, config bu
 		return nil, err
 	}
 
-	// Build tools
-	tool := b.buildPackagesTool()
-	handler := b.buildPackagesHandler(config.ReadOnly)
-
-	return []server.ServerTool{
+	tools := []server.ServerTool{
 		{
-			Tool:    tool,
-			Handler: handler,
+			Tool:    b.buildPackagesTool(toolModeRead),
+			Handler: b.buildPackagesHandler(toolModeRead),
 		},
-	}, nil
+	}
+	if !config.ReadOnly {
+		tools = append(tools, server.ServerTool{
+			Tool:    b.buildPackagesTool(toolModeWrite),
+			Handler: b.buildPackagesHandler(toolModeWrite),
+		})
+	}
+
+	return tools, nil
 }
 
 // buildPackagesTool builds the Pulsar admin packages MCP tool definition
-func (b *PulsarAdminPackagesToolBuilder) buildPackagesTool() mcp.Tool {
+func (b *PulsarAdminPackagesToolBuilder) buildPackagesTool(mode toolMode) mcp.Tool {
 	toolDesc := "Manage packages in Apache Pulsar. Support package scheme: `function://`, `source://`, `sink://`" +
 		"Allows listing, viewing, updating, downloading and uploading packages. " +
 		"Some operations require super-user permissions."
@@ -97,13 +108,23 @@ func (b *PulsarAdminPackagesToolBuilder) buildPackagesTool() mcp.Tool {
 		"- download: Download a package (requires super-user permissions)\n" +
 		"- upload: Upload a package (requires super-user permissions)"
 
-	return mcp.NewTool("pulsar_admin_package",
+	operationEnum := []string{"list", "get", "download"}
+	toolName := "pulsar_admin_package_read"
+	annotation := toolannotations.ReadOnly("Read Pulsar Packages")
+	if isToolModeWrite(mode) {
+		operationEnum = []string{"update", "delete", "upload"}
+		toolName = "pulsar_admin_package_write"
+		annotation = toolannotations.Destructive("Manage Pulsar Packages")
+	}
+
+	return mcp.NewTool(toolName,
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("resource", mcp.Required(),
 			mcp.Description(resourceDesc),
 		),
 		mcp.WithString("operation", mcp.Required(),
 			mcp.Description(operationDesc),
+			mcp.Enum(operationEnum...),
 		),
 		mcp.WithString("packageName",
 			mcp.Description("Name of the package to operate on. "+
@@ -127,11 +148,12 @@ func (b *PulsarAdminPackagesToolBuilder) buildPackagesTool() mcp.Tool {
 		mcp.WithObject("properties",
 			mcp.Description("Additional properties for the package as key-value pairs. Optional for update and upload operations"),
 		),
+		annotation,
 	)
 }
 
 // buildPackagesHandler builds the Pulsar admin packages handler function
-func (b *PulsarAdminPackagesToolBuilder) buildPackagesHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminPackagesToolBuilder) buildPackagesHandler(mode toolMode) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get required parameters
 		resource, err := request.RequireString("resource")
@@ -148,9 +170,8 @@ func (b *PulsarAdminPackagesToolBuilder) buildPackagesHandler(readOnly bool) fun
 		resource = strings.ToLower(resource)
 		operation = strings.ToLower(operation)
 
-		// Validate write operations in read-only mode
-		if readOnly && (operation == "update" || operation == "delete" || operation == "download" || operation == "upload") {
-			return mcp.NewToolResultError("Write operations are not allowed in read-only mode"), nil
+		if !validateModeOperation(mode, operation, pulsarPackageWriteOperations) {
+			return mcp.NewToolResultError(fmt.Sprintf("Operation %q is not available in %s mode", operation, mode)), nil
 		}
 
 		// Get Pulsar session from context

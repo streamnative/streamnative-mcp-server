@@ -1,5 +1,8 @@
 #### pulsar_admin_package
 
+**Claude connector safety:** Actual MCP tools: `pulsar_admin_package_read` (`list`, `get`, `download`) and `pulsar_admin_package_write` (`update`, `delete`, `upload`).
+
+
 Manage packages in Apache Pulsar. Packages are reusable components that can be shared across functions, sources, and sinks. The system supports package schemes including `function://`, `source://`, and `sink://` for different component types.
 
 This tool provides operations across two resource types:
@@ -29,4 +32,4 @@ This tool provides operations across two resource types:
 - **packages** (Packages of a specific type):
   - **list**: List all packages of a specific type in a namespace
     - `type` (string, required): Package type (function, source, sink)
-    - `namespace` (string, required): The namespace name 
+    - `namespace` (string, required): The namespace name

@@ -1,5 +1,8 @@
 #### kafka-admin-schema-registry
 
+**Claude connector safety:** Actual MCP tools: `kafka_admin_sr_read` (`list`, `get`) and `kafka_admin_sr_write` (`set`, `create`, `delete`).
+
+
 This tool provides access to Kafka Schema Registry operations, including managing subjects, versions, and compatibility settings.
 
 - **subjects**
@@ -35,4 +38,4 @@ This tool provides access to Kafka Schema Registry operations, including managin
 
 - **types**
   - **list**: List supported schema types (e.g. AVRO, JSON, PROTOBUF)
-    - _Parameters_: None 
+    - _Parameters_: None

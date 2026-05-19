@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import (
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 )
 
 // PulsarAdminBrokerStatsToolBuilder implements the ToolBuilder interface for Pulsar Broker Statistics
@@ -106,6 +107,7 @@ func (b *PulsarAdminBrokerStatsToolBuilder) buildBrokerStatsTool() mcp.Tool {
 		mcp.WithString("allocator_name",
 			mcp.Description("The name of the allocator to get statistics for. Required only when resource=allocator_stats"),
 		),
+		toolannotations.ReadOnly("Read Pulsar Broker Statistics"),
 	)
 }
 

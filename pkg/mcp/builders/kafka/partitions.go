@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 	"github.com/twmb/franz-go/pkg/kadm"
 )
 
@@ -56,6 +57,10 @@ func NewKafkaPartitionsToolBuilder() *KafkaPartitionsToolBuilder {
 
 // BuildTools builds the Kafka Partitions tool list
 func (b *KafkaPartitionsToolBuilder) BuildTools(_ context.Context, config builders.ToolBuildConfig) ([]server.ServerTool, error) {
+	if config.ReadOnly {
+		return nil, nil
+	}
+
 	// Check features - return empty list if no required features are present
 	if !b.HasAnyRequiredFeature(config.Features) {
 		return nil, nil
@@ -68,7 +73,7 @@ func (b *KafkaPartitionsToolBuilder) BuildTools(_ context.Context, config builde
 
 	// Build tools
 	tool := b.buildKafkaPartitionsTool()
-	handler := b.buildKafkaPartitionsHandler(config.ReadOnly)
+	handler := b.buildKafkaPartitionsHandler()
 
 	return []server.ServerTool{
 		{
@@ -109,13 +114,14 @@ func (b *KafkaPartitionsToolBuilder) buildKafkaPartitionsTool() mcp.Tool {
 		"   partitions: 12\n\n" +
 		"This tool requires appropriate Kafka permissions for partition management."
 
-	return mcp.NewTool("kafka_admin_partitions",
+	return mcp.NewTool("kafka_admin_partitions_write",
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("resource", mcp.Required(),
 			mcp.Description(resourceDesc),
 		),
 		mcp.WithString("operation", mcp.Required(),
 			mcp.Description(operationDesc),
+			mcp.Enum("update"),
 		),
 		mcp.WithString("topic",
 			mcp.Description("The name of the Kafka topic to operate on. "+
@@ -129,11 +135,12 @@ func (b *KafkaPartitionsToolBuilder) buildKafkaPartitionsTool() mcp.Tool {
 				"A larger number of partitions can help increase parallelism and throughput, but may also "+
 				"increase resource utilization on the brokers. "+
 				"Consider Kafka cluster capacity when setting this value.")),
+		toolannotations.Destructive("Update Kafka Partitions"),
 	)
 }
 
 // buildKafkaPartitionsHandler builds the Kafka Partitions handler function
-func (b *KafkaPartitionsToolBuilder) buildKafkaPartitionsHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *KafkaPartitionsToolBuilder) buildKafkaPartitionsHandler() func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get required parameters
 		resource, err := request.RequireString("resource")
@@ -149,11 +156,6 @@ func (b *KafkaPartitionsToolBuilder) buildKafkaPartitionsHandler(readOnly bool) 
 		// Normalize parameters
 		resource = strings.ToLower(resource)
 		operation = strings.ToLower(operation)
-
-		// Validate write operations in read-only mode
-		if readOnly && operation == "update" {
-			return mcp.NewToolResultError("Write operations are not allowed in read-only mode"), nil
-		}
 
 		// Get Kafka admin client
 		session := mcpCtx.GetKafkaSession(ctx)

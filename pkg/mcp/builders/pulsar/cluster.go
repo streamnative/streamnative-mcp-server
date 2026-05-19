@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,7 +25,14 @@ import (
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 )
+
+var pulsarClusterWriteOperations = map[string]struct{}{
+	"create": {},
+	"update": {},
+	"delete": {},
+}
 
 // PulsarAdminClusterToolBuilder implements the ToolBuilder interface for Pulsar Admin Cluster tools
 // It provides functionality to build Pulsar cluster management tools
@@ -69,21 +76,25 @@ func (b *PulsarAdminClusterToolBuilder) BuildTools(_ context.Context, config bui
 		return nil, err
 	}
 
-	// Build tools
-	tool := b.buildClusterTool()
-	handler := b.buildClusterHandler(config.ReadOnly)
-
-	return []server.ServerTool{
+	tools := []server.ServerTool{
 		{
-			Tool:    tool,
-			Handler: handler,
+			Tool:    b.buildClusterTool(toolModeRead),
+			Handler: b.buildClusterHandler(toolModeRead),
 		},
-	}, nil
+	}
+	if !config.ReadOnly {
+		tools = append(tools, server.ServerTool{
+			Tool:    b.buildClusterTool(toolModeWrite),
+			Handler: b.buildClusterHandler(toolModeWrite),
+		})
+	}
+
+	return tools, nil
 }
 
 // buildClusterTool builds the Pulsar Admin Cluster MCP tool definition
 // Migrated from the original tool definition logic
-func (b *PulsarAdminClusterToolBuilder) buildClusterTool() mcp.Tool {
+func (b *PulsarAdminClusterToolBuilder) buildClusterTool(mode toolMode) mcp.Tool {
 	toolDesc := "Unified tool for managing Apache Pulsar clusters.\n" +
 		"This tool provides access to various cluster resources and operations, including:\n" +
 		"1. Manage clusters (resource=cluster): List, get, create, update, delete clusters\n" +
@@ -108,13 +119,23 @@ func (b *PulsarAdminClusterToolBuilder) buildClusterTool() mcp.Tool {
 		"- update: Update an existing resource (used with cluster, peer_clusters, failure_domain)\n" +
 		"- delete: Delete a resource (used with cluster, failure_domain)"
 
-	return mcp.NewTool("pulsar_admin_cluster",
+	operationEnum := []string{"list", "get"}
+	toolName := "pulsar_admin_cluster_read"
+	annotation := toolannotations.ReadOnly("Read Pulsar Clusters")
+	if isToolModeWrite(mode) {
+		operationEnum = []string{"create", "update", "delete"}
+		toolName = "pulsar_admin_cluster_write"
+		annotation = toolannotations.Destructive("Manage Pulsar Clusters")
+	}
+
+	return mcp.NewTool(toolName,
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("resource", mcp.Required(),
 			mcp.Description(resourceDesc),
 		),
 		mcp.WithString("operation", mcp.Required(),
 			mcp.Description(operationDesc),
+			mcp.Enum(operationEnum...),
 		),
 		mcp.WithString("cluster_name",
 			mcp.Description("Name of the Pulsar cluster, required for all operations except 'list' with resource=cluster"),
@@ -154,12 +175,13 @@ func (b *PulsarAdminClusterToolBuilder) buildClusterTool() mcp.Tool {
 				},
 			),
 		),
+		annotation,
 	)
 }
 
 // buildClusterHandler builds the Pulsar Admin Cluster handler function
 // Migrated from the original handler logic
-func (b *PulsarAdminClusterToolBuilder) buildClusterHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminClusterToolBuilder) buildClusterHandler(mode toolMode) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get Pulsar session from context
 		session := mcpCtx.GetPulsarSession(ctx)
@@ -191,10 +213,8 @@ func (b *PulsarAdminClusterToolBuilder) buildClusterHandler(readOnly bool) func(
 			return mcp.NewToolResultError(errMsg), nil
 		}
 
-		// Check write operation permissions
-		if (operation == "create" || operation == "update" || operation == "delete") && readOnly {
-			return mcp.NewToolResultError("Create/update/delete operations not allowed in read-only mode. " +
-				"Please contact your administrator if you need to modify cluster resources."), nil
+		if !validateModeOperation(mode, operation, pulsarClusterWriteOperations) {
+			return mcp.NewToolResultError(fmt.Sprintf("Operation %q is not available in %s mode", operation, mode)), nil
 		}
 
 		// Process request based on resource type
