@@ -91,6 +91,12 @@ func (b *PulsarAdminBrokersToolBuilder) BuildTools(_ context.Context, config bui
 
 // buildPulsarAdminBrokersTool builds the Pulsar admin brokers MCP tool definition
 func (b *PulsarAdminBrokersToolBuilder) buildPulsarAdminBrokersTool(mode toolMode) mcp.Tool {
+	resourceDesc := "Type of broker resource to access, available options:\n" +
+		"- brokers: Broker listings\n" +
+		"- health: Broker health status\n" +
+		"- config: Broker configurations\n" +
+		"- namespaces: Namespaces owned by a broker"
+	resourceEnum := []string{"brokers", "health", "config", "namespaces"}
 	operationEnum := []string{"list", "get"}
 	operationDesc := "Operation to perform, available options:\n" +
 		"- list: List resources (used with brokers)\n" +
@@ -99,6 +105,9 @@ func (b *PulsarAdminBrokersToolBuilder) buildPulsarAdminBrokersTool(mode toolMod
 	toolName := "pulsar_admin_brokers_read"
 	annotation := toolannotations.ReadOnly("Read Pulsar Brokers")
 	if isToolModeWrite(mode) {
+		resourceDesc = "Type of broker resource to access, available options:\n" +
+			"- config: Broker dynamic configuration values"
+		resourceEnum = []string{"config"}
 		operationEnum = []string{"update", "delete"}
 		operationDesc = "Operation to perform, available options:\n" +
 			"- update: Update a broker dynamic configuration value\n" +
@@ -111,11 +120,8 @@ func (b *PulsarAdminBrokersToolBuilder) buildPulsarAdminBrokersTool(mode toolMod
 	tool := mcp.NewTool(toolName,
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("resource", mcp.Required(),
-			mcp.Description("Type of resource to access, available options:\n"+
-				"- brokers: Broker listings\n"+
-				"- health: Broker health status\n"+
-				"- config: Broker configurations\n"+
-				"- namespaces: Namespaces owned by a broker"),
+			mcp.Description(resourceDesc),
+			mcp.Enum(resourceEnum...),
 		),
 		mcp.WithString("operation", mcp.Required(),
 			mcp.Description(operationDesc),
@@ -181,7 +187,7 @@ func (b *PulsarAdminBrokersToolBuilder) buildPulsarAdminBrokersHandler(mode tool
 		operation, err := request.RequireString("operation")
 		if err != nil {
 			return mcp.NewToolResultError("Missing required operation parameter. " +
-				"Please specify one of: list, get, update, delete based on the resource type."), nil
+				"Please specify one of: " + modeSupportedOperations(mode, []string{"list", "get"}, []string{"update", "delete"}) + " based on the resource type."), nil
 		}
 
 		// Validate if the parameter combination is valid

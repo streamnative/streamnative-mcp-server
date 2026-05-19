@@ -100,6 +100,7 @@ func (b *KafkaSchemaRegistryToolBuilder) buildKafkaSchemaRegistryTool(mode toolM
 		"- version: A specific version of a subject's schema\n" +
 		"- compatibility: Compatibility levels that control schema evolution rules\n" +
 		"- types: Supported schema format types (like AVRO, JSON, PROTOBUF)"
+	resourceEnum := []string{"subjects", "subject", "versions", "version", "compatibility", "types"}
 
 	operationDesc := "Operation to perform. Available operations:\n" +
 		"- list: List all subjects, versions for a subject, or supported schema types\n" +
@@ -108,6 +109,11 @@ func (b *KafkaSchemaRegistryToolBuilder) buildKafkaSchemaRegistryTool(mode toolM
 	toolName := "kafka_admin_sr_read"
 	annotation := toolannotations.ReadOnly("Read Kafka Schema Registry")
 	if isToolModeWrite(mode) {
+		resourceDesc = "Resource to operate on. Available resources:\n" +
+			"- subject: A specific schema subject to register or delete\n" +
+			"- version: A specific version of a subject's schema to delete\n" +
+			"- compatibility: Compatibility levels that control schema evolution rules"
+		resourceEnum = []string{"subject", "version", "compatibility"}
 		operationDesc = "Operation to perform. Available operations:\n" +
 			"- set: Set compatibility level for global or subject-specific schema evolution\n" +
 			"- create: Register a new schema for a subject\n" +
@@ -155,6 +161,7 @@ func (b *KafkaSchemaRegistryToolBuilder) buildKafkaSchemaRegistryTool(mode toolM
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("resource", mcp.Required(),
 			mcp.Description(resourceDesc),
+			mcp.Enum(resourceEnum...),
 		),
 		mcp.WithString("operation", mcp.Required(),
 			mcp.Description(operationDesc),

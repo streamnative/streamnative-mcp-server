@@ -120,6 +120,7 @@ func (b *PulsarAdminTopicToolBuilder) buildTopicTool(mode toolMode) mcp.Tool {
 	resourceDesc := "Resource to operate on. Available resources:\n" +
 		"- topic: A Pulsar topic\n" +
 		"- topics: Multiple topics within a namespace"
+	resourceEnum := []string{"topic", "topics"}
 
 	operationDesc := "Operation to perform. Available operations:\n" +
 		"- list: List all topics in a namespace\n" +
@@ -141,6 +142,9 @@ func (b *PulsarAdminTopicToolBuilder) buildTopicTool(mode toolMode) mcp.Tool {
 		toolDesc = "Manage Apache Pulsar topics. " +
 			"This write tool changes topic lifecycle, permissions, partitioning, compaction, or offload state. " +
 			"Do not use this tool for Kafka protocol operations. Use 'kafka_admin_topics_write' instead."
+		resourceDesc = "Resource to operate on. Available resources:\n" +
+			"- topic: A Pulsar topic"
+		resourceEnum = []string{"topic"}
 		operationDesc = "Operation to perform. Available operations:\n" +
 			"- grant-permissions: Grant topic permissions to a role\n" +
 			"- revoke-permissions: Revoke topic permissions from a role\n" +
@@ -160,6 +164,7 @@ func (b *PulsarAdminTopicToolBuilder) buildTopicTool(mode toolMode) mcp.Tool {
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("resource", mcp.Required(),
 			mcp.Description(resourceDesc),
+			mcp.Enum(resourceEnum...),
 		),
 		mcp.WithString("operation", mcp.Required(),
 			mcp.Description(operationDesc),

@@ -93,6 +93,7 @@ func (b *KafkaTopicsToolBuilder) buildKafkaTopicsTool(mode toolMode) mcp.Tool {
 	resourceDesc := "Resource to operate on. Available resources:\n" +
 		"- topic: A single Kafka topic for read operations (get, metadata)\n" +
 		"- topics: Collection of Kafka topics for list operations"
+	resourceEnum := []string{"topic", "topics"}
 
 	operationDesc := "Operation to perform. Available operations:\n" +
 		"- list: List all topics in the Kafka cluster, optionally including internal topics\n" +
@@ -108,6 +109,7 @@ func (b *KafkaTopicsToolBuilder) buildKafkaTopicsTool(mode toolMode) mcp.Tool {
 		operationEnum = []string{"create", "delete"}
 		resourceDesc = "Resource to operate on. Available resources:\n" +
 			"- topic: A single Kafka topic for create or delete operations"
+		resourceEnum = []string{"topic"}
 		toolName = "kafka_admin_topics_write"
 		annotation = toolannotations.Destructive("Manage Kafka Topics")
 	}
@@ -148,6 +150,7 @@ func (b *KafkaTopicsToolBuilder) buildKafkaTopicsTool(mode toolMode) mcp.Tool {
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("resource", mcp.Required(),
 			mcp.Description(resourceDesc),
+			mcp.Enum(resourceEnum...),
 		),
 		mcp.WithString("operation", mcp.Required(),
 			mcp.Description(operationDesc),

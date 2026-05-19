@@ -56,11 +56,7 @@ func TestPulsarToolAnnotationCompliance(t *testing.T) {
 
 func assertOperationEnumMode(t *testing.T, toolName string, operationSchema any) {
 	t.Helper()
-	schema, ok := operationSchema.(map[string]any)
-	if !ok {
-		return
-	}
-	rawEnum, ok := schema["enum"].([]string)
+	rawEnum, ok := pulsarStringEnum(operationSchema)
 	if !ok {
 		return
 	}
@@ -74,6 +70,22 @@ func assertOperationEnumMode(t *testing.T, toolName string, operationSchema any)
 		}
 	}
 	require.False(t, seenRead && seenWrite, toolName)
+}
+
+func requirePulsarStringEnum(t *testing.T, toolName string, propertySchema any, expected []string) {
+	t.Helper()
+	actual, ok := pulsarStringEnum(propertySchema)
+	require.True(t, ok, "%s resource enum must be explicit", toolName)
+	require.ElementsMatch(t, expected, actual, toolName)
+}
+
+func pulsarStringEnum(propertySchema any) ([]string, bool) {
+	schema, ok := propertySchema.(map[string]any)
+	if !ok {
+		return nil, false
+	}
+	rawEnum, ok := schema["enum"].([]string)
+	return rawEnum, ok
 }
 
 func pulsarComplianceWriteOperations() map[string]struct{} {
@@ -108,21 +120,37 @@ func pulsarComplianceWriteOperations() map[string]struct{} {
 
 func TestPulsarSplitToolsExposeModeSpecificParameters(t *testing.T) {
 	expectedProperties := map[string][]string{
-		"pulsar_admin_brokers_read":           {"resource", "operation", "clusterName", "brokerUrl", "configType"},
-		"pulsar_admin_brokers_write":          {"resource", "operation", "configName", "configValue"},
-		"pulsar_admin_cluster_read":           {"resource", "operation", "cluster_name", "domain_name"},
-		"pulsar_admin_functions_read":         {"operation", "fqfn", "tenant", "namespace", "name", "instanceId", "key", "path", "destinationFile"},
-		"pulsar_admin_namespace_read":         {"operation", "tenant", "namespace"},
-		"pulsar_admin_nsisolationpolicy_read": {"resource", "operation", "cluster", "name"},
-		"pulsar_admin_package_read":           {"resource", "operation", "packageName", "namespace", "type", "path"},
-		"pulsar_admin_resourcequota_read":     {"resource", "operation", "namespace", "bundle"},
-		"pulsar_admin_schema_read":            {"resource", "operation", "topic", "version"},
-		"pulsar_admin_sinks_read":             {"operation", "tenant", "namespace", "name"},
-		"pulsar_admin_sources_read":           {"operation", "tenant", "namespace", "name"},
-		"pulsar_admin_subscription_read":      {"resource", "operation", "topic", "subscription", "ledgerId", "entryId", "count"},
-		"pulsar_admin_tenant_read":            {"resource", "operation", "tenant"},
-		"pulsar_admin_topic_policy_read":      {"operation", "topic", "applied", "type"},
-		"pulsar_admin_topic_read":             {"resource", "operation", "topic", "namespace", "partitioned", "per-partition", "wait"},
+		"pulsar_admin_brokers_read":            {"resource", "operation", "clusterName", "brokerUrl", "configType"},
+		"pulsar_admin_brokers_write":           {"resource", "operation", "configName", "configValue"},
+		"pulsar_admin_cluster_read":            {"resource", "operation", "cluster_name", "domain_name"},
+		"pulsar_admin_cluster_write":           {"resource", "operation", "cluster_name", "domain_name", "service_url", "service_url_tls", "broker_service_url", "broker_service_url_tls", "peer_cluster_names", "brokers"},
+		"pulsar_admin_functions_read":          {"operation", "fqfn", "tenant", "namespace", "name", "instanceId", "key", "path", "destinationFile"},
+		"pulsar_admin_namespace_read":          {"operation", "tenant", "namespace"},
+		"pulsar_admin_nsisolationpolicy_read":  {"resource", "operation", "cluster", "name"},
+		"pulsar_admin_nsisolationpolicy_write": {"resource", "operation", "cluster", "name", "namespaces", "primary", "secondary", "autoFailoverPolicyType", "autoFailoverPolicyParams"},
+		"pulsar_admin_package_read":            {"resource", "operation", "packageName", "namespace", "type", "path"},
+		"pulsar_admin_package_write":           {"resource", "operation", "packageName", "description", "contact", "path", "properties"},
+		"pulsar_admin_resourcequota_read":      {"resource", "operation", "namespace", "bundle"},
+		"pulsar_admin_schema_read":             {"resource", "operation", "topic", "version"},
+		"pulsar_admin_sinks_read":              {"operation", "tenant", "namespace", "name"},
+		"pulsar_admin_sources_read":            {"operation", "tenant", "namespace", "name"},
+		"pulsar_admin_subscription_read":       {"resource", "operation", "topic", "subscription", "ledgerId", "entryId", "count"},
+		"pulsar_admin_tenant_read":             {"resource", "operation", "tenant"},
+		"pulsar_admin_topic_policy_read":       {"operation", "topic", "applied", "type"},
+		"pulsar_admin_topic_read":              {"resource", "operation", "topic", "namespace", "partitioned", "per-partition", "wait"},
+		"pulsar_admin_topic_write":             {"resource", "operation", "topic", "partitions", "force", "non-partitioned", "config", "messageId", "role", "actions"},
+	}
+	expectedResourceEnums := map[string][]string{
+		"pulsar_admin_brokers_read":            {"brokers", "health", "config", "namespaces"},
+		"pulsar_admin_brokers_write":           {"config"},
+		"pulsar_admin_cluster_read":            {"cluster", "peer_clusters", "failure_domain"},
+		"pulsar_admin_cluster_write":           {"cluster", "peer_clusters", "failure_domain"},
+		"pulsar_admin_nsisolationpolicy_read":  {"policy", "broker", "brokers"},
+		"pulsar_admin_nsisolationpolicy_write": {"policy"},
+		"pulsar_admin_package_read":            {"package", "packages"},
+		"pulsar_admin_package_write":           {"package"},
+		"pulsar_admin_topic_read":              {"topic", "topics"},
+		"pulsar_admin_topic_write":             {"topic"},
 	}
 
 	for _, builder := range allPulsarComplianceBuilders() {
@@ -137,6 +165,9 @@ func TestPulsarSplitToolsExposeModeSpecificParameters(t *testing.T) {
 				continue
 			}
 			require.ElementsMatch(t, expected, pulsarToolPropertyNames(tool), tool.Name)
+			if expectedEnum, ok := expectedResourceEnums[tool.Name]; ok {
+				requirePulsarStringEnum(t, tool.Name, tool.InputSchema.Properties["resource"], expectedEnum)
+			}
 		}
 	}
 }

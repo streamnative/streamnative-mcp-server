@@ -94,6 +94,7 @@ func (b *KafkaGroupsToolBuilder) buildKafkaGroupsTool(mode toolMode) mcp.Tool {
 	resourceDesc := "Resource to operate on. Available resources:\n" +
 		"- group: A single Kafka Consumer Group for read operations (describe, offsets)\n" +
 		"- groups: Collection of Kafka Consumer Groups for list operations"
+	resourceEnum := []string{"group", "groups"}
 
 	operationDesc := "Operation to perform. Available operations:\n" +
 		"- list: List all Kafka Consumer Groups in the cluster\n" +
@@ -110,6 +111,7 @@ func (b *KafkaGroupsToolBuilder) buildKafkaGroupsTool(mode toolMode) mcp.Tool {
 		operationEnum = []string{"remove-members", "delete-offset", "set-offset"}
 		resourceDesc = "Resource to operate on. Available resources:\n" +
 			"- group: A single Kafka Consumer Group for membership and offset changes"
+		resourceEnum = []string{"group"}
 		toolName = "kafka_admin_groups_write"
 		annotation = toolannotations.Destructive("Manage Kafka Consumer Groups")
 	}
@@ -157,6 +159,7 @@ func (b *KafkaGroupsToolBuilder) buildKafkaGroupsTool(mode toolMode) mcp.Tool {
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("resource", mcp.Required(),
 			mcp.Description(resourceDesc),
+			mcp.Enum(resourceEnum...),
 		),
 		mcp.WithString("operation", mcp.Required(),
 			mcp.Description(operationDesc),

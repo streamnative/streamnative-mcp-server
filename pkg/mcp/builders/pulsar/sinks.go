@@ -275,7 +275,10 @@ func (b *PulsarAdminSinksToolBuilder) buildSinksHandler(mode toolMode) func(cont
 		}
 
 		if !validOperations[operation] {
-			return mcp.NewToolResultError(fmt.Sprintf("Invalid operation: '%s'. Supported operations: list, get, status, create, update, delete, start, stop, restart, list-built-in", operation)), nil
+			return mcp.NewToolResultError(fmt.Sprintf("Invalid operation: '%s'. Supported operations: %s", operation,
+				modeSupportedOperations(mode,
+					[]string{"list", "get", "status", "list-built-in"},
+					[]string{"create", "update", "delete", "start", "stop", "restart"}))), nil
 		}
 
 		if !validateModeOperation(mode, operation, pulsarSinkWriteOperations) {

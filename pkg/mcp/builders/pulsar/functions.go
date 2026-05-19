@@ -342,7 +342,10 @@ func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsHandler(mode 
 
 		// Check if the operation is valid
 		if !isSupportedFunctionOperation(operation) {
-			return b.handleError("validate operation", fmt.Errorf("invalid operation: '%s'. Supported operations: list, get, status, stats, querystate, create, update, delete, download, start, stop, restart, putstate, trigger, upload", operation)), nil
+			return b.handleError("validate operation", fmt.Errorf("invalid operation: '%s'. Supported operations: %s", operation,
+				modeSupportedOperations(mode,
+					[]string{"list", "get", "status", "stats", "querystate", "download"},
+					[]string{"create", "update", "delete", "start", "stop", "restart", "putstate", "trigger", "upload"}))), nil
 		}
 
 		if !validateModeOperation(mode, operation, readOnlyRestrictedFunctionOperations) {

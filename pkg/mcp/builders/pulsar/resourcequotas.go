@@ -213,7 +213,8 @@ func (b *PulsarAdminResourceQuotasToolBuilder) buildResourceQuotasHandler(mode t
 		case "reset":
 			return b.handleQuotaReset(admin, request)
 		default:
-			return mcp.NewToolResultError(fmt.Sprintf("Invalid operation: %s. Available operations: get, set, reset", operation)), nil
+			return mcp.NewToolResultError(fmt.Sprintf("Invalid operation: %s. Available operations: %s", operation,
+				modeSupportedOperations(mode, []string{"get"}, []string{"set", "reset"}))), nil
 		}
 	}
 }

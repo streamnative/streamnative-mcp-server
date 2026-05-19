@@ -107,6 +107,7 @@ func (b *PulsarAdminClusterToolBuilder) buildClusterTool(mode toolMode) mcp.Tool
 		"- cluster: Pulsar cluster configuration\n" +
 		"- peer_clusters: Peer clusters for geo-replication\n" +
 		"- failure_domain: Failure domains for fault tolerance"
+	resourceEnum := []string{"cluster", "peer_clusters", "failure_domain"}
 
 	operationDesc := "Operation to perform, available options (depend on resource):\n" +
 		"- list: List resources (used with cluster, failure_domain)\n" +
@@ -131,6 +132,7 @@ func (b *PulsarAdminClusterToolBuilder) buildClusterTool(mode toolMode) mcp.Tool
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("resource", mcp.Required(),
 			mcp.Description(resourceDesc),
+			mcp.Enum(resourceEnum...),
 		),
 		mcp.WithString("operation", mcp.Required(),
 			mcp.Description(operationDesc),
@@ -209,7 +211,7 @@ func (b *PulsarAdminClusterToolBuilder) buildClusterHandler(mode toolMode) func(
 		operation, err := request.RequireString("operation")
 		if err != nil {
 			return mcp.NewToolResultError("Missing required operation parameter. " +
-				"Please specify one of: list, get, create, update, delete based on the resource type."), nil
+				"Please specify one of: " + modeSupportedOperations(mode, []string{"list", "get"}, []string{"create", "update", "delete"}) + " based on the resource type."), nil
 		}
 
 		// Validate if the parameter combination is valid

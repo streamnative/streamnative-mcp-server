@@ -219,7 +219,10 @@ func (b *PulsarAdminNamespaceToolBuilder) buildNamespaceHandler(mode toolMode) f
 				return b.handleSplitBundle(ctx, client, request)
 			}
 		default:
-			return mcp.NewToolResultError(fmt.Sprintf("Unknown operation: %s. Supported operations: list, get_topics, create, delete, clear_backlog, unsubscribe, unload, split_bundle", operation)), nil
+			return mcp.NewToolResultError(fmt.Sprintf("Unknown operation: %s. Supported operations: %s", operation,
+				modeSupportedOperations(mode,
+					[]string{"list", "get_topics"},
+					[]string{"create", "delete", "clear_backlog", "unsubscribe", "unload", "split_bundle"}))), nil
 		}
 
 		// Should not reach here

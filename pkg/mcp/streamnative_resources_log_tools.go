@@ -48,7 +48,7 @@ func StreamNativeAddLogTools(s *server.MCPServer, _ bool, features []string) {
 func NewSNCloudLogsTool() mcp.Tool {
 	return mcp.NewTool("sncloud_logs",
 		mcp.WithDescription("Display the logs of resources in StreamNative Cloud, including pulsar functions, pulsar source connectors, pulsar sink connectors, and kafka connect connectors logs running along with PulsarInstance and PulsarCluster."+
-			"This tool is used to help you debug issues in the cluster currently bound to the session. This tool is suggested to be used with 'pulsar_admin_functions', 'pulsar_admin_sinks', 'pulsar_admin_sources', and 'kafka_admin_connect'."),
+			"This tool is used to help you debug issues in the cluster currently bound to the session. This tool is suggested to be used with the relevant split read/write admin tools, such as 'pulsar_admin_functions_read', 'pulsar_admin_sinks_read', 'pulsar_admin_sources_read', and 'kafka_admin_connect_read' for inspection workflows."),
 		mcp.WithString("component", mcp.Required(),
 			mcp.Description("The component to get logs from, including "+strings.Join(FunctionConnectorList, ", ")),
 			mcp.Enum(FunctionConnectorList...),

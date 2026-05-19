@@ -1,4 +1,4 @@
-#### pulsar_admin_functions
+#### pulsar_admin_functions_read / pulsar_admin_functions_write
 
 **Claude connector safety:** Actual MCP tools are split into `pulsar_admin_functions_read` and `pulsar_admin_functions_write`. The read tool is read-only and only exposes read operations/parameters. The write tool is destructive and is not registered in read-only mode.
 

@@ -100,6 +100,7 @@ func (b *PulsarAdminNsIsolationPolicyToolBuilder) buildNsIsolationPolicyTool(mod
 		"- policy: Namespace isolation policy\n" +
 		"- broker: Broker with namespace isolation policies\n" +
 		"- brokers: All brokers with namespace isolation policies"
+	resourceEnum := []string{"policy", "broker", "brokers"}
 
 	operationDesc := "Operation to perform. Available operations:\n" +
 		"- get: Get resource details\n" +
@@ -111,9 +112,12 @@ func (b *PulsarAdminNsIsolationPolicyToolBuilder) buildNsIsolationPolicyTool(mod
 	if isToolModeWrite(mode) {
 		toolDesc = "Manage namespace isolation policies in a Pulsar cluster. " +
 			"This write tool creates, updates, or deletes namespace isolation policies."
+		resourceDesc = "Resource to operate on. Available resources:\n" +
+			"- policy: Namespace isolation policy"
+		resourceEnum = []string{"policy"}
 		operationDesc = "Operation to perform. Available operations:\n" +
-			"- set: Create or update a resource (requires super-user permissions)\n" +
-			"- delete: Delete a resource (requires super-user permissions)"
+			"- set: Create or update a namespace isolation policy (requires super-user permissions)\n" +
+			"- delete: Delete a namespace isolation policy (requires super-user permissions)"
 		operationEnum = []string{"set", "delete"}
 		toolName = "pulsar_admin_nsisolationpolicy_write"
 		annotation = toolannotations.Destructive("Manage Pulsar Namespace Isolation Policies")
@@ -123,6 +127,7 @@ func (b *PulsarAdminNsIsolationPolicyToolBuilder) buildNsIsolationPolicyTool(mod
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("resource", mcp.Required(),
 			mcp.Description(resourceDesc),
+			mcp.Enum(resourceEnum...),
 		),
 		mcp.WithString("operation", mcp.Required(),
 			mcp.Description(operationDesc),
@@ -218,7 +223,7 @@ func (b *PulsarAdminNsIsolationPolicyToolBuilder) buildNsIsolationPolicyHandler(
 		// Dispatch based on resource type
 		switch resource {
 		case "policy":
-			return b.handlePolicyResource(client, operation, cluster, request)
+			return b.handlePolicyResource(client, operation, cluster, request, mode)
 		case "broker":
 			return b.handleBrokerResource(client, operation, cluster, request)
 		case "brokers":
@@ -232,7 +237,7 @@ func (b *PulsarAdminNsIsolationPolicyToolBuilder) buildNsIsolationPolicyHandler(
 // Helper functions
 
 // handlePolicyResource handles operations on the "policy" resource
-func (b *PulsarAdminNsIsolationPolicyToolBuilder) handlePolicyResource(client cmdutils.Client, operation, cluster string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminNsIsolationPolicyToolBuilder) handlePolicyResource(client cmdutils.Client, operation, cluster string, request mcp.CallToolRequest, mode toolMode) (*mcp.CallToolResult, error) {
 	switch operation {
 	case "get":
 		name, err := request.RequireString("name")
@@ -331,7 +336,8 @@ func (b *PulsarAdminNsIsolationPolicyToolBuilder) handlePolicyResource(client cm
 		return mcp.NewToolResultText(fmt.Sprintf("Create/Update namespace isolation policy %s successfully", name)), nil
 
 	default:
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid operation for resource 'policy': %s. Available operations: get, list, delete, set", operation)), nil
+		return mcp.NewToolResultError(fmt.Sprintf("Invalid operation for resource 'policy': %s. Available operations: %s", operation,
+			modeSupportedOperations(mode, []string{"get", "list"}, []string{"set", "delete"}))), nil
 	}
 }
 

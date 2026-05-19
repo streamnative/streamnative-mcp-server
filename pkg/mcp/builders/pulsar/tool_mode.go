@@ -40,6 +40,13 @@ func validateModeOperation(mode toolMode, operation string, writeOperations map[
 	return (mode == toolModeWrite) == isWriteOperation(operation, writeOperations)
 }
 
+func modeSupportedOperations(mode toolMode, readOperations, writeOperations []string) string {
+	if isToolModeWrite(mode) {
+		return strings.Join(writeOperations, ", ")
+	}
+	return strings.Join(readOperations, ", ")
+}
+
 func pruneToolInputSchema(tool *mcp.Tool, allowedProperties []string) {
 	allowed := make(map[string]struct{}, len(allowedProperties))
 	for _, property := range allowedProperties {

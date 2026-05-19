@@ -105,6 +105,7 @@ func (b *KafkaConnectToolBuilder) buildKafkaConnectTool(mode toolMode) mcp.Tool 
 		"- connector: A single Kafka Connect connector instance that moves data between Kafka and external systems.\n" +
 		"- connectors: Collection of all Kafka Connect connectors in a cluster.\n" +
 		"- connector-plugins: Collection of all Kafka Connect connector plugins, StreamNative Cloud provides a set of built-in connectors via this resource."
+	resourceEnum := []string{"kafka-connect-cluster", "connector", "connectors", "connector-plugins"}
 
 	operationDesc := "Operation to perform. Available operations:\n" +
 		"- list: List all connectors or connector plugins in a cluster.\n" +
@@ -113,6 +114,9 @@ func (b *KafkaConnectToolBuilder) buildKafkaConnectTool(mode toolMode) mcp.Tool 
 	toolName := "kafka_admin_connect_read"
 	annotation := toolannotations.ReadOnly("Read Kafka Connect")
 	if isToolModeWrite(mode) {
+		resourceDesc = "Resource to operate on. Available resources:\n" +
+			"- connector: A single Kafka Connect connector instance that moves data between Kafka and external systems."
+		resourceEnum = []string{"connector"}
 		operationDesc = "Operation to perform. Available operations:\n" +
 			"- create: Create a new connector with specified configuration.\n" +
 			"- update: Modify an existing connector's configuration.\n" +
@@ -168,6 +172,7 @@ func (b *KafkaConnectToolBuilder) buildKafkaConnectTool(mode toolMode) mcp.Tool 
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("resource", mcp.Required(),
 			mcp.Description(resourceDesc),
+			mcp.Enum(resourceEnum...),
 		),
 		mcp.WithString("operation", mcp.Required(),
 			mcp.Description(operationDesc),

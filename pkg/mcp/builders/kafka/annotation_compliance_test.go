@@ -72,11 +72,7 @@ func toolPropertyNames(tool mcp.Tool) []string {
 
 func assertOperationEnumMode(t *testing.T, toolName string, operationSchema any) {
 	t.Helper()
-	schema, ok := operationSchema.(map[string]any)
-	if !ok {
-		return
-	}
-	rawEnum, ok := schema["enum"].([]string)
+	rawEnum, ok := stringEnum(operationSchema)
 	if !ok {
 		return
 	}
@@ -93,6 +89,22 @@ func assertOperationEnumMode(t *testing.T, toolName string, operationSchema any)
 		}
 	}
 	require.False(t, seenRead && seenWrite, toolName)
+}
+
+func requireStringEnum(t *testing.T, toolName string, propertySchema any, expected []string) {
+	t.Helper()
+	actual, ok := stringEnum(propertySchema)
+	require.True(t, ok, "%s resource enum must be explicit", toolName)
+	require.ElementsMatch(t, expected, actual, toolName)
+}
+
+func stringEnum(propertySchema any) ([]string, bool) {
+	schema, ok := propertySchema.(map[string]any)
+	if !ok {
+		return nil, false
+	}
+	rawEnum, ok := schema["enum"].([]string)
+	return rawEnum, ok
 }
 
 func TestKafkaSplitToolsExposeModeSpecificParameters(t *testing.T) {
@@ -113,6 +125,16 @@ func TestKafkaSplitToolsExposeModeSpecificParameters(t *testing.T) {
 		"kafka_admin_connect_read":  {"resource", "operation", "name"},
 		"kafka_admin_connect_write": {"resource", "operation", "name", "config"},
 	}
+	expectedResourceEnums := map[string][]string{
+		"kafka_admin_topics_read":   {"topic", "topics"},
+		"kafka_admin_topics_write":  {"topic"},
+		"kafka_admin_groups_read":   {"group", "groups"},
+		"kafka_admin_groups_write":  {"group"},
+		"kafka_admin_sr_read":       {"subjects", "subject", "versions", "version", "compatibility", "types"},
+		"kafka_admin_sr_write":      {"subject", "version", "compatibility"},
+		"kafka_admin_connect_read":  {"kafka-connect-cluster", "connector", "connectors", "connector-plugins"},
+		"kafka_admin_connect_write": {"connector"},
+	}
 
 	for _, builder := range builderList {
 		tools, err := builder.BuildTools(context.Background(), builders.ToolBuildConfig{
@@ -122,6 +144,7 @@ func TestKafkaSplitToolsExposeModeSpecificParameters(t *testing.T) {
 		for _, serverTool := range tools {
 			tool := serverTool.Tool
 			require.ElementsMatch(t, expectedProperties[tool.Name], toolPropertyNames(tool), tool.Name)
+			requireStringEnum(t, tool.Name, tool.InputSchema.Properties["resource"], expectedResourceEnums[tool.Name])
 		}
 	}
 }

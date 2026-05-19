@@ -91,8 +91,8 @@ func (b *KafkaPartitionsToolBuilder) buildKafkaPartitionsTool() mcp.Tool {
 	operationDesc := "Operation to perform. Available operations:\n" +
 		"- update: Update the number of partitions for an existing Kafka topic. This operation can only increase the number of partitions, not decrease them."
 
-	toolDesc := "Unified tool for managing Apache Kafka partitions.\n" +
-		"This tool provides access to Kafka partition operations, particularly adding partitions to existing topics.\n" +
+	toolDesc := "Manage Apache Kafka partitions.\n" +
+		"This write tool adds partitions to existing topics and may change producer key-to-partition mapping.\n" +
 		"Kafka partitions are the fundamental unit of parallelism and scalability in Kafka. Each partition is an ordered, " +
 		"immutable sequence of records that is continually appended to. Partitions can be distributed across multiple brokers " +
 		"to enable parallel processing of a topic.\n\n" +
@@ -118,6 +118,7 @@ func (b *KafkaPartitionsToolBuilder) buildKafkaPartitionsTool() mcp.Tool {
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("resource", mcp.Required(),
 			mcp.Description(resourceDesc),
+			mcp.Enum("partition"),
 		),
 		mcp.WithString("operation", mcp.Required(),
 			mcp.Description(operationDesc),

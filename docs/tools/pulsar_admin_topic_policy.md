@@ -1,4 +1,4 @@
-#### pulsar_admin_topic_policy
+#### pulsar_admin_topic_policy_read / pulsar_admin_topic_policy_write
 
 **Claude connector safety:** Actual MCP tools are split into `pulsar_admin_topic_policy_read` and `pulsar_admin_topic_policy_write`. The read tool is read-only and only exposes get operations/parameters. The write tool is destructive and is not registered in read-only mode.
 
