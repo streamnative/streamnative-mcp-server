@@ -30,7 +30,7 @@ import (
 var pulsarPackageOperationSpecs = builders.OperationRegistry{
 	{Name: "list", Mode: builders.OperationModeRead},
 	{Name: "get", Mode: builders.OperationModeRead},
-	{Name: "download", Mode: builders.OperationModeRead},
+	{Name: "download", Mode: builders.OperationModeWrite, Destructive: true},
 	{Name: "update", Mode: builders.OperationModeWrite, Destructive: true},
 	{Name: "delete", Mode: builders.OperationModeWrite, Destructive: true},
 	{Name: "upload", Mode: builders.OperationModeWrite, Destructive: true},
@@ -95,7 +95,7 @@ func (b *PulsarAdminPackagesToolBuilder) BuildTools(_ context.Context, config bu
 // buildPackagesTool builds the Pulsar admin packages MCP tool definition
 func (b *PulsarAdminPackagesToolBuilder) buildPackagesTool(mode toolMode) mcp.Tool {
 	toolDesc := "Read packages in Apache Pulsar. Support package schemes: `function://`, `source://`, `sink://`. " +
-		"Allows listing, viewing, and downloading packages."
+		"Allows listing packages and viewing package metadata."
 
 	resourceDesc := "Resource to operate on. Available resources:\n" +
 		"- package: A specific package\n" +
@@ -104,19 +104,19 @@ func (b *PulsarAdminPackagesToolBuilder) buildPackagesTool(mode toolMode) mcp.To
 
 	operationDesc := "Operation to perform. Available operations:\n" +
 		"- list: List all packages of a specific type or versions of a package\n" +
-		"- get: Get metadata of a package\n" +
-		"- download: Download a package"
+		"- get: Get metadata of a package"
 
 	operationEnum := pulsarPackageOperationSpecs.NamesForMode(mode)
 	toolName := "pulsar_admin_package_read"
 	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Packages", "Manage Pulsar Packages", pulsarPackageOperationSpecs)
 	if isToolModeWrite(mode) {
 		toolDesc = "Manage packages in Apache Pulsar. Support package schemes: `function://`, `source://`, `sink://`. " +
-			"This write tool updates metadata, deletes packages, or uploads package contents."
+			"This write tool downloads package contents, updates metadata, deletes packages, or uploads package contents."
 		resourceDesc = "Resource to operate on. Available resources:\n" +
 			"- package: A specific package"
 		resourceEnum = []string{"package"}
 		operationDesc = "Operation to perform. Available operations:\n" +
+			"- download: Download a package to a local filesystem path\n" +
 			"- update: Update metadata of a package (requires super-user permissions)\n" +
 			"- delete: Delete a package (requires super-user permissions)\n" +
 			"- upload: Upload a package (requires super-user permissions)"
@@ -160,7 +160,7 @@ func (b *PulsarAdminPackagesToolBuilder) buildPackagesTool(mode toolMode) mcp.To
 	if isToolModeWrite(mode) {
 		pruneToolInputSchema(&tool, []string{"resource", "operation", "packageName", "description", "contact", "path", "properties"})
 	} else {
-		pruneToolInputSchema(&tool, []string{"resource", "operation", "packageName", "namespace", "type", "path"})
+		pruneToolInputSchema(&tool, []string{"resource", "operation", "packageName", "namespace", "type"})
 	}
 	return tool
 }

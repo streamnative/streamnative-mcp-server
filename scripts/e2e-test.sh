@@ -76,12 +76,63 @@ require_cmd() {
 }
 
 load_tokens() {
-  [[ -f "$TOKEN_ENV_FILE" ]] || die "missing token env file: $TOKEN_ENV_FILE"
-  set -a
-  # shellcheck disable=SC1090
-  source "$TOKEN_ENV_FILE"
-  set +a
-  [[ -n "${ADMIN_TOKEN:-}" ]] || die "ADMIN_TOKEN not set in $TOKEN_ENV_FILE"
+  if [[ -f "$TOKEN_ENV_FILE" ]]; then
+    set -a
+    # shellcheck disable=SC1090
+    source "$TOKEN_ENV_FILE"
+    set +a
+  fi
+
+  if [[ -z "${ADMIN_TOKEN:-}" || -z "${TEST_USER_TOKEN:-}" ]]; then
+    require_cmd python3
+    [[ -f "$TOKEN_SECRET_FILE" ]] || die "missing token secret file: $TOKEN_SECRET_FILE"
+    generate_test_tokens "$TOKEN_SECRET_FILE"
+  fi
+
+  [[ -n "${ADMIN_TOKEN:-}" ]] || die "ADMIN_TOKEN is not set and could not be generated"
+  [[ -n "${TEST_USER_TOKEN:-}" ]] || die "TEST_USER_TOKEN is not set and could not be generated"
+}
+
+generate_test_tokens() {
+  local secret_file="$1"
+  local generated
+  if ! generated="$(python3 - "$secret_file" <<'PY'
+import base64
+import hashlib
+import hmac
+import json
+import sys
+
+secret_path = sys.argv[1]
+with open(secret_path, "rb") as secret_file:
+    secret = secret_file.read()
+
+
+def b64url(value):
+    return base64.urlsafe_b64encode(value).rstrip(b"=").decode("ascii")
+
+
+def token(subject):
+    header = {"alg": "HS256", "typ": "JWT"}
+    payload = {"exp": 4102444800, "iat": 1700000000, "sub": subject}
+    signing_input = ".".join(
+        [
+            b64url(json.dumps(header, separators=(",", ":")).encode("utf-8")),
+            b64url(json.dumps(payload, separators=(",", ":")).encode("utf-8")),
+        ]
+    ).encode("ascii")
+    signature = hmac.new(secret, signing_input, hashlib.sha256).digest()
+    return signing_input.decode("ascii") + "." + b64url(signature)
+
+print("ADMIN_TOKEN=" + token("admin"))
+print("TEST_USER_TOKEN=" + token("test-user"))
+PY
+  )"; then
+    die "failed to generate e2e JWT tokens"
+  fi
+  ADMIN_TOKEN="$(printf '%s\n' "$generated" | awk -F= '$1 == "ADMIN_TOKEN" {print substr($0, index($0, "=") + 1)}')"
+  TEST_USER_TOKEN="$(printf '%s\n' "$generated" | awk -F= '$1 == "TEST_USER_TOKEN" {print substr($0, index($0, "=") + 1)}')"
+  export ADMIN_TOKEN TEST_USER_TOKEN
 }
 
 ensure_kind_network() {

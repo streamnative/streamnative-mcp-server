@@ -154,7 +154,7 @@ func TestPulsarSplitToolsExposeModeSpecificParameters(t *testing.T) {
 		"pulsar_admin_namespace_read":          {"operation", "tenant", "namespace"},
 		"pulsar_admin_nsisolationpolicy_read":  {"resource", "operation", "cluster", "name"},
 		"pulsar_admin_nsisolationpolicy_write": {"resource", "operation", "cluster", "name", "namespaces", "primary", "secondary", "autoFailoverPolicyType", "autoFailoverPolicyParams"},
-		"pulsar_admin_package_read":            {"resource", "operation", "packageName", "namespace", "type", "path"},
+		"pulsar_admin_package_read":            {"resource", "operation", "packageName", "namespace", "type"},
 		"pulsar_admin_package_write":           {"resource", "operation", "packageName", "description", "contact", "path", "properties"},
 		"pulsar_admin_resourcequota_read":      {"resource", "operation", "namespace", "bundle"},
 		"pulsar_admin_schema_read":             {"resource", "operation", "topic", "version"},

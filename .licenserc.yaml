@@ -38,6 +38,7 @@ header:
     - '.gitignore'
     - 'Dockerfile.goreleaser'
     - '**/.gitkeep'
+    - 'hack/common.sh'
     - 'charts/snmcp/e2e/test-secret.key'
     - 'charts/snmcp/templates/NOTES.txt'
 
