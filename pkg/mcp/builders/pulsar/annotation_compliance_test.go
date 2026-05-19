@@ -24,6 +24,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestPulsarOperationSpecsAreValid(t *testing.T) {
+	for name, registry := range pulsarComplianceOperationSpecs() {
+		require.NotPanics(t, registry.MustValidate, name)
+		require.NotEmpty(t, registry.NamesForMode(builders.OperationModeRead), name)
+		require.NotEmpty(t, registry.NamesForMode(builders.OperationModeWrite), name)
+		require.ErrorContains(t, registry.ValidateModeOperation(builders.OperationModeRead, "__unknown__"), "unknown operation", name)
+	}
+}
+
 func TestPulsarToolAnnotationCompliance(t *testing.T) {
 	builderList := allPulsarComplianceBuilders()
 
@@ -56,17 +65,25 @@ func TestPulsarToolAnnotationCompliance(t *testing.T) {
 
 func assertOperationEnumMode(t *testing.T, toolName string, operationSchema any) {
 	t.Helper()
+	registry, ok := pulsarComplianceOperationSpecs()[toolName]
+	if !ok {
+		return
+	}
 	rawEnum, ok := pulsarStringEnum(operationSchema)
 	if !ok {
 		return
 	}
-	writeOperations := pulsarComplianceWriteOperations()
 	seenRead, seenWrite := false, false
 	for _, op := range rawEnum {
-		if _, isWrite := writeOperations[op]; isWrite {
-			seenWrite = true
-		} else {
+		spec, ok := registry.SpecFor(op)
+		require.True(t, ok, "%s operation %q must be declared in OperationSpec", toolName, op)
+		switch spec.Mode {
+		case builders.OperationModeRead:
 			seenRead = true
+		case builders.OperationModeWrite:
+			seenWrite = true
+		default:
+			require.Failf(t, "invalid operation mode", "%s operation %q has mode %q", toolName, op, spec.Mode)
 		}
 	}
 	require.False(t, seenRead && seenWrite, toolName)
@@ -88,34 +105,37 @@ func pulsarStringEnum(propertySchema any) ([]string, bool) {
 	return rawEnum, ok
 }
 
-func pulsarComplianceWriteOperations() map[string]struct{} {
-	writeOperations := map[string]struct{}{
-		"create": {},
-		"update": {},
-		"delete": {},
-		"upload": {},
+func pulsarComplianceOperationSpecs() map[string]builders.OperationRegistry {
+	return map[string]builders.OperationRegistry{
+		"pulsar_admin_brokers_read":            pulsarBrokerOperationSpecs,
+		"pulsar_admin_brokers_write":           pulsarBrokerOperationSpecs,
+		"pulsar_admin_cluster_read":            pulsarClusterOperationSpecs,
+		"pulsar_admin_cluster_write":           pulsarClusterOperationSpecs,
+		"pulsar_admin_functions_read":          pulsarFunctionOperationSpecs,
+		"pulsar_admin_functions_write":         pulsarFunctionOperationSpecs,
+		"pulsar_admin_namespace_read":          pulsarNamespaceOperationSpecs,
+		"pulsar_admin_namespace_write":         pulsarNamespaceOperationSpecs,
+		"pulsar_admin_nsisolationpolicy_read":  pulsarNsIsolationPolicyOperationSpecs,
+		"pulsar_admin_nsisolationpolicy_write": pulsarNsIsolationPolicyOperationSpecs,
+		"pulsar_admin_package_read":            pulsarPackageOperationSpecs,
+		"pulsar_admin_package_write":           pulsarPackageOperationSpecs,
+		"pulsar_admin_resourcequota_read":      pulsarResourceQuotaOperationSpecs,
+		"pulsar_admin_resourcequota_write":     pulsarResourceQuotaOperationSpecs,
+		"pulsar_admin_schema_read":             pulsarSchemaOperationSpecs,
+		"pulsar_admin_schema_write":            pulsarSchemaOperationSpecs,
+		"pulsar_admin_sinks_read":              pulsarSinkOperationSpecs,
+		"pulsar_admin_sinks_write":             pulsarSinkOperationSpecs,
+		"pulsar_admin_sources_read":            pulsarSourceOperationSpecs,
+		"pulsar_admin_sources_write":           pulsarSourceOperationSpecs,
+		"pulsar_admin_subscription_read":       pulsarSubscriptionOperationSpecs,
+		"pulsar_admin_subscription_write":      pulsarSubscriptionOperationSpecs,
+		"pulsar_admin_tenant_read":             pulsarTenantOperationSpecs,
+		"pulsar_admin_tenant_write":            pulsarTenantOperationSpecs,
+		"pulsar_admin_topic_policy_read":       pulsarTopicPolicyOperationSpecs,
+		"pulsar_admin_topic_policy_write":      pulsarTopicPolicyOperationSpecs,
+		"pulsar_admin_topic_read":              pulsarTopicOperationSpecs,
+		"pulsar_admin_topic_write":             pulsarTopicOperationSpecs,
 	}
-	for _, source := range []map[string]struct{}{
-		readOnlyRestrictedTopicOperations,
-		readOnlyRestrictedSubscriptionOperations,
-		pulsarNamespaceWriteOperations,
-		readOnlyRestrictedTopicPolicyOperations,
-		pulsarBrokerWriteOperations,
-		pulsarClusterWriteOperations,
-		readOnlyRestrictedFunctionOperations,
-		pulsarSinkWriteOperations,
-		pulsarSourceWriteOperations,
-		pulsarPackageWriteOperations,
-		pulsarSchemaWriteOperations,
-		pulsarTenantWriteOperations,
-		pulsarNsIsolationPolicyWriteOperations,
-		pulsarResourceQuotaWriteOperations,
-	} {
-		for op := range source {
-			writeOperations[op] = struct{}{}
-		}
-	}
-	return writeOperations
 }
 
 func TestPulsarSplitToolsExposeModeSpecificParameters(t *testing.T) {

@@ -26,13 +26,14 @@ import (
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
-	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 )
 
-var pulsarTenantWriteOperations = map[string]struct{}{
-	"create": {},
-	"update": {},
-	"delete": {},
+var pulsarTenantOperationSpecs = builders.OperationRegistry{
+	{Name: "list", Mode: builders.OperationModeRead},
+	{Name: "get", Mode: builders.OperationModeRead},
+	{Name: "create", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "update", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "delete", Mode: builders.OperationModeWrite, Destructive: true},
 }
 
 // PulsarAdminTenantToolBuilder implements the ToolBuilder interface for Pulsar Admin Tenant tools
@@ -112,9 +113,9 @@ func (b *PulsarAdminTenantToolBuilder) buildTenantTool(mode toolMode) mcp.Tool {
 		"- list: List all tenants in the Pulsar instance\n" +
 		"- get: Get configuration details for a specific tenant"
 
-	operationEnum := []string{"list", "get"}
+	operationEnum := pulsarTenantOperationSpecs.NamesForMode(mode)
 	toolName := "pulsar_admin_tenant_read"
-	annotation := toolannotations.ReadOnly("Read Pulsar Tenants")
+	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Tenants", "Manage Pulsar Tenants")
 	if isToolModeWrite(mode) {
 		toolDesc = "Manage Apache Pulsar tenants. " +
 			"This write tool creates, updates, or deletes tenant configuration and may change cluster state."
@@ -122,9 +123,8 @@ func (b *PulsarAdminTenantToolBuilder) buildTenantTool(mode toolMode) mcp.Tool {
 			"- create: Create a new tenant with specified configuration\n" +
 			"- update: Update configuration for an existing tenant\n" +
 			"- delete: Delete an existing tenant (must not have any active namespaces)"
-		operationEnum = []string{"create", "update", "delete"}
+		operationEnum = pulsarTenantOperationSpecs.NamesForMode(mode)
 		toolName = "pulsar_admin_tenant_write"
-		annotation = toolannotations.Destructive("Manage Pulsar Tenants")
 	}
 
 	tool := mcp.NewTool(toolName,
@@ -201,8 +201,8 @@ func (b *PulsarAdminTenantToolBuilder) buildTenantHandler(mode toolMode) func(co
 			return mcp.NewToolResultError(fmt.Sprintf("Invalid resource: %s. Only 'tenant' is supported.", resource)), nil
 		}
 
-		if !validateModeOperation(mode, operation, pulsarTenantWriteOperations) {
-			return mcp.NewToolResultError(fmt.Sprintf("Operation %q is not available in %s mode", operation, mode)), nil
+		if err := validateModeOperation(mode, operation, pulsarTenantOperationSpecs); err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 
 		// Get Pulsar session from context

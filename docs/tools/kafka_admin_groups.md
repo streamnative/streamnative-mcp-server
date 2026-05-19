@@ -1,5 +1,13 @@
 #### kafka-admin-groups
 
+
+<!-- generated:operations:start -->
+| Tool | Mode | Operations |
+|---|---|---|
+| `kafka_admin_groups_read` | read | `list`, `describe`, `offsets` |
+| `kafka_admin_groups_write` | write | `remove-members`, `delete-offset`, `set-offset` |
+<!-- generated:operations:end -->
+
 **Claude connector safety:** Actual MCP tools are split into `kafka_admin_groups_read` and `kafka_admin_groups_write`. The read tool is read-only and only exposes read operations/parameters. The write tool is destructive and is not registered in read-only mode.
 
 ### `kafka_admin_groups_read`

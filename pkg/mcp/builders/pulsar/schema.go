@@ -29,12 +29,12 @@ import (
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
-	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 )
 
-var pulsarSchemaWriteOperations = map[string]struct{}{
-	"upload": {},
-	"delete": {},
+var pulsarSchemaOperationSpecs = builders.OperationRegistry{
+	{Name: "get", Mode: builders.OperationModeRead},
+	{Name: "upload", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "delete", Mode: builders.OperationModeWrite, Destructive: true},
 }
 
 // PulsarAdminSchemaToolBuilder implements the ToolBuilder interface for Pulsar Admin Schema tools
@@ -108,18 +108,17 @@ func (b *PulsarAdminSchemaToolBuilder) buildSchemaTool(mode toolMode) mcp.Tool {
 	operationDesc := "Operation to perform. Available operations:\n" +
 		"- get: Get the schema for a topic (optionally by version)"
 
-	operationEnum := []string{"get"}
+	operationEnum := pulsarSchemaOperationSpecs.NamesForMode(mode)
 	toolName := "pulsar_admin_schema_read"
-	annotation := toolannotations.ReadOnly("Read Pulsar Schemas")
+	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Schemas", "Manage Pulsar Schemas")
 	if isToolModeWrite(mode) {
 		toolDesc = "Manage Apache Pulsar schemas for topics. " +
 			"This write tool uploads or deletes topic schemas."
 		operationDesc = "Operation to perform. Available operations:\n" +
 			"- upload: Upload a new schema for a topic (requires namespace admin permissions)\n" +
 			"- delete: Delete the schema for a topic (requires namespace admin permissions)"
-		operationEnum = []string{"upload", "delete"}
+		operationEnum = pulsarSchemaOperationSpecs.NamesForMode(mode)
 		toolName = "pulsar_admin_schema_write"
-		annotation = toolannotations.Destructive("Manage Pulsar Schemas")
 	}
 
 	tool := mcp.NewTool(toolName,
@@ -180,8 +179,8 @@ func (b *PulsarAdminSchemaToolBuilder) buildSchemaHandler(mode toolMode) func(co
 		resource = strings.ToLower(resource)
 		operation = strings.ToLower(operation)
 
-		if !validateModeOperation(mode, operation, pulsarSchemaWriteOperations) {
-			return mcp.NewToolResultError(fmt.Sprintf("Operation %q is not available in %s mode", operation, mode)), nil
+		if err := validateModeOperation(mode, operation, pulsarSchemaOperationSpecs); err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 
 		// Verify resource type

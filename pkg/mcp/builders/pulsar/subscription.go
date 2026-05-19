@@ -29,26 +29,17 @@ import (
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
-	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 )
 
-var supportedSubscriptionOperations = map[string]struct{}{
-	"list":              {},
-	"create":            {},
-	"delete":            {},
-	"skip":              {},
-	"expire":            {},
-	"reset-cursor":      {},
-	"peek":              {},
-	"get-message-by-id": {},
-}
-
-var readOnlyRestrictedSubscriptionOperations = map[string]struct{}{
-	"create":       {},
-	"delete":       {},
-	"skip":         {},
-	"expire":       {},
-	"reset-cursor": {},
+var pulsarSubscriptionOperationSpecs = builders.OperationRegistry{
+	{Name: "list", Mode: builders.OperationModeRead},
+	{Name: "peek", Mode: builders.OperationModeRead},
+	{Name: "get-message-by-id", Mode: builders.OperationModeRead},
+	{Name: "create", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "delete", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "skip", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "expire", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "reset-cursor", Mode: builders.OperationModeWrite, Destructive: true},
 }
 
 const maxSubscriptionPeekCount int64 = 100
@@ -136,9 +127,9 @@ func (b *PulsarAdminSubscriptionToolBuilder) buildSubscriptionTool(mode toolMode
 		"- peek: Peek one or more messages for a subscription without advancing the cursor\n" +
 		"- get-message-by-id: Read a message by ledger ID and entry ID for topic-level debugging"
 
-	operationEnum := []string{"list", "peek", "get-message-by-id"}
+	operationEnum := pulsarSubscriptionOperationSpecs.NamesForMode(mode)
 	toolName := "pulsar_admin_subscription_read"
-	annotation := toolannotations.ReadOnly("Read Pulsar Subscriptions")
+	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Subscriptions", "Manage Pulsar Subscriptions")
 	if isToolModeWrite(mode) {
 		toolDesc = "Manage Apache Pulsar subscriptions on topics. " +
 			"This write tool creates or deletes subscriptions and changes subscription cursor positions."
@@ -148,9 +139,8 @@ func (b *PulsarAdminSubscriptionToolBuilder) buildSubscriptionTool(mode toolMode
 			"- skip: Skip a specified number of messages for a subscription\n" +
 			"- expire: Expire messages older than specified time for a subscription\n" +
 			"- reset-cursor: Reset the cursor position for a subscription to a specific message ID"
-		operationEnum = []string{"create", "delete", "skip", "expire", "reset-cursor"}
+		operationEnum = pulsarSubscriptionOperationSpecs.NamesForMode(mode)
 		toolName = "pulsar_admin_subscription_write"
-		annotation = toolannotations.Destructive("Manage Pulsar Subscriptions")
 	}
 
 	tool := mcp.NewTool(toolName,
@@ -235,8 +225,8 @@ func (b *PulsarAdminSubscriptionToolBuilder) buildSubscriptionHandler(mode toolM
 			return mcp.NewToolResultError(fmt.Sprintf("Unknown operation: %s", operation)), nil
 		}
 
-		if !validateModeOperation(mode, operation, readOnlyRestrictedSubscriptionOperations) {
-			return mcp.NewToolResultError(fmt.Sprintf("Operation %q is not available in %s mode", operation, mode)), nil
+		if err := validateModeOperation(mode, operation, pulsarSubscriptionOperationSpecs); err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 
 		// Verify resource type
@@ -542,13 +532,13 @@ func (b *PulsarAdminSubscriptionToolBuilder) handleSubsGetMessageByID(admin cmdu
 }
 
 func isSupportedSubscriptionOperation(operation string) bool {
-	_, ok := supportedSubscriptionOperations[strings.ToLower(operation)]
+	_, ok := pulsarSubscriptionOperationSpecs.SpecFor(operation)
 	return ok
 }
 
 func isReadOnlyRestrictedSubscriptionOperation(operation string) bool {
-	_, ok := readOnlyRestrictedSubscriptionOperations[strings.ToLower(operation)]
-	return ok
+	spec, ok := pulsarSubscriptionOperationSpecs.SpecFor(operation)
+	return ok && spec.Mode == builders.OperationModeWrite
 }
 
 func parseSubscriptionMessageID(messageID string) (utils.MessageID, error) {

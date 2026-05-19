@@ -1,5 +1,13 @@
 #### pulsar_admin_subscription_read / pulsar_admin_subscription_write
 
+
+<!-- generated:operations:start -->
+| Tool | Mode | Operations |
+|---|---|---|
+| `pulsar_admin_subscription_read` | read | `list`, `peek`, `get-message-by-id` |
+| `pulsar_admin_subscription_write` | write | `create`, `delete`, `skip`, `expire`, `reset-cursor` |
+<!-- generated:operations:end -->
+
 **Claude connector safety:** Actual MCP tools are split into `pulsar_admin_subscription_read` and `pulsar_admin_subscription_write`. The read tool is read-only and only exposes read operations/parameters. The write tool is destructive and is not registered in read-only mode.
 
 ### `pulsar_admin_subscription_read`

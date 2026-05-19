@@ -4,6 +4,33 @@
 
 Prepare StreamNative MCP Server for Claude connector submission and review.
 
+## Current review follow-up: operation spec registry
+
+Reviewer feedback is valid: current branch split read/write tool names, but duplicated `toolMode` helpers and per-builder write-operation maps still create scatter-shot maintenance. Adding one operation can require enum updates, write map updates, handler switch updates, docs, and compliance-test classification. `validateModeOperation` also classifies any operation missing from the write map as read, so an unclassified future write can pass read-mode validation until the handler switch rejects or mishandles it.
+
+Recommended next design: make each tool family declare operation metadata once, then derive mode-specific tool schemas, annotations, validation, and tests from that registry.
+
+```go
+type OperationMode string
+
+const (
+    OperationModeRead  OperationMode = "read"
+    OperationModeWrite OperationMode = "write"
+)
+
+type OperationSpec struct {
+    Name        string
+    Mode        OperationMode
+    Destructive bool
+    Idempotent  bool
+    Resources   []string
+    Params      []ParamSpec
+    Handler     OperationHandler
+}
+```
+
+Scope is incremental but complete: add shared spec helpers, migrate `kafka/topics.go` and `pulsar/namespace.go` as reference implementations, then migrate every remaining split builder in batches. Keep current read/write tool names unchanged. Use docs generated operation-table blocks first; do not rewrite full Markdown documents.
+
 Hard requirements from Claude docs:
 
 - every MCP tool has non-empty `annotations.title`
@@ -403,11 +430,15 @@ Plan:
 
 ### Phase 1: shared annotation + mode helpers
 
+Status: implemented on current branch.
+
 - Add `pkg/mcp/toolannotations` helper.
 - Add local read/write mode helpers in builders with mixed operations.
 - Add reusable operation validation helpers where a builder already has operation maps.
 
 ### Phase 2: split Kafka tools completely
+
+Status: implemented on current branch; follow-up refactor still needed to remove duplicated operation classification.
 
 - Update all Kafka builders to build mode-specific tools.
 - Ensure read/write tools have mode-specific descriptions, examples, operation enums, and parameter schemas.
@@ -418,6 +449,8 @@ Plan:
 
 ### Phase 3: split Pulsar tools completely
 
+Status: implemented on current branch; follow-up refactor still needed to remove duplicated operation classification.
+
 - Update all Pulsar builders to build mode-specific tools.
 - Ensure read/write tools have mode-specific descriptions, examples, operation enums, and parameter schemas.
 - Preserve existing read-only behavior by not registering write tools in read-only config.
@@ -427,25 +460,109 @@ Plan:
 
 ### Phase 4: StreamNative Cloud/static tool annotations
 
+Status: implemented on current branch.
+
 - Add annotations to context/log/resource tools.
 - Keep already split apply/delete tools.
 - Ensure no new mixed resource tool appears.
 
 ### Phase 5: dynamic tools
 
+Status: implemented on current branch.
+
 - Add annotations to Functions-as-Tools.
 - Validate read-only exposure behavior.
 
 ### Phase 6: runtime-visible docs
 
+Status: implemented on current branch, with generated operation-table guard tests for migrated split builders.
+
 Update runtime-visible docs together with schema changes:
 
-- `README.md` feature/tool examples if names change.
-- `docs/tools/*.md` matching renamed/split tools.
+- Keep current read/write tool names unchanged.
+- `README.md` feature/tool examples only if behavior changes.
+- `docs/tools/*.md` matching current split tools.
 - Split docs into explicit read/write sections where a family has both tool modes.
 - Ensure read docs do not mention write-only operations or parameters.
 - Ensure write docs do not rely on old mixed tool names.
 - Any design notes under `agents/` if tool surface changes are architectural.
+
+### Phase 7: shared operation spec registry follow-up
+
+Status: implemented on current branch.
+
+Goal: make operation metadata single-source-of-truth and remove copy-paste `toolMode` + `writeOperations` maps.
+
+1. Add shared operation metadata API, likely under `pkg/mcp/builders/operations.go`:
+   - `OperationModeRead` / `OperationModeWrite`
+   - `OperationSpec`
+   - `ParamSpec`
+   - `OperationHandler` type alias or adapter
+   - `OperationRegistry` or helper functions over `[]OperationSpec`
+2. Shared helpers must derive:
+   - read operation enum
+   - write operation enum
+   - operation description fragments/table rows
+   - mode-specific validation
+   - unknown-operation rejection
+   - read/write annotation selection
+   - compliance-test classification
+3. Validation semantics:
+   - operation absent from spec => reject, never default to read
+   - operation present with wrong mode => reject with mode-specific error
+   - operation present with matching mode => dispatch allowed
+4. Migrate two reference builders first:
+   - `pkg/mcp/builders/kafka/topics.go`
+   - `pkg/mcp/builders/pulsar/namespace.go`
+5. Reference builder acceptance criteria:
+   - no local `xxxWriteOperations` map
+   - operation enum generated from specs
+   - handler validation uses specs
+   - unknown operation test added
+   - read-only build still excludes write tools
+   - tool names unchanged
+   - docs operation table generated or checked from specs
+6. Migrate remaining Kafka split builders:
+   - `connect.go`
+   - `groups.go`
+   - `schema_registry.go`
+   - `topics.go`
+7. Migrate remaining Pulsar split builders:
+   - `brokers.go`
+   - `cluster.go`
+   - `functions.go`
+   - `namespace.go`
+   - `nsisolationpolicy.go`
+   - `packages.go`
+   - `resourcequotas.go`
+   - `schema.go`
+   - `sinks.go`
+   - `sources.go`
+   - `subscription.go`
+   - `tenant.go`
+   - `topic.go`
+   - `topic_policy.go`
+8. Keep pure read/write client tools out of forced registry migration unless helper reuse is cheap:
+   - `kafka_client_produce`
+   - `kafka_client_consume`
+   - `pulsar_client_produce`
+   - `pulsar_client_consume`
+   - pure read Pulsar admin status/stats/worker tools
+9. Replace compliance-test manual classification:
+   - derive write/read operation sets from specs
+   - assert no enum mixes read/write specs
+   - assert every enum value exists in specs
+   - assert specs cover every handler switch operation
+10. Docs generation/check:
+   - do not rewrite whole Markdown documents
+   - add generated operation table blocks only:
+     `<!-- generated:operations:start -->` / `<!-- generated:operations:end -->`
+   - add `go generate` or test helper to refresh/check blocks
+11. Cleanup after migration:
+   - delete or shrink duplicated Kafka/Pulsar `tool_mode.go`
+   - move shared `pruneToolInputSchema`/required filtering helper if still duplicated
+   - remove obsolete per-builder write maps
+   - remove obsolete compliance-test write maps
 
 ## Tests / compliance guard
 
@@ -465,25 +582,36 @@ Add focused tests:
 - StreamNative Cloud/context/log/resource tools have valid annotations.
 - PFTools dynamic tool creation has valid annotation.
 - Operation validation rejects read operations on write tools and write operations on read tools.
+- Operation validation rejects unknown operations instead of treating them as read.
+- Operation enum values are derived from or checked against `OperationSpec`.
+- Compliance tests derive read/write classification from `OperationSpec`, not hand-maintained write maps.
+- Docs generated operation table blocks match `OperationSpec`.
 
 Static guard:
 
 - Build all feature sets and assert no `operation` enum contains both read and write verbs in one tool.
 - For split tool families, assert mode-specific schema/description purity with family-specific allow/deny lists.
+- Assert every handler switch operation has a matching `OperationSpec` entry.
 
 ## Risks
 
 - Tool split is runtime-visible and likely breaking for clients/prompts that call old names.
-- Docs under `docs/tools/` can drift if not updated with split names.
+- Operation spec refactor can accidentally change schema ordering, descriptions, or enum content even when tool names stay unchanged.
+- Docs under `docs/tools/` can drift if generated operation blocks are not checked in tests or `go generate`.
 - Some operations are ambiguous (`consume`, `trigger`, cursor operations, context reset). Conservative destructive annotation may add confirmations but avoids unsafe auto-run.
 - Some current tools may have read-only-mode logic embedded in handlers; after split, registration and handler validation must both enforce mode to prevent write leakage.
+- `OperationSpec.Handler` can over-couple schema metadata and dispatch if introduced too early. Prefer enum/validation/test/doc generation first, then dispatch consolidation.
 - `mcp-go` default annotations are unsafe for compliance because title empty and destructive default true.
 
 ## Confirmed decisions
 
 - Fix all current mixed read/write surfaces, not only `kafka/topics.go` and `pulsar/namespace.go`.
+- Implement operation-spec follow-up across all affected split builders, not only the two reference files.
+- Start with shared spec + two reference migrations: `kafka/topics.go` and `pulsar/namespace.go`.
+- Keep current read/write tool names unchanged.
 - Do not preserve old mixed tool names or old mixed builder/schema patterns.
 - Runtime-visible docs must be updated with read/write split and must avoid mixed read/write wording.
+- For docs generation, start with generated operation table blocks only; do not generate whole Markdown documents.
 - Conservative safety annotations are acceptable for ambiguous side-effect tools unless implementation proves true read-only behavior.
 
 ## Recommended validation

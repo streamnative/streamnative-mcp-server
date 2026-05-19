@@ -29,19 +29,29 @@ import (
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
-	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 )
 
-var readOnlyRestrictedTopicOperations = map[string]struct{}{
-	"create":             {},
-	"delete":             {},
-	"unload":             {},
-	"terminate":          {},
-	"compact":            {},
-	"update":             {},
-	"offload":            {},
-	"grant-permissions":  {},
-	"revoke-permissions": {},
+var pulsarTopicOperationSpecs = builders.OperationRegistry{
+	{Name: "list", Mode: builders.OperationModeRead},
+	{Name: "get", Mode: builders.OperationModeRead},
+	{Name: "get-permissions", Mode: builders.OperationModeRead},
+	{Name: "stats", Mode: builders.OperationModeRead},
+	{Name: "lookup", Mode: builders.OperationModeRead},
+	{Name: "internal-stats", Mode: builders.OperationModeRead},
+	{Name: "internal-info", Mode: builders.OperationModeRead},
+	{Name: "bundle-range", Mode: builders.OperationModeRead},
+	{Name: "last-message-id", Mode: builders.OperationModeRead},
+	{Name: "compact-status", Mode: builders.OperationModeRead},
+	{Name: "offload-status", Mode: builders.OperationModeRead},
+	{Name: "grant-permissions", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "revoke-permissions", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "create", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "delete", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "unload", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "terminate", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "compact", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "update", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "offload", Mode: builders.OperationModeWrite, Destructive: true},
 }
 
 var topicOperationAliases = map[string]string{
@@ -135,9 +145,9 @@ func (b *PulsarAdminTopicToolBuilder) buildTopicTool(mode toolMode) mcp.Tool {
 		"- compact-status: Get compaction status for a topic (legacy alias: status)\n" +
 		"- offload-status: Check the status of data offloading for a topic"
 
-	operationEnum := []string{"list", "get", "get-permissions", "stats", "lookup", "internal-stats", "internal-info", "bundle-range", "last-message-id", "compact-status", "offload-status"}
+	operationEnum := pulsarTopicOperationSpecs.NamesForMode(mode)
 	toolName := "pulsar_admin_topic_read"
-	annotation := toolannotations.ReadOnly("Read Pulsar Topics")
+	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Topics", "Manage Pulsar Topics")
 	if isToolModeWrite(mode) {
 		toolDesc = "Manage Apache Pulsar topics. " +
 			"This write tool changes topic lifecycle, permissions, partitioning, compaction, or offload state. " +
@@ -155,9 +165,8 @@ func (b *PulsarAdminTopicToolBuilder) buildTopicTool(mode toolMode) mcp.Tool {
 			"- compact: Trigger compaction on a topic\n" +
 			"- update: Update topic partitions\n" +
 			"- offload: Offload data from a topic to long-term storage"
-		operationEnum = []string{"grant-permissions", "revoke-permissions", "create", "delete", "unload", "terminate", "compact", "update", "offload"}
+		operationEnum = pulsarTopicOperationSpecs.NamesForMode(mode)
 		toolName = "pulsar_admin_topic_write"
-		annotation = toolannotations.Destructive("Manage Pulsar Topics")
 	}
 
 	tool := mcp.NewTool(toolName,
@@ -261,8 +270,8 @@ func (b *PulsarAdminTopicToolBuilder) buildTopicHandler(mode toolMode) func(cont
 		resource = strings.ToLower(resource)
 		operation = normalizeTopicOperation(operation)
 
-		if !validateModeOperation(mode, operation, readOnlyRestrictedTopicOperations) {
-			return mcp.NewToolResultError(fmt.Sprintf("Operation %q is not available in %s mode", operation, mode)), nil
+		if err := validateModeOperation(mode, operation, pulsarTopicOperationSpecs); err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 
 		// Get Pulsar session from context
@@ -336,8 +345,8 @@ func (b *PulsarAdminTopicToolBuilder) buildTopicHandler(mode toolMode) func(cont
 }
 
 func isReadOnlyRestrictedTopicOperation(operation string) bool {
-	_, ok := readOnlyRestrictedTopicOperations[strings.ToLower(operation)]
-	return ok
+	spec, ok := pulsarTopicOperationSpecs.SpecFor(operation)
+	return ok && spec.Mode == builders.OperationModeWrite
 }
 
 func normalizeTopicOperation(operation string) string {

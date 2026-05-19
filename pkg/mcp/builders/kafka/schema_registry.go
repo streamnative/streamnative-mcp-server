@@ -25,14 +25,15 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
-	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 	"github.com/twmb/franz-go/pkg/sr"
 )
 
-var kafkaSchemaRegistryWriteOperations = map[string]struct{}{
-	"set":    {},
-	"create": {},
-	"delete": {},
+var kafkaSchemaRegistryOperationSpecs = builders.OperationRegistry{
+	{Name: "list", Mode: builders.OperationModeRead},
+	{Name: "get", Mode: builders.OperationModeRead},
+	{Name: "set", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "create", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "delete", Mode: builders.OperationModeWrite, Destructive: true},
 }
 
 // KafkaSchemaRegistryToolBuilder implements the ToolBuilder interface for Kafka Schema Registry
@@ -105,9 +106,9 @@ func (b *KafkaSchemaRegistryToolBuilder) buildKafkaSchemaRegistryTool(mode toolM
 	operationDesc := "Operation to perform. Available operations:\n" +
 		"- list: List all subjects, versions for a subject, or supported schema types\n" +
 		"- get: Get a subject's latest schema, a specific version, or compatibility level"
-	operationEnum := []string{"list", "get"}
+	operationEnum := kafkaSchemaRegistryOperationSpecs.NamesForMode(mode)
 	toolName := "kafka_admin_sr_read"
-	annotation := toolannotations.ReadOnly("Read Kafka Schema Registry")
+	annotation := builders.ToolAnnotationForMode(mode, "Read Kafka Schema Registry", "Manage Kafka Schema Registry")
 	if isToolModeWrite(mode) {
 		resourceDesc = "Resource to operate on. Available resources:\n" +
 			"- subject: A specific schema subject to register or delete\n" +
@@ -118,9 +119,8 @@ func (b *KafkaSchemaRegistryToolBuilder) buildKafkaSchemaRegistryTool(mode toolM
 			"- set: Set compatibility level for global or subject-specific schema evolution\n" +
 			"- create: Register a new schema for a subject\n" +
 			"- delete: Delete a schema subject or a specific version"
-		operationEnum = []string{"set", "create", "delete"}
+		operationEnum = kafkaSchemaRegistryOperationSpecs.NamesForMode(mode)
 		toolName = "kafka_admin_sr_write"
-		annotation = toolannotations.Destructive("Manage Kafka Schema Registry")
 	}
 
 	toolDesc := "Read Apache Kafka Schema Registry metadata and schemas.\n" +
@@ -214,8 +214,8 @@ func (b *KafkaSchemaRegistryToolBuilder) buildKafkaSchemaRegistryHandler(mode to
 		resource = strings.ToLower(resource)
 		operation = strings.ToLower(operation)
 
-		if !validateModeOperation(mode, operation, kafkaSchemaRegistryWriteOperations) {
-			return mcp.NewToolResultError(fmt.Sprintf("Operation %q is not available in %s mode", operation, mode)), nil
+		if err := validateModeOperation(mode, operation, kafkaSchemaRegistryOperationSpecs); err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 
 		// Get Schema Registry client

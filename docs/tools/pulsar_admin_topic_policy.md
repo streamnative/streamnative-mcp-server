@@ -1,5 +1,13 @@
 #### pulsar_admin_topic_policy_read / pulsar_admin_topic_policy_write
 
+
+<!-- generated:operations:start -->
+| Tool | Mode | Operations |
+|---|---|---|
+| `pulsar_admin_topic_policy_read` | read | `get-retention`, `get-message-ttl`, `get-max-producers`, `get-max-consumers`, `get-max-unacked-messages-per-consumer`, `get-max-unacked-messages-per-subscription`, `get-persistence`, `get-delayed-delivery`, `get-dispatch-rate`, `get-subscription-dispatch-rate`, `get-deduplication`, `get-backlog-quotas`, `get-compaction-threshold`, `get-publish-rate`, `get-inactive-topic-policies`, `get-subscription-types` |
+| `pulsar_admin_topic_policy_write` | write | `set-retention`, `remove-retention`, `set-message-ttl`, `remove-message-ttl`, `set-max-producers`, `remove-max-producers`, `set-max-consumers`, `remove-max-consumers`, `set-max-unacked-messages-per-consumer`, `remove-max-unacked-messages-per-consumer`, `set-max-unacked-messages-per-subscription`, `remove-max-unacked-messages-per-subscription`, `set-persistence`, `remove-persistence`, `set-delayed-delivery`, `remove-delayed-delivery`, `set-dispatch-rate`, `remove-dispatch-rate`, `set-subscription-dispatch-rate`, `remove-subscription-dispatch-rate`, `set-deduplication`, `remove-deduplication`, `set-backlog-quota`, `remove-backlog-quota`, `set-compaction-threshold`, `remove-compaction-threshold`, `set-publish-rate`, `remove-publish-rate`, `set-inactive-topic-policies`, `remove-inactive-topic-policies`, `set-subscription-types`, `remove-subscription-types` |
+<!-- generated:operations:end -->
+
 **Claude connector safety:** Actual MCP tools are split into `pulsar_admin_topic_policy_read` and `pulsar_admin_topic_policy_write`. The read tool is read-only and only exposes get operations/parameters. The write tool is destructive and is not registered in read-only mode.
 
 ### `pulsar_admin_topic_policy_read`

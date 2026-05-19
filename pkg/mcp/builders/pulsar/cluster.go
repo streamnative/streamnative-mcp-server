@@ -25,13 +25,14 @@ import (
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
-	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 )
 
-var pulsarClusterWriteOperations = map[string]struct{}{
-	"create": {},
-	"update": {},
-	"delete": {},
+var pulsarClusterOperationSpecs = builders.OperationRegistry{
+	{Name: "list", Mode: builders.OperationModeRead},
+	{Name: "get", Mode: builders.OperationModeRead},
+	{Name: "create", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "update", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "delete", Mode: builders.OperationModeWrite, Destructive: true},
 }
 
 // PulsarAdminClusterToolBuilder implements the ToolBuilder interface for Pulsar Admin Cluster tools
@@ -113,9 +114,9 @@ func (b *PulsarAdminClusterToolBuilder) buildClusterTool(mode toolMode) mcp.Tool
 		"- list: List resources (used with cluster, failure_domain)\n" +
 		"- get: Retrieve resource information (used with cluster, peer_clusters, failure_domain)"
 
-	operationEnum := []string{"list", "get"}
+	operationEnum := pulsarClusterOperationSpecs.NamesForMode(mode)
 	toolName := "pulsar_admin_cluster_read"
-	annotation := toolannotations.ReadOnly("Read Pulsar Clusters")
+	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Clusters", "Manage Pulsar Clusters")
 	if isToolModeWrite(mode) {
 		toolDesc = "Manage Apache Pulsar clusters.\n" +
 			"This write tool creates, updates, or deletes clusters and failure domains, and updates peer cluster settings."
@@ -123,9 +124,8 @@ func (b *PulsarAdminClusterToolBuilder) buildClusterTool(mode toolMode) mcp.Tool
 			"- create: Create a new resource (used with cluster, failure_domain)\n" +
 			"- update: Update an existing resource (used with cluster, peer_clusters, failure_domain)\n" +
 			"- delete: Delete a resource (used with cluster, failure_domain)"
-		operationEnum = []string{"create", "update", "delete"}
+		operationEnum = pulsarClusterOperationSpecs.NamesForMode(mode)
 		toolName = "pulsar_admin_cluster_write"
-		annotation = toolannotations.Destructive("Manage Pulsar Clusters")
 	}
 
 	tool := mcp.NewTool(toolName,
@@ -211,7 +211,7 @@ func (b *PulsarAdminClusterToolBuilder) buildClusterHandler(mode toolMode) func(
 		operation, err := request.RequireString("operation")
 		if err != nil {
 			return mcp.NewToolResultError("Missing required operation parameter. " +
-				"Please specify one of: " + modeSupportedOperations(mode, []string{"list", "get"}, []string{"create", "update", "delete"}) + " based on the resource type."), nil
+				"Please specify one of: " + modeSupportedOperations(mode, pulsarClusterOperationSpecs) + " based on the resource type."), nil
 		}
 
 		// Validate if the parameter combination is valid
@@ -220,8 +220,8 @@ func (b *PulsarAdminClusterToolBuilder) buildClusterHandler(mode toolMode) func(
 			return mcp.NewToolResultError(errMsg), nil
 		}
 
-		if !validateModeOperation(mode, operation, pulsarClusterWriteOperations) {
-			return mcp.NewToolResultError(fmt.Sprintf("Operation %q is not available in %s mode", operation, mode)), nil
+		if err := validateModeOperation(mode, operation, pulsarClusterOperationSpecs); err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 
 		// Process request based on resource type

@@ -24,14 +24,16 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
-	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 	"github.com/twmb/franz-go/pkg/kadm"
 )
 
-var kafkaGroupWriteOperations = map[string]struct{}{
-	"remove-members": {},
-	"delete-offset":  {},
-	"set-offset":     {},
+var kafkaGroupOperationSpecs = builders.OperationRegistry{
+	{Name: "list", Mode: builders.OperationModeRead},
+	{Name: "describe", Mode: builders.OperationModeRead},
+	{Name: "offsets", Mode: builders.OperationModeRead},
+	{Name: "remove-members", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "delete-offset", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "set-offset", Mode: builders.OperationModeWrite, Destructive: true},
 }
 
 // KafkaGroupsToolBuilder implements the ToolBuilder interface for Kafka Consumer Groups
@@ -100,20 +102,19 @@ func (b *KafkaGroupsToolBuilder) buildKafkaGroupsTool(mode toolMode) mcp.Tool {
 		"- list: List all Kafka Consumer Groups in the cluster\n" +
 		"- describe: Get detailed information about a specific Consumer Group, including members, offsets, and lag\n" +
 		"- offsets: Get offsets for a specific consumer group"
-	operationEnum := []string{"list", "describe", "offsets"}
+	operationEnum := kafkaGroupOperationSpecs.NamesForMode(mode)
 	toolName := "kafka_admin_groups_read"
-	annotation := toolannotations.ReadOnly("Read Kafka Consumer Groups")
+	annotation := builders.ToolAnnotationForMode(mode, "Read Kafka Consumer Groups", "Manage Kafka Consumer Groups")
 	if isToolModeWrite(mode) {
 		operationDesc = "Operation to perform. Available operations:\n" +
 			"- remove-members: Remove specific members from a Consumer Group to force rebalancing or troubleshoot issues\n" +
 			"- delete-offset: Delete a specific offset for a consumer group of a topic\n" +
 			"- set-offset: Set a specific offset for a consumer group's topic-partition"
-		operationEnum = []string{"remove-members", "delete-offset", "set-offset"}
+		operationEnum = kafkaGroupOperationSpecs.NamesForMode(mode)
 		resourceDesc = "Resource to operate on. Available resources:\n" +
 			"- group: A single Kafka Consumer Group for membership and offset changes"
 		resourceEnum = []string{"group"}
 		toolName = "kafka_admin_groups_write"
-		annotation = toolannotations.Destructive("Manage Kafka Consumer Groups")
 	}
 
 	toolDesc := "Read Apache Kafka Consumer Groups.\n" +
@@ -207,8 +208,8 @@ func (b *KafkaGroupsToolBuilder) buildKafkaGroupsHandler(mode toolMode) func(con
 		resource = strings.ToLower(resource)
 		operation = strings.ToLower(operation)
 
-		if !validateModeOperation(mode, operation, kafkaGroupWriteOperations) {
-			return mcp.NewToolResultError(fmt.Sprintf("Operation %q is not available in %s mode", operation, mode)), nil
+		if err := validateModeOperation(mode, operation, kafkaGroupOperationSpecs); err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 
 		// Get Kafka admin client

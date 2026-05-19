@@ -1,5 +1,13 @@
 #### pulsar_admin_cluster_read / pulsar_admin_cluster_write
 
+
+<!-- generated:operations:start -->
+| Tool | Mode | Operations |
+|---|---|---|
+| `pulsar_admin_cluster_read` | read | `list`, `get` |
+| `pulsar_admin_cluster_write` | write | `create`, `update`, `delete` |
+<!-- generated:operations:end -->
+
 **Claude connector safety:** Actual MCP tools are split into `pulsar_admin_cluster_read` and `pulsar_admin_cluster_write`. The read tool is read-only and only exposes read operations/parameters. The write tool is destructive and is not registered in read-only mode.
 
 ### `pulsar_admin_cluster_read`

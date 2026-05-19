@@ -26,12 +26,12 @@ import (
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
-	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 )
 
-var pulsarResourceQuotaWriteOperations = map[string]struct{}{
-	"set":   {},
-	"reset": {},
+var pulsarResourceQuotaOperationSpecs = builders.OperationRegistry{
+	{Name: "get", Mode: builders.OperationModeRead},
+	{Name: "set", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "reset", Mode: builders.OperationModeWrite, Destructive: true},
 }
 
 // PulsarAdminResourceQuotasToolBuilder implements the ToolBuilder interface for Pulsar admin resource quotas
@@ -102,18 +102,17 @@ func (b *PulsarAdminResourceQuotasToolBuilder) buildResourceQuotasTool(mode tool
 	operationDesc := "Operation to perform. Available operations:\n" +
 		"- get: Get the resource quota for a specified namespace bundle or default quota"
 
-	operationEnum := []string{"get"}
+	operationEnum := pulsarResourceQuotaOperationSpecs.NamesForMode(mode)
 	toolName := "pulsar_admin_resourcequota_read"
-	annotation := toolannotations.ReadOnly("Read Pulsar Resource Quotas")
+	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Resource Quotas", "Manage Pulsar Resource Quotas")
 	if isToolModeWrite(mode) {
 		toolDesc = "Manage Apache Pulsar resource quotas for brokers, namespaces and bundles. " +
 			"This write tool sets or resets quota configuration."
 		operationDesc = "Operation to perform. Available operations:\n" +
 			"- set: Set the resource quota for a specified namespace bundle or default quota (requires super-user permissions)\n" +
 			"- reset: Reset a namespace bundle's resource quota to default value (requires super-user permissions)"
-		operationEnum = []string{"set", "reset"}
+		operationEnum = pulsarResourceQuotaOperationSpecs.NamesForMode(mode)
 		toolName = "pulsar_admin_resourcequota_write"
-		annotation = toolannotations.Destructive("Manage Pulsar Resource Quotas")
 	}
 
 	tool := mcp.NewTool(toolName,
@@ -184,8 +183,8 @@ func (b *PulsarAdminResourceQuotasToolBuilder) buildResourceQuotasHandler(mode t
 		resource = strings.ToLower(resource)
 		operation = strings.ToLower(operation)
 
-		if !validateModeOperation(mode, operation, pulsarResourceQuotaWriteOperations) {
-			return mcp.NewToolResultError(fmt.Sprintf("Operation %q is not available in %s mode", operation, mode)), nil
+		if err := validateModeOperation(mode, operation, pulsarResourceQuotaOperationSpecs); err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 
 		// Verify resource type
@@ -214,7 +213,7 @@ func (b *PulsarAdminResourceQuotasToolBuilder) buildResourceQuotasHandler(mode t
 			return b.handleQuotaReset(admin, request)
 		default:
 			return mcp.NewToolResultError(fmt.Sprintf("Invalid operation: %s. Available operations: %s", operation,
-				modeSupportedOperations(mode, []string{"get"}, []string{"set", "reset"}))), nil
+				modeSupportedOperations(mode, pulsarResourceQuotaOperationSpecs))), nil
 		}
 	}
 }

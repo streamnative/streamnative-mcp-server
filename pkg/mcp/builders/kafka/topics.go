@@ -24,13 +24,15 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
-	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 	"github.com/twmb/franz-go/pkg/kadm"
 )
 
-var kafkaTopicWriteOperations = map[string]struct{}{
-	"create": {},
-	"delete": {},
+var kafkaTopicOperationSpecs = builders.OperationRegistry{
+	{Name: "list", Mode: builders.OperationModeRead},
+	{Name: "get", Mode: builders.OperationModeRead},
+	{Name: "metadata", Mode: builders.OperationModeRead},
+	{Name: "create", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "delete", Mode: builders.OperationModeWrite, Destructive: true},
 }
 
 // KafkaTopicsToolBuilder implements the ToolBuilder interface for Kafka Topics
@@ -99,19 +101,18 @@ func (b *KafkaTopicsToolBuilder) buildKafkaTopicsTool(mode toolMode) mcp.Tool {
 		"- list: List all topics in the Kafka cluster, optionally including internal topics\n" +
 		"- get: Get detailed configuration for a specific topic\n" +
 		"- metadata: Get metadata for a specific topic\n"
-	operationEnum := []string{"list", "get", "metadata"}
+	operationEnum := kafkaTopicOperationSpecs.NamesForMode(mode)
 	toolName := "kafka_admin_topics_read"
-	annotation := toolannotations.ReadOnly("Read Kafka Topics")
+	annotation := builders.ToolAnnotationForMode(mode, "Read Kafka Topics", "Manage Kafka Topics")
 	if isToolModeWrite(mode) {
 		operationDesc = "Operation to perform. Available operations:\n" +
 			"- create: Create a new topic with specified partitions, replication factor, and optional configs\n" +
 			"- delete: Delete an existing topic\n"
-		operationEnum = []string{"create", "delete"}
+		operationEnum = kafkaTopicOperationSpecs.NamesForMode(mode)
 		resourceDesc = "Resource to operate on. Available resources:\n" +
 			"- topic: A single Kafka topic for create or delete operations"
 		resourceEnum = []string{"topic"}
 		toolName = "kafka_admin_topics_write"
-		annotation = toolannotations.Destructive("Manage Kafka Topics")
 	}
 
 	toolDesc := "Read Apache Kafka topic metadata and lists.\n" +
@@ -207,8 +208,8 @@ func (b *KafkaTopicsToolBuilder) buildKafkaTopicsHandler(mode toolMode) func(con
 		resource = strings.ToLower(resource)
 		operation = strings.ToLower(operation)
 
-		if !validateModeOperation(mode, operation, kafkaTopicWriteOperations) {
-			return mcp.NewToolResultError(fmt.Sprintf("Operation %q is not available in %s mode", operation, mode)), nil
+		if err := validateModeOperation(mode, operation, kafkaTopicOperationSpecs); err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 
 		// Get Kafka admin client

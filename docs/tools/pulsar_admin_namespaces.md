@@ -1,5 +1,13 @@
 #### pulsar_admin_namespace_read / pulsar_admin_namespace_write
 
+
+<!-- generated:operations:start -->
+| Tool | Mode | Operations |
+|---|---|---|
+| `pulsar_admin_namespace_read` | read | `list`, `get_topics` |
+| `pulsar_admin_namespace_write` | write | `create`, `delete`, `clear_backlog`, `unsubscribe`, `unload`, `split_bundle` |
+<!-- generated:operations:end -->
+
 **Claude connector safety:** Actual MCP tools are split into `pulsar_admin_namespace_read` and `pulsar_admin_namespace_write`. The read tool is read-only and only exposes read operations/parameters. The write tool is destructive and is not registered in read-only mode.
 
 ### `pulsar_admin_namespace_read`

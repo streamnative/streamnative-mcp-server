@@ -28,17 +28,20 @@ import (
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
-	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 	"gopkg.in/yaml.v2"
 )
 
-var pulsarSourceWriteOperations = map[string]struct{}{
-	"create":  {},
-	"update":  {},
-	"delete":  {},
-	"start":   {},
-	"stop":    {},
-	"restart": {},
+var pulsarSourceOperationSpecs = builders.OperationRegistry{
+	{Name: "list", Mode: builders.OperationModeRead},
+	{Name: "get", Mode: builders.OperationModeRead},
+	{Name: "status", Mode: builders.OperationModeRead},
+	{Name: "list-built-in", Mode: builders.OperationModeRead},
+	{Name: "create", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "update", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "delete", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "start", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "stop", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "restart", Mode: builders.OperationModeWrite, Destructive: true},
 }
 
 // PulsarAdminSourcesToolBuilder implements the ToolBuilder interface for Pulsar admin sources
@@ -109,9 +112,9 @@ func (b *PulsarAdminSourcesToolBuilder) buildSourcesTool(mode toolMode) mcp.Tool
 		"- status: Get the runtime status of a source (instances, metrics)\n" +
 		"- list-built-in: List all built-in source connectors available in the system"
 
-	operationEnum := []string{"list", "get", "status", "list-built-in"}
+	operationEnum := pulsarSourceOperationSpecs.NamesForMode(mode)
 	toolName := "pulsar_admin_sources_read"
-	annotation := toolannotations.ReadOnly("Read Pulsar Sources")
+	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Sources", "Manage Pulsar Sources")
 	if isToolModeWrite(mode) {
 		toolDesc = "Manage Apache Pulsar Sources for data ingestion and integration. " +
 			"This write tool deploys, updates, deletes, starts, stops, or restarts sources."
@@ -122,9 +125,8 @@ func (b *PulsarAdminSourcesToolBuilder) buildSourcesTool(mode toolMode) mcp.Tool
 			"- start: Start a stopped source\n" +
 			"- stop: Stop a running source\n" +
 			"- restart: Restart a source"
-		operationEnum = []string{"create", "update", "delete", "start", "stop", "restart"}
+		operationEnum = pulsarSourceOperationSpecs.NamesForMode(mode)
 		toolName = "pulsar_admin_sources_write"
-		annotation = toolannotations.Destructive("Manage Pulsar Sources")
 	}
 
 	tool := mcp.NewTool(toolName,
@@ -244,13 +246,11 @@ func (b *PulsarAdminSourcesToolBuilder) buildSourcesHandler(mode toolMode) func(
 
 		if !validOperations[operation] {
 			return mcp.NewToolResultError(fmt.Sprintf("Invalid operation: '%s'. Supported operations: %s", operation,
-				modeSupportedOperations(mode,
-					[]string{"list", "get", "status", "list-built-in"},
-					[]string{"create", "update", "delete", "start", "stop", "restart"}))), nil
+				modeSupportedOperations(mode, pulsarSourceOperationSpecs))), nil
 		}
 
-		if !validateModeOperation(mode, operation, pulsarSourceWriteOperations) {
-			return mcp.NewToolResultError(fmt.Sprintf("Operation %q is not available in %s mode", operation, mode)), nil
+		if err := validateModeOperation(mode, operation, pulsarSourceOperationSpecs); err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 
 		// Get Pulsar session from context

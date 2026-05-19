@@ -27,16 +27,17 @@ import (
 	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
-	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 )
 
-var kafkaConnectWriteOperations = map[string]struct{}{
-	"create":  {},
-	"update":  {},
-	"delete":  {},
-	"restart": {},
-	"pause":   {},
-	"resume":  {},
+var kafkaConnectOperationSpecs = builders.OperationRegistry{
+	{Name: "list", Mode: builders.OperationModeRead},
+	{Name: "get", Mode: builders.OperationModeRead},
+	{Name: "create", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "update", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "delete", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "restart", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "pause", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "resume", Mode: builders.OperationModeWrite, Destructive: true},
 }
 
 // KafkaConnectToolBuilder implements the ToolBuilder interface for Kafka Connect
@@ -110,9 +111,9 @@ func (b *KafkaConnectToolBuilder) buildKafkaConnectTool(mode toolMode) mcp.Tool 
 	operationDesc := "Operation to perform. Available operations:\n" +
 		"- list: List all connectors or connector plugins in a cluster.\n" +
 		"- get: Retrieve detailed information about a Kafka Connect cluster or specific connector."
-	operationEnum := []string{"list", "get"}
+	operationEnum := kafkaConnectOperationSpecs.NamesForMode(mode)
 	toolName := "kafka_admin_connect_read"
-	annotation := toolannotations.ReadOnly("Read Kafka Connect")
+	annotation := builders.ToolAnnotationForMode(mode, "Read Kafka Connect", "Manage Kafka Connect")
 	if isToolModeWrite(mode) {
 		resourceDesc = "Resource to operate on. Available resources:\n" +
 			"- connector: A single Kafka Connect connector instance that moves data between Kafka and external systems."
@@ -124,9 +125,8 @@ func (b *KafkaConnectToolBuilder) buildKafkaConnectTool(mode toolMode) mcp.Tool 
 			"- restart: Restart a running connector (useful after failures or configuration changes).\n" +
 			"- pause: Temporarily stop a connector from processing data.\n" +
 			"- resume: Continue processing with a previously paused connector."
-		operationEnum = []string{"create", "update", "delete", "restart", "pause", "resume"}
+		operationEnum = kafkaConnectOperationSpecs.NamesForMode(mode)
 		toolName = "kafka_admin_connect_write"
-		annotation = toolannotations.Destructive("Manage Kafka Connect")
 	}
 
 	toolDesc := "Read Apache Kafka Connect cluster, connector, and plugin information.\n" +
@@ -222,8 +222,8 @@ func (b *KafkaConnectToolBuilder) buildKafkaConnectHandler(mode toolMode) func(c
 		resource = strings.ToLower(resource)
 		operation = strings.ToLower(operation)
 
-		if !validateModeOperation(mode, operation, kafkaConnectWriteOperations) {
-			return mcp.NewToolResultError(fmt.Sprintf("Operation %q is not available in %s mode", operation, mode)), nil
+		if err := validateModeOperation(mode, operation, kafkaConnectOperationSpecs); err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 
 		// Get Kafka Connect client

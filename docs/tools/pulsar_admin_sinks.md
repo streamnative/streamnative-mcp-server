@@ -1,5 +1,13 @@
 #### pulsar_admin_sinks_read / pulsar_admin_sinks_write
 
+
+<!-- generated:operations:start -->
+| Tool | Mode | Operations |
+|---|---|---|
+| `pulsar_admin_sinks_read` | read | `list`, `get`, `status`, `list-built-in` |
+| `pulsar_admin_sinks_write` | write | `create`, `update`, `delete`, `start`, `stop`, `restart` |
+<!-- generated:operations:end -->
+
 **Claude connector safety:** Actual MCP tools are split into `pulsar_admin_sinks_read` and `pulsar_admin_sinks_write`. The read tool is read-only and only exposes read operations/parameters. The write tool is destructive and is not registered in read-only mode.
 
 Pulsar Sinks export data from Pulsar topics to external systems.

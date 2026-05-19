@@ -12,28 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package kafka
+package builders
 
 import (
 	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 )
 
-type toolMode = builders.OperationMode
-
-const (
-	toolModeRead  = builders.OperationModeRead
-	toolModeWrite = builders.OperationModeWrite
-)
-
-func isToolModeWrite(mode toolMode) bool {
-	return mode == toolModeWrite
-}
-
-func validateModeOperation(mode toolMode, operation string, operations builders.OperationRegistry) error {
-	return operations.ValidateModeOperation(mode, operation)
-}
-
-func pruneToolInputSchema(tool *mcp.Tool, allowedProperties []string) {
-	builders.PruneToolInputSchema(tool, allowedProperties)
+// ToolAnnotationForMode selects Claude connector safety annotations from the
+// operation mode so schemas, validation, and annotations share the same mode
+// vocabulary.
+func ToolAnnotationForMode(mode OperationMode, readTitle, writeTitle string) mcp.ToolOption {
+	if mode == OperationModeWrite {
+		return toolannotations.Destructive(writeTitle)
+	}
+	return toolannotations.ReadOnly(readTitle)
 }

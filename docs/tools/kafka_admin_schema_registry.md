@@ -1,5 +1,13 @@
 #### kafka-admin-schema-registry
 
+
+<!-- generated:operations:start -->
+| Tool | Mode | Operations |
+|---|---|---|
+| `kafka_admin_sr_read` | read | `list`, `get` |
+| `kafka_admin_sr_write` | write | `set`, `create`, `delete` |
+<!-- generated:operations:end -->
+
 **Claude connector safety:** Actual MCP tools are split into `kafka_admin_sr_read` and `kafka_admin_sr_write`. The read tool is read-only and only exposes read operations/parameters. The write tool is destructive and is not registered in read-only mode.
 
 ### `kafka_admin_sr_read`

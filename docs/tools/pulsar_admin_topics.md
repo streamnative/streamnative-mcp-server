@@ -1,5 +1,13 @@
 #### pulsar_admin_topic_read / pulsar_admin_topic_write
 
+
+<!-- generated:operations:start -->
+| Tool | Mode | Operations |
+|---|---|---|
+| `pulsar_admin_topic_read` | read | `list`, `get`, `get-permissions`, `stats`, `lookup`, `internal-stats`, `internal-info`, `bundle-range`, `last-message-id`, `compact-status`, `offload-status` |
+| `pulsar_admin_topic_write` | write | `grant-permissions`, `revoke-permissions`, `create`, `delete`, `unload`, `terminate`, `compact`, `update`, `offload` |
+<!-- generated:operations:end -->
+
 **Claude connector safety:** Actual MCP tools are split into `pulsar_admin_topic_read` and `pulsar_admin_topic_write`. The read tool is read-only and only exposes read operations/parameters. The write tool is destructive and is not registered in read-only mode.
 
 ### `pulsar_admin_topic_read`

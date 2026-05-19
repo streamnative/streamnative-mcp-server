@@ -24,6 +24,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestKafkaOperationSpecsAreValid(t *testing.T) {
+	for name, registry := range kafkaComplianceOperationSpecs() {
+		require.NotPanics(t, registry.MustValidate, name)
+		require.NotEmpty(t, registry.NamesForMode(builders.OperationModeRead), name)
+		require.NotEmpty(t, registry.NamesForMode(builders.OperationModeWrite), name)
+		require.ErrorContains(t, registry.ValidateModeOperation(builders.OperationModeRead, "__unknown__"), "unknown operation", name)
+	}
+}
+
 func TestKafkaToolAnnotationCompliance(t *testing.T) {
 	builderList := []builders.ToolBuilder{
 		NewKafkaTopicsToolBuilder(),
@@ -72,23 +81,41 @@ func toolPropertyNames(tool mcp.Tool) []string {
 
 func assertOperationEnumMode(t *testing.T, toolName string, operationSchema any) {
 	t.Helper()
+	registry, ok := kafkaComplianceOperationSpecs()[toolName]
+	if !ok {
+		return
+	}
 	rawEnum, ok := stringEnum(operationSchema)
 	if !ok {
 		return
 	}
-	writeOperations := map[string]struct{}{
-		"create": {}, "delete": {}, "set": {}, "update": {}, "restart": {}, "pause": {}, "resume": {},
-		"remove-members": {}, "delete-offset": {}, "set-offset": {},
-	}
 	seenRead, seenWrite := false, false
 	for _, op := range rawEnum {
-		if _, ok := writeOperations[op]; ok {
-			seenWrite = true
-		} else {
+		spec, ok := registry.SpecFor(op)
+		require.True(t, ok, "%s operation %q must be declared in OperationSpec", toolName, op)
+		switch spec.Mode {
+		case builders.OperationModeRead:
 			seenRead = true
+		case builders.OperationModeWrite:
+			seenWrite = true
+		default:
+			require.Failf(t, "invalid operation mode", "%s operation %q has mode %q", toolName, op, spec.Mode)
 		}
 	}
 	require.False(t, seenRead && seenWrite, toolName)
+}
+
+func kafkaComplianceOperationSpecs() map[string]builders.OperationRegistry {
+	return map[string]builders.OperationRegistry{
+		"kafka_admin_topics_read":   kafkaTopicOperationSpecs,
+		"kafka_admin_topics_write":  kafkaTopicOperationSpecs,
+		"kafka_admin_groups_read":   kafkaGroupOperationSpecs,
+		"kafka_admin_groups_write":  kafkaGroupOperationSpecs,
+		"kafka_admin_sr_read":       kafkaSchemaRegistryOperationSpecs,
+		"kafka_admin_sr_write":      kafkaSchemaRegistryOperationSpecs,
+		"kafka_admin_connect_read":  kafkaConnectOperationSpecs,
+		"kafka_admin_connect_write": kafkaConnectOperationSpecs,
+	}
 }
 
 func requireStringEnum(t *testing.T, toolName string, propertySchema any, expected []string) {

@@ -29,97 +29,62 @@ import (
 	ctlutil "github.com/streamnative/pulsarctl/pkg/ctl/utils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
-	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 )
 
-var readOnlyRestrictedTopicPolicyOperations = map[string]struct{}{
-	"set-retention":                                {},
-	"remove-retention":                             {},
-	"set-message-ttl":                              {},
-	"remove-message-ttl":                           {},
-	"set-max-producers":                            {},
-	"remove-max-producers":                         {},
-	"set-max-consumers":                            {},
-	"remove-max-consumers":                         {},
-	"set-max-unacked-messages-per-consumer":        {},
-	"remove-max-unacked-messages-per-consumer":     {},
-	"set-max-unacked-messages-per-subscription":    {},
-	"remove-max-unacked-messages-per-subscription": {},
-	"set-persistence":                              {},
-	"remove-persistence":                           {},
-	"set-delayed-delivery":                         {},
-	"remove-delayed-delivery":                      {},
-	"set-dispatch-rate":                            {},
-	"remove-dispatch-rate":                         {},
-	"set-subscription-dispatch-rate":               {},
-	"remove-subscription-dispatch-rate":            {},
-	"set-deduplication":                            {},
-	"remove-deduplication":                         {},
-	"set-backlog-quota":                            {},
-	"remove-backlog-quota":                         {},
-	"set-compaction-threshold":                     {},
-	"remove-compaction-threshold":                  {},
-	"set-publish-rate":                             {},
-	"remove-publish-rate":                          {},
-	"set-inactive-topic-policies":                  {},
-	"remove-inactive-topic-policies":               {},
-	"set-subscription-types":                       {},
-	"remove-subscription-types":                    {},
+var pulsarTopicPolicyOperationSpecs = builders.OperationRegistry{
+	{Name: "get-retention", Mode: builders.OperationModeRead},
+	{Name: "get-message-ttl", Mode: builders.OperationModeRead},
+	{Name: "get-max-producers", Mode: builders.OperationModeRead},
+	{Name: "get-max-consumers", Mode: builders.OperationModeRead},
+	{Name: "get-max-unacked-messages-per-consumer", Mode: builders.OperationModeRead},
+	{Name: "get-max-unacked-messages-per-subscription", Mode: builders.OperationModeRead},
+	{Name: "get-persistence", Mode: builders.OperationModeRead},
+	{Name: "get-delayed-delivery", Mode: builders.OperationModeRead},
+	{Name: "get-dispatch-rate", Mode: builders.OperationModeRead},
+	{Name: "get-subscription-dispatch-rate", Mode: builders.OperationModeRead},
+	{Name: "get-deduplication", Mode: builders.OperationModeRead},
+	{Name: "get-backlog-quotas", Mode: builders.OperationModeRead},
+	{Name: "get-compaction-threshold", Mode: builders.OperationModeRead},
+	{Name: "get-publish-rate", Mode: builders.OperationModeRead},
+	{Name: "get-inactive-topic-policies", Mode: builders.OperationModeRead},
+	{Name: "get-subscription-types", Mode: builders.OperationModeRead},
+	{Name: "set-retention", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "remove-retention", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "set-message-ttl", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "remove-message-ttl", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "set-max-producers", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "remove-max-producers", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "set-max-consumers", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "remove-max-consumers", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "set-max-unacked-messages-per-consumer", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "remove-max-unacked-messages-per-consumer", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "set-max-unacked-messages-per-subscription", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "remove-max-unacked-messages-per-subscription", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "set-persistence", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "remove-persistence", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "set-delayed-delivery", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "remove-delayed-delivery", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "set-dispatch-rate", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "remove-dispatch-rate", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "set-subscription-dispatch-rate", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "remove-subscription-dispatch-rate", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "set-deduplication", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "remove-deduplication", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "set-backlog-quota", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "remove-backlog-quota", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "set-compaction-threshold", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "remove-compaction-threshold", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "set-publish-rate", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "remove-publish-rate", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "set-inactive-topic-policies", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "remove-inactive-topic-policies", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "set-subscription-types", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "remove-subscription-types", Mode: builders.OperationModeWrite, Destructive: true},
 }
 
-var readOnlyTopicPolicyOperations = []string{
-	"get-retention",
-	"get-message-ttl",
-	"get-max-producers",
-	"get-max-consumers",
-	"get-max-unacked-messages-per-consumer",
-	"get-max-unacked-messages-per-subscription",
-	"get-persistence",
-	"get-delayed-delivery",
-	"get-dispatch-rate",
-	"get-subscription-dispatch-rate",
-	"get-deduplication",
-	"get-backlog-quotas",
-	"get-compaction-threshold",
-	"get-publish-rate",
-	"get-inactive-topic-policies",
-	"get-subscription-types",
-}
+var readOnlyTopicPolicyOperations = pulsarTopicPolicyOperationSpecs.ReadNames()
 
-var writeTopicPolicyOperations = []string{
-	"set-retention",
-	"remove-retention",
-	"set-message-ttl",
-	"remove-message-ttl",
-	"set-max-producers",
-	"remove-max-producers",
-	"set-max-consumers",
-	"remove-max-consumers",
-	"set-max-unacked-messages-per-consumer",
-	"remove-max-unacked-messages-per-consumer",
-	"set-max-unacked-messages-per-subscription",
-	"remove-max-unacked-messages-per-subscription",
-	"set-persistence",
-	"remove-persistence",
-	"set-delayed-delivery",
-	"remove-delayed-delivery",
-	"set-dispatch-rate",
-	"remove-dispatch-rate",
-	"set-subscription-dispatch-rate",
-	"remove-subscription-dispatch-rate",
-	"set-deduplication",
-	"remove-deduplication",
-	"set-backlog-quota",
-	"remove-backlog-quota",
-	"set-compaction-threshold",
-	"remove-compaction-threshold",
-	"set-publish-rate",
-	"remove-publish-rate",
-	"set-inactive-topic-policies",
-	"remove-inactive-topic-policies",
-	"set-subscription-types",
-	"remove-subscription-types",
-}
+var writeTopicPolicyOperations = pulsarTopicPolicyOperationSpecs.WriteNames()
 
 var topicPolicyOperationAliases = map[string]string{
 	"get_ttl":                     "get-message-ttl",
@@ -220,7 +185,7 @@ func (b *PulsarAdminTopicPolicyToolBuilder) buildTopicPolicyTool(mode toolMode) 
 
 	operationEnum := readOnlyTopicPolicyOperations
 	toolName := "pulsar_admin_topic_policy_read"
-	annotation := toolannotations.ReadOnly("Read Pulsar Topic Policies")
+	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Topic Policies", "Manage Pulsar Topic Policies")
 	if isToolModeWrite(mode) {
 		toolDesc = "Manage Pulsar topic-level policies with operation names aligned to pulsarctl topic policy commands. " +
 			"This write tool sets or removes topic-level policies. Legacy underscore operation aliases from the older MCP implementation remain supported."
@@ -242,7 +207,6 @@ func (b *PulsarAdminTopicPolicyToolBuilder) buildTopicPolicyTool(mode toolMode) 
 		}, "\n")
 		operationEnum = writeTopicPolicyOperations
 		toolName = "pulsar_admin_topic_policy_write"
-		annotation = toolannotations.Destructive("Manage Pulsar Topic Policies")
 	}
 
 	tool := mcp.NewTool(toolName,
@@ -359,8 +323,8 @@ func (b *PulsarAdminTopicPolicyToolBuilder) buildTopicPolicyHandler(mode toolMod
 			return mcp.NewToolResultError("Missing required parameter 'topic'"), nil
 		}
 
-		if !validateModeOperation(mode, operation, readOnlyRestrictedTopicPolicyOperations) {
-			return mcp.NewToolResultError(fmt.Sprintf("Operation %q is not available in %s mode", operation, mode)), nil
+		if err := validateModeOperation(mode, operation, pulsarTopicPolicyOperationSpecs); err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 
 		session := mcpCtx.GetPulsarSession(ctx)
@@ -491,8 +455,8 @@ func normalizeTopicPolicyOperation(operation string) string {
 }
 
 func isReadOnlyRestrictedTopicPolicyOperation(operation string) bool {
-	_, ok := readOnlyRestrictedTopicPolicyOperations[normalizeTopicPolicyOperation(operation)]
-	return ok
+	spec, ok := pulsarTopicPolicyOperationSpecs.SpecFor(normalizeTopicPolicyOperation(operation))
+	return ok && spec.Mode == builders.OperationModeWrite
 }
 
 func (b *PulsarAdminTopicPolicyToolBuilder) handleError(operation string, err error) *mcp.CallToolResult {

@@ -28,7 +28,6 @@ import (
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
-	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 	"gopkg.in/yaml.v2"
 )
 
@@ -105,9 +104,9 @@ func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsTool(mode too
 		"- querystate: Query state stored by a stateful function for a specific key\n" +
 		"- download: Download function package data from Pulsar to a local file"
 
-	operationEnum := []string{"list", "get", "status", "stats", "querystate", "download"}
+	operationEnum := pulsarFunctionOperationSpecs.NamesForMode(mode)
 	toolName := "pulsar_admin_functions_read"
-	annotation := toolannotations.ReadOnly("Read Pulsar Functions")
+	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Functions", "Manage Pulsar Functions")
 	if isToolModeWrite(mode) {
 		toolDesc = "Manage Apache Pulsar Functions for stream processing. " +
 			"This write tool deploys, updates, deletes, starts, stops, restarts, stores state for, triggers, or uploads packages for functions."
@@ -121,9 +120,8 @@ func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsTool(mode too
 			"- putstate: Store state in a function's state store\n" +
 			"- trigger: Manually trigger a function with a specific value\n" +
 			"- upload: Upload a local file into Pulsar function package storage"
-		operationEnum = []string{"create", "update", "delete", "start", "stop", "restart", "putstate", "trigger", "upload"}
+		operationEnum = pulsarFunctionOperationSpecs.NamesForMode(mode)
 		toolName = "pulsar_admin_functions_write"
-		annotation = toolannotations.Destructive("Manage Pulsar Functions")
 	}
 
 	tool := mcp.NewTool(toolName,
@@ -340,16 +338,9 @@ func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsHandler(mode 
 			return b.handleError("get operation", err), nil
 		}
 
-		// Check if the operation is valid
-		if !isSupportedFunctionOperation(operation) {
-			return b.handleError("validate operation", fmt.Errorf("invalid operation: '%s'. Supported operations: %s", operation,
-				modeSupportedOperations(mode,
-					[]string{"list", "get", "status", "stats", "querystate", "download"},
-					[]string{"create", "update", "delete", "start", "stop", "restart", "putstate", "trigger", "upload"}))), nil
-		}
-
-		if !validateModeOperation(mode, operation, readOnlyRestrictedFunctionOperations) {
-			return b.handleError("check permissions", fmt.Errorf("operation %q is not available in %s mode", operation, mode)), nil
+		// Check if the operation is valid for this tool mode.
+		if err := validateModeOperation(mode, operation, pulsarFunctionOperationSpecs); err != nil {
+			return b.handleError("validate operation", err), nil
 		}
 
 		var identity functionIdentity
@@ -793,44 +784,32 @@ const (
 	defaultNamespace = "default"
 )
 
-var supportedFunctionOperations = map[string]struct{}{
-	"list":       {},
-	"get":        {},
-	"status":     {},
-	"stats":      {},
-	"querystate": {},
-	"create":     {},
-	"update":     {},
-	"delete":     {},
-	"download":   {},
-	"start":      {},
-	"stop":       {},
-	"restart":    {},
-	"putstate":   {},
-	"trigger":    {},
-	"upload":     {},
-}
-
-var readOnlyRestrictedFunctionOperations = map[string]struct{}{
-	"create":   {},
-	"update":   {},
-	"delete":   {},
-	"start":    {},
-	"stop":     {},
-	"restart":  {},
-	"putstate": {},
-	"trigger":  {},
-	"upload":   {},
+var pulsarFunctionOperationSpecs = builders.OperationRegistry{
+	{Name: "list", Mode: builders.OperationModeRead},
+	{Name: "get", Mode: builders.OperationModeRead},
+	{Name: "status", Mode: builders.OperationModeRead},
+	{Name: "stats", Mode: builders.OperationModeRead},
+	{Name: "querystate", Mode: builders.OperationModeRead},
+	{Name: "download", Mode: builders.OperationModeRead},
+	{Name: "create", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "update", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "delete", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "start", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "stop", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "restart", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "putstate", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "trigger", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "upload", Mode: builders.OperationModeWrite, Destructive: true},
 }
 
 func isSupportedFunctionOperation(operation string) bool {
-	_, ok := supportedFunctionOperations[operation]
+	_, ok := pulsarFunctionOperationSpecs.SpecFor(operation)
 	return ok
 }
 
 func isReadOnlyRestrictedFunctionOperation(operation string) bool {
-	_, ok := readOnlyRestrictedFunctionOperations[operation]
-	return ok
+	spec, ok := pulsarFunctionOperationSpecs.SpecFor(operation)
+	return ok && spec.Mode == builders.OperationModeWrite
 }
 
 func (b *PulsarAdminFunctionsToolBuilder) parseFunctionIdentity(request mcp.CallToolRequest, operation string) (functionIdentity, error) {

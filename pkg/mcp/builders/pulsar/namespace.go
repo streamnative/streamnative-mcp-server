@@ -26,16 +26,17 @@ import (
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
-	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 )
 
-var pulsarNamespaceWriteOperations = map[string]struct{}{
-	"create":        {},
-	"delete":        {},
-	"clear_backlog": {},
-	"unsubscribe":   {},
-	"unload":        {},
-	"split_bundle":  {},
+var pulsarNamespaceOperationSpecs = builders.OperationRegistry{
+	{Name: "list", Mode: builders.OperationModeRead},
+	{Name: "get_topics", Mode: builders.OperationModeRead},
+	{Name: "create", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "delete", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "clear_backlog", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "unsubscribe", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "unload", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "split_bundle", Mode: builders.OperationModeWrite, Destructive: true},
 }
 
 // PulsarAdminNamespaceToolBuilder implements the ToolBuilder interface for Pulsar Admin Namespace tools
@@ -106,9 +107,9 @@ func (b *PulsarAdminNamespaceToolBuilder) buildNamespaceTool(mode toolMode) mcp.
 		"- list: List all namespaces for a tenant\n" +
 		"- get_topics: Get all topics within a namespace"
 
-	operationEnum := []string{"list", "get_topics"}
+	operationEnum := pulsarNamespaceOperationSpecs.NamesForMode(mode)
 	toolName := "pulsar_admin_namespace_read"
-	annotation := toolannotations.ReadOnly("Read Pulsar Namespaces")
+	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Namespaces", "Manage Pulsar Namespaces")
 	if isToolModeWrite(mode) {
 		toolDesc = "Manage Apache Pulsar namespaces. " +
 			"This write tool creates, deletes, unloads, splits bundles, clears backlog, or unsubscribes namespace subscriptions."
@@ -119,9 +120,8 @@ func (b *PulsarAdminNamespaceToolBuilder) buildNamespaceTool(mode toolMode) mcp.
 			"- unsubscribe: Unsubscribe from a subscription for all topics in a namespace\n" +
 			"- unload: Unload a namespace from the current serving broker\n" +
 			"- split_bundle: Split a namespace bundle"
-		operationEnum = []string{"create", "delete", "clear_backlog", "unsubscribe", "unload", "split_bundle"}
+		operationEnum = pulsarNamespaceOperationSpecs.NamesForMode(mode)
 		toolName = "pulsar_admin_namespace_write"
-		annotation = toolannotations.Destructive("Manage Pulsar Namespaces")
 	}
 
 	tool := mcp.NewTool(toolName,
@@ -192,8 +192,8 @@ func (b *PulsarAdminNamespaceToolBuilder) buildNamespaceHandler(mode toolMode) f
 			return mcp.NewToolResultError(fmt.Sprintf("Failed to get admin client: %v", err)), nil
 		}
 
-		if !validateModeOperation(mode, operation, pulsarNamespaceWriteOperations) {
-			return mcp.NewToolResultError(fmt.Sprintf("Operation %q is not available in %s mode", operation, mode)), nil
+		if err := validateModeOperation(mode, operation, pulsarNamespaceOperationSpecs); err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 
 		// Route to appropriate handler based on operation
@@ -220,9 +220,7 @@ func (b *PulsarAdminNamespaceToolBuilder) buildNamespaceHandler(mode toolMode) f
 			}
 		default:
 			return mcp.NewToolResultError(fmt.Sprintf("Unknown operation: %s. Supported operations: %s", operation,
-				modeSupportedOperations(mode,
-					[]string{"list", "get_topics"},
-					[]string{"create", "delete", "clear_backlog", "unsubscribe", "unload", "split_bundle"}))), nil
+				modeSupportedOperations(mode, pulsarNamespaceOperationSpecs))), nil
 		}
 
 		// Should not reach here

@@ -18,78 +18,32 @@ import (
 	"strings"
 
 	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 )
 
-type toolMode string
+type toolMode = builders.OperationMode
 
 const (
-	toolModeRead  toolMode = "read"
-	toolModeWrite toolMode = "write"
+	toolModeRead  = builders.OperationModeRead
+	toolModeWrite = builders.OperationModeWrite
 )
 
 func isToolModeWrite(mode toolMode) bool {
 	return mode == toolModeWrite
 }
 
-func isWriteOperation(operation string, writeOperations map[string]struct{}) bool {
-	_, ok := writeOperations[strings.ToLower(operation)]
-	return ok
+func validateModeOperation(mode toolMode, operation string, operations builders.OperationRegistry) error {
+	return operations.ValidateModeOperation(mode, operation)
 }
 
-func validateModeOperation(mode toolMode, operation string, writeOperations map[string]struct{}) bool {
-	return (mode == toolModeWrite) == isWriteOperation(operation, writeOperations)
-}
-
-func modeSupportedOperations(mode toolMode, readOperations, writeOperations []string) string {
-	if isToolModeWrite(mode) {
-		return strings.Join(writeOperations, ", ")
-	}
-	return strings.Join(readOperations, ", ")
+func modeSupportedOperations(mode toolMode, operations builders.OperationRegistry) string {
+	return strings.Join(operations.NamesForMode(mode), ", ")
 }
 
 func pruneToolInputSchema(tool *mcp.Tool, allowedProperties []string) {
-	allowed := make(map[string]struct{}, len(allowedProperties))
-	for _, property := range allowedProperties {
-		allowed[property] = struct{}{}
-	}
-
-	for property := range tool.InputSchema.Properties {
-		if _, ok := allowed[property]; !ok {
-			delete(tool.InputSchema.Properties, property)
-		}
-	}
-
-	filterRequiredProperties(tool, allowed)
+	builders.PruneToolInputSchema(tool, allowedProperties)
 }
 
 func removeToolInputSchemaProperties(tool *mcp.Tool, properties []string) {
-	removed := make(map[string]struct{}, len(properties))
-	for _, property := range properties {
-		removed[property] = struct{}{}
-		delete(tool.InputSchema.Properties, property)
-	}
-
-	if len(tool.InputSchema.Required) == 0 {
-		return
-	}
-	required := tool.InputSchema.Required[:0]
-	for _, property := range tool.InputSchema.Required {
-		if _, ok := removed[property]; !ok {
-			required = append(required, property)
-		}
-	}
-	tool.InputSchema.Required = required
-}
-
-func filterRequiredProperties(tool *mcp.Tool, allowed map[string]struct{}) {
-	if len(tool.InputSchema.Required) == 0 {
-		return
-	}
-	required := tool.InputSchema.Required[:0]
-	for _, property := range tool.InputSchema.Required {
-		if _, ok := allowed[property]; ok {
-			required = append(required, property)
-		}
-	}
-	tool.InputSchema.Required = required
+	builders.RemoveToolInputSchemaProperties(tool, properties)
 }

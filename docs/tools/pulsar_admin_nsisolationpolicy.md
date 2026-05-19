@@ -1,5 +1,13 @@
 #### pulsar_admin_nsisolationpolicy_read / pulsar_admin_nsisolationpolicy_write
 
+
+<!-- generated:operations:start -->
+| Tool | Mode | Operations |
+|---|---|---|
+| `pulsar_admin_nsisolationpolicy_read` | read | `get`, `list` |
+| `pulsar_admin_nsisolationpolicy_write` | write | `set`, `delete` |
+<!-- generated:operations:end -->
+
 **Claude connector safety:** Actual MCP tools are split into `pulsar_admin_nsisolationpolicy_read` and `pulsar_admin_nsisolationpolicy_write`. The read tool is read-only and only exposes read operations/parameters. The write tool is destructive and is not registered in read-only mode.
 
 Namespace isolation policies control which brokers specific namespaces can use.

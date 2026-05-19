@@ -28,17 +28,20 @@ import (
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
-	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 	"gopkg.in/yaml.v2"
 )
 
-var pulsarSinkWriteOperations = map[string]struct{}{
-	"create":  {},
-	"update":  {},
-	"delete":  {},
-	"start":   {},
-	"stop":    {},
-	"restart": {},
+var pulsarSinkOperationSpecs = builders.OperationRegistry{
+	{Name: "list", Mode: builders.OperationModeRead},
+	{Name: "get", Mode: builders.OperationModeRead},
+	{Name: "status", Mode: builders.OperationModeRead},
+	{Name: "list-built-in", Mode: builders.OperationModeRead},
+	{Name: "create", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "update", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "delete", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "start", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "stop", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "restart", Mode: builders.OperationModeWrite, Destructive: true},
 }
 
 // PulsarAdminSinksToolBuilder implements the ToolBuilder interface for Pulsar admin sinks
@@ -109,9 +112,9 @@ func (b *PulsarAdminSinksToolBuilder) buildSinksTool(mode toolMode) mcp.Tool {
 		"- status: Get the runtime status of a sink (instances, metrics)\n" +
 		"- list-built-in: List all built-in sink connectors available in the system"
 
-	operationEnum := []string{"list", "get", "status", "list-built-in"}
+	operationEnum := pulsarSinkOperationSpecs.NamesForMode(mode)
 	toolName := "pulsar_admin_sinks_read"
-	annotation := toolannotations.ReadOnly("Read Pulsar Sinks")
+	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Sinks", "Manage Pulsar Sinks")
 	if isToolModeWrite(mode) {
 		toolDesc = "Manage Apache Pulsar Sinks for data movement and integration. " +
 			"This write tool deploys, updates, deletes, starts, stops, or restarts sinks."
@@ -122,9 +125,8 @@ func (b *PulsarAdminSinksToolBuilder) buildSinksTool(mode toolMode) mcp.Tool {
 			"- start: Start a stopped sink\n" +
 			"- stop: Stop a running sink\n" +
 			"- restart: Restart a sink"
-		operationEnum = []string{"create", "update", "delete", "start", "stop", "restart"}
+		operationEnum = pulsarSinkOperationSpecs.NamesForMode(mode)
 		toolName = "pulsar_admin_sinks_write"
-		annotation = toolannotations.Destructive("Manage Pulsar Sinks")
 	}
 
 	tool := mcp.NewTool(toolName,
@@ -276,13 +278,11 @@ func (b *PulsarAdminSinksToolBuilder) buildSinksHandler(mode toolMode) func(cont
 
 		if !validOperations[operation] {
 			return mcp.NewToolResultError(fmt.Sprintf("Invalid operation: '%s'. Supported operations: %s", operation,
-				modeSupportedOperations(mode,
-					[]string{"list", "get", "status", "list-built-in"},
-					[]string{"create", "update", "delete", "start", "stop", "restart"}))), nil
+				modeSupportedOperations(mode, pulsarSinkOperationSpecs))), nil
 		}
 
-		if !validateModeOperation(mode, operation, pulsarSinkWriteOperations) {
-			return mcp.NewToolResultError(fmt.Sprintf("Operation %q is not available in %s mode", operation, mode)), nil
+		if err := validateModeOperation(mode, operation, pulsarSinkOperationSpecs); err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 
 		// Get Pulsar session from context

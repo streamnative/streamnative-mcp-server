@@ -25,13 +25,15 @@ import (
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
-	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 )
 
-var pulsarPackageWriteOperations = map[string]struct{}{
-	"update": {},
-	"delete": {},
-	"upload": {},
+var pulsarPackageOperationSpecs = builders.OperationRegistry{
+	{Name: "list", Mode: builders.OperationModeRead},
+	{Name: "get", Mode: builders.OperationModeRead},
+	{Name: "download", Mode: builders.OperationModeRead},
+	{Name: "update", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "delete", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "upload", Mode: builders.OperationModeWrite, Destructive: true},
 }
 
 // PulsarAdminPackagesToolBuilder implements the ToolBuilder interface for Pulsar admin packages
@@ -105,9 +107,9 @@ func (b *PulsarAdminPackagesToolBuilder) buildPackagesTool(mode toolMode) mcp.To
 		"- get: Get metadata of a package\n" +
 		"- download: Download a package"
 
-	operationEnum := []string{"list", "get", "download"}
+	operationEnum := pulsarPackageOperationSpecs.NamesForMode(mode)
 	toolName := "pulsar_admin_package_read"
-	annotation := toolannotations.ReadOnly("Read Pulsar Packages")
+	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Packages", "Manage Pulsar Packages")
 	if isToolModeWrite(mode) {
 		toolDesc = "Manage packages in Apache Pulsar. Support package schemes: `function://`, `source://`, `sink://`. " +
 			"This write tool updates metadata, deletes packages, or uploads package contents."
@@ -118,9 +120,8 @@ func (b *PulsarAdminPackagesToolBuilder) buildPackagesTool(mode toolMode) mcp.To
 			"- update: Update metadata of a package (requires super-user permissions)\n" +
 			"- delete: Delete a package (requires super-user permissions)\n" +
 			"- upload: Upload a package (requires super-user permissions)"
-		operationEnum = []string{"update", "delete", "upload"}
+		operationEnum = pulsarPackageOperationSpecs.NamesForMode(mode)
 		toolName = "pulsar_admin_package_write"
-		annotation = toolannotations.Destructive("Manage Pulsar Packages")
 	}
 
 	tool := mcp.NewTool(toolName,
@@ -182,8 +183,8 @@ func (b *PulsarAdminPackagesToolBuilder) buildPackagesHandler(mode toolMode) fun
 		resource = strings.ToLower(resource)
 		operation = strings.ToLower(operation)
 
-		if !validateModeOperation(mode, operation, pulsarPackageWriteOperations) {
-			return mcp.NewToolResultError(fmt.Sprintf("Operation %q is not available in %s mode", operation, mode)), nil
+		if err := validateModeOperation(mode, operation, pulsarPackageOperationSpecs); err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 
 		// Get Pulsar session from context
@@ -317,7 +318,7 @@ func (b *PulsarAdminPackagesToolBuilder) handlePackageResource(client cmdutils.C
 
 	default:
 		return mcp.NewToolResultError(fmt.Sprintf("Invalid operation for resource 'package': %s. Available operations: %s", operation,
-			modeSupportedOperations(mode, []string{"list", "get", "download"}, []string{"update", "delete", "upload"}))), nil
+			modeSupportedOperations(mode, pulsarPackageOperationSpecs))), nil
 	}
 }
 
