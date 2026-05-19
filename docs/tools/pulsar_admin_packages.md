@@ -1,35 +1,42 @@
 #### pulsar_admin_package
 
-**Claude connector safety:** Actual MCP tools: `pulsar_admin_package_read` (`list`, `get`, `download`) and `pulsar_admin_package_write` (`update`, `delete`, `upload`).
+**Claude connector safety:** Actual MCP tools are split into `pulsar_admin_package_read` and `pulsar_admin_package_write`. The read tool is read-only and only exposes read operations/parameters. The write tool is destructive and is not registered in read-only mode.
 
+Supported package schemes include `function://`, `source://`, and `sink://`.
 
-Manage packages in Apache Pulsar. Packages are reusable components that can be shared across functions, sources, and sinks. The system supports package schemes including `function://`, `source://`, and `sink://` for different component types.
+### `pulsar_admin_package_read`
 
-This tool provides operations across two resource types:
+Read package metadata, versions, package lists, and package contents.
 
-- **package** (A specific package):
-  - **list**: List all versions of a specific package
-    - `packageName` (string, required): Name of the package
-  - **get**: Get metadata of a specific package
-    - `packageName` (string, required): Name of the package
-  - **update**: Update metadata of a specific package
-    - `packageName` (string, required): Name of the package
-    - `description` (string, required): Description of the package
-    - `contact` (string, optional): Contact information for the package
-    - `properties` (object, optional): Additional properties as key-value pairs
-  - **delete**: Delete a specific package
-    - `packageName` (string, required): Name of the package
-  - **download**: Download a package to local storage
-    - `packageName` (string, required): Name of the package
-    - `path` (string, required): Path to download the package to
-  - **upload**: Upload a package from local storage
-    - `packageName` (string, required): Name of the package
-    - `path` (string, required): Path to upload the package from
-    - `description` (string, required): Description of the package
-    - `contact` (string, optional): Contact information for the package
-    - `properties` (object, optional): Additional properties as key-value pairs
+- **package**
+  - **list**: List versions of a package
+    - `packageName` (string, required): Package name
+  - **get**: Get package metadata
+    - `packageName` (string, required): Package name
+  - **download**: Download package contents to local storage
+    - `packageName` (string, required): Package name
+    - `path` (string, required): Local destination path
 
-- **packages** (Packages of a specific type):
-  - **list**: List all packages of a specific type in a namespace
-    - `type` (string, required): Package type (function, source, sink)
-    - `namespace` (string, required): The namespace name
+- **packages**
+  - **list**: List packages of a type in a namespace
+    - `type` (string, required): Package type: `function`, `source`, or `sink`
+    - `namespace` (string, required): Namespace name
+
+### `pulsar_admin_package_write`
+
+Manage package metadata and package contents.
+
+- **package**
+  - **update**: Update package metadata
+    - `packageName` (string, required): Package name
+    - `description` (string, required): Package description
+    - `contact` (string, optional): Contact information
+    - `properties` (object, optional): Additional properties
+  - **delete**: Delete a package
+    - `packageName` (string, required): Package name
+  - **upload**: Upload package contents from local storage
+    - `packageName` (string, required): Package name
+    - `path` (string, required): Local source path
+    - `description` (string, required): Package description
+    - `contact` (string, optional): Contact information
+    - `properties` (object, optional): Additional properties

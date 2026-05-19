@@ -194,41 +194,58 @@ func (b *PulsarAdminTopicPolicyToolBuilder) BuildTools(_ context.Context, config
 
 // buildTopicPolicyTool builds the Pulsar Admin Topic Policy MCP tool definition
 func (b *PulsarAdminTopicPolicyToolBuilder) buildTopicPolicyTool(mode toolMode) mcp.Tool {
-	toolDesc := "Manage Pulsar topic-level policies with operation names aligned to pulsarctl topic policy commands. " +
-		"This tool covers retention, message TTL, producer and consumer limits, persistence, delayed delivery, " +
-		"dispatch throttling, deduplication, backlog quotas, compaction thresholds, publish rates, inactive topic policies, " +
-		"and subscription dispatch throttling. Legacy underscore operation aliases from the older MCP implementation remain supported."
+	toolDesc := "Read Pulsar topic-level policies with operation names aligned to pulsarctl topic policy commands. " +
+		"This read-only tool retrieves retention, TTL, limits, persistence, delayed delivery, throttling, deduplication, backlog quota, compaction, publish rate, inactive topic, and subscription type policies. " +
+		"Legacy underscore operation aliases from the older MCP implementation remain supported."
 
 	operationDesc := strings.Join([]string{
 		"Operation to perform. Available operations:",
-		"- get-retention / set-retention / remove-retention: manage topic retention policy",
-		"- get-message-ttl / set-message-ttl / remove-message-ttl: manage topic message TTL",
-		"- get-max-producers / set-max-producers / remove-max-producers: manage producer limit",
-		"- get-max-consumers / set-max-consumers / remove-max-consumers: manage consumer limit",
-		"- get-max-unacked-messages-per-consumer / set-max-unacked-messages-per-consumer / remove-max-unacked-messages-per-consumer",
-		"- get-max-unacked-messages-per-subscription / set-max-unacked-messages-per-subscription / remove-max-unacked-messages-per-subscription",
-		"- get-persistence / set-persistence / remove-persistence: manage topic persistence",
-		"- get-delayed-delivery / set-delayed-delivery / remove-delayed-delivery: manage delayed delivery policy",
-		"- get-dispatch-rate / set-dispatch-rate / remove-dispatch-rate: manage topic dispatch throttling",
-		"- get-subscription-dispatch-rate / set-subscription-dispatch-rate / remove-subscription-dispatch-rate",
-		"- get-deduplication / set-deduplication / remove-deduplication: manage deduplication policy",
-		"- get-backlog-quotas / set-backlog-quota / remove-backlog-quota: manage backlog quotas",
-		"- get-compaction-threshold / set-compaction-threshold / remove-compaction-threshold: manage compaction threshold",
-		"- get-publish-rate / set-publish-rate / remove-publish-rate: manage publish rate policy",
-		"- get-inactive-topic-policies / set-inactive-topic-policies / remove-inactive-topic-policies",
-		"- get-subscription-types / set-subscription-types / remove-subscription-types: additional MCP-only compatibility operations",
+		"- get-retention: read topic retention policy",
+		"- get-message-ttl: read topic message TTL",
+		"- get-max-producers: read producer limit",
+		"- get-max-consumers: read consumer limit",
+		"- get-max-unacked-messages-per-consumer: read unacked message limit per consumer",
+		"- get-max-unacked-messages-per-subscription: read unacked message limit per subscription",
+		"- get-persistence: read topic persistence",
+		"- get-delayed-delivery: read delayed delivery policy",
+		"- get-dispatch-rate: read topic dispatch throttling",
+		"- get-subscription-dispatch-rate: read subscription dispatch throttling",
+		"- get-deduplication: read deduplication policy",
+		"- get-backlog-quotas: read backlog quotas",
+		"- get-compaction-threshold: read compaction threshold",
+		"- get-publish-rate: read publish rate policy",
+		"- get-inactive-topic-policies: read inactive topic policies",
+		"- get-subscription-types: read allowed subscription types",
 	}, "\n")
 
 	operationEnum := readOnlyTopicPolicyOperations
 	toolName := "pulsar_admin_topic_policy_read"
 	annotation := toolannotations.ReadOnly("Read Pulsar Topic Policies")
 	if isToolModeWrite(mode) {
+		toolDesc = "Manage Pulsar topic-level policies with operation names aligned to pulsarctl topic policy commands. " +
+			"This write tool sets or removes topic-level policies. Legacy underscore operation aliases from the older MCP implementation remain supported."
+		operationDesc = strings.Join([]string{
+			"Operation to perform. Available operations:",
+			"- set/remove-retention: manage topic retention policy",
+			"- set/remove-message-ttl: manage topic message TTL",
+			"- set/remove-max-producers: manage producer limit",
+			"- set/remove-max-consumers: manage consumer limit",
+			"- set/remove-persistence: manage topic persistence",
+			"- set/remove-delayed-delivery: manage delayed delivery policy",
+			"- set/remove-dispatch-rate: manage topic dispatch throttling",
+			"- set/remove-deduplication: manage deduplication policy",
+			"- set/remove-backlog-quota: manage backlog quotas",
+			"- set/remove-compaction-threshold: manage compaction threshold",
+			"- set/remove-publish-rate: manage publish rate policy",
+			"- set/remove-inactive-topic-policies: manage inactive topic policies",
+			"- set/remove-subscription-types: manage allowed subscription types",
+		}, "\n")
 		operationEnum = writeTopicPolicyOperations
 		toolName = "pulsar_admin_topic_policy_write"
 		annotation = toolannotations.Destructive("Manage Pulsar Topic Policies")
 	}
 
-	return mcp.NewTool(toolName,
+	tool := mcp.NewTool(toolName,
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("operation", mcp.Required(),
 			mcp.Description(operationDesc),
@@ -298,7 +315,7 @@ func (b *PulsarAdminTopicPolicyToolBuilder) buildTopicPolicyTool(mode toolMode) 
 			mcp.Description("Backlog quota retention policy. Valid values: producer_request_hold, producer_exception, consumer_backlog_eviction. Used by set-backlog-quota."),
 		),
 		mcp.WithString("type",
-			mcp.Description("Backlog quota type. Valid values: destination_storage or message_age. Used by get-backlog-quotas, set-backlog-quota, and remove-backlog-quota."),
+			mcp.Description("Backlog quota type. Valid values: destination_storage or message_age. Used by backlog quota operations."),
 		),
 		mcp.WithBoolean("delete-while-inactive",
 			mcp.Description("Whether inactive topics should be deleted. Used by set-inactive-topic-policies."),
@@ -320,6 +337,12 @@ func (b *PulsarAdminTopicPolicyToolBuilder) buildTopicPolicyTool(mode toolMode) 
 		),
 		annotation,
 	)
+	if isToolModeWrite(mode) {
+		removeToolInputSchemaProperties(&tool, []string{"applied"})
+	} else {
+		pruneToolInputSchema(&tool, []string{"operation", "topic", "applied", "type"})
+	}
+	return tool
 }
 
 // buildTopicPolicyHandler builds the Pulsar Admin Topic Policy handler function

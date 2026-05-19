@@ -19,6 +19,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	"github.com/stretchr/testify/require"
 )
@@ -61,6 +62,14 @@ func TestKafkaToolAnnotationCompliance(t *testing.T) {
 	}
 }
 
+func toolPropertyNames(tool mcp.Tool) []string {
+	names := make([]string, 0, len(tool.InputSchema.Properties))
+	for name := range tool.InputSchema.Properties {
+		names = append(names, name)
+	}
+	return names
+}
+
 func assertOperationEnumMode(t *testing.T, toolName string, operationSchema any) {
 	t.Helper()
 	schema, ok := operationSchema.(map[string]any)
@@ -84,6 +93,37 @@ func assertOperationEnumMode(t *testing.T, toolName string, operationSchema any)
 		}
 	}
 	require.False(t, seenRead && seenWrite, toolName)
+}
+
+func TestKafkaSplitToolsExposeModeSpecificParameters(t *testing.T) {
+	builderList := []builders.ToolBuilder{
+		NewKafkaTopicsToolBuilder(),
+		NewKafkaGroupsToolBuilder(),
+		NewKafkaSchemaRegistryToolBuilder(),
+		NewKafkaConnectToolBuilder(),
+	}
+
+	expectedProperties := map[string][]string{
+		"kafka_admin_topics_read":   {"resource", "operation", "name", "includeInternal"},
+		"kafka_admin_topics_write":  {"resource", "operation", "name", "partitions", "replicationFactor", "configs"},
+		"kafka_admin_groups_read":   {"resource", "operation", "group"},
+		"kafka_admin_groups_write":  {"resource", "operation", "group", "members", "topic", "partition", "offset"},
+		"kafka_admin_sr_read":       {"resource", "operation", "subject", "version"},
+		"kafka_admin_sr_write":      {"resource", "operation", "subject", "version", "compatibility", "schemaType", "schema"},
+		"kafka_admin_connect_read":  {"resource", "operation", "name"},
+		"kafka_admin_connect_write": {"resource", "operation", "name", "config"},
+	}
+
+	for _, builder := range builderList {
+		tools, err := builder.BuildTools(context.Background(), builders.ToolBuildConfig{
+			Features: []string{"all", "all-kafka", "kafka-admin", "kafka-admin-kafka-connect", "kafka-admin-schema-registry"},
+		})
+		require.NoError(t, err)
+		for _, serverTool := range tools {
+			tool := serverTool.Tool
+			require.ElementsMatch(t, expectedProperties[tool.Name], toolPropertyNames(tool), tool.Name)
+		}
+	}
 }
 
 func TestKafkaReadOnlyBuildsNoWriteTools(t *testing.T) {

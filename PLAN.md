@@ -30,6 +30,8 @@ Reference implementation checked:
 
 ## Current findings
 
+Current follow-up focus: previous read/write split only separated tool names and operation enums in some builders. It still leaves mixed mode descriptions and write-only schema fields visible on read tools. Examples: `pkg/mcp/builders/kafka/topics.go` and `pkg/mcp/builders/pulsar/namespace.go`; same class can exist in other split builders. Connector review can still treat this as a mixed surface because `tools/list` exposes write verbs/examples/parameters through read tools.
+
 Static `mcp.NewTool(...)` definitions found under `pkg/`: 36 tool definitions plus dynamic Pulsar Functions-as-Tools.
 
 Current gaps:
@@ -39,6 +41,7 @@ Current gaps:
 - Only `sncloud_resources_apply` and `sncloud_resources_delete` currently set `WithToolAnnotation`; `apply` sets title only.
 - Dynamic Pulsar Functions-as-Tools in `pkg/mcp/pftools/manager.go` create tools without title/read-only/destructive annotations.
 - Many admin tools multiplex read and write operations through one `operation` parameter. Claude review criteria says mixed read/write catch-all tools can be rejected even if description documents safe/unsafe operations.
+- Some already-split tools still have mixed descriptions and schemas. Mode-specific enum is not enough; read tools must not expose write operations, examples, or write-only parameters.
 
 ## Proposed design
 
@@ -48,7 +51,7 @@ Follow `mcp-auth0-proxy` pattern:
 
 - split mixed tools into separate read and write tool names
 - keep shared internal implementation where practical
-- make operation enum mode-specific, so tool schema itself prevents mixed use
+- make operation enum, description, examples, and parameters mode-specific, so tool schema itself prevents mixed use
 - keep read-only runtime mode simple: register only read tools
 - in read-write runtime mode: register read tools and write tools as separate entries
 - do not expose legacy mixed tools in Claude-submitted surface
@@ -71,8 +74,8 @@ Pure write/side-effect tools can keep current names if description and annotatio
 
 Compatibility policy:
 
-- Recommended for Claude readiness: remove mixed legacy tool registration from default surface.
-- If backward compatibility is required, add opt-in legacy registration behind a feature/config flag and keep it disabled for connector submission.
+- Remove mixed legacy tool registration from default surface.
+- Do not add opt-in legacy aliases or compatibility flags for old mixed tool names.
 - Do not keep mixed legacy tools visible in submitted connector, even with destructive annotation.
 
 ### Shared helper APIs
@@ -100,6 +103,16 @@ Build functions should accept mode:
 - `buildHandler(mode toolMode, readOnly bool)`
 - `validateOperation(mode, operation)`
 - `isWriteOperation(operation)`
+
+Mode-specific tool builders should also split:
+
+- `toolDesc`
+- `resourceDesc` when resource meanings differ by mode
+- `operationDesc`
+- `operationEnum`
+- parameter set (`mcp.WithString`, `mcp.WithNumber`, `mcp.WithObject`, etc.)
+
+Read tools must not expose write-only fields. Write tools should not expose read-only-only fields unless a write operation genuinely needs them.
 
 ## Split inventory
 
@@ -394,18 +407,22 @@ Plan:
 - Add local read/write mode helpers in builders with mixed operations.
 - Add reusable operation validation helpers where a builder already has operation maps.
 
-### Phase 2: split Kafka tools
+### Phase 2: split Kafka tools completely
 
-- Update Kafka builders to build mode-specific tools.
+- Update all Kafka builders to build mode-specific tools.
+- Ensure read/write tools have mode-specific descriptions, examples, operation enums, and parameter schemas.
 - Read-only config returns only read tools.
 - Read-write config returns read + write tools, except pure write tools remain write-only.
+- Remove old mixed tool surface; no compatibility alias.
 - Update wrapper tests/docs.
 
-### Phase 3: split Pulsar tools
+### Phase 3: split Pulsar tools completely
 
-- Update Pulsar builders to build mode-specific tools.
+- Update all Pulsar builders to build mode-specific tools.
+- Ensure read/write tools have mode-specific descriptions, examples, operation enums, and parameter schemas.
 - Preserve existing read-only behavior by not registering write tools in read-only config.
 - Ensure mode-specific operation enums and validation errors.
+- Remove old mixed tool surface; no compatibility alias.
 - Add/extend parity tests for operation coverage.
 
 ### Phase 4: StreamNative Cloud/static tool annotations
@@ -419,18 +436,16 @@ Plan:
 - Add annotations to Functions-as-Tools.
 - Validate read-only exposure behavior.
 
-### Phase 6: docs and compatibility
+### Phase 6: runtime-visible docs
 
-Update runtime-visible docs:
+Update runtime-visible docs together with schema changes:
 
 - `README.md` feature/tool examples if names change.
 - `docs/tools/*.md` matching renamed/split tools.
+- Split docs into explicit read/write sections where a family has both tool modes.
+- Ensure read docs do not mention write-only operations or parameters.
+- Ensure write docs do not rely on old mixed tool names.
 - Any design notes under `agents/` if tool surface changes are architectural.
-
-Compatibility decision needed before implementation:
-
-- Preferred: breaking but review-safe tool surface; remove mixed tool names.
-- Alternative: temporary alias support hidden behind explicit opt-in flag, disabled by default and not used for Claude submission.
 
 ## Tests / compliance guard
 
@@ -444,13 +459,17 @@ Add focused tests:
   - read tools: `ReadOnlyHint=true`, `DestructiveHint=false`
   - write tools: `DestructiveHint=true`, `ReadOnlyHint=false`
   - read-only config returns no write tools
+  - read tools do not expose known write-only parameters
+  - read tool descriptions do not mention known write-only operations, examples, or destructive verbs for that family
+  - write tool schemas do not expose read-only-only parameters unless genuinely shared
 - StreamNative Cloud/context/log/resource tools have valid annotations.
 - PFTools dynamic tool creation has valid annotation.
 - Operation validation rejects read operations on write tools and write operations on read tools.
 
-Optional static test:
+Static guard:
 
 - Build all feature sets and assert no `operation` enum contains both read and write verbs in one tool.
+- For split tool families, assert mode-specific schema/description purity with family-specific allow/deny lists.
 
 ## Risks
 
@@ -460,12 +479,12 @@ Optional static test:
 - Some current tools may have read-only-mode logic embedded in handlers; after split, registration and handler validation must both enforce mode to prevent write leakage.
 - `mcp-go` default annotations are unsafe for compliance because title empty and destructive default true.
 
-## Questions to confirm
+## Confirmed decisions
 
-1. Can we remove legacy mixed tool names from default registration, accepting breaking tool-name changes for Claude readiness?
-2. Should we add an opt-in legacy compatibility flag, disabled by default, or avoid compatibility layer entirely?
-3. For consume tools, should we conservatively classify as destructive, or implement a true non-mutating read variant first?
-4. Should session-only context changes (`sncloud_context_use_cluster/reset`) be marked destructive for Claude safety?
+- Fix all current mixed read/write surfaces, not only `kafka/topics.go` and `pulsar/namespace.go`.
+- Do not preserve old mixed tool names or old mixed builder/schema patterns.
+- Runtime-visible docs must be updated with read/write split and must avoid mixed read/write wording.
+- Conservative safety annotations are acceptable for ambiguous side-effect tools unless implementation proves true read-only behavior.
 
 ## Recommended validation
 

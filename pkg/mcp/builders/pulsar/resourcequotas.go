@@ -92,30 +92,31 @@ func (b *PulsarAdminResourceQuotasToolBuilder) BuildTools(_ context.Context, con
 
 // buildResourceQuotasTool builds the Pulsar admin resource quotas MCP tool definition
 func (b *PulsarAdminResourceQuotasToolBuilder) buildResourceQuotasTool(mode toolMode) mcp.Tool {
-	toolDesc := "Manage Apache Pulsar resource quotas for brokers, namespaces and bundles. " +
+	toolDesc := "Read Apache Pulsar resource quotas for brokers, namespaces and bundles. " +
 		"Resource quotas define limits for resource usage such as message rates, bandwidth, and memory. " +
-		"These quotas help prevent resource abuse and ensure fair resource allocation across the Pulsar cluster. " +
-		"Operations include getting, setting, and resetting quotas. " +
-		"Requires super-user permissions for all operations."
+		"This read-only tool retrieves quota configuration without changing it."
 
 	resourceDesc := "Resource to operate on. Available resources:\n" +
 		"- quota: The resource quota configuration for a specific namespace bundle or the default quota"
 
 	operationDesc := "Operation to perform. Available operations:\n" +
-		"- get: Get the resource quota for a specified namespace bundle or default quota\n" +
-		"- set: Set the resource quota for a specified namespace bundle or default quota (requires super-user permissions)\n" +
-		"- reset: Reset a namespace bundle's resource quota to default value (requires super-user permissions)"
+		"- get: Get the resource quota for a specified namespace bundle or default quota"
 
 	operationEnum := []string{"get"}
 	toolName := "pulsar_admin_resourcequota_read"
 	annotation := toolannotations.ReadOnly("Read Pulsar Resource Quotas")
 	if isToolModeWrite(mode) {
+		toolDesc = "Manage Apache Pulsar resource quotas for brokers, namespaces and bundles. " +
+			"This write tool sets or resets quota configuration."
+		operationDesc = "Operation to perform. Available operations:\n" +
+			"- set: Set the resource quota for a specified namespace bundle or default quota (requires super-user permissions)\n" +
+			"- reset: Reset a namespace bundle's resource quota to default value (requires super-user permissions)"
 		operationEnum = []string{"set", "reset"}
 		toolName = "pulsar_admin_resourcequota_write"
 		annotation = toolannotations.Destructive("Manage Pulsar Resource Quotas")
 	}
 
-	return mcp.NewTool(toolName,
+	tool := mcp.NewTool(toolName,
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("resource", mcp.Required(),
 			mcp.Description(resourceDesc),
@@ -125,9 +126,7 @@ func (b *PulsarAdminResourceQuotasToolBuilder) buildResourceQuotasTool(mode tool
 			mcp.Enum(operationEnum...),
 		),
 		mcp.WithString("namespace",
-			mcp.Description("The namespace name in the format 'tenant/namespace'. "+
-				"Optional for 'get' and 'set' operations (to get/set default quota if omitted). "+
-				"Required for 'reset' operation."),
+			mcp.Description("The namespace name in the format 'tenant/namespace'. Optional when targeting the default quota."),
 		),
 		mcp.WithString("bundle",
 			mcp.Description("The bundle range in the format '{start-boundary}_{end-boundary}'. "+
@@ -159,6 +158,12 @@ func (b *PulsarAdminResourceQuotasToolBuilder) buildResourceQuotasTool(mode tool
 		),
 		annotation,
 	)
+	if isToolModeWrite(mode) {
+		pruneToolInputSchema(&tool, []string{"resource", "operation", "namespace", "bundle", "msgRateIn", "msgRateOut", "bandwidthIn", "bandwidthOut", "memory", "dynamic"})
+	} else {
+		pruneToolInputSchema(&tool, []string{"resource", "operation", "namespace", "bundle"})
+	}
+	return tool
 }
 
 // buildResourceQuotasHandler builds the Pulsar admin resource quotas handler function

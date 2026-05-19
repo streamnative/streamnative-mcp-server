@@ -1,16 +1,23 @@
 #### pulsar_admin_schema
 
-**Claude connector safety:** Actual MCP tools: `pulsar_admin_schema_read` (`get`) and `pulsar_admin_schema_write` (`upload`, `delete`).
+**Claude connector safety:** Actual MCP tools are split into `pulsar_admin_schema_read` and `pulsar_admin_schema_write`. The read tool is read-only and only exposes read operations/parameters. The write tool is destructive and is not registered in read-only mode.
 
+### `pulsar_admin_schema_read`
 
-Manage Apache Pulsar schemas for topics.
+Read schema information for a topic.
 
 - **schema**
-  - **get**: Get the schema for a topic
-    - `topic` (string, required): The fully qualified topic name
-    - `version` (number, optional): Schema version number
-  - **upload**: Upload a new schema for a topic
-    - `topic` (string, required): The fully qualified topic name
+  - **get**: Get topic schema
+    - `topic` (string, required): Fully qualified topic name
+    - `version` (number, optional): Schema version
+
+### `pulsar_admin_schema_write`
+
+Upload or delete topic schemas.
+
+- **schema**
+  - **upload**: Upload a schema for a topic
+    - `topic` (string, required): Fully qualified topic name
     - `filename` (string, required): Path to the schema definition file
-  - **delete**: Delete the schema for a topic
-    - `topic` (string, required): The fully qualified topic name
+  - **delete**: Delete a topic schema
+    - `topic` (string, required): Fully qualified topic name

@@ -92,8 +92,8 @@ func (b *KafkaGroupsToolBuilder) BuildTools(_ context.Context, config builders.T
 // buildKafkaGroupsTool builds the Kafka Groups MCP tool definition
 func (b *KafkaGroupsToolBuilder) buildKafkaGroupsTool(mode toolMode) mcp.Tool {
 	resourceDesc := "Resource to operate on. Available resources:\n" +
-		"- group: A single Kafka Consumer Group for operations on individual groups (describe, remove-members, set-offset, delete-offset)\n" +
-		"- groups: Collection of Kafka Consumer Groups for bulk operations (list)"
+		"- group: A single Kafka Consumer Group for read operations (describe, offsets)\n" +
+		"- groups: Collection of Kafka Consumer Groups for list operations"
 
 	operationDesc := "Operation to perform. Available operations:\n" +
 		"- list: List all Kafka Consumer Groups in the cluster\n" +
@@ -108,49 +108,52 @@ func (b *KafkaGroupsToolBuilder) buildKafkaGroupsTool(mode toolMode) mcp.Tool {
 			"- delete-offset: Delete a specific offset for a consumer group of a topic\n" +
 			"- set-offset: Set a specific offset for a consumer group's topic-partition"
 		operationEnum = []string{"remove-members", "delete-offset", "set-offset"}
+		resourceDesc = "Resource to operate on. Available resources:\n" +
+			"- group: A single Kafka Consumer Group for membership and offset changes"
 		toolName = "kafka_admin_groups_write"
 		annotation = toolannotations.Destructive("Manage Kafka Consumer Groups")
 	}
 
-	toolDesc := "Unified tool for managing Apache Kafka Consumer Groups.\n" +
-		"This tool provides access to Kafka consumer group operations including listing, describing, and managing group membership.\n" +
-		"Kafka Consumer Groups are a key concept for scalable consumption of Kafka topics. A consumer group consists of multiple consumer instances\n" +
-		"that collaborate to consume data from topic partitions. Kafka ensures that:\n" +
-		"- Each partition is consumed by exactly one consumer in the group\n" +
-		"- When consumers join or leave, Kafka triggers a 'rebalance' to redistribute partitions\n" +
-		"- Consumer groups track consumption progress through committed offsets\n\n" +
+	toolDesc := "Read Apache Kafka Consumer Groups.\n" +
+		"This read-only tool lists consumer groups, describes group state, and fetches committed offsets without changing group state.\n\n" +
 		"Usage Examples:\n\n" +
 		"1. List all Kafka Consumer Groups in the cluster:\n" +
 		"   resource: \"groups\"\n" +
 		"   operation: \"list\"\n\n" +
-		"2. Describe a specific Kafka Consumer Group to see its members and consumption details:\n" +
+		"2. Describe a specific Kafka Consumer Group:\n" +
 		"   resource: \"group\"\n" +
 		"   operation: \"describe\"\n" +
 		"   group: \"my-consumer-group\"\n\n" +
-		"3. Remove specific members from a Kafka Consumer Group to trigger rebalancing:\n" +
-		"   resource: \"group\"\n" +
-		"   operation: \"remove-members\"\n" +
-		"   group: \"my-consumer-group\"\n" +
-		"   members: \"consumer-instance-1,consumer-instance-2\"\n\n" +
-		"4. Get offsets for a specific consumer group:\n" +
+		"3. Get offsets for a specific consumer group:\n" +
 		"   resource: \"group\"\n" +
 		"   operation: \"offsets\"\n" +
 		"   group: \"my-consumer-group\"\n\n" +
-		"5. Delete a specific offset for a consumer group of a topic:\n" +
-		"   resource: \"group\"\n" +
-		"   operation: \"delete-offset\"\n" +
-		"   group: \"my-consumer-group\"\n" +
-		"   topic: \"my-topic\"\n\n" +
-		"6. Set a specific offset for a consumer group's topic-partition:\n" +
-		"   resource: \"group\"\n" +
-		"   operation: \"set-offset\"\n" +
-		"   group: \"my-consumer-group\"\n" +
-		"   topic: \"my-topic\"\n" +
-		"   partition: 0\n" +
-		"   offset: 1000\n\n" +
-		"This tool requires Kafka super-user permissions."
+		"This tool requires Kafka permissions for group reads."
+	if isToolModeWrite(mode) {
+		toolDesc = "Manage Apache Kafka Consumer Groups.\n" +
+			"This write tool removes group members and changes committed offsets.\n\n" +
+			"Usage Examples:\n\n" +
+			"1. Remove specific members from a Kafka Consumer Group:\n" +
+			"   resource: \"group\"\n" +
+			"   operation: \"remove-members\"\n" +
+			"   group: \"my-consumer-group\"\n" +
+			"   members: \"consumer-instance-1,consumer-instance-2\"\n\n" +
+			"2. Delete a specific offset for a consumer group of a topic:\n" +
+			"   resource: \"group\"\n" +
+			"   operation: \"delete-offset\"\n" +
+			"   group: \"my-consumer-group\"\n" +
+			"   topic: \"my-topic\"\n\n" +
+			"3. Set a specific offset for a consumer group's topic-partition:\n" +
+			"   resource: \"group\"\n" +
+			"   operation: \"set-offset\"\n" +
+			"   group: \"my-consumer-group\"\n" +
+			"   topic: \"my-topic\"\n" +
+			"   partition: 0\n" +
+			"   offset: 1000\n\n" +
+			"This tool requires Kafka super-user permissions."
+	}
 
-	return mcp.NewTool(toolName,
+	tool := mcp.NewTool(toolName,
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("resource", mcp.Required(),
 			mcp.Description(resourceDesc),
@@ -160,8 +163,7 @@ func (b *KafkaGroupsToolBuilder) buildKafkaGroupsTool(mode toolMode) mcp.Tool {
 			mcp.Enum(operationEnum...),
 		),
 		mcp.WithString("group",
-			mcp.Description("The name of the Kafka Consumer Group to operate on. "+
-				"Required for the 'describe' and 'remove-members' operations. "+
+			mcp.Description("The name of the Kafka Consumer Group to operate on. Required for operations that target one group. "+
 				"Must be an existing consumer group name in the Kafka cluster. "+
 				"Consumer Group names are case-sensitive and typically follow a naming convention like 'application-name'.")),
 		mcp.WithString("members",
@@ -176,6 +178,12 @@ func (b *KafkaGroupsToolBuilder) buildKafkaGroupsTool(mode toolMode) mcp.Tool {
 			mcp.Description("The offset value to set. Required for 'set-offset' operation.")),
 		annotation,
 	)
+	if isToolModeWrite(mode) {
+		pruneToolInputSchema(&tool, []string{"resource", "operation", "group", "members", "topic", "partition", "offset"})
+	} else {
+		pruneToolInputSchema(&tool, []string{"resource", "operation", "group"})
+	}
+	return tool
 }
 
 // buildKafkaGroupsHandler builds the Kafka Groups handler function

@@ -99,38 +99,35 @@ func (b *PulsarAdminSourcesToolBuilder) BuildTools(_ context.Context, config bui
 
 // buildSourcesTool builds the Pulsar admin sources MCP tool definition
 func (b *PulsarAdminSourcesToolBuilder) buildSourcesTool(mode toolMode) mcp.Tool {
-	toolDesc := "Manage Apache Pulsar Sources for data ingestion and integration. " +
+	toolDesc := "Read Apache Pulsar Sources for data ingestion and integration. " +
 		"Pulsar Sources are connectors that import data from external systems into Pulsar topics. " +
-		"Sources connect to external systems such as databases, messaging platforms, storage services, " +
-		"and real-time data streams to pull data and publish it to Pulsar topics. " +
-		"Built-in source connectors are available for common systems like Kafka, JDBC, AWS services, and more. " +
-		"Sources follow the tenant/namespace/name hierarchy for organization and access control, " +
-		"can scale through parallelism configuration, and support various processing guarantees. " +
-		"This tool provides complete lifecycle management including deployment, configuration, " +
-		"monitoring, and runtime control. Sources use schema types to ensure data compatibility."
+		"This read-only tool lists sources and built-in source connectors and retrieves source configuration or runtime status."
 
 	operationDesc := "Operation to perform. Available operations:\n" +
 		"- list: List all sources under a specific tenant and namespace\n" +
 		"- get: Get the configuration of a source\n" +
 		"- status: Get the runtime status of a source (instances, metrics)\n" +
-		"- create: Deploy a new source with specified parameters\n" +
-		"- update: Update the configuration of an existing source\n" +
-		"- delete: Delete a source\n" +
-		"- start: Start a stopped source\n" +
-		"- stop: Stop a running source\n" +
-		"- restart: Restart a source\n" +
 		"- list-built-in: List all built-in source connectors available in the system"
 
 	operationEnum := []string{"list", "get", "status", "list-built-in"}
 	toolName := "pulsar_admin_sources_read"
 	annotation := toolannotations.ReadOnly("Read Pulsar Sources")
 	if isToolModeWrite(mode) {
+		toolDesc = "Manage Apache Pulsar Sources for data ingestion and integration. " +
+			"This write tool deploys, updates, deletes, starts, stops, or restarts sources."
+		operationDesc = "Operation to perform. Available operations:\n" +
+			"- create: Deploy a new source with specified parameters\n" +
+			"- update: Update the configuration of an existing source\n" +
+			"- delete: Delete a source\n" +
+			"- start: Start a stopped source\n" +
+			"- stop: Stop a running source\n" +
+			"- restart: Restart a source"
 		operationEnum = []string{"create", "update", "delete", "start", "stop", "restart"}
 		toolName = "pulsar_admin_sources_write"
 		annotation = toolannotations.Destructive("Manage Pulsar Sources")
 	}
 
-	return mcp.NewTool(toolName,
+	tool := mcp.NewTool(toolName,
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("operation", mcp.Required(),
 			mcp.Description(operationDesc),
@@ -146,8 +143,7 @@ func (b *PulsarAdminSourcesToolBuilder) buildSourcesTool(mode toolMode) mcp.Tool
 				"Sources in a namespace typically publish to topics within the same namespace. "+
 				"Defaults to 'default' if not provided.")),
 		mcp.WithString("name",
-			mcp.Description("The source name. Required for all operations except 'list' and 'list-built-in'. "+
-				"Can be provided via source-config-file for create/update. "+
+			mcp.Description("The source name. Required for operations that target one source. "+
 				"Names should be descriptive of the source's purpose and must be unique within a namespace. "+
 				"Source names are used in metrics, logs, and when addressing the source via APIs.")),
 		mcp.WithString("archive",
@@ -225,6 +221,10 @@ func (b *PulsarAdminSourcesToolBuilder) buildSourcesTool(mode toolMode) mcp.Tool
 			mcp.Description("Whether to update authentication data during source update. Optional for 'update' only.")),
 		annotation,
 	)
+	if !isToolModeWrite(mode) {
+		pruneToolInputSchema(&tool, []string{"operation", "tenant", "namespace", "name"})
+	}
+	return tool
 }
 
 // buildSourcesHandler builds the Pulsar admin sources handler function

@@ -14,7 +14,11 @@
 
 package kafka
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/mark3labs/mcp-go/mcp"
+)
 
 type toolMode string
 
@@ -30,4 +34,28 @@ func isToolModeWrite(mode toolMode) bool {
 func validateModeOperation(mode toolMode, operation string, writeOperations map[string]struct{}) bool {
 	_, isWrite := writeOperations[strings.ToLower(operation)]
 	return (mode == toolModeWrite) == isWrite
+}
+
+func pruneToolInputSchema(tool *mcp.Tool, allowedProperties []string) {
+	allowed := make(map[string]struct{}, len(allowedProperties))
+	for _, property := range allowedProperties {
+		allowed[property] = struct{}{}
+	}
+
+	for property := range tool.InputSchema.Properties {
+		if _, ok := allowed[property]; !ok {
+			delete(tool.InputSchema.Properties, property)
+		}
+	}
+
+	if len(tool.InputSchema.Required) == 0 {
+		return
+	}
+	required := tool.InputSchema.Required[:0]
+	for _, property := range tool.InputSchema.Required {
+		if _, ok := allowed[property]; ok {
+			required = append(required, property)
+		}
+	}
+	tool.InputSchema.Required = required
 }

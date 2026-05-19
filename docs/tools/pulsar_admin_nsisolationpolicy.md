@@ -1,35 +1,40 @@
 #### pulsar_admin_nsisolationpolicy
 
-**Claude connector safety:** Actual MCP tools: `pulsar_admin_nsisolationpolicy_read` (`get`, `list`) and `pulsar_admin_nsisolationpolicy_write` (`set`, `delete`).
+**Claude connector safety:** Actual MCP tools are split into `pulsar_admin_nsisolationpolicy_read` and `pulsar_admin_nsisolationpolicy_write`. The read tool is read-only and only exposes read operations/parameters. The write tool is destructive and is not registered in read-only mode.
 
+Namespace isolation policies control which brokers specific namespaces can use.
 
-Manage namespace isolation policies in a Pulsar cluster. Namespace isolation policies enable physical isolation of namespaces by controlling which brokers specific namespaces can use. This helps provide predictable performance and resource isolation, especially in multi-tenant environments.
+### `pulsar_admin_nsisolationpolicy_read`
 
-This tool provides operations across three resource types:
+Read namespace isolation policies and related broker assignments.
 
-- **policy** (Namespace isolation policy):
-  - **get**: Get details of a specific isolation policy
-    - `cluster` (string, required): The cluster name
-    - `name` (string, required): Name of the isolation policy
-  - **list**: List all isolation policies in a cluster
-    - `cluster` (string, required): The cluster name
+- **policy**
+  - **get**: Get an isolation policy
+    - `cluster` (string, required): Cluster name
+    - `name` (string, required): Isolation policy name
+  - **list**: List isolation policies in a cluster
+    - `cluster` (string, required): Cluster name
+- **broker**
+  - **get**: Get a broker with its isolation policies
+    - `cluster` (string, required): Cluster name
+    - `name` (string, required): Broker name
+- **brokers**
+  - **list**: List brokers with isolation policies
+    - `cluster` (string, required): Cluster name
+
+### `pulsar_admin_nsisolationpolicy_write`
+
+Create, update, or delete namespace isolation policies.
+
+- **policy**
   - **set**: Create or update an isolation policy
-    - `cluster` (string, required): The cluster name
-    - `name` (string, required): Name of the isolation policy
-    - `namespaces` (array, required): List of namespaces to apply the isolation policy
-    - `primary` (array, required): List of primary brokers for the namespaces
-    - `secondary` (array, optional): List of secondary brokers for the namespaces
-    - `autoFailoverPolicyType` (string, optional): Auto failover policy type (e.g., min_available)
-    - `autoFailoverPolicyParams` (object, optional): Auto failover policy parameters (e.g., {'min_limit': '1', 'usage_threshold': '100'})
+    - `cluster` (string, required): Cluster name
+    - `name` (string, required): Isolation policy name
+    - `namespaces` (array, required): Namespaces to apply the policy to
+    - `primary` (array, required): Primary brokers
+    - `secondary` (array, optional): Secondary brokers
+    - `autoFailoverPolicyType` (string, optional): Auto failover policy type
+    - `autoFailoverPolicyParams` (object, optional): Auto failover policy parameters
   - **delete**: Delete an isolation policy
-    - `cluster` (string, required): The cluster name
-    - `name` (string, required): Name of the isolation policy
-
-- **broker** (Broker with isolation policies):
-  - **get**: Get details of a specific broker with its isolation policies
-    - `cluster` (string, required): The cluster name
-    - `name` (string, required): Name of the broker
-
-- **brokers** (All brokers with isolation policies):
-  - **list**: List all brokers with their isolation policies
-    - `cluster` (string, required): The cluster name
+    - `cluster` (string, required): Cluster name
+    - `name` (string, required): Isolation policy name

@@ -98,31 +98,31 @@ func (b *PulsarAdminSchemaToolBuilder) BuildTools(_ context.Context, config buil
 // buildSchemaTool builds the Pulsar Admin Schema MCP tool definition
 // Migrated from the original tool definition logic
 func (b *PulsarAdminSchemaToolBuilder) buildSchemaTool(mode toolMode) mcp.Tool {
-	toolDesc := "Manage Apache Pulsar schemas for topics. " +
+	toolDesc := "Read Apache Pulsar schemas for topics. " +
 		"Schemas in Pulsar define the structure of message data, enabling data validation, evolution, and interoperability. " +
-		"Pulsar supports multiple schema types including AVRO, JSON, PROTOBUF, etc., allowing strong typing of message content. " +
-		"Schema versioning ensures backward/forward compatibility as data structures evolve over time. " +
-		"Operations include getting, uploading, and deleting schemas. " +
-		"Requires namespace admin permissions for all operations."
+		"This read-only tool retrieves schema versions without changing topic schema configuration."
 
 	resourceDesc := "Resource to operate on. Available resources:\n" +
 		"- schema: The schema configuration for a specific topic"
 
 	operationDesc := "Operation to perform. Available operations:\n" +
-		"- get: Get the schema for a topic (optionally by version)\n" +
-		"- upload: Upload a new schema for a topic (requires namespace admin permissions)\n" +
-		"- delete: Delete the schema for a topic (requires namespace admin permissions)"
+		"- get: Get the schema for a topic (optionally by version)"
 
 	operationEnum := []string{"get"}
 	toolName := "pulsar_admin_schema_read"
 	annotation := toolannotations.ReadOnly("Read Pulsar Schemas")
 	if isToolModeWrite(mode) {
+		toolDesc = "Manage Apache Pulsar schemas for topics. " +
+			"This write tool uploads or deletes topic schemas."
+		operationDesc = "Operation to perform. Available operations:\n" +
+			"- upload: Upload a new schema for a topic (requires namespace admin permissions)\n" +
+			"- delete: Delete the schema for a topic (requires namespace admin permissions)"
 		operationEnum = []string{"upload", "delete"}
 		toolName = "pulsar_admin_schema_write"
 		annotation = toolannotations.Destructive("Manage Pulsar Schemas")
 	}
 
-	return mcp.NewTool(toolName,
+	tool := mcp.NewTool(toolName,
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("resource", mcp.Required(),
 			mcp.Description(resourceDesc),
@@ -148,6 +148,12 @@ func (b *PulsarAdminSchemaToolBuilder) buildSchemaTool(mode toolMode) mcp.Tool {
 		),
 		annotation,
 	)
+	if isToolModeWrite(mode) {
+		pruneToolInputSchema(&tool, []string{"resource", "operation", "topic", "filename"})
+	} else {
+		pruneToolInputSchema(&tool, []string{"resource", "operation", "topic", "version"})
+	}
+	return tool
 }
 
 // buildSchemaHandler builds the Pulsar Admin Schema handler function

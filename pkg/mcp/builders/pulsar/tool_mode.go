@@ -14,7 +14,11 @@
 
 package pulsar
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/mark3labs/mcp-go/mcp"
+)
 
 type toolMode string
 
@@ -34,4 +38,51 @@ func isWriteOperation(operation string, writeOperations map[string]struct{}) boo
 
 func validateModeOperation(mode toolMode, operation string, writeOperations map[string]struct{}) bool {
 	return (mode == toolModeWrite) == isWriteOperation(operation, writeOperations)
+}
+
+func pruneToolInputSchema(tool *mcp.Tool, allowedProperties []string) {
+	allowed := make(map[string]struct{}, len(allowedProperties))
+	for _, property := range allowedProperties {
+		allowed[property] = struct{}{}
+	}
+
+	for property := range tool.InputSchema.Properties {
+		if _, ok := allowed[property]; !ok {
+			delete(tool.InputSchema.Properties, property)
+		}
+	}
+
+	filterRequiredProperties(tool, allowed)
+}
+
+func removeToolInputSchemaProperties(tool *mcp.Tool, properties []string) {
+	removed := make(map[string]struct{}, len(properties))
+	for _, property := range properties {
+		removed[property] = struct{}{}
+		delete(tool.InputSchema.Properties, property)
+	}
+
+	if len(tool.InputSchema.Required) == 0 {
+		return
+	}
+	required := tool.InputSchema.Required[:0]
+	for _, property := range tool.InputSchema.Required {
+		if _, ok := removed[property]; !ok {
+			required = append(required, property)
+		}
+	}
+	tool.InputSchema.Required = required
+}
+
+func filterRequiredProperties(tool *mcp.Tool, allowed map[string]struct{}) {
+	if len(tool.InputSchema.Required) == 0 {
+		return
+	}
+	required := tool.InputSchema.Required[:0]
+	for _, property := range tool.InputSchema.Required {
+		if _, ok := allowed[property]; ok {
+			required = append(required, property)
+		}
+	}
+	tool.InputSchema.Required = required
 }

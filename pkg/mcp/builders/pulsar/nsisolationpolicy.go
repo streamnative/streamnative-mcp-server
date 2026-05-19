@@ -93,9 +93,8 @@ func (b *PulsarAdminNsIsolationPolicyToolBuilder) BuildTools(_ context.Context, 
 
 // buildNsIsolationPolicyTool builds the Pulsar admin namespace isolation policy MCP tool definition
 func (b *PulsarAdminNsIsolationPolicyToolBuilder) buildNsIsolationPolicyTool(mode toolMode) mcp.Tool {
-	toolDesc := "Manage namespace isolation policies in a Pulsar cluster. " +
-		"Allows viewing, creating, updating, and deleting namespace isolation policies. " +
-		"Some operations require super-user permissions."
+	toolDesc := "Read namespace isolation policies in a Pulsar cluster. " +
+		"Allows viewing namespace isolation policies and related broker policy assignments."
 
 	resourceDesc := "Resource to operate on. Available resources:\n" +
 		"- policy: Namespace isolation policy\n" +
@@ -104,20 +103,23 @@ func (b *PulsarAdminNsIsolationPolicyToolBuilder) buildNsIsolationPolicyTool(mod
 
 	operationDesc := "Operation to perform. Available operations:\n" +
 		"- get: Get resource details\n" +
-		"- list: List all instances of the resource\n" +
-		"- set: Create or update a resource (requires super-user permissions)\n" +
-		"- delete: Delete a resource (requires super-user permissions)"
+		"- list: List all instances of the resource"
 
 	operationEnum := []string{"get", "list"}
 	toolName := "pulsar_admin_nsisolationpolicy_read"
 	annotation := toolannotations.ReadOnly("Read Pulsar Namespace Isolation Policies")
 	if isToolModeWrite(mode) {
+		toolDesc = "Manage namespace isolation policies in a Pulsar cluster. " +
+			"This write tool creates, updates, or deletes namespace isolation policies."
+		operationDesc = "Operation to perform. Available operations:\n" +
+			"- set: Create or update a resource (requires super-user permissions)\n" +
+			"- delete: Delete a resource (requires super-user permissions)"
 		operationEnum = []string{"set", "delete"}
 		toolName = "pulsar_admin_nsisolationpolicy_write"
 		annotation = toolannotations.Destructive("Manage Pulsar Namespace Isolation Policies")
 	}
 
-	return mcp.NewTool(toolName,
+	tool := mcp.NewTool(toolName,
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("resource", mcp.Required(),
 			mcp.Description(resourceDesc),
@@ -130,8 +132,7 @@ func (b *PulsarAdminNsIsolationPolicyToolBuilder) buildNsIsolationPolicyTool(mod
 			mcp.Description("Cluster name"),
 		),
 		mcp.WithString("name",
-			mcp.Description("Name of the policy or broker to operate on, based on resource type.\n"+
-				"Required for: policy.get, policy.delete, policy.set, broker.get"),
+			mcp.Description("Name of the policy or broker to operate on, based on resource type. Required for operations that target one policy or broker."),
 		),
 		mcp.WithArray("namespaces",
 			mcp.Description("List of namespaces to apply the isolation policy. Required for policy.set"),
@@ -168,6 +169,12 @@ func (b *PulsarAdminNsIsolationPolicyToolBuilder) buildNsIsolationPolicyTool(mod
 		),
 		annotation,
 	)
+	if isToolModeWrite(mode) {
+		pruneToolInputSchema(&tool, []string{"resource", "operation", "cluster", "name", "namespaces", "primary", "secondary", "autoFailoverPolicyType", "autoFailoverPolicyParams"})
+	} else {
+		pruneToolInputSchema(&tool, []string{"resource", "operation", "cluster", "name"})
+	}
+	return tool
 }
 
 // buildNsIsolationPolicyHandler builds the Pulsar admin namespace isolation policy handler function

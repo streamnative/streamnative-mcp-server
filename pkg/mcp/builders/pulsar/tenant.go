@@ -96,7 +96,7 @@ func (b *PulsarAdminTenantToolBuilder) BuildTools(_ context.Context, config buil
 // buildTenantTool builds the Pulsar Admin Tenant MCP tool definition
 // Migrated from the original tool definition logic
 func (b *PulsarAdminTenantToolBuilder) buildTenantTool(mode toolMode) mcp.Tool {
-	toolDesc := "Manage Apache Pulsar tenants. " +
+	toolDesc := "Read Apache Pulsar tenants. " +
 		"Tenants are the highest level administrative unit in Pulsar's multi-tenancy hierarchy. " +
 		"Each tenant can contain multiple namespaces, allowing for logical isolation of applications. " +
 		"Tenant configuration controls admin access and cluster availability across organizations. " +
@@ -110,21 +110,24 @@ func (b *PulsarAdminTenantToolBuilder) buildTenantTool(mode toolMode) mcp.Tool {
 
 	operationDesc := "Operation to perform. Available operations:\n" +
 		"- list: List all tenants in the Pulsar instance\n" +
-		"- get: Get configuration details for a specific tenant\n" +
-		"- create: Create a new tenant with specified configuration\n" +
-		"- update: Update configuration for an existing tenant\n" +
-		"- delete: Delete an existing tenant (must not have any active namespaces)"
+		"- get: Get configuration details for a specific tenant"
 
 	operationEnum := []string{"list", "get"}
 	toolName := "pulsar_admin_tenant_read"
 	annotation := toolannotations.ReadOnly("Read Pulsar Tenants")
 	if isToolModeWrite(mode) {
+		toolDesc = "Manage Apache Pulsar tenants. " +
+			"This write tool creates, updates, or deletes tenant configuration and may change cluster state."
+		operationDesc = "Operation to perform. Available operations:\n" +
+			"- create: Create a new tenant with specified configuration\n" +
+			"- update: Update configuration for an existing tenant\n" +
+			"- delete: Delete an existing tenant (must not have any active namespaces)"
 		operationEnum = []string{"create", "update", "delete"}
 		toolName = "pulsar_admin_tenant_write"
 		annotation = toolannotations.Destructive("Manage Pulsar Tenants")
 	}
 
-	return mcp.NewTool(toolName,
+	tool := mcp.NewTool(toolName,
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("resource", mcp.Required(),
 			mcp.Description(resourceDesc),
@@ -166,6 +169,12 @@ func (b *PulsarAdminTenantToolBuilder) buildTenantTool(mode toolMode) mcp.Tool {
 		),
 		annotation,
 	)
+	if isToolModeWrite(mode) {
+		pruneToolInputSchema(&tool, []string{"resource", "operation", "tenant", "adminRoles", "allowedClusters"})
+	} else {
+		pruneToolInputSchema(&tool, []string{"resource", "operation", "tenant"})
+	}
+	return tool
 }
 
 // buildTenantHandler builds the Pulsar Admin Tenant handler function

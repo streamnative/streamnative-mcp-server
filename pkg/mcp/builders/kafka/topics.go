@@ -91,8 +91,8 @@ func (b *KafkaTopicsToolBuilder) BuildTools(_ context.Context, config builders.T
 // buildKafkaTopicsTool builds the Kafka Topics MCP tool definition
 func (b *KafkaTopicsToolBuilder) buildKafkaTopicsTool(mode toolMode) mcp.Tool {
 	resourceDesc := "Resource to operate on. Available resources:\n" +
-		"- topic: A single Kafka topic for operations on individual topics (create, get, delete)\n" +
-		"- topics: Collection of Kafka topics for bulk operations (list)"
+		"- topic: A single Kafka topic for read operations (get, metadata)\n" +
+		"- topics: Collection of Kafka topics for list operations"
 
 	operationDesc := "Operation to perform. Available operations:\n" +
 		"- list: List all topics in the Kafka cluster, optionally including internal topics\n" +
@@ -106,57 +106,45 @@ func (b *KafkaTopicsToolBuilder) buildKafkaTopicsTool(mode toolMode) mcp.Tool {
 			"- create: Create a new topic with specified partitions, replication factor, and optional configs\n" +
 			"- delete: Delete an existing topic\n"
 		operationEnum = []string{"create", "delete"}
+		resourceDesc = "Resource to operate on. Available resources:\n" +
+			"- topic: A single Kafka topic for create or delete operations"
 		toolName = "kafka_admin_topics_write"
 		annotation = toolannotations.Destructive("Manage Kafka Topics")
 	}
 
-	toolDesc := "Unified tool for managing Apache Kafka topics.\n" +
-		"This tool provides access to various Kafka topic operations, including creation, deletion, listing, and configuration retrieval.\n" +
-		"Kafka topics are the core abstraction for organizing and partitioning data streams. Topics:\n" +
-		"- Organize messages into categories for producers and consumers\n" +
-		"- Are divided into partitions for scalability and parallelism\n" +
-		"- Can be configured with replication factors for fault tolerance\n" +
-		"- Support various configuration options for retention, compression, and more\n\n" +
+	toolDesc := "Read Apache Kafka topic metadata and lists.\n" +
+		"This read-only tool lists topics and retrieves topic details or metadata without changing the cluster.\n\n" +
 		"Usage Examples:\n\n" +
 		"1. List all topics (excluding internal Kafka topics):\n" +
 		"   resource: \"topics\"\n" +
 		"   operation: \"list\"\n\n" +
-		"2. List all topics including internal ones:\n" +
-		"   resource: \"topics\"\n" +
-		"   operation: \"list\"\n" +
-		"   includeInternal: true\n\n" +
-		"3. Create a new topic with default settings:\n" +
-		"   resource: \"topic\"\n" +
-		"   operation: \"create\"\n" +
-		"   name: \"user-events\"\n" +
-		"   partitions: 3\n" +
-		"   replicationFactor: 2\n\n" +
-		"4. Create a topic with custom configuration:\n" +
-		"   resource: \"topic\"\n" +
-		"   operation: \"create\"\n" +
-		"   name: \"log-aggregation\"\n" +
-		"   partitions: 6\n" +
-		"   replicationFactor: 3\n" +
-		"   configs: {\n" +
-		"     \"retention.ms\": \"604800000\",\n" +
-		"     \"compression.type\": \"gzip\",\n" +
-		"     \"cleanup.policy\": \"compact\"\n" +
-		"   }\n\n" +
-		"5. Get detailed information about a topic:\n" +
+		"2. Get detailed information about a topic:\n" +
 		"   resource: \"topic\"\n" +
 		"   operation: \"get\"\n" +
 		"   name: \"user-events\"\n\n" +
-		"6. Get metadata for a topic:\n" +
+		"3. Get metadata for a topic:\n" +
 		"   resource: \"topic\"\n" +
 		"   operation: \"metadata\"\n" +
 		"   name: \"user-events\"\n\n" +
-		"7. Delete a topic:\n" +
-		"   resource: \"topic\"\n" +
-		"   operation: \"delete\"\n" +
-		"   name: \"old-topic\"\n\n" +
-		"This tool requires appropriate Kafka permissions for topic management."
+		"This tool requires appropriate Kafka permissions for topic reads."
+	if isToolModeWrite(mode) {
+		toolDesc = "Manage Apache Kafka topic lifecycle.\n" +
+			"This write tool creates and deletes Kafka topics and may change cluster state.\n\n" +
+			"Usage Examples:\n\n" +
+			"1. Create a new topic with default settings:\n" +
+			"   resource: \"topic\"\n" +
+			"   operation: \"create\"\n" +
+			"   name: \"user-events\"\n" +
+			"   partitions: 3\n" +
+			"   replicationFactor: 2\n\n" +
+			"2. Delete a topic:\n" +
+			"   resource: \"topic\"\n" +
+			"   operation: \"delete\"\n" +
+			"   name: \"old-topic\"\n\n" +
+			"This tool requires appropriate Kafka permissions for topic management."
+	}
 
-	return mcp.NewTool(toolName,
+	tool := mcp.NewTool(toolName,
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("resource", mcp.Required(),
 			mcp.Description(resourceDesc),
@@ -166,8 +154,7 @@ func (b *KafkaTopicsToolBuilder) buildKafkaTopicsTool(mode toolMode) mcp.Tool {
 			mcp.Enum(operationEnum...),
 		),
 		mcp.WithString("name",
-			mcp.Description("The name of the Kafka topic to operate on. "+
-				"Required for 'get', 'create', 'delete', and 'metadata' operations on the 'topic' resource. "+
+			mcp.Description("The name of the Kafka topic to operate on. Required for operations that target one topic. "+
 				"Topic names should follow Kafka naming conventions (alphanumeric, dots, underscores, and hyphens).")),
 		mcp.WithNumber("partitions",
 			mcp.Description("The number of partitions for the topic. Required for 'create' operation. "+
@@ -191,6 +178,12 @@ func (b *KafkaTopicsToolBuilder) buildKafkaTopicsTool(mode toolMode) mcp.Tool {
 				"Default: false")),
 		annotation,
 	)
+	if isToolModeWrite(mode) {
+		pruneToolInputSchema(&tool, []string{"resource", "operation", "name", "partitions", "replicationFactor", "configs"})
+	} else {
+		pruneToolInputSchema(&tool, []string{"resource", "operation", "name", "includeInternal"})
+	}
+	return tool
 }
 
 // buildKafkaTopicsHandler builds the Kafka Topics handler function

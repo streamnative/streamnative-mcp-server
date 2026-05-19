@@ -175,7 +175,11 @@ func TestKafkaConnectToolBuilder_ToolDefinition(t *testing.T) {
 	assert.Contains(t, tool.InputSchema.Properties, "resource")
 	assert.Contains(t, tool.InputSchema.Properties, "operation")
 	assert.Contains(t, tool.InputSchema.Properties, "name")
-	assert.Contains(t, tool.InputSchema.Properties, "config")
+	assert.NotContains(t, tool.InputSchema.Properties, "config")
+
+	writeTool := builder.buildKafkaConnectTool(toolModeWrite)
+	assert.Equal(t, "kafka_admin_connect_write", writeTool.Name)
+	assert.Contains(t, writeTool.InputSchema.Properties, "config")
 
 	// Verify required fields
 	assert.Contains(t, tool.InputSchema.Required, "resource")

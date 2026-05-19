@@ -95,12 +95,8 @@ func (b *PulsarAdminClusterToolBuilder) BuildTools(_ context.Context, config bui
 // buildClusterTool builds the Pulsar Admin Cluster MCP tool definition
 // Migrated from the original tool definition logic
 func (b *PulsarAdminClusterToolBuilder) buildClusterTool(mode toolMode) mcp.Tool {
-	toolDesc := "Unified tool for managing Apache Pulsar clusters.\n" +
-		"This tool provides access to various cluster resources and operations, including:\n" +
-		"1. Manage clusters (resource=cluster): List, get, create, update, delete clusters\n" +
-		"2. Manage peer clusters (resource=peer_clusters): Get, update peer clusters\n" +
-		"3. Manage failure domains (resource=failure_domain): List, get, create, update, delete failure domains\n\n" +
-		"Different functions are accessed by combining resource and operation parameters, with other parameters used selectively based on operation type.\n\n" +
+	toolDesc := "Read Apache Pulsar clusters.\n" +
+		"This read-only tool lists clusters and failure domains, and retrieves cluster, peer cluster, or failure domain details.\n\n" +
 		"Examples:\n" +
 		"- {\"resource\": \"cluster\", \"operation\": \"list\"} lists all clusters\n" +
 		"- {\"resource\": \"cluster\", \"operation\": \"get\", \"cluster_name\": \"my-cluster\"} gets cluster configuration\n" +
@@ -114,21 +110,24 @@ func (b *PulsarAdminClusterToolBuilder) buildClusterTool(mode toolMode) mcp.Tool
 
 	operationDesc := "Operation to perform, available options (depend on resource):\n" +
 		"- list: List resources (used with cluster, failure_domain)\n" +
-		"- get: Retrieve resource information (used with cluster, peer_clusters, failure_domain)\n" +
-		"- create: Create a new resource (used with cluster, failure_domain)\n" +
-		"- update: Update an existing resource (used with cluster, peer_clusters, failure_domain)\n" +
-		"- delete: Delete a resource (used with cluster, failure_domain)"
+		"- get: Retrieve resource information (used with cluster, peer_clusters, failure_domain)"
 
 	operationEnum := []string{"list", "get"}
 	toolName := "pulsar_admin_cluster_read"
 	annotation := toolannotations.ReadOnly("Read Pulsar Clusters")
 	if isToolModeWrite(mode) {
+		toolDesc = "Manage Apache Pulsar clusters.\n" +
+			"This write tool creates, updates, or deletes clusters and failure domains, and updates peer cluster settings."
+		operationDesc = "Operation to perform, available options (depend on resource):\n" +
+			"- create: Create a new resource (used with cluster, failure_domain)\n" +
+			"- update: Update an existing resource (used with cluster, peer_clusters, failure_domain)\n" +
+			"- delete: Delete a resource (used with cluster, failure_domain)"
 		operationEnum = []string{"create", "update", "delete"}
 		toolName = "pulsar_admin_cluster_write"
 		annotation = toolannotations.Destructive("Manage Pulsar Clusters")
 	}
 
-	return mcp.NewTool(toolName,
+	tool := mcp.NewTool(toolName,
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("resource", mcp.Required(),
 			mcp.Description(resourceDesc),
@@ -141,7 +140,7 @@ func (b *PulsarAdminClusterToolBuilder) buildClusterTool(mode toolMode) mcp.Tool
 			mcp.Description("Name of the Pulsar cluster, required for all operations except 'list' with resource=cluster"),
 		),
 		mcp.WithString("domain_name",
-			mcp.Description("Name of the failure domain, required when resource=failure_domain and operation is get, create, update, or delete"),
+			mcp.Description("Name of the failure domain. Required when resource=failure_domain and the operation targets one specific domain."),
 		),
 		mcp.WithString("service_url",
 			mcp.Description("Pulsar cluster web service URL (e.g., http://example.pulsar.io:8080), used when resource=cluster and operation is create or update"),
@@ -177,6 +176,12 @@ func (b *PulsarAdminClusterToolBuilder) buildClusterTool(mode toolMode) mcp.Tool
 		),
 		annotation,
 	)
+	if isToolModeWrite(mode) {
+		pruneToolInputSchema(&tool, []string{"resource", "operation", "cluster_name", "domain_name", "service_url", "service_url_tls", "broker_service_url", "broker_service_url_tls", "peer_cluster_names", "brokers"})
+	} else {
+		pruneToolInputSchema(&tool, []string{"resource", "operation", "cluster_name", "domain_name"})
+	}
+	return tool
 }
 
 // buildClusterHandler builds the Pulsar Admin Cluster handler function

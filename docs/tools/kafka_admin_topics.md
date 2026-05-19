@@ -1,21 +1,30 @@
 #### kafka-admin-topics
 
-**Claude connector safety:** Actual MCP tools: `kafka_admin_topics_read` (`list`, `get`, `metadata`) and `kafka_admin_topics_write` (`create`, `delete`).
+**Claude connector safety:** Actual MCP tools are split into `kafka_admin_topics_read` and `kafka_admin_topics_write`. The read tool is read-only and only exposes read operations/parameters. The write tool is destructive and is not registered in read-only mode.
 
+### `kafka_admin_topics_read`
 
-This tool provides access to various Kafka topic operations, including creation, deletion, listing, and configuration retrieval.
+Read Kafka topic lists, configurations, and metadata.
 
 - **topics**
-  - **list**: List all topics in the Kafka cluster
-    - `include-internal` (boolean, optional): Whether to include internal Kafka topics (those starting with an underscore). Default: false
+  - **list**: List topics in the Kafka cluster
+    - `includeInternal` (boolean, optional): Include internal Kafka topics. Default: false
 
 - **topic**
-  - **get**: Get detailed configuration for a specific topic
-    - `name` (string, required): The name of the Kafka topic
-  - **create**: Create a new topic
-    - `name` (string, required): The name of the Kafka topic
-    - `partitions` (number, optional): Number of partitions. Default: 1
-    - `replication-factor` (number, optional): Replication factor. Default: 1
-    - `configs` (array of string, optional): Topic configuration overrides as key-value strings, e.g. ["cleanup.policy=compact", "retention.ms=604800000"]
-  - **delete**: Delete an existing topic
-    - `name` (string, required): The name of the Kafka topic
+  - **get**: Get detailed configuration for a topic
+    - `name` (string, required): Kafka topic name
+  - **metadata**: Get metadata for a topic
+    - `name` (string, required): Kafka topic name
+
+### `kafka_admin_topics_write`
+
+Create or delete Kafka topics.
+
+- **topic**
+  - **create**: Create a topic
+    - `name` (string, required): Kafka topic name
+    - `partitions` (number, optional): Number of partitions
+    - `replicationFactor` (number, optional): Replication factor
+    - `configs` (object, optional): Topic configuration overrides
+  - **delete**: Delete a topic
+    - `name` (string, required): Kafka topic name

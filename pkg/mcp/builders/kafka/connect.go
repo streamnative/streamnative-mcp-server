@@ -125,18 +125,9 @@ func (b *KafkaConnectToolBuilder) buildKafkaConnectTool(mode toolMode) mcp.Tool 
 		annotation = toolannotations.Destructive("Manage Kafka Connect")
 	}
 
-	toolDesc := "Unified tool for managing Apache Kafka Connect.\n" +
-		"Kafka Connect is a framework for connecting Kafka with external systems such as databases, key-value stores, search indexes, and file systems. " +
-		"It provides a standardized way to stream data in and out of Kafka, without requiring custom integration code.\n\n" +
-		"Key concepts in Kafka Connect:\n\n" +
-		"- Connectors: The high-level abstraction that coordinates data streaming by managing tasks\n" +
-		"- Tasks: The implementation of how data is copied to or from Kafka\n" +
-		"- Workers: The running processes that execute connectors and tasks\n" +
-		"- Plugins: Reusable connector implementations for specific external systems\n" +
-		"- Source Connectors: Import data from external systems into Kafka topics\n" +
-		"- Sink Connectors: Export data from Kafka topics to external systems\n\n" +
-		"Kafka Connect simplifies data integration, enables scalable and reliable streaming pipelines, " +
-		"and reduces the operational burden of managing data flows.\n\n" +
+	toolDesc := "Read Apache Kafka Connect cluster, connector, and plugin information.\n" +
+		"Kafka Connect is a framework for connecting Kafka with external systems through reusable connectors.\n" +
+		"This read-only tool lists connectors and plugins and retrieves cluster or connector details.\n\n" +
 		"Usage Examples:\n\n" +
 		"1. List all connectors in the Kafka Connect cluster:\n" +
 		"   resource: \"connectors\"\n" +
@@ -145,55 +136,35 @@ func (b *KafkaConnectToolBuilder) buildKafkaConnectTool(mode toolMode) mcp.Tool 
 		"   resource: \"connector\"\n" +
 		"   operation: \"get\"\n" +
 		"   name: \"my-jdbc-source\"\n\n" +
-		"3. Create a new JDBC source connector:\n" +
-		"   resource: \"connector\"\n" +
-		"   operation: \"create\"\n" +
-		"   name: \"my-jdbc-source\"\n" +
-		"   config: {\n" +
-		"     \"connector.class\": \"io.confluent.connect.jdbc.JdbcSourceConnector\",\n" +
-		"     \"connection.url\": \"jdbc:mysql://mysql:3306/mydb\",\n" +
-		"     \"connection.user\": \"user\",\n" +
-		"     \"connection.password\": \"password\",\n" +
-		"     \"topic.prefix\": \"mysql-\",\n" +
-		"     \"table.whitelist\": \"users,orders\",\n" +
-		"     \"mode\": \"incrementing\",\n" +
-		"     \"incrementing.column.name\": \"id\",\n" +
-		"     \"tasks.max\": \"1\"\n" +
-		"   }\n\n" +
-		"4. Update an existing connector's configuration:\n" +
-		"   resource: \"connector\"\n" +
-		"   operation: \"update\"\n" +
-		"   name: \"my-jdbc-source\"\n" +
-		"   config: {\n" +
-		"     \"connector.class\": \"io.confluent.connect.jdbc.JdbcSourceConnector\",\n" +
-		"     \"tasks.max\": \"2\",\n" +
-		"     \"table.whitelist\": \"users,orders,products\"\n" +
-		"   }\n\n" +
-		"5. Delete a connector:\n" +
-		"   resource: \"connector\"\n" +
-		"   operation: \"delete\"\n" +
-		"   name: \"my-jdbc-source\"\n\n" +
-		"6. Restart a connector after configuration changes or errors:\n" +
-		"   resource: \"connector\"\n" +
-		"   operation: \"restart\"\n" +
-		"   name: \"my-jdbc-source\"\n\n" +
-		"7. Pause a connector temporarily:\n" +
-		"   resource: \"connector\"\n" +
-		"   operation: \"pause\"\n" +
-		"   name: \"my-jdbc-source\"\n\n" +
-		"8. Resume a paused connector:\n" +
-		"   resource: \"connector\"\n" +
-		"   operation: \"resume\"\n" +
-		"   name: \"my-jdbc-source\"\n\n" +
-		"9. List all available connector plugins:\n" +
+		"3. List all available connector plugins:\n" +
 		"   resource: \"connector-plugins\"\n" +
 		"   operation: \"list\"\n\n" +
-		"10. Get information about the Kafka Connect cluster:\n" +
-		"    resource: \"kafka-connect-cluster\"\n" +
-		"    operation: \"get\"\n\n" +
-		"This tool requires appropriate Kafka Connect permissions."
+		"4. Get information about the Kafka Connect cluster:\n" +
+		"   resource: \"kafka-connect-cluster\"\n" +
+		"   operation: \"get\"\n\n" +
+		"This tool requires appropriate Kafka Connect read permissions."
+	if isToolModeWrite(mode) {
+		toolDesc = "Manage Apache Kafka Connect connectors.\n" +
+			"This write tool creates, updates, deletes, restarts, pauses, or resumes connectors.\n\n" +
+			"Usage Examples:\n\n" +
+			"1. Create a new connector:\n" +
+			"   resource: \"connector\"\n" +
+			"   operation: \"create\"\n" +
+			"   name: \"my-jdbc-source\"\n" +
+			"   config: {...}\n\n" +
+			"2. Update an existing connector's configuration:\n" +
+			"   resource: \"connector\"\n" +
+			"   operation: \"update\"\n" +
+			"   name: \"my-jdbc-source\"\n" +
+			"   config: {...}\n\n" +
+			"3. Restart a connector:\n" +
+			"   resource: \"connector\"\n" +
+			"   operation: \"restart\"\n" +
+			"   name: \"my-jdbc-source\"\n\n" +
+			"This tool requires appropriate Kafka Connect write permissions."
+	}
 
-	return mcp.NewTool(toolName,
+	tool := mcp.NewTool(toolName,
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("resource", mcp.Required(),
 			mcp.Description(resourceDesc),
@@ -203,8 +174,7 @@ func (b *KafkaConnectToolBuilder) buildKafkaConnectTool(mode toolMode) mcp.Tool 
 			mcp.Enum(operationEnum...),
 		),
 		mcp.WithString("name",
-			mcp.Description("The name of the Kafka Connect connector to operate on. "+
-				"Required for 'get', 'create', 'update', 'delete', 'restart', 'pause', and 'resume' operations on the 'connector' resource. "+
+			mcp.Description("The name of the Kafka Connect connector to operate on. Required for operations that target one connector. "+
 				"Must be unique within the Kafka Connect cluster. "+
 				"Should be descriptive of the connector's purpose, such as 'mysql-inventory-source' or 'elasticsearch-logs-sink'.")),
 		mcp.WithObject("config",
@@ -220,6 +190,12 @@ func (b *KafkaConnectToolBuilder) buildKafkaConnectTool(mode toolMode) mcp.Tool 
 				"Additional fields depend on the specific connector type being used.")),
 		annotation,
 	)
+	if isToolModeWrite(mode) {
+		pruneToolInputSchema(&tool, []string{"resource", "operation", "name", "config"})
+	} else {
+		pruneToolInputSchema(&tool, []string{"resource", "operation", "name"})
+	}
+	return tool
 }
 
 // buildKafkaConnectHandler builds the Kafka Connect handler function

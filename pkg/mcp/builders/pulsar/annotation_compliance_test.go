@@ -19,6 +19,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	"github.com/stretchr/testify/require"
 )
@@ -103,6 +104,49 @@ func pulsarComplianceWriteOperations() map[string]struct{} {
 		}
 	}
 	return writeOperations
+}
+
+func TestPulsarSplitToolsExposeModeSpecificParameters(t *testing.T) {
+	expectedProperties := map[string][]string{
+		"pulsar_admin_brokers_read":           {"resource", "operation", "clusterName", "brokerUrl", "configType"},
+		"pulsar_admin_brokers_write":          {"resource", "operation", "configName", "configValue"},
+		"pulsar_admin_cluster_read":           {"resource", "operation", "cluster_name", "domain_name"},
+		"pulsar_admin_functions_read":         {"operation", "fqfn", "tenant", "namespace", "name", "instanceId", "key", "path", "destinationFile"},
+		"pulsar_admin_namespace_read":         {"operation", "tenant", "namespace"},
+		"pulsar_admin_nsisolationpolicy_read": {"resource", "operation", "cluster", "name"},
+		"pulsar_admin_package_read":           {"resource", "operation", "packageName", "namespace", "type", "path"},
+		"pulsar_admin_resourcequota_read":     {"resource", "operation", "namespace", "bundle"},
+		"pulsar_admin_schema_read":            {"resource", "operation", "topic", "version"},
+		"pulsar_admin_sinks_read":             {"operation", "tenant", "namespace", "name"},
+		"pulsar_admin_sources_read":           {"operation", "tenant", "namespace", "name"},
+		"pulsar_admin_subscription_read":      {"resource", "operation", "topic", "subscription", "ledgerId", "entryId", "count"},
+		"pulsar_admin_tenant_read":            {"resource", "operation", "tenant"},
+		"pulsar_admin_topic_policy_read":      {"operation", "topic", "applied", "type"},
+		"pulsar_admin_topic_read":             {"resource", "operation", "topic", "namespace", "partitioned", "per-partition", "wait"},
+	}
+
+	for _, builder := range allPulsarComplianceBuilders() {
+		tools, err := builder.BuildTools(context.Background(), builders.ToolBuildConfig{
+			Features: []string{"all", "all-pulsar", "pulsar-admin", "pulsar-client"},
+		})
+		require.NoError(t, err)
+		for _, serverTool := range tools {
+			tool := serverTool.Tool
+			expected, ok := expectedProperties[tool.Name]
+			if !ok {
+				continue
+			}
+			require.ElementsMatch(t, expected, pulsarToolPropertyNames(tool), tool.Name)
+		}
+	}
+}
+
+func pulsarToolPropertyNames(tool mcp.Tool) []string {
+	names := make([]string, 0, len(tool.InputSchema.Properties))
+	for name := range tool.InputSchema.Properties {
+		names = append(names, name)
+	}
+	return names
 }
 
 func TestPulsarReadOnlyBuildsNoWriteTools(t *testing.T) {

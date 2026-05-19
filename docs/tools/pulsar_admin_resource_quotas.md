@@ -1,27 +1,32 @@
 #### pulsar_admin_resourcequota
 
-**Claude connector safety:** Actual MCP tools: `pulsar_admin_resourcequota_read` (`get`) and `pulsar_admin_resourcequota_write` (`set`, `reset`).
+**Claude connector safety:** Actual MCP tools are split into `pulsar_admin_resourcequota_read` and `pulsar_admin_resourcequota_write`. The read tool is read-only and only exposes read operations/parameters. The write tool is destructive and is not registered in read-only mode.
 
+### `pulsar_admin_resourcequota_read`
 
-Manage Apache Pulsar resource quotas for brokers, namespaces and bundles. Resource quotas define limits for resource usage such as message rates, bandwidth, and memory. These quotas help prevent resource abuse and ensure fair resource allocation across the Pulsar cluster.
+Read resource quota configuration for default quotas or namespace bundles.
 
-This tool provides operations on the following resource:
+- **quota**
+  - **get**: Get a resource quota
+    - `namespace` (string, optional): Namespace name in `tenant/namespace` format
+    - `bundle` (string, optional): Bundle range in `{start-boundary}_{end-boundary}` format
 
-- **quota** (Resource quota configuration):
-  - **get**: Get resource quota for a namespace bundle or the default quota
-    - `namespace` (string, optional): The namespace name in format 'tenant/namespace'
-    - `bundle` (string, optional): The bundle range in format '{start-boundary}_{end-boundary}'
-      - Note: If namespace and bundle are both omitted, returns the default quota
-      - Note: If namespace is specified, bundle must also be specified and vice versa
-  - **set**: Set resource quota for a namespace bundle or the default quota
-    - `namespace` (string, optional): The namespace name in format 'tenant/namespace'
-    - `bundle` (string, optional): The bundle range in format '{start-boundary}_{end-boundary}'
-    - `msgRateIn` (number, required): Maximum incoming messages per second
-    - `msgRateOut` (number, required): Maximum outgoing messages per second
-    - `bandwidthIn` (number, required): Maximum inbound bandwidth in bytes per second
-    - `bandwidthOut` (number, required): Maximum outbound bandwidth in bytes per second
-    - `memory` (number, required): Maximum memory usage in Mbytes
-    - `dynamic` (boolean, optional): Whether to allow quota to be dynamically re-calculated
-  - **reset**: Reset a namespace bundle's resource quota to default value
-    - `namespace` (string, required): The namespace name in format 'tenant/namespace'
-    - `bundle` (string, required): The bundle range in format '{start-boundary}_{end-boundary}'
+If `namespace` and `bundle` are omitted, the default quota is returned. If one of `namespace` or `bundle` is specified, the other must also be specified.
+
+### `pulsar_admin_resourcequota_write`
+
+Set or reset resource quota configuration.
+
+- **quota**
+  - **set**: Set a resource quota
+    - `namespace` (string, optional): Namespace name in `tenant/namespace` format
+    - `bundle` (string, optional): Bundle range in `{start-boundary}_{end-boundary}` format
+    - `msgRateIn` (number, required): Incoming messages per second
+    - `msgRateOut` (number, required): Outgoing messages per second
+    - `bandwidthIn` (number, required): Inbound bandwidth in bytes per second
+    - `bandwidthOut` (number, required): Outbound bandwidth in bytes per second
+    - `memory` (number, required): Memory usage in Mbytes
+    - `dynamic` (boolean, optional): Allow dynamic recalculation
+  - **reset**: Reset a namespace bundle resource quota to the default
+    - `namespace` (string, required): Namespace name in `tenant/namespace` format
+    - `bundle` (string, required): Bundle range in `{start-boundary}_{end-boundary}` format

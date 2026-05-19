@@ -24,24 +24,34 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestBuildTopicToolIncludesPermissionOperations(t *testing.T) {
+func TestBuildTopicToolIncludesModeSpecificPermissionOperations(t *testing.T) {
 	builder := NewPulsarAdminTopicToolBuilder()
 
-	tool := builder.buildTopicTool(toolModeRead)
+	readTool := builder.buildTopicTool(toolModeRead)
+	require.NotContains(t, readTool.InputSchema.Properties, "role")
+	require.NotContains(t, readTool.InputSchema.Properties, "actions")
+	require.Contains(t, readTool.InputSchema.Properties, "wait")
 
-	require.Contains(t, tool.InputSchema.Properties, "role")
-	require.Contains(t, tool.InputSchema.Properties, "actions")
-	require.Contains(t, tool.InputSchema.Properties, "wait")
-
-	operationSchema, ok := tool.InputSchema.Properties["operation"].(map[string]any)
+	readOperationSchema, ok := readTool.InputSchema.Properties["operation"].(map[string]any)
 	require.True(t, ok)
-
-	description, ok := operationSchema["description"].(string)
+	readDescription, ok := readOperationSchema["description"].(string)
 	require.True(t, ok)
-	require.Contains(t, description, "get-permissions")
-	require.Contains(t, description, "grant-permissions")
-	require.Contains(t, description, "revoke-permissions")
-	require.Contains(t, description, "compact-status")
+	require.Contains(t, readDescription, "get-permissions")
+	require.NotContains(t, readDescription, "grant-permissions")
+	require.NotContains(t, readDescription, "revoke-permissions")
+	require.Contains(t, readDescription, "compact-status")
+
+	writeTool := builder.buildTopicTool(toolModeWrite)
+	require.Contains(t, writeTool.InputSchema.Properties, "role")
+	require.Contains(t, writeTool.InputSchema.Properties, "actions")
+	require.NotContains(t, writeTool.InputSchema.Properties, "wait")
+
+	writeOperationSchema, ok := writeTool.InputSchema.Properties["operation"].(map[string]any)
+	require.True(t, ok)
+	writeDescription, ok := writeOperationSchema["description"].(string)
+	require.True(t, ok)
+	require.Contains(t, writeDescription, "grant-permissions")
+	require.Contains(t, writeDescription, "revoke-permissions")
 }
 
 func TestParseTopicActions(t *testing.T) {

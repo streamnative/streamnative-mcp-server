@@ -1,78 +1,49 @@
 #### pulsar_admin_sources
 
-**Claude connector safety:** Actual MCP tools: `pulsar_admin_sources_read` (`list`, `get`, `status`, `list-built-in`) and `pulsar_admin_sources_write` (`create`, `update`, `delete`, `start`, `stop`, `restart`).
+**Claude connector safety:** Actual MCP tools are split into `pulsar_admin_sources_read` and `pulsar_admin_sources_write`. The read tool is read-only and only exposes read operations/parameters. The write tool is destructive and is not registered in read-only mode.
 
+Pulsar Sources import data from external systems into Pulsar topics.
 
-Manage Apache Pulsar Sources for data ingestion and integration. Pulsar Sources are connectors that import data from external systems into Pulsar topics. Sources connect to external systems such as databases, messaging platforms, storage services, and real-time data streams to pull data and publish it to Pulsar topics.
+### `pulsar_admin_sources_read`
 
-This tool provides complete lifecycle management for source connectors:
+Read source lists, configuration, runtime status, and built-in source connector types.
 
-- **list**: List all sources in a namespace
-  - `tenant` (string, optional): The tenant name (default: `public`)
-  - `namespace` (string, optional): The namespace name (default: `default`)
-
+- **list**: List sources in a namespace
+  - `tenant` (string, optional): Tenant name; default `public`
+  - `namespace` (string, optional): Namespace name; default `default`
 - **get**: Get source configuration
-  - `tenant` (string, optional): The tenant name (default: `public`)
-  - `namespace` (string, optional): The namespace name (default: `default`)
-  - `name` (string, required): The source name
+  - `tenant` (string, optional): Tenant name; default `public`
+  - `namespace` (string, optional): Namespace name; default `default`
+  - `name` (string, required): Source name
+- **status**: Get source runtime status
+  - `tenant` (string, optional): Tenant name; default `public`
+  - `namespace` (string, optional): Namespace name; default `default`
+  - `name` (string, required): Source name
+- **list-built-in**: List built-in source connectors
 
-- **status**: Get runtime status of a source (instances, metrics)
-  - `tenant` (string, optional): The tenant name (default: `public`)
-  - `namespace` (string, optional): The namespace name (default: `default`)
-  - `name` (string, required): The source name
+### `pulsar_admin_sources_write`
 
-- **create**: Deploy a new source connector
-  - `tenant` (string, optional): The tenant name (default: `public`)
-  - `namespace` (string, optional): The namespace name (default: `default`)
-  - `name` (string, required): The source name (can be provided via `source-config-file`)
-  - `destination-topic-name` (string, required): Topic where data will be written
-  - Either `archive` or `source-type` must be specified (but not both):
-    - `archive` (string): Path to the archive file containing source code
-    - `source-type` (string): Built-in connector type to use (e.g., 'kafka', 'jdbc')
-  - `source-config-file` (string, optional): YAML file with source configuration
-  - `deserialization-classname` (string, optional): SerDe class for the source
-  - `schema-type` (string, optional): Schema type for encoding messages (e.g., 'avro', 'json')
-  - `classname` (string, optional): Source class name if using custom implementation
-  - `processing-guarantees` (string, optional): Delivery semantics ('atleast_once', 'atmost_once', 'effectively_once')
-  - `parallelism` (number, optional): Number of instances to run concurrently (default: 1)
-  - `cpu` (number, optional): CPU cores per instance
-  - `ram` (number, optional): RAM bytes per instance
-  - `disk` (number, optional): Disk bytes per instance
-  - `source-config` (object, optional): Connector-specific configuration parameters
-  - `producer-config` (object, optional): Producer configuration
-  - `batch-builder` (string, optional): Batch builder type
-  - `batch-source-config` (object, optional): Batch source configuration
-  - `custom-runtime-options` (string, optional): Runtime customization options
-  - `secrets` (object, optional): Secrets configuration map
+Manage source connector lifecycle and runtime state.
 
-- **update**: Update an existing source connector
-  - `tenant` (string, optional): The tenant name (default: `public`)
-  - `namespace` (string, optional): The namespace name (default: `default`)
-  - `name` (string, required): The source name (can be provided via `source-config-file`)
-  - Parameters similar to `create` operation (all optional during update)
-  - `update-auth-data` (boolean, optional): Whether to update auth data
+Common identity parameters:
 
+- `tenant` (string, optional): Tenant name; default `public`
+- `namespace` (string, optional): Namespace name; default `default`
+- `name` (string, required for operations targeting one source): Source name
+
+Operations:
+
+- **create**: Deploy a source connector
+  - Common identity parameters
+  - Connector/package parameters include `destination-topic-name`, `archive` or `source-type`, `source-config-file`, serialization settings, `classname`, processing guarantees, `parallelism`, resources (`cpu`, `ram`, `disk`), `source-config`, producer config, batch config, secrets, and runtime options
+- **update**: Update source connector configuration
+  - Common identity parameters
+  - Same configuration parameters as `create`, plus `update-auth-data`
 - **delete**: Delete a source
-  - `tenant` (string, optional): The tenant name (default: `public`)
-  - `namespace` (string, optional): The namespace name (default: `default`)
-  - `name` (string, required): The source name
-
+  - Common identity parameters
 - **start**: Start a stopped source
-  - `tenant` (string, optional): The tenant name (default: `public`)
-  - `namespace` (string, optional): The namespace name (default: `default`)
-  - `name` (string, required): The source name
-
+  - Common identity parameters
 - **stop**: Stop a running source
-  - `tenant` (string, optional): The tenant name (default: `public`)
-  - `namespace` (string, optional): The namespace name (default: `default`)
-  - `name` (string, required): The source name
-
+  - Common identity parameters
 - **restart**: Restart a source
-  - `tenant` (string, optional): The tenant name (default: `public`)
-  - `namespace` (string, optional): The namespace name (default: `default`)
-  - `name` (string, required): The source name
-
-- **list-built-in**: List all built-in source connectors available in the system
-  - No parameters required
-
-Built-in source connectors are available for common systems like Kafka, JDBC, AWS services, and more. Sources follow the tenant/namespace/name hierarchy for organization and access control, can scale through parallelism configuration, and support various processing guarantees.
+  - Common identity parameters

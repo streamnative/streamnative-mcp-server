@@ -39,16 +39,22 @@ func TestBuildTopicPolicyToolIncludesPulsarctlParityOperations(t *testing.T) {
 	require.Contains(t, description, "get-inactive-topic-policies")
 }
 
-func TestBuildTopicPolicyToolIncludesTopicPolicyParameters(t *testing.T) {
+func TestBuildTopicPolicyToolIncludesModeSpecificParameters(t *testing.T) {
 	builder := NewPulsarAdminTopicPolicyToolBuilder()
 
-	tool := builder.buildTopicPolicyTool(toolModeRead)
+	readTool := builder.buildTopicPolicyTool(toolModeRead)
+	require.Contains(t, readTool.InputSchema.Properties, "applied")
+	require.NotContains(t, readTool.InputSchema.Properties, "count")
+	require.NotContains(t, readTool.InputSchema.Properties, "limit-size")
+	require.NotContains(t, readTool.InputSchema.Properties, "delete-mode")
+	require.NotContains(t, readTool.InputSchema.Properties, "subscription-types")
 
-	require.Contains(t, tool.InputSchema.Properties, "applied")
-	require.Contains(t, tool.InputSchema.Properties, "count")
-	require.Contains(t, tool.InputSchema.Properties, "limit-size")
-	require.Contains(t, tool.InputSchema.Properties, "delete-mode")
-	require.Contains(t, tool.InputSchema.Properties, "subscription-types")
+	writeTool := builder.buildTopicPolicyTool(toolModeWrite)
+	require.NotContains(t, writeTool.InputSchema.Properties, "applied")
+	require.Contains(t, writeTool.InputSchema.Properties, "count")
+	require.Contains(t, writeTool.InputSchema.Properties, "limit-size")
+	require.Contains(t, writeTool.InputSchema.Properties, "delete-mode")
+	require.Contains(t, writeTool.InputSchema.Properties, "subscription-types")
 }
 
 func TestNormalizeTopicPolicyOperationSupportsLegacyAliases(t *testing.T) {
