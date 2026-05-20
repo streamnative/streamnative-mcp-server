@@ -81,7 +81,8 @@ func extractGeneratedOperationBlock(t *testing.T, content string) string {
 	end := strings.Index(content[start:], endMarker)
 	require.NotEqual(t, -1, end, "missing generated operation end marker")
 	end += start + len(endMarker)
-	return strings.TrimSpace(content[start:end])
+	block := strings.TrimSpace(content[start:end])
+	return strings.ReplaceAll(block, "\r\n", "\n")
 }
 
 func formatOperationNames(operations []string) string {
