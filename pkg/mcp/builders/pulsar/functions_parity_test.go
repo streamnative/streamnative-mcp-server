@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ func TestParseFunctionIdentity(t *testing.T) {
 func TestFunctionOperationCoverageIncludesFileTransfer(t *testing.T) {
 	require.True(t, isSupportedFunctionOperation("download"))
 	require.True(t, isSupportedFunctionOperation("upload"))
-	require.True(t, isReadOnlyRestrictedFunctionOperation("download"))
+	require.False(t, isReadOnlyRestrictedFunctionOperation("download"))
 	require.True(t, isReadOnlyRestrictedFunctionOperation("upload"))
 }
 

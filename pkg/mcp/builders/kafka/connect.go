@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,6 +28,17 @@ import (
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
+
+var kafkaConnectOperationSpecs = builders.OperationRegistry{
+	{Name: "list", Mode: builders.OperationModeRead},
+	{Name: "get", Mode: builders.OperationModeRead},
+	{Name: "create", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "update", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "delete", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "restart", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "pause", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "resume", Mode: builders.OperationModeWrite, Destructive: true},
+}
 
 // KafkaConnectToolBuilder implements the ToolBuilder interface for Kafka Connect
 // It provides functionality to build Kafka Connect administration tools
@@ -71,49 +82,56 @@ func (b *KafkaConnectToolBuilder) BuildTools(_ context.Context, config builders.
 		return nil, err
 	}
 
-	// Build tools
-	tool := b.buildKafkaConnectTool()
-	handler := b.buildKafkaConnectHandler(config.ReadOnly)
-
-	return []server.ServerTool{
+	tools := []server.ServerTool{
 		{
-			Tool:    tool,
-			Handler: handler,
+			Tool:    b.buildKafkaConnectTool(toolModeRead),
+			Handler: b.buildKafkaConnectHandler(toolModeRead),
 		},
-	}, nil
+	}
+	if !config.ReadOnly {
+		tools = append(tools, server.ServerTool{
+			Tool:    b.buildKafkaConnectTool(toolModeWrite),
+			Handler: b.buildKafkaConnectHandler(toolModeWrite),
+		})
+	}
+
+	return tools, nil
 }
 
 // buildKafkaConnectTool builds the Kafka Connect MCP tool definition
 // Migrated from the original tool definition logic
-func (b *KafkaConnectToolBuilder) buildKafkaConnectTool() mcp.Tool {
+func (b *KafkaConnectToolBuilder) buildKafkaConnectTool(mode toolMode) mcp.Tool {
 	resourceDesc := "Resource to operate on. Available resources:\n" +
 		"- kafka-connect-cluster: A single Kafka Connect cluster that manages connectors and tasks.\n" +
 		"- connector: A single Kafka Connect connector instance that moves data between Kafka and external systems.\n" +
 		"- connectors: Collection of all Kafka Connect connectors in a cluster.\n" +
 		"- connector-plugins: Collection of all Kafka Connect connector plugins, StreamNative Cloud provides a set of built-in connectors via this resource."
+	resourceEnum := []string{"kafka-connect-cluster", "connector", "connectors", "connector-plugins"}
 
 	operationDesc := "Operation to perform. Available operations:\n" +
 		"- list: List all connectors or connector plugins in a cluster.\n" +
-		"- get: Retrieve detailed information about a Kafka Connect cluster or specific connector.\n" +
-		"- create: Create a new connector with specified configuration.\n" +
-		"- update: Modify an existing connector's configuration.\n" +
-		"- delete: Remove a connector from the Kafka Connect cluster.\n" +
-		"- restart: Restart a running connector (useful after failures or configuration changes).\n" +
-		"- pause: Temporarily stop a connector from processing data.\n" +
-		"- resume: Continue processing with a previously paused connector."
+		"- get: Retrieve detailed information about a Kafka Connect cluster or specific connector."
+	operationEnum := kafkaConnectOperationSpecs.NamesForMode(mode)
+	toolName := "kafka_admin_connect_read"
+	annotation := builders.ToolAnnotationForMode(mode, "Read Kafka Connect", "Manage Kafka Connect", kafkaConnectOperationSpecs)
+	if isToolModeWrite(mode) {
+		resourceDesc = "Resource to operate on. Available resources:\n" +
+			"- connector: A single Kafka Connect connector instance that moves data between Kafka and external systems."
+		resourceEnum = []string{"connector"}
+		operationDesc = "Operation to perform. Available operations:\n" +
+			"- create: Create a new connector with specified configuration.\n" +
+			"- update: Modify an existing connector's configuration.\n" +
+			"- delete: Remove a connector from the Kafka Connect cluster.\n" +
+			"- restart: Restart a running connector (useful after failures or configuration changes).\n" +
+			"- pause: Temporarily stop a connector from processing data.\n" +
+			"- resume: Continue processing with a previously paused connector."
+		operationEnum = kafkaConnectOperationSpecs.NamesForMode(mode)
+		toolName = "kafka_admin_connect_write"
+	}
 
-	toolDesc := "Unified tool for managing Apache Kafka Connect.\n" +
-		"Kafka Connect is a framework for connecting Kafka with external systems such as databases, key-value stores, search indexes, and file systems. " +
-		"It provides a standardized way to stream data in and out of Kafka, without requiring custom integration code.\n\n" +
-		"Key concepts in Kafka Connect:\n\n" +
-		"- Connectors: The high-level abstraction that coordinates data streaming by managing tasks\n" +
-		"- Tasks: The implementation of how data is copied to or from Kafka\n" +
-		"- Workers: The running processes that execute connectors and tasks\n" +
-		"- Plugins: Reusable connector implementations for specific external systems\n" +
-		"- Source Connectors: Import data from external systems into Kafka topics\n" +
-		"- Sink Connectors: Export data from Kafka topics to external systems\n\n" +
-		"Kafka Connect simplifies data integration, enables scalable and reliable streaming pipelines, " +
-		"and reduces the operational burden of managing data flows.\n\n" +
+	toolDesc := "Read Apache Kafka Connect cluster, connector, and plugin information.\n" +
+		"Kafka Connect is a framework for connecting Kafka with external systems through reusable connectors.\n" +
+		"This read-only tool lists connectors and plugins and retrieves cluster or connector details.\n\n" +
 		"Usage Examples:\n\n" +
 		"1. List all connectors in the Kafka Connect cluster:\n" +
 		"   resource: \"connectors\"\n" +
@@ -122,65 +140,46 @@ func (b *KafkaConnectToolBuilder) buildKafkaConnectTool() mcp.Tool {
 		"   resource: \"connector\"\n" +
 		"   operation: \"get\"\n" +
 		"   name: \"my-jdbc-source\"\n\n" +
-		"3. Create a new JDBC source connector:\n" +
-		"   resource: \"connector\"\n" +
-		"   operation: \"create\"\n" +
-		"   name: \"my-jdbc-source\"\n" +
-		"   config: {\n" +
-		"     \"connector.class\": \"io.confluent.connect.jdbc.JdbcSourceConnector\",\n" +
-		"     \"connection.url\": \"jdbc:mysql://mysql:3306/mydb\",\n" +
-		"     \"connection.user\": \"user\",\n" +
-		"     \"connection.password\": \"password\",\n" +
-		"     \"topic.prefix\": \"mysql-\",\n" +
-		"     \"table.whitelist\": \"users,orders\",\n" +
-		"     \"mode\": \"incrementing\",\n" +
-		"     \"incrementing.column.name\": \"id\",\n" +
-		"     \"tasks.max\": \"1\"\n" +
-		"   }\n\n" +
-		"4. Update an existing connector's configuration:\n" +
-		"   resource: \"connector\"\n" +
-		"   operation: \"update\"\n" +
-		"   name: \"my-jdbc-source\"\n" +
-		"   config: {\n" +
-		"     \"connector.class\": \"io.confluent.connect.jdbc.JdbcSourceConnector\",\n" +
-		"     \"tasks.max\": \"2\",\n" +
-		"     \"table.whitelist\": \"users,orders,products\"\n" +
-		"   }\n\n" +
-		"5. Delete a connector:\n" +
-		"   resource: \"connector\"\n" +
-		"   operation: \"delete\"\n" +
-		"   name: \"my-jdbc-source\"\n\n" +
-		"6. Restart a connector after configuration changes or errors:\n" +
-		"   resource: \"connector\"\n" +
-		"   operation: \"restart\"\n" +
-		"   name: \"my-jdbc-source\"\n\n" +
-		"7. Pause a connector temporarily:\n" +
-		"   resource: \"connector\"\n" +
-		"   operation: \"pause\"\n" +
-		"   name: \"my-jdbc-source\"\n\n" +
-		"8. Resume a paused connector:\n" +
-		"   resource: \"connector\"\n" +
-		"   operation: \"resume\"\n" +
-		"   name: \"my-jdbc-source\"\n\n" +
-		"9. List all available connector plugins:\n" +
+		"3. List all available connector plugins:\n" +
 		"   resource: \"connector-plugins\"\n" +
 		"   operation: \"list\"\n\n" +
-		"10. Get information about the Kafka Connect cluster:\n" +
-		"    resource: \"kafka-connect-cluster\"\n" +
-		"    operation: \"get\"\n\n" +
-		"This tool requires appropriate Kafka Connect permissions."
+		"4. Get information about the Kafka Connect cluster:\n" +
+		"   resource: \"kafka-connect-cluster\"\n" +
+		"   operation: \"get\"\n\n" +
+		"This tool requires appropriate Kafka Connect read permissions."
+	if isToolModeWrite(mode) {
+		toolDesc = "Manage Apache Kafka Connect connectors.\n" +
+			"This write tool creates, updates, deletes, restarts, pauses, or resumes connectors.\n\n" +
+			"Usage Examples:\n\n" +
+			"1. Create a new connector:\n" +
+			"   resource: \"connector\"\n" +
+			"   operation: \"create\"\n" +
+			"   name: \"my-jdbc-source\"\n" +
+			"   config: {...}\n\n" +
+			"2. Update an existing connector's configuration:\n" +
+			"   resource: \"connector\"\n" +
+			"   operation: \"update\"\n" +
+			"   name: \"my-jdbc-source\"\n" +
+			"   config: {...}\n\n" +
+			"3. Restart a connector:\n" +
+			"   resource: \"connector\"\n" +
+			"   operation: \"restart\"\n" +
+			"   name: \"my-jdbc-source\"\n\n" +
+			"This tool requires appropriate Kafka Connect write permissions."
+	}
 
-	return mcp.NewTool("kafka_admin_connect",
+	tool := mcp.NewTool(toolName,
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("resource", mcp.Required(),
 			mcp.Description(resourceDesc),
+			mcp.Enum(resourceEnum...),
 		),
 		mcp.WithString("operation", mcp.Required(),
 			mcp.Description(operationDesc),
+			mcp.Enum(operationEnum...),
 		),
 		mcp.WithString("name",
-			mcp.Description("The name of the Kafka Connect connector to operate on. "+
-				"Required for 'get', 'create', 'update', 'delete', 'restart', 'pause', and 'resume' operations on the 'connector' resource. "+
+			mcp.Description("The name of the Kafka Connect connector to operate on. Required for operations that target one connector. "+
 				"Must be unique within the Kafka Connect cluster. "+
 				"Should be descriptive of the connector's purpose, such as 'mysql-inventory-source' or 'elasticsearch-logs-sink'.")),
 		mcp.WithObject("config",
@@ -194,12 +193,19 @@ func (b *KafkaConnectToolBuilder) buildKafkaConnectTool() mcp.Tool {
 				"- key.converter/value.converter: Data format converters\n"+
 				"- transforms: Optional transformations to apply to data\n"+
 				"Additional fields depend on the specific connector type being used.")),
+		annotation,
 	)
+	if isToolModeWrite(mode) {
+		pruneToolInputSchema(&tool, []string{"resource", "operation", "name", "config"})
+	} else {
+		pruneToolInputSchema(&tool, []string{"resource", "operation", "name"})
+	}
+	return tool
 }
 
 // buildKafkaConnectHandler builds the Kafka Connect handler function
 // Migrated from the original handler logic
-func (b *KafkaConnectToolBuilder) buildKafkaConnectHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *KafkaConnectToolBuilder) buildKafkaConnectHandler(mode toolMode) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get required parameters
 		resource, err := request.RequireString("resource")
@@ -216,9 +222,8 @@ func (b *KafkaConnectToolBuilder) buildKafkaConnectHandler(readOnly bool) func(c
 		resource = strings.ToLower(resource)
 		operation = strings.ToLower(operation)
 
-		// Validate write operations in read-only mode
-		if readOnly && (operation == "create" || operation == "update" || operation == "delete" || operation == "restart" || operation == "pause" || operation == "resume") {
-			return mcp.NewToolResultError("Write operations are not allowed in read-only mode"), nil
+		if err := validateModeOperation(mode, operation, kafkaConnectOperationSpecs); err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 
 		// Get Kafka Connect client

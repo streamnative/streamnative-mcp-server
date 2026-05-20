@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,10 +24,11 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/auth/store"
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 )
 
 // RegisterContextTools registers context-related tools on the server.
-func RegisterContextTools(s *server.MCPServer, features []string, skipContextTools bool) {
+func RegisterContextTools(s *server.MCPServer, features []string, readOnly bool, skipContextTools bool) {
 	if !slices.Contains(features, string(FeatureStreamNativeCloud)) && !slices.Contains(features, string(FeatureAll)) {
 		return
 	}
@@ -36,6 +37,7 @@ func RegisterContextTools(s *server.MCPServer, features []string, skipContextToo
 	whoamiTool := mcp.NewTool("sncloud_context_whoami",
 		mcp.WithDescription("Display the currently logged-in service account. "+
 			"Returns the name of the authenticated service account and the organization."),
+		toolannotations.ReadOnly("Show StreamNative Cloud Identity"),
 	)
 	s.AddTool(whoamiTool, handleWhoami)
 
@@ -48,12 +50,14 @@ func RegisterContextTools(s *server.MCPServer, features []string, skipContextToo
 		mcp.WithString("clusterName", mcp.Required(),
 			mcp.Description("The name of the pulsar cluster to use"),
 		),
+		toolannotations.LocalSessionMutation("Use StreamNative Cloud Cluster Context"),
 	)
 	resetContextTool := mcp.NewTool("sncloud_context_reset",
 		mcp.WithDescription("Reset the current StreamNative Cloud cluster context. After reset, the session has no bound Pulsar or Kafka cluster connection; use `sncloud_context_use_cluster` before calling cluster-specific tools again."),
+		toolannotations.LocalSessionMutation("Reset StreamNative Cloud Cluster Context"),
 	)
-	// Skip registering context mutation tools if context is already provided
-	if !skipContextTools {
+	// Skip registering context mutation tools when context is already provided or the server is read-only.
+	if !skipContextTools && !readOnly {
 		s.AddTool(setContextTool, handleSetContext)
 		s.AddTool(resetContextTool, handleResetContext)
 	}
@@ -61,6 +65,7 @@ func RegisterContextTools(s *server.MCPServer, features []string, skipContextToo
 	// Add available-contexts tool
 	availableContextsTool := mcp.NewTool("sncloud_context_available_clusters",
 		mcp.WithDescription("Display the context-bindable Pulsar clusters for the current organization. You can use `sncloud_context_use_cluster` to change the context to a specific cluster. You will need to ask for the USER to confirm the target context cluster if there are multiple clusters."),
+		toolannotations.ReadOnly("List StreamNative Cloud Cluster Contexts"),
 	)
 	s.AddTool(availableContextsTool, handleAvailableContexts)
 }

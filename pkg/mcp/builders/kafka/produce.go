@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 	"github.com/twmb/franz-go/pkg/kgo"
 	"github.com/twmb/franz-go/pkg/sr"
 )
@@ -145,6 +146,7 @@ func (b *KafkaProduceToolBuilder) buildKafkaProduceTool() mcp.Tool {
 				"description": "key value pair in the format of \"key=value\"",
 			}),
 		),
+		toolannotations.Destructive("Produce Kafka Messages"),
 		mcp.WithNumber("partition",
 			mcp.Description("The specific partition to send the message to. "+
 				"Optional. If not specified, Kafka will automatically assign a partition based on the message key (if provided) or round-robin assignment. "+

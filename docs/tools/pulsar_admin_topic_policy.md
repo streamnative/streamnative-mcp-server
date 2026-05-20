@@ -1,41 +1,78 @@
-#### pulsar_admin_topic_policy
+#### pulsar_admin_topic_policy_read / pulsar_admin_topic_policy_write
 
-Manage Pulsar topic-level policies with operation names aligned to `pulsarctl topics`.
 
-- **Core operations**
-  - Retention: `get-retention`, `set-retention`, `remove-retention`
-  - Message TTL: `get-message-ttl`, `set-message-ttl`, `remove-message-ttl`
-  - Producer and consumer limits:
-    - `get-max-producers`, `set-max-producers`, `remove-max-producers`
-    - `get-max-consumers`, `set-max-consumers`, `remove-max-consumers`
-    - `get-max-unacked-messages-per-consumer`, `set-max-unacked-messages-per-consumer`, `remove-max-unacked-messages-per-consumer`
-    - `get-max-unacked-messages-per-subscription`, `set-max-unacked-messages-per-subscription`, `remove-max-unacked-messages-per-subscription`
-  - Persistence: `get-persistence`, `set-persistence`, `remove-persistence`
-  - Delayed delivery: `get-delayed-delivery`, `set-delayed-delivery`, `remove-delayed-delivery`
-  - Dispatch throttling:
-    - `get-dispatch-rate`, `set-dispatch-rate`, `remove-dispatch-rate`
-    - `get-subscription-dispatch-rate`, `set-subscription-dispatch-rate`, `remove-subscription-dispatch-rate`
-    - `get-publish-rate`, `set-publish-rate`, `remove-publish-rate`
-  - Topic-level toggles: `get-deduplication`, `set-deduplication`, `remove-deduplication`
-  - Storage and cleanup:
-    - `get-backlog-quotas`, `set-backlog-quota`, `remove-backlog-quota`
-    - `get-compaction-threshold`, `set-compaction-threshold`, `remove-compaction-threshold`
-    - `get-inactive-topic-policies`, `set-inactive-topic-policies`, `remove-inactive-topic-policies`
-  - Additional MCP-only compatibility operations: `get-subscription-types`, `set-subscription-types`, `remove-subscription-types`
+<!-- generated:operations:start -->
+| Tool | Mode | Operations |
+|---|---|---|
+| `pulsar_admin_topic_policy_read` | read | `get-retention`, `get-message-ttl`, `get-max-producers`, `get-max-consumers`, `get-max-unacked-messages-per-consumer`, `get-max-unacked-messages-per-subscription`, `get-persistence`, `get-delayed-delivery`, `get-dispatch-rate`, `get-subscription-dispatch-rate`, `get-deduplication`, `get-backlog-quotas`, `get-compaction-threshold`, `get-publish-rate`, `get-inactive-topic-policies`, `get-subscription-types` |
+| `pulsar_admin_topic_policy_write` | write | `set-retention`, `remove-retention`, `set-message-ttl`, `remove-message-ttl`, `set-max-producers`, `remove-max-producers`, `set-max-consumers`, `remove-max-consumers`, `set-max-unacked-messages-per-consumer`, `remove-max-unacked-messages-per-consumer`, `set-max-unacked-messages-per-subscription`, `remove-max-unacked-messages-per-subscription`, `set-persistence`, `remove-persistence`, `set-delayed-delivery`, `remove-delayed-delivery`, `set-dispatch-rate`, `remove-dispatch-rate`, `set-subscription-dispatch-rate`, `remove-subscription-dispatch-rate`, `set-deduplication`, `remove-deduplication`, `set-backlog-quota`, `remove-backlog-quota`, `set-compaction-threshold`, `remove-compaction-threshold`, `set-publish-rate`, `remove-publish-rate`, `set-inactive-topic-policies`, `remove-inactive-topic-policies`, `set-subscription-types`, `remove-subscription-types` |
+<!-- generated:operations:end -->
 
-- **Shared parameters**
-  - `topic` (string, required): Fully qualified topic name
-  - `applied` (boolean, optional): Return the effective inherited policy for `get-retention`, `get-backlog-quotas`, `get-compaction-threshold`, and `get-inactive-topic-policies`
+**Claude connector safety:** Actual MCP tools are split into `pulsar_admin_topic_policy_read` and `pulsar_admin_topic_policy_write`. The read tool is read-only and only exposes get operations/parameters. The write tool is destructive and is not registered in read-only mode.
 
-- **Operation-specific parameters**
-  - Retention: `retention-time`, `retention-size`
-  - Message TTL: `ttl-seconds`
-  - Max limits: `count`
-  - Persistence: `bookkeeper-ensemble`, `bookkeeper-write-quorum`, `bookkeeper-ack-quorum`, `ml-mark-delete-max-rate`
-  - Delayed delivery: `enable`, `disable`, `time`
-  - Dispatch throttling: `msg-rate`, `byte-rate`, `period`, `relative-to-publish-rate`
-  - Backlog quota: `limit-size`, `limit-time`, `policy`, `type`
-  - Inactive topic policies: `delete-while-inactive`, `max-inactive-duration`, `delete-mode`
-  - Subscription type restriction: `subscription-types`
+### `pulsar_admin_topic_policy_read`
 
-Legacy underscore operation aliases from the older MCP implementation are still accepted for backward compatibility.
+Read topic-level policies.
+
+Read operations:
+
+- `get-retention`
+- `get-message-ttl`
+- `get-max-producers`
+- `get-max-consumers`
+- `get-max-unacked-messages-per-consumer`
+- `get-max-unacked-messages-per-subscription`
+- `get-persistence`
+- `get-delayed-delivery`
+- `get-dispatch-rate`
+- `get-subscription-dispatch-rate`
+- `get-deduplication`
+- `get-backlog-quotas`
+- `get-compaction-threshold`
+- `get-publish-rate`
+- `get-inactive-topic-policies`
+- `get-subscription-types`
+
+Read parameters:
+
+- `topic` (string, required): Fully qualified topic name
+- `applied` (boolean, optional): Return effective inherited policy where supported
+- `type` (string, optional): Backlog quota type for backlog quota reads
+
+### `pulsar_admin_topic_policy_write`
+
+Set or remove topic-level policies.
+
+Write operations:
+
+- `set-retention`, `remove-retention`
+- `set-message-ttl`, `remove-message-ttl`
+- `set-max-producers`, `remove-max-producers`
+- `set-max-consumers`, `remove-max-consumers`
+- `set-max-unacked-messages-per-consumer`, `remove-max-unacked-messages-per-consumer`
+- `set-max-unacked-messages-per-subscription`, `remove-max-unacked-messages-per-subscription`
+- `set-persistence`, `remove-persistence`
+- `set-delayed-delivery`, `remove-delayed-delivery`
+- `set-dispatch-rate`, `remove-dispatch-rate`
+- `set-subscription-dispatch-rate`, `remove-subscription-dispatch-rate`
+- `set-deduplication`, `remove-deduplication`
+- `set-backlog-quota`, `remove-backlog-quota`
+- `set-compaction-threshold`, `remove-compaction-threshold`
+- `set-publish-rate`, `remove-publish-rate`
+- `set-inactive-topic-policies`, `remove-inactive-topic-policies`
+- `set-subscription-types`, `remove-subscription-types`
+
+Write parameters:
+
+- `topic` (string, required): Fully qualified topic name
+- Retention: `retention-time`, `retention-size`
+- Message TTL: `ttl-seconds`
+- Max limits: `count`
+- Persistence: `bookkeeper-ensemble`, `bookkeeper-write-quorum`, `bookkeeper-ack-quorum`, `ml-mark-delete-max-rate`
+- Delayed delivery: `enable`, `disable`, `time`
+- Dispatch/publish throttling: `msg-rate`, `byte-rate`, `period`, `relative-to-publish-rate`
+- Backlog quota: `limit-size`, `limit-time`, `policy`, `type`
+- Inactive topic policies: `delete-while-inactive`, `max-inactive-duration`, `delete-mode`
+- Subscription type restriction: `subscription-types`
+
+Legacy underscore operation aliases from the older MCP implementation are still accepted by the handlers.

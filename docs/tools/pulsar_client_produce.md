@@ -11,4 +11,4 @@ Produce messages to a Pulsar topic. This tool allows you to send messages to a s
   - `chunking` (boolean, optional): Should split the message and publish in chunks if message size is larger than allowed max size (default: false)
   - `separator` (string, optional): Character to split messages string on (default: none)
   - `properties` (array, optional): Properties to add, key=value format. Specify multiple times for multiple properties
-  - `key` (string, optional): Partitioning key to add to each message 
+  - `key` (string, optional): Partitioning key to add to each message

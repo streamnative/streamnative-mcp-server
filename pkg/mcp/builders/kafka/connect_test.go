@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -56,12 +56,13 @@ func TestKafkaConnectToolBuilder_BuildTools_Success(t *testing.T) {
 	tools, err := builder.BuildTools(context.Background(), config)
 
 	require.NoError(t, err)
-	require.Len(t, tools, 1)
+	require.Len(t, tools, 2)
 
 	tool := tools[0]
 	assert.NotNil(t, tool.Tool)
 	assert.NotNil(t, tool.Handler)
-	assert.Equal(t, "kafka_admin_connect", tool.Tool.Name)
+	assert.Equal(t, "kafka_admin_connect_read", tool.Tool.Name)
+	assert.Equal(t, "kafka_admin_connect_write", tools[1].Tool.Name)
 }
 
 func TestKafkaConnectToolBuilder_BuildTools_WithAllFeature(t *testing.T) {
@@ -78,7 +79,7 @@ func TestKafkaConnectToolBuilder_BuildTools_WithAllFeature(t *testing.T) {
 	require.Len(t, tools, 1)
 
 	tool := tools[0]
-	assert.Equal(t, "kafka_admin_connect", tool.Tool.Name)
+	assert.Equal(t, "kafka_admin_connect_read", tool.Tool.Name)
 }
 
 func TestKafkaConnectToolBuilder_BuildTools_WithAllKafkaFeature(t *testing.T) {
@@ -92,7 +93,7 @@ func TestKafkaConnectToolBuilder_BuildTools_WithAllKafkaFeature(t *testing.T) {
 	tools, err := builder.BuildTools(context.Background(), config)
 
 	require.NoError(t, err)
-	require.Len(t, tools, 1)
+	require.Len(t, tools, 2)
 }
 
 func TestKafkaConnectToolBuilder_BuildTools_WithKafkaAdminFeature(t *testing.T) {
@@ -106,7 +107,7 @@ func TestKafkaConnectToolBuilder_BuildTools_WithKafkaAdminFeature(t *testing.T) 
 	tools, err := builder.BuildTools(context.Background(), config)
 
 	require.NoError(t, err)
-	require.Len(t, tools, 1)
+	require.Len(t, tools, 2)
 }
 
 func TestKafkaConnectToolBuilder_BuildTools_NoMatchingFeatures(t *testing.T) {
@@ -165,16 +166,20 @@ func TestKafkaConnectToolBuilder_Validate_NoRequiredFeatures(t *testing.T) {
 func TestKafkaConnectToolBuilder_ToolDefinition(t *testing.T) {
 	builder := NewKafkaConnectToolBuilder()
 
-	tool := builder.buildKafkaConnectTool()
+	tool := builder.buildKafkaConnectTool(toolModeRead)
 
-	assert.Equal(t, "kafka_admin_connect", tool.Name)
+	assert.Equal(t, "kafka_admin_connect_read", tool.Name)
 	assert.NotEmpty(t, tool.Description)
 
 	// Verify required parameters
 	assert.Contains(t, tool.InputSchema.Properties, "resource")
 	assert.Contains(t, tool.InputSchema.Properties, "operation")
 	assert.Contains(t, tool.InputSchema.Properties, "name")
-	assert.Contains(t, tool.InputSchema.Properties, "config")
+	assert.NotContains(t, tool.InputSchema.Properties, "config")
+
+	writeTool := builder.buildKafkaConnectTool(toolModeWrite)
+	assert.Equal(t, "kafka_admin_connect_write", writeTool.Name)
+	assert.Contains(t, writeTool.InputSchema.Properties, "config")
 
 	// Verify required fields
 	assert.Contains(t, tool.InputSchema.Required, "resource")

@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -44,8 +44,9 @@ func TestPulsarAdminFunctionsToolBuilder(t *testing.T) {
 
 		tools, err := builder.BuildTools(context.Background(), config)
 		require.NoError(t, err)
-		assert.Len(t, tools, 1)
-		assert.Equal(t, "pulsar_admin_functions", tools[0].Tool.Name)
+		assert.Len(t, tools, 2)
+		assert.Equal(t, "pulsar_admin_functions_read", tools[0].Tool.Name)
+		assert.Equal(t, "pulsar_admin_functions_write", tools[1].Tool.Name)
 		assert.NotNil(t, tools[0].Handler)
 	})
 

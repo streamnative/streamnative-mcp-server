@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,6 +26,13 @@ import (
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
+
+var pulsarBrokerOperationSpecs = builders.OperationRegistry{
+	{Name: "list", Mode: builders.OperationModeRead},
+	{Name: "get", Mode: builders.OperationModeRead},
+	{Name: "update", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "delete", Mode: builders.OperationModeWrite, Destructive: true},
+}
 
 // PulsarAdminBrokersToolBuilder implements the ToolBuilder interface for Pulsar admin brokers
 // /nolint:revive
@@ -67,42 +74,58 @@ func (b *PulsarAdminBrokersToolBuilder) BuildTools(_ context.Context, config bui
 		return nil, err
 	}
 
-	// Build tools
-	tool := b.buildPulsarAdminBrokersTool()
-	handler := b.buildPulsarAdminBrokersHandler(config.ReadOnly)
-
-	return []server.ServerTool{
+	tools := []server.ServerTool{
 		{
-			Tool:    tool,
-			Handler: handler,
+			Tool:    b.buildPulsarAdminBrokersTool(toolModeRead),
+			Handler: b.buildPulsarAdminBrokersHandler(toolModeRead),
 		},
-	}, nil
+	}
+	if !config.ReadOnly {
+		tools = append(tools, server.ServerTool{
+			Tool:    b.buildPulsarAdminBrokersTool(toolModeWrite),
+			Handler: b.buildPulsarAdminBrokersHandler(toolModeWrite),
+		})
+	}
+
+	return tools, nil
 }
 
 // buildPulsarAdminBrokersTool builds the Pulsar admin brokers MCP tool definition
-func (b *PulsarAdminBrokersToolBuilder) buildPulsarAdminBrokersTool() mcp.Tool {
-	return mcp.NewTool("pulsar_admin_brokers",
-		mcp.WithDescription("Unified tool for managing Apache Pulsar broker resources. This tool integrates multiple broker management functions, including:\n"+
-			"1. List active brokers in a cluster (resource=brokers, operation=list)\n"+
-			"2. Check broker health status (resource=health, operation=get)\n"+
-			"3. Manage broker configurations (resource=config, operation=get/update/delete)\n"+
-			"4. View namespaces owned by a broker (resource=namespaces, operation=get)\n\n"+
-			"Different functions are accessed by combining resource and operation parameters, with other parameters used selectively based on operation type.\n"+
-			"Example: {\"resource\": \"config\", \"operation\": \"get\", \"configType\": \"dynamic\"} retrieves all dynamic configuration names.\n"+
-			"This tool requires Pulsar super-user permissions."),
+func (b *PulsarAdminBrokersToolBuilder) buildPulsarAdminBrokersTool(mode toolMode) mcp.Tool {
+	resourceDesc := "Type of broker resource to access, available options:\n" +
+		"- brokers: Broker listings\n" +
+		"- health: Broker health status\n" +
+		"- config: Broker configurations\n" +
+		"- namespaces: Namespaces owned by a broker"
+	resourceEnum := []string{"brokers", "health", "config", "namespaces"}
+	operationEnum := pulsarBrokerOperationSpecs.NamesForMode(mode)
+	operationDesc := "Operation to perform, available options:\n" +
+		"- list: List resources (used with brokers)\n" +
+		"- get: Retrieve resource information (used with health, config, namespaces)"
+	toolDesc := "Read Apache Pulsar broker resources. This tool lists active brokers, checks broker health, reads broker configurations, and views namespaces owned by a broker."
+	toolName := "pulsar_admin_brokers_read"
+	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Brokers", "Manage Pulsar Brokers", pulsarBrokerOperationSpecs)
+	if isToolModeWrite(mode) {
+		resourceDesc = "Type of broker resource to access, available options:\n" +
+			"- config: Broker dynamic configuration values"
+		resourceEnum = []string{"config"}
+		operationEnum = pulsarBrokerOperationSpecs.NamesForMode(mode)
+		operationDesc = "Operation to perform, available options:\n" +
+			"- update: Update a broker dynamic configuration value\n" +
+			"- delete: Delete a broker dynamic configuration value"
+		toolDesc = "Manage Apache Pulsar broker configurations. This write tool updates or deletes broker dynamic configuration values."
+		toolName = "pulsar_admin_brokers_write"
+	}
+
+	tool := mcp.NewTool(toolName,
+		mcp.WithDescription(toolDesc),
 		mcp.WithString("resource", mcp.Required(),
-			mcp.Description("Type of resource to access, available options:\n"+
-				"- brokers: Manage broker listings\n"+
-				"- health: Check broker health status\n"+
-				"- config: Manage broker configurations\n"+
-				"- namespaces: Manage namespaces owned by a broker"),
+			mcp.Description(resourceDesc),
+			mcp.Enum(resourceEnum...),
 		),
 		mcp.WithString("operation", mcp.Required(),
-			mcp.Description("Operation to perform, available options:\n"+
-				"- list: List resources (used with brokers)\n"+
-				"- get: Retrieve resource information (used with health, config, namespaces)\n"+
-				"- update: Update a resource (used with config)\n"+
-				"- delete: Delete a resource (used with config)"),
+			mcp.Description(operationDesc),
+			mcp.Enum(operationEnum...),
 		),
 		mcp.WithString("clusterName",
 			mcp.Description("Pulsar cluster name, required for these operations:\n"+
@@ -129,11 +152,18 @@ func (b *PulsarAdminBrokersToolBuilder) buildPulsarAdminBrokersTool() mcp.Tool {
 			mcp.Description("Configuration parameter value, required for these operations:\n"+
 				"- When resource=config, operation=update"),
 		),
+		annotation,
 	)
+	if isToolModeWrite(mode) {
+		pruneToolInputSchema(&tool, []string{"resource", "operation", "configName", "configValue"})
+	} else {
+		pruneToolInputSchema(&tool, []string{"resource", "operation", "clusterName", "brokerUrl", "configType"})
+	}
+	return tool
 }
 
 // buildPulsarAdminBrokersHandler builds the Pulsar admin brokers handler function
-func (b *PulsarAdminBrokersToolBuilder) buildPulsarAdminBrokersHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminBrokersToolBuilder) buildPulsarAdminBrokersHandler(mode toolMode) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get Pulsar session from context
 		session := mcpCtx.GetPulsarSession(ctx)
@@ -157,13 +187,17 @@ func (b *PulsarAdminBrokersToolBuilder) buildPulsarAdminBrokersHandler(readOnly 
 		operation, err := request.RequireString("operation")
 		if err != nil {
 			return mcp.NewToolResultError("Missing required operation parameter. " +
-				"Please specify one of: list, get, update, delete based on the resource type."), nil
+				"Please specify one of: " + modeSupportedOperations(mode, pulsarBrokerOperationSpecs) + " based on the resource type."), nil
 		}
 
 		// Validate if the parameter combination is valid
 		validCombination, errMsg := b.validateResourceOperation(resource, operation)
 		if !validCombination {
 			return mcp.NewToolResultError(errMsg), nil
+		}
+
+		if err := validateModeOperation(mode, operation, pulsarBrokerOperationSpecs); err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 
 		// Process request based on resource type
@@ -173,11 +207,6 @@ func (b *PulsarAdminBrokersToolBuilder) buildPulsarAdminBrokersHandler(readOnly 
 		case "health":
 			return b.handleHealthResource(client, operation, request)
 		case "config":
-			// Check write operation permissions
-			if (operation == "update" || operation == "delete") && readOnly {
-				return mcp.NewToolResultError("Configuration update/delete operations not allowed in read-only mode. " +
-					"Please contact your administrator if you need to modify broker configurations."), nil
-			}
 			return b.handleConfigResource(client, operation, request)
 		case "namespaces":
 			return b.handleNamespacesResource(client, operation, request)

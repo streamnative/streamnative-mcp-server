@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	context2 "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 )
 
 // FunctionConnectorList lists supported log components.
@@ -47,7 +48,7 @@ func StreamNativeAddLogTools(s *server.MCPServer, _ bool, features []string) {
 func NewSNCloudLogsTool() mcp.Tool {
 	return mcp.NewTool("sncloud_logs",
 		mcp.WithDescription("Display the logs of resources in StreamNative Cloud, including pulsar functions, pulsar source connectors, pulsar sink connectors, and kafka connect connectors logs running along with PulsarInstance and PulsarCluster."+
-			"This tool is used to help you debug issues in the cluster currently bound to the session. This tool is suggested to be used with 'pulsar_admin_functions', 'pulsar_admin_sinks', 'pulsar_admin_sources', and 'kafka_admin_connect'."),
+			"This tool is used to help you debug issues in the cluster currently bound to the session. This tool is suggested to be used with the relevant split read/write admin tools, such as 'pulsar_admin_functions_read', 'pulsar_admin_sinks_read', 'pulsar_admin_sources_read', and 'kafka_admin_connect_read' for inspection workflows."),
 		mcp.WithString("component", mcp.Required(),
 			mcp.Description("The component to get logs from, including "+strings.Join(FunctionConnectorList, ", ")),
 			mcp.Enum(FunctionConnectorList...),
@@ -81,6 +82,7 @@ func NewSNCloudLogsTool() mcp.Tool {
 			mcp.Description("Return previous terminated container logs, defaults to false."),
 			mcp.DefaultBool(false),
 		),
+		toolannotations.ReadOnly("Read StreamNative Cloud Logs"),
 	)
 }
 

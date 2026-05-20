@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,6 +26,15 @@ import (
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
+
+var pulsarPackageOperationSpecs = builders.OperationRegistry{
+	{Name: "list", Mode: builders.OperationModeRead},
+	{Name: "get", Mode: builders.OperationModeRead},
+	{Name: "download", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "update", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "delete", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "upload", Mode: builders.OperationModeWrite, Destructive: true},
+}
 
 // PulsarAdminPackagesToolBuilder implements the ToolBuilder interface for Pulsar admin packages
 // /nolint:revive
@@ -67,47 +76,66 @@ func (b *PulsarAdminPackagesToolBuilder) BuildTools(_ context.Context, config bu
 		return nil, err
 	}
 
-	// Build tools
-	tool := b.buildPackagesTool()
-	handler := b.buildPackagesHandler(config.ReadOnly)
-
-	return []server.ServerTool{
+	tools := []server.ServerTool{
 		{
-			Tool:    tool,
-			Handler: handler,
+			Tool:    b.buildPackagesTool(toolModeRead),
+			Handler: b.buildPackagesHandler(toolModeRead),
 		},
-	}, nil
+	}
+	if !config.ReadOnly {
+		tools = append(tools, server.ServerTool{
+			Tool:    b.buildPackagesTool(toolModeWrite),
+			Handler: b.buildPackagesHandler(toolModeWrite),
+		})
+	}
+
+	return tools, nil
 }
 
 // buildPackagesTool builds the Pulsar admin packages MCP tool definition
-func (b *PulsarAdminPackagesToolBuilder) buildPackagesTool() mcp.Tool {
-	toolDesc := "Manage packages in Apache Pulsar. Support package scheme: `function://`, `source://`, `sink://`" +
-		"Allows listing, viewing, updating, downloading and uploading packages. " +
-		"Some operations require super-user permissions."
+func (b *PulsarAdminPackagesToolBuilder) buildPackagesTool(mode toolMode) mcp.Tool {
+	toolDesc := "Read packages in Apache Pulsar. Support package schemes: `function://`, `source://`, `sink://`. " +
+		"Allows listing packages and viewing package metadata."
 
 	resourceDesc := "Resource to operate on. Available resources:\n" +
 		"- package: A specific package\n" +
 		"- packages: All packages of a specific type"
+	resourceEnum := []string{"package", "packages"}
 
 	operationDesc := "Operation to perform. Available operations:\n" +
 		"- list: List all packages of a specific type or versions of a package\n" +
-		"- get: Get metadata of a package\n" +
-		"- update: Update metadata of a package (requires super-user permissions)\n" +
-		"- delete: Delete a package (requires super-user permissions)\n" +
-		"- download: Download a package (requires super-user permissions)\n" +
-		"- upload: Upload a package (requires super-user permissions)"
+		"- get: Get metadata of a package"
 
-	return mcp.NewTool("pulsar_admin_package",
+	operationEnum := pulsarPackageOperationSpecs.NamesForMode(mode)
+	toolName := "pulsar_admin_package_read"
+	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Packages", "Manage Pulsar Packages", pulsarPackageOperationSpecs)
+	if isToolModeWrite(mode) {
+		toolDesc = "Manage packages in Apache Pulsar. Support package schemes: `function://`, `source://`, `sink://`. " +
+			"This write tool downloads package contents, updates metadata, deletes packages, or uploads package contents."
+		resourceDesc = "Resource to operate on. Available resources:\n" +
+			"- package: A specific package"
+		resourceEnum = []string{"package"}
+		operationDesc = "Operation to perform. Available operations:\n" +
+			"- download: Download a package to a local filesystem path\n" +
+			"- update: Update metadata of a package (requires super-user permissions)\n" +
+			"- delete: Delete a package (requires super-user permissions)\n" +
+			"- upload: Upload a package (requires super-user permissions)"
+		operationEnum = pulsarPackageOperationSpecs.NamesForMode(mode)
+		toolName = "pulsar_admin_package_write"
+	}
+
+	tool := mcp.NewTool(toolName,
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("resource", mcp.Required(),
 			mcp.Description(resourceDesc),
+			mcp.Enum(resourceEnum...),
 		),
 		mcp.WithString("operation", mcp.Required(),
 			mcp.Description(operationDesc),
+			mcp.Enum(operationEnum...),
 		),
 		mcp.WithString("packageName",
-			mcp.Description("Name of the package to operate on. "+
-				"Required for operations on a specific package: get, update, delete, download, upload"),
+			mcp.Description("Name of the package to operate on. Required for operations that target one specific package."),
 		),
 		mcp.WithString("namespace",
 			mcp.Description("The namespace name. Required for listing packages of a specific type"),
@@ -122,16 +150,23 @@ func (b *PulsarAdminPackagesToolBuilder) buildPackagesTool() mcp.Tool {
 			mcp.Description("Contact information for the package. Optional for update and upload operations"),
 		),
 		mcp.WithString("path",
-			mcp.Description("Path to download a package to or upload a package from. Required for download and upload operations"),
+			mcp.Description("Filesystem path used by package transfer operations. For downloads, this is the destination path."),
 		),
 		mcp.WithObject("properties",
 			mcp.Description("Additional properties for the package as key-value pairs. Optional for update and upload operations"),
 		),
+		annotation,
 	)
+	if isToolModeWrite(mode) {
+		pruneToolInputSchema(&tool, []string{"resource", "operation", "packageName", "description", "contact", "path", "properties"})
+	} else {
+		pruneToolInputSchema(&tool, []string{"resource", "operation", "packageName", "namespace", "type"})
+	}
+	return tool
 }
 
 // buildPackagesHandler builds the Pulsar admin packages handler function
-func (b *PulsarAdminPackagesToolBuilder) buildPackagesHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminPackagesToolBuilder) buildPackagesHandler(mode toolMode) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get required parameters
 		resource, err := request.RequireString("resource")
@@ -148,9 +183,8 @@ func (b *PulsarAdminPackagesToolBuilder) buildPackagesHandler(readOnly bool) fun
 		resource = strings.ToLower(resource)
 		operation = strings.ToLower(operation)
 
-		// Validate write operations in read-only mode
-		if readOnly && (operation == "update" || operation == "delete" || operation == "download" || operation == "upload") {
-			return mcp.NewToolResultError("Write operations are not allowed in read-only mode"), nil
+		if err := validateModeOperation(mode, operation, pulsarPackageOperationSpecs); err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 
 		// Get Pulsar session from context
@@ -167,7 +201,7 @@ func (b *PulsarAdminPackagesToolBuilder) buildPackagesHandler(readOnly bool) fun
 		// Dispatch based on resource type
 		switch resource {
 		case "package":
-			return b.handlePackageResource(client, operation, request)
+			return b.handlePackageResource(client, operation, request, mode)
 		case "packages":
 			return b.handlePackagesResource(client, operation, request)
 		default:
@@ -179,7 +213,7 @@ func (b *PulsarAdminPackagesToolBuilder) buildPackagesHandler(readOnly bool) fun
 // Helper functions
 
 // handlePackageResource handles operations on a specific package
-func (b *PulsarAdminPackagesToolBuilder) handlePackageResource(client cmdutils.Client, operation string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminPackagesToolBuilder) handlePackageResource(client cmdutils.Client, operation string, request mcp.CallToolRequest, mode toolMode) (*mcp.CallToolResult, error) {
 	packageName, err := request.RequireString("packageName")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Missing required parameter 'packageName' for package operations: %v", err)), nil
@@ -283,7 +317,8 @@ func (b *PulsarAdminPackagesToolBuilder) handlePackageResource(client cmdutils.C
 		), nil
 
 	default:
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid operation for resource 'package': %s. Available operations: list, get, update, delete, download, upload", operation)), nil
+		return mcp.NewToolResultError(fmt.Sprintf("Invalid operation for resource 'package': %s. Available operations: %s", operation,
+			modeSupportedOperations(mode, pulsarPackageOperationSpecs))), nil
 	}
 }
 

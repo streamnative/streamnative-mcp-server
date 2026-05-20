@@ -5,7 +5,7 @@ Display the context-bindable Pulsar clusters available in the current StreamNati
 - **sncloud_context_available_clusters**
   - No parameters required
 
-You can use `sncloud_context_use_cluster` to bind the current session to a specific Pulsar cluster. You will need to ask for user confirmation of the target cluster if there are multiple clusters available. 
+You can use `sncloud_context_use_cluster` to bind the current session to a specific Pulsar cluster. You will need to ask for user confirmation of the target cluster if there are multiple clusters available.
 
 ---
 
@@ -17,7 +17,7 @@ Bind the current session to a specific StreamNative Cloud cluster. Once the sess
   - `instanceName` (string, required): The name of the Pulsar instance to use
   - `clusterName` (string, required): The name of the Pulsar cluster to use
 
-If you encounter `ContextNotSetErr`, use `sncloud_context_available_clusters` to list the available clusters and bind the session to a specific cluster. 
+If you encounter `ContextNotSetErr`, use `sncloud_context_available_clusters` to list the available clusters and bind the session to a specific cluster.
 
 ---
 
@@ -37,7 +37,7 @@ Display the currently logged-in service account. Returns the name of the authent
 - **sncloud_context_whoami**
   - No parameters required
 
-This tool returns a JSON object containing the service account name and organization. 
+This tool returns a JSON object containing the service account name and organization.
 
 ---
 
@@ -88,4 +88,4 @@ Delete StreamNative Cloud resources. This tool removes resources from the organi
   - `type` (string, required): The type of the resource to delete
     - Options: Instance, PulsarInstance, PulsarCluster, KafkaCluster
 
-This is a destructive operation that cannot be undone. Use with caution. 
+This is a destructive operation that cannot be undone. Use with caution.

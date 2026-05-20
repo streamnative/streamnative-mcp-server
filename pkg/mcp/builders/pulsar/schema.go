@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,6 +30,12 @@ import (
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
+
+var pulsarSchemaOperationSpecs = builders.OperationRegistry{
+	{Name: "get", Mode: builders.OperationModeRead},
+	{Name: "upload", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "delete", Mode: builders.OperationModeWrite, Destructive: true},
+}
 
 // PulsarAdminSchemaToolBuilder implements the ToolBuilder interface for Pulsar Admin Schema tools
 // It provides functionality to build Pulsar schema management tools
@@ -73,43 +79,56 @@ func (b *PulsarAdminSchemaToolBuilder) BuildTools(_ context.Context, config buil
 		return nil, err
 	}
 
-	// Build tools
-	tool := b.buildSchemaTool()
-	handler := b.buildSchemaHandler(config.ReadOnly)
-
-	return []server.ServerTool{
+	tools := []server.ServerTool{
 		{
-			Tool:    tool,
-			Handler: handler,
+			Tool:    b.buildSchemaTool(toolModeRead),
+			Handler: b.buildSchemaHandler(toolModeRead),
 		},
-	}, nil
+	}
+	if !config.ReadOnly {
+		tools = append(tools, server.ServerTool{
+			Tool:    b.buildSchemaTool(toolModeWrite),
+			Handler: b.buildSchemaHandler(toolModeWrite),
+		})
+	}
+
+	return tools, nil
 }
 
 // buildSchemaTool builds the Pulsar Admin Schema MCP tool definition
 // Migrated from the original tool definition logic
-func (b *PulsarAdminSchemaToolBuilder) buildSchemaTool() mcp.Tool {
-	toolDesc := "Manage Apache Pulsar schemas for topics. " +
+func (b *PulsarAdminSchemaToolBuilder) buildSchemaTool(mode toolMode) mcp.Tool {
+	toolDesc := "Read Apache Pulsar schemas for topics. " +
 		"Schemas in Pulsar define the structure of message data, enabling data validation, evolution, and interoperability. " +
-		"Pulsar supports multiple schema types including AVRO, JSON, PROTOBUF, etc., allowing strong typing of message content. " +
-		"Schema versioning ensures backward/forward compatibility as data structures evolve over time. " +
-		"Operations include getting, uploading, and deleting schemas. " +
-		"Requires namespace admin permissions for all operations."
+		"This read-only tool retrieves schema versions without changing topic schema configuration."
 
 	resourceDesc := "Resource to operate on. Available resources:\n" +
 		"- schema: The schema configuration for a specific topic"
 
 	operationDesc := "Operation to perform. Available operations:\n" +
-		"- get: Get the schema for a topic (optionally by version)\n" +
-		"- upload: Upload a new schema for a topic (requires namespace admin permissions)\n" +
-		"- delete: Delete the schema for a topic (requires namespace admin permissions)"
+		"- get: Get the schema for a topic (optionally by version)"
 
-	return mcp.NewTool("pulsar_admin_schema",
+	operationEnum := pulsarSchemaOperationSpecs.NamesForMode(mode)
+	toolName := "pulsar_admin_schema_read"
+	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Schemas", "Manage Pulsar Schemas", pulsarSchemaOperationSpecs)
+	if isToolModeWrite(mode) {
+		toolDesc = "Manage Apache Pulsar schemas for topics. " +
+			"This write tool uploads or deletes topic schemas."
+		operationDesc = "Operation to perform. Available operations:\n" +
+			"- upload: Upload a new schema for a topic (requires namespace admin permissions)\n" +
+			"- delete: Delete the schema for a topic (requires namespace admin permissions)"
+		operationEnum = pulsarSchemaOperationSpecs.NamesForMode(mode)
+		toolName = "pulsar_admin_schema_write"
+	}
+
+	tool := mcp.NewTool(toolName,
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("resource", mcp.Required(),
 			mcp.Description(resourceDesc),
 		),
 		mcp.WithString("operation", mcp.Required(),
 			mcp.Description(operationDesc),
+			mcp.Enum(operationEnum...),
 		),
 		mcp.WithString("topic", mcp.Required(),
 			mcp.Description("The fully qualified topic name in the format 'persistent://tenant/namespace/topic'. "+
@@ -126,12 +145,19 @@ func (b *PulsarAdminSchemaToolBuilder) buildSchemaTool() mcp.Tool {
 				"The file should contain a JSON object with 'type', 'schema', and optionally 'properties' fields. "+
 				"Supported schema types include: AVRO, JSON, PROTOBUF, PROTOBUF_NATIVE, KEY_VALUE, BYTES, STRING, INT8, INT16, INT32, INT64, FLOAT, DOUBLE, BOOLEAN, NONE."),
 		),
+		annotation,
 	)
+	if isToolModeWrite(mode) {
+		pruneToolInputSchema(&tool, []string{"resource", "operation", "topic", "filename"})
+	} else {
+		pruneToolInputSchema(&tool, []string{"resource", "operation", "topic", "version"})
+	}
+	return tool
 }
 
 // buildSchemaHandler builds the Pulsar Admin Schema handler function
 // Migrated from the original handler logic
-func (b *PulsarAdminSchemaToolBuilder) buildSchemaHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminSchemaToolBuilder) buildSchemaHandler(mode toolMode) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get required parameters
 		resource, err := request.RequireString("resource")
@@ -153,9 +179,8 @@ func (b *PulsarAdminSchemaToolBuilder) buildSchemaHandler(readOnly bool) func(co
 		resource = strings.ToLower(resource)
 		operation = strings.ToLower(operation)
 
-		// Validate write operations in read-only mode
-		if readOnly && (operation == "upload" || operation == "delete") {
-			return mcp.NewToolResultError("Write operations are not allowed in read-only mode"), nil
+		if err := validateModeOperation(mode, operation, pulsarSchemaOperationSpecs); err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 
 		// Verify resource type

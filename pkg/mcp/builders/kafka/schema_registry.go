@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,6 +27,14 @@ import (
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 	"github.com/twmb/franz-go/pkg/sr"
 )
+
+var kafkaSchemaRegistryOperationSpecs = builders.OperationRegistry{
+	{Name: "list", Mode: builders.OperationModeRead},
+	{Name: "get", Mode: builders.OperationModeRead},
+	{Name: "set", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "create", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "delete", Mode: builders.OperationModeWrite, Destructive: true},
+}
 
 // KafkaSchemaRegistryToolBuilder implements the ToolBuilder interface for Kafka Schema Registry
 // /nolint:revive
@@ -68,48 +76,56 @@ func (b *KafkaSchemaRegistryToolBuilder) BuildTools(_ context.Context, config bu
 		return nil, err
 	}
 
-	// Build tools
-	tool := b.buildKafkaSchemaRegistryTool()
-	handler := b.buildKafkaSchemaRegistryHandler(config.ReadOnly)
-
-	return []server.ServerTool{
+	tools := []server.ServerTool{
 		{
-			Tool:    tool,
-			Handler: handler,
+			Tool:    b.buildKafkaSchemaRegistryTool(toolModeRead),
+			Handler: b.buildKafkaSchemaRegistryHandler(toolModeRead),
 		},
-	}, nil
+	}
+	if !config.ReadOnly {
+		tools = append(tools, server.ServerTool{
+			Tool:    b.buildKafkaSchemaRegistryTool(toolModeWrite),
+			Handler: b.buildKafkaSchemaRegistryHandler(toolModeWrite),
+		})
+	}
+
+	return tools, nil
 }
 
 // buildKafkaSchemaRegistryTool builds the Kafka Schema Registry MCP tool definition
-func (b *KafkaSchemaRegistryToolBuilder) buildKafkaSchemaRegistryTool() mcp.Tool {
+func (b *KafkaSchemaRegistryToolBuilder) buildKafkaSchemaRegistryTool(mode toolMode) mcp.Tool {
 	resourceDesc := "Resource to operate on. Available resources:\n" +
 		"- subjects: Collection of all schema subjects in the Schema Registry\n" +
 		"- subject: A specific schema subject (a named schema that can have multiple versions)\n" +
 		"- versions: Collection of all versions for a specific subject\n" +
 		"- version: A specific version of a subject's schema\n" +
-		"- compatibility: Compatibility settings that control schema evolution rules\n" +
+		"- compatibility: Compatibility levels that control schema evolution rules\n" +
 		"- types: Supported schema format types (like AVRO, JSON, PROTOBUF)"
+	resourceEnum := []string{"subjects", "subject", "versions", "version", "compatibility", "types"}
 
 	operationDesc := "Operation to perform. Available operations:\n" +
 		"- list: List all subjects, versions for a subject, or supported schema types\n" +
-		"- get: Get a subject's latest schema, a specific version, or compatibility setting\n" +
-		"- set: Set compatibility level for global or subject-specific schema evolution\n" +
-		"- create: Register a new schema for a subject\n" +
-		"- delete: Delete a schema subject or a specific version"
+		"- get: Get a subject's latest schema, a specific version, or compatibility level"
+	operationEnum := kafkaSchemaRegistryOperationSpecs.NamesForMode(mode)
+	toolName := "kafka_admin_sr_read"
+	annotation := builders.ToolAnnotationForMode(mode, "Read Kafka Schema Registry", "Manage Kafka Schema Registry", kafkaSchemaRegistryOperationSpecs)
+	if isToolModeWrite(mode) {
+		resourceDesc = "Resource to operate on. Available resources:\n" +
+			"- subject: A specific schema subject to register or delete\n" +
+			"- version: A specific version of a subject's schema to delete\n" +
+			"- compatibility: Compatibility levels that control schema evolution rules"
+		resourceEnum = []string{"subject", "version", "compatibility"}
+		operationDesc = "Operation to perform. Available operations:\n" +
+			"- set: Set compatibility level for global or subject-specific schema evolution\n" +
+			"- create: Register a new schema for a subject\n" +
+			"- delete: Delete a schema subject or a specific version"
+		operationEnum = kafkaSchemaRegistryOperationSpecs.NamesForMode(mode)
+		toolName = "kafka_admin_sr_write"
+	}
 
-	toolDesc := "Unified tool for managing Apache Kafka Schema Registry.\n" +
+	toolDesc := "Read Apache Kafka Schema Registry metadata and schemas.\n" +
 		"Schema Registry provides a centralized repository for managing and validating schemas for Kafka data.\n" +
-		"It enables schema evolution while maintaining compatibility between producers and consumers.\n\n" +
-		"Key concepts:\n" +
-		"- Subject: A named schema that can have multiple versions\n" +
-		"- Version: A specific instance of a schema for a subject\n" +
-		"- Compatibility: Rules that govern how schemas can evolve\n" +
-		"- Schema Types: Format types like AVRO, JSON Schema, and Protocol Buffers\n\n" +
-		"Compatibility levels:\n" +
-		"- BACKWARD: New schema can read data written with previous schema\n" +
-		"- FORWARD: Previous schema can read data written with new schema\n" +
-		"- FULL: Both backward and forward compatibility\n" +
-		"- NONE: No compatibility enforcement\n\n" +
+		"This read-only tool lists subjects, versions, schema types, and retrieves schemas or compatibility levels.\n\n" +
 		"Usage Examples:\n\n" +
 		"1. List all schema subjects:\n" +
 		"   resource: \"subjects\"\n" +
@@ -118,26 +134,38 @@ func (b *KafkaSchemaRegistryToolBuilder) buildKafkaSchemaRegistryTool() mcp.Tool
 		"   resource: \"subject\"\n" +
 		"   operation: \"get\"\n" +
 		"   subject: \"user-events-value\"\n\n" +
-		"3. Register a new schema:\n" +
-		"   resource: \"subject\"\n" +
-		"   operation: \"create\"\n" +
-		"   subject: \"user-events-value\"\n" +
-		"   schema: {...}\n" +
-		"   schemaType: \"AVRO\"\n\n" +
-		"4. Set compatibility level:\n" +
+		"3. Get compatibility level:\n" +
 		"   resource: \"compatibility\"\n" +
-		"   operation: \"set\"\n" +
-		"   subject: \"user-events-value\"\n" +
-		"   compatibility: \"BACKWARD\"\n\n" +
-		"This tool requires appropriate Schema Registry permissions."
+		"   operation: \"get\"\n" +
+		"   subject: \"user-events-value\"\n\n" +
+		"This tool requires appropriate Schema Registry read permissions."
+	if isToolModeWrite(mode) {
+		toolDesc = "Manage Apache Kafka Schema Registry schemas and compatibility.\n" +
+			"This write tool registers or deletes schemas and changes compatibility settings.\n\n" +
+			"Usage Examples:\n\n" +
+			"1. Register a new schema:\n" +
+			"   resource: \"subject\"\n" +
+			"   operation: \"create\"\n" +
+			"   subject: \"user-events-value\"\n" +
+			"   schema: {...}\n" +
+			"   schemaType: \"AVRO\"\n\n" +
+			"2. Set compatibility level:\n" +
+			"   resource: \"compatibility\"\n" +
+			"   operation: \"set\"\n" +
+			"   subject: \"user-events-value\"\n" +
+			"   compatibility: \"BACKWARD\"\n\n" +
+			"This tool requires appropriate Schema Registry write permissions."
+	}
 
-	return mcp.NewTool("kafka_admin_sr",
+	tool := mcp.NewTool(toolName,
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("resource", mcp.Required(),
 			mcp.Description(resourceDesc),
+			mcp.Enum(resourceEnum...),
 		),
 		mcp.WithString("operation", mcp.Required(),
 			mcp.Description(operationDesc),
+			mcp.Enum(operationEnum...),
 		),
 		mcp.WithString("subject",
 			mcp.Description("The name of the schema subject. "+
@@ -158,11 +186,18 @@ func (b *KafkaSchemaRegistryToolBuilder) buildKafkaSchemaRegistryTool() mcp.Tool
 			mcp.Description("The schema definition as a JSON object. "+
 				"Required for 'create' operation on 'subject' resource. "+
 				"The structure depends on the schema type (AVRO, JSON Schema, or Protocol Buffers).")),
+		annotation,
 	)
+	if isToolModeWrite(mode) {
+		pruneToolInputSchema(&tool, []string{"resource", "operation", "subject", "version", "compatibility", "schemaType", "schema"})
+	} else {
+		pruneToolInputSchema(&tool, []string{"resource", "operation", "subject", "version"})
+	}
+	return tool
 }
 
 // buildKafkaSchemaRegistryHandler builds the Kafka Schema Registry handler function
-func (b *KafkaSchemaRegistryToolBuilder) buildKafkaSchemaRegistryHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *KafkaSchemaRegistryToolBuilder) buildKafkaSchemaRegistryHandler(mode toolMode) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get required parameters
 		resource, err := request.RequireString("resource")
@@ -179,9 +214,8 @@ func (b *KafkaSchemaRegistryToolBuilder) buildKafkaSchemaRegistryHandler(readOnl
 		resource = strings.ToLower(resource)
 		operation = strings.ToLower(operation)
 
-		// Validate write operations in read-only mode
-		if readOnly && (operation == "create" || operation == "delete" || operation == "set") {
-			return mcp.NewToolResultError("Write operations are not allowed in read-only mode"), nil
+		if err := validateModeOperation(mode, operation, kafkaSchemaRegistryOperationSpecs); err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 
 		// Get Schema Registry client

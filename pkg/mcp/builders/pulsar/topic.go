@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,16 +31,27 @@ import (
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
 
-var readOnlyRestrictedTopicOperations = map[string]struct{}{
-	"create":             {},
-	"delete":             {},
-	"unload":             {},
-	"terminate":          {},
-	"compact":            {},
-	"update":             {},
-	"offload":            {},
-	"grant-permissions":  {},
-	"revoke-permissions": {},
+var pulsarTopicOperationSpecs = builders.OperationRegistry{
+	{Name: "list", Mode: builders.OperationModeRead},
+	{Name: "get", Mode: builders.OperationModeRead},
+	{Name: "get-permissions", Mode: builders.OperationModeRead},
+	{Name: "stats", Mode: builders.OperationModeRead},
+	{Name: "lookup", Mode: builders.OperationModeRead},
+	{Name: "internal-stats", Mode: builders.OperationModeRead},
+	{Name: "internal-info", Mode: builders.OperationModeRead},
+	{Name: "bundle-range", Mode: builders.OperationModeRead},
+	{Name: "last-message-id", Mode: builders.OperationModeRead},
+	{Name: "compact-status", Mode: builders.OperationModeRead},
+	{Name: "offload-status", Mode: builders.OperationModeRead},
+	{Name: "grant-permissions", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "revoke-permissions", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "create", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "delete", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "unload", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "terminate", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "compact", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "update", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "offload", Mode: builders.OperationModeWrite, Destructive: true},
 }
 
 var topicOperationAliases = map[string]string{
@@ -91,45 +102,40 @@ func (b *PulsarAdminTopicToolBuilder) BuildTools(_ context.Context, config build
 		return nil, err
 	}
 
-	// Build tools
-	tool := b.buildTopicTool()
-	handler := b.buildTopicHandler(config.ReadOnly)
-
-	return []server.ServerTool{
+	tools := []server.ServerTool{
 		{
-			Tool:    tool,
-			Handler: handler,
+			Tool:    b.buildTopicTool(toolModeRead),
+			Handler: b.buildTopicHandler(toolModeRead),
 		},
-	}, nil
+	}
+	if !config.ReadOnly {
+		tools = append(tools, server.ServerTool{
+			Tool:    b.buildTopicTool(toolModeWrite),
+			Handler: b.buildTopicHandler(toolModeWrite),
+		})
+	}
+
+	return tools, nil
 }
 
 // buildTopicTool builds the Pulsar Admin Topic MCP tool definition
 // Migrated from the original tool definition logic
-func (b *PulsarAdminTopicToolBuilder) buildTopicTool() mcp.Tool {
-	toolDesc := "Manage Apache Pulsar topics. " +
+func (b *PulsarAdminTopicToolBuilder) buildTopicTool(mode toolMode) mcp.Tool {
+	toolDesc := "Read Apache Pulsar topics. " +
 		"Topics are the core messaging entities in Pulsar that store and transmit messages. " +
-		"Pulsar supports two types of topics: persistent (durable storage with guaranteed delivery) " +
-		"and non-persistent (in-memory with at-most-once delivery). " +
-		"Topics can be partitioned for parallel processing and higher throughput, where each partition " +
-		"functions as an independent topic with its own message log. " +
-		"Topics follow a hierarchical naming structure: persistent://tenant/namespace/topic. " +
-		"This tool supports various operations on topics including creation, deletion, lookup, compaction, " +
-		"offloading, and retrieving statistics. " +
-		"Do not use this tool for Kafka protocol operations. Use 'kafka_admin_topics' instead." +
+		"This read-only tool lists topics and retrieves metadata, permissions, statistics, lookup information, internal details, message IDs, and long-running operation status. " +
+		"Do not use this tool for Kafka protocol operations. Use 'kafka_admin_topics_read' instead. " +
 		"Most operations require namespace admin permissions."
 
 	resourceDesc := "Resource to operate on. Available resources:\n" +
 		"- topic: A Pulsar topic\n" +
 		"- topics: Multiple topics within a namespace"
+	resourceEnum := []string{"topic", "topics"}
 
 	operationDesc := "Operation to perform. Available operations:\n" +
 		"- list: List all topics in a namespace\n" +
 		"- get: Get metadata for a topic\n" +
 		"- get-permissions: Get topic permissions for all roles\n" +
-		"- grant-permissions: Grant topic permissions to a role\n" +
-		"- revoke-permissions: Revoke topic permissions from a role\n" +
-		"- create: Create a new topic with optional partitions\n" +
-		"- delete: Delete a topic\n" +
 		"- stats: Get stats for a topic\n" +
 		"- lookup: Look up the broker serving a topic\n" +
 		"- internal-stats: Get internal stats for a topic\n" +
@@ -137,20 +143,41 @@ func (b *PulsarAdminTopicToolBuilder) buildTopicTool() mcp.Tool {
 		"- bundle-range: Get the bundle range of a topic\n" +
 		"- last-message-id: Get the last message ID of a topic\n" +
 		"- compact-status: Get compaction status for a topic (legacy alias: status)\n" +
-		"- unload: Unload a topic\n" +
-		"- terminate: Terminate a topic\n" +
-		"- compact: Trigger compaction on a topic\n" +
-		"- update: Update a topic partitions\n" +
-		"- offload: Offload data from a topic to long-term storage\n" +
 		"- offload-status: Check the status of data offloading for a topic"
 
-	return mcp.NewTool("pulsar_admin_topic",
+	operationEnum := pulsarTopicOperationSpecs.NamesForMode(mode)
+	toolName := "pulsar_admin_topic_read"
+	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Topics", "Manage Pulsar Topics", pulsarTopicOperationSpecs)
+	if isToolModeWrite(mode) {
+		toolDesc = "Manage Apache Pulsar topics. " +
+			"This write tool changes topic lifecycle, permissions, partitioning, compaction, or offload state. " +
+			"Do not use this tool for Kafka protocol operations. Use 'kafka_admin_topics_write' instead."
+		resourceDesc = "Resource to operate on. Available resources:\n" +
+			"- topic: A Pulsar topic"
+		resourceEnum = []string{"topic"}
+		operationDesc = "Operation to perform. Available operations:\n" +
+			"- grant-permissions: Grant topic permissions to a role\n" +
+			"- revoke-permissions: Revoke topic permissions from a role\n" +
+			"- create: Create a new topic with optional partitions\n" +
+			"- delete: Delete a topic\n" +
+			"- unload: Unload a topic\n" +
+			"- terminate: Terminate a topic\n" +
+			"- compact: Trigger compaction on a topic\n" +
+			"- update: Update topic partitions\n" +
+			"- offload: Offload data from a topic to long-term storage"
+		operationEnum = pulsarTopicOperationSpecs.NamesForMode(mode)
+		toolName = "pulsar_admin_topic_write"
+	}
+
+	tool := mcp.NewTool(toolName,
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("resource", mcp.Required(),
 			mcp.Description(resourceDesc),
+			mcp.Enum(resourceEnum...),
 		),
 		mcp.WithString("operation", mcp.Required(),
 			mcp.Description(operationDesc),
+			mcp.Enum(operationEnum...),
 		),
 		mcp.WithString("topic",
 			mcp.Description("The fully qualified topic name (format: [persistent|non-persistent]://tenant/namespace/topic). "+
@@ -214,12 +241,19 @@ func (b *PulsarAdminTopicToolBuilder) buildTopicTool() mcp.Tool {
 				},
 			),
 		),
+		annotation,
 	)
+	if isToolModeWrite(mode) {
+		pruneToolInputSchema(&tool, []string{"resource", "operation", "topic", "partitions", "force", "non-partitioned", "config", "messageId", "role", "actions"})
+	} else {
+		pruneToolInputSchema(&tool, []string{"resource", "operation", "topic", "namespace", "partitioned", "per-partition", "wait"})
+	}
+	return tool
 }
 
 // buildTopicHandler builds the Pulsar Admin Topic handler function
 // Migrated from the original handler logic
-func (b *PulsarAdminTopicToolBuilder) buildTopicHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTopicToolBuilder) buildTopicHandler(mode toolMode) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get required parameters
 		resource, err := request.RequireString("resource")
@@ -236,9 +270,8 @@ func (b *PulsarAdminTopicToolBuilder) buildTopicHandler(readOnly bool) func(cont
 		resource = strings.ToLower(resource)
 		operation = normalizeTopicOperation(operation)
 
-		// Validate write operations in read-only mode
-		if readOnly && isReadOnlyRestrictedTopicOperation(operation) {
-			return mcp.NewToolResultError("Write operations are not allowed in read-only mode"), nil
+		if err := validateModeOperation(mode, operation, pulsarTopicOperationSpecs); err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 
 		// Get Pulsar session from context
@@ -312,8 +345,8 @@ func (b *PulsarAdminTopicToolBuilder) buildTopicHandler(readOnly bool) func(cont
 }
 
 func isReadOnlyRestrictedTopicOperation(operation string) bool {
-	_, ok := readOnlyRestrictedTopicOperations[strings.ToLower(operation)]
-	return ok
+	spec, ok := pulsarTopicOperationSpecs.SpecFor(operation)
+	return ok && spec.Mode == builders.OperationModeWrite
 }
 
 func normalizeTopicOperation(operation string) string {

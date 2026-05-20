@@ -1,59 +1,78 @@
-#### pulsar_admin_topic
+#### pulsar_admin_topic_read / pulsar_admin_topic_write
 
-Manage Apache Pulsar topics. Topics are the core messaging entities in Pulsar that store and transmit messages. Pulsar supports two types of topics: persistent (durable storage with guaranteed delivery) and non-persistent (in-memory with at-most-once delivery). Topics can be partitioned for parallel processing and higher throughput.
 
-- **topic**
-  - **get**: Get metadata for a topic
-    - `topic` (string, required): The fully qualified topic name
-  - **get-permissions**: Get the current topic permissions for every role
-    - `topic` (string, required): The fully qualified topic name
-  - **grant-permissions**: Grant topic permissions to a role
-    - `topic` (string, required): The fully qualified topic name
-    - `role` (string, required): The role to grant permissions to
-    - `actions` (array of strings, required): Allowed values are `produce`, `consume`, `sources`, `sinks`, `functions`, `packages`
-  - **revoke-permissions**: Revoke all topic permissions from a role
-    - `topic` (string, required): The fully qualified topic name
-    - `role` (string, required): The role to revoke permissions from
-  - **create**: Create a new topic with optional partitions
-    - `topic` (string, required): The fully qualified topic name
-    - `partitions` (number, required): The number of partitions (0 for non-partitioned)
-  - **delete**: Delete a topic
-    - `topic` (string, required): The fully qualified topic name
-    - `force` (boolean, optional): Force operation even if it disrupts producers/consumers
-    - `non-partitioned` (boolean, optional): Delete only the non-partitioned topic with the same name
-  - **stats**: Get statistics for a topic
-    - `topic` (string, required): The fully qualified topic name
-    - `partitioned` (boolean, optional): Get stats for a partitioned topic
-    - `per-partition` (boolean, optional): Include per-partition stats
-  - **lookup**: Look up the broker serving a topic
-    - `topic` (string, required): The fully qualified topic name
-  - **internal-stats**: Get internal stats for a topic
-    - `topic` (string, required): The fully qualified topic name
-  - **internal-info**: Get internal info for a topic
-    - `topic` (string, required): The fully qualified topic name
-  - **bundle-range**: Get the bundle range of a topic
-    - `topic` (string, required): The fully qualified topic name
-  - **last-message-id**: Get the last message ID of a topic
-    - `topic` (string, required): The fully qualified topic name
-  - **compact-status**: Get compaction status for a topic (`status` is still accepted as a legacy alias)
-    - `topic` (string, required): The fully qualified topic name
-    - `wait` (boolean, optional): Poll until the compaction finishes
-  - **unload**: Unload a topic from broker memory
-    - `topic` (string, required): The fully qualified topic name
-  - **terminate**: Terminate a topic (close all producers and mark as inactive)
-    - `topic` (string, required): The fully qualified topic name
-  - **compact**: Trigger compaction on a topic
-    - `topic` (string, required): The fully qualified topic name
-  - **update**: Update the number of partitions for a topic
-    - `topic` (string, required): The fully qualified topic name
-    - `partitions` (number, required): The new number of partitions
-  - **offload**: Offload data from a topic to long-term storage
-    - `topic` (string, required): The fully qualified topic name
-    - `messageId` (string, required): Message ID up to which to offload (format: ledgerId:entryId)
-  - **offload-status**: Check the status of data offloading for a topic
-    - `topic` (string, required): The fully qualified topic name
-    - `wait` (boolean, optional): Poll until the offload finishes
+<!-- generated:operations:start -->
+| Tool | Mode | Operations |
+|---|---|---|
+| `pulsar_admin_topic_read` | read | `list`, `get`, `get-permissions`, `stats`, `lookup`, `internal-stats`, `internal-info`, `bundle-range`, `last-message-id`, `compact-status`, `offload-status` |
+| `pulsar_admin_topic_write` | write | `grant-permissions`, `revoke-permissions`, `create`, `delete`, `unload`, `terminate`, `compact`, `update`, `offload` |
+<!-- generated:operations:end -->
+
+**Claude connector safety:** Actual MCP tools are split into `pulsar_admin_topic_read` and `pulsar_admin_topic_write`. The read tool is read-only and only exposes read operations/parameters. The write tool is destructive and is not registered in read-only mode.
+
+### `pulsar_admin_topic_read`
+
+Read topic metadata, permissions, statistics, lookup details, and long-running operation status.
 
 - **topics**
-  - **list**: List all topics in a namespace
-    - `namespace` (string, required): The namespace name (format: tenant/namespace) 
+  - **list**: List topics in a namespace
+    - `namespace` (string, required): Namespace name in `tenant/namespace` format
+
+- **topic**
+  - **get**: Get topic metadata
+    - `topic` (string, required): Fully qualified topic name
+  - **get-permissions**: Get topic permissions for all roles
+    - `topic` (string, required): Fully qualified topic name
+  - **stats**: Get topic statistics
+    - `topic` (string, required): Fully qualified topic name
+    - `partitioned` (boolean, optional): Treat topic as partitioned
+    - `per-partition` (boolean, optional): Include per-partition stats
+  - **lookup**: Look up the broker serving a topic
+    - `topic` (string, required): Fully qualified topic name
+  - **internal-stats**: Get topic internal stats
+    - `topic` (string, required): Fully qualified topic name
+  - **internal-info**: Get topic internal info
+    - `topic` (string, required): Fully qualified topic name
+  - **bundle-range**: Get topic bundle range
+    - `topic` (string, required): Fully qualified topic name
+  - **last-message-id**: Get the last message ID of a topic
+    - `topic` (string, required): Fully qualified topic name
+  - **compact-status**: Get topic compaction status (`status` is accepted as a legacy alias)
+    - `topic` (string, required): Fully qualified topic name
+    - `wait` (boolean, optional): Poll until compaction status is final
+  - **offload-status**: Get topic offload status
+    - `topic` (string, required): Fully qualified topic name
+    - `wait` (boolean, optional): Poll until offload status is final
+
+### `pulsar_admin_topic_write`
+
+Manage topic lifecycle, permissions, partitioning, compaction, and offload state.
+
+- **topic**
+  - **grant-permissions**: Grant topic permissions to a role
+    - `topic` (string, required): Fully qualified topic name
+    - `role` (string, required): Role to grant permissions to
+    - `actions` (array, required): Allowed values include `produce`, `consume`, `sources`, `sinks`, `functions`, `packages`
+  - **revoke-permissions**: Revoke all topic permissions from a role
+    - `topic` (string, required): Fully qualified topic name
+    - `role` (string, required): Role to revoke permissions from
+  - **create**: Create a topic
+    - `topic` (string, required): Fully qualified topic name
+    - `partitions` (number, required): Number of partitions; use `0` for non-partitioned
+  - **delete**: Delete a topic
+    - `topic` (string, required): Fully qualified topic name
+    - `force` (boolean, optional): Force operation even if producers or consumers are active
+    - `non-partitioned` (boolean, optional): Delete only a non-partitioned topic with this name
+  - **unload**: Unload a topic from broker memory
+    - `topic` (string, required): Fully qualified topic name
+  - **terminate**: Terminate a topic
+    - `topic` (string, required): Fully qualified topic name
+  - **compact**: Trigger topic compaction
+    - `topic` (string, required): Fully qualified topic name
+  - **update**: Update topic partitions or configuration
+    - `topic` (string, required): Fully qualified topic name
+    - `partitions` (number, optional): New partition count
+    - `config` (string, optional): JSON topic configuration
+  - **offload**: Offload topic data to long-term storage
+    - `topic` (string, required): Fully qualified topic name
+    - `messageId` (string, required): Message ID up to which data should be offloaded

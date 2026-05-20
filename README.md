@@ -240,6 +240,8 @@ The StreamNative MCP Server allows you to enable or disable specific groups of f
 
 ---
 
+Claude connector compatibility: admin tools that previously mixed read and write operations behind one `operation` parameter are exposed as separate read/write MCP tools, for example `kafka_admin_topics_read` and `kafka_admin_topics_write`. Read tools include `annotations.readOnlyHint=true`; write or side-effectful tools include `annotations.destructiveHint=true`. In `--read-only` mode, write/destructive tools are not registered.
+
 #### Kafka Features
 
 | Feature                   | Description                                      | Docs |

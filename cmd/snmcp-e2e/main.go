@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -129,7 +129,7 @@ func run(ctx context.Context, cfg config) error {
 		return err
 	}
 	if len(clusters) == 0 {
-		return errors.New("no clusters returned from pulsar_admin_cluster")
+		return errors.New("no clusters returned from pulsar_admin_cluster_read")
 	}
 	cluster := clusters[0]
 
@@ -149,23 +149,23 @@ func run(ctx context.Context, cfg config) error {
 	sourceName := fmt.Sprintf("e2e-source-%d", suffix)
 	sourceParallelismUpdated := 2
 
-	result, err := callTool(ctx, adminClient, "pulsar_admin_tenant", map[string]any{
+	result, err := callTool(ctx, adminClient, "pulsar_admin_tenant_write", map[string]any{
 		"resource":        "tenant",
 		"operation":       "create",
 		"tenant":          tenant,
 		"adminRoles":      []string{"admin"},
 		"allowedClusters": []string{cluster},
 	})
-	if err := requireToolOK(result, err, "pulsar_admin_tenant create"); err != nil {
+	if err := requireToolOK(result, err, "pulsar_admin_tenant_write create"); err != nil {
 		return err
 	}
 
-	result, err = callTool(ctx, adminClient, "pulsar_admin_namespace", map[string]any{
+	result, err = callTool(ctx, adminClient, "pulsar_admin_namespace_write", map[string]any{
 		"operation": "create",
 		"namespace": namespace,
 		"clusters":  []string{cluster},
 	})
-	if err := requireToolOK(result, err, "pulsar_admin_namespace create"); err != nil {
+	if err := requireToolOK(result, err, "pulsar_admin_namespace_write create"); err != nil {
 		return err
 	}
 
@@ -179,13 +179,13 @@ func run(ctx context.Context, cfg config) error {
 		return err
 	}
 
-	result, err = callTool(ctx, adminClient, "pulsar_admin_topic", map[string]any{
+	result, err = callTool(ctx, adminClient, "pulsar_admin_topic_write", map[string]any{
 		"resource":   "topic",
 		"operation":  "create",
 		"topic":      topic,
 		"partitions": float64(0),
 	})
-	if err := requireToolOK(result, err, "pulsar_admin_topic create"); err != nil {
+	if err := requireToolOK(result, err, "pulsar_admin_topic_write create"); err != nil {
 		return err
 	}
 
@@ -220,23 +220,23 @@ func run(ctx context.Context, cfg config) error {
 		return err
 	}
 
-	result, err = callTool(ctx, adminClient, "pulsar_admin_topic", map[string]any{
+	result, err = callTool(ctx, adminClient, "pulsar_admin_topic_write", map[string]any{
 		"resource":   "topic",
 		"operation":  "create",
 		"topic":      functionInputTopic,
 		"partitions": float64(0),
 	})
-	if err := requireToolOK(result, err, "pulsar_admin_topic create function input"); err != nil {
+	if err := requireToolOK(result, err, "pulsar_admin_topic_write create function input"); err != nil {
 		return err
 	}
 
-	result, err = callTool(ctx, adminClient, "pulsar_admin_topic", map[string]any{
+	result, err = callTool(ctx, adminClient, "pulsar_admin_topic_write", map[string]any{
 		"resource":   "topic",
 		"operation":  "create",
 		"topic":      functionOutputTopic,
 		"partitions": float64(0),
 	})
-	if err := requireToolOK(result, err, "pulsar_admin_topic create function output"); err != nil {
+	if err := requireToolOK(result, err, "pulsar_admin_topic_write create function output"); err != nil {
 		return err
 	}
 
@@ -249,7 +249,7 @@ func run(ctx context.Context, cfg config) error {
 		"/server/e2e/functions/echo.py",
 		"echo.EchoFunction",
 	)
-	result, err = callTool(ctx, adminClient, "pulsar_admin_functions", map[string]any{
+	result, err = callTool(ctx, adminClient, "pulsar_admin_functions_write", map[string]any{
 		"operation": "create",
 		"tenant":    tenant,
 		"namespace": namespaceName,
@@ -259,7 +259,7 @@ func run(ctx context.Context, cfg config) error {
 		"output":    functionOutputTopic,
 		"py":        "/server/e2e/functions/echo.py",
 	})
-	if err := requireToolOK(result, err, "pulsar_admin_functions create"); err != nil {
+	if err := requireToolOK(result, err, "pulsar_admin_functions_write create"); err != nil {
 		return err
 	}
 
@@ -267,19 +267,19 @@ func run(ctx context.Context, cfg config) error {
 		return err
 	}
 
-	result, err = callTool(ctx, adminClient, "pulsar_admin_functions", map[string]any{
+	result, err = callTool(ctx, adminClient, "pulsar_admin_functions_read", map[string]any{
 		"operation":  "stats",
 		"tenant":     tenant,
 		"namespace":  namespaceName,
 		"name":       functionName,
 		"instanceId": float64(0),
 	})
-	if err := requireToolOK(result, err, "pulsar_admin_functions stats"); err != nil {
+	if err := requireToolOK(result, err, "pulsar_admin_functions_read stats"); err != nil {
 		return err
 	}
 
 	triggerValue := "e2e-trigger"
-	result, err = callTool(ctx, adminClient, "pulsar_admin_functions", map[string]any{
+	result, err = callTool(ctx, adminClient, "pulsar_admin_functions_write", map[string]any{
 		"operation":    "trigger",
 		"tenant":       tenant,
 		"namespace":    namespaceName,
@@ -287,7 +287,7 @@ func run(ctx context.Context, cfg config) error {
 		"topic":        functionInputTopic,
 		"triggerValue": triggerValue,
 	})
-	if err := requireToolOK(result, err, "pulsar_admin_functions trigger"); err != nil {
+	if err := requireToolOK(result, err, "pulsar_admin_functions_write trigger"); err != nil {
 		return err
 	}
 	triggerResult := firstText(result)
@@ -298,47 +298,47 @@ func run(ctx context.Context, cfg config) error {
 		}
 	}
 
-	result, err = callTool(ctx, adminClient, "pulsar_admin_functions", map[string]any{
+	result, err = callTool(ctx, adminClient, "pulsar_admin_functions_write", map[string]any{
 		"operation":  "update",
 		"tenant":     tenant,
 		"namespace":  namespaceName,
 		"name":       functionName,
 		"userConfig": map[string]any{"updated": true},
 	})
-	if err := requireToolOK(result, err, "pulsar_admin_functions update"); err != nil {
+	if err := requireToolOK(result, err, "pulsar_admin_functions_write update"); err != nil {
 		return err
 	}
 
-	result, err = callTool(ctx, adminClient, "pulsar_admin_functions", map[string]any{
+	result, err = callTool(ctx, adminClient, "pulsar_admin_functions_read", map[string]any{
 		"operation": "get",
 		"tenant":    tenant,
 		"namespace": namespaceName,
 		"name":      functionName,
 	})
-	if err := requireToolOK(result, err, "pulsar_admin_functions get"); err != nil {
+	if err := requireToolOK(result, err, "pulsar_admin_functions_read get"); err != nil {
 		return err
 	}
 	if err := assertFunctionUserConfig(firstText(result), "updated"); err != nil {
 		return err
 	}
 
-	result, err = callTool(ctx, adminClient, "pulsar_admin_functions", map[string]any{
+	result, err = callTool(ctx, adminClient, "pulsar_admin_functions_write", map[string]any{
 		"operation": "delete",
 		"tenant":    tenant,
 		"namespace": namespaceName,
 		"name":      functionName,
 	})
-	if err := requireToolOK(result, err, "pulsar_admin_functions delete"); err != nil {
+	if err := requireToolOK(result, err, "pulsar_admin_functions_write delete"); err != nil {
 		return err
 	}
 
-	result, err = callTool(ctx, adminClient, "pulsar_admin_topic", map[string]any{
+	result, err = callTool(ctx, adminClient, "pulsar_admin_topic_write", map[string]any{
 		"resource":   "topic",
 		"operation":  "create",
 		"topic":      sinkInputTopic,
 		"partitions": float64(0),
 	})
-	if err := requireToolOK(result, err, "pulsar_admin_topic create sink input"); err != nil {
+	if err := requireToolOK(result, err, "pulsar_admin_topic_write create sink input"); err != nil {
 		return err
 	}
 
@@ -351,7 +351,7 @@ func run(ctx context.Context, cfg config) error {
 		return err
 	}
 
-	result, err = callTool(ctx, adminClient, "pulsar_admin_sinks", map[string]any{
+	result, err = callTool(ctx, adminClient, "pulsar_admin_sinks_write", map[string]any{
 		"operation": "create",
 		"tenant":    tenant,
 		"namespace": namespaceName,
@@ -359,7 +359,7 @@ func run(ctx context.Context, cfg config) error {
 		"sink-type": sinkType,
 		"inputs":    []string{sinkInputTopic},
 	})
-	if err := requireToolOK(result, err, "pulsar_admin_sinks create"); err != nil {
+	if err := requireToolOK(result, err, "pulsar_admin_sinks_write create"); err != nil {
 		return err
 	}
 
@@ -367,7 +367,7 @@ func run(ctx context.Context, cfg config) error {
 		return err
 	}
 
-	result, err = callTool(ctx, adminClient, "pulsar_admin_sinks", map[string]any{
+	result, err = callTool(ctx, adminClient, "pulsar_admin_sinks_write", map[string]any{
 		"operation":   "update",
 		"tenant":      tenant,
 		"namespace":   namespaceName,
@@ -375,40 +375,40 @@ func run(ctx context.Context, cfg config) error {
 		"sink-type":   sinkType,
 		"parallelism": float64(sinkParallelismUpdated),
 	})
-	if err := requireToolOK(result, err, "pulsar_admin_sinks update"); err != nil {
+	if err := requireToolOK(result, err, "pulsar_admin_sinks_write update"); err != nil {
 		return err
 	}
 
-	result, err = callTool(ctx, adminClient, "pulsar_admin_sinks", map[string]any{
+	result, err = callTool(ctx, adminClient, "pulsar_admin_sinks_read", map[string]any{
 		"operation": "get",
 		"tenant":    tenant,
 		"namespace": namespaceName,
 		"name":      sinkName,
 	})
-	if err := requireToolOK(result, err, "pulsar_admin_sinks get"); err != nil {
+	if err := requireToolOK(result, err, "pulsar_admin_sinks_read get"); err != nil {
 		return err
 	}
 	if err := assertSinkParallelism(firstText(result), sinkParallelismUpdated); err != nil {
 		return err
 	}
 
-	result, err = callTool(ctx, adminClient, "pulsar_admin_sinks", map[string]any{
+	result, err = callTool(ctx, adminClient, "pulsar_admin_sinks_write", map[string]any{
 		"operation": "delete",
 		"tenant":    tenant,
 		"namespace": namespaceName,
 		"name":      sinkName,
 	})
-	if err := requireToolOK(result, err, "pulsar_admin_sinks delete"); err != nil {
+	if err := requireToolOK(result, err, "pulsar_admin_sinks_write delete"); err != nil {
 		return err
 	}
 
-	result, err = callTool(ctx, adminClient, "pulsar_admin_topic", map[string]any{
+	result, err = callTool(ctx, adminClient, "pulsar_admin_topic_write", map[string]any{
 		"resource":   "topic",
 		"operation":  "create",
 		"topic":      sourceOutputTopic,
 		"partitions": float64(0),
 	})
-	if err := requireToolOK(result, err, "pulsar_admin_topic create source output"); err != nil {
+	if err := requireToolOK(result, err, "pulsar_admin_topic_write create source output"); err != nil {
 		return err
 	}
 
@@ -421,7 +421,7 @@ func run(ctx context.Context, cfg config) error {
 		return err
 	}
 
-	result, err = callTool(ctx, adminClient, "pulsar_admin_sources", map[string]any{
+	result, err = callTool(ctx, adminClient, "pulsar_admin_sources_write", map[string]any{
 		"operation":              "create",
 		"tenant":                 tenant,
 		"namespace":              namespaceName,
@@ -432,7 +432,7 @@ func run(ctx context.Context, cfg config) error {
 			"sleepBetweenMessages": "60000",
 		},
 	})
-	if err := requireToolOK(result, err, "pulsar_admin_sources create"); err != nil {
+	if err := requireToolOK(result, err, "pulsar_admin_sources_write create"); err != nil {
 		return err
 	}
 
@@ -440,7 +440,7 @@ func run(ctx context.Context, cfg config) error {
 		return err
 	}
 
-	result, err = callTool(ctx, adminClient, "pulsar_admin_sources", map[string]any{
+	result, err = callTool(ctx, adminClient, "pulsar_admin_sources_write", map[string]any{
 		"operation":   "update",
 		"tenant":      tenant,
 		"namespace":   namespaceName,
@@ -448,40 +448,40 @@ func run(ctx context.Context, cfg config) error {
 		"source-type": sourceType,
 		"parallelism": float64(sourceParallelismUpdated),
 	})
-	if err := requireToolOK(result, err, "pulsar_admin_sources update"); err != nil {
+	if err := requireToolOK(result, err, "pulsar_admin_sources_write update"); err != nil {
 		return err
 	}
 
-	result, err = callTool(ctx, adminClient, "pulsar_admin_sources", map[string]any{
+	result, err = callTool(ctx, adminClient, "pulsar_admin_sources_read", map[string]any{
 		"operation": "get",
 		"tenant":    tenant,
 		"namespace": namespaceName,
 		"name":      sourceName,
 	})
-	if err := requireToolOK(result, err, "pulsar_admin_sources get"); err != nil {
+	if err := requireToolOK(result, err, "pulsar_admin_sources_read get"); err != nil {
 		return err
 	}
 	if err := assertSourceParallelism(firstText(result), sourceParallelismUpdated); err != nil {
 		return err
 	}
 
-	result, err = callTool(ctx, adminClient, "pulsar_admin_sources", map[string]any{
+	result, err = callTool(ctx, adminClient, "pulsar_admin_sources_write", map[string]any{
 		"operation": "delete",
 		"tenant":    tenant,
 		"namespace": namespaceName,
 		"name":      sourceName,
 	})
-	if err := requireToolOK(result, err, "pulsar_admin_sources delete"); err != nil {
+	if err := requireToolOK(result, err, "pulsar_admin_sources_write delete"); err != nil {
 		return err
 	}
 
-	result, err = callTool(ctx, adminClient, "pulsar_admin_topic", map[string]any{
+	result, err = callTool(ctx, adminClient, "pulsar_admin_topic_write", map[string]any{
 		"resource":   "topic",
 		"operation":  "create",
 		"topic":      concurrentTopic,
 		"partitions": float64(0),
 	})
-	if err := requireToolOK(result, err, "pulsar_admin_topic create concurrent"); err != nil {
+	if err := requireToolOK(result, err, "pulsar_admin_topic_write create concurrent"); err != nil {
 		return err
 	}
 
@@ -565,7 +565,7 @@ func expectUnauthorized(ctx context.Context, sseURL, token string, verbose bool)
 		return fmt.Errorf("expected auth error during initialize for %s, got %v", sseURL, err)
 	}
 
-	result, err := callTool(ctx, c, "pulsar_admin_cluster", map[string]any{
+	result, err := callTool(ctx, c, "pulsar_admin_cluster_read", map[string]any{
 		"resource":  "cluster",
 		"operation": "list",
 	})
@@ -710,11 +710,11 @@ func isAuthText(text string) bool {
 }
 
 func listClusters(ctx context.Context, c *client.Client) ([]string, error) {
-	result, err := callTool(ctx, c, "pulsar_admin_cluster", map[string]any{
+	result, err := callTool(ctx, c, "pulsar_admin_cluster_read", map[string]any{
 		"resource":  "cluster",
 		"operation": "list",
 	})
-	if err := requireToolOK(result, err, "pulsar_admin_cluster list"); err != nil {
+	if err := requireToolOK(result, err, "pulsar_admin_cluster_read list"); err != nil {
 		return nil, err
 	}
 	raw := firstText(result)
@@ -749,13 +749,13 @@ func waitForFunctionRunning(ctx context.Context, c *client.Client, tenant, names
 }
 
 func getFunctionStatus(ctx context.Context, c *client.Client, tenant, namespace, name string) (functionStatus, error) {
-	result, err := callTool(ctx, c, "pulsar_admin_functions", map[string]any{
+	result, err := callTool(ctx, c, "pulsar_admin_functions_read", map[string]any{
 		"operation": "status",
 		"tenant":    tenant,
 		"namespace": namespace,
 		"name":      name,
 	})
-	if err := requireToolOK(result, err, "pulsar_admin_functions status"); err != nil {
+	if err := requireToolOK(result, err, "pulsar_admin_functions_read status"); err != nil {
 		return functionStatus{}, err
 	}
 	raw := firstText(result)
@@ -792,10 +792,10 @@ type connectorDefinition struct {
 }
 
 func listBuiltInSinks(ctx context.Context, c *client.Client) ([]connectorDefinition, error) {
-	result, err := callTool(ctx, c, "pulsar_admin_sinks", map[string]any{
+	result, err := callTool(ctx, c, "pulsar_admin_sinks_read", map[string]any{
 		"operation": "list-built-in",
 	})
-	if err := requireToolOK(result, err, "pulsar_admin_sinks list-built-in"); err != nil {
+	if err := requireToolOK(result, err, "pulsar_admin_sinks_read list-built-in"); err != nil {
 		return nil, err
 	}
 	raw := firstText(result)
@@ -828,10 +828,10 @@ func selectSinkType(definitions []connectorDefinition, preferred []string) (stri
 }
 
 func listBuiltInSources(ctx context.Context, c *client.Client) ([]connectorDefinition, error) {
-	result, err := callTool(ctx, c, "pulsar_admin_sources", map[string]any{
+	result, err := callTool(ctx, c, "pulsar_admin_sources_read", map[string]any{
 		"operation": "list-built-in",
 	})
-	if err := requireToolOK(result, err, "pulsar_admin_sources list-built-in"); err != nil {
+	if err := requireToolOK(result, err, "pulsar_admin_sources_read list-built-in"); err != nil {
 		return nil, err
 	}
 	raw := firstText(result)
@@ -880,13 +880,13 @@ type sinkInstanceStatusData struct {
 }
 
 func getSinkStatus(ctx context.Context, c *client.Client, tenant, namespace, name string) (sinkStatus, error) {
-	result, err := callTool(ctx, c, "pulsar_admin_sinks", map[string]any{
+	result, err := callTool(ctx, c, "pulsar_admin_sinks_read", map[string]any{
 		"operation": "status",
 		"tenant":    tenant,
 		"namespace": namespace,
 		"name":      name,
 	})
-	if err := requireToolOK(result, err, "pulsar_admin_sinks status"); err != nil {
+	if err := requireToolOK(result, err, "pulsar_admin_sinks_read status"); err != nil {
 		return sinkStatus{}, err
 	}
 	raw := firstText(result)
@@ -933,13 +933,13 @@ func waitForSourceRunning(ctx context.Context, c *client.Client, tenant, namespa
 }
 
 func getSourceStatus(ctx context.Context, c *client.Client, tenant, namespace, name string) (sourceStatus, error) {
-	result, err := callTool(ctx, c, "pulsar_admin_sources", map[string]any{
+	result, err := callTool(ctx, c, "pulsar_admin_sources_read", map[string]any{
 		"operation": "status",
 		"tenant":    tenant,
 		"namespace": namespace,
 		"name":      name,
 	})
-	if err := requireToolOK(result, err, "pulsar_admin_sources status"); err != nil {
+	if err := requireToolOK(result, err, "pulsar_admin_sources_read status"); err != nil {
 		return sourceStatus{}, err
 	}
 	raw := firstText(result)

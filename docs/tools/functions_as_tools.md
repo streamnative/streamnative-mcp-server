@@ -1,3 +1,5 @@
+**Claude connector safety:** Safety annotation: dynamically generated Pulsar Functions-as-Tools are destructive and are not registered in read-only mode.
+
 # Functions as Tools
 
 The "Functions as Tools" feature allows the StreamNative MCP Server to dynamically discover Apache Pulsar Functions deployed in your cluster and expose them as invokable MCP tools for AI agents. This significantly enhances the capabilities of AI agents by allowing them to interact with custom business logic encapsulated in Pulsar Functions without manual tool registration for each function.
@@ -93,7 +95,7 @@ Beyond customizing individual tool properties at the function deployment level, 
     *   **Example**: `public/default,my-tenant/app-functions`
     *   **Default**: Empty (meaning discover from all accessible namespaces (only on StreamNative Cloud)).
 *   `FUNCTIONS_AS_TOOLS_STRICT_EXPORT`
-    *   **Description**: Only export functions with `MCP_TOOL_NAME` and `MCP_TOOL_DESCRIPTION` defined. 
+    *   **Description**: Only export functions with `MCP_TOOL_NAME` and `MCP_TOOL_DESCRIPTION` defined.
     *   **Format**: `true` or `false`
     *   **Example**: `false`
     *   **Default**: `true`

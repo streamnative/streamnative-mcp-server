@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -73,30 +73,28 @@ func (b *PulsarAdminFunctionsToolBuilder) BuildTools(_ context.Context, config b
 		return nil, err
 	}
 
-	// Build tools
-	tool := b.buildPulsarAdminFunctionsTool()
-	handler := b.buildPulsarAdminFunctionsHandler(config.ReadOnly)
-
-	return []server.ServerTool{
+	tools := []server.ServerTool{
 		{
-			Tool:    tool,
-			Handler: handler,
+			Tool:    b.buildPulsarAdminFunctionsTool(toolModeRead),
+			Handler: b.buildPulsarAdminFunctionsHandler(toolModeRead),
 		},
-	}, nil
+	}
+	if !config.ReadOnly {
+		tools = append(tools, server.ServerTool{
+			Tool:    b.buildPulsarAdminFunctionsTool(toolModeWrite),
+			Handler: b.buildPulsarAdminFunctionsHandler(toolModeWrite),
+		})
+	}
+
+	return tools, nil
 }
 
 // buildPulsarAdminFunctionsTool builds the Pulsar admin functions MCP tool definition
 // Migrated from the original tool definition logic
-func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsTool() mcp.Tool {
-	toolDesc := "Manage Apache Pulsar Functions for stream processing. " +
-		"Pulsar Functions are lightweight compute processes that can consume messages from one or more Pulsar topics, " +
-		"apply user-defined processing logic, and produce results to another topic. " +
-		"Functions support Java, Python, and Go runtimes, enabling complex event processing, " +
-		"data transformations, filtering, and integration with external systems. " +
-		"Functions follow the tenant/namespace/name hierarchy for organization, " +
-		"can maintain state, and can scale through parallelism configuration. " +
-		"This tool provides complete lifecycle management including deployment, monitoring, scaling, " +
-		"state management, and triggering. Functions require proper permissions to access their topics."
+func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsTool(mode toolMode) mcp.Tool {
+	toolDesc := "Read Apache Pulsar Functions for stream processing. " +
+		"Pulsar Functions are lightweight compute processes that can consume messages from one or more Pulsar topics, apply user-defined processing logic, and produce results to another topic. " +
+		"This read-only tool lists functions and retrieves configuration, status, statistics, state, or package data. Functions require proper permissions to access their topics."
 
 	operationDesc := "Operation to perform. Available operations:\n" +
 		"- list: List all functions under a specific tenant and namespace\n" +
@@ -104,21 +102,33 @@ func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsTool() mcp.To
 		"- status: Get the runtime status of a function (instances, metrics)\n" +
 		"- stats: Get detailed statistics of a function (throughput, processing latency)\n" +
 		"- querystate: Query state stored by a stateful function for a specific key\n" +
-		"- create: Deploy a new function with specified parameters\n" +
-		"- update: Update the configuration of an existing function\n" +
-		"- delete: Delete a function\n" +
-		"- download: Download function package data from Pulsar to a local file\n" +
-		"- start: Start a stopped function\n" +
-		"- stop: Stop a running function\n" +
-		"- restart: Restart a function\n" +
-		"- putstate: Store state in a function's state store\n" +
-		"- trigger: Manually trigger a function with a specific value\n" +
-		"- upload: Upload a local file into Pulsar function package storage"
+		"- download: Download function package data from Pulsar to a local file"
 
-	return mcp.NewTool("pulsar_admin_functions",
+	operationEnum := pulsarFunctionOperationSpecs.NamesForMode(mode)
+	toolName := "pulsar_admin_functions_read"
+	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Functions", "Manage Pulsar Functions", pulsarFunctionOperationSpecs)
+	if isToolModeWrite(mode) {
+		toolDesc = "Manage Apache Pulsar Functions for stream processing. " +
+			"This write tool deploys, updates, deletes, starts, stops, restarts, stores state for, triggers, or uploads packages for functions."
+		operationDesc = "Operation to perform. Available operations:\n" +
+			"- create: Deploy a new function with specified parameters\n" +
+			"- update: Update the configuration of an existing function\n" +
+			"- delete: Delete a function\n" +
+			"- start: Start a stopped function\n" +
+			"- stop: Stop a running function\n" +
+			"- restart: Restart a function\n" +
+			"- putstate: Store state in a function's state store\n" +
+			"- trigger: Manually trigger a function with a specific value\n" +
+			"- upload: Upload a local file into Pulsar function package storage"
+		operationEnum = pulsarFunctionOperationSpecs.NamesForMode(mode)
+		toolName = "pulsar_admin_functions_write"
+	}
+
+	tool := mcp.NewTool(toolName,
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("operation", mcp.Required(),
-			mcp.Description(operationDesc)),
+			mcp.Description(operationDesc),
+			mcp.Enum(operationEnum...)),
 		mcp.WithString("fqfn",
 			mcp.Description("The Fully Qualified Function Name in the form tenant/namespace/name. "+
 				"Mutually exclusive with tenant, namespace, and name parameters.")),
@@ -132,8 +142,7 @@ func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsTool() mcp.To
 				"Functions in a namespace typically process topics within the same namespace. "+
 				"Defaults to 'default' if not provided.")),
 		mcp.WithString("name",
-			mcp.Description("The function name. Required for all operations except 'list', "+
-				"unless it can be inferred from classname during create/update. "+
+			mcp.Description("The function name. Required for operations that target one function. "+
 				"Names should be descriptive of the function's purpose and must be unique within a namespace. "+
 				"Function names are used in metrics, logs, and when addressing the function via APIs.")),
 		mcp.WithString("instanceId",
@@ -271,18 +280,15 @@ func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsTool() mcp.To
 			mcp.Description("Path to the local file that should be uploaded into Pulsar function package storage. "+
 				"Required for the 'upload' operation.")),
 		mcp.WithString("path",
-			mcp.Description("Pulsar package storage path. Required for the 'upload' operation. "+
-				"For 'download', provide this to download directly from package storage. "+
-				"When omitted for 'download', identify the function with fqfn or tenant/namespace/name instead.")),
+			mcp.Description("Pulsar package storage path used by package transfer operations. For downloads, provide this to read directly from package storage.")),
 		mcp.WithString("destinationFile",
 			mcp.Description("Local file path where downloaded function package data should be written. "+
 				"Required for the 'download' operation.")),
 		mcp.WithBoolean("updateAuthData",
 			mcp.Description("Whether to update auth data on update operations.")),
 		mcp.WithString("key",
-			mcp.Description("The state key. Required for 'querystate' and 'putstate' operations. "+
-				"Keys are used to identify values in the function's state store. "+
-				"They should be reasonable in length and follow a consistent pattern. "+
+			mcp.Description("The state key. Required for operations that access one value in the function's state store. "+
+				"Keys should be reasonable in length and follow a consistent pattern. "+
 				"State keys are typically limited to 128 characters.")),
 		mcp.WithString("value",
 			mcp.Description("The state value. Required for 'putstate' operation. "+
@@ -301,12 +307,19 @@ func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsTool() mcp.To
 				"The function processes this value just like a normal message.")),
 		mcp.WithString("triggerFile",
 			mcp.Description("Path to a file containing the trigger value. Required for 'trigger' operation unless triggerValue is set.")),
+		annotation,
 	)
+	if isToolModeWrite(mode) {
+		removeToolInputSchemaProperties(&tool, []string{"instanceId", "destinationFile"})
+	} else {
+		pruneToolInputSchema(&tool, []string{"operation", "fqfn", "tenant", "namespace", "name", "instanceId", "key", "path", "destinationFile"})
+	}
+	return tool
 }
 
 // buildPulsarAdminFunctionsHandler builds the Pulsar admin functions handler function
 // Migrated from the original handler logic
-func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsHandler(mode toolMode) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get Pulsar session from context
 		session := mcpCtx.GetPulsarSession(ctx)
@@ -325,14 +338,9 @@ func (b *PulsarAdminFunctionsToolBuilder) buildPulsarAdminFunctionsHandler(readO
 			return b.handleError("get operation", err), nil
 		}
 
-		// Check if the operation is valid
-		if !isSupportedFunctionOperation(operation) {
-			return b.handleError("validate operation", fmt.Errorf("invalid operation: '%s'. Supported operations: list, get, status, stats, querystate, create, update, delete, download, start, stop, restart, putstate, trigger, upload", operation)), nil
-		}
-
-		// Check write permissions for write operations
-		if readOnly && isReadOnlyRestrictedFunctionOperation(operation) {
-			return b.handleError("check permissions", fmt.Errorf("operation '%s' not allowed in read-only mode. Read-only mode restricts modifications and package transfer operations for Pulsar Functions", operation)), nil
+		// Check if the operation is valid for this tool mode.
+		if err := validateModeOperation(mode, operation, pulsarFunctionOperationSpecs); err != nil {
+			return b.handleError("validate operation", err), nil
 		}
 
 		var identity functionIdentity
@@ -776,45 +784,32 @@ const (
 	defaultNamespace = "default"
 )
 
-var supportedFunctionOperations = map[string]struct{}{
-	"list":       {},
-	"get":        {},
-	"status":     {},
-	"stats":      {},
-	"querystate": {},
-	"create":     {},
-	"update":     {},
-	"delete":     {},
-	"download":   {},
-	"start":      {},
-	"stop":       {},
-	"restart":    {},
-	"putstate":   {},
-	"trigger":    {},
-	"upload":     {},
-}
-
-var readOnlyRestrictedFunctionOperations = map[string]struct{}{
-	"create":   {},
-	"update":   {},
-	"delete":   {},
-	"download": {},
-	"start":    {},
-	"stop":     {},
-	"restart":  {},
-	"putstate": {},
-	"trigger":  {},
-	"upload":   {},
+var pulsarFunctionOperationSpecs = builders.OperationRegistry{
+	{Name: "list", Mode: builders.OperationModeRead},
+	{Name: "get", Mode: builders.OperationModeRead},
+	{Name: "status", Mode: builders.OperationModeRead},
+	{Name: "stats", Mode: builders.OperationModeRead},
+	{Name: "querystate", Mode: builders.OperationModeRead},
+	{Name: "download", Mode: builders.OperationModeRead},
+	{Name: "create", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "update", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "delete", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "start", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "stop", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "restart", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "putstate", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "trigger", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "upload", Mode: builders.OperationModeWrite, Destructive: true},
 }
 
 func isSupportedFunctionOperation(operation string) bool {
-	_, ok := supportedFunctionOperations[operation]
+	_, ok := pulsarFunctionOperationSpecs.SpecFor(operation)
 	return ok
 }
 
 func isReadOnlyRestrictedFunctionOperation(operation string) bool {
-	_, ok := readOnlyRestrictedFunctionOperations[operation]
-	return ok
+	spec, ok := pulsarFunctionOperationSpecs.SpecFor(operation)
+	return ok && spec.Mode == builders.OperationModeWrite
 }
 
 func (b *PulsarAdminFunctionsToolBuilder) parseFunctionIdentity(request mcp.CallToolRequest, operation string) (functionIdentity, error) {

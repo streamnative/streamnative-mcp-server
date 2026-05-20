@@ -1,5 +1,8 @@
 #### kafka-client-consume
 
+**Claude connector safety:** Safety annotation: `kafka_client_consume` is destructive and is not registered in read-only mode because it can commit consumer offsets.
+
+
 Consume messages from a Kafka topic. This tool allows you to read messages from Kafka topics with various consumption options.
 
 - **kafka_client_consume**
@@ -12,4 +15,4 @@ Consume messages from a Kafka topic. This tool allows you to read messages from 
       - 'atend': Begin from the next message after the consumer starts
       - 'atcommitted': Begin from the last committed offset (only works with specified 'group')
     - `max-messages` (number, optional): Maximum number of messages to consume in this request. Default: 10
-    - `timeout` (number, optional): Maximum time in seconds to wait for messages. Default: 10 
+    - `timeout` (number, optional): Maximum time in seconds to wait for messages. Default: 10

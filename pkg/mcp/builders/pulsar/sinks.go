@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,6 +30,19 @@ import (
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 	"gopkg.in/yaml.v2"
 )
+
+var pulsarSinkOperationSpecs = builders.OperationRegistry{
+	{Name: "list", Mode: builders.OperationModeRead},
+	{Name: "get", Mode: builders.OperationModeRead},
+	{Name: "status", Mode: builders.OperationModeRead},
+	{Name: "list-built-in", Mode: builders.OperationModeRead},
+	{Name: "create", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "update", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "delete", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "start", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "stop", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "restart", Mode: builders.OperationModeWrite, Destructive: true},
+}
 
 // PulsarAdminSinksToolBuilder implements the ToolBuilder interface for Pulsar admin sinks
 // /nolint:revive
@@ -71,47 +84,56 @@ func (b *PulsarAdminSinksToolBuilder) BuildTools(_ context.Context, config build
 		return nil, err
 	}
 
-	// Build tools
-	tool := b.buildSinksTool()
-	handler := b.buildSinksHandler(config.ReadOnly)
-
-	return []server.ServerTool{
+	tools := []server.ServerTool{
 		{
-			Tool:    tool,
-			Handler: handler,
+			Tool:    b.buildSinksTool(toolModeRead),
+			Handler: b.buildSinksHandler(toolModeRead),
 		},
-	}, nil
+	}
+	if !config.ReadOnly {
+		tools = append(tools, server.ServerTool{
+			Tool:    b.buildSinksTool(toolModeWrite),
+			Handler: b.buildSinksHandler(toolModeWrite),
+		})
+	}
+
+	return tools, nil
 }
 
 // buildSinksTool builds the Pulsar admin sinks MCP tool definition
-func (b *PulsarAdminSinksToolBuilder) buildSinksTool() mcp.Tool {
-	toolDesc := "Manage Apache Pulsar Sinks for data movement and integration. " +
-		"Pulsar Sinks are connectors that export data from Pulsar topics to external systems such as databases, " +
-		"storage services, messaging systems, and third-party applications. " +
-		"Sinks consume messages from one or more Pulsar topics, transform the data if needed, " +
-		"and write it to external systems in a format compatible with the target destination. " +
-		"Built-in sink connectors are available for common systems like Kafka, JDBC, Elasticsearch, and cloud storage. " +
-		"Sinks follow the tenant/namespace/name hierarchy for organization and access control, " +
-		"can scale through parallelism configuration, and support configurable subscription types. " +
-		"This tool provides complete lifecycle management including deployment, configuration, " +
-		"monitoring, and runtime control. Sinks require proper permissions to access their input topics."
+func (b *PulsarAdminSinksToolBuilder) buildSinksTool(mode toolMode) mcp.Tool {
+	toolDesc := "Read Apache Pulsar Sinks for data movement and integration. " +
+		"Pulsar Sinks are connectors that export data from Pulsar topics to external systems. " +
+		"This read-only tool lists sinks and built-in sink connectors and retrieves sink configuration or runtime status."
 
 	operationDesc := "Operation to perform. Available operations:\n" +
 		"- list: List all sinks under a specific tenant and namespace\n" +
 		"- get: Get the configuration of a sink\n" +
 		"- status: Get the runtime status of a sink (instances, metrics)\n" +
-		"- create: Deploy a new sink with specified parameters\n" +
-		"- update: Update the configuration of an existing sink\n" +
-		"- delete: Delete a sink\n" +
-		"- start: Start a stopped sink\n" +
-		"- stop: Stop a running sink\n" +
-		"- restart: Restart a sink\n" +
 		"- list-built-in: List all built-in sink connectors available in the system"
 
-	return mcp.NewTool("pulsar_admin_sinks",
+	operationEnum := pulsarSinkOperationSpecs.NamesForMode(mode)
+	toolName := "pulsar_admin_sinks_read"
+	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Sinks", "Manage Pulsar Sinks", pulsarSinkOperationSpecs)
+	if isToolModeWrite(mode) {
+		toolDesc = "Manage Apache Pulsar Sinks for data movement and integration. " +
+			"This write tool deploys, updates, deletes, starts, stops, or restarts sinks."
+		operationDesc = "Operation to perform. Available operations:\n" +
+			"- create: Deploy a new sink with specified parameters\n" +
+			"- update: Update the configuration of an existing sink\n" +
+			"- delete: Delete a sink\n" +
+			"- start: Start a stopped sink\n" +
+			"- stop: Stop a running sink\n" +
+			"- restart: Restart a sink"
+		operationEnum = pulsarSinkOperationSpecs.NamesForMode(mode)
+		toolName = "pulsar_admin_sinks_write"
+	}
+
+	tool := mcp.NewTool(toolName,
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("operation", mcp.Required(),
-			mcp.Description(operationDesc)),
+			mcp.Description(operationDesc),
+			mcp.Enum(operationEnum...)),
 		mcp.WithString("tenant",
 			mcp.Description("The tenant name. Tenants are the primary organizational unit in Pulsar, "+
 				"providing multi-tenancy and resource isolation. Sinks deployed within a tenant "+
@@ -123,8 +145,7 @@ func (b *PulsarAdminSinksToolBuilder) buildSinksTool() mcp.Tool {
 				"Sinks in a namespace typically process topics within the same namespace. "+
 				"Defaults to 'default' if not provided.")),
 		mcp.WithString("name",
-			mcp.Description("The sink name. Required for all operations except 'list' and 'list-built-in'. "+
-				"Can be provided via sink-config-file for create/update. "+
+			mcp.Description("The sink name. Required for operations that target one sink. "+
 				"Names should be descriptive of the sink's purpose and must be unique within a namespace. "+
 				"Sink names are used in metrics, logs, and when addressing the sink via APIs.")),
 		mcp.WithString("archive",
@@ -232,11 +253,16 @@ func (b *PulsarAdminSinksToolBuilder) buildSinksTool() mcp.Tool {
 			mcp.Description("Transform function configuration. Optional for 'create' and 'update'.")),
 		mcp.WithBoolean("update-auth-data",
 			mcp.Description("Whether to update authentication data during sink update. Optional for 'update' only.")),
+		annotation,
 	)
+	if !isToolModeWrite(mode) {
+		pruneToolInputSchema(&tool, []string{"operation", "tenant", "namespace", "name"})
+	}
+	return tool
 }
 
 // buildSinksHandler builds the Pulsar admin sinks handler function
-func (b *PulsarAdminSinksToolBuilder) buildSinksHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminSinksToolBuilder) buildSinksHandler(mode toolMode) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Extract and validate operation parameter
 		operation, err := request.RequireString("operation")
@@ -251,17 +277,12 @@ func (b *PulsarAdminSinksToolBuilder) buildSinksHandler(readOnly bool) func(cont
 		}
 
 		if !validOperations[operation] {
-			return mcp.NewToolResultError(fmt.Sprintf("Invalid operation: '%s'. Supported operations: list, get, status, create, update, delete, start, stop, restart, list-built-in", operation)), nil
+			return mcp.NewToolResultError(fmt.Sprintf("Invalid operation: '%s'. Supported operations: %s", operation,
+				modeSupportedOperations(mode, pulsarSinkOperationSpecs))), nil
 		}
 
-		// Check write permissions for write operations
-		writeOperations := map[string]bool{
-			"create": true, "update": true, "delete": true, "start": true,
-			"stop": true, "restart": true,
-		}
-
-		if readOnly && writeOperations[operation] {
-			return mcp.NewToolResultError(fmt.Sprintf("Operation '%s' not allowed in read-only mode. Read-only mode restricts modifications to Pulsar Sinks.", operation)), nil
+		if err := validateModeOperation(mode, operation, pulsarSinkOperationSpecs); err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 
 		// Get Pulsar session from context

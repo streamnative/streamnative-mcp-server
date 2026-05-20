@@ -1,24 +1,41 @@
 #### kafka-admin-groups
 
-This tool provides access to Kafka consumer group operations including listing, describing, and managing group membership.
+
+<!-- generated:operations:start -->
+| Tool | Mode | Operations |
+|---|---|---|
+| `kafka_admin_groups_read` | read | `list`, `describe`, `offsets` |
+| `kafka_admin_groups_write` | write | `remove-members`, `delete-offset`, `set-offset` |
+<!-- generated:operations:end -->
+
+**Claude connector safety:** Actual MCP tools are split into `kafka_admin_groups_read` and `kafka_admin_groups_write`. The read tool is read-only and only exposes read operations/parameters. The write tool is destructive and is not registered in read-only mode.
+
+### `kafka_admin_groups_read`
+
+Read Kafka consumer group metadata and committed offsets.
 
 - **groups**
-  - **list**: List all Kafka Consumer Groups in the cluster
-    - _Parameters_: None
+  - **list**: List Kafka consumer groups
 
 - **group**
-  - **describe**: Get detailed information about a specific Consumer Group
-    - `group` (string, required): The name of the Kafka Consumer Group
-  - **remove-members**: Remove specific members from a Consumer Group
-    - `group` (string, required): The name of the Kafka Consumer Group
-    - `members` (string, required): Comma-separated list of member instance IDs (e.g. "consumer-instance-1,consumer-instance-2")
-  - **offsets**: Get offsets for a specific consumer group
-    - `group` (string, required): The name of the Kafka Consumer Group
-  - **delete-offset**: Delete a specific offset for a consumer group of a topic
-    - `group` (string, required): The name of the Kafka Consumer Group
-    - `topic` (string, required): The name of the Kafka topic
-  - **set-offset**: Set a specific offset for a consumer group's topic-partition
-    - `group` (string, required): The name of the Kafka Consumer Group
-    - `topic` (string, required): The name of the Kafka topic
-    - `partition` (number, required): The partition number
-    - `offset` (number, required): The offset value to set (use -1 for earliest, -2 for latest, or a specific value) 
+  - **describe**: Get detailed information about a consumer group
+    - `group` (string, required): Consumer group name
+  - **offsets**: Get committed offsets for a consumer group
+    - `group` (string, required): Consumer group name
+
+### `kafka_admin_groups_write`
+
+Change consumer group membership or committed offsets.
+
+- **group**
+  - **remove-members**: Remove specific members from a consumer group
+    - `group` (string, required): Consumer group name
+    - `members` (string, required): Comma-separated member instance IDs
+  - **delete-offset**: Delete offsets for a consumer group topic
+    - `group` (string, required): Consumer group name
+    - `topic` (string, required): Kafka topic name
+  - **set-offset**: Set a consumer group offset for one topic partition
+    - `group` (string, required): Consumer group name
+    - `topic` (string, required): Kafka topic name
+    - `partition` (number, required): Partition number
+    - `offset` (number, required): Offset value

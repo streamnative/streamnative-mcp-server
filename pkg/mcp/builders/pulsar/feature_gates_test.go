@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,8 +32,9 @@ func TestPulsarAdminNsIsolationPolicyToolBuilder_FeatureGate(t *testing.T) {
 		Features: []string{"pulsar-admin-ns-isolation-policy"},
 	})
 	require.NoError(t, err)
-	require.Len(t, tools, 1)
-	assert.Equal(t, "pulsar_admin_nsisolationpolicy", tools[0].Tool.Name)
+	require.Len(t, tools, 2)
+	assert.Equal(t, "pulsar_admin_nsisolationpolicy_read", tools[0].Tool.Name)
+	assert.Equal(t, "pulsar_admin_nsisolationpolicy_write", tools[1].Tool.Name)
 }
 
 func TestPulsarAdminResourceQuotasToolBuilder_FeatureGate(t *testing.T) {
@@ -45,6 +46,7 @@ func TestPulsarAdminResourceQuotasToolBuilder_FeatureGate(t *testing.T) {
 		Features: []string{"pulsar-admin-resource-quotas"},
 	})
 	require.NoError(t, err)
-	require.Len(t, tools, 1)
-	assert.Equal(t, "pulsar_admin_resourcequota", tools[0].Tool.Name)
+	require.Len(t, tools, 2)
+	assert.Equal(t, "pulsar_admin_resourcequota_read", tools[0].Tool.Name)
+	assert.Equal(t, "pulsar_admin_resourcequota_write", tools[1].Tool.Name)
 }

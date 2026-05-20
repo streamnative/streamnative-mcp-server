@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,6 +28,13 @@ import (
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
+
+var pulsarNsIsolationPolicyOperationSpecs = builders.OperationRegistry{
+	{Name: "get", Mode: builders.OperationModeRead},
+	{Name: "list", Mode: builders.OperationModeRead},
+	{Name: "set", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "delete", Mode: builders.OperationModeWrite, Destructive: true},
+}
 
 // PulsarAdminNsIsolationPolicyToolBuilder implements the ToolBuilder interface for Pulsar admin namespace isolation policies
 // /nolint:revive
@@ -69,49 +76,68 @@ func (b *PulsarAdminNsIsolationPolicyToolBuilder) BuildTools(_ context.Context, 
 		return nil, err
 	}
 
-	// Build tools
-	tool := b.buildNsIsolationPolicyTool()
-	handler := b.buildNsIsolationPolicyHandler(config.ReadOnly)
-
-	return []server.ServerTool{
+	tools := []server.ServerTool{
 		{
-			Tool:    tool,
-			Handler: handler,
+			Tool:    b.buildNsIsolationPolicyTool(toolModeRead),
+			Handler: b.buildNsIsolationPolicyHandler(toolModeRead),
 		},
-	}, nil
+	}
+	if !config.ReadOnly {
+		tools = append(tools, server.ServerTool{
+			Tool:    b.buildNsIsolationPolicyTool(toolModeWrite),
+			Handler: b.buildNsIsolationPolicyHandler(toolModeWrite),
+		})
+	}
+
+	return tools, nil
 }
 
 // buildNsIsolationPolicyTool builds the Pulsar admin namespace isolation policy MCP tool definition
-func (b *PulsarAdminNsIsolationPolicyToolBuilder) buildNsIsolationPolicyTool() mcp.Tool {
-	toolDesc := "Manage namespace isolation policies in a Pulsar cluster. " +
-		"Allows viewing, creating, updating, and deleting namespace isolation policies. " +
-		"Some operations require super-user permissions."
+func (b *PulsarAdminNsIsolationPolicyToolBuilder) buildNsIsolationPolicyTool(mode toolMode) mcp.Tool {
+	toolDesc := "Read namespace isolation policies in a Pulsar cluster. " +
+		"Allows viewing namespace isolation policies and related broker policy assignments."
 
 	resourceDesc := "Resource to operate on. Available resources:\n" +
 		"- policy: Namespace isolation policy\n" +
 		"- broker: Broker with namespace isolation policies\n" +
 		"- brokers: All brokers with namespace isolation policies"
+	resourceEnum := []string{"policy", "broker", "brokers"}
 
 	operationDesc := "Operation to perform. Available operations:\n" +
 		"- get: Get resource details\n" +
-		"- list: List all instances of the resource\n" +
-		"- set: Create or update a resource (requires super-user permissions)\n" +
-		"- delete: Delete a resource (requires super-user permissions)"
+		"- list: List all instances of the resource"
 
-	return mcp.NewTool("pulsar_admin_nsisolationpolicy",
+	operationEnum := pulsarNsIsolationPolicyOperationSpecs.NamesForMode(mode)
+	toolName := "pulsar_admin_nsisolationpolicy_read"
+	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Namespace Isolation Policies", "Manage Pulsar Namespace Isolation Policies", pulsarNsIsolationPolicyOperationSpecs)
+	if isToolModeWrite(mode) {
+		toolDesc = "Manage namespace isolation policies in a Pulsar cluster. " +
+			"This write tool creates, updates, or deletes namespace isolation policies."
+		resourceDesc = "Resource to operate on. Available resources:\n" +
+			"- policy: Namespace isolation policy"
+		resourceEnum = []string{"policy"}
+		operationDesc = "Operation to perform. Available operations:\n" +
+			"- set: Create or update a namespace isolation policy (requires super-user permissions)\n" +
+			"- delete: Delete a namespace isolation policy (requires super-user permissions)"
+		operationEnum = pulsarNsIsolationPolicyOperationSpecs.NamesForMode(mode)
+		toolName = "pulsar_admin_nsisolationpolicy_write"
+	}
+
+	tool := mcp.NewTool(toolName,
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("resource", mcp.Required(),
 			mcp.Description(resourceDesc),
+			mcp.Enum(resourceEnum...),
 		),
 		mcp.WithString("operation", mcp.Required(),
 			mcp.Description(operationDesc),
+			mcp.Enum(operationEnum...),
 		),
 		mcp.WithString("cluster", mcp.Required(),
 			mcp.Description("Cluster name"),
 		),
 		mcp.WithString("name",
-			mcp.Description("Name of the policy or broker to operate on, based on resource type.\n"+
-				"Required for: policy.get, policy.delete, policy.set, broker.get"),
+			mcp.Description("Name of the policy or broker to operate on, based on resource type. Required for operations that target one policy or broker."),
 		),
 		mcp.WithArray("namespaces",
 			mcp.Description("List of namespaces to apply the isolation policy. Required for policy.set"),
@@ -146,11 +172,18 @@ func (b *PulsarAdminNsIsolationPolicyToolBuilder) buildNsIsolationPolicyTool() m
 		mcp.WithObject("autoFailoverPolicyParams",
 			mcp.Description("Auto failover policy parameters as an object (e.g., {'min_limit': '1', 'usage_threshold': '100'}). Optional for policy.set"),
 		),
+		annotation,
 	)
+	if isToolModeWrite(mode) {
+		pruneToolInputSchema(&tool, []string{"resource", "operation", "cluster", "name", "namespaces", "primary", "secondary", "autoFailoverPolicyType", "autoFailoverPolicyParams"})
+	} else {
+		pruneToolInputSchema(&tool, []string{"resource", "operation", "cluster", "name"})
+	}
+	return tool
 }
 
 // buildNsIsolationPolicyHandler builds the Pulsar admin namespace isolation policy handler function
-func (b *PulsarAdminNsIsolationPolicyToolBuilder) buildNsIsolationPolicyHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminNsIsolationPolicyToolBuilder) buildNsIsolationPolicyHandler(mode toolMode) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get Pulsar session from context
 		session := mcpCtx.GetPulsarSession(ctx)
@@ -183,15 +216,14 @@ func (b *PulsarAdminNsIsolationPolicyToolBuilder) buildNsIsolationPolicyHandler(
 		resource = strings.ToLower(resource)
 		operation = strings.ToLower(operation)
 
-		// Validate write operations in read-only mode
-		if readOnly && (operation == "set" || operation == "delete") {
-			return mcp.NewToolResultError("Write operations are not allowed in read-only mode"), nil
+		if err := validateModeOperation(mode, operation, pulsarNsIsolationPolicyOperationSpecs); err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 
 		// Dispatch based on resource type
 		switch resource {
 		case "policy":
-			return b.handlePolicyResource(client, operation, cluster, request)
+			return b.handlePolicyResource(client, operation, cluster, request, mode)
 		case "broker":
 			return b.handleBrokerResource(client, operation, cluster, request)
 		case "brokers":
@@ -205,7 +237,7 @@ func (b *PulsarAdminNsIsolationPolicyToolBuilder) buildNsIsolationPolicyHandler(
 // Helper functions
 
 // handlePolicyResource handles operations on the "policy" resource
-func (b *PulsarAdminNsIsolationPolicyToolBuilder) handlePolicyResource(client cmdutils.Client, operation, cluster string, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminNsIsolationPolicyToolBuilder) handlePolicyResource(client cmdutils.Client, operation, cluster string, request mcp.CallToolRequest, mode toolMode) (*mcp.CallToolResult, error) {
 	switch operation {
 	case "get":
 		name, err := request.RequireString("name")
@@ -304,7 +336,8 @@ func (b *PulsarAdminNsIsolationPolicyToolBuilder) handlePolicyResource(client cm
 		return mcp.NewToolResultText(fmt.Sprintf("Create/Update namespace isolation policy %s successfully", name)), nil
 
 	default:
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid operation for resource 'policy': %s. Available operations: get, list, delete, set", operation)), nil
+		return mcp.NewToolResultError(fmt.Sprintf("Invalid operation for resource 'policy': %s. Available operations: %s", operation,
+			modeSupportedOperations(mode, pulsarNsIsolationPolicyOperationSpecs))), nil
 	}
 }
 

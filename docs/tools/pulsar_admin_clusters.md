@@ -1,45 +1,60 @@
-#### pulsar_admin_cluster
+#### pulsar_admin_cluster_read / pulsar_admin_cluster_write
 
-Unified tool for managing Apache Pulsar clusters.
+
+<!-- generated:operations:start -->
+| Tool | Mode | Operations |
+|---|---|---|
+| `pulsar_admin_cluster_read` | read | `list`, `get` |
+| `pulsar_admin_cluster_write` | write | `create`, `update`, `delete` |
+<!-- generated:operations:end -->
+
+**Claude connector safety:** Actual MCP tools are split into `pulsar_admin_cluster_read` and `pulsar_admin_cluster_write`. The read tool is read-only and only exposes read operations/parameters. The write tool is destructive and is not registered in read-only mode.
+
+### `pulsar_admin_cluster_read`
+
+Read Pulsar cluster, peer cluster, and failure domain configuration.
 
 - **cluster**
-  - **list**: List all clusters
-  - **get**: Get configuration for a specific cluster
-    - `cluster_name` (string, required): The cluster name
-  - **create**: Create a new cluster
-    - `cluster_name` (string, required): The cluster name
-    - `service_url` (string, optional): Cluster web service URL
-    - `service_url_tls` (string, optional): Cluster TLS web service URL
-    - `broker_service_url` (string, optional): Cluster broker service URL
-    - `broker_service_url_tls` (string, optional): Cluster TLS broker service URL
-    - `peer_cluster_names` (array, optional): List of peer clusters
-  - **update**: Update an existing cluster
-    - `cluster_name` (string, required): The cluster name
-    - Same optional parameters as create
-  - **delete**: Delete a cluster
-    - `cluster_name` (string, required): The cluster name
-    
+  - **list**: List clusters
+  - **get**: Get cluster configuration
+    - `cluster_name` (string, required): Cluster name
 - **peer_clusters**
-  - **get**: Get list of peer clusters
-    - `cluster_name` (string, required): The cluster name
-  - **update**: Update peer clusters list
-    - `cluster_name` (string, required): The cluster name
-    - `peer_cluster_names` (array, required): List of peer cluster names
-    
+  - **get**: Get peer clusters
+    - `cluster_name` (string, required): Cluster name
 - **failure_domain**
-  - **list**: List all failure domains in a cluster
-    - `cluster_name` (string, required): The cluster name
-  - **get**: Get configuration for a specific failure domain
-    - `cluster_name` (string, required): The cluster name
-    - `domain_name` (string, required): The failure domain name
-  - **create**: Create a new failure domain
-    - `cluster_name` (string, required): The cluster name
-    - `domain_name` (string, required): The failure domain name
-    - `brokers` (array, required): List of brokers in the domain
-  - **update**: Update an existing failure domain
-    - `cluster_name` (string, required): The cluster name
-    - `domain_name` (string, required): The failure domain name
-    - `brokers` (array, required): List of brokers in the domain
+  - **list**: List failure domains in a cluster
+    - `cluster_name` (string, required): Cluster name
+  - **get**: Get failure domain configuration
+    - `cluster_name` (string, required): Cluster name
+    - `domain_name` (string, required): Failure domain name
+
+### `pulsar_admin_cluster_write`
+
+Manage clusters, peer clusters, and failure domains.
+
+- **cluster**
+  - **create**: Create a cluster
+    - `cluster_name` (string, required): Cluster name
+    - `service_url` (string, optional): Web service URL
+    - `service_url_tls` (string, optional): TLS web service URL
+    - `broker_service_url` (string, optional): Broker service URL
+    - `broker_service_url_tls` (string, optional): TLS broker service URL
+    - `peer_cluster_names` (array, optional): Peer clusters
+  - **update**: Update a cluster
+    - Same parameters as `create`
+  - **delete**: Delete a cluster
+    - `cluster_name` (string, required): Cluster name
+- **peer_clusters**
+  - **update**: Update peer clusters
+    - `cluster_name` (string, required): Cluster name
+    - `peer_cluster_names` (array, required): Peer cluster names
+- **failure_domain**
+  - **create**: Create a failure domain
+    - `cluster_name` (string, required): Cluster name
+    - `domain_name` (string, required): Failure domain name
+    - `brokers` (array, required): Brokers in the domain
+  - **update**: Update a failure domain
+    - Same parameters as `create`
   - **delete**: Delete a failure domain
-    - `cluster_name` (string, required): The cluster name
-    - `domain_name` (string, required): The failure domain name 
+    - `cluster_name` (string, required): Cluster name
+    - `domain_name` (string, required): Failure domain name

@@ -18,3 +18,4 @@ scripts/update-sdk-apiserver.sh
 ralph/
 scripts/ralph*
 scripts/__pycache__/ralph*.pyc
+/PLAN.md

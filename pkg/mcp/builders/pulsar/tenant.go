@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,6 +27,14 @@ import (
 	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/builders"
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
+
+var pulsarTenantOperationSpecs = builders.OperationRegistry{
+	{Name: "list", Mode: builders.OperationModeRead},
+	{Name: "get", Mode: builders.OperationModeRead},
+	{Name: "create", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "update", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "delete", Mode: builders.OperationModeWrite, Destructive: true},
+}
 
 // PulsarAdminTenantToolBuilder implements the ToolBuilder interface for Pulsar Admin Tenant tools
 // It provides functionality to build Pulsar tenant management tools
@@ -70,22 +78,26 @@ func (b *PulsarAdminTenantToolBuilder) BuildTools(_ context.Context, config buil
 		return nil, err
 	}
 
-	// Build tools
-	tool := b.buildTenantTool()
-	handler := b.buildTenantHandler(config.ReadOnly)
-
-	return []server.ServerTool{
+	tools := []server.ServerTool{
 		{
-			Tool:    tool,
-			Handler: handler,
+			Tool:    b.buildTenantTool(toolModeRead),
+			Handler: b.buildTenantHandler(toolModeRead),
 		},
-	}, nil
+	}
+	if !config.ReadOnly {
+		tools = append(tools, server.ServerTool{
+			Tool:    b.buildTenantTool(toolModeWrite),
+			Handler: b.buildTenantHandler(toolModeWrite),
+		})
+	}
+
+	return tools, nil
 }
 
 // buildTenantTool builds the Pulsar Admin Tenant MCP tool definition
 // Migrated from the original tool definition logic
-func (b *PulsarAdminTenantToolBuilder) buildTenantTool() mcp.Tool {
-	toolDesc := "Manage Apache Pulsar tenants. " +
+func (b *PulsarAdminTenantToolBuilder) buildTenantTool(mode toolMode) mcp.Tool {
+	toolDesc := "Read Apache Pulsar tenants. " +
 		"Tenants are the highest level administrative unit in Pulsar's multi-tenancy hierarchy. " +
 		"Each tenant can contain multiple namespaces, allowing for logical isolation of applications. " +
 		"Tenant configuration controls admin access and cluster availability across organizations. " +
@@ -99,18 +111,30 @@ func (b *PulsarAdminTenantToolBuilder) buildTenantTool() mcp.Tool {
 
 	operationDesc := "Operation to perform. Available operations:\n" +
 		"- list: List all tenants in the Pulsar instance\n" +
-		"- get: Get configuration details for a specific tenant\n" +
-		"- create: Create a new tenant with specified configuration\n" +
-		"- update: Update configuration for an existing tenant\n" +
-		"- delete: Delete an existing tenant (must not have any active namespaces)"
+		"- get: Get configuration details for a specific tenant"
 
-	return mcp.NewTool("pulsar_admin_tenant",
+	operationEnum := pulsarTenantOperationSpecs.NamesForMode(mode)
+	toolName := "pulsar_admin_tenant_read"
+	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Tenants", "Manage Pulsar Tenants", pulsarTenantOperationSpecs)
+	if isToolModeWrite(mode) {
+		toolDesc = "Manage Apache Pulsar tenants. " +
+			"This write tool creates, updates, or deletes tenant configuration and may change cluster state."
+		operationDesc = "Operation to perform. Available operations:\n" +
+			"- create: Create a new tenant with specified configuration\n" +
+			"- update: Update configuration for an existing tenant\n" +
+			"- delete: Delete an existing tenant (must not have any active namespaces)"
+		operationEnum = pulsarTenantOperationSpecs.NamesForMode(mode)
+		toolName = "pulsar_admin_tenant_write"
+	}
+
+	tool := mcp.NewTool(toolName,
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("resource", mcp.Required(),
 			mcp.Description(resourceDesc),
 		),
 		mcp.WithString("operation", mcp.Required(),
 			mcp.Description(operationDesc),
+			mcp.Enum(operationEnum...),
 		),
 		mcp.WithString("tenant",
 			mcp.Description("The tenant name to operate on. Required for all operations except 'list'. "+
@@ -143,12 +167,19 @@ func (b *PulsarAdminTenantToolBuilder) buildTenantTool() mcp.Tool {
 				},
 			),
 		),
+		annotation,
 	)
+	if isToolModeWrite(mode) {
+		pruneToolInputSchema(&tool, []string{"resource", "operation", "tenant", "adminRoles", "allowedClusters"})
+	} else {
+		pruneToolInputSchema(&tool, []string{"resource", "operation", "tenant"})
+	}
+	return tool
 }
 
 // buildTenantHandler builds the Pulsar Admin Tenant handler function
 // Migrated from the original handler logic
-func (b *PulsarAdminTenantToolBuilder) buildTenantHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminTenantToolBuilder) buildTenantHandler(mode toolMode) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get required parameters
 		resource, err := request.RequireString("resource")
@@ -170,9 +201,8 @@ func (b *PulsarAdminTenantToolBuilder) buildTenantHandler(readOnly bool) func(co
 			return mcp.NewToolResultError(fmt.Sprintf("Invalid resource: %s. Only 'tenant' is supported.", resource)), nil
 		}
 
-		// Validate write operations in read-only mode
-		if readOnly && (operation == "create" || operation == "update" || operation == "delete") {
-			return mcp.NewToolResultError("Write operations are not allowed in read-only mode"), nil
+		if err := validateModeOperation(mode, operation, pulsarTenantOperationSpecs); err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 
 		// Get Pulsar session from context

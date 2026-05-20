@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,23 +31,15 @@ import (
 	mcpCtx "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 )
 
-var supportedSubscriptionOperations = map[string]struct{}{
-	"list":              {},
-	"create":            {},
-	"delete":            {},
-	"skip":              {},
-	"expire":            {},
-	"reset-cursor":      {},
-	"peek":              {},
-	"get-message-by-id": {},
-}
-
-var readOnlyRestrictedSubscriptionOperations = map[string]struct{}{
-	"create":       {},
-	"delete":       {},
-	"skip":         {},
-	"expire":       {},
-	"reset-cursor": {},
+var pulsarSubscriptionOperationSpecs = builders.OperationRegistry{
+	{Name: "list", Mode: builders.OperationModeRead},
+	{Name: "peek", Mode: builders.OperationModeRead},
+	{Name: "get-message-by-id", Mode: builders.OperationModeRead},
+	{Name: "create", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "delete", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "skip", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "expire", Mode: builders.OperationModeWrite, Destructive: true},
+	{Name: "reset-cursor", Mode: builders.OperationModeWrite, Destructive: true},
 }
 
 const maxSubscriptionPeekCount int64 = 100
@@ -103,27 +95,28 @@ func (b *PulsarAdminSubscriptionToolBuilder) BuildTools(_ context.Context, confi
 		return nil, err
 	}
 
-	// Build tools
-	tool := b.buildSubscriptionTool()
-	handler := b.buildSubscriptionHandler(config.ReadOnly)
-
-	return []server.ServerTool{
+	tools := []server.ServerTool{
 		{
-			Tool:    tool,
-			Handler: handler,
+			Tool:    b.buildSubscriptionTool(toolModeRead),
+			Handler: b.buildSubscriptionHandler(toolModeRead),
 		},
-	}, nil
+	}
+	if !config.ReadOnly {
+		tools = append(tools, server.ServerTool{
+			Tool:    b.buildSubscriptionTool(toolModeWrite),
+			Handler: b.buildSubscriptionHandler(toolModeWrite),
+		})
+	}
+
+	return tools, nil
 }
 
 // buildSubscriptionTool builds the Pulsar Admin Subscription MCP tool definition
 // Migrated from the original tool definition logic
-func (b *PulsarAdminSubscriptionToolBuilder) buildSubscriptionTool() mcp.Tool {
-	toolDesc := "Manage Apache Pulsar subscriptions on topics. " +
+func (b *PulsarAdminSubscriptionToolBuilder) buildSubscriptionTool(mode toolMode) mcp.Tool {
+	toolDesc := "Read Apache Pulsar subscriptions on topics. " +
 		"Subscriptions are named entities representing consumer groups that maintain their position in a topic. " +
-		"Pulsar supports multiple subscription modes (Exclusive, Shared, Failover, Key_Shared) to accommodate different messaging patterns. " +
-		"Each subscription tracks message acknowledgments independently, allowing multiple consumers to process messages at their own pace. " +
-		"Subscriptions persist even when all consumers disconnect, maintaining state and preventing message loss. " +
-		"Operations include listing, creating, deleting, and manipulating message cursors within subscriptions. " +
+		"This read-only tool lists subscriptions and inspects messages without advancing subscription cursors. " +
 		"Most operations require namespace admin permissions plus produce/consume permissions on the topic."
 
 	resourceDesc := "Resource to operate on. Available resources:\n" +
@@ -131,21 +124,33 @@ func (b *PulsarAdminSubscriptionToolBuilder) buildSubscriptionTool() mcp.Tool {
 
 	operationDesc := "Operation to perform. Available operations:\n" +
 		"- list: List all subscriptions for a topic\n" +
-		"- create: Create a new subscription on a topic\n" +
-		"- delete: Delete a subscription from a topic\n" +
-		"- skip: Skip a specified number of messages for a subscription\n" +
-		"- expire: Expire messages older than specified time for a subscription\n" +
-		"- reset-cursor: Reset the cursor position for a subscription to a specific message ID\n" +
 		"- peek: Peek one or more messages for a subscription without advancing the cursor\n" +
 		"- get-message-by-id: Read a message by ledger ID and entry ID for topic-level debugging"
 
-	return mcp.NewTool("pulsar_admin_subscription",
+	operationEnum := pulsarSubscriptionOperationSpecs.NamesForMode(mode)
+	toolName := "pulsar_admin_subscription_read"
+	annotation := builders.ToolAnnotationForMode(mode, "Read Pulsar Subscriptions", "Manage Pulsar Subscriptions", pulsarSubscriptionOperationSpecs)
+	if isToolModeWrite(mode) {
+		toolDesc = "Manage Apache Pulsar subscriptions on topics. " +
+			"This write tool creates or deletes subscriptions and changes subscription cursor positions."
+		operationDesc = "Operation to perform. Available operations:\n" +
+			"- create: Create a new subscription on a topic\n" +
+			"- delete: Delete a subscription from a topic\n" +
+			"- skip: Skip a specified number of messages for a subscription\n" +
+			"- expire: Expire messages older than specified time for a subscription\n" +
+			"- reset-cursor: Reset the cursor position for a subscription to a specific message ID"
+		operationEnum = pulsarSubscriptionOperationSpecs.NamesForMode(mode)
+		toolName = "pulsar_admin_subscription_write"
+	}
+
+	tool := mcp.NewTool(toolName,
 		mcp.WithDescription(toolDesc),
 		mcp.WithString("resource", mcp.Required(),
 			mcp.Description(resourceDesc),
 		),
 		mcp.WithString("operation", mcp.Required(),
 			mcp.Description(operationDesc),
+			mcp.Enum(operationEnum...),
 		),
 		mcp.WithString("topic", mcp.Required(),
 			mcp.Description("The fully qualified topic name in the format 'persistent://tenant/namespace/topic'. "+
@@ -165,9 +170,7 @@ func (b *PulsarAdminSubscriptionToolBuilder) buildSubscriptionTool() mcp.Tool {
 				"- specific position in 'ledgerId:entryId' format for precise positioning"),
 		),
 		mcp.WithNumber("count",
-			mcp.Description("The number of messages to skip (required for 'skip' operation) or peek (optional for 'peek', default 1). "+
-				"For 'skip', this moves the subscription cursor forward by the specified number of messages without processing them. "+
-				"For 'peek', this limits how many messages are returned without moving the cursor. Maximum: 100."),
+			mcp.Description("The number of messages for operations that process a count. For peek, this limits how many messages are returned without moving the cursor. Maximum: 100."),
 		),
 		mcp.WithNumber("expireTimeInSeconds",
 			mcp.Description("Expire messages older than the specified seconds (required for 'expire' operation). "+
@@ -184,12 +187,19 @@ func (b *PulsarAdminSubscriptionToolBuilder) buildSubscriptionTool() mcp.Tool {
 				"When true, all consumers will be forcefully disconnected and the subscription will be deleted. "+
 				"Use with caution as it can interrupt active message processing."),
 		),
+		annotation,
 	)
+	if isToolModeWrite(mode) {
+		pruneToolInputSchema(&tool, []string{"resource", "operation", "topic", "subscription", "messageId", "count", "expireTimeInSeconds", "force"})
+	} else {
+		pruneToolInputSchema(&tool, []string{"resource", "operation", "topic", "subscription", "ledgerId", "entryId", "count"})
+	}
+	return tool
 }
 
 // buildSubscriptionHandler builds the Pulsar Admin Subscription handler function
 // Migrated from the original handler logic
-func (b *PulsarAdminSubscriptionToolBuilder) buildSubscriptionHandler(readOnly bool) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (b *PulsarAdminSubscriptionToolBuilder) buildSubscriptionHandler(mode toolMode) func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	return func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		// Get required parameters
 		resource, err := request.RequireString("resource")
@@ -215,9 +225,8 @@ func (b *PulsarAdminSubscriptionToolBuilder) buildSubscriptionHandler(readOnly b
 			return mcp.NewToolResultError(fmt.Sprintf("Unknown operation: %s", operation)), nil
 		}
 
-		// Validate write operations in read-only mode
-		if readOnly && isReadOnlyRestrictedSubscriptionOperation(operation) {
-			return mcp.NewToolResultError("Write operations are not allowed in read-only mode"), nil
+		if err := validateModeOperation(mode, operation, pulsarSubscriptionOperationSpecs); err != nil {
+			return mcp.NewToolResultError(err.Error()), nil
 		}
 
 		// Verify resource type
@@ -523,13 +532,13 @@ func (b *PulsarAdminSubscriptionToolBuilder) handleSubsGetMessageByID(admin cmdu
 }
 
 func isSupportedSubscriptionOperation(operation string) bool {
-	_, ok := supportedSubscriptionOperations[strings.ToLower(operation)]
+	_, ok := pulsarSubscriptionOperationSpecs.SpecFor(operation)
 	return ok
 }
 
 func isReadOnlyRestrictedSubscriptionOperation(operation string) bool {
-	_, ok := readOnlyRestrictedSubscriptionOperations[strings.ToLower(operation)]
-	return ok
+	spec, ok := pulsarSubscriptionOperationSpecs.SpecFor(operation)
+	return ok && spec.Mode == builders.OperationModeWrite
 }
 
 func parseSubscriptionMessageID(messageID string) (utils.MessageID, error) {

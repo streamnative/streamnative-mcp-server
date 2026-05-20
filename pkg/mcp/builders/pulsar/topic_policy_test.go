@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import (
 func TestBuildTopicPolicyToolIncludesPulsarctlParityOperations(t *testing.T) {
 	builder := NewPulsarAdminTopicPolicyToolBuilder()
 
-	tool := builder.buildTopicPolicyTool()
+	tool := builder.buildTopicPolicyTool(toolModeRead)
 	operationSchema, ok := tool.InputSchema.Properties["operation"].(map[string]any)
 	require.True(t, ok)
 
@@ -39,16 +39,22 @@ func TestBuildTopicPolicyToolIncludesPulsarctlParityOperations(t *testing.T) {
 	require.Contains(t, description, "get-inactive-topic-policies")
 }
 
-func TestBuildTopicPolicyToolIncludesTopicPolicyParameters(t *testing.T) {
+func TestBuildTopicPolicyToolIncludesModeSpecificParameters(t *testing.T) {
 	builder := NewPulsarAdminTopicPolicyToolBuilder()
 
-	tool := builder.buildTopicPolicyTool()
+	readTool := builder.buildTopicPolicyTool(toolModeRead)
+	require.Contains(t, readTool.InputSchema.Properties, "applied")
+	require.NotContains(t, readTool.InputSchema.Properties, "count")
+	require.NotContains(t, readTool.InputSchema.Properties, "limit-size")
+	require.NotContains(t, readTool.InputSchema.Properties, "delete-mode")
+	require.NotContains(t, readTool.InputSchema.Properties, "subscription-types")
 
-	require.Contains(t, tool.InputSchema.Properties, "applied")
-	require.Contains(t, tool.InputSchema.Properties, "count")
-	require.Contains(t, tool.InputSchema.Properties, "limit-size")
-	require.Contains(t, tool.InputSchema.Properties, "delete-mode")
-	require.Contains(t, tool.InputSchema.Properties, "subscription-types")
+	writeTool := builder.buildTopicPolicyTool(toolModeWrite)
+	require.NotContains(t, writeTool.InputSchema.Properties, "applied")
+	require.Contains(t, writeTool.InputSchema.Properties, "count")
+	require.Contains(t, writeTool.InputSchema.Properties, "limit-size")
+	require.Contains(t, writeTool.InputSchema.Properties, "delete-mode")
+	require.Contains(t, writeTool.InputSchema.Properties, "subscription-types")
 }
 
 func TestNormalizeTopicPolicyOperationSupportsLegacyAliases(t *testing.T) {
@@ -76,7 +82,7 @@ func TestTopicPolicyWriteOperationsRespectReadOnly(t *testing.T) {
 
 func TestTopicPolicyHandlerBlocksWriteBeforeSessionLookup(t *testing.T) {
 	builder := NewPulsarAdminTopicPolicyToolBuilder()
-	handler := builder.buildTopicPolicyHandler(true)
+	handler := builder.buildTopicPolicyHandler(toolModeRead)
 
 	result, err := handler(context.Background(), mcp.CallToolRequest{
 		Params: mcp.CallToolParams{
@@ -93,7 +99,7 @@ func TestTopicPolicyHandlerBlocksWriteBeforeSessionLookup(t *testing.T) {
 
 	text, ok := result.Content[0].(mcp.TextContent)
 	require.True(t, ok)
-	require.Contains(t, text.Text, "read-only mode")
+	require.Contains(t, text.Text, "not available in read mode")
 }
 
 func TestBuildDelayedDeliveryDataUsesPulsarctlStyleArguments(t *testing.T) {

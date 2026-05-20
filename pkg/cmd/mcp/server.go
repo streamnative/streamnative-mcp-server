@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ func newMcpServer(_ context.Context, configOpts *ServerOptions, logrusLogger *lo
 			mcp.RegisterPrompts(s)
 			// Skip context tools if pulsar instance and cluster are provided via CLI
 			skipContextTools := snConfig.Context.PulsarInstance != "" && snConfig.Context.PulsarCluster != ""
-			mcp.RegisterContextTools(s, configOpts.Features, skipContextTools)
+			mcp.RegisterContextTools(s, configOpts.Features, configOpts.ReadOnly, skipContextTools)
 			mcp.StreamNativeAddLogTools(s, configOpts.ReadOnly, configOpts.Features)
 			mcp.StreamNativeAddResourceTools(s, configOpts.ReadOnly, configOpts.Features)
 		}

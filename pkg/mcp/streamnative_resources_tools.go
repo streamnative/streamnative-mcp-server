@@ -1,4 +1,4 @@
-// Copyright 2025 StreamNative
+// Copyright 2026 StreamNative
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import (
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/config"
 	context2 "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
+	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/toolannotations"
 	sncloud "github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserver"
 )
 
@@ -54,9 +55,7 @@ func NewSNCloudResourcesApplyTool() mcp.Tool {
 			mcp.Description("If true, only validate the resource without applying it to the server."),
 			mcp.DefaultBool(false),
 		),
-		mcp.WithToolAnnotation(mcp.ToolAnnotation{
-			Title: "Apply StreamNative Cloud Resources",
-		}),
+		toolannotations.Destructive("Apply StreamNative Cloud Resources"),
 	)
 }
 
@@ -71,10 +70,7 @@ func NewSNCloudResourcesDeleteTool() mcp.Tool {
 			mcp.Description("The type of the resource to delete, it can be Instance, PulsarInstance, PulsarCluster, or KafkaCluster."),
 			mcp.Enum("Instance", "PulsarInstance", "PulsarCluster", "KafkaCluster"),
 		),
-		mcp.WithToolAnnotation(mcp.ToolAnnotation{
-			Title:           "Delete StreamNative Cloud Resources",
-			DestructiveHint: &[]bool{true}[0],
-		}),
+		toolannotations.Destructive("Delete StreamNative Cloud Resources"),
 	)
 }
 

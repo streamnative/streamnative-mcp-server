@@ -1,34 +1,48 @@
 #### kafka-admin-connect
 
-Kafka Connect is a framework for integrating Kafka with external systems. The following resources and operations are supported:
+
+<!-- generated:operations:start -->
+| Tool | Mode | Operations |
+|---|---|---|
+| `kafka_admin_connect_read` | read | `list`, `get` |
+| `kafka_admin_connect_write` | write | `create`, `update`, `delete`, `restart`, `pause`, `resume` |
+<!-- generated:operations:end -->
+
+**Claude connector safety:** Actual MCP tools are split into `kafka_admin_connect_read` and `kafka_admin_connect_write`. The read tool is read-only and only exposes read operations/parameters. The write tool is destructive and is not registered in read-only mode.
+
+### `kafka_admin_connect_read`
+
+Read Kafka Connect cluster, connector, and plugin information.
 
 - **kafka-connect-cluster**
-  - **get**: Get information about the Kafka Connect cluster
-    - _Parameters_: None
+  - **get**: Get Kafka Connect cluster information
 
 - **connectors**
-  - **list**: List all connectors in the cluster
-    - _Parameters_: None
+  - **list**: List connectors in the cluster
 
 - **connector**
-  - **get**: Get details of a specific connector
-    - `name` (string, required): The connector name
-  - **create**: Create a new connector
-    - `name` (string, required): The connector name
-    - `config` (object, required): Connector configuration
-      - Must include at least `connector.class` and other required fields for the connector type
-  - **update**: Update an existing connector
-    - `name` (string, required): The connector name
-    - `config` (object, required): Updated configuration
-  - **delete**: Delete a connector
-    - `name` (string, required): The connector name
-  - **restart**: Restart a connector
-    - `name` (string, required): The connector name
-  - **pause**: Pause a connector
-    - `name` (string, required): The connector name
-  - **resume**: Resume a paused connector
-    - `name` (string, required): The connector name
+  - **get**: Get connector details
+    - `name` (string, required): Connector name
 
 - **connector-plugins**
-  - **list**: List all available connector plugins
-    - _Parameters_: None 
+  - **list**: List available connector plugins
+
+### `kafka_admin_connect_write`
+
+Manage Kafka Connect connector lifecycle and configuration.
+
+- **connector**
+  - **create**: Create a connector
+    - `name` (string, required): Connector name
+    - `config` (object, required): Connector configuration
+  - **update**: Update connector configuration
+    - `name` (string, required): Connector name
+    - `config` (object, required): Updated connector configuration
+  - **delete**: Delete a connector
+    - `name` (string, required): Connector name
+  - **restart**: Restart a connector
+    - `name` (string, required): Connector name
+  - **pause**: Pause a connector
+    - `name` (string, required): Connector name
+  - **resume**: Resume a connector
+    - `name` (string, required): Connector name
