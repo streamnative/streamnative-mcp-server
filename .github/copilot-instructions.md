@@ -1,6 +1,6 @@
 # Copilot instructions
 
-Use the repo's concrete workflow and architecture, not generic Go defaults. The codebase targets Go `1.25.6` from `go.mod`.
+Use the repo's concrete workflow and architecture, not generic Go defaults. The codebase targets Go `1.25.12` from `go.mod`.
 
 ## Build, test, and lint
 
