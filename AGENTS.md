@@ -8,7 +8,7 @@ Guide for autonomous coding agents working in `streamnative-mcp-server`.
 - **What it is**: A Go-based Model Context Protocol (MCP) server that exposes StreamNative Cloud, Apache Kafka, and Apache Pulsar operations through one MCP surface.
 - **Primary binary**: `bin/snmcp`, built from `cmd/streamnative-mcp-server/main.go`.
 - **Server modes**: `stdio` and `sse`.
-- **Current stack**: Go `1.25.6`, `cobra`, `mark3labs/mcp-go`, Docker, Helm, GoReleaser.
+- **Current stack**: Go `1.25.12`, `cobra`, `mark3labs/mcp-go`, Docker, Helm, GoReleaser.
 - **Published container names**: `streamnative/mcp-server` and `streamnative/snmcp`.
 
 ---
