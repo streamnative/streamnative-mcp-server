@@ -606,7 +606,8 @@ func newAuthedClient(ctx context.Context, sseURL, token, clientName string) (*cl
 
 func initializeClient(ctx context.Context, c *client.Client, name string) error {
 	req := mcp.InitializeRequest{}
-	req.Params.ProtocolVersion = mcp.LATEST_PROTOCOL_VERSION
+	// This client exercises legacy HTTP+SSE, which still uses initialize.
+	req.Params.ProtocolVersion = mcp.LATEST_LEGACY_PROTOCOL_VERSION
 	req.Params.ClientInfo = mcp.Implementation{
 		Name:    name,
 		Version: "1.0.0",

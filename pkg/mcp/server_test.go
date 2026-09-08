@@ -35,9 +35,34 @@ func TestNewServer_InitializeCompatibility(t *testing.T) {
 		expectedVersion string
 	}{
 		{
-			name:            "explicit latest protocol",
-			protocolVersion: mcp.LATEST_PROTOCOL_VERSION,
-			expectedVersion: mcp.LATEST_PROTOCOL_VERSION,
+			name:            "latest legacy protocol",
+			protocolVersion: "2025-11-25",
+			expectedVersion: "2025-11-25",
+		},
+		{
+			name:            "modern version cannot be negotiated through initialize",
+			protocolVersion: "2026-07-28",
+			expectedVersion: "2025-11-25",
+		},
+		{
+			name:            "June 2025 protocol",
+			protocolVersion: "2025-06-18",
+			expectedVersion: "2025-06-18",
+		},
+		{
+			name:            "March 2025 protocol",
+			protocolVersion: "2025-03-26",
+			expectedVersion: "2025-03-26",
+		},
+		{
+			name:            "original SSE protocol",
+			protocolVersion: "2024-11-05",
+			expectedVersion: "2024-11-05",
+		},
+		{
+			name:            "unknown version falls back to latest legacy",
+			protocolVersion: "2099-01-01",
+			expectedVersion: "2025-11-25",
 		},
 		{
 			name:            "empty protocol keeps backward compatible fallback",

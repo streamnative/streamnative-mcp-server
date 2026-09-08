@@ -6,7 +6,9 @@ A Model Context Protocol (MCP) server for integrating AI agents with StreamNativ
 
 StreamNative MCP Server provides a standard interface for LLMs (Large Language Models) and AI agents to interact with StreamNative Cloud services, Apache Kafka, and Apache Pulsar. This implementation follows the [Model Context Protocol](https://modelcontextprotocol.io/introduction) specification, enabling AI applications to access messaging services through a standardized interface.
 
-The server currently negotiates MCP protocol versions `2025-11-25`, `2025-06-18`, `2025-03-26`, and `2024-11-05`. The default preference is `2025-11-25`, while older clients remain supported through protocol negotiation.
+The server uses `mcp-go v1.0.0`. Legacy clients continue to negotiate MCP protocol versions `2025-11-25`, `2025-06-18`, `2025-03-26`, and `2024-11-05` through `initialize` (at most `2025-11-25`).
+
+Initial `2026-07-28` support is validated over stdio for a fixed-context, read-only Pulsar tenant tool/resource profile: clients send the protocol version and client capabilities in each request's `_meta`, without an `initialize` handshake, and can use `server/discover`. Cloud context switching and session-scoped Functions-as-tools are not validated modern profiles. The existing `sse` command remains the legacy HTTP+SSE transport; it is **not** a Streamable HTTP endpoint. Modern HTTP transport, subscription delivery, and multi-user isolation require further integration and validation; this is not a claim of full `2026-07-28` conformance. See the [support matrix and implementation plan](agents/mcp-2026-07-28-support.md).
 
 ## Features
 

@@ -9,7 +9,8 @@ tmp/
 # Go
 vendor
 .cursor/
-agents/
+/agents/*
+!/agents/mcp-2026-07-28-support.md
 .serena/
 .envrc
 scripts/update-sdk-apiserver.sh
@@ -19,3 +20,4 @@ ralph/
 scripts/ralph*
 scripts/__pycache__/ralph*.pyc
 /PLAN.md
+/agents
