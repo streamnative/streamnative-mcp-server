@@ -8,7 +8,7 @@ StreamNative MCP Server provides a standard interface for LLMs (Large Language M
 
 The server uses `mcp-go v1.0.0`. Legacy clients continue to negotiate MCP protocol versions `2025-11-25`, `2025-06-18`, `2025-03-26`, and `2024-11-05` through `initialize` (at most `2025-11-25`).
 
-Initial `2026-07-28` support is validated over stdio for a fixed-context, read-only Pulsar tenant tool/resource profile: clients send the protocol version and client capabilities in each request's `_meta`, without an `initialize` handshake, and can use `server/discover`. Cloud context switching and session-scoped Functions-as-tools are not validated modern profiles. The existing `sse` command remains the legacy HTTP+SSE transport; it is **not** a Streamable HTTP endpoint. Modern HTTP transport, subscription delivery, and multi-user isolation require further integration and validation; this is not a claim of full `2026-07-28` conformance. See the [support matrix and implementation plan](agents/mcp-2026-07-28-support.md).
+Initial `2026-07-28` support includes a validated stdio read-only Pulsar tenant profile and a modern-only `http` transport for fixed external backends. Requests carry version and capabilities in `_meta`, without `initialize`, and can use `server/discover`. Legacy `sse` remains unchanged. Cloud context switching, session-scoped Functions-as-tools, full subscriptions and MCP OAuth are outside the validated modern profiles. This is not full `2026-07-28` conformance; see the [support matrix and implementation plan](agents/mcp-2026-07-28-support.md).
 
 ## Features
 
@@ -133,7 +133,59 @@ bin/snmcp sse --http-addr :9090 --http-path /mcp --use-external-pulsar --pulsar-
 docker run -i --rm -e SNMCP_ORGANIZATION=my-org -e SNMCP_KEY_FILE=/key.json -v /path/to/key-file.json:/key.json -p 9090:9090 streamnative/snmcp sse
 ```
 
-#### Multi-Session Pulsar Mode (SSE only)
+#### Using Streamable HTTP (MCP 2026-07-28)
+
+The separate `http` command serves modern MCP requests at `/mcp` and defaults
+to `127.0.0.1:9090`. It supports a fixed external Kafka or Pulsar backend;
+StreamNative Cloud context switching and Functions-as-tools are not supported.
+Existing `stdio` and legacy `sse` commands remain available.
+
+```bash
+# Local, fixed backend credentials and read-only tools
+bin/snmcp http --use-external-pulsar --read-only \
+  --pulsar-web-service-url http://localhost:8080 \
+  --pulsar-service-url pulsar://localhost:6650
+
+# Discovery without an initialize handshake
+curl http://127.0.0.1:9090/mcp \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -H 'MCP-Protocol-Version: 2026-07-28' \
+  -H 'Mcp-Method: server/discover' \
+  --data '{"jsonrpc":"2.0","id":1,"method":"server/discover","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientCapabilities":{}}}}'
+```
+
+Every modern request carries its own protocol version and capabilities in
+`params._meta`; HTTP routing headers must agree with the body. `tools/call`,
+`resources/read`, and `prompts/get` also require `Mcp-Name`. Use an MCP
+2026-07-28 client to handle header encoding and request-scoped SSE responses.
+There is no modern `initialize` handshake, protocol session ID, standalone GET
+stream, or DELETE session endpoint. Health probes remain unauthenticated at
+`/mcp/healthz` and `/mcp/readyz`.
+
+The HTTP endpoint rejects all present Origin headers by default.
+`--http-allowed-origins=https://trusted.example` allows exact Origins; it does
+not enable CORS preflight/browser support. Incoming bodies are limited to 4 MiB
+and the production listener bounds body reads to 30 seconds.
+
+Non-loopback binding requires `--use-external-pulsar --multi-session-pulsar`.
+Every request must provide its own `Authorization: Bearer <PULSAR_TOKEN>`;
+clients are request-scoped and released only after the response finishes.
+`--session-cache-size` and `--session-ttl-minutes` are not accepted by `http`.
+Unlike SSE, HTTP does not inherit a fixed backend token, auth plugin or client
+certificate into this mode. Pulsar remains responsible for authorizing backend
+operations: constructing a client does **not** validate a credential. Discovery
+can succeed for a syntactically valid but unauthorized token.
+
+This is a backend-credential forwarding compatibility profile, **not an MCP
+OAuth resource server**: it does not validate MCP token audience/issuer or
+implement OAuth metadata. Do not expose it as a public authenticated service.
+Use a trusted TLS/auth gateway and network restrictions; multi-session mode
+alone is not an authentication boundary. Local fixed-backend clients share the
+configured backend identity. Cloud/context mutation, dynamic Functions-as-tools,
+full subscription coverage and OAuth remain outside this stage.
+
+#### Multi-Session Pulsar Mode (legacy SSE)
 
 When running the SSE server with external Pulsar, you can enable **multi-session mode** to support per-user authentication. In this mode, each HTTP request must include an `Authorization: Bearer <token>` header, and the server will create separate Pulsar sessions for each unique token.
 

@@ -13,12 +13,14 @@ replicaCount: 1
 
 # Server configuration
 server:
+  # Transport: sse (legacy default) or http (Streamable HTTP, opt-in)
+  transport: sse
   # Enable read-only mode (disables write operations)
   readOnly: false
   # Features to enable (e.g., "all-pulsar", "pulsar-admin", "pulsar-client")
   # Leave empty to use default (all-pulsar)
   features: []
-  # HTTP server base path for SSE, message, and health endpoints
+  # HTTP base path: http MCP endpoint, or SSE/message endpoints; health in both
   httpPath: "/mcp"
   # Config directory for snmcp state (must be writable)
   configDir: "/var/lib/snmcp"
