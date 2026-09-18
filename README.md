@@ -362,6 +362,48 @@ You can combine these features as needed using the `--features` flag. For exampl
 bin/snmcp stdio --organization my-org --key-file /path/to/key-file.json --features pulsar-client
 ```
 
+## Local binary E2E tests
+
+From the repository root, with Go (the version in `go.mod`) and a running local
+Docker daemon (Docker Desktop/OrbStack or a Unix socket):
+
+```bash
+go test -tags=e2e ./tests/e2e -count=1 -v -timeout=10m
+```
+
+This Go testing + testify suite builds the real server binary and starts a fresh
+`apachepulsar/pulsar:4.1.0` or `apache/kafka:3.9.1` (single-node KRaft) container
+through Testcontainers. The first run needs network access to pull the backend
+and Testcontainers Ryuk cleanup images. It does
+not require Kind, Helm, an LLM, or existing backend credentials. Missing Docker,
+image-pull failures, and readiness timeouts **fail**, rather than skip, the test.
+
+Both backends run over stdio, legacy SSE, and Streamable HTTP using the mcp-go
+clients: protocol negotiation/discovery (modern stdio/HTTP; legacy
+initialize/initialized for SSE), `tools/list`, topic lifecycle, and a duplicate-create
+backend error. Pulsar tests create/get/delete a partitioned topic, independently
+verified through Pulsar REST. Kafka tests create/produce/consume/delete a topic;
+native Kafka metadata/fetch requests verify partitions, payload, key, headers,
+rejection without mutation, and deletion. Kafka's admin tools expose per-topic
+broker errors in the JSON result; the test checks `TOPIC_ALREADY_EXISTS`, not just
+the outer `isError` flag. These tests do not cover StreamNative Cloud, authentication,
+or Helm deployment; the existing chart E2E remains separate.
+
+`.github/workflows/binary-e2e.yaml` runs separate Pulsar/Kafka jobs on Ubuntu for
+PRs, pushes to `main`, and manual dispatch, without any Cloud secrets. Each job
+runs all three transports and uploads its run log plus failure diagnostics for
+7 days. Select one backend locally with `-run '^TestPulsar$'` or `-run '^TestKafka$'`.
+
+Only freshly provisioned local backend endpoints are used: no endpoint override,
+remote Docker daemon, saved user configuration, inherited server credentials, or
+proxy settings. Ports are dynamic and loopback-bound; topic names and server
+config directories are unique. Cleanup stops/reaps server processes and removes
+the container and its data even on assertion failures (Ryuk provides an additional
+cleanup safety net). The printed `snmcp-e2e-logs-*` temporary directory retains
+build, server, and backend logs on failure, and is removed on success. Set
+`E2E_ARTIFACTS_DIR` to place these directories under a CI artifact directory. Ordinary
+`go test ./...` excludes this suite via the `e2e` build tag.
+
 ## Inspecting the MCP Server
 
 You can use the [@modelcontextprotocol/inspector](https://www.npmjs.com/package/@modelcontextprotocol/inspector) tool to inspect and test your MCP server. This is particularly useful for debugging and verifying your server's configuration.

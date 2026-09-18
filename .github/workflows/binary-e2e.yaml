@@ -1,0 +1,66 @@
+name: Binary E2E Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: binary-e2e-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Binary E2E (${{ matrix.backend }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - backend: pulsar
+            test: TestPulsar
+          - backend: kafka
+            test: TestKafka
+    env:
+      E2E_TEST: ${{ matrix.test }}
+      E2E_ARTIFACTS_DIR: ${{ github.workspace }}/tmp/binary-e2e
+    steps:
+      - name: Check out code
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Go
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version-file: go.mod
+
+      - name: Check Docker and download dependencies
+        run: |
+          mkdir -p "$E2E_ARTIFACTS_DIR"
+          docker info
+          go mod download
+
+      # Each test provisions its own real backend, builds the server binary,
+      # and exercises stdio, SSE, and HTTP. No Cloud endpoints or secrets.
+      - name: Run backend E2E
+        timeout-minutes: 15
+        shell: bash
+        run: |
+          set -o pipefail
+          go test -tags=e2e ./tests/e2e -list "^${E2E_TEST}$" | tee "$E2E_ARTIFACTS_DIR/discovery.log" | grep -Fx "$E2E_TEST"
+          go test -race -tags=e2e ./tests/e2e -run "^${E2E_TEST}$" -count=1 -v -timeout=10m 2>&1 | tee "$E2E_ARTIFACTS_DIR/run.log"
+
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: binary-e2e-${{ matrix.backend }}-${{ github.run_attempt }}
+          path: ${{ env.E2E_ARTIFACTS_DIR }}/
+          if-no-files-found: warn
+          retention-days: 7
