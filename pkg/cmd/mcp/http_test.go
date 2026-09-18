@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -375,6 +376,140 @@ func TestHTTPDiscoverWithoutInitialization(t *testing.T) {
 	require.Equal(t, "private", result["cacheScope"])
 	require.Equal(t, float64(0), result["ttlMs"])
 	require.Contains(t, result["_meta"], "io.modelcontextprotocol/serverInfo")
+	resources := result["capabilities"].(map[string]any)["resources"].(map[string]any)
+	require.NotEqual(t, true, resources["subscribe"])
+	require.NotEqual(t, true, resources["listChanged"])
+}
+
+func TestHTTPDeclinesUnsupportedResourceSubscriptions(t *testing.T) {
+	s := app.NewServer("http-test", "1", logrus.New())
+	handler, err := newHTTPHandler(s, nil, "/mcp", nil, nil)
+	require.NoError(t, err)
+	req := modernHTTPRequest(t, "http://localhost", "subscriptions/listen")
+	var body map[string]any
+	require.NoError(t, json.NewDecoder(req.Body).Decode(&body))
+	body["params"].(map[string]any)["notifications"] = map[string]any{
+		"resourcesListChanged": true, "resourceSubscriptions": []string{"pulsar://context"},
+	}
+	data, err := json.Marshal(body)
+	require.NoError(t, err)
+	req.Body = io.NopCloser(strings.NewReader(string(data)))
+	req.ContentLength = int64(len(data))
+	ctx, cancel := context.WithTimeout(t.Context(), 5*time.Second)
+	defer cancel()
+	recorder := httptest.NewRecorder()
+	handler.ServeHTTP(recorder, req.WithContext(ctx))
+	require.Equal(t, http.StatusOK, recorder.Code)
+	require.NoError(t, ctx.Err(), "unsupported subscriptions must complete without waiting for cancellation")
+	require.Contains(t, recorder.Body.String(), `"resultType":"complete"`)
+	require.NotContains(t, recorder.Body.String(), `"resourcesListChanged":true`)
+	require.NotContains(t, recorder.Body.String(), "pulsar://context")
+}
+
+func TestHTTPPulsarSessionResolver(t *testing.T) {
+	cfg := config.ExternalPulsar{
+		ServiceURL: "pulsar://127.0.0.1:6650", WebServiceURL: "http://127.0.0.1:8080",
+		Token: "global-token", AuthPlugin: "unused-plugin", AuthParams: "unused-params",
+		TLSCertFile: "/must-not-read-client-cert", TLSKeyFile: "/must-not-read-client-key",
+		TLSAllowInsecureConnection: true, TLSEnableHostnameVerification: true,
+	}
+	resolve := newHTTPPulsarSessionResolver(cfg)
+	first, releaseFirst, err := resolve(t.Context(), "alice")
+	require.NoError(t, err)
+	t.Cleanup(releaseFirst)
+	second, releaseSecond, err := resolve(t.Context(), "bob")
+	require.NoError(t, err)
+	t.Cleanup(releaseSecond)
+	third, releaseThird, err := resolve(t.Context(), "alice")
+	require.NoError(t, err)
+	t.Cleanup(releaseThird)
+	require.NotSame(t, first, second)
+	require.NotSame(t, first, third, "even identical credentials have independent request lifetimes")
+	require.Equal(t, pulsar.PulsarContext{
+		ServiceURL: cfg.ServiceURL, WebServiceURL: cfg.WebServiceURL, Token: "alice",
+		TLSAllowInsecureConnection: true, TLSEnableHostnameVerification: true,
+	}, first.Ctx)
+	require.Equal(t, "bob", second.Ctx.Token)
+	require.NotNil(t, first.Client)
+	releaseFirst()
+	releaseFirst() // Idempotent release, including the deferred cleanup.
+	require.Nil(t, first.Client)
+	require.Nil(t, first.AdminClient)
+	require.Empty(t, first.Ctx.Token)
+	require.NotNil(t, second.Client, "releasing one request must not close another")
+	require.NotNil(t, third.Client)
+
+	ctx, cancel := context.WithCancel(t.Context())
+	cancel()
+	s, release, err := resolve(ctx, "alice")
+	require.ErrorIs(t, err, context.Canceled)
+	require.Nil(t, s)
+	require.Nil(t, release)
+	s, release, err = resolve(t.Context(), "")
+	require.Error(t, err)
+	require.Nil(t, s)
+	require.Nil(t, release)
+	invalid := cfg
+	invalid.ServiceURL = "://invalid"
+	s, release, err = newHTTPPulsarSessionResolver(invalid)(t.Context(), "alice")
+	require.Error(t, err)
+	require.Nil(t, s)
+	require.Nil(t, release)
+}
+
+func TestHTTPReleaseAfterToolFailureOrCancellation(t *testing.T) {
+	for _, cancelRequest := range []bool{false, true} {
+		t.Run(fmt.Sprintf("cancel=%t", cancelRequest), func(t *testing.T) {
+			s := app.NewServer("http-test", "1", logrus.New())
+			var released atomic.Int32
+			started := make(chan struct{})
+			s.MCPServer.AddTool(protocol.NewTool("fail"), func(ctx context.Context, _ protocol.CallToolRequest) (*protocol.CallToolResult, error) {
+				close(started)
+				if cancelRequest {
+					<-ctx.Done()
+				}
+				if released.Load() != 0 {
+					t.Error("the tool must retain its backend until it returns")
+				}
+				return nil, errors.New("tool failed")
+			})
+			handler, err := newHTTPHandler(s, nil, "/mcp", nil, func(context.Context, string) (*pulsar.Session, func(), error) {
+				return &pulsar.Session{}, func() { released.Add(1) }, nil
+			})
+			require.NoError(t, err)
+			req := modernHTTPRequest(t, "http://localhost", "tools/call")
+			var body map[string]any
+			require.NoError(t, json.NewDecoder(req.Body).Decode(&body))
+			body["params"].(map[string]any)["name"] = "fail"
+			data, err := json.Marshal(body)
+			require.NoError(t, err)
+			req.Body = io.NopCloser(strings.NewReader(string(data)))
+			req.ContentLength = int64(len(data))
+			req.Header.Set("Mcp-Name", "fail")
+			req.Header.Set("Authorization", "Bearer alice")
+			ctx, cancel := context.WithCancel(t.Context())
+			defer cancel()
+			done := make(chan struct{})
+			go func() {
+				defer close(done)
+				handler.ServeHTTP(httptest.NewRecorder(), req.WithContext(ctx))
+			}()
+			select {
+			case <-started:
+			case <-time.After(5 * time.Second):
+				t.Fatal("tool did not start")
+			}
+			if cancelRequest {
+				cancel()
+			}
+			select {
+			case <-done:
+			case <-time.After(5 * time.Second):
+				t.Fatal("handler did not finish")
+			}
+			require.EqualValues(t, 1, released.Load())
+		})
+	}
 }
 
 func modernHTTPRequest(t *testing.T, base, method string) *http.Request {

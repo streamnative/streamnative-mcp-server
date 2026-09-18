@@ -39,7 +39,6 @@ import (
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/config"
 	app "github.com/streamnative/streamnative-mcp-server/pkg/mcp"
-	"github.com/streamnative/streamnative-mcp-server/pkg/mcp/session"
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
@@ -123,23 +122,7 @@ func runHTTPServer(parent context.Context, opts *ServerOptions, origins []string
 	// No Functions-as-tools: the catalog must not depend on protocol sessions.
 	var resolve httpSessionResolver
 	if opts.MultiSessionPulsar {
-		p := opts.Pulsar
-		base := pulsar.PulsarContext{
-			ServiceURL: p.ServiceURL, WebServiceURL: p.WebServiceURL,
-			TLSAllowInsecureConnection:    p.TLSAllowInsecureConnection,
-			TLSEnableHostnameVerification: p.TLSEnableHostnameVerification,
-			TLSTrustCertsFilePath:         p.TLSTrustCertsFilePath,
-		}
-		// The existing manager has no leases: LRU/TTL eviction closes in-flight
-		// clients. Give each request a private manager and stop it only on release.
-		// No fixed token, auth plugin or client certificate is inherited.
-		resolve = func(ctx context.Context, token string) (*pulsar.Session, func(), error) {
-			manager := session.NewPulsarSessionManager(&session.PulsarSessionManagerConfig{
-				MaxSessions: 1, SessionTTL: time.Duration(1<<63 - 1), CleanupInterval: time.Duration(1<<63 - 1), BaseContext: base,
-			}, nil, logger)
-			ps, err := manager.GetOrCreateSession(ctx, token)
-			return ps, sync.OnceFunc(manager.Stop), err
-		}
+		resolve = newHTTPPulsarSessionResolver(opts.Pulsar)
 	}
 	handler, err := newHTTPHandler(s, opts.Options, opts.HTTPPath, origins, resolve)
 	if err != nil {
@@ -186,6 +169,36 @@ func runHTTPServer(parent context.Context, opts *ServerOptions, origins []string
 	return nil
 }
 
+// newHTTPPulsarSessionResolver owns one backend session per request, not a
+// protocol session or cache entry. The caller releases it after ServeHTTP.
+func newHTTPPulsarSessionResolver(p config.ExternalPulsar) httpSessionResolver {
+	return func(ctx context.Context, token string) (*pulsar.Session, func(), error) {
+		if err := ctx.Err(); err != nil {
+			return nil, nil, err
+		}
+		if token == "" {
+			return nil, nil, fmt.Errorf("pulsar bearer credentials required")
+		}
+		// Explicit allowlist: never inherit a fixed token, auth plugin or client
+		// certificate. Each request supplies its own backend identity.
+		ps, err := pulsar.NewSession(pulsar.PulsarContext{
+			ServiceURL: p.ServiceURL, WebServiceURL: p.WebServiceURL, Token: token,
+			TLSAllowInsecureConnection:    p.TLSAllowInsecureConnection,
+			TLSEnableHostnameVerification: p.TLSEnableHostnameVerification,
+			TLSTrustCertsFilePath:         p.TLSTrustCertsFilePath,
+		})
+		if err != nil {
+			return nil, nil, fmt.Errorf("create request Pulsar session: %w", err)
+		}
+		release := sync.OnceFunc(ps.ResetPulsarContext)
+		if err := ctx.Err(); err != nil {
+			release()
+			return nil, nil, err
+		}
+		return ps, release, nil
+	}
+}
+
 func newHTTPHandler(s *app.Server, options *config.Options, endpoint string, origins []string, resolve httpSessionResolver) (http.Handler, error) {
 	if !validHTTPEndpoint(endpoint) {
 		return nil, fmt.Errorf("http-path must be a clean absolute URL path")
@@ -197,6 +210,10 @@ func newHTTPHandler(s *app.Server, options *config.Options, endpoint string, ori
 		}
 		allowed[origin] = true
 	}
+	// This private CLI handler owns its MCP server. Configure before serving:
+	// modern resource change delivery is not implemented by this profile.
+	// Keep pkg/mcp's defaults unchanged for legacy and embedded consumers.
+	server.WithResourceCapabilities(false, false)(s.MCPServer)
 	transport := server.NewStreamableHTTPServer(s.MCPServer,
 		server.WithEndpointPath(endpoint),
 		server.WithStreamableHTTPProtocolVersions(protocol.ProtocolVersion20260728))

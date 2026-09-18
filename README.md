@@ -8,7 +8,7 @@ StreamNative MCP Server provides a standard interface for LLMs (Large Language M
 
 The server uses `mcp-go v1.1.0`. Legacy clients continue to negotiate MCP protocol versions `2025-11-25`, `2025-06-18`, `2025-03-26`, and `2024-11-05` through `initialize` (at most `2025-11-25`).
 
-Initial `2026-07-28` support includes a validated stdio read-only Pulsar tenant profile and a modern-only `http` transport for fixed external backends. Requests carry version and capabilities in `_meta`, without `initialize`, and can use `server/discover`. Legacy `sse` remains unchanged. Cloud context switching, session-scoped Functions-as-tools, full subscriptions and MCP OAuth are outside the validated modern profiles. This is not full `2026-07-28` conformance; see the [support matrix and implementation plan](agents/mcp-2026-07-28-support.md).
+Initial `2026-07-28` support uses mcp-go v1.1.0 and includes a validated stdio read-only Pulsar tenant profile and a modern-only `http` transport for fixed external backends. Requests carry version and capabilities in `_meta`, without `initialize`, and can use `server/discover`. Stdio permits modern operations only for a single fixed external Kafka/Pulsar backend; Cloud and other state-dependent stdio profiles report legacy versions and reject modern operations before dispatch, while still allowing discovery for fallback. Legacy `sse` remains unchanged. Cloud context switching, session-scoped Functions-as-tools, resource change subscriptions and MCP OAuth are outside the validated modern profiles. This is not full `2026-07-28` conformance; see the [support matrix and implementation plan](agents/mcp-2026-07-28-support.md).
 
 ## Features
 
@@ -162,6 +162,12 @@ Every modern request carries its own protocol version and capabilities in
 There is no modern `initialize` handshake, protocol session ID, standalone GET
 stream, or DELETE session endpoint. Health probes remain unauthenticated at
 `/mcp/healthz` and `/mcp/readyz`.
+
+Modern profiles do not advertise resource `subscribe` or `listChanged`
+capabilities. Requested resource subscriptions are excluded from the
+`subscriptions/listen` filter; a request with no supported subscriptions
+completes without opening a long-lived subscription. This does not change
+legacy initialize capabilities or request-scoped progress streaming.
 
 The HTTP endpoint rejects all present Origin headers by default.
 `--http-allowed-origins=https://trusted.example` allows exact Origins; it does
