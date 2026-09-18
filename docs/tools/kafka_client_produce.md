@@ -2,6 +2,9 @@
 
 Produce messages to a Kafka topic. This tool allows you to send single or multiple messages with various options.
 
+The producer reuses the session-owned Kafka client without closing it after each
+call, so subsequent produce and admin operations can use the same MCP connection.
+
 - **kafka_client_produce**
   - **Description**: Send messages to a Kafka topic, supporting keys, headers, partitions, batching, and file-based payloads.
   - **Parameters**:

@@ -81,3 +81,15 @@ Get the image tag
 {{- define "snmcp.imageTag" -}}
 {{- default .Chart.AppVersion .Values.image.tag }}
 {{- end }}
+
+{{/* Preserve SSE for releases whose reused values predate transport selection. */}}
+{{- define "snmcp.transport" -}}
+{{- $transport := "sse" -}}
+{{- if hasKey .Values.server "transport" -}}
+{{- $transport = .Values.server.transport -}}
+{{- end -}}
+{{- if not (has $transport (list "sse" "http")) -}}
+{{- fail "server.transport must be one of: sse, http" -}}
+{{- end -}}
+{{- $transport -}}
+{{- end -}}

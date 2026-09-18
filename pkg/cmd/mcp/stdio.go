@@ -16,6 +16,7 @@ package mcp
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -25,6 +26,7 @@ import (
 
 	stdlog "log"
 
+	protocol "github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -65,7 +67,7 @@ func runStdioServer(configOpts *ServerOptions) error {
 	// Create a new MCP server
 	ctx = context.WithValue(ctx, common.OptionsKey, configOpts.Options)
 	stdLogger := stdlog.New(logger.Writer(), "snmcp-server", 0)
-	mcpServer, err := newMcpServer(ctx, configOpts, logger)
+	mcpServer, err := newMcpServer(ctx, configOpts, logger, stdioServerOptions(configOpts)...)
 	if err != nil {
 		return fmt.Errorf("failed to create MCP server: %w", err)
 	}
@@ -115,6 +117,52 @@ func runStdioServer(configOpts *ServerOptions) error {
 	}
 
 	return nil
+}
+
+// stdioServerOptions keeps state-dependent profiles on legacy revisions. The
+// SDK's supported-version context only changes discovery on stdio; it does not
+// enforce dispatch, so reject modern requests before any method handler runs.
+func stdioServerOptions(opts *ServerOptions) []server.ServerOption {
+	modern := opts.KeyFile == "" && !opts.MultiSessionPulsar && opts.UseExternalKafka != opts.UseExternalPulsar
+	hooks := &server.Hooks{}
+	hooks.AddOnRequestInitialization(func(_ context.Context, _ any, message any) error {
+		var request struct {
+			Method protocol.MCPMethod
+			Params struct {
+				Meta *protocol.Meta `json:"_meta"`
+			}
+		}
+		raw, ok := message.(json.RawMessage)
+		if !ok || json.Unmarshal(raw, &request) != nil || request.Params.Meta == nil {
+			return nil // Leave malformed envelopes to the SDK.
+		}
+		if !modern && protocol.IsModernProtocol(request.Params.Meta.ProtocolVersion()) && request.Method != protocol.MethodServerDiscover {
+			// v1.1.0 maps initialization-hook errors to INVALID_REQUEST. Avoid
+			// forking the SDK just to customize that code; the request is refused.
+			return fmt.Errorf("this stdio profile requires a legacy protocol version; modern requests require a fixed external backend")
+		}
+		return nil
+	})
+	hooks.AddAfterDiscover(func(ctx context.Context, _ any, _ *protocol.DiscoverRequest, result *protocol.DiscoverResult) {
+		if !modern {
+			result.SupportedVersions = protocol.LegacyProtocolVersions()
+			return
+		}
+		if info := server.RequestProtocolInfoFromContext(ctx); info != nil && info.Modern && result.Capabilities.Resources != nil {
+			// This is a per-response snapshot, not the shared legacy capability.
+			result.Capabilities.Resources.Subscribe = false
+			result.Capabilities.Resources.ListChanged = false
+		}
+	})
+	hooks.AddBeforeSubscriptionsListen(func(ctx context.Context, _ any, request *protocol.SubscriptionsListenRequest) {
+		if info := server.RequestProtocolInfoFromContext(ctx); info != nil && info.Modern {
+			// Decline unsupported resource subscriptions using the SDK's normal
+			// acknowledged-filter response. Never mutate shared capabilities.
+			request.Params.Notifications.ResourceSubscriptions = nil
+			request.Params.Notifications.ResourcesListChanged = false
+		}
+	})
+	return []server.ServerOption{server.WithHooks(hooks)}
 }
 
 func initLogger(filePath string) (*logrus.Logger, error) {

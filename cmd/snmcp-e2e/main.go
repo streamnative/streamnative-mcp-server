@@ -21,6 +21,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -39,6 +40,8 @@ type config struct {
 	testUserToken string
 	timeout       time.Duration
 	verbose       bool
+	transport     string
+	readOnly      bool
 }
 
 func main() {
@@ -59,13 +62,30 @@ func main() {
 }
 
 func parseConfig() (config, error) {
+	return parseConfigArgs(os.Args[1:])
+}
+
+func parseConfigArgs(args []string) (config, error) {
 	var cfg config
+	flag := flag.NewFlagSet("snmcp-e2e", flag.ContinueOnError)
+	// Flag errors may echo token values; only return the generic error below.
+	flag.SetOutput(io.Discard)
 	flag.StringVar(&cfg.httpBaseURL, "http-base", getenv("E2E_HTTP_BASE", "http://127.0.0.1:9090/mcp"), "HTTP base URL for MCP endpoints")
 	flag.StringVar(&cfg.adminToken, "admin-token", getenv("ADMIN_TOKEN", ""), "Admin JWT token")
 	flag.StringVar(&cfg.testUserToken, "test-user-token", getenv("TEST_USER_TOKEN", ""), "Test user JWT token")
 	flag.DurationVar(&cfg.timeout, "timeout", 3*time.Minute, "Overall timeout for the E2E run")
 	flag.BoolVar(&cfg.verbose, "verbose", getenvBool("E2E_VERBOSE", false), "Enable verbose logging")
-	flag.Parse()
+	flag.StringVar(&cfg.transport, "transport", getenv("E2E_TRANSPORT", "sse"), "MCP transport: sse or http")
+	flag.BoolVar(&cfg.readOnly, "read-only", getenvBool("E2E_READ_ONLY", false), "Test the HTTP read-only catalog")
+	if err := flag.Parse(args); err != nil {
+		return config{}, errors.New("invalid E2E flags")
+	}
+	if cfg.transport != "sse" && cfg.transport != "http" {
+		return config{}, errors.New("transport must be sse or http")
+	}
+	if cfg.readOnly && cfg.transport != "http" {
+		return config{}, errors.New("read-only E2E requires http transport")
+	}
 
 	if cfg.adminToken == "" {
 		return config{}, errors.New("admin token is required")
@@ -95,6 +115,9 @@ func normalizeBaseURL(raw string) (string, error) {
 }
 
 func run(ctx context.Context, cfg config) error {
+	if cfg.transport == "http" {
+		return runHTTP(ctx, cfg)
+	}
 	logf(cfg.verbose, "http base: %s", cfg.httpBaseURL)
 	if err := checkHealth(ctx, cfg.httpBaseURL); err != nil {
 		return err
@@ -606,7 +629,8 @@ func newAuthedClient(ctx context.Context, sseURL, token, clientName string) (*cl
 
 func initializeClient(ctx context.Context, c *client.Client, name string) error {
 	req := mcp.InitializeRequest{}
-	req.Params.ProtocolVersion = mcp.LATEST_PROTOCOL_VERSION
+	// This client exercises legacy HTTP+SSE, which still uses initialize.
+	req.Params.ProtocolVersion = mcp.LATEST_LEGACY_PROTOCOL_VERSION
 	req.Params.ClientInfo = mcp.Implementation{
 		Name:    name,
 		Version: "1.0.0",

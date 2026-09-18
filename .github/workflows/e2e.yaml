@@ -2,50 +2,103 @@ name: E2E Tests
 
 on:
   push:
-    paths:
-      - "charts/**"
-      - "cmd/snmcp-e2e/**"
-      - "scripts/e2e-test.sh"
-      - ".github/workflows/e2e.yaml"
+    branches: [main]
+  # Always create PR checks, including changes to SDK, builders and transports.
+  # No path filter: a required check must not remain pending for skipped paths.
   pull_request:
-    paths:
-      - "charts/**"
-      - "cmd/snmcp-e2e/**"
-      - "scripts/e2e-test.sh"
-      - ".github/workflows/e2e.yaml"
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: e2e-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   e2e:
-    runs-on: ubuntu-latest
+    name: E2E (${{ matrix.profile }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - profile: legacy-sse
+            transport: sse
+            read-only: "false"
+            http-path: /mcp
+          - profile: modern-http
+            transport: http
+            read-only: "false"
+            http-path: /mcp
+          - profile: modern-http-read-only
+            transport: http
+            read-only: "true"
+            http-path: /custom/mcp
+    env:
+      SNMCP_TRANSPORT: ${{ matrix.transport }}
+      SNMCP_READ_ONLY: ${{ matrix.read-only }}
+      SNMCP_HTTP_PATH: ${{ matrix.http-path }}
+      E2E_ARTIFACTS_DIR: ${{ github.workspace }}/tmp/e2e
+      E2E_VERBOSE: "1"
+      PULSAR_STARTUP_TIMEOUT: "300"
+      SNMCP_WAIT_TIMEOUT: 300s
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
           go-version-file: "go.mod"
 
       - name: Set up Helm
-        uses: azure/setup-helm@v4
+        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4
+        with:
+          version: v3.19.0
 
       - name: Set up Kind
-        uses: helm/kind-action@v1
+        uses: helm/kind-action@ef37e7f390d99f746eb8b610417061a60e82a6cc # v1
         with:
           cluster_name: kind
+          version: v0.31.0
+          kubectl_version: v1.35.0
+          wait: 120s
 
       - name: Download dependencies
         run: go mod download
 
+      - name: Check harness and chart contracts
+        run: |
+          bash scripts/tests/e2e-test.sh
+          bash charts/snmcp/tests/transport.sh
+          go test ./cmd/snmcp-e2e ./pkg/cmd/mcp
+
       - name: Run E2E tests
-        env:
-          E2E_VERBOSE: "1"
-        run: ./scripts/e2e-test.sh all
+        timeout-minutes: 25
+        run: |
+          mkdir -p "$E2E_ARTIFACTS_DIR"
+          set -o pipefail
+          ./scripts/e2e-test.sh all 2>&1 | tee "$E2E_ARTIFACTS_DIR/run.log"
+
+      - name: Collect diagnostics
+        if: always()
+        timeout-minutes: 2
+        run: ./scripts/e2e-test.sh logs
+
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: e2e-${{ matrix.profile }}-${{ github.run_attempt }}
+          path: tmp/e2e/
+          if-no-files-found: warn
+          retention-days: 7
 
       - name: Cleanup
         if: always()
+        timeout-minutes: 2
         run: ./scripts/e2e-test.sh cleanup

@@ -2,6 +2,7 @@
 Copyright 2025 StreamNative
 SPDX-License-Identifier: Apache-2.0
 */}}
+{{- $transport := include "snmcp.transport" . }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -37,7 +38,11 @@ spec:
           image: "{{ .Values.image.repository }}:{{ include "snmcp.imageTag" . }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
-            - sse
+            - {{ $transport }}
+            {{- if eq $transport "http" }}
+            - --http-addr
+            - ":9090"
+            {{- end }}
             - --use-external-pulsar
             - --multi-session-pulsar
             - --pulsar-web-service-url
@@ -46,12 +51,18 @@ spec:
             - --pulsar-service-url
             - "$(SNMCP_PULSAR_SERVICE_URL)"
             {{- end }}
+            {{- if eq $transport "sse" }}
             - --session-cache-size
             - "$(SNMCP_SESSION_CACHE_SIZE)"
             - --session-ttl-minutes
             - "$(SNMCP_SESSION_TTL_MINUTES)"
+            {{- end }}
             - --http-path
+            {{- if eq $transport "http" }}
+            - {{ default "/" (trimSuffix "/" .Values.server.httpPath) | quote }}
+            {{- else }}
             - "$(SNMCP_HTTP_PATH)"
+            {{- end }}
             {{- if .Values.server.readOnly }}
             - --read-only
             {{- end }}
