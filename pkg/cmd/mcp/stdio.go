@@ -71,11 +71,12 @@ func runStdioServer(configOpts *ServerOptions) error {
 	if err != nil {
 		return fmt.Errorf("failed to create MCP server: %w", err)
 	}
+	defer mcpServer.Close()
 
 	ctx = mcpctx.WithSNCloudSession(ctx, mcpServer.SNCloudSession)
 	ctx = mcpctx.WithPulsarSession(ctx, mcpServer.PulsarSession)
 	ctx = mcpctx.WithKafkaSession(ctx, mcpServer.KafkaSession)
-	if configOpts.KeyFile != "" && configOpts.PulsarInstance != "" && configOpts.PulsarCluster != "" {
+	if configOpts.IsCloudConfigured() && configOpts.PulsarInstance != "" && configOpts.PulsarCluster != "" {
 		if err := mcpctx.SetContext(ctx, configOpts.Options, configOpts.PulsarInstance, configOpts.PulsarCluster); err != nil {
 			return fmt.Errorf("failed to set StreamNative Cloud context: %w", err)
 		}
@@ -123,7 +124,7 @@ func runStdioServer(configOpts *ServerOptions) error {
 // SDK's supported-version context only changes discovery on stdio; it does not
 // enforce dispatch, so reject modern requests before any method handler runs.
 func stdioServerOptions(opts *ServerOptions) []server.ServerOption {
-	modern := opts.KeyFile == "" && !opts.MultiSessionPulsar && opts.UseExternalKafka != opts.UseExternalPulsar
+	modern := !opts.IsCloudConfigured() && !opts.MultiSessionPulsar && opts.UseExternalKafka != opts.UseExternalPulsar
 	hooks := &server.Hooks{}
 	hooks.AddOnRequestInitialization(func(_ context.Context, _ any, message any) error {
 		var request struct {

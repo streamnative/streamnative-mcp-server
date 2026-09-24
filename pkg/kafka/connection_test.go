@@ -15,12 +15,68 @@
 package kafka
 
 import (
+	"context"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"sync/atomic"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/twmb/franz-go/pkg/kgo"
+	"github.com/twmb/franz-go/pkg/sasl"
+	"golang.org/x/oauth2"
 )
 
 const contextNotSetErr = "err: ContextNotSetErr: Please set the cluster context first"
+
+type rotatingTokenSource struct{ token atomic.Value }
+
+func (s *rotatingTokenSource) Token() (*oauth2.Token, error) {
+	return &oauth2.Token{AccessToken: s.token.Load().(string)}, nil
+}
+
+func TestKafkaClientsReadCurrentTokenAtAuthenticationTime(t *testing.T) {
+	source := &rotatingTokenSource{}
+	source.token.Store("old-token")
+	api := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		user, password, ok := r.BasicAuth()
+		if !ok || user != "public/default" || password != "new-token" {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		if r.URL.Path == "/" {
+			_, _ = fmt.Fprint(w, "{}")
+			return
+		}
+		_, _ = fmt.Fprint(w, "[]")
+	}))
+	defer api.Close()
+	session, err := NewSession(KafkaContext{
+		BootstrapServers: "localhost:9093", AuthMechanism: "PLAIN", AuthUser: "public/default", AuthPass: "token:old-token",
+		SchemaRegistryURL: api.URL, SchemaRegistryAuthUser: "public/default", SchemaRegistryAuthPass: "old-token",
+		ConnectURL: api.URL, ConnectAuthUser: "public/default", ConnectAuthPass: "old-token",
+		TokenSource: source, TokenPrefix: "token:",
+	})
+	require.NoError(t, err)
+	defer session.ResetKafkaContext()
+	source.token.Store("new-token")
+	client, err := session.GetClient()
+	require.NoError(t, err)
+	mechanisms := client.OptValue(kgo.SASL).([]sasl.Mechanism)
+	_, data, err := mechanisms[0].Authenticate(context.Background(), "localhost")
+	require.NoError(t, err)
+	require.Equal(t, "\x00public/default\x00token:new-token", string(data))
+	schema, err := session.GetSchemaRegistryClient()
+	require.NoError(t, err)
+	_, err = schema.Subjects(context.Background())
+	require.NoError(t, err)
+	connect, err := session.GetConnectClient()
+	require.NoError(t, err)
+	_, err = connect.GetInfo(context.Background())
+	require.NoError(t, err)
+}
 
 func TestSessionGetKafkaClientsRequireContext(t *testing.T) {
 	session := &Session{}

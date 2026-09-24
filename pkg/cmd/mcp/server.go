@@ -37,13 +37,11 @@ func newMcpServer(_ context.Context, configOpts *ServerOptions, logrusLogger *lo
 	var s *server.MCPServer
 	var mcpServer *mcp.Server
 	switch {
-	case snConfig.KeyFile != "":
+	case configOpts.IsCloudConfigured():
 		{
-			issuer := snConfig.Auth.Issuer()
-			userName, err := configOpts.WhoAmI(issuer.Audience)
+			userName, err := configOpts.CloudIdentity()
 			if err != nil {
-				stdlog.Fatalf("failed to get user name: %v", err)
-				os.Exit(1)
+				return nil, errors.Wrap(err, "failed to get effective identity")
 			}
 			// Create StreamNative Cloud session and set as default
 			session, err := config.NewSNCloudSessionFromOptions(configOpts.Options)
@@ -55,9 +53,7 @@ func newMcpServer(_ context.Context, configOpts *ServerOptions, logrusLogger *lo
 
 			s = mcpServer.MCPServer
 			mcp.RegisterPrompts(s)
-			// Skip context tools if pulsar instance and cluster are provided via CLI
-			skipContextTools := snConfig.Context.PulsarInstance != "" && snConfig.Context.PulsarCluster != ""
-			mcp.RegisterContextTools(s, configOpts.Features, configOpts.ReadOnly, skipContextTools)
+			mcp.RegisterContextTools(s, configOpts.Features, configOpts.ReadOnly, configOpts.LockClusterContext)
 			mcp.StreamNativeAddLogTools(s, configOpts.ReadOnly, configOpts.Features)
 			mcp.StreamNativeAddResourceTools(s, configOpts.ReadOnly, configOpts.Features)
 		}

@@ -18,187 +18,161 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/streamnative/streamnative-mcp-server/pkg/auth"
 	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	"github.com/streamnative/streamnative-mcp-server/pkg/config"
 	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
 	context2 "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
-	sncloud "github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserver"
+	"golang.org/x/oauth2"
 )
 
-// DefaultKafkaPort is the default Kafka port for StreamNative Cloud.
+// DefaultKafkaPort is the default Kafka port for standalone Cloud clusters.
 const DefaultKafkaPort = 9093
 
-// SetContext resolves and stores StreamNative Cloud context in memory.
+// SetContext resolves a selection through its provider, prepares protocol clients,
+// and atomically publishes them. It does not interpret injected credentials.
 func SetContext(ctx context.Context, options *config.Options, instanceName, clusterName string) error {
-	snConfig := options.LoadConfigOrDie()
-	myselfGrant, err := options.LoadGrant(snConfig.Auth.Audience)
-	if err != nil || myselfGrant == nil {
-		return fmt.Errorf("failed to auth to StreamNative Cloud: %v", err)
+	if options == nil || instanceName == "" || clusterName == "" {
+		return fmt.Errorf("options, instance and cluster are required")
 	}
-
-	// Get API client from session
 	session := context2.GetSNCloudSession(ctx)
 	if session == nil {
 		return fmt.Errorf("failed to get StreamNative Cloud session")
 	}
-
-	apiClient, err := session.GetAPIClient()
-	if err != nil {
-		return fmt.Errorf("failed to get API client: %v", err)
+	unlock := session.LockRuntimeMutation()
+	defer unlock()
+	var resolver config.ClusterResolver = standaloneClusterResolver{options: options, session: session}
+	if options.CloudProvider != nil {
+		if options.CloudProvider.Resolver == nil {
+			return fmt.Errorf("cloud resolver is not configured")
+		}
+		resolver = options.CloudProvider.Resolver
 	}
-
-	instances, instancesBody, err := apiClient.CloudStreamnativeIoV1alpha1Api.ListCloudStreamnativeIoV1alpha1NamespacedPulsarInstance(ctx, options.Organization).Execute()
+	resolved, err := resolver.ResolveCluster(ctx, instanceName, clusterName)
 	if err != nil {
-		return fmt.Errorf("failed to list pulsar instances: %v", err)
+		return err
 	}
-	defer func() { _ = instancesBody.Body.Close() }()
-
-	var instance sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarInstance
-	foundInstance := false
-	for _, i := range instances.Items {
-		if *i.Metadata.Name == instanceName {
-			if common.IsInstanceValid(i) {
-				instance = i
-				foundInstance = true
-				break
-			}
-			return fmt.Errorf("pulsar instance %s is not valid", instanceName)
+	if resolved.Pulsar.ServiceURL == "" || resolved.Pulsar.WebServiceURL == "" {
+		return fmt.Errorf("resolver returned incomplete Pulsar endpoints")
+	}
+	candidate := &config.RuntimeBinding{
+		Instance: instanceName, Cluster: clusterName, Pulsar: &pulsar.Session{}, Kafka: &kafka.Session{},
+	}
+	published := false
+	defer func() {
+		if !published {
+			candidate.Close()
+		}
+	}()
+	if err := candidate.Pulsar.SetPulsarContext(resolved.Pulsar); err != nil {
+		return fmt.Errorf("prepare Pulsar context: %w", err)
+	}
+	if resolved.Kafka != nil {
+		if err := candidate.Kafka.SetKafkaContext(*resolved.Kafka); err != nil {
+			return fmt.Errorf("prepare Kafka context: %w", err)
 		}
 	}
-	if !foundInstance {
-		return fmt.Errorf("pulsar instance %s not found in organization %s", instanceName, options.Organization)
+	if err := ctx.Err(); err != nil {
+		return err
 	}
+	session.PublishRuntimeBinding(candidate)
+	published = true
+	return nil
+}
 
-	clusters, clustersBody, err := apiClient.CloudStreamnativeIoV1alpha1Api.ListCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(ctx, options.Organization).Execute()
+type standaloneClusterResolver struct {
+	options *config.Options
+	session *config.Session
+}
+
+func (r standaloneClusterResolver) ResolveCluster(ctx context.Context,
+	instanceName, clusterName string,
+) (config.ResolvedRuntime, error) {
+	options, session := r.options, r.session
+	var resolved config.ResolvedRuntime
+	if options.Store == nil {
+		return resolved, fmt.Errorf("standalone Cloud authentication is not configured")
+	}
+	snConfig := options.LoadConfigOrDie()
+	grant, err := options.LoadGrant(snConfig.Auth.Audience)
 	if err != nil {
-		return fmt.Errorf("failed to list pulsar clusters: %v", err)
+		return resolved, fmt.Errorf("load Cloud authentication: %w", err)
 	}
-	defer func() { _ = clustersBody.Body.Close() }()
-	var cluster sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarCluster
-	foundCluster := false
-	for _, c := range clusters.Items {
-		if *c.Metadata.Name == clusterName && c.Spec.InstanceName == instanceName {
-			if common.IsClusterAvailable(c) {
-				cluster = c
-				foundCluster = true
-				break
-			}
-			return fmt.Errorf("pulsar cluster %s is not available", clusterName)
-		}
+	if grant == nil {
+		return resolved, fmt.Errorf("cloud authentication is missing")
 	}
-	if !foundCluster {
-		return fmt.Errorf("pulsar cluster %s not found", clusterName)
+	client, err := session.GetAPIClient()
+	if err != nil {
+		return resolved, err
 	}
-
-	clusterUID := string(*cluster.Metadata.Uid)
+	cluster, issuer, err := resolveLegacyPulsarCluster(ctx, client, options.Organization, instanceName, clusterName, snConfig.Auth.Issuer())
+	if err != nil {
+		return resolved, err
+	}
 	dnsName := ""
 	for _, endpoint := range cluster.Spec.ServiceEndpoints {
-		if *endpoint.Type == "service" {
+		if endpoint.Type != nil && *endpoint.Type == "service" {
 			dnsName = endpoint.DnsName
 			break
 		}
 	}
-
 	if dnsName == "" {
-		return fmt.Errorf("no valid service endpoint found for PulsarCluster '%s'", clusterName)
+		return resolved, fmt.Errorf("no valid service endpoint found for PulsarCluster %q", clusterName)
 	}
-
-	issuer, err := getIssuer(&instance, snConfig.Auth.Issuer())
+	if grant.Type != auth.GrantTypeClientCredentials || grant.ClientCredentials == nil {
+		return resolved, fmt.Errorf("standalone Cloud mode requires service account credentials")
+	}
+	// The standalone session has one immutable identity and no persistent
+	// cross-session runtime cache. No resource-specific audience policy is applied.
+	key := fmt.Sprintf("%q:%q", issuer.IssuerEndpoint, issuer.Audience)
+	source := session.RuntimeTokenSource(key, func() oauth2.TokenSource {
+		return oauth2.ReuseTokenSourceWithExpiry(nil, &legacyTokenRefresher{
+			issuer: *issuer, credentials: *grant.ClientCredentials,
+		}, common.TokenRefreshWindow)
+	})
+	token, err := source.Token()
 	if err != nil {
-		return fmt.Errorf("failed to get issuer: %v", err)
+		return resolved, err
 	}
-
-	tokenKey := issuer.Audience
-
-	accessToken := ""
-	refreshToken := true
-	cachedGrant, err := options.LoadGrant(tokenKey)
-	if err == nil && cachedGrant != nil {
-
-		cacheHasValidToken, err := common.HasCachedValidToken(cachedGrant)
-		if err != nil {
-			cacheHasValidToken = false
-		}
-
-		if cacheHasValidToken {
-			tokenAboutToExpire, err := common.IsTokenAboutToExpire(cachedGrant, common.TokenRefreshWindow)
-			if err != nil {
-				tokenAboutToExpire = true
-			}
-
-			if !tokenAboutToExpire {
-				refreshToken = false
-				accessToken = cachedGrant.Token.AccessToken
-			}
+	resolved.Pulsar = pulsar.PulsarContext{
+		WebServiceURL: getBasePath(snConfig.ProxyLocation, options.Organization, *cluster.Metadata.Uid),
+		ServiceURL:    getServiceURL(dnsName), Token: token.AccessToken, TokenSource: source,
+	}
+	if cluster.Spec.Config != nil && cluster.Spec.Config.Protocols != nil && cluster.Spec.Config.Protocols.Kafka != nil {
+		resolved.Kafka = &kafka.KafkaContext{
+			BootstrapServers:  fmt.Sprintf("%s:%d", dnsName, DefaultKafkaPort),
+			SchemaRegistryURL: fmt.Sprintf("https://%s/kafka", dnsName),
+			ConnectURL:        fmt.Sprintf("%s/admin/kafkaconnect/", snConfig.ProxyLocation),
+			AuthType:          "sasl_ssl", AuthMechanism: "PLAIN", AuthUser: "public/default", AuthPass: "token:" + token.AccessToken,
+			UseTLS: true, SchemaRegistryAuthUser: "public/default", SchemaRegistryAuthPass: token.AccessToken,
+			ConnectAuthUser: "public/default", ConnectAuthPass: token.AccessToken,
+			TokenSource: source, TokenPrefix: "token:",
 		}
 	}
+	return resolved, nil
+}
 
-	if refreshToken {
-		flow, err := getFlow(issuer, myselfGrant)
-		if err != nil {
-			return fmt.Errorf("failed to get flow: %v", err)
-		}
+type legacyTokenRefresher struct {
+	issuer      auth.Issuer
+	credentials auth.KeyFile
+}
 
-		newGrant, err := flow.Authorize()
-		if err != nil {
-			return fmt.Errorf("failed to authorize: %v", err)
-		}
-
-		if newGrant.Token != nil {
-			_ = options.SaveGrant(tokenKey, *newGrant)
-			accessToken = newGrant.Token.AccessToken
-		}
-	}
-
-	if accessToken == "" {
-		return fmt.Errorf("failed to get access token")
-	}
-
-	psession := context2.GetPulsarSession(ctx)
-	if psession == nil {
-		return fmt.Errorf("failed to get pulsar session")
-	}
-	err = psession.SetPulsarContext(pulsar.PulsarContext{
-		WebServiceURL: getBasePath(snConfig.ProxyLocation, options.Organization, clusterUID),
-		ServiceURL:    getServiceURL(dnsName),
-		Token:         accessToken,
+func (s *legacyTokenRefresher) Token() (*oauth2.Token, error) {
+	flow, err := getFlow(&s.issuer, &auth.AuthorizationGrant{
+		Type: auth.GrantTypeClientCredentials, ClientCredentials: &s.credentials,
 	})
 	if err != nil {
-		return fmt.Errorf("failed to change pulsar context: %v", err)
+		return nil, err
 	}
-
-	kctx := kafka.KafkaContext{
-		BootstrapServers:       fmt.Sprintf("%s:%d", dnsName, DefaultKafkaPort),
-		SchemaRegistryURL:      fmt.Sprintf("https://%s/kafka", dnsName),
-		ConnectURL:             fmt.Sprintf("%s/admin/kafkaconnect/", snConfig.ProxyLocation),
-		AuthType:               "sasl_ssl",
-		AuthMechanism:          "PLAIN",
-		AuthUser:               "public/default",
-		AuthPass:               "token:" + accessToken,
-		UseTLS:                 true,
-		SchemaRegistryAuthUser: "public/default",
-		SchemaRegistryAuthPass: accessToken,
-		ConnectAuthUser:        "public/default",
-		ConnectAuthPass:        accessToken,
-	}
-
-	ksession := context2.GetKafkaSession(ctx)
-	if ksession == nil {
-		return fmt.Errorf("failed to get kafka session")
-	}
-	err = ksession.SetKafkaContext(kctx)
+	grant, err := flow.Authorize()
 	if err != nil {
-		return fmt.Errorf("failed to change kafka context: %v", err)
+		return nil, err
 	}
-
-	session.SetPulsarClusterContext(instanceName, clusterName)
-
-	// TODO: check if need to set log client
-	// if issuer != nil && options.AuthOptions.Store != nil {
-	// }
-
-	return nil
+	if grant == nil || grant.Token == nil || !grant.Token.Valid() || grant.Token.Expiry.IsZero() {
+		return nil, fmt.Errorf("authorization returned no valid expiring access token")
+	}
+	return grant.Token, nil
 }
 
 // ResetContext clears StreamNative Cloud cluster bindings and protocol sessions.
@@ -207,20 +181,14 @@ func ResetContext(ctx context.Context) error {
 	if session == nil {
 		return fmt.Errorf("failed to get StreamNative Cloud session")
 	}
-
-	psession := context2.GetPulsarSession(ctx)
-	if psession == nil {
-		return fmt.Errorf("failed to get pulsar session")
+	unlock := session.LockRuntimeMutation()
+	defer unlock()
+	var initial *config.RuntimeBinding
+	if session.CurrentRuntimeBinding() == nil {
+		initial = &config.RuntimeBinding{Pulsar: context2.GetPulsarSession(ctx), Kafka: context2.GetKafkaSession(ctx)}
 	}
-
-	ksession := context2.GetKafkaSession(ctx)
-	if ksession == nil {
-		return fmt.Errorf("failed to get kafka session")
-	}
-
-	psession.ResetPulsarContext()
-	ksession.ResetKafkaContext()
-	session.ResetPulsarClusterContext()
+	session.PublishRuntimeBinding(&config.RuntimeBinding{Pulsar: &pulsar.Session{}, Kafka: &kafka.Session{}})
+	initial.Close()
 
 	return nil
 }

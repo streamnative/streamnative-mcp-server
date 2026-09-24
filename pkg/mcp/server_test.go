@@ -17,7 +17,9 @@ package mcp
 import (
 	"context"
 	"encoding/json"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
@@ -25,6 +27,41 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func TestExternalServerDoesNotAcquireCloudBindingLease(t *testing.T) {
+	srv := NewServer("external", "test", logrus.New())
+	ctx := WithSNCloudSession(context.Background(), srv.SNCloudSession)
+	entered, release := make(chan struct{}), make(chan struct{})
+	releaseRequest := sync.OnceFunc(func() { close(release) })
+	t.Cleanup(releaseRequest)
+	srv.MCPServer.AddTool(mcp.NewTool("hold"), func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		close(entered)
+		<-release
+		return mcp.NewToolResultText("done"), nil
+	})
+	requestDone := make(chan struct{})
+	go func() {
+		srv.MCPServer.HandleMessage(ctx, json.RawMessage(`{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"hold"}}`))
+		close(requestDone)
+	}()
+	select {
+	case <-entered:
+	case <-time.After(time.Second):
+		t.Fatal("handler did not start")
+	}
+	closed := make(chan struct{})
+	go func() { srv.Close(); close(closed) }()
+	select {
+	case <-closed:
+	case <-time.After(100 * time.Millisecond):
+		releaseRequest()
+		<-requestDone
+		<-closed
+		t.Fatal("external mode must not wait for a Cloud binding lease")
+	}
+	releaseRequest()
+	<-requestDone
+}
 
 func TestNewServer_InitializeCompatibility(t *testing.T) {
 	t.Parallel()

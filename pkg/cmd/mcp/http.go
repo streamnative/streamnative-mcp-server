@@ -56,7 +56,7 @@ func NewCmdMcpHTTPServer(shared *ServerOptions) *cobra.Command {
 		Args: cobra.NoArgs,
 		PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
 			// Check both flags and env before Complete touches keyring or credentials.
-			if shared.KeyFile != "" || viper.GetString("key-file") != "" ||
+			if shared.IsCloudConfigured() || viper.GetString("key-file") != "" ||
 				(shared.UseExternalKafka || viper.GetBool("use-external-kafka")) == (shared.UseExternalPulsar || viper.GetBool("use-external-pulsar")) {
 				return fmt.Errorf("http transport requires exactly one external Kafka/Pulsar mode; Cloud is unsupported")
 			}
@@ -111,14 +111,7 @@ func runHTTPServer(parent context.Context, opts *ServerOptions, origins []string
 	if err != nil {
 		return fmt.Errorf("create HTTP MCP server: %w", err)
 	}
-	defer func() {
-		if s.KafkaSession != nil {
-			s.KafkaSession.ResetKafkaContext()
-		}
-		if s.PulsarSession != nil {
-			s.PulsarSession.ResetPulsarContext()
-		}
-	}()
+	defer s.Close()
 	// No Functions-as-tools: the catalog must not depend on protocol sessions.
 	var resolve httpSessionResolver
 	if opts.MultiSessionPulsar {

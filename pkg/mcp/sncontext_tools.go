@@ -73,9 +73,7 @@ func RegisterContextTools(s *server.MCPServer, features []string, readOnly bool,
 // handleWhoami handles the whoami tool request
 func handleWhoami(ctx context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	options := common.GetOptions(ctx)
-	issuer := options.LoadConfigOrDie().Auth.Issuer()
-
-	userName, err := options.WhoAmI(issuer.Audience)
+	userName, err := options.CloudIdentity()
 	if err != nil {
 		if err == store.ErrNoAuthenticationData {
 			return mcp.NewToolResultText("Not logged in."), nil

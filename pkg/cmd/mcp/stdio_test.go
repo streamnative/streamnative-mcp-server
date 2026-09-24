@@ -43,6 +43,10 @@ func TestStdioProtocolProfiles(t *testing.T) {
 		{name: "unconfigured"},
 		{name: "ambiguous backends", options: config.Options{UseExternalKafka: true, UseExternalPulsar: true}},
 		{name: "Cloud takes precedence", options: config.Options{KeyFile: "not-read.json", UseExternalPulsar: true}},
+		{name: "injected Cloud", options: config.Options{CloudProvider: &config.CloudProvider{}}},
+		{name: "injected Cloud cannot masquerade as external", options: config.Options{
+			CloudProvider: &config.CloudProvider{}, UseExternalPulsar: true,
+		}},
 		{name: "multi-session", options: config.Options{UseExternalPulsar: true}, multiSession: true},
 		{name: "fixed Kafka", options: config.Options{UseExternalKafka: true}, modern: true},
 		{name: "fixed Pulsar", options: config.Options{UseExternalPulsar: true}, modern: true},

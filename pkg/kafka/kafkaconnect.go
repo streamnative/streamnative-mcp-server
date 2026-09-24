@@ -19,9 +19,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/http"
 	"net/url"
 	"strings"
 
+	runtimeauth "github.com/streamnative/streamnative-mcp-server/pkg/auth"
 	kafkaconnect "github.com/streamnative/streamnative-mcp-server/sdk/sdk-kafkaconnect"
 )
 
@@ -153,6 +155,11 @@ func NewConnect(kc *KafkaContext) (Connect, error) {
 	}
 
 	// Create API client and context
+	if kc.TokenSource != nil {
+		cfg.HTTPClient = &http.Client{Transport: &runtimeauth.TokenTransport{
+			Source: kc.TokenSource, Username: kc.ConnectAuthUser,
+		}}
+	}
 	apiClient := kafkaconnect.NewAPIClient(cfg)
 
 	return &connectImpl{
@@ -165,7 +172,10 @@ func NewConnect(kc *KafkaContext) (Connect, error) {
 // GetInfo gets information about the Kafka Connect cluster
 func (c *connectImpl) GetInfo(_ context.Context) (map[string]interface{}, error) {
 	// Make request
-	serverInfo, _, err := c.client.DefaultAPI.ServerInfo(c.ctx).Execute()
+	serverInfo, response, err := c.client.DefaultAPI.ServerInfo(c.ctx).Execute()
+	if response != nil && response.Body != nil {
+		defer func() { _ = response.Body.Close() }()
+	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to get Kafka Connect server info: %w", err)
 	}
@@ -212,7 +222,10 @@ func (c *connectImpl) ListConnectors(_ context.Context) ([]string, error) {
 // GetConnector gets information about a connector
 func (c *connectImpl) GetConnector(ctx context.Context, name string) (*ConnectorInfo, error) {
 	// Make request
-	info, _, err := c.client.DefaultAPI.GetConnector(c.ctx, name).Execute()
+	info, response, err := c.client.DefaultAPI.GetConnector(c.ctx, name).Execute()
+	if response != nil && response.Body != nil {
+		defer func() { _ = response.Body.Close() }()
+	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to get connector: %w", err)
 	}
@@ -334,7 +347,10 @@ func (c *connectImpl) UpdateConnector(_ context.Context, name string, config map
 // DeleteConnector deletes a connector
 func (c *connectImpl) DeleteConnector(_ context.Context, name string) error {
 	// Make request
-	_, err := c.client.DefaultAPI.DestroyConnector(c.ctx, name).Execute()
+	response, err := c.client.DefaultAPI.DestroyConnector(c.ctx, name).Execute()
+	if response != nil && response.Body != nil {
+		defer func() { _ = response.Body.Close() }()
+	}
 	if err != nil {
 		return fmt.Errorf("failed to delete connector: %w", err)
 	}
@@ -345,7 +361,10 @@ func (c *connectImpl) DeleteConnector(_ context.Context, name string) error {
 // PauseConnector pauses a connector
 func (c *connectImpl) PauseConnector(_ context.Context, name string) error {
 	// Make request
-	_, err := c.client.DefaultAPI.PauseConnector(c.ctx, name).Execute()
+	response, err := c.client.DefaultAPI.PauseConnector(c.ctx, name).Execute()
+	if response != nil && response.Body != nil {
+		defer func() { _ = response.Body.Close() }()
+	}
 	if err != nil {
 		return fmt.Errorf("failed to pause connector: %w", err)
 	}
@@ -356,7 +375,10 @@ func (c *connectImpl) PauseConnector(_ context.Context, name string) error {
 // ResumeConnector resumes a connector
 func (c *connectImpl) ResumeConnector(_ context.Context, name string) error {
 	// Make request
-	_, err := c.client.DefaultAPI.ResumeConnector(c.ctx, name).Execute()
+	response, err := c.client.DefaultAPI.ResumeConnector(c.ctx, name).Execute()
+	if response != nil && response.Body != nil {
+		defer func() { _ = response.Body.Close() }()
+	}
 	if err != nil {
 		return fmt.Errorf("failed to resume connector: %w", err)
 	}
@@ -367,7 +389,10 @@ func (c *connectImpl) ResumeConnector(_ context.Context, name string) error {
 // RestartConnector restarts a connector
 func (c *connectImpl) RestartConnector(_ context.Context, name string) error {
 	// Make request
-	_, _, err := c.client.DefaultAPI.RestartConnector(c.ctx, name).Execute()
+	_, response, err := c.client.DefaultAPI.RestartConnector(c.ctx, name).Execute()
+	if response != nil && response.Body != nil {
+		defer func() { _ = response.Body.Close() }()
+	}
 	if err != nil {
 		return fmt.Errorf("failed to restart connector: %w", err)
 	}

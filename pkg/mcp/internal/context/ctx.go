@@ -33,6 +33,7 @@ const (
 	SNCloudSessionContextKey      contextKey = "sncloud_session"
 	PulsarSessionContextKey       contextKey = "pulsar_session"
 	KafkaSessionContextKey        contextKey = "kafka_session"
+	runtimeSnapshotKey            contextKey = "runtime_snapshot"
 )
 
 // WithSNCloudOrganization sets the SNCloud organization in the context
@@ -63,6 +64,34 @@ func WithPulsarSession(ctx context.Context, session *pulsar.Session) context.Con
 // WithKafkaSession sets the Kafka session in the context
 func WithKafkaSession(ctx context.Context, session *kafka.Session) context.Context {
 	return context.WithValue(ctx, KafkaSessionContextKey, session)
+}
+
+type runtimeSnapshot struct{ binding *config.RuntimeBinding }
+
+// AcquireRuntimeContext pins the selected generation for one request. Mutation
+// handlers must not acquire this lease, since publishing requires a write lock.
+func AcquireRuntimeContext(ctx context.Context) (context.Context, func()) {
+	session := GetSNCloudSession(ctx)
+	if session == nil {
+		return ctx, func() {}
+	}
+	binding, release := session.AcquireRuntimeBinding()
+	if binding == nil && session.Ctx.Organization == "" {
+		// External modes have their own client lifetime and no Cloud binding.
+		release()
+		return ctx, func() {}
+	}
+	return context.WithValue(ctx, runtimeSnapshotKey, runtimeSnapshot{binding}), release
+}
+
+func runtimeBinding(ctx context.Context) *config.RuntimeBinding {
+	if snapshot, ok := ctx.Value(runtimeSnapshotKey).(runtimeSnapshot); ok {
+		return snapshot.binding
+	}
+	if session := GetSNCloudSession(ctx); session != nil {
+		return session.CurrentRuntimeBinding()
+	}
+	return nil
 }
 
 // GetSNCloudOrganization gets the SNCloud organization from the context
@@ -106,6 +135,9 @@ func GetSNCloudSession(ctx context.Context) *config.Session {
 
 // GetPulsarSession gets the Pulsar session from the context
 func GetPulsarSession(ctx context.Context) *pulsar.Session {
+	if binding := runtimeBinding(ctx); binding != nil {
+		return binding.Pulsar
+	}
 	session, ok := ctx.Value(PulsarSessionContextKey).(*pulsar.Session)
 	if !ok {
 		return nil
@@ -115,6 +147,9 @@ func GetPulsarSession(ctx context.Context) *pulsar.Session {
 
 // GetKafkaSession gets the Kafka session from the context
 func GetKafkaSession(ctx context.Context) *kafka.Session {
+	if binding := runtimeBinding(ctx); binding != nil {
+		return binding.Kafka
+	}
 	session, ok := ctx.Value(KafkaSessionContextKey).(*kafka.Session)
 	if !ok {
 		return nil

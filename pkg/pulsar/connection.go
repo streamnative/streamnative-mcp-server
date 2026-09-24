@@ -27,6 +27,8 @@ import (
 	pulsaradminconfig "github.com/apache/pulsar-client-go/pulsaradmin/pkg/admin/config"
 	"github.com/apache/pulsar-client-go/pulsaradmin/pkg/rest"
 	"github.com/streamnative/pulsarctl/pkg/cmdutils"
+	runtimeauth "github.com/streamnative/streamnative-mcp-server/pkg/auth"
+	"golang.org/x/oauth2"
 )
 
 const (
@@ -39,6 +41,7 @@ type PulsarContext struct { //nolint:revive
 	ServiceURL                    string
 	WebServiceURL                 string
 	Token                         string
+	TokenSource                   oauth2.TokenSource `json:"-"`
 	AuthPlugin                    string
 	AuthParams                    string
 	TLSAllowInsecureConnection    bool
@@ -159,8 +162,28 @@ func (s *Session) SetPulsarContext(ctx PulsarContext) error {
 		}
 	}
 
+	if pc.TokenSource != nil {
+		source := pc.TokenSource
+		s.ClientOptions.Authentication = pulsar.NewAuthenticationTokenFromSupplier(func() (string, error) {
+			token, err := source.Token()
+			if err != nil {
+				return "", err
+			}
+			return token.AccessToken, nil
+		})
+	}
 	s.AdminClient = s.PulsarCtlConfig.Client(pulsaradminconfig.V2)
 	s.AdminV3Client = s.PulsarCtlConfig.Client(pulsaradminconfig.V3)
+	if pc.TokenSource != nil {
+		s.AdminClient, err = newRuntimeAdminClient(s.PulsarCtlConfig, pc.TokenSource, pulsaradminconfig.V2, s.AdminClient)
+		if err != nil {
+			return err
+		}
+		s.AdminV3Client, err = newRuntimeAdminClient(s.PulsarCtlConfig, pc.TokenSource, pulsaradminconfig.V3, s.AdminV3Client)
+		if err != nil {
+			return err
+		}
+	}
 
 	s.Client, err = pulsar.NewClient(s.ClientOptions)
 	if err != nil {
@@ -240,6 +263,9 @@ func (s *Session) GetAdminStatusClient() (*rest.Client, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to build status auth provider: %w", err)
 	}
+	if s.Ctx.TokenSource != nil {
+		authProvider = &runtimeauth.TokenTransport{Source: s.Ctx.TokenSource, Base: authProvider.Transport()}
+	}
 
 	s.adminStatusREST = &rest.Client{
 		ServiceURL:  cfg.WebServiceURL,
@@ -261,4 +287,27 @@ func (s *Session) GetPulsarClient() (pulsar.Client, error) {
 		return nil, fmt.Errorf("err: ContextNotSetErr: Please set the cluster context first")
 	}
 	return s.Client, nil
+}
+
+type runtimeAdminClient struct {
+	admin.Client
+	tokenClient cmdutils.Client
+}
+
+func (c *runtimeAdminClient) Token() cmdutils.Token { return c.tokenClient.Token() }
+
+func newRuntimeAdminClient(cfg *cmdutils.ClusterConfig, source oauth2.TokenSource,
+	version pulsaradminconfig.APIVersion, tokenClient cmdutils.Client,
+) (cmdutils.Client, error) {
+	configuration := pulsaradminconfig.Config(*cfg)
+	configuration.PulsarAPIVersion = version
+	base, err := pulsaradminauth.NewDefaultTransport(&configuration)
+	if err != nil {
+		return nil, err
+	}
+	client, err := admin.NewPulsarClientWithAuthProvider(&configuration, &runtimeauth.TokenTransport{Source: source, Base: base})
+	if err != nil {
+		return nil, err
+	}
+	return &runtimeAdminClient{Client: client, tokenClient: tokenClient}, nil
 }

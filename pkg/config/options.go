@@ -20,9 +20,12 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/99designs/keyring"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/streamnative/streamnative-mcp-server/pkg/auth"
+	"github.com/streamnative/streamnative-mcp-server/pkg/auth/store"
 	"gopkg.in/yaml.v2"
 )
 
@@ -49,9 +52,10 @@ const (
 // Options represents the common options used throughout the program.
 type Options struct {
 	AuthOptions
-	ConfigDir  string
-	ConfigPath string
-	Server     string
+	CloudProvider *CloudProvider `json:"-" yaml:"-"`
+	ConfigDir     string
+	ConfigPath    string
+	Server        string
 	// the OAuth 2.0 issuer endpoint
 	IssuerEndpoint string
 	// the audience identifier for the API server (default: server URL)
@@ -209,8 +213,15 @@ func (o *Options) AddFlags(cmd *cobra.Command) {
 
 // Complete completes options from the provided values
 func (o *Options) Complete() error {
+	if o.CloudProvider != nil {
+		// An explicit provider is authoritative. Do not read ambient credential
+		// configuration, open a keyring, or authorize using a different identity.
+		return o.validateCloudProvider()
+	}
 	// First try to get config directory from environment variables
-	o.ConfigDir = viper.GetString("config-dir")
+	if o.ConfigDir == "" {
+		o.ConfigDir = viper.GetString("config-dir")
+	}
 	if o.ConfigDir == "" {
 		home, err := homedir.Dir()
 		if err != nil {
@@ -404,12 +415,18 @@ func (o *Options) Complete() error {
 		}
 	}
 
-	err := o.AuthOptions.Complete(o)
-	if err != nil {
+	if o.KeyFile != "" {
+		credentials, err := auth.NewClientCredentialsProviderFromKeyFile(o.KeyFile).GetClientCredentials()
+		if err != nil || credentials == nil || credentials.ClientID == "" || credentials.ClientSecret == "" {
+			// Inline-key parser errors may include the entire credential URL.
+			return fmt.Errorf("invalid or incomplete service account credentials")
+		}
+		// Standalone key-file sessions own their credentials and cache in memory.
+		// Persistent credential selection/cache policy belongs to an embedding app.
+		o.Store, err = store.NewKeyringStore(keyring.NewArrayKeyring(nil))
 		return err
 	}
-
-	return nil
+	return o.AuthOptions.Complete(o)
 }
 
 // GetConfigDirectory returns the directory used for configuration data.

@@ -90,6 +90,12 @@ If you want to access to your StreamNative Cloud, you will need to have followin
 4. Service Account with admin role
 5. Download the Service Account Key file
 
+Standalone key-file mode keeps grants and runtime token renewal state in memory
+for the current session. Embedding applications may instead inject a
+`config.CloudProvider` to own identity, control-plane authentication and cluster
+resolution without giving this module a key file or grant store. See the
+[runtime provider interface](agents/runtime-provider.md).
+
 ### Start the MCP Server
 
 #### Using stdio Server
@@ -99,7 +105,7 @@ If you want to access to your StreamNative Cloud, you will need to have followin
 bin/snmcp stdio --organization my-org --key-file /path/to/key-file.json
 
 # Start MCP server with StreamNative Cloud authentication and pre-configured context
-# When --pulsar-instance and --pulsar-cluster are provided, context mutation tools are disabled
+# An initial cluster does not disable context switching; add --lock-cluster-context to lock it
 bin/snmcp stdio --organization my-org --key-file /path/to/key-file.json --pulsar-instance my-instance --pulsar-cluster my-cluster
 
 # Start MCP server with external Kafka
@@ -120,7 +126,7 @@ docker run -i --rm -e SNMCP_ORGANIZATION=my-org -e SNMCP_KEY_FILE=/key.json -v /
 bin/snmcp sse --http-addr :9090 --http-path /mcp --organization my-org --key-file /path/to/key-file.json
 
 # Start MCP server with SSE and pre-configured StreamNative Cloud context
-# When --pulsar-instance and --pulsar-cluster are provided, context mutation tools are disabled
+# An initial cluster does not disable context switching; add --lock-cluster-context to lock it
 bin/snmcp sse --http-addr :9090 --http-path /mcp --organization my-org --key-file /path/to/key-file.json --pulsar-instance my-instance --pulsar-cluster my-cluster
 
 # Start MCP server with SSE and external Kafka
