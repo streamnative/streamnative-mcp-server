@@ -75,12 +75,13 @@ func runSseServer(configOpts *ServerOptions) error {
 	if err != nil {
 		return fmt.Errorf("failed to create MCP server: %w", err)
 	}
+	defer mcpServer.Close()
 
 	// 4. Set the context
 	ctx = mcpctx.WithSNCloudSession(ctx, mcpServer.SNCloudSession)
 	ctx = mcpctx.WithPulsarSession(ctx, mcpServer.PulsarSession)
 	ctx = mcpctx.WithKafkaSession(ctx, mcpServer.KafkaSession)
-	if configOpts.KeyFile != "" {
+	if configOpts.IsCloudConfigured() {
 		if configOpts.PulsarInstance != "" && configOpts.PulsarCluster != "" {
 			err = mcpctx.SetContext(ctx, configOpts.Options, configOpts.PulsarInstance, configOpts.PulsarCluster)
 			if err != nil {

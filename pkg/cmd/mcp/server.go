@@ -28,32 +28,32 @@ import (
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
-func newMcpServer(_ context.Context, configOpts *ServerOptions, logrusLogger *logrus.Logger) (*mcp.Server, error) {
+func newMcpServer(_ context.Context, configOpts *ServerOptions, logrusLogger *logrus.Logger, serverOpts ...server.ServerOption) (*mcp.Server, error) {
 	snConfig := configOpts.LoadConfigOrDie()
+	newServer := func(instructions string) *mcp.Server {
+		opts := append([]server.ServerOption{server.WithInstructions(instructions)}, serverOpts...)
+		return mcp.NewServer("streamnative-mcp-server", "0.0.1", logrusLogger, opts...)
+	}
 	var s *server.MCPServer
 	var mcpServer *mcp.Server
 	switch {
-	case snConfig.KeyFile != "":
+	case configOpts.IsCloudConfigured():
 		{
-			issuer := snConfig.Auth.Issuer()
-			userName, err := configOpts.WhoAmI(issuer.Audience)
+			userName, err := configOpts.CloudIdentity()
 			if err != nil {
-				stdlog.Fatalf("failed to get user name: %v", err)
-				os.Exit(1)
+				return nil, errors.Wrap(err, "failed to get effective identity")
 			}
 			// Create StreamNative Cloud session and set as default
 			session, err := config.NewSNCloudSessionFromOptions(configOpts.Options)
 			if err != nil {
 				return nil, errors.Wrap(err, "failed to create StreamNative Cloud session")
 			}
-			mcpServer = mcp.NewServer("streamnative-mcp-server", "0.0.1", logrusLogger, server.WithInstructions(mcp.GetStreamNativeCloudServerInstructions(userName, snConfig)))
+			mcpServer = newServer(mcp.GetStreamNativeCloudServerInstructions(userName, snConfig))
 			mcpServer.SNCloudSession = session
 
 			s = mcpServer.MCPServer
 			mcp.RegisterPrompts(s)
-			// Skip context tools if pulsar instance and cluster are provided via CLI
-			skipContextTools := snConfig.Context.PulsarInstance != "" && snConfig.Context.PulsarCluster != ""
-			mcp.RegisterContextTools(s, configOpts.Features, configOpts.ReadOnly, skipContextTools)
+			mcp.RegisterContextTools(s, configOpts.Features, configOpts.ReadOnly, configOpts.LockClusterContext)
 			mcp.StreamNativeAddLogTools(s, configOpts.ReadOnly, configOpts.Features)
 			mcp.StreamNativeAddResourceTools(s, configOpts.ReadOnly, configOpts.Features)
 		}
@@ -77,13 +77,13 @@ func newMcpServer(_ context.Context, configOpts *ServerOptions, logrusLogger *lo
 			if err != nil {
 				return nil, errors.Wrap(err, "failed to set external Kafka context")
 			}
-			mcpServer = mcp.NewServer("streamnative-mcp-server", "0.0.1", logrusLogger, server.WithInstructions(mcp.GetExternalKafkaServerInstructions(snConfig.ExternalKafka.BootstrapServers)))
+			mcpServer = newServer(mcp.GetExternalKafkaServerInstructions(snConfig.ExternalKafka.BootstrapServers))
 			mcpServer.KafkaSession = ksession
 			s = mcpServer.MCPServer
 		}
 	case snConfig.ExternalPulsar != nil:
 		{
-			mcpServer = mcp.NewServer("streamnative-mcp-server", "0.0.1", logrusLogger, server.WithInstructions(mcp.GetExternalPulsarServerInstructions(snConfig.ExternalPulsar.WebServiceURL)))
+			mcpServer = newServer(mcp.GetExternalPulsarServerInstructions(snConfig.ExternalPulsar.WebServiceURL))
 			s = mcpServer.MCPServer
 
 			// Only create global PulsarSession if not in multi-session mode

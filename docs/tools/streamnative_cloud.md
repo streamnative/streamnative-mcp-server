@@ -19,6 +19,24 @@ Bind the current session to a specific StreamNative Cloud cluster. Once the sess
 
 If you encounter `ContextNotSetErr`, use `sncloud_context_available_clusters` to list the available clusters and bind the session to a specific cluster.
 
+Standalone Cloud mode uses service-account key files and the selected
+PulsarInstance's OAuth2 status. It requires resource GET permissions. Grants and
+runtime token renewal state are local to the running session.
+
+Embedding applications can supply a `config.CloudProvider` with their own identity,
+control-plane TokenSource and cluster resolver. Application-specific discovery,
+credential selection and authentication policies belong to that provider. Runtime
+clients obtain fresh credentials from their TokenSources without requiring another
+`use_cluster` call. See [provider ownership](../../agents/runtime-provider.md).
+
+A failed switch preserves the previous binding. Successful switches and resets
+wait for in-flight MCP requests to finish before closing their old clients.
+Pulsar-only clusters do not retain a Kafka connection from an earlier binding.
+
+Providing an initial cluster does not disable this tool. Use
+`--lock-cluster-context` to disable use/reset explicitly; `--read-only` also
+continues to hide both tools. Read-only sessions can use an initial cluster.
+
 ---
 
 #### sncloud_context_reset

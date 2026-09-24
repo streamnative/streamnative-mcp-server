@@ -9,7 +9,9 @@ tmp/
 # Go
 vendor
 .cursor/
-agents/
+/agents/*
+!/agents/mcp-2026-07-28-support.md
+!/agents/runtime-provider.md
 .serena/
 .envrc
 scripts/update-sdk-apiserver.sh

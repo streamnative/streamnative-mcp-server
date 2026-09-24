@@ -2,36 +2,57 @@
 Copyright 2025 StreamNative
 SPDX-License-Identifier: Apache-2.0
 */}}
+{{- $transport := include "snmcp.transport" . }}
+{{- $endpoint := trimSuffix "/" .Values.server.httpPath }}
+{{- if eq $transport "http" }}
+{{- $endpoint = default "/" $endpoint }}
+{{- else }}
+{{- $endpoint = printf "%s/sse" $endpoint }}
+{{- end }}
 StreamNative MCP Server has been deployed!
 
 1. Get the application URL:
 {{- if .Values.ingress.enabled }}
 {{- range $host := .Values.ingress.hosts }}
-  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ $.Values.server.httpPath }}/sse
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ $endpoint }}
 {{- end }}
 {{- else if contains "NodePort" .Values.service.type }}
   export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "snmcp.fullname" . }})
   export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
-  echo "http://$NODE_IP:$NODE_PORT{{ .Values.server.httpPath }}/sse"
+  echo "http://$NODE_IP:$NODE_PORT{{ $endpoint }}"
 {{- else if contains "LoadBalancer" .Values.service.type }}
   NOTE: It may take a few minutes for the LoadBalancer IP to be available.
   You can watch the status by running:
     kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "snmcp.fullname" . }}
   export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "snmcp.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
-  echo "http://$SERVICE_IP:{{ .Values.service.port }}{{ .Values.server.httpPath }}/sse"
+  echo "http://$SERVICE_IP:{{ .Values.service.port }}{{ $endpoint }}"
 {{- else if contains "ClusterIP" .Values.service.type }}
   kubectl port-forward svc/{{ include "snmcp.fullname" . }} {{ .Values.service.port }}:{{ .Values.service.port }} -n {{ .Release.Namespace }}
-  echo "http://localhost:{{ .Values.service.port }}{{ .Values.server.httpPath }}/sse"
+  echo "http://localhost:{{ .Values.service.port }}{{ $endpoint }}"
 {{- end }}
 
 2. Connect MCP clients with Authorization header:
+{{- if eq $transport "http" }}
+   Configure a Streamable HTTP MCP client with the URL above and:
+     Authorization: Bearer <YOUR_PULSAR_TOKEN>
+   Use MCP 2026-07-28 per-request metadata and server/discover, not initialize or GET.
+   Requests with an Origin header are rejected by default; use non-browser clients.
+{{- else }}
    curl -H "Authorization: Bearer <YOUR_PULSAR_TOKEN>" <SSE_URL>
+{{- end }}
 
 3. This deployment is configured for Multi-Session Pulsar mode.
    Each request must include a valid Pulsar JWT token in the Authorization header.
+   This is backend token forwarding, not a full MCP OAuth authorization flow.
+   Use a trusted TLS-terminating proxy and restrict backend network access.
 
 Configuration:
+  - Transport: {{ $transport }}
   - Pulsar Web Service URL: {{ .Values.pulsar.webServiceURL }}
+{{- if eq $transport "sse" }}
   - Session Cache Size: {{ .Values.session.cacheSize }}
   - Session TTL: {{ .Values.session.ttlMinutes }} minutes
+{{- else }}
+  - Backend client lifetime: one request (cache settings unused)
+{{- end }}
   - Read-Only Mode: {{ .Values.server.readOnly }}

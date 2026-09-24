@@ -15,10 +15,14 @@
 package mcp
 
 import (
+	"context"
+
+	mcpgo "github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/sirupsen/logrus"
 	"github.com/streamnative/streamnative-mcp-server/pkg/config"
 	"github.com/streamnative/streamnative-mcp-server/pkg/kafka"
+	context2 "github.com/streamnative/streamnative-mcp-server/pkg/mcp/internal/context"
 	"github.com/streamnative/streamnative-mcp-server/pkg/pulsar"
 )
 
@@ -29,6 +33,19 @@ type Server struct {
 	PulsarSession  *pulsar.Session
 	SNCloudSession *config.Session
 	logger         *logrus.Logger
+}
+
+// Close releases Cloud runtime generations and external protocol sessions.
+func (s *Server) Close() {
+	if s.SNCloudSession != nil {
+		_ = s.SNCloudSession.Close()
+	}
+	if s.PulsarSession != nil {
+		s.PulsarSession.ResetPulsarContext()
+	}
+	if s.KafkaSession != nil {
+		s.KafkaSession.ResetKafkaContext()
+	}
 }
 
 // NewServer creates a new MCP server with StreamNative integrations.
@@ -46,6 +63,30 @@ func AddOpts(opts ...server.ServerOption) []server.ServerOption {
 		server.WithResourceCapabilities(true, true),
 		server.WithRecovery(),
 		server.WithLogging(),
+		server.WithToolHandlerMiddleware(func(next server.ToolHandlerFunc) server.ToolHandlerFunc {
+			return func(ctx context.Context, request mcpgo.CallToolRequest) (*mcpgo.CallToolResult, error) {
+				if request.Params.Name == "sncloud_context_use_cluster" || request.Params.Name == "sncloud_context_reset" {
+					return next(ctx, request)
+				}
+				ctx, release := context2.AcquireRuntimeContext(ctx)
+				defer release()
+				return next(ctx, request)
+			}
+		}),
+		server.WithResourceHandlerMiddleware(func(next server.ResourceHandlerFunc) server.ResourceHandlerFunc {
+			return func(ctx context.Context, request mcpgo.ReadResourceRequest) ([]mcpgo.ResourceContents, error) {
+				ctx, release := context2.AcquireRuntimeContext(ctx)
+				defer release()
+				return next(ctx, request)
+			}
+		}),
+		server.WithPromptHandlerMiddleware(func(next server.PromptHandlerFunc) server.PromptHandlerFunc {
+			return func(ctx context.Context, request mcpgo.GetPromptRequest) (*mcpgo.GetPromptResult, error) {
+				ctx, release := context2.AcquireRuntimeContext(ctx)
+				defer release()
+				return next(ctx, request)
+			}
+		}),
 	}
 	opts = append(defaultOpts, opts...)
 	return opts

@@ -6,7 +6,9 @@ A Model Context Protocol (MCP) server for integrating AI agents with StreamNativ
 
 StreamNative MCP Server provides a standard interface for LLMs (Large Language Models) and AI agents to interact with StreamNative Cloud services, Apache Kafka, and Apache Pulsar. This implementation follows the [Model Context Protocol](https://modelcontextprotocol.io/introduction) specification, enabling AI applications to access messaging services through a standardized interface.
 
-The server currently negotiates MCP protocol versions `2025-11-25`, `2025-06-18`, `2025-03-26`, and `2024-11-05`. The default preference is `2025-11-25`, while older clients remain supported through protocol negotiation.
+The server uses `mcp-go v1.1.0`. Legacy clients continue to negotiate MCP protocol versions `2025-11-25`, `2025-06-18`, `2025-03-26`, and `2024-11-05` through `initialize` (at most `2025-11-25`).
+
+Initial `2026-07-28` support uses mcp-go v1.1.0 and includes a validated stdio read-only Pulsar tenant profile and a modern-only `http` transport for fixed external backends. Requests carry version and capabilities in `_meta`, without `initialize`, and can use `server/discover`. Stdio permits modern operations only for a single fixed external Kafka/Pulsar backend; Cloud and other state-dependent stdio profiles report legacy versions and reject modern operations before dispatch, while still allowing discovery for fallback. Legacy `sse` remains unchanged. Cloud context switching, session-scoped Functions-as-tools, resource change subscriptions and MCP OAuth are outside the validated modern profiles. This is not full `2026-07-28` conformance; see the [support matrix and implementation plan](agents/mcp-2026-07-28-support.md).
 
 ## Features
 
@@ -88,6 +90,12 @@ If you want to access to your StreamNative Cloud, you will need to have followin
 4. Service Account with admin role
 5. Download the Service Account Key file
 
+Standalone key-file mode keeps grants and runtime token renewal state in memory
+for the current session. Embedding applications may instead inject a
+`config.CloudProvider` to own identity, control-plane authentication and cluster
+resolution without giving this module a key file or grant store. See the
+[runtime provider interface](agents/runtime-provider.md).
+
 ### Start the MCP Server
 
 #### Using stdio Server
@@ -97,7 +105,7 @@ If you want to access to your StreamNative Cloud, you will need to have followin
 bin/snmcp stdio --organization my-org --key-file /path/to/key-file.json
 
 # Start MCP server with StreamNative Cloud authentication and pre-configured context
-# When --pulsar-instance and --pulsar-cluster are provided, context mutation tools are disabled
+# An initial cluster does not disable context switching; add --lock-cluster-context to lock it
 bin/snmcp stdio --organization my-org --key-file /path/to/key-file.json --pulsar-instance my-instance --pulsar-cluster my-cluster
 
 # Start MCP server with external Kafka
@@ -118,7 +126,7 @@ docker run -i --rm -e SNMCP_ORGANIZATION=my-org -e SNMCP_KEY_FILE=/key.json -v /
 bin/snmcp sse --http-addr :9090 --http-path /mcp --organization my-org --key-file /path/to/key-file.json
 
 # Start MCP server with SSE and pre-configured StreamNative Cloud context
-# When --pulsar-instance and --pulsar-cluster are provided, context mutation tools are disabled
+# An initial cluster does not disable context switching; add --lock-cluster-context to lock it
 bin/snmcp sse --http-addr :9090 --http-path /mcp --organization my-org --key-file /path/to/key-file.json --pulsar-instance my-instance --pulsar-cluster my-cluster
 
 # Start MCP server with SSE and external Kafka
@@ -131,7 +139,65 @@ bin/snmcp sse --http-addr :9090 --http-path /mcp --use-external-pulsar --pulsar-
 docker run -i --rm -e SNMCP_ORGANIZATION=my-org -e SNMCP_KEY_FILE=/key.json -v /path/to/key-file.json:/key.json -p 9090:9090 streamnative/snmcp sse
 ```
 
-#### Multi-Session Pulsar Mode (SSE only)
+#### Using Streamable HTTP (MCP 2026-07-28)
+
+The separate `http` command serves modern MCP requests at `/mcp` and defaults
+to `127.0.0.1:9090`. It supports a fixed external Kafka or Pulsar backend;
+StreamNative Cloud context switching and Functions-as-tools are not supported.
+Existing `stdio` and legacy `sse` commands remain available.
+
+```bash
+# Local, fixed backend credentials and read-only tools
+bin/snmcp http --use-external-pulsar --read-only \
+  --pulsar-web-service-url http://localhost:8080 \
+  --pulsar-service-url pulsar://localhost:6650
+
+# Discovery without an initialize handshake
+curl http://127.0.0.1:9090/mcp \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -H 'MCP-Protocol-Version: 2026-07-28' \
+  -H 'Mcp-Method: server/discover' \
+  --data '{"jsonrpc":"2.0","id":1,"method":"server/discover","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientCapabilities":{}}}}'
+```
+
+Every modern request carries its own protocol version and capabilities in
+`params._meta`; HTTP routing headers must agree with the body. `tools/call`,
+`resources/read`, and `prompts/get` also require `Mcp-Name`. Use an MCP
+2026-07-28 client to handle header encoding and request-scoped SSE responses.
+There is no modern `initialize` handshake, protocol session ID, standalone GET
+stream, or DELETE session endpoint. Health probes remain unauthenticated at
+`/mcp/healthz` and `/mcp/readyz`.
+
+Modern profiles do not advertise resource `subscribe` or `listChanged`
+capabilities. Requested resource subscriptions are excluded from the
+`subscriptions/listen` filter; a request with no supported subscriptions
+completes without opening a long-lived subscription. This does not change
+legacy initialize capabilities or request-scoped progress streaming.
+
+The HTTP endpoint rejects all present Origin headers by default.
+`--http-allowed-origins=https://trusted.example` allows exact Origins; it does
+not enable CORS preflight/browser support. Incoming bodies are limited to 4 MiB
+and the production listener bounds body reads to 30 seconds.
+
+Non-loopback binding requires `--use-external-pulsar --multi-session-pulsar`.
+Every request must provide its own `Authorization: Bearer <PULSAR_TOKEN>`;
+clients are request-scoped and released only after the response finishes.
+`--session-cache-size` and `--session-ttl-minutes` are not accepted by `http`.
+Unlike SSE, HTTP does not inherit a fixed backend token, auth plugin or client
+certificate into this mode. Pulsar remains responsible for authorizing backend
+operations: constructing a client does **not** validate a credential. Discovery
+can succeed for a syntactically valid but unauthorized token.
+
+This is a backend-credential forwarding compatibility profile, **not an MCP
+OAuth resource server**: it does not validate MCP token audience/issuer or
+implement OAuth metadata. Do not expose it as a public authenticated service.
+Use a trusted TLS/auth gateway and network restrictions; multi-session mode
+alone is not an authentication boundary. Local fixed-backend clients share the
+configured backend identity. Cloud/context mutation, dynamic Functions-as-tools,
+full subscription coverage and OAuth remain outside this stage.
+
+#### Multi-Session Pulsar Mode (legacy SSE)
 
 When running the SSE server with external Pulsar, you can enable **multi-session mode** to support per-user authentication. In this mode, each HTTP request must include an `Authorization: Bearer <token>` header, and the server will create separate Pulsar sessions for each unique token.
 
@@ -301,6 +367,48 @@ You can combine these features as needed using the `--features` flag. For exampl
 # Enable only Pulsar client features
 bin/snmcp stdio --organization my-org --key-file /path/to/key-file.json --features pulsar-client
 ```
+
+## Local binary E2E tests
+
+From the repository root, with Go (the version in `go.mod`) and a running local
+Docker daemon (Docker Desktop/OrbStack or a Unix socket):
+
+```bash
+go test -tags=e2e ./tests/e2e -count=1 -v -timeout=10m
+```
+
+This Go testing + testify suite builds the real server binary and starts a fresh
+`apachepulsar/pulsar:4.1.0` or `apache/kafka:3.9.1` (single-node KRaft) container
+through Testcontainers. The first run needs network access to pull the backend
+and Testcontainers Ryuk cleanup images. It does
+not require Kind, Helm, an LLM, or existing backend credentials. Missing Docker,
+image-pull failures, and readiness timeouts **fail**, rather than skip, the test.
+
+Both backends run over stdio, legacy SSE, and Streamable HTTP using the mcp-go
+clients: protocol negotiation/discovery (modern stdio/HTTP; legacy
+initialize/initialized for SSE), `tools/list`, topic lifecycle, and a duplicate-create
+backend error. Pulsar tests create/get/delete a partitioned topic, independently
+verified through Pulsar REST. Kafka tests create/produce/consume/delete a topic;
+native Kafka metadata/fetch requests verify partitions, payload, key, headers,
+rejection without mutation, and deletion. Kafka's admin tools expose per-topic
+broker errors in the JSON result; the test checks `TOPIC_ALREADY_EXISTS`, not just
+the outer `isError` flag. These tests do not cover StreamNative Cloud, authentication,
+or Helm deployment; the existing chart E2E remains separate.
+
+`.github/workflows/binary-e2e.yaml` runs separate Pulsar/Kafka jobs on Ubuntu for
+PRs, pushes to `main`, and manual dispatch, without any Cloud secrets. Each job
+runs all three transports and uploads its run log plus failure diagnostics for
+7 days. Select one backend locally with `-run '^TestPulsar$'` or `-run '^TestKafka$'`.
+
+Only freshly provisioned local backend endpoints are used: no endpoint override,
+remote Docker daemon, saved user configuration, inherited server credentials, or
+proxy settings. Ports are dynamic and loopback-bound; topic names and server
+config directories are unique. Cleanup stops/reaps server processes and removes
+the container and its data even on assertion failures (Ryuk provides an additional
+cleanup safety net). The printed `snmcp-e2e-logs-*` temporary directory retains
+build, server, and backend logs on failure, and is removed on success. Set
+`E2E_ARTIFACTS_DIR` to place these directories under a CI artifact directory. Ordinary
+`go test ./...` excludes this suite via the `e2e` build tag.
 
 ## Inspecting the MCP Server
 

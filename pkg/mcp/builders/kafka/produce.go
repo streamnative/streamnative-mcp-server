@@ -212,7 +212,8 @@ func (b *KafkaProduceToolBuilder) buildKafkaProduceHandler() func(context.Contex
 		if err != nil {
 			return b.handleError("create Kafka client", err), nil
 		}
-		defer kafkaClient.Close()
+		// GetClient without overrides returns the session-owned shared client.
+		// Closing it here would break subsequent produce and admin calls.
 
 		srClient, err := session.GetSchemaRegistryClient()
 		schemaReady := false

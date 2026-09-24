@@ -16,11 +16,15 @@
 package kafka
 
 import (
+	"context"
 	"crypto/tls"
 	"fmt"
+	"net/http"
 	"strings"
 	"sync"
+	"time"
 
+	runtimeauth "github.com/streamnative/streamnative-mcp-server/pkg/auth"
 	"github.com/twmb/franz-go/pkg/kadm"
 	"github.com/twmb/franz-go/pkg/kgo"
 	"github.com/twmb/franz-go/pkg/kversion"
@@ -28,10 +32,13 @@ import (
 	"github.com/twmb/franz-go/pkg/sasl/scram"
 	"github.com/twmb/franz-go/pkg/sr"
 	"github.com/twmb/tlscfg"
+	"golang.org/x/oauth2"
 )
 
 //nolint:revive
 type KafkaContext struct {
+	TokenSource       oauth2.TokenSource `json:"-"`
+	TokenPrefix       string
 	BootstrapServers  string
 	AuthType          string
 	AuthMechanism     string
@@ -174,9 +181,23 @@ func (s *Session) SetKafkaContext(ctx KafkaContext) error {
 	if err != nil {
 		return fmt.Errorf("failed to create TLS config: %w", err)
 	}
-	s.Options, err = saslOpt(saslConfig, s.Options)
-	if err != nil {
-		return fmt.Errorf("failed to create SASL config: %w", err)
+	if kc.TokenSource == nil {
+		s.Options, err = saslOpt(saslConfig, s.Options)
+		if err != nil {
+			return fmt.Errorf("failed to create SASL config: %w", err)
+		}
+	} else {
+		if !strings.EqualFold(kc.AuthMechanism, "PLAIN") {
+			return fmt.Errorf("runtime token authentication requires SASL PLAIN")
+		}
+		source, username, prefix := kc.TokenSource, kc.AuthUser, kc.TokenPrefix
+		s.Options = append(s.Options, kgo.SASL(plain.Plain(func(context.Context) (plain.Auth, error) {
+			token, err := source.Token()
+			if err != nil {
+				return plain.Auth{}, err
+			}
+			return plain.Auth{User: username, Pass: prefix + token.AccessToken}, nil
+		})))
 	}
 	s.Options = append(s.Options, kgo.MaxVersions(kversion.V2_8_0()))
 
@@ -189,15 +210,7 @@ func (s *Session) SetKafkaContext(ctx KafkaContext) error {
 
 	s.AdminClient = kadm.NewClient(s.Client)
 	if kc.SchemaRegistryURL != "" {
-		SrOpts := []sr.ClientOpt{}
-		SrOpts = append(SrOpts, sr.URLs(kc.SchemaRegistryURL))
-		if kc.SchemaRegistryAuthUser != "" && kc.SchemaRegistryAuthPass != "" {
-			SrOpts = append(SrOpts, sr.BasicAuth(kc.SchemaRegistryAuthUser, kc.SchemaRegistryAuthPass))
-		} else if kc.SchemaRegistryBearerToken != "" {
-			SrOpts = append(SrOpts, sr.BearerToken(kc.SchemaRegistryBearerToken))
-		}
-		SrOpts = append(SrOpts, sr.UserAgent("streamnative-mcp-server"))
-		s.SchemaRegistryClient, err = sr.NewClient(SrOpts...)
+		s.SchemaRegistryClient, err = newSchemaRegistryClient(*kc)
 		if err != nil {
 			return fmt.Errorf("failed to create kafka schema registry client: %w", err)
 		}
@@ -295,23 +308,30 @@ func (s *Session) GetSchemaRegistryClient() (*sr.Client, error) {
 	}
 
 	if s.SchemaRegistryClient == nil {
-		SrOpts := []sr.ClientOpt{}
-		SrOpts = append(SrOpts, sr.URLs(s.Ctx.SchemaRegistryURL))
-		if s.Ctx.SchemaRegistryAuthUser != "" && s.Ctx.SchemaRegistryAuthPass != "" {
-			SrOpts = append(SrOpts, sr.BasicAuth(s.Ctx.SchemaRegistryAuthUser, s.Ctx.SchemaRegistryAuthPass))
-		} else if s.Ctx.SchemaRegistryBearerToken != "" {
-			SrOpts = append(SrOpts, sr.BearerToken(s.Ctx.SchemaRegistryBearerToken))
-		}
-		SrOpts = append(SrOpts, sr.UserAgent("streamnative-mcp-server"))
-
 		var err error
-		s.SchemaRegistryClient, err = sr.NewClient(SrOpts...)
+		s.SchemaRegistryClient, err = newSchemaRegistryClient(s.Ctx)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create kafka schema registry client: %w", err)
 		}
 	}
 
 	return s.SchemaRegistryClient, nil
+}
+
+func newSchemaRegistryClient(kc KafkaContext) (*sr.Client, error) {
+	opts := []sr.ClientOpt{sr.URLs(kc.SchemaRegistryURL), sr.UserAgent("streamnative-mcp-server")}
+	switch {
+	case kc.TokenSource != nil:
+		// Preserve franz-go's five-second default HTTP timeout.
+		opts = append(opts, sr.HTTPClient(&http.Client{Timeout: 5 * time.Second, Transport: &runtimeauth.TokenTransport{
+			Source: kc.TokenSource, Username: kc.SchemaRegistryAuthUser,
+		}}))
+	case kc.SchemaRegistryAuthUser != "" && kc.SchemaRegistryAuthPass != "":
+		opts = append(opts, sr.BasicAuth(kc.SchemaRegistryAuthUser, kc.SchemaRegistryAuthPass))
+	case kc.SchemaRegistryBearerToken != "":
+		opts = append(opts, sr.BearerToken(kc.SchemaRegistryBearerToken))
+	}
+	return sr.NewClient(opts...)
 }
 
 // GetConnectClient returns the Kafka Connect client.

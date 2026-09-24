@@ -28,6 +28,7 @@ import (
 // ServerOptions is the options for the MCP server commands
 type ServerOptions struct {
 	ReadOnly           bool
+	LockClusterContext bool
 	LogFile            string
 	LogCommands        bool
 	Features           []string
@@ -56,23 +57,25 @@ func (o *ServerOptions) Complete() error {
 
 	// If the key file is provided, use it to authenticate to StreamNative Cloud
 	switch {
-	case snConfig.KeyFile != "":
+	case o.IsCloudConfigured():
 		{
-			issuer := snConfig.Auth.Issuer()
+			if o.CloudProvider == nil {
+				issuer := snConfig.Auth.Issuer()
 
-			// authorize
-			flow, err := o.newClientCredentialsFlow(issuer, o.KeyFile)
-			if err != nil {
-				return errors.Wrap(err, "configuration error: unable to use client credential flow")
-			}
-			grant, err := flow.Authorize()
-			if err != nil {
-				return errors.Wrap(err, "activation failed")
-			}
+				// authorize
+				flow, err := o.newClientCredentialsFlow(issuer, o.KeyFile)
+				if err != nil {
+					return errors.Wrap(err, "configuration error: unable to use client credential flow")
+				}
+				grant, err := flow.Authorize()
+				if err != nil {
+					return errors.Wrap(err, "activation failed")
+				}
 
-			// persist the authorization data
-			if err = o.SaveGrant(issuer.Audience, *grant); err != nil {
-				return errors.Wrap(err, "Unable to store the authorization data")
+				// persist the authorization data
+				if err = o.SaveGrant(issuer.Audience, *grant); err != nil {
+					return errors.Wrap(err, "Unable to store the authorization data")
+				}
 			}
 
 			if len(o.Features) != 0 {
@@ -112,6 +115,8 @@ func (o *ServerOptions) Complete() error {
 
 // AddFlags registers command flags for the server options.
 func (o *ServerOptions) AddFlags(cmd *cobra.Command) {
+	cmd.PersistentFlags().BoolVar(&o.LockClusterContext, "lock-cluster-context", false,
+		"Disable context switching (an initial cluster alone does not lock the session)")
 	cmd.PersistentFlags().BoolVarP(&o.ReadOnly, "read-only", "r", false, "Read-only mode")
 	cmd.PersistentFlags().StringVar(&o.LogFile, "log-file", "", "Path to log file")
 	cmd.PersistentFlags().BoolVar(&o.LogCommands, "enable-command-logging", false, "When enabled, the server will log all command requests and responses to the log file")

@@ -83,7 +83,6 @@ func TestSession_GetAPIClient_JWT_LazyInitialization(t *testing.T) {
 			APIURL:  "https://api.example.com",
 			Timeout: 30 * time.Second,
 		},
-		useJWT:      true,
 		TokenSource: NewJWTTokenSource("test-jwt-token"),
 	}
 
@@ -118,7 +117,6 @@ func TestSession_GetAPIClient_OAuth_LazyInitialization(t *testing.T) {
 			APIURL:  "https://api.example.com",
 			Timeout: 30 * time.Second,
 		},
-		useJWT:         false,
 		TokenRefresher: &OAuth2TokenRefresher{source: mockRefresher},
 	}
 
@@ -147,7 +145,6 @@ func TestSession_GetAPIClient_ErrorPaths(t *testing.T) {
 					APIURL:  "https://api.example.com",
 					Timeout: 30 * time.Second,
 				},
-				useJWT:         false,
 				TokenRefresher: nil,
 			},
 			expectError: "token refresher not initialized",
@@ -159,7 +156,6 @@ func TestSession_GetAPIClient_ErrorPaths(t *testing.T) {
 					APIURL:  "://invalid-url",
 					Timeout: 30 * time.Second,
 				},
-				useJWT:      true,
 				TokenSource: NewJWTTokenSource("test-jwt-token"),
 			},
 			expectError: "failed to parse API URL",
@@ -183,7 +179,6 @@ func TestSession_GetAPIClient_ConcurrentAccess(t *testing.T) {
 			APIURL:  "https://api.example.com",
 			Timeout: 30 * time.Second,
 		},
-		useJWT:      true,
 		TokenSource: NewJWTTokenSource("test-jwt-token"),
 	}
 
@@ -218,7 +213,6 @@ func TestSession_GetLogClient_JWT_LazyInitialization(t *testing.T) {
 			LogAPIURL: "https://logs.example.com",
 			Timeout:   30 * time.Second,
 		},
-		useJWT:      true,
 		TokenSource: NewJWTTokenSource("test-jwt-token"),
 	}
 
@@ -250,7 +244,6 @@ func TestSession_GetLogClient_OAuth_LazyInitialization(t *testing.T) {
 			LogAPIURL: "https://logs.example.com",
 			Timeout:   30 * time.Second,
 		},
-		useJWT:         false,
 		TokenRefresher: &OAuth2TokenRefresher{source: mockRefresher},
 	}
 
@@ -278,7 +271,6 @@ func TestSession_GetLogClient_ErrorPaths(t *testing.T) {
 					LogAPIURL: "https://logs.example.com",
 					Timeout:   30 * time.Second,
 				},
-				useJWT:         false,
 				TokenRefresher: nil,
 			},
 			expectError: "token refresher not initialized",
@@ -302,7 +294,6 @@ func TestSession_GetLogClient_ConcurrentAccess(t *testing.T) {
 			LogAPIURL: "https://logs.example.com",
 			Timeout:   30 * time.Second,
 		},
-		useJWT:      true,
 		TokenSource: NewJWTTokenSource("test-jwt-token"),
 	}
 
@@ -346,7 +337,6 @@ func TestSession_TokenRefreshing_Scenarios(t *testing.T) {
 				APIURL:  "https://api.example.com",
 				Timeout: 30 * time.Second,
 			},
-			useJWT:         false,
 			TokenRefresher: &OAuth2TokenRefresher{source: mockRefresher},
 		}
 
@@ -367,7 +357,6 @@ func TestSession_TokenRefreshing_Scenarios(t *testing.T) {
 				APIURL:  "https://api.example.com",
 				Timeout: 30 * time.Second,
 			},
-			useJWT:         false,
 			TokenRefresher: &OAuth2TokenRefresher{source: mockRefresher},
 		}
 
@@ -386,7 +375,6 @@ func TestSession_InitializationOnlyOnce(t *testing.T) {
 			APIURL:  "https://api.example.com",
 			Timeout: 30 * time.Second,
 		},
-		useJWT:      true,
 		TokenSource: NewJWTTokenSource("test-jwt-token"),
 	}
 
@@ -439,7 +427,7 @@ func TestNewSNCloudSession_JWT(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, session)
 
-	assert.True(t, session.useJWT)
+	assert.IsType(t, &JWTTokenSource{}, session.TokenSource)
 	assert.NotNil(t, session.TokenSource)
 	assert.Nil(t, session.TokenRefresher)
 

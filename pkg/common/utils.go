@@ -244,7 +244,7 @@ func ConvertToMapString(m map[string]interface{}) map[string]string {
 	return result
 }
 
-// IsInstanceValid checks if PulsarInstance has valid OAuth2 authentication configuration
+// IsInstanceValid checks the standalone OAuth2 status contract.
 func IsInstanceValid(instance sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarInstance) bool {
 	return instance.Status != nil &&
 		(instance.Status.Auth.Type == "oauth2" || instance.Status.Auth.Type == "apikey") &&

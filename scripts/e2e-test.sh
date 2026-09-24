@@ -30,7 +30,9 @@ PULSAR_STARTUP_INTERVAL="${PULSAR_STARTUP_INTERVAL:-3}"
 SNMCP_RELEASE="${SNMCP_RELEASE:-snmcp}"
 SNMCP_NAMESPACE="${SNMCP_NAMESPACE:-default}"
 SNMCP_CHART_DIR="${SNMCP_CHART_DIR:-${ROOT_DIR}/charts/snmcp}"
-SNMCP_FEATURES=""
+SNMCP_TRANSPORT="${SNMCP_TRANSPORT:-sse}"
+SNMCP_READ_ONLY="${SNMCP_READ_ONLY:-false}"
+E2E_ARTIFACTS_DIR="${E2E_ARTIFACTS_DIR:-${ROOT_DIR}/tmp/e2e}"
 SNMCP_IMAGE_REPO="${SNMCP_IMAGE_REPO:-}"
 SNMCP_IMAGE_TAG="${SNMCP_IMAGE_TAG:-}"
 SNMCP_WAIT_TIMEOUT="${SNMCP_WAIT_TIMEOUT:-180s}"
@@ -55,18 +57,23 @@ die() {
 
 collect_logs() {
   log "collecting debug logs"
+  mkdir -p "$E2E_ARTIFACTS_DIR"
   if command -v kubectl >/dev/null 2>&1; then
-    log "snmcp logs (last 200 lines)"
-    kubectl logs "deployment/${SNMCP_RELEASE}" \
+    kubectl --request-timeout=15s get pods,services,deployments \
+      --namespace "$SNMCP_NAMESPACE" -o wide > "$E2E_ARTIFACTS_DIR/workloads.log" 2>&1 || true
+    kubectl --request-timeout=15s get events --namespace "$SNMCP_NAMESPACE" \
+      --sort-by=.lastTimestamp > "$E2E_ARTIFACTS_DIR/events.log" 2>&1 || true
+    kubectl --request-timeout=15s logs "deployment/${SNMCP_RELEASE}" \
       --namespace "$SNMCP_NAMESPACE" \
-      --tail=200 \
-      || true
+      --all-containers=true --tail=1000 > "$E2E_ARTIFACTS_DIR/snmcp.log" 2>&1 || true
+    kubectl --request-timeout=15s logs "deployment/${SNMCP_RELEASE}" \
+      --namespace "$SNMCP_NAMESPACE" --previous --all-containers=true \
+      --tail=1000 > "$E2E_ARTIFACTS_DIR/snmcp-previous.log" 2>&1 || true
   fi
 
   if command -v docker >/dev/null 2>&1; then
     if docker ps -a --format '{{.Names}}' | grep -qx "$PULSAR_CONTAINER"; then
-      log "pulsar container logs (last 200 lines)"
-      docker logs --tail 200 "$PULSAR_CONTAINER" || true
+      docker logs --tail 1000 "$PULSAR_CONTAINER" > "$E2E_ARTIFACTS_DIR/pulsar.log" 2>&1 || true
     fi
   fi
 }
@@ -148,7 +155,7 @@ wait_for_http() {
   local timeout="$2"
   local deadline=$((SECONDS + timeout))
   while ((SECONDS < deadline)); do
-    if curl -fsS "$url" >/dev/null; then
+    if curl --connect-timeout 2 --max-time 5 -fsS "$url" >/dev/null; then
       return 0
     fi
     sleep 2
@@ -189,7 +196,7 @@ setup_pulsar() {
   while ((SECONDS < deadline)); do
     local ip
     if ip="$(pulsar_ip 2>/dev/null)" && [[ -n "$ip" ]]; then
-      if curl -fsS "http://${ip}:${PULSAR_WEB_PORT}/admin/v2/clusters" \
+      if curl --connect-timeout 2 --max-time 5 -fsS "http://${ip}:${PULSAR_WEB_PORT}/admin/v2/clusters" \
         -H "Authorization: Bearer ${ADMIN_TOKEN}" >/dev/null; then
         log "pulsar ready at ${ip}"
         return 0
@@ -231,6 +238,9 @@ deploy_mcp() {
     --create-namespace
     --set "pulsar.webServiceURL=http://${ip}:${PULSAR_WEB_PORT}"
     --set "pulsar.serviceURL=pulsar://${ip}:${PULSAR_BROKER_PORT}"
+    --set "server.transport=${SNMCP_TRANSPORT}"
+    --set "server.readOnly=${SNMCP_READ_ONLY}"
+    --set-string "server.httpPath=${SNMCP_HTTP_PATH}"
     --wait
     --timeout "$SNMCP_WAIT_TIMEOUT"
   )
@@ -264,11 +274,12 @@ run_tests() {
   go build -o "$SNMCP_E2E_BIN" "${ROOT_DIR}/cmd/snmcp-e2e" >/dev/null
 
   log "starting port-forward for snmcp service"
+  mkdir -p "$E2E_ARTIFACTS_DIR"
   kubectl port-forward "svc/${SNMCP_RELEASE}" "${SNMCP_LOCAL_PORT}:${SNMCP_SERVICE_PORT}" \
-    --namespace "$SNMCP_NAMESPACE" >/dev/null 2>&1 &
+    --namespace "$SNMCP_NAMESPACE" > "$E2E_ARTIFACTS_DIR/port-forward.log" 2>&1 &
   SNMCP_PORT_FORWARD_PID=$!
 
-  trap 'if [[ -n "${SNMCP_PORT_FORWARD_PID:-}" ]]; then kill "$SNMCP_PORT_FORWARD_PID" >/dev/null 2>&1 || true; fi' RETURN
+  trap 'if [[ -n "${SNMCP_PORT_FORWARD_PID:-}" ]]; then kill "$SNMCP_PORT_FORWARD_PID" >/dev/null 2>&1 || true; wait "$SNMCP_PORT_FORWARD_PID" 2>/dev/null || true; fi' EXIT
 
   local health_url="http://127.0.0.1:${SNMCP_LOCAL_PORT}${SNMCP_HTTP_PATH}/healthz"
   if ! wait_for_http "$health_url" "$SNMCP_PORT_FORWARD_TIMEOUT"; then
@@ -277,7 +288,7 @@ run_tests() {
 
   local http_base="http://127.0.0.1:${SNMCP_LOCAL_PORT}${SNMCP_HTTP_PATH}"
   log "running snmcp-e2e against ${http_base}"
-  if ! E2E_HTTP_BASE="$http_base" "$SNMCP_E2E_BIN"; then
+  if ! E2E_HTTP_BASE="$http_base" E2E_TRANSPORT="$SNMCP_TRANSPORT" E2E_READ_ONLY="$SNMCP_READ_ONLY" "$SNMCP_E2E_BIN"; then
     collect_logs
     return 1
   fi
@@ -304,12 +315,21 @@ Commands:
   build-image    Build snmcp image and load into kind
   deploy-mcp     Deploy snmcp Helm chart and wait for readiness
   run-tests      Port-forward snmcp service and run E2E client
+  logs           Collect bounded diagnostics into E2E_ARTIFACTS_DIR
   cleanup        Remove Pulsar container and uninstall snmcp release
   all            Run setup-pulsar, build-image, deploy-mcp, and run-tests
 USAGE
 }
 
 main() {
+  case "$SNMCP_TRANSPORT" in
+    sse|http) ;;
+    *) die "SNMCP_TRANSPORT must be sse or http" ;;
+  esac
+  case "$SNMCP_READ_ONLY" in
+    true|false) ;;
+    *) die "SNMCP_READ_ONLY must be true or false" ;;
+  esac
   local cmd="${1:-}"
   case "$cmd" in
     setup-pulsar)
@@ -326,6 +346,9 @@ main() {
       ;;
     cleanup)
       cleanup
+      ;;
+    logs)
+      collect_logs
       ;;
     all)
       setup_pulsar

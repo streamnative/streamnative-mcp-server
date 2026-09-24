@@ -33,6 +33,8 @@ import (
 
 // SNCloudContext represents the configuration context for StreamNative Cloud session
 type SNCloudContext struct {
+	TokenSource    oauth2.TokenSource
+	Transport      http.RoundTripper
 	IssuerURL      string
 	Audience       string
 	KeyFilePath    string
@@ -48,16 +50,29 @@ type SNCloudContext struct {
 
 // Session represents a StreamNative Cloud session with managed clients
 type Session struct {
-	Ctx            SNCloudContext
-	APIClient      *sncloud.APIClient
-	LogClient      *http.Client
-	TokenRefresher *OAuth2TokenRefresher
-	TokenSource    oauth2.TokenSource
-	Configuration  *sncloud.Configuration
-	mutex          sync.RWMutex
-	apiClientOnce  sync.Once
-	logClientOnce  sync.Once
-	useJWT         bool
+	Ctx               SNCloudContext
+	APIClient         *sncloud.APIClient
+	LogClient         *http.Client
+	TokenRefresher    *OAuth2TokenRefresher
+	TokenSource       oauth2.TokenSource
+	Configuration     *sncloud.Configuration
+	mutex             sync.RWMutex
+	apiClientOnce     sync.Once
+	logClientOnce     sync.Once
+	runtimeSources    sync.Map
+	runtimeMutationMu sync.Mutex
+	runtimeBindingMu  sync.RWMutex
+	runtimeBinding    *RuntimeBinding
+}
+
+// RuntimeTokenSource shares refresh state across bindings with the same scoped
+// cache key. Creating a source must not perform network requests.
+func (s *Session) RuntimeTokenSource(key string, create func() oauth2.TokenSource) oauth2.TokenSource {
+	if source, ok := s.runtimeSources.Load(key); ok {
+		return source.(oauth2.TokenSource)
+	}
+	source, _ := s.runtimeSources.LoadOrStore(key, create())
+	return source.(oauth2.TokenSource)
 }
 
 // OAuth2TokenRefresher implements oauth2.TokenSource interface for refreshing OAuth2 tokens
@@ -111,12 +126,14 @@ func NewSNCloudSession(ctx SNCloudContext) (*Session, error) {
 		Ctx: ctx,
 	}
 
-	// Check if JWT token is provided
-	if ctx.JWTToken != "" {
+	// Explicit authentication is owned by the embedding application.
+	switch {
+	case ctx.TokenSource != nil:
+		session.TokenSource = ctx.TokenSource
+	case ctx.JWTToken != "":
 		// Use JWT token directly without refresh mechanism
-		session.useJWT = true
 		session.TokenSource = NewJWTTokenSource(ctx.JWTToken)
-	} else {
+	default:
 		// Initialize the session by setting up the token refresher for OAuth flow
 		if err := session.initializeTokenRefresher(); err != nil {
 			return nil, errors.Wrap(err, "failed to initialize token refresher")
@@ -131,6 +148,11 @@ func NewSNCloudSessionFromOptions(options *Options) (*Session, error) {
 	if options == nil {
 		return nil, errors.New("options cannot be nil")
 	}
+	if options.CloudProvider != nil {
+		if err := options.validateCloudProvider(); err != nil {
+			return nil, err
+		}
+	}
 
 	// Create SNCloudContext from options
 	ctx := SNCloudContext{
@@ -144,6 +166,10 @@ func NewSNCloudSessionFromOptions(options *Options) (*Session, error) {
 		TokenStore:     options.Store,
 		PulsarInstance: options.PulsarInstance,
 		PulsarCluster:  options.PulsarCluster,
+	}
+	if options.CloudProvider != nil {
+		ctx.TokenSource = options.CloudProvider.TokenSource
+		ctx.Transport = options.CloudProvider.Transport
 	}
 
 	// Create session
@@ -250,8 +276,8 @@ func (s *Session) GetAPIClient() (*sncloud.APIClient, error) {
 func (s *Session) initializeAPIClient() error {
 	var tokenSource oauth2.TokenSource
 
-	if s.useJWT {
-		// Use JWT token directly
+	if s.TokenSource != nil {
+		// Use the caller-owned source, which may itself refresh credentials.
 		tokenSource = s.TokenSource
 	} else {
 		// Use OAuth token with refresh
@@ -265,7 +291,7 @@ func (s *Session) initializeAPIClient() error {
 	httpClient := &http.Client{
 		Transport: &oauth2.Transport{
 			Source: tokenSource,
-			Base:   http.DefaultTransport,
+			Base:   s.baseTransport(),
 		},
 		Timeout: s.Ctx.Timeout,
 	}
@@ -307,8 +333,8 @@ func (s *Session) GetLogClient() (*http.Client, error) {
 func (s *Session) initializeLogClient() error {
 	var tokenSource oauth2.TokenSource
 
-	if s.useJWT {
-		// Use JWT token directly
+	if s.TokenSource != nil {
+		// Use the caller-owned source, which may itself refresh credentials.
 		tokenSource = s.TokenSource
 	} else {
 		// Use OAuth token with refresh
@@ -323,15 +349,25 @@ func (s *Session) initializeLogClient() error {
 		Timeout: 10 * time.Second,
 		Transport: &oauth2.Transport{
 			Source: tokenSource,
-			Base:   http.DefaultTransport,
+			Base:   s.baseTransport(),
 		},
 	}
 
 	return nil
 }
 
+func (s *Session) baseTransport() http.RoundTripper {
+	if s.Ctx.Transport != nil {
+		return s.Ctx.Transport
+	}
+	return http.DefaultTransport
+}
+
 // Close closes the session and cleans up resources
 func (s *Session) Close() error {
+	unlock := s.LockRuntimeMutation()
+	defer unlock()
+	s.PublishRuntimeBinding(&RuntimeBinding{})
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 

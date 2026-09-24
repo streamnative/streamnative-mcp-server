@@ -17,7 +17,9 @@ package mcp
 import (
 	"context"
 	"encoding/json"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
@@ -25,6 +27,41 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func TestExternalServerDoesNotAcquireCloudBindingLease(t *testing.T) {
+	srv := NewServer("external", "test", logrus.New())
+	ctx := WithSNCloudSession(context.Background(), srv.SNCloudSession)
+	entered, release := make(chan struct{}), make(chan struct{})
+	releaseRequest := sync.OnceFunc(func() { close(release) })
+	t.Cleanup(releaseRequest)
+	srv.MCPServer.AddTool(mcp.NewTool("hold"), func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		close(entered)
+		<-release
+		return mcp.NewToolResultText("done"), nil
+	})
+	requestDone := make(chan struct{})
+	go func() {
+		srv.MCPServer.HandleMessage(ctx, json.RawMessage(`{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"hold"}}`))
+		close(requestDone)
+	}()
+	select {
+	case <-entered:
+	case <-time.After(time.Second):
+		t.Fatal("handler did not start")
+	}
+	closed := make(chan struct{})
+	go func() { srv.Close(); close(closed) }()
+	select {
+	case <-closed:
+	case <-time.After(100 * time.Millisecond):
+		releaseRequest()
+		<-requestDone
+		<-closed
+		t.Fatal("external mode must not wait for a Cloud binding lease")
+	}
+	releaseRequest()
+	<-requestDone
+}
 
 func TestNewServer_InitializeCompatibility(t *testing.T) {
 	t.Parallel()
@@ -35,9 +72,34 @@ func TestNewServer_InitializeCompatibility(t *testing.T) {
 		expectedVersion string
 	}{
 		{
-			name:            "explicit latest protocol",
-			protocolVersion: mcp.LATEST_PROTOCOL_VERSION,
-			expectedVersion: mcp.LATEST_PROTOCOL_VERSION,
+			name:            "latest legacy protocol",
+			protocolVersion: "2025-11-25",
+			expectedVersion: "2025-11-25",
+		},
+		{
+			name:            "modern version cannot be negotiated through initialize",
+			protocolVersion: "2026-07-28",
+			expectedVersion: "2025-11-25",
+		},
+		{
+			name:            "June 2025 protocol",
+			protocolVersion: "2025-06-18",
+			expectedVersion: "2025-06-18",
+		},
+		{
+			name:            "March 2025 protocol",
+			protocolVersion: "2025-03-26",
+			expectedVersion: "2025-03-26",
+		},
+		{
+			name:            "original SSE protocol",
+			protocolVersion: "2024-11-05",
+			expectedVersion: "2024-11-05",
+		},
+		{
+			name:            "unknown version falls back to latest legacy",
+			protocolVersion: "2099-01-01",
+			expectedVersion: "2025-11-25",
 		},
 		{
 			name:            "empty protocol keeps backward compatible fallback",

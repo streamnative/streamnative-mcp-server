@@ -16,9 +16,12 @@
 package mcp
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/streamnative/streamnative-mcp-server/pkg/auth"
+	"github.com/streamnative/streamnative-mcp-server/pkg/common"
 	sncloud "github.com/streamnative/streamnative-mcp-server/sdk/sdk-apiserver"
 )
 
@@ -56,7 +59,9 @@ func getServiceURL(dnsName string) string {
 	return fmt.Sprintf("pulsar+ssl://%s:%d", dnsName, DefaultPulsarPort)
 }
 
-func getIssuer(instance *sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarInstance, configIssuer auth.Issuer) (*auth.Issuer, error) {
+func getLegacyIssuer(instance *sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarInstance,
+	configIssuer auth.Issuer,
+) (*auth.Issuer, error) {
 	if instance.Status == nil {
 		return nil, fmt.Errorf("PulsarInstance '%s' has no auth configuration", *instance.Metadata.Name)
 	}
@@ -76,4 +81,59 @@ func getIssuer(instance *sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloud
 		ClientID:       configIssuer.ClientID,
 		Audience:       instance.Status.Auth.Oauth2.Audience,
 	}, nil
+}
+
+// resolveLegacyPulsarCluster implements the standalone status-based contract.
+// More specialized resource/authentication policies belong to injected resolvers.
+func resolveLegacyPulsarCluster(ctx context.Context, client *sncloud.APIClient, organization, instanceName, clusterName string,
+	issuer auth.Issuer,
+) (*sncloud.ComGithubStreamnativeCloudApiServerPkgApisCloudV1alpha1PulsarCluster, *auth.Issuer, error) {
+	if organization == "" {
+		return nil, nil, fmt.Errorf("organization is required")
+	}
+	api := client.CloudStreamnativeIoV1alpha1Api
+	cluster, response, err := api.ReadCloudStreamnativeIoV1alpha1NamespacedPulsarCluster(ctx, clusterName, organization).Execute()
+	closeAuthResponse(response)
+	if err != nil {
+		return nil, nil, fmt.Errorf("get PulsarCluster: %w", err)
+	}
+	if cluster == nil || cluster.Spec == nil {
+		return nil, nil, fmt.Errorf("PulsarCluster has no spec")
+	}
+	if err := validateLegacyMetadata(cluster.Metadata, clusterName, organization); err != nil {
+		return nil, nil, err
+	}
+	if cluster.Spec.InstanceName != instanceName {
+		return nil, nil, fmt.Errorf("PulsarCluster belongs to a different instance")
+	}
+	if cluster.Metadata.Uid == nil || *cluster.Metadata.Uid == "" || cluster.Status == nil || !common.IsClusterAvailable(*cluster) {
+		return nil, nil, fmt.Errorf("PulsarCluster is not available")
+	}
+	instance, response, err := api.ReadCloudStreamnativeIoV1alpha1NamespacedPulsarInstance(ctx, instanceName, organization).Execute()
+	closeAuthResponse(response)
+	if err != nil {
+		return nil, nil, fmt.Errorf("get PulsarInstance: %w", err)
+	}
+	if instance == nil {
+		return nil, nil, fmt.Errorf("empty PulsarInstance response")
+	}
+	if err := validateLegacyMetadata(instance.Metadata, instanceName, organization); err != nil {
+		return nil, nil, err
+	}
+	runtimeIssuer, err := getLegacyIssuer(instance, issuer)
+	return cluster, runtimeIssuer, err
+}
+
+func validateLegacyMetadata(metadata *sncloud.V1ObjectMeta, name, organization string) error {
+	if metadata == nil || metadata.Name == nil || *metadata.Name != name ||
+		metadata.Namespace == nil || *metadata.Namespace != organization {
+		return fmt.Errorf("resource metadata does not match %s/%s", organization, name)
+	}
+	return nil
+}
+
+func closeAuthResponse(response *http.Response) {
+	if response != nil && response.Body != nil {
+		_ = response.Body.Close()
+	}
 }
