@@ -91,7 +91,6 @@ func SetContext(ctx context.Context, options *config.Options, instanceName, clus
 		return fmt.Errorf("pulsar cluster %s not found", clusterName)
 	}
 
-	clusterUID := string(*cluster.Metadata.Uid)
 	dnsName := ""
 	for _, endpoint := range cluster.Spec.ServiceEndpoints {
 		if *endpoint.Type == "service" {
@@ -160,7 +159,7 @@ func SetContext(ctx context.Context, options *config.Options, instanceName, clus
 		return fmt.Errorf("failed to get pulsar session")
 	}
 	err = psession.SetPulsarContext(pulsar.PulsarContext{
-		WebServiceURL: getBasePath(snConfig.ProxyLocation, options.Organization, clusterUID),
+		WebServiceURL: getWebServiceURL(dnsName),
 		ServiceURL:    getServiceURL(dnsName),
 		Token:         accessToken,
 	})
@@ -171,7 +170,7 @@ func SetContext(ctx context.Context, options *config.Options, instanceName, clus
 	kctx := kafka.KafkaContext{
 		BootstrapServers:       fmt.Sprintf("%s:%d", dnsName, DefaultKafkaPort),
 		SchemaRegistryURL:      fmt.Sprintf("https://%s/kafka", dnsName),
-		ConnectURL:             fmt.Sprintf("%s/admin/kafkaconnect/", snConfig.ProxyLocation),
+		ConnectURL:             getKafkaConnectURL(dnsName),
 		AuthType:               "sasl_ssl",
 		AuthMechanism:          "PLAIN",
 		AuthUser:               "public/default",
