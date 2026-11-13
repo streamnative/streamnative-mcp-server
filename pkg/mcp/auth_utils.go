@@ -41,14 +41,20 @@ func getFlow(issuer *auth.Issuer, grant *auth.AuthorizationGrant) (auth.Flow, er
 	}
 }
 
-// getBasePath constructs the base path for Pulsar admin API
-func getBasePath(proxyLocation, org, clusterID string) string {
-	// Ensure proxyLocation doesn't end with a slash to prevent double slashes
-	if proxyLocation != "" && proxyLocation[len(proxyLocation)-1] == '/' {
-		proxyLocation = proxyLocation[:len(proxyLocation)-1]
-	}
+// getWebServiceURL constructs the Pulsar admin URL of the cluster endpoint.
+//
+// The MCP server authenticates with a service account (client-credentials)
+// token. The StreamNative proxy (proxy.streamnative.cloud) rejects service
+// account tokens on workload admin paths, so admin requests go to the cluster
+// endpoint directly and never through the proxy.
+func getWebServiceURL(dnsName string) string {
+	return fmt.Sprintf("https://%s", dnsName)
+}
 
-	return fmt.Sprintf("%s/pulsar-admin/%s/pulsarcluster-%s", proxyLocation, org, clusterID)
+// getKafkaConnectURL constructs the Kafka Connect URL of the cluster endpoint.
+// It does not use the StreamNative proxy, for the same reason as getWebServiceURL.
+func getKafkaConnectURL(dnsName string) string {
+	return fmt.Sprintf("https://%s/admin/kafkaconnect/", dnsName)
 }
 
 // getServiceURL constructs the service URL for Pulsar protocol
