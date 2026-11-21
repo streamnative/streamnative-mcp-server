@@ -93,6 +93,7 @@ type CircuitBreaker struct {
 	failureThreshold int
 	resetTimeout     time.Duration
 	lastFailure      time.Time
+	probeStartedAt   time.Time
 	state            CircuitState
 	mutex            sync.RWMutex
 }
