@@ -74,8 +74,9 @@ func (cb *CircuitBreaker) RecordFailure() {
 
 // AllowRequest determines if a request should be allowed
 func (cb *CircuitBreaker) AllowRequest() bool {
-	cb.mutex.RLock()
-	defer cb.mutex.RUnlock()
+	// This can change state, so it needs the write lock.
+	cb.mutex.Lock()
+	defer cb.mutex.Unlock()
 
 	switch cb.state {
 	case StateClosed:
@@ -84,20 +85,22 @@ func (cb *CircuitBreaker) AllowRequest() bool {
 	case StateOpen:
 		// If open, check if timeout has expired
 		if time.Since(cb.lastFailure) > cb.resetTimeout {
-			// Reset to half-open in a separate goroutine to avoid deadlock
-			go func() {
-				cb.mutex.Lock()
-				defer cb.mutex.Unlock()
-				cb.state = StateHalfOpen
-			}()
-			// Allow this request as a test
+			// Move to half-open and let this request through as the probe
+			cb.state = StateHalfOpen
+			cb.probeStartedAt = time.Now()
 			return true
 		}
 		// Still open and timeout hasn't expired
 		return false
 	case StateHalfOpen:
-		// Allow one request in half-open state to test
-		return true
+		// A probe is already in flight, so hold everything else back until it
+		// reports success or failure. If it never reports, allow a new probe
+		// after another reset timeout so the breaker can't get stuck.
+		if time.Since(cb.probeStartedAt) > cb.resetTimeout {
+			cb.probeStartedAt = time.Now()
+			return true
+		}
+		return false
 	default:
 		return false
 	}
