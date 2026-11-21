@@ -55,6 +55,8 @@ to interact with StreamNative Cloud resources and services.`,
 			_ = cmd.Help()
 		},
 		Version: fmt.Sprintf("Version: %s\nCommit: %s\nBuild Date: %s", version, commit, date),
+		// main() prints the error returned by Execute; avoid cobra printing it a second time.
+		SilenceErrors: true,
 	}
 
 	// Add global flags

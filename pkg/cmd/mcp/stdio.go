@@ -39,10 +39,13 @@ func NewCmdMcpStdioServer(configOpts *ServerOptions) *cobra.Command {
 		Use:   "stdio",
 		Short: "Start stdio server",
 		Long:  `Start a server that communicates via standard input/output streams using JSON-RPC messages.`,
-		Run: func(_ *cobra.Command, _ []string) {
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			// Flags parsed fine; any error from here on is a runtime failure, not a usage error.
+			cmd.SilenceUsage = true
 			if err := runStdioServer(configOpts); err != nil {
-				fmt.Fprintf(os.Stderr, "failed to run stdio server: %v\n", err)
+				return fmt.Errorf("failed to run stdio server: %w", err)
 			}
+			return nil
 		},
 		PersistentPreRunE: func(_ *cobra.Command, _ []string) error {
 			return configOpts.Complete()
